@@ -23,14 +23,14 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                var rasterOptions = new VectorRasterizationOptions
+                VectorRasterizationOptions rasterOptions = new VectorRasterizationOptions
                 {
-                    BackgroundColor = Aspose.Imaging.Color.White,
+                    BackgroundColor = Color.White,
                     PageWidth = image.Width,
                     PageHeight = image.Height
                 };
 
-                var pdfOptions = new PdfOptions
+                PdfOptions pdfOptions = new PdfOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };

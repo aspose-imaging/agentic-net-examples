@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -23,18 +24,18 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
 
-            // Load the ODG file into a memory stream
-            using (FileStream fileStream = File.OpenRead(inputPath))
-            using (MemoryStream memoryStream = new MemoryStream())
+            // Load ODG file into a memory stream
+            byte[] fileBytes = File.ReadAllBytes(inputPath);
+            using (MemoryStream memoryStream = new MemoryStream(fileBytes))
             {
-                fileStream.CopyTo(memoryStream);
-                memoryStream.Position = 0; // Reset position for reading
-
-                // Load image from the memory stream
+                // Load the image from the memory stream
                 using (Image image = Image.Load(memoryStream))
                 {
-                    // Save the image as PNG
-                    var pngOptions = new PngOptions();
+                    // Optionally cast to OdgImage if specific ODG features are needed
+                    // OdgImage odgImage = (OdgImage)image;
+
+                    // Save as PNG using Image.Save
+                    PngOptions pngOptions = new PngOptions();
                     image.Save(outputPath, pngOptions);
                 }
             }

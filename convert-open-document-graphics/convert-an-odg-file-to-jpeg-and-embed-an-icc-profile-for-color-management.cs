@@ -10,40 +10,50 @@ class Program
     {
         try
         {
-            // Hardcoded file paths
-            string inputPath = @"C:\temp\sample.odg";
-            string outputPath = @"C:\temp\sample.jpg";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\input.odg";
+            string outputPath = @"C:\temp\output.jpg";
+
+            // Hardcoded ICC profile file paths
             string rgbProfilePath = @"C:\temp\eciRGB_v2.icc";
             string cmykProfilePath = @"C:\temp\ISOcoated_v2_FullGamut4.icc";
 
-            // Verify input file exists
+            // Validate input files
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
+            if (!File.Exists(rgbProfilePath))
+            {
+                Console.Error.WriteLine($"File not found: {rgbProfilePath}");
+                return;
+            }
+            if (!File.Exists(cmykProfilePath))
+            {
+                Console.Error.WriteLine($"File not found: {cmykProfilePath}");
+                return;
+            }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG options with ICC profiles
-                var jpegOptions = new JpegOptions
-                {
-                    // Use CMYK color mode to demonstrate both profiles; change to Rgb if desired
-                    ColorType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionColorMode.Cmyk
-                };
-
                 // Open ICC profile streams
                 using (FileStream rgbStream = File.OpenRead(rgbProfilePath))
                 using (FileStream cmykStream = File.OpenRead(cmykProfilePath))
                 {
-                    jpegOptions.RgbColorProfile = new StreamSource(rgbStream);
-                    jpegOptions.CmykColorProfile = new StreamSource(cmykStream);
+                    // Configure JPEG options with embedded ICC profiles
+                    JpegOptions jpegOptions = new JpegOptions
+                    {
+                        ColorType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionColorMode.Cmyk,
+                        RgbColorProfile = new StreamSource(rgbStream),
+                        CmykColorProfile = new StreamSource(cmykStream)
+                    };
 
-                    // Save the image as JPEG with embedded profiles
+                    // Save the image as JPEG with the specified options
                     image.Save(outputPath, jpegOptions);
                 }
             }

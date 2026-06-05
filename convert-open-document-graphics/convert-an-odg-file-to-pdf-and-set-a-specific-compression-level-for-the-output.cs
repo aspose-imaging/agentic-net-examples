@@ -8,40 +8,39 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\sample.pdf";
-
-        // Ensure the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Input\sample.odg";
+            string outputPath = @"C:\Output\sample.pdf";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
                 // Set up rasterization options for ODG
-                var rasterOptions = new OdgRasterizationOptions
+                OdgRasterizationOptions rasterizationOptions = new OdgRasterizationOptions
                 {
                     BackgroundColor = Color.White,
                     PageSize = image.Size
                 };
 
                 // Configure PDF save options with desired compression
-                var pdfOptions = new PdfOptions
+                PdfOptions pdfOptions = new PdfOptions
                 {
-                    VectorRasterizationOptions = rasterOptions,
+                    VectorRasterizationOptions = rasterizationOptions,
                     PdfCoreOptions = new PdfCoreOptions
                     {
-                        // Example compression setting; adjust as needed
-                        Compression = PdfImageCompressionOptions.Flate
+                        Compression = PdfImageCompressionOptions.Flate // Set specific compression level
                     }
                 };
 

@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Data\sample.otg";
-            string outputPath = @"C:\Data\sample.pdf";
+            string inputPath = @"C:\input\sample.otg";
+            string outputPath = @"C:\output\sample.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,30 +21,29 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PDF save options
-                var pdfOptions = new PdfOptions();
-
-                // Set custom PDF metadata
-                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
+                // Configure PDF options with custom metadata
+                PdfOptions pdfOptions = new PdfOptions();
+                PdfDocumentInfo docInfo = new PdfDocumentInfo
                 {
-                    Author = "Custom Author",
-                    Title = "Custom Title"
+                    Author = "John Doe",
+                    Title = "Sample OTG to PDF"
                 };
+                pdfOptions.PdfDocumentInfo = docInfo;
 
-                // Configure OTG rasterization options
-                var otgRasterOptions = new OtgRasterizationOptions
+                // Set rasterization options for OTG conversion
+                OtgRasterizationOptions otgRasterOptions = new OtgRasterizationOptions
                 {
                     PageSize = image.Size // preserve original size
                 };
                 pdfOptions.VectorRasterizationOptions = otgRasterOptions;
 
-                // Save the image as PDF with metadata
+                // Save the image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }

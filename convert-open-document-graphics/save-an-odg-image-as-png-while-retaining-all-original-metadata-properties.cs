@@ -2,52 +2,45 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.odg";
+        string outputPath = "output.png";
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\temp\sample.odg";
-            string outputPath = @"C:\temp\sample.png";
-
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG save options
-                PngOptions pngOptions = new PngOptions
+                var rasterizationOptions = new VectorRasterizationOptions
                 {
-                    // Preserve all original metadata
-                    KeepMetadata = true,
-
-                    // Rasterization options required for vector ODG files
-                    VectorRasterizationOptions = new OdgRasterizationOptions
-                    {
-                        PageSize = image.Size,
-                        BackgroundColor = Color.White
-                    }
+                    PageWidth = image.Width,
+                    PageHeight = image.Height,
+                    BackgroundColor = Aspose.Imaging.Color.White
                 };
 
-                // Save the image as PNG while retaining metadata
+                var pngOptions = new PngOptions
+                {
+                    KeepMetadata = true,
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
                 image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

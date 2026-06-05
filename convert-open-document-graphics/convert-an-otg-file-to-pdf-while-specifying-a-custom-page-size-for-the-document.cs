@@ -7,13 +7,13 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "sample.otg";
+        string outputPath = "sample.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.otg";
-            string outputPath = "Output/sample.pdf";
-
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,21 +26,19 @@ class Program
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure OTG rasterization options with a custom page size
-                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
+                // Configure rasterization options with a custom page size (e.g., 800x600 points)
+                var otgRasterOptions = new OtgRasterizationOptions
                 {
-                    // Example custom size (width x height) in points
-                    PageSize = new SizeF(800, 600),
-                    BackgroundColor = Color.White
+                    PageSize = new SizeF(800, 600)
                 };
 
-                // Set up PDF save options and assign the rasterization options
-                PdfOptions pdfOptions = new PdfOptions
+                // Set up PDF save options
+                var pdfOptions = new PdfOptions
                 {
-                    VectorRasterizationOptions = otgOptions
+                    VectorRasterizationOptions = otgRasterOptions
                 };
 
-                // Save the image as PDF
+                // Save as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }

@@ -12,7 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample_converted.png";
+            string outputPath = @"C:\Images\sample.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,20 +27,19 @@ class Program
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PNG save options with OTG rasterization settings
-                PngOptions pngOptions = new PngOptions();
-                OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
+                // Apply gamma correction (e.g., gamma = 2.2)
+                if (image is RasterImage raster)
                 {
-                    // Preserve original size
+                    raster.AdjustGamma(2.2f);
+                }
+
+                // Configure PNG save options with OTG rasterization
+                PngOptions pngOptions = new PngOptions();
+                OtgRasterizationOptions otgRasterOptions = new OtgRasterizationOptions
+                {
                     PageSize = image.Size
                 };
-                pngOptions.VectorRasterizationOptions = otgRasterization;
-
-                // Apply gamma correction (example gamma value 2.2)
-                if (image is RasterImage rasterImage)
-                {
-                    rasterImage.AdjustGamma(2.2f);
-                }
+                pngOptions.VectorRasterizationOptions = otgRasterOptions;
 
                 // Save the image as PNG
                 image.Save(outputPath, pngOptions);

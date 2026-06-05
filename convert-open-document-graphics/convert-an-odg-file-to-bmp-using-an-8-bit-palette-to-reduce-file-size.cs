@@ -2,7 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,42 +11,35 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.odg";
-            string outputPath = "output.bmp";
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Images\sample.odg";
+            string outputPath = @"C:\Images\output.bmp";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the ODG image
-            using (Image image = Image.Load(inputPath))
+            using (Image odgImage = Image.Load(inputPath))
             {
-                // Configure BMP save options for 8‑bit palette
+                // Prepare BMP save options with 8‑bit palette
                 BmpOptions bmpOptions = new BmpOptions
                 {
-                    BitsPerPixel = 8
+                    BitsPerPixel = 8,
+                    // Use a standard 8‑bit grayscale palette; replace with a closer palette if desired
+                    Palette = Aspose.Imaging.ColorPaletteHelper.Create8BitGrayscale(false),
+                    Compression = Aspose.Imaging.FileFormats.Bmp.BitmapCompression.Rgb,
+                    ResolutionSettings = new ResolutionSetting(96.0, 96.0)
                 };
 
-                // Attempt to create a palette based on the source image
-                if (image is RasterImage raster)
-                {
-                    bmpOptions.Palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256);
-                }
-                else
-                {
-                    // Fallback to a standard 8‑bit grayscale palette
-                    bmpOptions.Palette = ColorPaletteHelper.Create8BitGrayscale(false);
-                }
-
-                // Save the image as BMP using the configured options
-                image.Save(outputPath, bmpOptions);
+                // Save the image as an 8‑bit BMP
+                odgImage.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)

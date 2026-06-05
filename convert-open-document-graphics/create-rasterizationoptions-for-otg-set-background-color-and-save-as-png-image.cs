@@ -12,7 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\output\sample.png";
+            string outputPath = @"C:\Images\sample.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,11 +27,8 @@ class Program
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Create PNG save options
-                PngOptions pngOptions = new PngOptions();
-
-                // Configure OTG rasterization options
-                OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
+                // Configure rasterization options for OTG
+                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
                 {
                     // Set background color (e.g., white)
                     BackgroundColor = Color.White,
@@ -39,8 +36,11 @@ class Program
                     PageSize = image.Size
                 };
 
-                // Assign rasterization options to the PNG save options
-                pngOptions.VectorRasterizationOptions = otgRasterizationOptions;
+                // Set PNG save options and attach rasterization options
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = otgOptions
+                };
 
                 // Save the image as PNG
                 image.Save(outputPath, pngOptions);

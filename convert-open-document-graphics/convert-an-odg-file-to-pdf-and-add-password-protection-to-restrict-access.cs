@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.odg";
+        string outputPath = @"C:\Images\sample_protected.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Input\sample.odg";
-            string outputPath = @"C:\Output\sample.pdf";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,8 +27,8 @@ class Program
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options for ODG
-                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+                // Set up rasterization options for ODG to PDF conversion
+                OdgRasterizationOptions rasterizationOptions = new OdgRasterizationOptions
                 {
                     BackgroundColor = Color.White,
                     PageSize = image.Size
@@ -37,16 +37,17 @@ class Program
                 // Configure PDF save options
                 PdfOptions pdfOptions = new PdfOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = rasterizationOptions
                 };
 
-                // Embed a digital signature using a password (acts as protection)
+                // Add simple protection by embedding a digital signature (if supported)
                 if (image is RasterCachedMultipageImage multiPageImage)
                 {
+                    // The password is used to generate a digital signature that can act as a protection mechanism
                     multiPageImage.EmbedDigitalSignature("MySecretPassword");
                 }
 
-                // Save as PDF
+                // Save the image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }

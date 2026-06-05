@@ -7,11 +7,12 @@ class Program
 {
     static void Main()
     {
+        // Hard‑coded input and dummy output paths
+        string inputPath = @"C:\Images\sample.odg";
+        string outputPath = @"C:\Images\output.png";
+
         try
         {
-            // Hardcoded input ODG file path
-            string inputPath = @"C:\temp\sample.odg";
-
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -19,18 +20,22 @@ class Program
                 return;
             }
 
+            // Ensure the output directory exists (required by the safety rules)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the ODG image
             using (Image odgImage = Image.Load(inputPath))
             {
-                // Prepare a memory stream to hold the PNG data
-                using (MemoryStream pngStream = new MemoryStream())
-                {
-                    // Save the image as PNG into the memory stream
-                    PngOptions pngOptions = new PngOptions();
-                    odgImage.Save(pngStream, pngOptions);
+                // Prepare PNG save options
+                var pngOptions = new PngOptions();
 
-                    // Optionally, display the size of the generated PNG data
-                    Console.WriteLine($"PNG data length: {pngStream.Length} bytes");
+                // Save the image into a memory stream as PNG
+                using (var memoryStream = new MemoryStream())
+                {
+                    odgImage.Save(memoryStream, pngOptions);
+
+                    // Example usage of the resulting PNG data
+                    Console.WriteLine($"PNG data length: {memoryStream.Length} bytes");
                 }
             }
         }

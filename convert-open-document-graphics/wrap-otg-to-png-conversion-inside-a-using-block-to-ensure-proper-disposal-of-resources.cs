@@ -23,16 +23,17 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the OTG image inside a using block for proper disposal
+            // Load the OTG image and ensure proper disposal
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options to match the source size
+                // Configure rasterization options for OTG
                 OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
                 {
+                    // Preserve original page size
                     PageSize = image.Size
                 };
 
-                // Set up PNG save options and attach the rasterization options
+                // Set PNG save options and attach rasterization options
                 PngOptions pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = otgOptions

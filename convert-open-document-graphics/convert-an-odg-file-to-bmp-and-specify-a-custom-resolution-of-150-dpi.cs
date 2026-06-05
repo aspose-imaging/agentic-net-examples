@@ -9,44 +9,49 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.odg";
+        string outputPath = @"C:\Images\sample_converted.bmp";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.odg";
-            string outputPath = @"C:\Images\sample.bmp";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the ODG image
             using (Image odgImage = Image.Load(inputPath))
             {
-                // Prepare BMP save options
-                BmpOptions bmpOptions = new BmpOptions();
-
-                // Save ODG to a memory stream as BMP
-                using (MemoryStream ms = new MemoryStream())
+                // Prepare rasterization options for ODG
+                var rasterOptions = new OdgRasterizationOptions
                 {
-                    odgImage.Save(ms, bmpOptions);
-                    ms.Position = 0; // Reset stream position for reading
+                    // Preserve the original size
+                    PageSize = odgImage.Size
+                };
 
-                    // Load the BMP from the memory stream
-                    using (BmpImage bmpImage = new BmpImage(ms))
-                    {
-                        // Set custom resolution to 150 DPI
-                        bmpImage.SetResolution(150.0, 150.0);
+                // Prepare BMP save options and attach rasterization options
+                var bmpOptions = new BmpOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                        // Save the final BMP file
-                        bmpImage.Save(outputPath);
-                    }
-                }
+                // Save the ODG as BMP (initial resolution may be default)
+                odgImage.Save(outputPath, bmpOptions);
+            }
+
+            // Re-open the saved BMP to set the desired resolution (150 DPI)
+            using (Image bmpImage = Image.Load(outputPath))
+            {
+                var bmp = (BmpImage)bmpImage;
+                bmp.SetResolution(150.0, 150.0);
+                // Overwrite the file with the new resolution
+                bmp.Save(outputPath);
             }
         }
         catch (Exception ex)

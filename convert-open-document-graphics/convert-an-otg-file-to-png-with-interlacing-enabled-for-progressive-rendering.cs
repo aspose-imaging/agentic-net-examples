@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -12,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = "input.otg";
+            string outputPath = "output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,25 +21,25 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PNG save options with progressive (interlaced) encoding
+                // Configure PNG options with progressive (interlaced) rendering
                 var pngOptions = new PngOptions
                 {
                     Progressive = true
                 };
 
-                // Configure rasterization options for OTG conversion
-                var otgRasterization = new OtgRasterizationOptions
+                // Set OTG rasterization options to match the source image size
+                var otgRasterizationOptions = new OtgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
-                pngOptions.VectorRasterizationOptions = otgRasterization;
+                pngOptions.VectorRasterizationOptions = otgRasterizationOptions;
 
-                // Save the image as PNG with interlacing
+                // Save the image as PNG with the specified options
                 image.Save(outputPath, pngOptions);
             }
         }

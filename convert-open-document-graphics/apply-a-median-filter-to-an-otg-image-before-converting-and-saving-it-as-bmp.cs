@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -12,7 +13,6 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Images\sample.otg";
-            string tempBmpPath = @"C:\Images\temp.bmp";
             string outputPath = @"C:\Images\output.bmp";
 
             // Verify input file exists
@@ -22,39 +22,40 @@ class Program
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(tempBmpPath));
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the OTG image and rasterize it to a temporary BMP file
+            // Load the OTG image
             using (Image otgImage = Image.Load(inputPath))
             {
-                // Set up rasterization options for OTG
+                // Prepare BMP save options with rasterization settings for OTG
+                BmpOptions bmpOptions = new BmpOptions();
                 OtgRasterizationOptions otgRasterOptions = new OtgRasterizationOptions
                 {
+                    // Use the original OTG size for rasterization
                     PageSize = otgImage.Size
                 };
+                bmpOptions.VectorRasterizationOptions = otgRasterOptions;
 
-                // BMP save options with vector rasterization
-                BmpOptions bmpOptions = new BmpOptions
+                // Rasterize OTG to a memory stream
+                using (MemoryStream rasterStream = new MemoryStream())
                 {
-                    VectorRasterizationOptions = otgRasterOptions
-                };
+                    otgImage.Save(rasterStream, bmpOptions);
+                    rasterStream.Position = 0; // Reset stream for reading
 
-                // Save rasterized image to temporary BMP
-                otgImage.Save(tempBmpPath, bmpOptions);
-            }
+                    // Load the rasterized image
+                    using (Image rasterImage = Image.Load(rasterStream))
+                    {
+                        // Cast to RasterImage to apply filters
+                        RasterImage raster = (RasterImage)rasterImage;
 
-            // Load the temporary BMP as a raster image, apply median filter, and save final BMP
-            using (Image bmpImage = Image.Load(tempBmpPath))
-            {
-                RasterImage rasterImage = (RasterImage)bmpImage;
+                        // Apply median filter with size 5 to the whole image
+                        raster.Filter(raster.Bounds, new MedianFilterOptions(5));
 
-                // Apply median filter with size 5 to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
-
-                // Save the filtered image to the final output path
-                rasterImage.Save(outputPath);
+                        // Save the filtered raster image as BMP
+                        raster.Save(outputPath);
+                    }
+                }
             }
         }
         catch (Exception ex)

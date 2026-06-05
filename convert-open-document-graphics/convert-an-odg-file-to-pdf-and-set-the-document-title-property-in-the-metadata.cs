@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Temp\sample.odg";
-            string outputPath = @"C:\Temp\sample.pdf";
+            string inputPath = @"C:\input\sample.odg";
+            string outputPath = @"C:\output\sample.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -29,29 +29,20 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Configure rasterization options for ODG
-                var rasterizationOptions = new OdgRasterizationOptions
+                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
                 {
                     BackgroundColor = Color.White,
                     PageSize = image.Size
                 };
 
-                // Configure PDF save options
-                var pdfOptions = new PdfOptions
+                // Configure PDF options and set document title
+                PdfOptions pdfOptions = new PdfOptions
                 {
-                    VectorRasterizationOptions = rasterizationOptions,
-                    PdfDocumentInfo = new PdfDocumentInfo()
+                    VectorRasterizationOptions = rasterOptions,
+                    PdfDocumentInfo = new PdfDocumentInfo { Title = "My Document Title" }
                 };
 
-                // Set the PDF document title metadata
-                pdfOptions.PdfDocumentInfo.Title = "Converted ODG Document";
-
-                // Optionally set the ODG metadata title as well
-                if (image is OdgImage odgImage)
-                {
-                    odgImage.Metadata.Title = "Converted ODG Document";
-                }
-
-                // Save as PDF
+                // Save the image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }

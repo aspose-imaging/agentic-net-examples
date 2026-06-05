@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample_blur.jpg";
+            string inputPath = @"C:\temp\input.otg";
+            string outputPath = @"C:\temp\output.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -25,37 +25,17 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
-            using (Image otgImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Rasterize OTG to a raster image in memory (PNG)
-                using (var memoryStream = new MemoryStream())
-                {
-                    var pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = new OtgRasterizationOptions
-                        {
-                            PageSize = otgImage.Size
-                        }
-                    };
-                    otgImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
+                // Cast to RasterImage to apply raster filters
+                RasterImage rasterImage = (RasterImage)image;
 
-                    // Load the rasterized image
-                    using (Image rasterImage = Image.Load(memoryStream))
-                    {
-                        var raster = (RasterImage)rasterImage;
+                // Apply Gaussian blur filter to the whole image
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                        // Apply Gaussian blur filter (size 5, sigma 4.0) to the whole image
-                        raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                        // Save the processed image as JPEG
-                        var jpegOptions = new JpegOptions
-                        {
-                            Quality = 90
-                        };
-                        raster.Save(outputPath, jpegOptions);
-                    }
-                }
+                // Save as JPEG
+                JpegOptions jpegOptions = new JpegOptions();
+                rasterImage.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)

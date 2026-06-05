@@ -1,6 +1,8 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -8,11 +10,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.odg";
-            string outputPath = "sample.pdf";
+            // Define relative input and output paths
+            string inputPath = "Input/sample.odg";
+            string outputPath = "Output/sample.pdf";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,21 +25,26 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the ODG image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options (margins, background, page size)
-                Aspose.Imaging.ImageOptions.OdgRasterizationOptions rasterOptions = new Aspose.Imaging.ImageOptions.OdgRasterizationOptions();
-                rasterOptions.BackgroundColor = Aspose.Imaging.Color.White;
-                rasterOptions.BorderX = 20; // left/right margin in pixels
-                rasterOptions.BorderY = 30; // top/bottom margin in pixels
-                rasterOptions.PageSize = image.Size; // preserve original size
+                // Configure rasterization options for ODG
+                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageSize = image.Size,
+                    // Set margins (border) in pixels
+                    BorderX = 50,
+                    BorderY = 50
+                };
 
                 // Configure PDF save options with custom DPI
-                PdfOptions pdfOptions = new PdfOptions();
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
-                pdfOptions.ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300, 300); // DPI X, DPI Y
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    ResolutionSettings = new ResolutionSetting(300, 300),
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                // Save as PDF
+                // Save the image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }

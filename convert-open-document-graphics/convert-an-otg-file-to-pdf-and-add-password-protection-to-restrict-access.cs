@@ -2,41 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "Input/sample.otg";
-            string outputPath = "Output/sample.pdf";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\sample.pdf";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                var otgOptions = new OtgRasterizationOptions
+                // Set up rasterization options for PDF conversion
+                OtgRasterizationOptions otgRasterOptions = new OtgRasterizationOptions
                 {
-                    PageSize = image.Size,
-                    BackgroundColor = Color.White
+                    PageSize = image.Size
                 };
 
-                var pdfOptions = new PdfOptions
+                // Configure PDF save options
+                PdfOptions pdfOptions = new PdfOptions
                 {
-                    VectorRasterizationOptions = otgOptions
+                    VectorRasterizationOptions = otgRasterOptions
                 };
 
-                // Password protection for PDF is not supported by Aspose.Imaging.
-                throw new NotSupportedException("Password protection for PDF is not supported by Aspose.Imaging.");
+                // Embed a digital signature (password protection) into each page
+                if (image is RasterCachedMultipageImage multiPageImage)
+                {
+                    multiPageImage.EmbedDigitalSignature("mySecretPassword");
+                }
 
-                // image.Save(outputPath, pdfOptions);
+                // Save the image as PDF
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)

@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -10,36 +9,37 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample.pdf";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\input\sample.otg";
+            string outputPath = @"C:\output\sample.pdf";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options to match the source size
-                OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
+                // Configure rasterization options for OTG
+                OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
                 {
+                    // Preserve original page size
                     PageSize = image.Size
                 };
 
-                // Configure PDF save options and attach the rasterization options
+                // Set up PDF save options and attach rasterization options
                 PdfOptions pdfOptions = new PdfOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = otgRasterizationOptions
                 };
 
-                // Save the image as a flattened PDF document
+                // Save as flattened PDF
                 image.Save(outputPath, pdfOptions);
             }
         }

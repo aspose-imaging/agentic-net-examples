@@ -1,6 +1,6 @@
 using System;
-using System.Diagnostics;
 using System.IO;
+using System.Diagnostics;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -24,28 +24,27 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Measure conversion time
-            Stopwatch stopwatch = Stopwatch.StartNew();
+            // Start timing
+            Stopwatch sw = Stopwatch.StartNew();
 
-            // Load OTG image and save as PNG with rasterization options
+            // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG save options
+                // Prepare PNG save options with rasterization settings
                 PngOptions pngOptions = new PngOptions();
-
-                // Set vector rasterization options for OTG
-                OtgRasterizationOptions otgRaster = new OtgRasterizationOptions
+                OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
                 {
-                    PageSize = image.Size // Preserve original size
+                    PageSize = image.Size // preserve original size
                 };
-                pngOptions.VectorRasterizationOptions = otgRaster;
+                pngOptions.VectorRasterizationOptions = otgRasterization;
 
-                // Save the image as PNG
+                // Save as PNG
                 image.Save(outputPath, pngOptions);
             }
 
-            stopwatch.Stop();
-            Console.WriteLine($"Conversion time: {stopwatch.ElapsedMilliseconds} ms");
+            // Stop timing
+            sw.Stop();
+            Console.WriteLine($"Conversion completed in {sw.ElapsedMilliseconds} ms.");
         }
         catch (Exception ex)
         {
