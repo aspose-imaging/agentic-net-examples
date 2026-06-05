@@ -10,12 +10,12 @@ class Program
     {
         try
         {
-            // Set up base, input and output directories
+            // Define base, input and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure input directory exists; if not, create and exit
+            // Ensure input directory exists
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -29,48 +29,50 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
+            // Get all CDR files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.cdr");
             foreach (string inputPath in files)
             {
-                // Process only CDR files
-                if (!inputPath.EndsWith(".cdr", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Prepare output path with .psd extension
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".psd");
+                // Prepare output PSD path
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".psd");
 
-                // Ensure the output directory exists
+                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the CDR image
                 using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
                 {
-                    // Configure PSD export options
-                    PsdOptions psdOptions = new PsdOptions();
-
-                    // Export each page of the CDR as a separate layer in the PSD
-                    psdOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, cdr.PageCount));
-
-                    // Set rasterization options for vector content
-                    psdOptions.VectorRasterizationOptions = new CdrRasterizationOptions
+                    // Cache all pages to avoid repeated loading
+                    cdr.CacheData();
+                    foreach (var page in cdr.Pages)
                     {
-                        BackgroundColor = Color.White,
-                        PageWidth = cdr.Width,
-                        PageHeight = cdr.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
+                        page.CacheData();
+                    }
+
+                    // Configure PSD export options
+                    PsdOptions psdOptions = new PsdOptions
+                    {
+                        // Rasterize vector content with desired settings
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
+                        }
+                        // MultiPageOptions left null to export all pages as layers
                     };
 
-                    // Save as PSD
+                    // Save as PSD, preserving layers
                     cdr.Save(outputPath, psdOptions);
                 }
             }
