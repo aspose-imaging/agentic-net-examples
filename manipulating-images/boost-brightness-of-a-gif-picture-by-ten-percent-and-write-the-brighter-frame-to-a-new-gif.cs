@@ -1,15 +1,16 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.gif";
-        string outputPath = @"C:\Images\output.gif";
+        string inputPath = "input\\sample.gif";
+        string outputPath = "output\\brighter.gif";
 
         try
         {
@@ -26,14 +27,14 @@ class Program
             // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to GifImage to access GIF-specific methods
-                GifImage gifImage = (GifImage)image;
+                GifImage gif = (GifImage)image;
 
-                // Increase brightness by approximately 10% (255 * 0.10 ≈ 25)
-                gifImage.AdjustBrightness(25);
+                // Increase brightness by ~10% (26 out of 255)
+                gif.AdjustBrightness(26);
 
-                // Save the modified GIF
-                gifImage.Save(outputPath);
+                // Save the modified GIF using GifOptions
+                GifOptions options = new GifOptions();
+                gif.Save(outputPath, options);
             }
         }
         catch (Exception ex)

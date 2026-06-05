@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging;
 
 class Program
 {
@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\input\sample.cdr";
-            string outputPath = @"C:\output\deskewed.tif";
+            string inputPath = @"C:\Images\sample.cdr";
+            string outputPath = @"C:\Images\output.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -25,31 +25,23 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR document
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+            // Load the CDR document as a raster image
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Rasterize the CDR to a PNG in memory
-                using (MemoryStream rasterStream = new MemoryStream())
+                // Deskew the image (do not resize, use LightGray background)
+                image.NormalizeAngle(false, Color.LightGray);
+
+                // Prepare TIFF save options
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
-                    // Save CDR as PNG (default rasterization options)
-                    cdrImage.Save(rasterStream, new PngOptions());
+                    // Optional: set compression, photometric, etc.
+                    Compression = TiffCompressions.Lzw,
+                    Photometric = TiffPhotometrics.Rgb,
+                    BitsPerSample = new ushort[] { 8, 8, 8 }
+                };
 
-                    // Reset stream position for reading
-                    rasterStream.Position = 0;
-
-                    // Load the rasterized image as RasterImage
-                    using (RasterImage rasterImage = (RasterImage)Image.Load(rasterStream))
-                    {
-                        // Deskew the image (do not resize, use LightGray background)
-                        rasterImage.NormalizeAngle(false, Color.LightGray);
-
-                        // Prepare TIFF save options
-                        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-                        // Save the deskewed image as TIFF
-                        rasterImage.Save(outputPath, tiffOptions);
-                    }
-                }
+                // Save the deskewed image as TIFF
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)

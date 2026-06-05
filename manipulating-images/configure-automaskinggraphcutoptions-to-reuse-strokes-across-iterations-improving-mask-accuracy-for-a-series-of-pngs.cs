@@ -14,72 +14,83 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            // Define input and output PNG files
+            string[] inputPaths = { "input1.png", "input2.png" };
+            string[] outputPaths = { "output1.png", "output2.png" };
 
-            if (!Directory.Exists(inputDirectory))
+            for (int i = 0; i < inputPaths.Length; i++)
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
-                return;
-            }
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.png");
-            foreach (string inputPath in files)
-            {
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath1 = Path.Combine(outputDirectory, fileName + "_mask1.png");
-                string outputPath2 = Path.Combine(outputDirectory, fileName + "_mask2.png");
+                // Ensure output directory exists
+                string outputDir = Path.GetDirectoryName(outputPath);
+                Directory.CreateDirectory(outputDir);
 
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath1));
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath2));
+                // Temporary file used by ExportOptions
+                string tempFile = Path.Combine(Path.GetTempPath(), $"mask_temp_{i}.png");
+
+                // First masking pass – calculate default strokes
+                AutoMaskingGraphCutOptions options = new AutoMaskingGraphCutOptions
+                {
+                    CalculateDefaultStrokes = true,
+                    FeatheringRadius = 3,
+                    Method = SegmentationMethod.GraphCut,
+                    Decompose = false,
+                    ExportOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new FileCreateSource(tempFile, false)
+                    },
+                    BackgroundReplacementColor = Color.Transparent
+                };
 
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    string tempPath = Path.GetTempFileName();
-
-                    var options = new AutoMaskingGraphCutOptions
+                    // Perform initial decomposition to obtain default strokes
+                    using (MaskingResult initialResult = new ImageMasking(image).Decompose(options))
                     {
-                        CalculateDefaultStrokes = true,
-                        FeatheringRadius = 3,
-                        Method = SegmentationMethod.GraphCut,
-                        Decompose = false,
-                        ExportOptions = new PngOptions
+                        // Initial result can be ignored; we only need the strokes
+                    }
+
+                    // Retrieve default strokes after first pass
+                    Point[] backgroundStrokes = options.DefaultBackgroundStrokes;
+                    Point[] foregroundStrokes = options.DefaultForegroundStrokes;
+                    Rectangle[] objectRectangles = options.DefaultObjectsRectangles;
+
+                    // Second masking pass – reuse strokes without recalculating
+                    options.CalculateDefaultStrokes = false;
+                    options.Args = new AutoMaskingArgs
+                    {
+                        ObjectsPoints = new Point[][]
                         {
-                            ColorType = PngColorType.TruecolorWithAlpha,
-                            Source = new FileCreateSource(tempPath, false)
+                            backgroundStrokes,
+                            foregroundStrokes
                         },
-                        BackgroundReplacementColor = Color.Transparent
+                        ObjectsRectangles = objectRectangles
                     };
 
-                    MaskingResult results = new ImageMasking(image).Decompose(options);
-                    using (RasterImage resultImage = (RasterImage)results[1].GetImage())
+                    using (MaskingResult finalResult = new ImageMasking(image).Decompose(options))
                     {
-                        resultImage.Save(outputPath1, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                        using (RasterImage resultImage = (RasterImage)finalResult[1].GetImage())
+                        {
+                            // Save the refined masked image
+                            resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                        }
                     }
+                }
 
-                    options.CalculateDefaultStrokes = false;
-                    results = new ImageMasking(image).Decompose(options);
-                    using (RasterImage resultImage2 = (RasterImage)results[1].GetImage())
-                    {
-                        resultImage2.Save(outputPath2, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-                    }
-
-                    if (File.Exists(tempPath))
-                    {
-                        File.Delete(tempPath);
-                    }
+                // Clean up temporary file
+                if (File.Exists(tempFile))
+                {
+                    File.Delete(tempFile);
                 }
             }
         }

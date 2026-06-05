@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
 
@@ -8,69 +9,62 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputDirectory = "C:\\temp\\frames";
-        string outputPath = "C:\\temp\\output\\animated.gif";
-
         try
         {
-            // Get all GIF frame files
+            // Hardcoded input directory containing GIF frames and output file path
+            string inputDirectory = @"C:\temp\frames";
+            string outputPath = @"C:\temp\output\animated_bright.gif";
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Get all GIF files in the input directory
             string[] frameFiles = Directory.GetFiles(inputDirectory, "*.gif");
-            if (frameFiles.Length == 0)
-            {
-                Console.Error.WriteLine("No GIF frames found in the input directory.");
-                return;
-            }
 
-            // Load the first frame, adjust brightness, and create the animated GIF
-            string firstPath = frameFiles[0];
-            if (!File.Exists(firstPath))
-            {
-                Console.Error.WriteLine($"File not found: {firstPath}");
-                return;
-            }
+            GifImage resultGif = null;
 
-            using (Image firstImage = Image.Load(firstPath))
+            foreach (string frameFile in frameFiles)
             {
-                // Increase brightness of the first frame
-                if (firstImage is GifImage firstGif)
+                // Verify each input file exists
+                if (!File.Exists(frameFile))
                 {
-                    firstGif.AdjustBrightness(50); // brightness value in range [-255,255]
+                    Console.Error.WriteLine($"File not found: {frameFile}");
+                    return;
                 }
 
-                // Create a GifImage using the first frame block
-                using (GifImage animatedGif = new GifImage(new GifFrameBlock((RasterImage)firstImage)))
+                // Load the GIF frame
+                using (GifImage frameGif = (GifImage)Image.Load(frameFile))
                 {
-                    // Process remaining frames
-                    for (int i = 1; i < frameFiles.Length; i++)
+                    // Increase brightness (value range: -255 to 255)
+                    frameGif.AdjustBrightness(50);
+
+                    if (resultGif == null)
                     {
-                        string path = frameFiles[i];
-                        if (!File.Exists(path))
-                        {
-                            Console.Error.WriteLine($"File not found: {path}");
-                            continue;
-                        }
-
-                        using (Image img = Image.Load(path))
-                        {
-                            // Increase brightness of each subsequent frame
-                            if (img is GifImage gif)
-                            {
-                                gif.AdjustBrightness(50);
-                            }
-
-                            // Add the frame to the animated GIF
-                            animatedGif.AddPage((RasterImage)img);
-                        }
+                        // Create the result GIF using the first frame's active frame block
+                        resultGif = new GifImage((GifFrameBlock)frameGif.ActiveFrame);
                     }
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the animated GIF with smoother colors
-                    animatedGif.Save(outputPath);
+                    else
+                    {
+                        // Add the current frame as a new page to the result GIF
+                        resultGif.AddPage((RasterImage)frameGif.ActiveFrame);
+                    }
                 }
             }
+
+            if (resultGif == null)
+            {
+                Console.Error.WriteLine("No frames were processed.");
+                return;
+            }
+
+            // Set palette correction for smoother colors
+            GifOptions saveOptions = new GifOptions
+            {
+                DoPaletteCorrection = true
+            };
+
+            // Save the animated GIF
+            resultGif.Save(outputPath, saveOptions);
         }
         catch (Exception ex)
         {

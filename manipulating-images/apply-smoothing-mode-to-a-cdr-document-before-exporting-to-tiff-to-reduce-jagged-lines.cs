@@ -12,35 +12,39 @@ class Program
         string inputPath = @"C:\Images\sample.cdr";
         string outputPath = @"C:\Images\sample_output.tif";
 
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+        // Ensure any runtime exception is reported cleanly
         try
         {
-            // Load the CDR vector image
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CDR image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options with smoothing
+                // Prepare TIFF export options
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                // Configure vector rasterization options for CDR
                 var rasterOptions = new CdrRasterizationOptions
                 {
-                    // Apply antialiasing to reduce jagged lines
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias
+                    // Apply anti‑alias smoothing to reduce jagged lines
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
+                    // Optional: preserve original size
+                    PageSize = image.Size,
+                    // Optional: set background to white
+                    BackgroundColor = Aspose.Imaging.Color.White
                 };
 
-                // Prepare TIFF save options and attach rasterization settings
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                tiffOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the rasterized image as TIFF
+                // Save the image as TIFF using the configured options
                 image.Save(outputPath, tiffOptions);
             }
         }
@@ -50,3 +54,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When converting CorelDRAW (.cdr) artwork to high‑resolution TIFF for printing, a developer can use this code to apply anti‑alias smoothing and avoid jagged edges.
+ * 2. When generating archival TIFF files from vector CDR designs for a document management system, the smoothing mode ensures clean line rendering.
+ * 3. When preparing CDR graphics for inclusion in a PDF or Word report that requires TIFF images, the code smooths the rasterized output to improve visual quality.
+ * 4. When automating batch conversion of CDR logos to TIFF for a web‑based asset pipeline, applying SmoothingMode.AntiAlias prevents pixelated edges on different screen sizes.
+ * 5. When creating TIFF previews of CDR files for a digital asset catalog, the anti‑alias smoothing produces professional‑grade thumbnails without manual editing.
+ */

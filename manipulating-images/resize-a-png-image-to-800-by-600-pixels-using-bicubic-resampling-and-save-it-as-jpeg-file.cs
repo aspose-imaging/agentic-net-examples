@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.jpg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,7 +21,7 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
@@ -29,11 +29,8 @@ class Program
                 // Resize to 800x600 using Bicubic (CubicConvolution) resampling
                 image.Resize(800, 600, ResizeType.CubicConvolution);
 
-                // Prepare JPEG save options (default quality)
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Quality = 100
-                };
+                // Prepare JPEG save options (default settings)
+                var jpegOptions = new JpegOptions();
 
                 // Save as JPEG
                 image.Save(outputPath, jpegOptions);

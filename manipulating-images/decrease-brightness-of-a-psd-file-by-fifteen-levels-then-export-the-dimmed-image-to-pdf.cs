@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -9,7 +10,7 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Input PSD file and output PDF file paths
             string inputPath = "Input/sample.psd";
             string outputPath = "Output/dimmed.pdf";
 
@@ -28,16 +29,13 @@ class Program
             {
                 // Cast to RasterImage for brightness adjustment
                 RasterImage raster = image as RasterImage;
-                if (raster == null)
+                if (raster != null)
                 {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
-                    return;
+                    // Decrease brightness by 15 levels
+                    raster.AdjustBrightness(-15);
                 }
 
-                // Decrease brightness by 15 levels
-                raster.AdjustBrightness(-15);
-
-                // Save the adjusted image as PDF
+                // Save the modified image as PDF
                 using (PdfOptions pdfOptions = new PdfOptions())
                 {
                     image.Save(outputPath, pdfOptions);

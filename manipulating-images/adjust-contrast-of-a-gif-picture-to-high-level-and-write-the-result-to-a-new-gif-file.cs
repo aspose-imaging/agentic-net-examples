@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.gif";
-        string outputPath = @"C:\Images\output_contrast.gif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\input.gif";
+            string outputPath = @"c:\temp\output_contrast.gif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -30,10 +30,10 @@ class Program
                 // Cast to GifImage to access AdjustContrast
                 GifImage gifImage = (GifImage)image;
 
-                // Apply high contrast (range -100 to 100)
-                gifImage.AdjustContrast(80f);
+                // Apply high contrast (maximum allowed value)
+                gifImage.AdjustContrast(100f);
 
-                // Save the result as a GIF
+                // Save the modified image as GIF
                 gifImage.Save(outputPath, new GifOptions());
             }
         }

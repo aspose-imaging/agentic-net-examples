@@ -10,17 +10,14 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"c:\input\";
-            string outputDir = @"c:\output\";
+            // Hardcoded input file paths
+            string[] inputPaths = new string[]
+            {
+                @"c:\input\image1.jpg",
+                @"c:\input\image2.bmp"
+            };
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Get all files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDir);
-
-            foreach (string inputPath in inputFiles)
+            foreach (var inputPath in inputPaths)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -29,28 +26,28 @@ class Program
                     return;
                 }
 
-                // Load the image
+                // Build output path (same name, .png extension, in c:\output)
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                string outputPath = Path.Combine(@"c:\output", outputFileName);
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the source image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Calculate crop rectangle (5-pixel border on each side)
+                    // Define a rectangle that crops a 5‑pixel border from each side
                     int cropX = 5;
                     int cropY = 5;
-                    int cropWidth = Math.Max(0, image.Width - 2 * cropX);
-                    int cropHeight = Math.Max(0, image.Height - 2 * cropY);
-                    var cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
+                    int cropWidth = Math.Max(0, image.Width - 10);
+                    int cropHeight = Math.Max(0, image.Height - 10);
+                    var bounds = new Rectangle(cropX, cropY, cropWidth, cropHeight);
 
-                    // Prepare PNG save options
+                    // PNG save options (default)
                     var pngOptions = new PngOptions();
 
-                    // Build output file path with .png extension
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png");
-
-                    // Ensure the output directory exists (unconditional as required)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the cropped image as PNG
-                    image.Save(outputPath, pngOptions, cropRect);
+                    // Save the cropped region as PNG
+                    image.Save(outputPath, pngOptions, bounds);
                 }
             }
         }

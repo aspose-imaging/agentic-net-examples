@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -10,53 +10,41 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = "Input";
-            string outputDir = "Output";
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Ensure input directory exists; create if missing and exit
-            if (!Directory.Exists(inputDir))
+            if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputDir);
-                Console.WriteLine($"Input directory created at: {inputDir}. Add PNG files and rerun.");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(outputDirectory);
 
-            // Get all PNG files in the input directory
-            string[] files = Directory.GetFiles(inputDir, "*.png");
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
             foreach (string inputPath in files)
             {
-                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Prepare output file path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_MotionWiener.png";
-                string outputPath = Path.Combine(outputDir, outputFileName);
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + "_filtered.png");
 
-                // Ensure the output directory exists before saving
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the image, apply MotionWiener filter, and save as PNG
                 using (Image image = Image.Load(inputPath))
                 {
                     RasterImage raster = (RasterImage)image;
-                    // Apply motion Wiener filter: length=10, smooth=1.0, angle=90.0
-                    raster.Filter(raster.Bounds, new MotionWienerFilterOptions(10, 1.0, 90.0));
-                    raster.Save(outputPath, new PngOptions());
-                }
 
-                Console.WriteLine($"Processed: {inputPath} -> {outputPath}");
+                    // Apply motion Wiener filter: length 10, smooth 1.0, angle 90.0
+                    raster.Filter(raster.Bounds, new MotionWienerFilterOptions(10, 1.0, 90.0));
+
+                    PngOptions saveOptions = new PngOptions();
+                    raster.Save(outputPath, saveOptions);
+                }
             }
         }
         catch (Exception ex)

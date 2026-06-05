@@ -1,12 +1,13 @@
 using System;
 using System.IO;
+using System.Diagnostics;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -14,12 +15,13 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hard‑coded paths
             string inputPath = "input.jpg";
-            string outputDefaultPath = "output_default.png";
-            string outputCustomPath = "output_custom.png";
+            string outputDir = "output";
+            string outputDefaultPath = Path.Combine(outputDir, "default.png");
+            string outputCustomPath = Path.Combine(outputDir, "custom.png");
 
-            // Verify input file exists
+            // Input validation
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -30,9 +32,10 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputDefaultPath));
             Directory.CreateDirectory(Path.GetDirectoryName(outputCustomPath));
 
-            // ---------- Auto masking with default strokes ----------
+            // Load source image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
+                // ---------- Default (auto) strokes ----------
                 var defaultOptions = new AutoMaskingGraphCutOptions
                 {
                     CalculateDefaultStrokes = true,
@@ -47,19 +50,26 @@ class Program
                     BackgroundReplacementColor = Color.Transparent
                 };
 
-                var start = DateTime.Now;
-                using (MaskingResult results = new ImageMasking(image).Decompose(defaultOptions))
-                {
-                    var duration = (DateTime.Now - start).TotalMilliseconds;
-                    Console.WriteLine($"Default strokes duration: {duration} ms");
+                Stopwatch swDefault = Stopwatch.StartNew();
+                MaskingResult defaultResult = new ImageMasking(image).Decompose(defaultOptions);
+                swDefault.Stop();
 
-                    using (RasterImage resultImage = (RasterImage)results[1].GetImage())
-                    {
-                        resultImage.Save(outputDefaultPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-                    }
+                using (defaultResult)
+                using (RasterImage resultImage = (RasterImage)defaultResult[1].GetImage())
+                {
+                    resultImage.Save(outputDefaultPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
 
-                // ---------- Auto masking with custom user strokes ----------
+                // ---------- Custom user strokes ----------
+                var customArgs = new AutoMaskingArgs
+                {
+                    ObjectsPoints = new Point[][]
+                    {
+                        new Point[] { new Point(10, 10), new Point(20, 10) }, // background points
+                        new Point[] { new Point(30, 30) }                     // foreground point
+                    }
+                };
+
                 var customOptions = new GraphCutMaskingOptions
                 {
                     FeatheringRadius = 3,
@@ -71,27 +81,22 @@ class Program
                         Source = new StreamSource(new MemoryStream())
                     },
                     BackgroundReplacementColor = Color.Transparent,
-                    Args = new AutoMaskingArgs
-                    {
-                        ObjectsPoints = new Point[][]
-                        {
-                            defaultOptions.DefaultBackgroundStrokes,
-                            defaultOptions.DefaultForegroundStrokes
-                        }
-                    }
+                    Args = customArgs
                 };
 
-                start = DateTime.Now;
-                using (MaskingResult results = new ImageMasking(image).Decompose(customOptions))
-                {
-                    var duration = (DateTime.Now - start).TotalMilliseconds;
-                    Console.WriteLine($"Custom strokes duration: {duration} ms");
+                Stopwatch swCustom = Stopwatch.StartNew();
+                MaskingResult customResult = new ImageMasking(image).Decompose(customOptions);
+                swCustom.Stop();
 
-                    using (RasterImage resultImage = (RasterImage)results[1].GetImage())
-                    {
-                        resultImage.Save(outputCustomPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-                    }
+                using (customResult)
+                using (RasterImage resultImage = (RasterImage)customResult[1].GetImage())
+                {
+                    resultImage.Save(outputCustomPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
+
+                // Output timing information
+                Console.WriteLine($"Default strokes time: {swDefault.ElapsedMilliseconds} ms");
+                Console.WriteLine($"Custom strokes time: {swCustom.ElapsedMilliseconds} ms");
             }
         }
         catch (Exception ex)

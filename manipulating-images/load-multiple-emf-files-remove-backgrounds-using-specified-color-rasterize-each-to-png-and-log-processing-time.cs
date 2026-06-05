@@ -11,24 +11,18 @@ class Program
     {
         try
         {
-            // Hardcoded input folder and list of EMF files
-            string inputFolder = @"C:\Images\Input";
-            string[] emfFiles = new[]
+            // Hardcoded input EMF files
+            string[] inputFiles = new[]
             {
-                "image1.emf",
-                "image2.emf",
-                "image3.emf"
+                @"C:\Images\input1.emf",
+                @"C:\Images\input2.emf"
             };
 
-            // Hardcoded output folder
-            string outputFolder = @"C:\Images\Output";
+            // Color to use when removing background (example: white)
+            var backgroundRemovalColor = Aspose.Imaging.Color.White;
 
-            foreach (var fileName in emfFiles)
+            foreach (var inputPath in inputFiles)
             {
-                // Build full input and output paths
-                string inputPath = Path.Combine(inputFolder, fileName);
-                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(fileName) + ".png");
-
                 // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
@@ -36,39 +30,49 @@ class Program
                     return;
                 }
 
+                // Determine output PNG path
+                string outputPath = Path.ChangeExtension(inputPath, ".png");
+
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Measure processing time
-                Stopwatch sw = Stopwatch.StartNew();
+                var stopwatch = Stopwatch.StartNew();
 
                 // Load EMF image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to EmfImage to access vector-specific methods
-                    EmfImage emfImage = (EmfImage)image;
+                    // Cast to EmfImage for background operations
+                    var emfImage = image as EmfImage;
+                    if (emfImage == null)
+                    {
+                        Console.Error.WriteLine($"Unsupported image format: {inputPath}");
+                        continue;
+                    }
 
-                    // Remove background (default removes any background)
+                    // Set background color (if needed) and remove background
+                    emfImage.BackgroundColor = backgroundRemovalColor;
+                    emfImage.HasBackgroundColor = true;
                     emfImage.RemoveBackground();
 
-                    // Prepare PNG save options with rasterization settings
+                    // Prepare rasterization options for PNG output
+                    var rasterOptions = new EmfRasterizationOptions
+                    {
+                        PageSize = emfImage.Size,
+                        BackgroundColor = backgroundRemovalColor
+                    };
+
                     var pngOptions = new PngOptions
                     {
-                        VectorRasterizationOptions = new EmfRasterizationOptions
-                        {
-                            // Set background color for rasterization (optional, can be transparent)
-                            BackgroundColor = Aspose.Imaging.Color.White,
-                            // Use original image size
-                            PageSize = emfImage.Size
-                        }
+                        VectorRasterizationOptions = rasterOptions
                     };
 
                     // Save rasterized PNG
                     emfImage.Save(outputPath, pngOptions);
                 }
 
-                sw.Stop();
-                Console.WriteLine($"Processed '{fileName}' in {sw.ElapsedMilliseconds} ms. Output: {outputPath}");
+                stopwatch.Stop();
+                Console.WriteLine($"Processed '{inputPath}' to '{outputPath}' in {stopwatch.ElapsedMilliseconds} ms.");
             }
         }
         catch (Exception ex)

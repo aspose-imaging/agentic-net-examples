@@ -2,9 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,29 +9,38 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.jpg";
             string outputPath = "output.png";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (JpegImage image = (JpegImage)Image.Load(inputPath))
+            // Load the JPEG image
+            using (Image image = Image.Load(inputPath))
             {
-                int newWidth = 800;
-                int newHeight = 600;
+                // Define new dimensions (example: half the original size)
+                int newWidth = image.Width / 2;
+                int newHeight = image.Height / 2;
+
+                // Resize using Lanczos algorithm
                 image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
-                image.EmbedDigitalSignature("secure123");
-
-                PngOptions pngOptions = new PngOptions
+                // Embed digital signature with a password
+                if (image is RasterImage raster)
                 {
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                    raster.EmbedDigitalSignature("password123");
+                }
+
+                // Save the result as PNG
+                var pngOptions = new PngOptions();
                 image.Save(outputPath, pngOptions);
             }
         }

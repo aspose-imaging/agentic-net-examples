@@ -12,13 +12,13 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.png";
-
         try
         {
-            // Verify input file exists
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string outputPath = "output.png";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,34 +28,46 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Temporary file for export options source
+            string tempExportPath = Path.Combine(Path.GetTempPath(), "mask_temp.png");
+
+            // Configure export options for masking (requires a source)
+            PngOptions exportOptions = new PngOptions
+            {
+                ColorType = PngColorType.TruecolorWithAlpha,
+                Source = new FileCreateSource(tempExportPath, false)
+            };
+
             // Load the source image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Configure auto‑masking options (GraphCut)
-                var options = new AutoMaskingGraphCutOptions
+                // Configure auto-masking options
+                AutoMaskingGraphCutOptions maskingOptions = new AutoMaskingGraphCutOptions
                 {
                     CalculateDefaultStrokes = true,
                     FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
                     Method = SegmentationMethod.GraphCut,
                     Decompose = false,
-                    ExportOptions = new PngOptions
-                    {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new StreamSource(new MemoryStream())
-                    },
-                    BackgroundReplacementColor = Color.Transparent
+                    BackgroundReplacementColor = Color.Transparent,
+                    ExportOptions = exportOptions
                 };
 
                 // Perform masking
-                using (MaskingResult maskingResult = new ImageMasking(image).Decompose(options))
+                using (MaskingResult maskingResult = new ImageMasking(image).Decompose(maskingOptions))
                 {
-                    // Retrieve the foreground segment (index 1)
+                    // Get the foreground (masked) image
                     using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
                     {
                         // Save the result as PNG
                         foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                     }
                 }
+            }
+
+            // Clean up temporary export file
+            if (File.Exists(tempExportPath))
+            {
+                File.Delete(tempExportPath);
             }
         }
         catch (Exception ex)

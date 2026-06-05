@@ -7,27 +7,47 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.psd";
+        string outputPath = "output\\output.png";
+
         try
         {
-            string inputPath = "input.psd";
-            string outputPath = "output.png";
-
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the PSD image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                if (!raster.IsCached) raster.CacheData();
-                raster.AdjustContrast(-20f); // lower contrast by 20%
+                // Cast to RasterImage for pixel manipulation
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
+                // Cache image data if not already cached
+                if (!raster.IsCached)
+                {
+                    raster.CacheData();
+                }
+
+                // Lower contrast by 20%
+                raster.AdjustContrast(-20f);
+
+                // Prepare PNG save options
                 PngOptions pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+
+                // Save the adjusted image as PNG
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)

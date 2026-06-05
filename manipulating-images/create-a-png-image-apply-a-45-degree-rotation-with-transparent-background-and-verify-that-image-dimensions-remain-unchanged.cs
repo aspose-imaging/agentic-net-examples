@@ -2,47 +2,49 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Define output path
-            string outputPath = "output.png";
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\input.png";
+            string outputPath = @"c:\temp\output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a PNG image of 200x200 pixels
-            using (PngImage png = new PngImage(200, 200))
+            // Load the PNG image
+            using (PngImage pngImage = new PngImage(inputPath))
             {
-                // Fill the image with a solid color for visibility
-                Graphics graphics = new Graphics(png);
-                SolidBrush brush = new SolidBrush(Color.Red);
-                graphics.FillRectangle(brush, png.Bounds);
-
                 // Store original dimensions
-                int originalWidth = png.Width;
-                int originalHeight = png.Height;
+                int originalWidth = pngImage.Width;
+                int originalHeight = pngImage.Height;
 
                 // Rotate 45 degrees without resizing, using transparent background
-                png.Rotate(45f, false, Color.Transparent);
+                pngImage.Rotate(45f, false, Color.Transparent);
 
                 // Verify dimensions remain unchanged
-                if (png.Width == originalWidth && png.Height == originalHeight)
+                if (pngImage.Width == originalWidth && pngImage.Height == originalHeight)
                 {
                     Console.WriteLine("Dimensions unchanged after rotation.");
                 }
                 else
                 {
-                    Console.WriteLine($"Dimensions changed: ({originalWidth}x{originalHeight}) -> ({png.Width}x{png.Height})");
+                    Console.WriteLine("Dimensions changed after rotation.");
                 }
 
                 // Save the rotated image
-                png.Save(outputPath);
+                pngImage.Save(outputPath);
             }
         }
         catch (Exception ex)

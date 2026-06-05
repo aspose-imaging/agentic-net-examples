@@ -2,41 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using System.Drawing;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.png";
-
-        // Check input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded paths
+            string inputSvgPath = "input.svg";
+            string tempRasterPath = "temp.png";
+            string outputPath = "output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputSvgPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputSvgPath}");
+                return;
+            }
+
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(tempRasterPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load SVG and rasterize to a temporary PNG
+            using (Image svgImage = Image.Load(inputSvgPath))
+            {
+                var pngOptions = new PngOptions();
+                svgImage.Save(tempRasterPath, pngOptions);
+            }
+
             // Load the rasterized image
-            using (Image image = Image.Load(inputPath))
+            using (Image rasterImageBase = Image.Load(tempRasterPath))
             {
                 // Cast to RasterImage to apply filters
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage rasterImage = (RasterImage)rasterImageBase;
 
-                // Configure Gauss‑Wiener filter (size = 7, sigma = 3.0)
-                var gaussWienerOptions = new GaussWienerFilterOptions(7, 3.0);
+                // Custom strength parameters for Gauss-Wiener filter
+                int kernelSize = 5;          // example size (must be odd)
+                double sigma = 4.0;          // custom strength (smoothing)
 
-                // Apply the filter to the whole image
-                rasterImage.Filter(rasterImage.Bounds, gaussWienerOptions);
+                // Apply Gauss-Wiener filter to the whole image
+                rasterImage.Filter(rasterImage.Bounds, new GaussWienerFilterOptions(kernelSize, sigma));
 
-                // Save the processed image
+                // Save the filtered image
                 rasterImage.Save(outputPath);
             }
         }

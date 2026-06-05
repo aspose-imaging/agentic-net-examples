@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"c:\temp\sample.tif";
-            string outputPath = @"c:\temp\sample_high_contrast.pdf";
+            string inputPath = @"C:\Images\sample.tif";
+            string outputPath = @"C:\Images\sample_high_contrast.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -34,7 +34,8 @@ class Program
                 tiffImage.AdjustContrast(30f);
 
                 // Save the result as PDF
-                tiffImage.Save(outputPath, new PdfOptions());
+                PdfOptions pdfOptions = new PdfOptions();
+                tiffImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)

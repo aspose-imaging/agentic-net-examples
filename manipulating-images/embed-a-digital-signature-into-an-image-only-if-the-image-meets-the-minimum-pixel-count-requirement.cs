@@ -1,59 +1,63 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Wrap the whole logic to catch unexpected exceptions
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input/sample.jpg";
-            string outputPath = "output/signed_sample.jpg";
+            string inputPath = @"C:\Images\input.jpg";
+            string outputPath = @"C:\Images\output_signed.jpg";
 
-            // Verify input file exists
+            // Password for the digital signature
+            string password = "SecretPassword";
+
+            // Minimum pixel count required to embed a signature
+            const long MinPixelCount = 500_000; // example threshold
+
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates if missing)
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the image using Aspose.Imaging
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access digital signature methods
+                // Work only with raster images (most common formats)
                 if (image is RasterImage rasterImage)
                 {
-                    // Minimum pixel count requirement (example: 800x600 = 480,000)
-                    const long MinPixelCount = 800L * 600L;
-
-                    // Calculate total pixel count
                     long pixelCount = (long)rasterImage.Width * rasterImage.Height;
 
-                    // Embed digital signature only if the image meets the size requirement
+                    // Embed the digital signature only if the image meets the size requirement
                     if (pixelCount >= MinPixelCount)
                     {
-                        string password = "MySecretPassword";
                         rasterImage.EmbedDigitalSignature(password);
                     }
+                    else
+                    {
+                        Console.WriteLine($"Image pixel count ({pixelCount}) is below the minimum required ({MinPixelCount}). Signature not applied.");
+                    }
 
-                    // Save the (potentially signed) image to the output path
+                    // Save the (potentially) signed image to the output path
                     rasterImage.Save(outputPath);
                 }
                 else
                 {
-                    Console.Error.WriteLine("The loaded image is not a raster image and cannot be signed.");
+                    Console.Error.WriteLine("The loaded image is not a raster image and cannot be processed.");
                 }
             }
         }
         catch (Exception ex)
         {
+            // Catch any unexpected errors and report them
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

@@ -2,19 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.psd";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = "input.psd";
+            string outputPath = "output.png";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,14 +23,14 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PSD image as a raster image
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            // Load the PSD image
+            using (Image image = Image.Load(inputPath))
             {
-                // Deskew the image without resizing, using a light gray background
-                image.NormalizeAngle(false, Color.LightGray);
+                // Deskew the image (do not resize canvas, fill background with white)
+                ((RasterImage)image).NormalizeAngle(false, Color.White);
 
                 // Prepare PNG save options
-                var pngOptions = new PngOptions();
+                PngOptions pngOptions = new PngOptions();
 
                 // Save the deskewed image as PNG
                 image.Save(outputPath, pngOptions);

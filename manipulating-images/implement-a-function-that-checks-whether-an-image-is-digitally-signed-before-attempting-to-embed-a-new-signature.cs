@@ -1,49 +1,42 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.jpg";
-            string outputPath = "output.jpg";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists (null‑safe)
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-                Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            using (var image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access digital signature methods
-                RasterImage raster = (RasterImage)image;
-
-                // Password for digital signature operations
+                var raster = (RasterImage)image;
                 string password = "secure123";
 
-                // Check if the image is already digitally signed
                 bool isSigned = raster.IsDigitalSigned(password);
-
-                if (!isSigned)
+                if (isSigned)
                 {
-                    // Embed a new digital signature
-                    raster.EmbedDigitalSignature(password);
+                    Console.WriteLine("Image is already digitally signed.");
                 }
-
-                // Save the (potentially) modified image
-                image.Save(outputPath);
+                else
+                {
+                    raster.EmbedDigitalSignature(password);
+                    raster.Save(outputPath, new PngOptions());
+                    Console.WriteLine("Digital signature embedded and image saved.");
+                }
             }
         }
         catch (Exception ex)

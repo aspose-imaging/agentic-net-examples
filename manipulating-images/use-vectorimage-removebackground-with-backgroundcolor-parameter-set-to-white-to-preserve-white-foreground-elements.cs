@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats;
 
 class Program
 {
@@ -20,20 +21,20 @@ class Program
                 return;
             }
 
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the vector image
             using (VectorImage vectorImage = (VectorImage)Image.Load(inputPath))
             {
-                // Configure background removal settings to treat white as background
-                var bgSettings = new RemoveBackgroundSettings
+                // Configure background removal settings with white background color
+                RemoveBackgroundSettings settings = new RemoveBackgroundSettings
                 {
-                    Color1 = Aspose.Imaging.Color.White // set background color to white
+                    Color1 = Aspose.Imaging.Color.White
                 };
 
                 // Remove the background using the configured settings
-                vectorImage.RemoveBackground(bgSettings);
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                vectorImage.RemoveBackground(settings);
 
                 // Save the processed image
                 vectorImage.Save(outputPath);

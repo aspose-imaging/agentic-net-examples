@@ -1,76 +1,59 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
+        string inputFolder = @"C:\Images\Input";
+        string outputFolder = @"C:\Images\Output";
+        // Password used for digital signature
+        string password = "mySecret";
 
         try
         {
-            // Validate input directory
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+            // Get all PNG files in the input folder
+            string[] inputFiles = Directory.GetFiles(inputFolder, "*.png");
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
+            foreach (string inputPath in inputFiles)
             {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            // Get all PNG files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.png");
-
-            foreach (string inputPath in files)
-            {
-                // Check if the input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Determine output file path
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the image
-                using (Image image = Image.Load(inputPath))
+                // Load the image as a RasterImage (PNG is a raster format)
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    // Cast to RasterImage for processing
-                    RasterImage raster = (RasterImage)image;
-
-                    // Verify minimum size requirement (8x8)
-                    if (raster.Width < 8 || raster.Height < 8)
+                    // Ensure the image meets the minimum size requirement
+                    if (image.Width < 8 || image.Height < 8)
                     {
-                        Console.WriteLine($"Skipping {inputPath}: image size is smaller than 8x8 pixels.");
+                        Console.Error.WriteLine($"Image too small (minimum 8x8): {inputPath}");
                         continue;
                     }
 
-                    // Embed digital signature with a valid password
-                    raster.EmbedDigitalSignature("secure123");
+                    // Embed the digital signature using the provided password
+                    image.EmbedDigitalSignature(password);
+
+                    // Determine the output path (same file name in the output folder)
+                    string outputPath = Path.Combine(outputFolder, Path.GetFileName(inputPath));
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save the signed image
-                    raster.Save(outputPath);
+                    image.Save(outputPath);
                 }
-
-                Console.WriteLine($"Processed and saved: {outputPath}");
             }
         }
         catch (Exception ex)
         {
+            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

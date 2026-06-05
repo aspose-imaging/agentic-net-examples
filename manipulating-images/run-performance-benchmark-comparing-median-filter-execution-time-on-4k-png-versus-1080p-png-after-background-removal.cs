@@ -1,9 +1,8 @@
 using System;
-using System.Diagnostics;
 using System.IO;
+using System.Diagnostics;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -47,28 +46,27 @@ class Program
         }
     }
 
-    // Loads an image, (placeholder for background removal), applies median filter, saves result, and returns elapsed milliseconds
+    // Loads an image, applies a median filter, saves the result, and returns elapsed milliseconds
     static long ApplyMedianFilterAndMeasure(string inputPath, string outputPath)
     {
         Stopwatch sw = new Stopwatch();
-
         using (Image image = Image.Load(inputPath))
         {
-            // Cast to RasterImage to access filtering capabilities
+            // Cast to RasterImage to access Filter method
             RasterImage rasterImage = (RasterImage)image;
 
-            // Placeholder for background removal step (if needed)
-            // For example, you could use WatermarkRemover with TeleaWatermarkOptions here.
-
-            // Measure median filter execution time
+            // Start timing
             sw.Start();
+
+            // Apply median filter with a rectangle size of 5 to the entire image
             rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+
+            // Stop timing after filter is applied
             sw.Stop();
 
-            // Save the filtered image
+            // Save the processed image
             rasterImage.Save(outputPath);
         }
-
         return sw.ElapsedMilliseconds;
     }
 }

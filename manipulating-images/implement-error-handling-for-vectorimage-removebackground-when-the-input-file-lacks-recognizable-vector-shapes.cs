@@ -11,43 +11,44 @@ class Program
         string inputPath = @"C:\Images\input.cdr";
         string outputPath = @"C:\Images\output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Check if the loaded image is a vector image
-                if (!(image is VectorImage vectorImage))
+                // Ensure the loaded image is a vector image
+                if (image is VectorImage vectorImage)
                 {
-                    Console.Error.WriteLine("The provided file is not a vector image.");
-                    return;
-                }
+                    try
+                    {
+                        // Attempt to remove background; may fail if no recognizable vector shapes
+                        vectorImage.RemoveBackground();
+                    }
+                    catch (Exception ex)
+                    {
+                        // Specific handling for background removal failure
+                        Console.Error.WriteLine($"RemoveBackground failed: {ex.Message}");
+                        // Continue without background removal
+                    }
 
-                // Attempt to remove the background
-                try
-                {
-                    vectorImage.RemoveBackground();
+                    // Save the result as PNG
+                    var pngOptions = new PngOptions();
+                    vectorImage.Save(outputPath, pngOptions);
                 }
-                catch (Exception ex)
+                else
                 {
-                    // Handle cases where background removal fails (e.g., no recognizable vector shapes)
-                    Console.Error.WriteLine($"Background removal failed: {ex.Message}");
-                    // Continue without background removal
+                    Console.Error.WriteLine("The loaded file is not a vector image.");
                 }
-
-                // Save the result as a raster image (PNG)
-                var pngOptions = new PngOptions();
-                vectorImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
