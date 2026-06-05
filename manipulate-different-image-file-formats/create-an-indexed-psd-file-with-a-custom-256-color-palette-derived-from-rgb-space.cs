@@ -3,49 +3,46 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Output PSD file path (hard‑coded)
-            string outputPath = "output/output.psd";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\sample.bmp";
+            string outputPath = @"C:\temp\output.psd";
 
-            // Ensure the output directory exists
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a custom 256‑color palette derived from RGB space
-            Color[] paletteColors = new Color[256];
-            for (int i = 0; i < 256; i++)
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
-                // Simple variation across RGB channels
-                int r = (i * 5) % 256;
-                int g = (i * 3) % 256;
-                int b = (i * 7) % 256;
-                paletteColors[i] = Color.FromArgb(255, r, g, b);
-            }
-            var customPalette = new ColorPalette(paletteColors);
+                // Cast to RasterImage to work with palettes
+                RasterImage raster = (RasterImage)image;
 
-            // Configure PSD options for an indexed image
-            PsdOptions psdOptions = new PsdOptions
-            {
-                Source = new FileCreateSource(outputPath, false),
-                ColorMode = ColorModes.Indexed,
-                Palette = customPalette,
-                ChannelBitsCount = 8,               // 8 bits per channel
-                ChannelsCount = (short)1,           // Indexed images use a single channel
-                CompressionMethod = CompressionMethod.RLE,
-                Version = 6                         // Default PSD version
-            };
+                // Create PSD options with a custom 256‑color palette derived from RGB space
+                PsdOptions psdOptions = new PsdOptions
+                {
+                    // Standard 8‑bit per channel
+                    ChannelBitsCount = 8,
+                    // Use RGB color mode; the palette will define the indexed colors
+                    ColorMode = ColorModes.Rgb,
+                    // Uniform 256‑color palette covering the RGB space
+                    Palette = ColorPaletteHelper.GetUniformColorPalette(raster)
+                };
 
-            // Create a 256×256 indexed PSD image bound to the output file
-            using (Image psdImage = Image.Create(psdOptions, 256, 256))
-            {
-                // No additional drawing is required; the palette is stored with the file
-                psdImage.Save(); // Save to the bound FileCreateSource
+                // Save the image as an indexed PSD file
+                image.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)
@@ -54,3 +51,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert a high‑resolution BMP into an indexed PSD with a uniform 256‑color palette for compatibility with legacy Photoshop workflows.
+ * 2. When a graphics pipeline requires reducing file size by saving images as 8‑bit indexed PSDs while preserving the original RGB color space for web‑ready assets.
+ * 3. When an automated batch process must generate PSD files from scanned bitmap documents and enforce a consistent 256‑color palette to ensure predictable color mapping across all pages.
+ * 4. When a game‑development toolchain needs to import BMP textures and export them as indexed PSDs so that artists can edit layers in Photoshop without exceeding the 256‑color limit.
+ * 5. When a digital archiving system has to store legacy bitmap images as PSD files with a custom palette derived from the full RGB spectrum to maintain visual fidelity while supporting Photoshop’s native format.
+ */
