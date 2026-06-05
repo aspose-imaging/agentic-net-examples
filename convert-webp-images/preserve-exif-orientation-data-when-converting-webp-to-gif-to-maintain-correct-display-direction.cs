@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -10,9 +10,9 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = "c:\\temp\\input.webp";
-            string outputPath = "c:\\temp\\output.gif";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.webp";
+            string outputPath = @"C:\temp\output.gif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,20 +21,22 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the WebP image
             using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Preserve EXIF orientation by auto‑rotating if needed
-                if (webPImage is RasterImage raster)
-                {
-                    raster.AutoRotate();
-                }
+                // Apply EXIF orientation so the resulting image has correct direction
+                webPImage.AutoRotate();
 
-                // Save the image as GIF, keeping metadata (orientation already applied)
-                webPImage.Save(outputPath, new GifOptions());
+                // Save as GIF while keeping metadata (if supported)
+                GifOptions gifOptions = new GifOptions
+                {
+                    // Preserve metadata where possible
+                    KeepMetadata = true
+                };
+                webPImage.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
