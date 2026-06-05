@@ -1,5 +1,8 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
@@ -10,54 +13,62 @@ class Program
     {
         try
         {
-            string inputPath1 = "input1.jpg";
-            string inputPath2 = "input2.jpg";
-            string outputPath = "output.jpg";
+            // Hardcoded input and output paths
+            string[] inputPaths = new string[] { "input1.jpg", "input2.jpg", "input3.jpg" };
+            string outputPath = "merged.jpg";
 
-            if (!File.Exists(inputPath1))
+            // Validate input files
+            foreach (string inputPath in inputPaths)
             {
-                Console.Error.WriteLine($"File not found: {inputPath1}");
-                return;
-            }
-            if (!File.Exists(inputPath2))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath2}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            int totalWidth = 0;
-            int maxHeight = 0;
-            string[] inputPaths = new[] { inputPath1, inputPath2 };
-
-            foreach (string path in inputPaths)
-            {
-                using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
-                using (JpegImage img = new JpegImage(fs))
+                if (!File.Exists(inputPath))
                 {
-                    totalWidth += img.Width;
-                    if (img.Height > maxHeight) maxHeight = img.Height;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
             }
 
-            FileCreateSource source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(jpegOptions, totalWidth, maxHeight))
+            // Collect sizes of all input images
+            List<Size> sizes = new List<Size>();
+            foreach (string inputPath in inputPaths)
+            {
+                using (FileStream stream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+                using (JpegImage img = new JpegImage(stream))
+                {
+                    sizes.Add(img.Size);
+                }
+            }
+
+            // Calculate canvas dimensions for horizontal merge
+            int canvasWidth = sizes.Sum(s => s.Width);
+            int canvasHeight = sizes.Max(s => s.Height);
+
+            // Create JPEG options with bound output source
+            Source outputSource = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions
+            {
+                Source = outputSource,
+                Quality = 100
+            };
+
+            // Create canvas image
+            using (JpegImage canvas = new JpegImage(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetX = 0;
-                foreach (string path in inputPaths)
+                foreach (string inputPath in inputPaths)
                 {
-                    using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
-                    using (JpegImage img = new JpegImage(fs))
+                    using (FileStream stream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+                    using (JpegImage img = new JpegImage(stream))
                     {
-                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
+                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
 
+                // Save the bound canvas
                 canvas.Save();
             }
         }
@@ -67,3 +78,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web service needs to generate a single panoramic thumbnail by loading multiple JPEG files with FileStream and merging them horizontally into one image.
+ * 2. When an e‑commerce platform wants to create a side‑by‑side collage of customer‑uploaded JPEG photos using JpegImage objects and automatic disposal via using blocks.
+ * 3. When a desktop publishing tool assembles several scanned JPEG pages into one wide canvas for a printable proof sheet, calculating canvas size from each image’s dimensions.
+ * 4. When a batch‑processing script for wildlife monitoring merges daily camera‑trap JPEG pictures into a horizontal strip for inclusion in a report.
+ * 5. When a digital signage system combines multiple advertisement JPEG banners into a single wide image to be displayed on a large screen.
+ */

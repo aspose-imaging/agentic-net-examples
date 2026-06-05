@@ -1,9 +1,9 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
@@ -11,21 +11,19 @@ class Program
 {
     static void Main(string[] args)
     {
+        string[] inputPaths = new string[]
+        {
+            "image1.jpg",
+            "image2.jpg",
+            "image3.jpg"
+        };
+        string outputPath = "merged.png";
+
         try
         {
-            // Hardcoded input JPEG files and output PNG file
-            string[] inputPaths = new string[]
-            {
-                "Input/image1.jpg",
-                "Input/image2.jpg",
-                "Input/image3.jpg"
-            };
-            string outputPath = "Output/merged.png";
+            List<string> validPaths = new List<string>();
+            List<Size> sizes = new List<Size>();
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Validate input files
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -33,43 +31,43 @@ class Program
                     Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
-            }
 
-            // Load, flip, and store pixel data of each image
-            var imagesData = new List<(int Width, int Height, int[] Pixels)>();
-            int totalWidth = 0;
-            int maxHeight = 0;
-
-            foreach (string path in inputPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                using (Image img = Image.Load(path))
                 {
-                    // Flip horizontally
-                    img.RotateFlip(RotateFlipType.RotateNoneFlipX);
-
-                    // Store dimensions and pixel data
-                    int[] pixels = img.LoadArgb32Pixels(img.Bounds);
-                    imagesData.Add((img.Width, img.Height, pixels));
-
-                    totalWidth += img.Width;
-                    if (img.Height > maxHeight) maxHeight = img.Height;
+                    sizes.Add(new Size(img.Width, img.Height));
                 }
+
+                validPaths.Add(path);
             }
 
-            // Create PNG canvas with the calculated size
-            Source src = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions { Source = src };
+            int totalWidth = sizes.Sum(s => s.Width);
+            int maxHeight = sizes.Max(s => s.Height);
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            Source source = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions() { Source = source };
+
             using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, totalWidth, maxHeight))
             {
                 int offsetX = 0;
-                foreach (var data in imagesData)
+
+                for (int i = 0; i < validPaths.Count; i++)
                 {
-                    Rectangle bounds = new Rectangle(offsetX, 0, data.Width, data.Height);
-                    canvas.SaveArgb32Pixels(bounds, data.Pixels);
-                    offsetX += data.Width;
+                    string path = validPaths[i];
+
+                    using (Image img = Image.Load(path))
+                    {
+                        img.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                        RasterImage raster = (RasterImage)img;
+
+                        Rectangle destRect = new Rectangle(offsetX, 0, raster.Width, raster.Height);
+                        canvas.SaveArgb32Pixels(destRect, raster.LoadArgb32Pixels(raster.Bounds));
+                    }
+
+                    offsetX += sizes[i].Width;
                 }
 
-                // Save the merged image
                 canvas.Save();
             }
         }
@@ -79,3 +77,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When creating a product catalog web page, a developer can use this C# Aspose.Imaging code to horizontally flip each JPEG photo of a product, stitch them side‑by‑side, and export the combined view as a high‑quality PNG for faster browser rendering.
+ * 2. When generating a before‑and‑after comparison for a photo‑editing app, the code flips the original JPEG images, aligns them in a single horizontal strip, and saves the result as a PNG to preserve lossless quality for display in the UI.
+ * 3. When preparing a printable marketing banner that requires mirrored images for symmetrical design, a C# developer can apply RotateFlip on each JPEG, merge them into one horizontal layout, and output a PNG that retains exact color fidelity.
+ * 4. When building an automated image‑processing pipeline that consolidates multiple user‑uploaded JPEG selfies into a single panoramic PNG thumbnail, this Aspose.Imaging snippet flips each photo, concatenates them horizontally, and creates a web‑optimized PNG file.
+ * 5. When developing a digital signage system that needs to show a series of mirrored JPEG advertisements in a single slide, the code flips each image, arranges them side‑by‑side, and exports the composite as a PNG for seamless playback on the display hardware.
+ */

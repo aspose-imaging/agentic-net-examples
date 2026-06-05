@@ -12,16 +12,9 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG file paths
-            string[] inputPaths = new string[]
-            {
-                "image1.jpg",
-                "image2.jpg",
-                "image3.jpg"
-            };
-
-            // Hardcoded output PNG file path
-            string outputPath = "merged.png";
+            // Hardcoded input JPEG files and output PNG file
+            string[] inputPaths = new string[] { "input/image1.jpg", "input/image2.jpg", "input/image3.jpg" };
+            string outputPath = "output/merged.png";
 
             // Validate each input file exists
             foreach (var path in inputPaths)
@@ -50,14 +43,9 @@ class Program
             int newWidth = sizes.Sum(s => s.Width);
             int newHeight = sizes.Max(s => s.Height);
 
-            // Create PNG options with interlacing (Progressive) enabled
+            // Create PNG options with interlacing (Progressive)
             Source src = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions()
-            {
-                Source = src,
-                Progressive = true,
-                CompressionLevel = 9 // maximum compression
-            };
+            PngOptions pngOptions = new PngOptions() { Source = src, Progressive = true };
 
             // Create the output canvas bound to the file
             using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, newWidth, newHeight))
@@ -73,7 +61,7 @@ class Program
                     }
                 }
 
-                // Save the bound image to the output file
+                // Save the bound image
                 canvas.Save();
             }
         }
@@ -83,3 +71,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When creating a web‑ready image gallery that combines multiple JPEG photos into a single progressive PNG for faster incremental loading in browsers.
+ * 2. When generating a printable product catalog where product photos (JPEG) are stitched side‑by‑side and saved as an interlaced PNG to preserve quality while reducing file size.
+ * 3. When building a desktop application that merges scanned JPEG documents into a single PNG banner with progressive rendering for smoother preview on low‑bandwidth connections.
+ * 4. When developing an automated marketing pipeline that concatenates campaign images into a single interlaced PNG to be embedded in email newsletters that support progressive display.
+ * 5. When implementing a server‑side image service that assembles user‑uploaded JPEG avatars into a horizontal PNG sprite sheet with interlacing to improve loading performance on mobile devices.
+ */

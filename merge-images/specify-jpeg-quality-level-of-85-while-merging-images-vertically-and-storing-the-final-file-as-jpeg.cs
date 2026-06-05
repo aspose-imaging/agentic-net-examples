@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -13,10 +13,12 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
-            string outputPath = "output.jpg";
+            string outputPath = "merged.jpg";
 
-            foreach (var path in inputPaths)
+            // Validate input files
+            foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -25,10 +27,12 @@ class Program
                 }
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Collect sizes of all images
             List<Size> sizes = new List<Size>();
-            foreach (var path in inputPaths)
+            foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
@@ -36,11 +40,13 @@ class Program
                 }
             }
 
+            // Calculate canvas dimensions for vertical merge
             int canvasWidth = sizes.Max(s => s.Width);
             int canvasHeight = sizes.Sum(s => s.Height);
 
-            FileCreateSource source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions()
+            // Create JPEG canvas with quality 85
+            Source source = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions
             {
                 Source = source,
                 Quality = 85
@@ -49,7 +55,7 @@ class Program
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
-                foreach (var path in inputPaths)
+                foreach (string path in inputPaths)
                 {
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
@@ -59,6 +65,7 @@ class Program
                     }
                 }
 
+                // Save the bound image
                 canvas.Save();
             }
         }
@@ -68,3 +75,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to create a single high‑quality JPEG banner by vertically stitching multiple product photos for a web storefront using C# and Aspose.Imaging.
+ * 2. When an e‑learning platform wants to merge scanned textbook pages into one JPEG file with a controlled quality level of 85 to reduce file size while preserving readability.
+ * 3. When a mobile app generates a vertical collage of user‑uploaded selfies and must save the result as a JPEG with consistent compression settings for efficient sharing.
+ * 4. When an automated reporting tool combines chart images generated throughout the day into a single JPEG summary image, ensuring the output retains visual fidelity with a quality of 85.
+ * 5. When a digital signage system assembles a series of advertisement slides into one tall JPEG file to be displayed on a scrolling screen, using Aspose.Imaging to manage the merge and JPEG quality.
+ */

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -13,7 +14,16 @@ class Program
         try
         {
             // Hardcoded input image paths
-            string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
+            string[] inputPaths = new[]
+            {
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
+
+            // Hardcoded output path
+            string outputPath = "merged.jpg";
+
             // Validate each input file exists
             foreach (string path in inputPaths)
             {
@@ -24,8 +34,6 @@ class Program
                 }
             }
 
-            // Hardcoded output path
-            string outputPath = "output/merged.jpg";
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
@@ -40,13 +48,8 @@ class Program
             }
 
             // Calculate canvas dimensions for vertical merge
-            int canvasWidth = 0;
-            int canvasHeight = 0;
-            foreach (Size sz in sizes)
-            {
-                if (sz.Width > canvasWidth) canvasWidth = sz.Width;
-                canvasHeight += sz.Height;
-            }
+            int canvasWidth = sizes.Max(s => s.Width);
+            int canvasHeight = sizes.Sum(s => s.Height);
 
             // Prepare JPEG options without metadata
             Source src = new FileCreateSource(outputPath, false);
@@ -70,7 +73,8 @@ class Program
                         offsetY += img.Height;
                     }
                 }
-                // Save the merged image
+
+                // Save the merged image (metadata already omitted)
                 canvas.Save();
             }
         }
@@ -80,3 +84,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When creating a printable photo collage by stacking multiple JPEGs vertically, a developer can use this code to merge the images and strip all EXIF metadata, resulting in a smaller file that loads faster on web galleries.
+ * 2. When generating product catalog pages that combine several product photos into a single vertical banner, the code helps reduce bandwidth by removing unnecessary metadata from the merged JPEG.
+ * 3. When automating the preparation of vertical social‑media story images from a series of source photos, developers can merge them and discard metadata to meet platform size limits.
+ * 4. When building a document scanning workflow that stitches scanned pages into one long JPEG, the code ensures the final document is lightweight by omitting metadata during the merge.
+ * 5. When developing a mobile app that creates vertical timelines of user‑uploaded pictures, this snippet merges the images and eliminates metadata to improve download speed and preserve user privacy.
+ */
