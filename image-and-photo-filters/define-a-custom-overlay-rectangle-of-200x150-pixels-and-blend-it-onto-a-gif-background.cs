@@ -3,41 +3,47 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
 using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.gif";
-        string outputPath = "output.gif";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.gif";
+            string outputPath = "output.gif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the GIF background image
             using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                // Define overlay rectangle dimensions and position
-                int rectX = 10;
-                int rectY = 10;
-                int rectWidth = 200;
-                int rectHeight = 150;
+                // Create a Graphics object for the active frame
+                Graphics graphics = new Graphics(gif.ActiveFrame);
 
-                // Semi‑transparent red brush
-                using (SolidBrush brush = new SolidBrush(Color.FromArgb(128, Color.Red)))
+                // Define a semi‑transparent red brush
+                using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Red))
                 {
-                    Graphics graphics = new Graphics(gif.ActiveFrame);
-                    graphics.FillRectangle(brush, new Rectangle(rectX, rectY, rectWidth, rectHeight));
+                    brush.Opacity = 128; // 0 (transparent) to 255 (opaque)
+
+                    // Define the overlay rectangle (200x150) at position (50,50)
+                    Rectangle overlayRect = new Rectangle(50, 50, 200, 150);
+
+                    // Fill the rectangle onto the GIF frame
+                    graphics.FillRectangle(brush, overlayRect);
                 }
 
+                // Save the modified GIF using default options
                 GifOptions options = new GifOptions();
                 gif.Save(outputPath, options);
             }
