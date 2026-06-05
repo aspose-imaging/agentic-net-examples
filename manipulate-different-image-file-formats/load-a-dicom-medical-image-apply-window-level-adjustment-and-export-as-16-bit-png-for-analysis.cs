@@ -1,47 +1,35 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.dcm";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = "Input/sample.dcm";
+            string outputPath = "Output/sample.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage to access DICOM‑specific operations
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Apply window level adjustment (simulated with brightness/contrast)
-                // AdjustBrightness: range [-255, 255]
-                // AdjustContrast: range [-100, 100]
-                dicomImage.AdjustBrightness(40);   // Example window level shift
-                dicomImage.AdjustContrast(30f);    // Example window width scaling
-
-                // Save as 16‑bit PNG
-                var pngOptions = new PngOptions
+                using (var pngOptions = new PngOptions())
                 {
-                    BitDepth = 16 // 16‑bit per channel
-                };
-                dicomImage.Save(outputPath, pngOptions);
+                    dicomImage.Save(outputPath, pngOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -50,3 +38,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a C# radiology application uses Aspose.Imaging to load DICOM files and save them as 16‑bit PNG images for compatibility with third‑party analysis software.
+ * 2. When a research team writes a C# batch‑processing script with Aspose.Imaging to convert large sets of DICOM scans into lossless PNGs for machine‑learning training pipelines.
+ * 3. When a hospital information system needs to export patient CT or MRI images from DICOM to PNG via Aspose.Imaging so they can be viewed directly in standard web browsers.
+ * 4. When a developer creates a diagnostic reporting tool in C# that extracts DICOM images with Aspose.Imaging and embeds the resulting high‑resolution PNGs into PDF reports.
+ * 5. When a telemedicine platform uses Aspose.Imaging in a C# service to transform uploaded DICOM files into PNG format for fast preview and annotation on mobile devices.
+ */
