@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
 
@@ -9,36 +10,41 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input\\sample.png";
-            string outputPath = "Output\\result.svg";
+            // Hardcoded input raster image and output SVG paths
+            string inputPath = "input.png";
+            string outputPath = "output.svg";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists (creates current directory if none)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the raster image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for drawing
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                // Cast to RasterImage for drawing operations
+                RasterImage raster = (RasterImage)image;
 
-                // Create an SVG canvas with custom viewbox dimensions (width=500, height=300, dpi=96)
-                SvgGraphics2D graphics = new SvgGraphics2D(500, 300, 96);
+                // Define custom SVG viewbox dimensions
+                int svgWidth = 800;   // width in pixels
+                int svgHeight = 600;  // height in pixels
+                int dpi = 96;         // resolution
 
-                // Draw the raster image onto the SVG canvas, scaling to fit the canvas size
-                graphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(500, 300));
+                // Create an SVG graphics canvas with the specified size
+                SvgGraphics2D graphics = new SvgGraphics2D(svgWidth, svgHeight, dpi);
+
+                // Draw the raster image onto the SVG canvas, scaling to fit the viewbox
+                graphics.DrawImage(raster, new Point(0, 0), new Size(svgWidth, svgHeight));
 
                 // Finalize the SVG image
                 using (SvgImage svgImage = graphics.EndRecording())
                 {
-                    // Save the SVG output
+                    // Save the SVG file
                     svgImage.Save(outputPath);
                 }
             }
