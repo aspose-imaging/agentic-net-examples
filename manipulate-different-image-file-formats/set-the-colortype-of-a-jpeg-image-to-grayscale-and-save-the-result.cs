@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"c:\temp\sample.bmp";
-            string outputPath = @"c:\temp\sample.grayscale.jpg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,19 +28,14 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Configure JPEG save options with Grayscale color type
-                JpegOptions saveOptions = new JpegOptions
+                var saveOptions = new JpegOptions
                 {
                     ColorType = JpegCompressionColorMode.Grayscale,
-                    // Optional: set quality and other parameters as needed
-                    Quality = 100,
-                    BitsPerChannel = 8,
-                    CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
-                    ResolutionSettings = new ResolutionSetting(96.0, 96.0),
-                    ResolutionUnit = ResolutionUnit.Inch,
-                    Palette = Aspose.Imaging.ColorPaletteHelper.Create8BitGrayscale(false)
+                    // Optional: use an 8‑bit grayscale palette to reduce size
+                    Palette = ColorPaletteHelper.Create8BitGrayscale(false)
                 };
 
-                // Save the image as JPEG with the specified options
+                // Save the image as a grayscale JPEG
                 image.Save(outputPath, saveOptions);
             }
         }
@@ -50,3 +45,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application needs to generate lightweight thumbnail previews for product photos by converting color JPEGs to 8‑bit grayscale to reduce bandwidth.
+ * 2. When a medical imaging system must store scanned X‑ray images as grayscale JPEGs to comply with DICOM‑like requirements while using C# and Aspose.Imaging.
+ * 3. When an archival tool processes legacy color photographs and saves them as grayscale JPEGs to preserve visual detail while minimizing file size.
+ * 4. When a batch‑processing script converts color scanned documents into grayscale JPEGs for OCR preprocessing in a .NET workflow.
+ * 5. When a mobile app backend generates grayscale JPEG avatars from user‑uploaded color images to maintain a consistent visual style across the platform.
+ */
