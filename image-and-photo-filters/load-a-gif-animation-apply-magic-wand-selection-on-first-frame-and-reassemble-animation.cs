@@ -1,35 +1,47 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.gif";
+        string outputPath = "output.gif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.gif";
-            string outputPath = "output\\result.gif";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+            // Load the GIF animation
             using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                // Apply Magic Wand selection on the first frame at point (10,10)
-                MagicWandTool.Select(gif, new MagicWandSettings(10, 10)).Apply();
+                // Proceed only if the GIF has at least one frame
+                if (gif.PageCount > 0)
+                {
+                    // Access the first frame as a RasterImage
+                    var firstFrame = (RasterImage)gif.Pages[0];
 
-                // Save the modified animation
-                gif.Save(outputPath, new GifOptions());
+                    // Apply Magic Wand selection on the first frame
+                    // Example: start point (10,10) with default threshold
+                    MagicWandTool
+                        .Select(firstFrame, new MagicWandSettings(10, 10))
+                        .Apply();
+                }
+
+                // Save the modified GIF animation
+                gif.Save(outputPath);
             }
         }
         catch (Exception ex)
