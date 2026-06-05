@@ -2,61 +2,54 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.bmp";
-        string outputPath = @"C:\temp\output.bmp";
-
         try
         {
-            // Input file existence check (if you need to load an existing image)
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            // Define output path (hardcoded)
+            string outputPath = @"output.bmp";
 
-            // Load the input BMP image
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
-            {
-                // Create a Graphics object for drawing
-                Graphics graphics = new Graphics(image);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Create a Pen with rounded line caps
+            // Create BMP options with bound file source
+            Source source = new FileCreateSource(outputPath, false);
+            BmpOptions bmpOptions = new BmpOptions { Source = source };
+
+            // Define canvas size
+            int width = 500;
+            int height = 300;
+
+            // Create a BMP canvas (bound to the output file)
+            using (Image canvas = Image.Create(bmpOptions, width, height))
+            {
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(canvas);
+
+                // Create a pen with rounded line caps for smooth curves
                 Pen pen = new Pen(Color.Blue, 5);
                 pen.StartCap = LineCap.Round;
                 pen.EndCap = LineCap.Round;
 
-                // Build a smooth curve using a cubic Bezier shape
-                GraphicsPath path = new GraphicsPath();
-                Figure figure = new Figure();
-                path.AddFigure(figure);
-
-                // Define control points for the Bezier curve
-                PointF[] bezierPoints = new PointF[]
+                // Define points for the curve
+                Point[] points = new Point[]
                 {
-                    new PointF(100, 500),   // Start point
-                    new PointF(200, 100),   // First control point
-                    new PointF(600, 100),   // Second control point
-                    new PointF(700, 500)    // End point
+                    new Point(50, 250),
+                    new Point(150, 50),
+                    new Point(250, 250),
+                    new Point(350, 50),
+                    new Point(450, 250)
                 };
-                figure.AddShape(new BezierShape(bezierPoints));
 
-                // Draw the path onto the image
-                graphics.DrawPath(pen, path);
+                // Draw the smooth curve
+                graphics.DrawCurve(pen, points);
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the modified image
-                image.Save(outputPath);
+                // Save the bound image
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -65,3 +58,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When generating a BMP signature stamp with Aspose.Imaging in C#, a Pen with rounded line caps is used to draw smooth, handwritten‑style curves.
+ * 2. When creating a BMP waveform image for an audio analysis dashboard, developers use a Pen with rounded caps to render the curve’s peaks and troughs with a polished look.
+ * 3. When producing a BMP map overlay that shows curved road routes, a rounded‑cap Pen ensures the lines appear smooth and visually consistent.
+ * 4. When exporting a BMP flowchart diagram, using a Pen with rounded line caps for connector curves improves readability and professional appearance.
+ * 5. When building a BMP thumbnail of a CAD sketch, a Pen with rounded caps draws the curved edges so the preview looks clean and high‑quality.
+ */
