@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -12,7 +10,7 @@ class Program
         try
         {
             string inputPath = "Input/sample.png";
-            string outputPath = "Output/result.pdf";
+            string outputPath = "Output/processed.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -22,9 +20,11 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Resize to 1200x800 using default nearest neighbour resampling
+                RasterImage raster = (RasterImage)image;
+
+                // Resize to 1200x800
                 raster.Resize(1200, 800);
 
                 // Apply median filter with size 5
