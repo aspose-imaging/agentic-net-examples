@@ -2,7 +2,7 @@
   "product": "Aspose.Imaging",
   "platform": "net",
   "framework": "net9.0",
-  "package_version": "26.5.0",
+  "package_version": "26.6.0",
   "total_examples": 2874,
   "total_categories": 17,
   "last_updated": "2026-06-05",
@@ -272,7 +272,7 @@
       ],
       "more_files": {
         "count": 132,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.5.0/conversion"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/conversion"
       }
     },
     {
@@ -406,7 +406,7 @@
       ],
       "more_files": {
         "count": 21,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.5.0/convert-apng"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-apng"
       }
     },
     {
@@ -617,7 +617,7 @@
       ],
       "more_files": {
         "count": 4,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.5.0/convert-cmx-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-cmx-images"
       }
     },
     {
@@ -847,7 +847,7 @@
       ],
       "more_files": {
         "count": 30,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.5.0/convert-eps-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-eps-images"
       }
     },
     {
@@ -1057,7 +1057,7 @@
       ],
       "more_files": {
         "count": 90,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.5.0/convert-open-document-graphics"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-open-document-graphics"
       }
     },
     {
@@ -1286,7 +1286,7 @@
       ],
       "more_files": {
         "count": 111,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.5.0/convert-raster-image"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-raster-image"
       }
     },
     {
@@ -1395,7 +1395,7 @@
       ],
       "more_files": {
         "count": 10,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.5.0/convert-svg-to-raster-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-svg-to-raster-images"
       }
     },
     {
@@ -1824,7 +1824,7 @@
       ],
       "more_files": {
         "count": 108,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.5.0/image-and-photo-filters"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/image-and-photo-filters"
       }
     },
     {
@@ -2400,7 +2400,7 @@
       ],
       "more_files": {
         "count": 434,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.5.0/kernel-filters"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/kernel-filters"
       }
     },
     {
@@ -3156,7 +3156,7 @@
       ],
       "more_files": {
         "count": 570,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.5.0/manipulate-different-image-file-formats"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/manipulate-different-image-file-formats"
       }
     },
     {
@@ -3701,7 +3701,7 @@
       ],
       "more_files": {
         "count": 383,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.5.0/manipulating-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/manipulating-images"
       }
     },
     {
@@ -3934,7 +3934,7 @@
       ],
       "more_files": {
         "count": 105,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.5.0/merge-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/merge-images"
       }
     },
     {
@@ -4459,7 +4459,7 @@
       ],
       "more_files": {
         "count": 367,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.5.0/working-with-drawing-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/working-with-drawing-images"
       }
     }
   ]
