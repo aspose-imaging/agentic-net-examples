@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Svg;
 
 public class Program
 {
@@ -11,8 +9,8 @@ public class Program
     {
         try
         {
-            string inputPath = "Input/sample.svg";
-            string outputPath = "Output/sample.bmp";
+            string inputPath = Path.Combine(Directory.GetCurrentDirectory(), "Input", "sample.svg");
+            string outputPath = Path.Combine(Directory.GetCurrentDirectory(), "Output", "sample.bmp");
 
             if (!File.Exists(inputPath))
             {
@@ -24,18 +22,19 @@ public class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                using (BmpOptions bmpOptions = new BmpOptions
+                var rasterOptions = new VectorRasterizationOptions
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
-                })
+                    BackgroundColor = Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
+                };
+
+                var bmpOptions = new BmpOptions
                 {
-                    image.Save(outputPath, bmpOptions);
-                }
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
