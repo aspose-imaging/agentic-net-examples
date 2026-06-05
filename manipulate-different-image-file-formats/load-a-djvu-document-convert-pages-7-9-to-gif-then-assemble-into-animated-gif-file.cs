@@ -4,84 +4,71 @@ using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.djvu";
-        string outputPath = @"C:\temp\output.gif";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load DjVu document from file stream
-            using (Stream stream = File.OpenRead(inputPath))
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.djvu";
+            string outputPath = @"C:\Images\output.gif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DjVu document
+            using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Pages 7‑9 (1‑based indexing)
-                int startPage = 7;
-                int endPage = 9;
-
-                // Guard against documents with fewer pages
-                if (djvuImage.PageCount < startPage)
-                {
-                    Console.Error.WriteLine("DjVu document does not contain the required pages.");
-                    return;
-                }
-
-                // Prepare GIF image
                 GifImage gifImage = null;
+                bool firstFrame = true;
 
-                for (int pageNumber = startPage; pageNumber <= endPage && pageNumber <= djvuImage.PageCount; pageNumber++)
+                // Iterate through all pages and process pages 7‑9
+                for (int i = 0; i < djvuImage.PageCount; i++)
                 {
-                    // DjVu pages collection is zero‑based
-                    var djvuPage = djvuImage.Pages[pageNumber - 1];
+                    // DjVu pages are 1‑based; adjust index accordingly
+                    int pageNumber = i + 1;
+                    if (pageNumber < 7 || pageNumber > 9)
+                        continue;
 
-                    // Save the page to a memory stream as PNG (any raster format works)
-                    using (var ms = new MemoryStream())
+                    // Retrieve the page as a raster image
+                    RasterImage rasterPage = (RasterImage)djvuImage.Pages[i];
+
+                    // Create a GIF frame from the raster page
+                    GifFrameBlock frameBlock = new GifFrameBlock(rasterPage);
+
+                    if (firstFrame)
                     {
-                        djvuPage.Save(ms, new PngOptions());
-                        ms.Position = 0;
-
-                        // Load the raster image from the memory stream
-                        using (var rasterImage = (RasterImage)Image.Load(ms))
-                        {
-                            if (gifImage == null)
-                            {
-                                // First frame: create GifImage with a GifFrameBlock
-                                var firstBlock = new GifFrameBlock(rasterImage);
-                                gifImage = new GifImage(firstBlock);
-                            }
-                            else
-                            {
-                                // Subsequent frames: add as pages
-                                gifImage.AddPage(rasterImage);
-                            }
-                        }
+                        // Initialize the animated GIF with the first frame
+                        gifImage = new GifImage(frameBlock);
+                        firstFrame = false;
+                    }
+                    else
+                    {
+                        // Add subsequent frames
+                        gifImage.AddPage(frameBlock);
                     }
                 }
 
-                if (gifImage == null)
+                if (gifImage != null)
                 {
-                    Console.Error.WriteLine("No frames were added to the animated GIF.");
-                    return;
+                    // Save the animated GIF
+                    gifImage.Save(outputPath);
+                    gifImage.Dispose();
                 }
-
-                // Save the animated GIF
-                gifImage.Save(outputPath);
-                gifImage.Dispose();
+                else
+                {
+                    Console.Error.WriteLine("Pages 7‑9 were not found in the DjVu document.");
+                }
             }
         }
         catch (Exception ex)
@@ -90,3 +77,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to extract pages 7‑9 from a multi‑page DjVu document and create an animated GIF for web preview, they can use this C# Aspose.Imaging code.
+ * 2. When a digital archive system must convert selected DjVu pages into a lightweight GIF animation for email newsletters, the example shows how to load, rasterize, and assemble the frames.
+ * 3. When an e‑learning platform wants to generate a short animated tutorial from specific pages of a DjVu textbook, this code demonstrates converting those pages to GIF frames in .NET.
+ * 4. When a document‑management workflow requires turning a subset of scanned DjVu pages into an animated GIF for quick visual inspection, the snippet provides the necessary C# operations.
+ * 5. When a mobile app needs to display a looping preview of pages 7‑9 from a DjVu file without loading the entire document, this example shows how to create an animated GIF using Aspose.Imaging for .NET.
+ */
