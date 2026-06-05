@@ -1,37 +1,37 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using Aspose.Imaging.ImageOptions;
+using System.Linq;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath1 = "input1.jpg";
-        string inputPath2 = "input2.jpg";
-        string outputPath = "output/merged.jpg";
+        // Hardcoded input and output paths
+        string[] inputPaths = { "input1.jpg", "input2.jpg" };
+        string outputPath = "output.jpg";
 
         try
         {
-            if (!File.Exists(inputPath1))
+            // Validate each input file
+            foreach (var path in inputPaths)
             {
-                Console.Error.WriteLine($"File not found: {inputPath1}");
-                return;
-            }
-            if (!File.Exists(inputPath2))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath2}");
-                return;
+                if (!File.Exists(path))
+                {
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
+                }
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            var imagePaths = new List<string> { inputPath1, inputPath2 };
-            var sizes = new List<Aspose.Imaging.Size>();
-
-            foreach (var path in imagePaths)
+            // Collect sizes of all input images
+            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            foreach (var path in inputPaths)
             {
                 using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
                 {
@@ -39,21 +39,19 @@ class Program
                 }
             }
 
-            int newWidth = 0;
-            int newHeight = 0;
-            foreach (var sz in sizes)
-            {
-                newWidth += sz.Width;
-                if (sz.Height > newHeight) newHeight = sz.Height;
-            }
+            // Calculate canvas dimensions for horizontal stitching
+            int newWidth = sizes.Sum(s => s.Width);
+            int newHeight = sizes.Max(s => s.Height);
 
-            Aspose.Imaging.Sources.FileCreateSource src = new Aspose.Imaging.Sources.FileCreateSource(outputPath, false);
-            JpegOptions opts = new JpegOptions { Source = src, Quality = 90 };
+            // Create output source and JPEG options
+            FileCreateSource source = new FileCreateSource(outputPath, false);
+            JpegOptions options = new JpegOptions() { Source = source, Quality = 90 };
 
-            using (Aspose.Imaging.FileFormats.Jpeg.JpegImage canvas = (Aspose.Imaging.FileFormats.Jpeg.JpegImage)Aspose.Imaging.Image.Create(opts, newWidth, newHeight))
+            // Create a JPEG canvas bound to the output file
+            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(options, newWidth, newHeight))
             {
                 int offsetX = 0;
-                foreach (var path in imagePaths)
+                foreach (var path in inputPaths)
                 {
                     using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
                     {
@@ -63,6 +61,7 @@ class Program
                     }
                 }
 
+                // Save the bound canvas
                 canvas.Save();
             }
         }
@@ -72,3 +71,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When an e‑commerce platform needs to automatically stitch multiple product photos into a single high‑quality JPEG banner, this C# Aspose.Imaging code can merge the images while gracefully handling missing files or access errors.
+ * 2. When a travel blog wants to generate panoramic views by concatenating a series of JPEG snapshots taken on a trip, the code creates a horizontal canvas and writes the result with configurable quality, protecting against read/write exceptions.
+ * 3. When a document management system scans multi‑page forms as separate JPEG files and must combine them into one image for archival, the routine validates each page, merges them, and catches file‑access issues to avoid processing interruptions.
+ * 4. When a marketing team automates the creation of social‑media collages from user‑submitted images, the program loads each JPEG, assembles them side‑by‑side, and uses try‑catch blocks to handle permission problems on the server.
+ * 5. When a desktop application generates printable photo strips from a set of camera‑generated JPEGs, the code calculates the canvas size, stitches the images, and ensures any missing or locked files are reported without crashing the app.
+ */
