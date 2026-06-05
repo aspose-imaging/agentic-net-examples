@@ -2,42 +2,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "Input/sample.cdr";
-            string outputPath = "Output/sample.psd";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.cdr";
+            string outputPath = @"C:\Images\sample.psd";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            // Load the CDR file
+            using (Image image = Image.Load(inputPath))
             {
-                PsdOptions options = new PsdOptions
+                // Configure PSD options for 16‑bit per channel
+                PsdOptions psdOptions = new PsdOptions
                 {
-                    ChannelBitsCount = 16,
-                    ChannelsCount = 3,
-                    ColorMode = ColorModes.Rgb,
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = cdr.Width,
-                        PageHeight = cdr.Height
-                    }
+                    ChannelBitsCount = 16,                         // 16 bits per channel
+                    ChannelsCount = 4,                             // RGBA channels
+                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb,
+                    CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.Raw,
+                    Version = 6                                    // Default PSD version
                 };
 
-                cdr.Save(outputPath, options);
+                // Save the image as PSD
+                image.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)

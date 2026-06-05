@@ -12,7 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Data\sample.cdr";
-            string outputPath = @"C:\Data\sample.cdr.page0.pdf";
+            string outputPath = @"C:\Data\sample_page0.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,26 +24,27 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
-            {
-                // Select the first page (index 0)
-                CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
+            int pageNumber = 0;
 
-                // Prepare PDF export options with vector rasterization settings
+            // Load the CDR image
+            using (CdrImage image = (CdrImage)Image.Load(inputPath))
+            {
+                // Get the specified page
+                CdrImagePage imagePage = (CdrImagePage)image.Pages[pageNumber];
+
+                // Configure PDF export options with vector rasterization
                 PdfOptions pdfOptions = new PdfOptions();
                 CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                     SmoothingMode = SmoothingMode.None,
-                    PageWidth = page.Width,
-                    PageHeight = page.Height
+                    PageWidth = imagePage.Width,
+                    PageHeight = imagePage.Height
                 };
-
                 pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the selected page as PDF
-                page.Save(outputPath, pdfOptions);
+                // Save the page as PDF
+                imagePage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)

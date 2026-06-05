@@ -4,8 +4,6 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
@@ -21,34 +19,38 @@ class Program
                 return;
             }
 
-            string outputDir = "output_psd";
-            Directory.CreateDirectory(outputDir);
-
             using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                for (int i = 0; i < cdr.PageCount; i++)
+                int pageCount = cdr.PageCount;
+
+                for (int i = 0; i < pageCount; i++)
                 {
-                    using (CdrImagePage page = (CdrImagePage)cdr.Pages[i])
+                    CdrImagePage page = (CdrImagePage)cdr.Pages[i];
+                    page.CacheData();
+
+                    string outputPath = $"page_{i + 1}.psd";
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    PsdOptions psdOptions = new PsdOptions
                     {
-                        string outputPath = Path.Combine(outputDir, $"page_{i + 1}.psd");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        ChannelBitsCount = (short)page.BitsPerPixel,
+                        ChannelsCount = (short)(page.BitsPerPixel / 8),
+                        CompressionMethod = CompressionMethod.RLE
+                    };
 
-                        PsdOptions psdOptions = new PsdOptions
-                        {
-                            CompressionMethod = CompressionMethod.RLE,
-                            ChannelBitsCount = (short)page.BitsPerPixel,
-                            ChannelsCount = (short)(page.BitsPerPixel / 8),
-                            ColorMode = ColorModes.Rgb,
-                            Version = 6,
-                            VectorRasterizationOptions = new VectorRasterizationOptions
-                            {
-                                PageWidth = page.Width,
-                                PageHeight = page.Height
-                            }
-                        };
+                    VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
+                    {
+                        PageWidth = page.Width,
+                        PageHeight = page.Height,
+                        BackgroundColor = Color.White,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    };
 
-                        page.Save(outputPath, psdOptions);
-                    }
+                    psdOptions.VectorRasterizationOptions = vectorOptions;
+
+                    page.Save(outputPath, psdOptions);
                 }
             }
         }
