@@ -1,58 +1,50 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.gif";
+        string outputPath = "output.gif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.gif";
-            string outputPath = @"C:\temp\output.gif";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Load the GIF image
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Cast to GifImage for GIF-specific operations
+                Aspose.Imaging.FileFormats.Gif.GifImage gif = (Aspose.Imaging.FileFormats.Gif.GifImage)image;
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Apply dithering (e.g., Floyd‑Steinberg with 8‑bit palette)
+                gif.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 8, null);
 
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Attempt to cast to GifImage to apply dithering
-                GifImage gifImage = image as GifImage;
-                if (gifImage != null)
-                {
-                    // Apply Floyd‑Steinberg dithering with a 4‑bit palette
-                    gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 4, null);
-                }
-
-                // Configure GIF saving options (color depth, palette correction, interlacing)
+                // Configure GIF save options for color depth and quality
                 GifOptions saveOptions = new GifOptions
                 {
-                    ColorResolution = 7,          // 8 bits per primary color (7 + 1)
-                    DoPaletteCorrection = true,   // Build optimal palette
-                    Interlaced = true             // Progressive display
+                    // ColorResolution = bits per primary color minus 1 (7 => 8 bits)
+                    ColorResolution = 7,
+                    // Enable palette correction for better color matching
+                    DoPaletteCorrection = true,
+                    // Optional: set interlaced flag if desired
+                    Interlaced = false
                 };
 
-                // Save using the appropriate object
-                if (gifImage != null)
-                {
-                    gifImage.Save(outputPath, saveOptions);
-                }
-                else
-                {
-                    image.Save(outputPath, saveOptions);
-                }
+                // Save the processed GIF with the specified options
+                gif.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
