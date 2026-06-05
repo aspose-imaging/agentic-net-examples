@@ -10,7 +10,7 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = @"C:\Images\sample.otg";
             string outputPath = @"C:\Images\sample.pdf";
 
@@ -28,20 +28,23 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Configure rasterization options for OTG
-                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
+                var otgRasterizationOptions = new OtgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
 
-                // Prepare PDF save options and set custom author metadata
-                PdfOptions pdfOptions = new PdfOptions
+                // Prepare PDF save options and attach rasterization options
+                var pdfOptions = new PdfOptions
                 {
-                    VectorRasterizationOptions = otgOptions,
-                    PdfDocumentInfo = new PdfDocumentInfo
-                    {
-                        Author = "Custom Author"
-                    }
+                    VectorRasterizationOptions = otgRasterizationOptions
                 };
+
+                // Set custom author metadata
+                var docInfo = new PdfDocumentInfo
+                {
+                    Author = "Custom Author"
+                };
+                pdfOptions.PdfDocumentInfo = docInfo;
 
                 // Save the image as PDF
                 image.Save(outputPath, pdfOptions);
