@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output.pdf";
+            string inputPath = @"input.jpg";
+            string outputPath = @"output\result.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,23 +27,17 @@ class Program
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Define resize settings with Lanczos resampling
-                var resizeSettings = new ImageResizeSettings
-                {
-                    Mode = ResizeType.LanczosResample
-                };
+                // Desired dimensions (example: half the original size)
+                int newWidth = image.Width / 2;
+                int newHeight = image.Height / 2;
 
-                // Example target size (you can adjust as needed)
-                int targetWidth = image.Width * 2;   // double width
-                int targetHeight = image.Height * 2; // double height
-
-                // Perform high‑quality resize
-                image.Resize(targetWidth, targetHeight, resizeSettings);
+                // Resize using Lanczos resampling for high quality
+                image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
                 // Prepare PDF export options
                 var pdfOptions = new PdfOptions();
 
-                // Save the resized image as a PDF
+                // Save the resized image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
