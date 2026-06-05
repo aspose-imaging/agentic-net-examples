@@ -10,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"c:\temp\sample.png";
-            string outputPath = @"c:\temp\sample_processed.png";
+            string inputPath = @"C:\Images\sample.png";
+            string outputPath = @"C:\Images\sample.MedianSharpen.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,13 +26,12 @@ class Program
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply median filter (kernel size 5) to the whole image
+                // Apply median filter to reduce noise
                 rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
-                // Apply sharpen filter (kernel size 5, sigma 4.0) to accentuate edges
+                // Apply sharpen filter to accentuate edges
                 rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
                 // Save the processed image
