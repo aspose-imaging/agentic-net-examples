@@ -4,17 +4,18 @@ using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.svg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.svg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,17 +26,14 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            // Load the PNG raster image
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage for drawing
-                RasterImage raster = (RasterImage)image;
-
                 int width = raster.Width;
                 int height = raster.Height;
-                int dpi = 96; // Standard screen DPI
+                int dpi = 96; // standard screen DPI
 
-                // Create an SVG graphics context
+                // Create an SVG graphics context with the same dimensions
                 SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
                 // Draw the raster image onto the SVG canvas
@@ -43,7 +41,7 @@ class Program
 
                 // Set stroke color to blue by drawing a rectangle border
                 Pen bluePen = new Pen(Color.Blue, 1);
-                graphics.DrawRectangle(bluePen, 0, 0, width, height);
+                graphics.DrawRectangle(bluePen, 0, 0, width - 1, height - 1);
 
                 // Finalize SVG image
                 using (SvgImage svgImage = graphics.EndRecording())
