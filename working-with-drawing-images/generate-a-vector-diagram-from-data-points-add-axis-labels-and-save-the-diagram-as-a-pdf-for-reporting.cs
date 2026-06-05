@@ -2,75 +2,55 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string outputPath = "Output/diagram.pdf";
+            // Hardcoded input SVG path
+            string inputPath = @"C:\Data\diagram.svg";
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Hardcoded output PDF path
+            string outputPath = @"C:\Data\report.pdf";
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            int width = 800;
-            int height = 600;
+            // Read original SVG content
+            string svgContent = File.ReadAllText(inputPath);
 
-            PngOptions pngOptions = new PngOptions();
+            // Define axis lines and labels as SVG elements
+            string axesAndLabels = @"
+  <line x1='50' y1='550' x2='750' y2='550' stroke='black' stroke-width='2'/>
+  <line x1='50' y1='550' x2='50' y2='50' stroke='black' stroke-width='2'/>
+  <text x='400' y='580' font-family='Arial' font-size='16' text-anchor='middle'>X Axis</text>
+  <text x='20' y='300' font-family='Arial' font-size='16' text-anchor='middle' transform='rotate(-90 20,300)'>Y Axis</text>";
 
-            using (Image image = Image.Create(pngOptions, width, height))
+            // Insert the new elements before the closing </svg> tag
+            string modifiedSvg = svgContent.Replace("</svg>", axesAndLabels + "\n</svg>");
+
+            // Write the modified SVG to a temporary file
+            string tempSvgPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.svg");
+            File.WriteAllText(tempSvgPath, modifiedSvg);
+
+            // Load the temporary SVG and save it as PDF
+            using (Image image = Image.Load(tempSvgPath))
             {
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                var pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
+            }
 
-                // Axis lines
-                Pen axisPen = new Pen(Color.Black, 2);
-                // X axis
-                graphics.DrawLine(axisPen, new Point(50, height - 50), new Point(width - 50, height - 50));
-                // Y axis
-                graphics.DrawLine(axisPen, new Point(50, height - 50), new Point(50, 50));
-
-                // Labels
-                using (SolidBrush textBrush = new SolidBrush(Color.Black))
-                {
-                    Font labelFont = new Font("Arial", 16, FontStyle.Regular);
-                    graphics.DrawString("X Axis", labelFont, textBrush, new PointF(width - 100, height - 40));
-                    graphics.DrawString("Y Axis", labelFont, textBrush, new PointF(10, 30));
-                }
-
-                // Sample data points
-                double[] dataX = { 0, 1, 2, 3, 4, 5 };
-                double[] dataY = { 0, 2, 4, 3, 5, 7 };
-
-                int plotLeft = 50;
-                int plotBottom = height - 50;
-                int plotRight = width - 50;
-                int plotTop = 50;
-
-                double maxX = dataX[dataX.Length - 1];
-                double maxY = 7; // maximum Y value for scaling
-
-                double scaleX = (plotRight - plotLeft) / maxX;
-                double scaleY = (plotBottom - plotTop) / maxY;
-
-                Pen pointPen = new Pen(Color.Red, 2);
-                for (int i = 0; i < dataX.Length - 1; i++)
-                {
-                    int x1 = plotLeft + (int)(dataX[i] * scaleX);
-                    int y1 = plotBottom - (int)(dataY[i] * scaleY);
-                    int x2 = plotLeft + (int)(dataX[i + 1] * scaleX);
-                    int y2 = plotBottom - (int)(dataY[i + 1] * scaleY);
-
-                    // Draw line between points
-                    graphics.DrawLine(pointPen, new Point(x1, y1), new Point(x2, y2));
-
-                    // Draw point marker
-                    graphics.DrawEllipse(pointPen, new Rectangle(x1 - 2, y1 - 2, 4, 4));
-                }
-
-                // Save as PDF
-                image.Save(outputPath, new PdfOptions());
+            // Optionally delete the temporary SVG file
+            if (File.Exists(tempSvgPath))
+            {
+                File.Delete(tempSvgPath);
             }
         }
         catch (Exception ex)
@@ -79,3 +59,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a financial analyst needs to convert a generated SVG chart of stock performance into a PDF report with labeled X and Y axes for distribution to stakeholders.
+ * 2. When an engineering team wants to embed a vector diagram of a circuit layout into a PDF technical manual, adding axis labels automatically via C# and Aspose.Imaging.
+ * 3. When a data‑science application produces SVG scatter plots that must be merged into a printable PDF summary, requiring on‑the‑fly insertion of axis lines and text.
+ * 4. When a marketing automation script creates SVG infographics and needs to produce PDF assets with proper axis annotations for client presentations.
+ * 5. When a compliance system archives SVG‑based process flow diagrams as searchable PDF files, adding axis labels to meet documentation standards using Aspose.Imaging for .NET.
+ */
