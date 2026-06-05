@@ -1,75 +1,55 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\Input\sample.jpg";
+        string outputPath = @"C:\Images\Output\sample_signed.jpg";
+
+        // Minimum pixel count requirement (e.g., 800x600)
+        const int MinPixelCount = 800 * 600;
+
+        // Password used for digital signature
+        const string password = "MySecretPassword";
+
         try
         {
-            // Define input and output directories
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
-
-            // Ensure input directory exists
-            if (!Directory.Exists(inputDirectory))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Get all files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory);
-            foreach (string inputPath in files)
+            // Load the image (supports single and multi‑page images)
+            using (Image img = Image.Load(inputPath))
             {
-                // Validate input file existence
-                if (!File.Exists(inputPath))
+                // Cast to RasterImage to access pixel dimensions and signature methods
+                if (img is RasterImage rasterImg)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    // Calculate total pixel count
+                    long pixelCount = (long)rasterImg.Width * rasterImg.Height;
+
+                    // Embed digital signature only if pixel count meets the minimum requirement
+                    if (pixelCount >= MinPixelCount)
+                    {
+                        rasterImg.EmbedDigitalSignature(password);
+                    }
+
+                    // Save the (potentially signed) image to the output path
+                    rasterImg.Save(outputPath);
                 }
-
-                // Prepare output path
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
-
-                // Ensure output directory exists (unconditional as per requirements)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the image
-                using (Image image = Image.Load(inputPath))
+                else
                 {
-                    // Check pixel count requirement (minimum 200x200)
-                    if (image.Width * image.Height < 200 * 200)
-                    {
-                        // Skip embedding for images that do not meet the size requirement
-                        continue;
-                    }
-
-                    // Cast to RasterCachedImage to access EmbedDigitalSignature
-                    if (image is RasterCachedImage rasterImage)
-                    {
-                        // Embed digital signature with a valid password
-                        rasterImage.EmbedDigitalSignature("secure123");
-                        // Save the signed image
-                        rasterImage.Save(outputPath);
-                    }
-                    else if (image is RasterCachedMultipageImage multipageImage)
-                    {
-                        // Embed digital signature for multipage images
-                        multipageImage.EmbedDigitalSignature("secure123");
-                        multipageImage.Save(outputPath);
-                    }
-                    else
-                    {
-                        // If the image type does not support digital signature, just copy it
-                        image.Save(outputPath);
-                    }
+                    Console.Error.WriteLine("Unsupported image type for digital signature embedding.");
                 }
             }
         }
