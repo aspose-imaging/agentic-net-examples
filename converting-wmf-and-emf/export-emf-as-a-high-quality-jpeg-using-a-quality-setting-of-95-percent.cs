@@ -5,45 +5,41 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.emf";
-            string outputPath = "output.jpg";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\sample.emf";
+            string outputPath = @"C:\Images\sample.jpg";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG options with high quality
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Quality = 95
-                };
-
-                // Set up vector rasterization options for proper EMF rendering
-                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                // Set rasterization options for vector to raster conversion
+                var rasterOptions = new EmfRasterizationOptions
                 {
                     PageSize = image.Size
                 };
-                jpegOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the image as JPEG
+                // Configure JPEG options with quality 95%
+                var jpegOptions = new JpegOptions
+                {
+                    Quality = 95,
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save the image as high‑quality JPEG
                 image.Save(outputPath, jpegOptions);
             }
         }

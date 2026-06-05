@@ -2,17 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.wmf";
-        string outputPath = @"C:\Images\output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.wmf";
+            string outputPath = "output\\resized.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,11 +27,14 @@ class Program
             // Load the WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Resize to 800x800 pixels
-                image.Resize(800, 800);
+                // Cast to WmfImage to access WMF-specific methods
+                var wmfImage = (WmfImage)image;
 
-                // Save as PNG
-                image.Save(outputPath, new PngOptions());
+                // Resize to 800x800 pixels using nearest neighbour resampling
+                wmfImage.Resize(800, 800, Aspose.Imaging.ResizeType.NearestNeighbourResample);
+
+                // Save the resized image as PNG
+                wmfImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)

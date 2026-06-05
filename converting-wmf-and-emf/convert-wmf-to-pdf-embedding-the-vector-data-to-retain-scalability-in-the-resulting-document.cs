@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
@@ -10,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\sample.wmf";
-            string outputPath = @"C:\Images\sample.pdf";
+            string inputPath = @"C:\Temp\sample.wmf";
+            string outputPath = @"C:\Temp\sample.pdf";
 
             // Verify that the input file exists
             if (!File.Exists(inputPath))
@@ -26,19 +27,19 @@ class Program
             // Load the WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure vector rasterization to preserve vector data
+                // Prepare vector rasterization options to keep the vector data
                 var vectorOptions = new WmfRasterizationOptions
                 {
                     PageSize = image.Size
                 };
 
-                // Set PDF options with the vector rasterization settings
+                // Configure PDF save options
                 var pdfOptions = new PdfOptions
                 {
                     VectorRasterizationOptions = vectorOptions
                 };
 
-                // Save as PDF, retaining scalability
+                // Save as PDF, preserving scalability
                 image.Save(outputPath, pdfOptions);
             }
         }

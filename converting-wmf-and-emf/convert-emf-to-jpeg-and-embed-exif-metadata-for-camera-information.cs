@@ -10,7 +10,7 @@ class Program
         try
         {
             string inputPath = "input.emf";
-            string outputPath = "output.jpg";
+            string outputPath = "output\\converted.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -20,28 +20,18 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Prepare JPEG options with EXIF metadata
+            JpegOptions jpegOptions = new JpegOptions();
+            jpegOptions.Quality = 90;
+
+            var exif = new Aspose.Imaging.Exif.JpegExifData();
+            exif.Make = "MyCameraMaker";
+            exif.Model = "MyCameraModel";
+            jpegOptions.ExifData = exif;
+
+            // Load EMF image and save as JPEG with EXIF
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare JPEG options with EXIF metadata
-                JpegOptions jpegOptions = new JpegOptions();
-
-                var exif = new Aspose.Imaging.Exif.JpegExifData
-                {
-                    Make = "MyCameraBrand",
-                    Model = "ModelXYZ",
-                    Software = "Aspose.Imaging"
-                };
-                jpegOptions.ExifData = exif;
-
-                // Set vector rasterization options for EMF rendering
-                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
-                {
-                    PageSize = image.Size,
-                    BackgroundColor = Aspose.Imaging.Color.White
-                };
-                jpegOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Save the image as JPEG with embedded EXIF data
                 image.Save(outputPath, jpegOptions);
             }
         }

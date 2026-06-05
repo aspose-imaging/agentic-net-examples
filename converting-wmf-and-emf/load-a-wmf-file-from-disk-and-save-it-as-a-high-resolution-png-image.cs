@@ -3,19 +3,18 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Wmf;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.wmf";
-            string outputPath = "output.png";
+            string inputPath = @"C:\Images\input.wmf";
+            string outputPath = @"C:\Images\output.png";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,22 +24,20 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load WMF image
-            using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
+            // Load the WMF image
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG options with high‑resolution rasterization
-                var pngOptions = new PngOptions
+                // Increase resolution by scaling the image (e.g., 4x)
+                if (image is WmfImage wmfImage)
                 {
-                    VectorRasterizationOptions = new WmfRasterizationOptions
-                    {
-                        // Increase page size for higher resolution (e.g., 2× original)
-                        PageSize = new Aspose.Imaging.SizeF(wmfImage.Width * 2, wmfImage.Height * 2),
-                        BackgroundColor = Aspose.Imaging.Color.White
-                    }
-                };
+                    int newWidth = wmfImage.Width * 4;
+                    int newHeight = wmfImage.Height * 4;
+                    wmfImage.Resize(newWidth, newHeight);
+                }
 
-                // Save as PNG
-                wmfImage.Save(outputPath, pngOptions);
+                // Save as high‑resolution PNG
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)

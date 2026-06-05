@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.emf";
-        string outputPath = @"C:\Images\output.bmp";
+        string inputPath = @"C:\Images\sample.emf";
+        string outputPath = @"C:\Images\sample_grayscale.bmp";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -27,34 +27,31 @@ class Program
             // Load the EMF image
             using (Image emfImage = Image.Load(inputPath))
             {
-                // Set up rasterization options for EMF to BMP conversion
-                var rasterizationOptions = new EmfRasterizationOptions
+                // Prepare BMP save options with rasterization settings
+                BmpOptions bmpOptions = new BmpOptions
                 {
-                    PageSize = emfImage.Size
+                    VectorRasterizationOptions = new EmfRasterizationOptions
+                    {
+                        PageSize = emfImage.Size
+                    }
                 };
 
-                // BMP save options with the rasterization settings
-                var bmpOptions = new BmpOptions
+                // Rasterize EMF to BMP in memory
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
+                    emfImage.Save(ms, bmpOptions);
+                    ms.Position = 0;
 
-                // Save the rasterized image as BMP
-                emfImage.Save(outputPath, bmpOptions);
-            }
+                    // Load the rasterized BMP image
+                    using (BmpImage bmpImage = (BmpImage)Image.Load(ms))
+                    {
+                        // Convert to grayscale
+                        bmpImage.Grayscale();
 
-            // Ensure output directory exists again before second save (unconditional as required)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the BMP image to apply grayscale
-            using (Image bmpImage = Image.Load(outputPath))
-            {
-                // Cast to BMP-specific class to access Grayscale method
-                var bmp = (BmpImage)bmpImage;
-                bmp.Grayscale(); // Convert to grayscale
-
-                // Overwrite the BMP file with the grayscale version
-                bmp.Save(outputPath);
+                        // Save the grayscale BMP to the output path
+                        bmpImage.Save(outputPath);
+                    }
+                }
             }
         }
         catch (Exception ex)

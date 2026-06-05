@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\input.emf";
-        string outputPath = @"C:\Temp\output.tif";
+        string inputPath = "input.emf";
+        string outputPath = "output.tif";
 
         try
         {
