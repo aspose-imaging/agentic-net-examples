@@ -1,28 +1,27 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output file paths
         string inputPath = @"C:\Images\input.png";
         string outputPath = @"C:\Images\output_cropped.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
@@ -34,8 +33,8 @@ class Program
                 int left = (rasterImage.Width - side) / 2;
                 int top = (rasterImage.Height - side) / 2;
 
-                // Create the cropping rectangle
-                Aspose.Imaging.Rectangle cropArea = new Aspose.Imaging.Rectangle(left, top, side, side);
+                // Define the cropping rectangle
+                Rectangle cropArea = new Rectangle(left, top, side, side);
 
                 // Perform the crop
                 rasterImage.Crop(cropArea);
