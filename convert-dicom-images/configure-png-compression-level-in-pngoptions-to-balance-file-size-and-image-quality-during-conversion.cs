@@ -10,32 +10,28 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\source.jpg";
-            string outputPath = @"C:\Images\output.png";
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\input.jpg";
+            string outputPath = @"c:\temp\output.png";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image (any supported format)
+            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG save options with a balanced compression level (0‑9)
-                var pngOptions = new PngOptions
+                // Configure PNG options with a balanced compression level (e.g., 6)
+                PngOptions pngOptions = new PngOptions
                 {
-                    // Progressive loading can improve perceived loading speed
-                    Progressive = true,
-                    // Use truecolor with alpha for full colour fidelity
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    // Set a moderate compression level (e.g., 6) to balance size and quality
-                    CompressionLevel = 6
+                    CompressionLevel = 6, // Range 0-9; 6 offers a good trade‑off between size and quality
+                    Progressive = true    // Optional: enable progressive loading
                 };
 
                 // Save the image as PNG using the configured options
