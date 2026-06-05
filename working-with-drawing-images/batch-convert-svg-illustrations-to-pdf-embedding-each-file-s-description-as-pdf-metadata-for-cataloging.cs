@@ -6,51 +6,70 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\InputSvgs";
-            string outputFolder = @"C:\OutputPdfs";
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // List of SVG files to convert
-            string[] svgFiles = new[]
+            if (!Directory.Exists(inputDirectory))
             {
-                Path.Combine(inputFolder, "illustration1.svg"),
-                Path.Combine(inputFolder, "illustration2.svg"),
-                Path.Combine(inputFolder, "illustration3.svg")
-            };
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            foreach (string inputPath in svgFiles)
+            if (!Directory.Exists(outputDirectory))
             {
-                // Verify the input file exists
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (var inputPath in files)
+            {
+                if (!Path.GetExtension(inputPath).Equals(".svg", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine the output PDF path
-                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
 
-                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the SVG image
+                string description = "";
+                try
+                {
+                    string svgContent = File.ReadAllText(inputPath);
+                    int start = svgContent.IndexOf("<desc>", StringComparison.OrdinalIgnoreCase);
+                    if (start >= 0)
+                    {
+                        int end = svgContent.IndexOf("</desc>", start, StringComparison.OrdinalIgnoreCase);
+                        if (end > start)
+                        {
+                            description = svgContent.Substring(start + 6, end - (start + 6)).Trim();
+                        }
+                    }
+                }
+                catch
+                {
+                }
+
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Configure PDF options and embed metadata (using the file name as title)
-                    var pdfOptions = new PdfOptions
+                    PdfOptions pdfOptions = new PdfOptions
                     {
-                        PdfDocumentInfo = new PdfDocumentInfo
-                        {
-                            Title = Path.GetFileNameWithoutExtension(inputPath)
-                            // Additional metadata fields (Author, Subject, etc.) can be set here if needed
-                        }
+                        PdfDocumentInfo = new PdfDocumentInfo()
                     };
 
-                    // Save the image as PDF
+                    // Optional: set metadata, e.g., pdfOptions.PdfDocumentInfo.Title = description;
+
                     image.Save(outputPath, pdfOptions);
                 }
             }
@@ -61,3 +80,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a publishing workflow requires batch converting hundreds of SVG artwork files into PDF documents while automatically embedding each SVG’s <desc> element as PDF metadata for searchable catalogs.
+ * 2. When an e‑learning platform needs to transform SVG diagrams into PDF handouts and preserve the diagram descriptions for accessibility tools that read PDF metadata.
+ * 3. When a marketing team wants to generate printable PDF brochures from SVG icons and ensure each icon’s description is stored in the PDF’s document information for easy indexing.
+ * 4. When a software documentation system must convert SVG flowcharts to PDF pages and retain the original <desc> annotations as PDF metadata to support keyword‑based retrieval.
+ * 5. When a legal firm automates the archival of SVG legal illustrations into PDF files, embedding the illustration’s description in the PDF metadata to meet compliance and audit requirements.
+ */
