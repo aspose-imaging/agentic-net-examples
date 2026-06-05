@@ -7,11 +7,11 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input directory containing PNG files
+        string inputDirectory = "C:\\Images";
+
         try
         {
-            // Hardcoded input directory containing PNG files
-            string inputDirectory = @"C:\Images";
-
             // Get all PNG files in the directory
             string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
 
@@ -24,20 +24,23 @@ class Program
                     return;
                 }
 
+                // Output path is the same as input path (overwrite)
+                string outputPath = inputPath;
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
                     // Cast to RasterImage to apply filters
-                    RasterImage rasterImage = (RasterImage)image;
+                    Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)image;
 
-                    // Apply a sharpen filter (kernel size 5, sigma 4.0)
+                    // Apply sharpen filter (kernel size 5, sigma 4.0)
                     rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                    // Ensure the output directory exists (same as input directory)
-                    Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
-
-                    // Overwrite the original file with the sharpened image
-                    rasterImage.Save(inputPath);
+                    // Save the enhanced image, overwriting the original
+                    rasterImage.Save(outputPath);
                 }
             }
         }
