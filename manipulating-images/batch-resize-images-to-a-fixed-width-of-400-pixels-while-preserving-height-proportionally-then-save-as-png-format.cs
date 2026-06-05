@@ -10,37 +10,38 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input\";
-            string outputDir = @"C:\Images\Output\";
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-            // List of image files to process
-            string[] files = new[]
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Get all files in the input directory
+            string[] inputFiles = Directory.GetFiles(inputDir);
+
+            foreach (string inputPath in inputFiles)
             {
-                "image1.jpg",
-                "image2.png",
-                "image3.bmp"
-            };
-
-            foreach (string fileName in files)
-            {
-                // Build full input and output paths
-                string inputPath = Path.Combine(inputDir, fileName);
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".png");
-
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Ensure output directory exists
+                // Determine the output file path (PNG format)
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                string outputPath = Path.Combine(outputDir, outputFileName);
+
+                // Ensure the output directory exists (unconditional)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load, resize proportionally to width 400, and save as PNG
+                // Load the image, resize width to 400 pixels proportionally, and save as PNG
                 using (Image image = Image.Load(inputPath))
                 {
-                    image.ResizeWidthProportionally(400, ResizeType.NearestNeighbourResample);
+                    // Resize width proportionally; default resample type is used
+                    image.ResizeWidthProportionally(400);
+
+                    // Save the resized image as PNG
                     image.Save(outputPath, new PngOptions());
                 }
             }
