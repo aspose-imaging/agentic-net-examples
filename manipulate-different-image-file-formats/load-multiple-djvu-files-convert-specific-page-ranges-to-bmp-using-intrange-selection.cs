@@ -11,17 +11,7 @@ class Program
         try
         {
             // Hardcoded input DjVu files
-            string[] inputPaths = {
-                @"C:\Images\sample1.djvu",
-                @"C:\Images\sample2.djvu"
-            };
-
-            // Define the page range to convert (inclusive)
-            int startPage = 1; // first page index (0‑based)
-            int endPage = 3;   // last page index (0‑based)
-
-            // Create an IntRange instance (required by the task)
-            IntRange range = new IntRange(startPage, endPage);
+            string[] inputPaths = { "input1.djvu", "input2.djvu" };
 
             foreach (string inputPath in inputPaths)
             {
@@ -32,37 +22,25 @@ class Program
                     return;
                 }
 
-                // Prepare output directory (same folder as input)
-                string outputDirectory = Path.GetDirectoryName(inputPath);
-                Directory.CreateDirectory(outputDirectory);
+                // Define output BMP file path
+                string outputPath = Path.Combine("output", Path.GetFileNameWithoutExtension(inputPath) + ".bmp");
 
-                // Open the DjVu file as a stream
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load DjVu image from file stream
                 using (FileStream stream = File.OpenRead(inputPath))
-                // Load DjVu image
                 using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    // Ensure the requested range does not exceed page count
-                    int maxPage = Math.Min(endPage, djvuImage.PageCount - 1);
-                    for (int pageIndex = startPage; pageIndex <= maxPage; pageIndex++)
-                    {
-                        // Build output BMP file path
-                        string outputPath = Path.Combine(
-                            outputDirectory,
-                            $"{Path.GetFileNameWithoutExtension(inputPath)}_page{pageIndex}.bmp");
+                    // Set up BMP save options with page range selection
+                    var saveOptions = new BmpOptions();
 
-                        // Ensure output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Example: export pages 1 to 3 (inclusive)
+                    var pageRange = new IntRange(1, 3);
+                    saveOptions.MultiPageOptions = new DjvuMultiPageOptions(pageRange);
 
-                        // Set BMP save options (MultiPageOptions not needed for BMP,
-                        // but we demonstrate usage with DjvuMultiPageOptions)
-                        BmpOptions bmpOptions = new BmpOptions
-                        {
-                            MultiPageOptions = new DjvuMultiPageOptions(range)
-                        };
-
-                        // Save the specific page as BMP
-                        djvuImage.Pages[pageIndex].Save(outputPath, bmpOptions);
-                    }
+                    // Save selected pages as BMP
+                    djvuImage.Save(outputPath, saveOptions);
                 }
             }
         }
@@ -72,3 +50,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑convert selected pages of multiple DjVu documents into BMP images for legacy Windows applications that only accept BMP files.
+ * 2. When an archival system must extract only the first three pages of each DjVu scan to generate thumbnail previews in BMP format for quick browsing.
+ * 3. When a document‑processing pipeline requires converting specific page ranges from DjVu e‑books into BMP to feed an OCR engine that only supports BMP input.
+ * 4. When a reporting tool has to programmatically render chosen pages of DjVu manuals as BMP graphics for inclusion in PDF reports generated with .NET.
+ * 5. When a migration script must read DjVu files from a folder, select a defined page interval, and save those pages as BMP files to comply with a third‑party vendor’s image format requirements.
+ */
