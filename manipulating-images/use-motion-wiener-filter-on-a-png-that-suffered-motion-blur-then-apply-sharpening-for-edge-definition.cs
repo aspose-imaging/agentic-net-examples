@@ -3,19 +3,18 @@ using System.IO;
 using System.Drawing;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"c:\temp\blurred.png";
+        string outputPath = @"c:\temp\restored.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\blurred.png";
-            string outputPath = @"C:\Images\restored.png";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,18 +27,21 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage to access filtering methods
                 RasterImage rasterImage = (RasterImage)image;
 
                 // Apply Motion Wiener filter to reduce motion blur
-                var motionOptions = new MotionWienerFilterOptions(10, 1.0, 90.0);
-                rasterImage.Filter(rasterImage.Bounds, motionOptions);
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new MotionWienerFilterOptions(size: 10, sigma: 1.0, angle: 90.0));
 
                 // Apply Sharpen filter for edge definition
-                var sharpenOptions = new SharpenFilterOptions(5, 4.0);
-                rasterImage.Filter(rasterImage.Bounds, sharpenOptions);
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new SharpenFilterOptions(size: 5, sigma: 4.0));
 
-                // Save the processed image as PNG
-                rasterImage.Save(outputPath, new PngOptions());
+                // Save the processed image
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
