@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\input.otg";
+        string outputPath = @"C:\output.svg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample.svg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,25 +26,19 @@ class Program
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options for OTG to preserve page size
-                var otgRasterOptions = new OtgRasterizationOptions
+                // Prepare SVG rasterization options; setting PageSize ensures correct viewBox
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
 
-                // Configure SVG options with proper viewBox via PageSize
-                var svgOptions = new SvgOptions
+                // Prepare SVG save options and assign rasterization options
+                SvgOptions svgOptions = new SvgOptions
                 {
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = image.Size
-                    }
+                    VectorRasterizationOptions = rasterOptions
                 };
 
-                // Assign OTG rasterization options to the save options (required for vector formats)
-                svgOptions.VectorRasterizationOptions = otgRasterOptions as VectorRasterizationOptions ?? svgOptions.VectorRasterizationOptions;
-
-                // Save as SVG; viewBox will be set based on PageSize
+                // Save as SVG
                 image.Save(outputPath, svgOptions);
             }
         }
