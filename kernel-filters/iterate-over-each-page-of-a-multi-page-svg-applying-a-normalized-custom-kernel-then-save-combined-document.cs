@@ -3,9 +3,10 @@ using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -15,9 +16,9 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.svg";
-            string outputPath = "output.tif";
+            string outputPath = "output.tiff";
 
-            // Input file existence check
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,92 +26,72 @@ class Program
             }
 
             // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the multi‑page SVG (or any vector image)
-            using (Image image = Image.Load(inputPath))
+            // Load the multi‑page SVG
+            using (Image svgImage = Image.Load(inputPath))
             {
-                // Cast to multipage interface if possible
-                IMultipageImage multipage = image as IMultipageImage;
+                // Determine page count (fallback to 1 if not multipage)
+                int pageCount = 1;
+                if (svgImage is IMultipageImage multipage && multipage.PageCount > 0)
+                {
+                    pageCount = multipage.PageCount;
+                }
+
+                // Prepare a list to hold processed raster pages
                 List<Image> processedPages = new List<Image>();
 
-                // Helper to process a single page
-                void ProcessPage(Image pageImage)
+                // Custom kernel (example 3x3 normalized kernel)
+                double[,] kernel = new double[,]
                 {
-                    // Rasterization options for SVG
-                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                    { 1, 2, 1 },
+                    { 2, 4, 2 },
+                    { 1, 2, 1 }
+                };
+                // Normalize kernel
+                double sum = 0;
+                foreach (double v in kernel) sum += v;
+                for (int i = 0; i < kernel.GetLength(0); i++)
+                {
+                    for (int j = 0; j < kernel.GetLength(1); j++)
                     {
-                        PageSize = pageImage.Size
-                    };
+                        kernel[i, j] /= sum;
+                    }
+                }
 
-                    // Create a temporary raster image (PNG) bound to a temp file
-                    string tempFile = Path.GetTempFileName();
-                    FileCreateSource tempSource = new FileCreateSource(tempFile, false);
-                    PngOptions pngOptions = new PngOptions { Source = tempSource };
-                    pngOptions.VectorRasterizationOptions = rasterOptions;
-
-                    // Create raster image
-                    Image rasterImg = Image.Create(pngOptions, pageImage.Width, pageImage.Height);
-                    RasterImage raster = (RasterImage)rasterImg;
-
-                    // Define a custom kernel (example 3x3 sharpen) and normalize it
-                    double[,] kernel = new double[,]
+                // Process each page
+                for (int pageIndex = 0; pageIndex < pageCount; pageIndex++)
+                {
+                    // Rasterize current page to PNG in memory
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        { 0, -1, 0 },
-                        { -1, 5, -1 },
-                        { 0, -1, 0 }
-                    };
-                    double sum = 0;
-                    foreach (double v in kernel) sum += v;
-                    if (Math.Abs(sum) > 1e-6)
-                    {
-                        for (int i = 0; i < kernel.GetLength(0); i++)
+                        PngOptions pngOptions = new PngOptions();
+                        // Rasterization options for SVG
+                        SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                         {
-                            for (int j = 0; j < kernel.GetLength(1); j++)
-                            {
-                                kernel[i, j] /= sum;
-                            }
-                        }
-                    }
+                            PageSize = svgImage.Size
+                        };
+                        pngOptions.VectorRasterizationOptions = rasterOptions;
+                        // Export only the current page
+                        pngOptions.MultiPageOptions = new MultiPageOptions(new IntRange(pageIndex, pageIndex + 1));
+                        svgImage.Save(ms, pngOptions);
+                        ms.Position = 0;
 
-                    // Apply convolution filter
-                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
-
-                    // Add processed raster image to collection
-                    processedPages.Add(rasterImg);
-                }
-
-                if (multipage != null && multipage.Pages != null && multipage.PageCount > 0)
-                {
-                    // Iterate over each page
-                    foreach (Image page in multipage.Pages)
-                    {
-                        ProcessPage(page);
-                        page.Dispose();
+                        // Load rasterized page
+                        RasterImage rasterPage = (RasterImage)Image.Load(ms);
+                        // Apply custom convolution filter
+                        rasterPage.Filter(rasterPage.Bounds, new ConvolutionFilterOptions(kernel));
+                        // Add the processed raster page to the list
+                        processedPages.Add(rasterPage);
                     }
                 }
-                else
+
+                // Create a multipage image from the processed pages
+                using (Image result = Image.Create(processedPages.ToArray(), true))
                 {
-                    // Single page fallback
-                    ProcessPage(image);
-                }
-
-                // Create a multipage image from processed raster pages
-                Image result = Image.Create(processedPages.ToArray());
-
-                // Save as TIFF with default options
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                result.Save(outputPath, tiffOptions);
-
-                // Dispose result and all temporary pages
-                result.Dispose();
-                foreach (var page in processedPages)
-                {
-                    page.Dispose();
+                    // Save as multi‑page TIFF
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    result.Save(outputPath, tiffOptions);
                 }
             }
         }
@@ -120,3 +101,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert each page of a multi‑page SVG into raster images, apply a normalized Gaussian blur kernel, and merge the results into a single multi‑page TIFF for printing or archival.
+ * 2. When an application must preprocess vector graphics from an SVG catalog by smoothing edges with a custom convolution filter before generating a high‑resolution TIFF document for PDF creation.
+ * 3. When a web service processes uploaded multi‑page SVG invoices, applies a sharpening filter using a normalized kernel, and stores the output as a multi‑page TIFF for compliance and OCR scanning.
+ * 4. When a GIS tool transforms layered SVG maps into a combined TIFF file while applying a blur kernel to reduce visual noise across all map layers.
+ * 5. When an e‑learning platform batch‑processes SVG slide decks, normalizes a convolution kernel to enhance readability, and saves the slides as a single multi‑page TIFF for offline viewing.
+ */
