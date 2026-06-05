@@ -1,16 +1,18 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.psd";
+        string outputPath = "output.png";
+
         try
         {
-            string inputPath = "input.psd";
-            string outputPath = "output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -19,20 +21,16 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Adjust brightness
-                if (image is Aspose.Imaging.RasterImage raster)
-                {
-                    raster.AdjustBrightness(50); // increase brightness by 50
-                }
+                RasterImage raster = (RasterImage)image;
+                raster.AdjustBrightness(50);
 
-                // Set smoothing mode
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                graphics.SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias;
+                Graphics graphics = new Graphics(raster);
+                graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-                // Export to PNG
                 PngOptions pngOptions = new PngOptions();
+                pngOptions.Source = new FileCreateSource(outputPath, false);
                 image.Save(outputPath, pngOptions);
             }
         }
