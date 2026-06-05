@@ -9,6 +9,7 @@ class Program
     {
         try
         {
+            // Input/Output directory setup
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
@@ -25,9 +26,9 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.psd");
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (var inputPath in files)
+            foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -35,16 +36,19 @@ class Program
                     return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Apply contrast enhancement (dynamic to accommodate format-specific method)
-                    dynamic img = image;
-                    img.AdjustContrast(20f);
+                    // Adjust contrast
+                    RasterImage raster = (RasterImage)image;
+                    if (!raster.IsCached) raster.CacheData();
+                    raster.AdjustContrast(30f); // contrast value in range [-100, 100]
 
+                    // Prepare output path
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save as PDF
                     using (PdfOptions pdfOptions = new PdfOptions())
                     {
                         image.Save(outputPath, pdfOptions);
