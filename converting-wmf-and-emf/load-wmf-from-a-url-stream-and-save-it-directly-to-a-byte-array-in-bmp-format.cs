@@ -1,37 +1,43 @@
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    // Entry point
+    static async Task Main(string[] args)
     {
         try
         {
             // Hardcoded URL of the WMF image
-            string inputUrl = "https://example.com/sample.wmf";
+            string wmfUrl = "https://example.com/sample.wmf";
 
-            // Download the WMF data into a stream
+            // Download the WMF image into a stream
             using (HttpClient httpClient = new HttpClient())
-            using (Stream wmfStream = httpClient.GetStreamAsync(inputUrl).Result)
-            // Load the WMF image from the stream
-            using (Image wmfImage = Image.Load(wmfStream))
+            using (HttpResponseMessage response = await httpClient.GetAsync(wmfUrl))
+            using (Stream wmfStream = await response.Content.ReadAsStreamAsync())
             {
-                // Prepare BMP save options (default options are sufficient)
-                BmpOptions bmpOptions = new BmpOptions();
-
-                // Save the image to a memory stream in BMP format
-                using (MemoryStream bmpMemory = new MemoryStream())
+                // Load the WMF image from the stream
+                using (Image wmfImage = Image.Load(wmfStream))
                 {
-                    wmfImage.Save(bmpMemory, bmpOptions);
-                    // Retrieve the byte array containing the BMP data
-                    byte[] bmpBytes = bmpMemory.ToArray();
+                    // Prepare a memory stream to hold the BMP data
+                    using (MemoryStream bmpStream = new MemoryStream())
+                    {
+                        // BMP save options (default settings)
+                        BmpOptions bmpOptions = new BmpOptions();
 
-                    // Example usage: output the size of the resulting byte array
-                    Console.WriteLine($"BMP byte array length: {bmpBytes.Length}");
+                        // Save the image as BMP into the memory stream
+                        wmfImage.Save(bmpStream, bmpOptions);
+
+                        // Retrieve the BMP bytes
+                        byte[] bmpBytes = bmpStream.ToArray();
+
+                        // Example usage: output the size of the resulting BMP byte array
+                        Console.WriteLine($"BMP byte array length: {bmpBytes.Length}");
+                    }
                 }
             }
         }
