@@ -1,55 +1,59 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the PNG as a raster image
-            using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\sample.png";
+            string outputPath = "C:\\temp\\sample_with_gradient.svg";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                int width = raster.Width;
-                int height = raster.Height;
-                int dpi = 96;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Create an SVG graphics canvas
-                var graphics = new SvgGraphics2D(width, height, dpi);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Create a linear gradient brush (red to blue)
-                var gradientBrush = new LinearGradientBrush(
-                    new Aspose.Imaging.Point(0, 0),
-                    new Aspose.Imaging.Point(width, height),
-                    Aspose.Imaging.Color.Red,
-                    Aspose.Imaging.Color.Blue);
+            // Load PNG to obtain dimensions
+            using (PngImage png = (PngImage)Image.Load(inputPath))
+            {
+                int width = png.Width;
+                int height = png.Height;
+                int dpi = 96; // default DPI
 
-                // Pen for the rectangle outline
-                var pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 1);
+                // Create SVG graphics context with same size as PNG
+                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-                // Fill the entire canvas with the gradient
-                graphics.FillRectangle(pen, gradientBrush, 0, 0, width, height);
+                // Define a linear gradient brush (red to blue) covering the whole image
+                LinearGradientBrush gradientBrush = new LinearGradientBrush(
+                    new PointF(0, 0),
+                    new PointF(width, height),
+                    Color.Red,
+                    Color.Blue);
 
-                // Finalize and save the SVG image
+                // Transparent pen for no outline
+                Pen transparentPen = new Pen(Color.Transparent, 0);
+
+                // Fill the entire SVG canvas with the gradient
+                graphics.FillRectangle(transparentPen, gradientBrush, 0, 0, width, height);
+
+                // Finalize SVG image
                 using (SvgImage svgImage = graphics.EndRecording())
                 {
+                    // Save SVG to output path
                     svgImage.Save(outputPath);
                 }
             }
