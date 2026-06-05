@@ -3,63 +3,66 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded paths
+        string csvPath = @"C:\temp\dimensions.csv";
+        string outputDir = @"C:\temp\output\";
+
         try
         {
-            // Input CSV containing width,height per line
-            string csvPath = "dimensions.csv";
+            // Verify input CSV exists
             if (!File.Exists(csvPath))
             {
                 Console.Error.WriteLine($"File not found: {csvPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            string outputDir = "Output";
-            Directory.CreateDirectory(outputDir);
-
+            // Read all lines from CSV
             string[] lines = File.ReadAllLines(csvPath);
             int index = 0;
 
             foreach (string line in lines)
             {
+                // Skip empty lines
                 if (string.IsNullOrWhiteSpace(line))
                     continue;
 
+                // Expected format: width,height
                 string[] parts = line.Split(',');
                 if (parts.Length < 2)
+                {
+                    Console.Error.WriteLine($"Invalid line format at index {index}: {line}");
                     continue;
+                }
 
-                if (!int.TryParse(parts[0].Trim(), out int width) ||
-                    !int.TryParse(parts[1].Trim(), out int height))
+                if (!int.TryParse(parts[0].Trim(), out int width) || !int.TryParse(parts[1].Trim(), out int height))
+                {
+                    Console.Error.WriteLine($"Invalid dimensions at index {index}: {line}");
                     continue;
+                }
 
+                // Build output file path
                 string outputPath = Path.Combine(outputDir, $"image_{index}.bmp");
+
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Create BMP options with bound source
-                FileCreateSource src = new FileCreateSource(outputPath, false);
-                BmpOptions options = new BmpOptions
+                // Set up BMP options with a file create source
+                BmpOptions bmpOptions = new BmpOptions
                 {
-                    Source = src,
-                    BitsPerPixel = 24
+                    BitsPerPixel = 24,
+                    Source = new FileCreateSource(outputPath, false)
                 };
 
-                // Create canvas
-                using (Image canvas = Image.Create(options, width, height))
+                // Create a new image with the specified dimensions
+                using (Image image = Image.Create(bmpOptions, width, height))
                 {
-                    // Fill canvas with white background
-                    Graphics graphics = new Graphics((RasterImage)canvas);
-                    SolidBrush brush = new SolidBrush(Color.White);
-                    graphics.FillRectangle(brush, new Rectangle(0, 0, width, height));
-
-                    // Save bound image
-                    canvas.Save();
+                    // Save the image (the source is already set to the output file)
+                    image.Save();
                 }
 
                 index++;
@@ -71,3 +74,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a set of placeholder BMP files for UI mock‑ups based on size specifications stored in a CSV inventory.
+ * 2. When an automated testing framework must create images of exact pixel dimensions to validate scaling algorithms in a C# application.
+ * 3. When a game asset pipeline requires bulk creation of texture maps in BMP format using dimension data exported from a spreadsheet.
+ * 4. When a reporting tool has to produce thumbnail‑size BMP charts for each record listed in a CSV file of width and height values.
+ * 5. When a legacy system expects BMP files of predefined sizes, and a developer automates their production by reading the required dimensions from a CSV configuration file.
+ */
