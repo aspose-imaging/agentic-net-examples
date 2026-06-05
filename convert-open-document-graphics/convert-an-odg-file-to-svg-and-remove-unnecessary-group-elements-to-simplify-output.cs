@@ -1,9 +1,9 @@
 using System;
 using System.IO;
-using System.Linq;
-using System.Xml.Linq;
+using System.Text.RegularExpressions;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.odg";
-            string outputPath = @"C:\Images\sample.svg";
+            string inputPath = @"C:\Temp\input.odg";
+            string outputPath = @"C:\Temp\output.svg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -38,41 +38,33 @@ class Program
                     }
                 };
 
-                // Save as SVG
-                image.Save(outputPath, svgOptions);
-            }
+                // Save to a temporary SVG file
+                string tempSvgPath = outputPath + ".tmp";
+                image.Save(tempSvgPath, svgOptions);
 
-            // Load generated SVG, remove empty <g> elements, and overwrite the file
-            XDocument svgDoc = XDocument.Load(outputPath);
-            RemoveEmptyGroups(svgDoc.Root);
-            svgDoc.Save(outputPath);
+                // Load SVG content for cleanup
+                string svgContent = File.ReadAllText(tempSvgPath);
+
+                // Remove empty group elements
+                while (svgContent.Contains("<g></g>"))
+                {
+                    svgContent = svgContent.Replace("<g></g>", string.Empty);
+                }
+
+                // Collapse groups that only wrap a single child without attributes
+                Regex groupRegex = new Regex(@"<g>(.*?)</g>", RegexOptions.Singleline);
+                svgContent = groupRegex.Replace(svgContent, "$1");
+
+                // Write cleaned SVG to final output
+                File.WriteAllText(outputPath, svgContent);
+
+                // Delete temporary file
+                File.Delete(tempSvgPath);
+            }
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
-        }
-    }
-
-    // Recursively removes <g> elements that have no child elements (or only whitespace)
-    static void RemoveEmptyGroups(XElement element)
-    {
-        if (element == null) return;
-
-        // Process child groups first
-        var groups = element.Elements().Where(e => e.Name.LocalName == "g").ToList();
-        foreach (var grp in groups)
-        {
-            RemoveEmptyGroups(grp);
-        }
-
-        // After processing children, remove groups that are empty
-        foreach (var grp in groups)
-        {
-            bool hasNonEmptyChild = grp.Elements().Any(e => e.Name.LocalName != "g" || !string.IsNullOrWhiteSpace(e.Value));
-            if (!hasNonEmptyChild && !grp.Elements().Any())
-            {
-                grp.Remove();
-            }
         }
     }
 }
