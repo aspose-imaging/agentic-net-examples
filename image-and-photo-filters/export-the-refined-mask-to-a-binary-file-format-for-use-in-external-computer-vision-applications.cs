@@ -12,13 +12,13 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input\\image.jpg";
-        string outputPath = "Output\\mask.bin";
-
         try
         {
-            // Input file existence check
+            // Hardcoded input and output paths
+            string inputPath = "Input\\sample.jpg";
+            string outputPath = "Output\\mask.bin";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -31,22 +31,19 @@ class Program
             // Load source image as RasterImage
             using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                // Prepare masking arguments (default auto masking)
-                var autoArgs = new AutoMaskingArgs();
-
-                // Export options required by masking (use in-memory stream)
+                // Prepare masking export options (required by the API)
                 var exportOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
                     Source = new StreamSource(new MemoryStream())
                 };
 
-                // Configure masking options
+                // Configure masking options (GraphCut segmentation)
                 var maskingOptions = new MaskingOptions
                 {
                     Method = SegmentationMethod.GraphCut,
                     Decompose = false,
-                    Args = autoArgs,
+                    Args = new AutoMaskingArgs(),
                     BackgroundReplacementColor = Color.Transparent,
                     ExportOptions = exportOptions
                 };
@@ -55,14 +52,23 @@ class Program
                 var masking = new ImageMasking(sourceImage);
                 using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
                 {
-                    // Obtain the foreground mask (binary representation)
-                    using (RasterImage mask = maskingResult[1].GetMask())
+                    // Retrieve the binary mask (foreground)
+                    using (RasterImage maskImage = maskingResult[1].GetMask())
                     {
-                        // Save mask as PNG (binary file extension is acceptable)
-                        mask.Save(outputPath, new PngOptions
+                        int width = maskImage.Width;
+                        int height = maskImage.Height;
+                        int[] argbPixels = new int[width * height];
+                        maskImage.SaveArgb32Pixels(new Rectangle(0, 0, width, height), argbPixels);
+
+                        // Write pixel data to binary file
+                        using (var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                        using (var binaryWriter = new BinaryWriter(fileStream))
                         {
-                            ColorType = PngColorType.Grayscale
-                        });
+                            foreach (int pixel in argbPixels)
+                            {
+                                binaryWriter.Write(pixel);
+                            }
+                        }
                     }
                 }
             }

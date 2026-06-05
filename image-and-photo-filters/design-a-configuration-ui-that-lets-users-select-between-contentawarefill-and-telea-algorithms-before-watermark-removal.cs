@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Shapes;
 
 class Program
@@ -21,37 +20,35 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            Console.WriteLine("Select watermark removal algorithm:");
-            Console.WriteLine("1 - Telea");
-            Console.WriteLine("2 - Content Aware Fill");
-            Console.Write("Enter choice (1 or 2): ");
-            string choice = Console.ReadLine();
-
-            var mask = new GraphicsPath();
-            var figure = new Figure();
-            figure.AddShape(new EllipseShape(new RectangleF(50, 50, 100, 100)));
-            mask.AddFigure(figure);
-
-            using (var image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                var raster = (RasterImage)image;
-                RasterImage result;
+                var mask = new GraphicsPath();
+                var figure = new Figure();
+                figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 200)));
+                mask.AddFigure(figure);
 
-                if (choice == "1")
+                Console.WriteLine("Select watermark removal algorithm:");
+                Console.WriteLine("1 - Telea");
+                Console.WriteLine("2 - Content Aware Fill");
+                Console.Write("Enter choice (1 or 2): ");
+                string choice = Console.ReadLine();
+
+                Aspose.Imaging.Watermark.Options.WatermarkOptions options;
+                if (choice == "2")
                 {
-                    var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
-                    result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, options);
-                }
-                else
-                {
-                    var options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
+                    var caOptions = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
                     {
                         MaxPaintingAttempts = 4
                     };
-                    result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, options);
+                    options = caOptions;
+                }
+                else
+                {
+                    var teleaOptions = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
+                    options = teleaOptions;
                 }
 
-                using (result)
+                using (RasterImage result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, options))
                 {
                     result.Save(outputPath);
                 }

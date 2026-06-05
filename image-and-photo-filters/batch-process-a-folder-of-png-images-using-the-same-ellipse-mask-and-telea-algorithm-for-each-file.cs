@@ -2,7 +2,11 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Watermark;
+using Aspose.Imaging.Watermark.Options;
 
 class Program
 {
@@ -10,50 +14,60 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = "InputImages";
-            string outputDirectory = "OutputImages";
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-            // Get all PNG files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.png");
-
-            foreach (string inputPath in files)
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDir))
             {
-                // Verify input file exists
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                return;
+            }
+
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            string[] files = Directory.GetFiles(inputDir, "*.png");
+
+            foreach (var inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Prepare output path
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + "_clean.png");
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + "_processed.png");
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the image
-                using (Image image = Image.Load(inputPath))
+                // Ensure output directory exists (null‑safe)
+                string outputDirPath = Path.GetDirectoryName(outputPath);
+                if (!string.IsNullOrEmpty(outputDirPath))
                 {
-                    // Cast to PNG image type
-                    PngImage pngImage = (PngImage)image;
+                    Directory.CreateDirectory(outputDirPath);
+                }
 
-                    // Define a reusable ellipse mask
+                using (var image = Image.Load(inputPath))
+                {
+                    var pngImage = (PngImage)image;
+
+                    // Create a common ellipse mask
                     var mask = new GraphicsPath();
                     var figure = new Figure();
-                    // Example ellipse parameters (x, y, width, height)
-                    figure.AddShape(new EllipseShape(new RectangleF(50, 50, 200, 150)));
+                    // Example ellipse covering the central area of the image
+                    figure.AddShape(new EllipseShape(new RectangleF(50, 50, pngImage.Width - 100, pngImage.Height - 100)));
                     mask.AddFigure(figure);
 
-                    // Configure Telea watermark removal options
-                    var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
+                    var options = new TeleaWatermarkOptions(mask);
 
-                    // Apply the watermark removal (object removal) algorithm
-                    var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options);
-
-                    // Save the processed image
-                    result.Save(outputPath);
+                    using (var result = WatermarkRemover.PaintOver(pngImage, options))
+                    {
+                        var saveOptions = new PngOptions { Source = new FileCreateSource(outputPath, false) };
+                        result.Save(outputPath, saveOptions);
+                    }
                 }
             }
         }

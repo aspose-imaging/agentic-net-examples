@@ -11,7 +11,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "output\\result.png";
+        string outputPath = "output.png";
 
         try
         {
@@ -28,17 +28,16 @@ class Program
             // Load the image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Create first magic wand selection and union with two more selections
-                var mask = MagicWandTool
-                    .Select(image, new MagicWandSettings(100, 100))          // first selection point
-                    .Union(new MagicWandSettings(200, 150))                // second selection point
-                    .Union(new MagicWandSettings(300, 250))                // third selection point
-                    .GetFeathered(new FeatheringSettings { Size = 8 });   // feathering radius 8
+                // Create three magic wand selections and combine them using union,
+                // then feather the combined mask with radius 8 and apply to the image
+                MagicWandTool
+                    .Select(image, new MagicWandSettings(100, 100))
+                    .Union(new MagicWandSettings(200, 150))
+                    .Union(new MagicWandSettings(300, 250))
+                    .GetFeathered(new FeatheringSettings() { Size = 8 })
+                    .Apply();
 
-                // Apply the combined mask to the image
-                mask.Apply();
-
-                // Save the result
+                // Save the processed image
                 image.Save(outputPath);
             }
         }

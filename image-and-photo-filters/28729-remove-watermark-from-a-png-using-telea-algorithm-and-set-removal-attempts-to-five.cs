@@ -1,18 +1,17 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Watermark;
-using Aspose.Imaging.Watermark.Options;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output file paths
         string inputPath = "input.png";
-        string outputPath = "output/output.png";
+        string outputPath = "output.png";
 
         try
         {
@@ -31,22 +30,20 @@ class Program
             {
                 var pngImage = (PngImage)image;
 
-                // Define an elliptical mask using GraphicsPath
+                // Define the mask area using a graphics path
                 var mask = new GraphicsPath();
                 var figure = new Figure();
-                // Example ellipse coordinates (x, y, width, height)
-                figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 150)));
+                figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
                 mask.AddFigure(figure);
 
-                // Use default ContentAwareFill options
-                var options = new ContentAwareFillWatermarkOptions(mask);
+                // Create Telea algorithm options
+                var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
 
-                // Remove the watermark
-                using (var result = WatermarkRemover.PaintOver(pngImage, options))
-                {
-                    // Save the processed image
-                    result.Save(outputPath);
-                }
+                // Perform watermark removal
+                var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options);
+
+                // Save the resulting image
+                result.Save(outputPath);
             }
         }
         catch (Exception ex)

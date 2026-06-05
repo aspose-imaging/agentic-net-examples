@@ -1,66 +1,91 @@
 using System;
 using System.IO;
-using System.Linq;
+using System.Security.Cryptography;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded paths
+        string inputPath = @"C:\Images\input.png";
+        string outputDir = @"C:\Images\output";
+        string sharpenOutputPath = Path.Combine(outputDir, "output_sharpen.png");
+        string bilateralOutputPath = Path.Combine(outputDir, "output_bilateral.png");
+
+        // Expected SHA256 hashes for the processed images (replace with real values)
+        const string expectedSharpenHash = "PLACEHOLDER_SHARPEN_HASH";
+        const string expectedBilateralHash = "PLACEHOLDER_BILATERAL_HASH";
+
         try
         {
-            // Hardcoded paths
-            string inputPath = "sample.png";
-            string sharpenOutputPath = "sharpened.png";
-            string gaussianOutputPath = "gaussian.png";
-
-            // Input validation
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directories exist
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(sharpenOutputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(gaussianOutputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(bilateralOutputPath));
 
-            // Expected simple checksums (replace with real values)
-            const int expectedSharpenChecksum = 123456789;
-            const int expectedGaussianChecksum = 987654321;
-
-            // Apply Sharpen filter
-            using (Image img = Image.Load(inputPath))
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)img;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-                raster.Save(sharpenOutputPath);
+                // Cast to RasterImage for filtering
+                RasterImage rasterImage = (RasterImage)image;
+
+                // ---------- Sharpen Filter ----------
+                // Apply sharpen filter with kernel size 5 and sigma 4.0
+                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+                // Save the sharpened image
+                rasterImage.Save(sharpenOutputPath);
+                // Compute hash
+                string sharpenHash = ComputeFileHash(sharpenOutputPath);
+                // Compare with expected
+                Console.WriteLine($"Sharpen filter hash: {sharpenHash}");
+                Console.WriteLine(sharpenHash.Equals(expectedSharpenHash, StringComparison.OrdinalIgnoreCase)
+                    ? "Sharpen filter output matches expected hash."
+                    : "Sharpen filter output does NOT match expected hash.");
+
+                // Reload original image for the next filter to avoid cumulative effects
+                rasterImage.Dispose();
+                using (Image image2 = Image.Load(inputPath))
+                {
+                    RasterImage rasterImage2 = (RasterImage)image2;
+
+                    // ---------- Bilateral Smoothing Filter ----------
+                    // Apply bilateral smoothing filter with kernel size 5
+                    rasterImage2.Filter(rasterImage2.Bounds, new BilateralSmoothingFilterOptions(5));
+                    // Save the bilateral filtered image
+                    rasterImage2.Save(bilateralOutputPath);
+                    // Compute hash
+                    string bilateralHash = ComputeFileHash(bilateralOutputPath);
+                    // Compare with expected
+                    Console.WriteLine($"Bilateral filter hash: {bilateralHash}");
+                    Console.WriteLine(bilateralHash.Equals(expectedBilateralHash, StringComparison.OrdinalIgnoreCase)
+                        ? "Bilateral filter output matches expected hash."
+                        : "Bilateral filter output does NOT match expected hash.");
+                }
             }
-
-            // Compute checksum for Sharpen output
-            byte[] sharpenBytes = File.ReadAllBytes(sharpenOutputPath);
-            int sharpenChecksum = sharpenBytes.Aggregate(0, (a, b) => (a * 31 + b) & 0x7fffffff);
-            Console.WriteLine($"Sharpen checksum: {sharpenChecksum}");
-            Console.WriteLine(sharpenChecksum == expectedSharpenChecksum ? "Sharpen test passed." : "Sharpen test failed.");
-
-            // Apply Gaussian Blur filter
-            using (Image img = Image.Load(inputPath))
-            {
-                RasterImage raster = (RasterImage)img;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-                raster.Save(gaussianOutputPath);
-            }
-
-            // Compute checksum for Gaussian output
-            byte[] gaussianBytes = File.ReadAllBytes(gaussianOutputPath);
-            int gaussianChecksum = gaussianBytes.Aggregate(0, (a, b) => (a * 31 + b) & 0x7fffffff);
-            Console.WriteLine($"Gaussian checksum: {gaussianChecksum}");
-            Console.WriteLine(gaussianChecksum == expectedGaussianChecksum ? "Gaussian test passed." : "Gaussian test failed.");
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    // Helper method to compute SHA256 hash of a file and return as hex string
+    private static string ComputeFileHash(string filePath)
+    {
+        using (FileStream stream = File.OpenRead(filePath))
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            byte[] hashBytes = sha256.ComputeHash(stream);
+            return BitConverter.ToString(hashBytes).Replace("-", string.Empty).ToLowerInvariant();
         }
     }
 }

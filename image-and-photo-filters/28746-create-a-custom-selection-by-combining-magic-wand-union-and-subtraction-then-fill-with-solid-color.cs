@@ -1,45 +1,44 @@
 using System;
 using System.IO;
-using System.Drawing;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.jpg";
+            string inputPath = "input.png";
             string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the JPEG image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Apply MagicWandTool with default settings (reference point at 0,0)
                 MagicWandTool
-                    .Select(image, new MagicWandSettings(0, 0))
+                    .Select(image, new MagicWandSettings(100, 100))
+                    .Union(new MagicWandSettings(200, 150))
+                    .Subtract(new RectangleMask(50, 50, 30, 30))
                     .Apply();
 
-                // Save the masked result as PNG with alpha channel
-                var pngOptions = new PngOptions
+                Graphics graphics = new Graphics(image);
+                using (SolidBrush brush = new SolidBrush(Color.FromArgb(128, 255, 0, 0)))
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha
-                };
-                image.Save(outputPath, pngOptions);
+                    graphics.FillRectangle(brush, new RectangleF(0, 0, image.Width, image.Height));
+                }
+
+                image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
             }
         }
         catch (Exception ex)

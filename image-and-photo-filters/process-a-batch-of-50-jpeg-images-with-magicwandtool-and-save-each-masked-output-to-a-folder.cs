@@ -1,28 +1,24 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output folders
+        string inputFolder = @"C:\Images\Input";
+        string outputFolder = @"C:\Images\Output";
+
         try
         {
-            // Hardcoded input and output folders
-            string inputFolder = @"C:\Images\Input";
-            string outputFolder = @"C:\Images\Output";
-
-            // Ensure the output folder exists
-            Directory.CreateDirectory(outputFolder);
-
-            // Process 50 JPEG images
+            // Process 50 JPEG images named image1.jpg ... image50.jpg
             for (int i = 1; i <= 50; i++)
             {
-                // Build input and output file paths
                 string inputPath = Path.Combine(inputFolder, $"image{i}.jpg");
-                string outputPath = Path.Combine(outputFolder, $"image{i}_masked.png");
-
                 // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
@@ -30,17 +26,23 @@ class Program
                     return;
                 }
 
-                // Ensure the output directory exists (handles nested paths)
+                string outputPath = Path.Combine(outputFolder, $"image{i}_masked.png");
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image, apply magic wand mask, and save the result
+                // Load the image, apply MagicWand mask, and save the result
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    // Create a mask using a reference point (10,10) and apply it
-                    MagicWandTool.Select(image, new MagicWandSettings(10, 10)).Apply();
+                    // Create a mask using MagicWandTool (starting at pixel 0,0 with default settings)
+                    MagicWandTool
+                        .Select(image, new MagicWandSettings(0, 0))
+                        .Apply();
 
-                    // Save the masked image
-                    image.Save(outputPath);
+                    // Save the masked image as PNG with alpha channel
+                    image.Save(outputPath, new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha
+                    });
                 }
             }
         }

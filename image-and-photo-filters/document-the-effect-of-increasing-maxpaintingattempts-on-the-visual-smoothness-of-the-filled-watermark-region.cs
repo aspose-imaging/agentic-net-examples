@@ -1,10 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -14,8 +12,8 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath2 = "output_attempts_2.png";
-            string outputPath5 = "output_attempts_5.png";
+            string outputPathLow = "output_low.png";
+            string outputPathHigh = "output_high.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,52 +22,45 @@ class Program
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath2));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath5));
+            // Ensure output directories exist (null‑safe)
+            string outDirLow = Path.GetDirectoryName(outputPathLow);
+            if (!string.IsNullOrEmpty(outDirLow)) Directory.CreateDirectory(outDirLow);
+            string outDirHigh = Path.GetDirectoryName(outputPathHigh);
+            if (!string.IsNullOrEmpty(outDirHigh)) Directory.CreateDirectory(outDirHigh);
 
             // Load the source image
             using (var image = Image.Load(inputPath))
             {
-                // Cast to specific format (PNG) for watermark removal
                 var pngImage = (PngImage)image;
 
                 // Define a simple elliptical mask
                 var mask = new GraphicsPath();
                 var figure = new Figure();
-                figure.AddShape(new EllipseShape(new RectangleF(50, 50, 200, 200)));
+                figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
                 mask.AddFigure(figure);
 
-                // ----------- Attempt with MaxPaintingAttempts = 2 -----------
-                var options2 = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
+                // ------------------------------
+                // Low MaxPaintingAttempts (2)
+                // ------------------------------
+                var optionsLow = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
                 {
-                    MaxPaintingAttempts = 2 // Fewer attempts may produce less smooth fill
+                    MaxPaintingAttempts = 2 // Fewer attempts may produce visible artifacts
                 };
-
-                using (var result2 = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options2))
+                using (var resultLow = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, optionsLow))
                 {
-                    // Save the result
-                    result2.Save(outputPath2, new PngOptions
-                    {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new StreamSource(new MemoryStream())
-                    });
+                    resultLow.Save(outputPathLow);
                 }
 
-                // ----------- Attempt with MaxPaintingAttempts = 5 -----------
-                var options5 = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
+                // ------------------------------
+                // High MaxPaintingAttempts (8)
+                // ------------------------------
+                var optionsHigh = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
                 {
-                    MaxPaintingAttempts = 5 // More attempts allow the algorithm to choose a better variant, resulting in smoother visual fill
+                    MaxPaintingAttempts = 8 // More attempts allow the algorithm to choose a smoother fill
                 };
-
-                using (var result5 = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options5))
+                using (var resultHigh = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, optionsHigh))
                 {
-                    // Save the result
-                    result5.Save(outputPath5, new PngOptions
-                    {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new StreamSource(new MemoryStream())
-                    });
+                    resultHigh.Save(outputPathHigh);
                 }
             }
         }

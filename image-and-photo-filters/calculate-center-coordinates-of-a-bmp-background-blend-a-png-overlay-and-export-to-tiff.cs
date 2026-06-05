@@ -2,7 +2,9 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,39 +13,40 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string bmpPath = "background.bmp";
-            string pngPath = "overlay.png";
-            string outputPath = "result.tif";
+            string backgroundPath = "background.bmp";
+            string overlayPath = "overlay.png";
+            string outputPath = "output.tif";
 
             // Validate input files
-            if (!File.Exists(bmpPath))
+            if (!File.Exists(backgroundPath))
             {
-                Console.Error.WriteLine($"File not found: {bmpPath}");
+                Console.Error.WriteLine($"File not found: {backgroundPath}");
                 return;
             }
-            if (!File.Exists(pngPath))
+            if (!File.Exists(overlayPath))
             {
-                Console.Error.WriteLine($"File not found: {pngPath}");
+                Console.Error.WriteLine($"File not found: {overlayPath}");
                 return;
             }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load background BMP and overlay PNG
-            using (RasterImage background = (RasterImage)Image.Load(bmpPath))
-            using (RasterImage overlay = (RasterImage)Image.Load(pngPath))
+            // Load background and overlay images
+            using (RasterImage background = (RasterImage)Image.Load(backgroundPath))
+            using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
             {
-                // Calculate top‑left corner to center the overlay
+                // Calculate center position
                 int offsetX = (background.Width - overlay.Width) / 2;
                 int offsetY = (background.Height - overlay.Height) / 2;
+                Point origin = new Point(offsetX, offsetY);
 
                 // Blend overlay onto background
-                Rectangle destRect = new Rectangle(offsetX, offsetY, overlay.Width, overlay.Height);
-                background.SaveArgb32Pixels(destRect, overlay.LoadArgb32Pixels(overlay.Bounds));
+                background.Blend(origin, overlay);
 
                 // Prepare TIFF save options
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Source = new FileCreateSource(outputPath, false);
 
                 // Save the blended image as TIFF
                 background.Save(outputPath, tiffOptions);

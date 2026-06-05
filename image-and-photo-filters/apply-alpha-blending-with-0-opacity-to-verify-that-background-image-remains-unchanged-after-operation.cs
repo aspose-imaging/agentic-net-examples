@@ -1,20 +1,18 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string backgroundPath = "background.png";
+        string overlayPath = "overlay.png";
+        string outputPath = "output\\output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string backgroundPath = "background.png";
-            string overlayPath = "overlay.png";
-            string outputPath = "output.png";
-
             // Verify input files exist
             if (!File.Exists(backgroundPath))
             {
@@ -34,13 +32,11 @@ class Program
             using (RasterImage background = (RasterImage)Image.Load(backgroundPath))
             using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
             {
-                // Blend overlay onto background with 0 opacity (no change to background)
+                // Blend overlay onto background with 0 opacity (no change expected)
                 background.Blend(new Point(0, 0), overlay, 0);
 
-                // Save the result as PNG
-                Source outSource = new FileCreateSource(outputPath, false);
-                PngOptions options = new PngOptions() { Source = outSource };
-                background.Save(outputPath, options);
+                // Save the resulting image
+                background.Save(outputPath);
             }
         }
         catch (Exception ex)
