@@ -3,10 +3,10 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -14,75 +14,89 @@ class Program
     {
         try
         {
-            string inputDir = "InputImages";
-            string outputDir = "OutputImages";
+            // Hardcoded input and output directories
+            string inputDir = "Input";
+            string outputDir = "Output";
 
+            // Validate input directory
             if (!Directory.Exists(inputDir))
             {
                 Directory.CreateDirectory(inputDir);
-                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDir}. Add PNG files and rerun.");
                 return;
             }
 
+            // Ensure output directory exists
             if (!Directory.Exists(outputDir))
             {
                 Directory.CreateDirectory(outputDir);
             }
 
+            // Process each PNG file in the input directory
             string[] files = Directory.GetFiles(inputDir, "*.png");
-
             foreach (string inputPath in files)
             {
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + "_masked.png");
+                // Determine output file path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_masked.png";
+                string outputPath = Path.Combine(outputDir, outputFileName);
+
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+                // Load the source image
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    AutoMaskingArgs userStrokes = new AutoMaskingArgs
-                    {
-                        ObjectsPoints = new Point[][]
-                        {
-                            new Point[] { new Point(10, 10), new Point(20, 10) },
-                            new Point[] { new Point(30, 30) }
-                        }
-                    };
-
-                    string tempExportPath = Path.GetTempFileName();
-
-                    AutoMaskingGraphCutOptions options = new AutoMaskingGraphCutOptions
+                    // Configure auto-masking with user-defined strokes
+                    var maskingOptions = new AutoMaskingGraphCutOptions
                     {
                         CalculateDefaultStrokes = false,
                         FeatheringRadius = 3,
                         Method = SegmentationMethod.GraphCut,
                         Decompose = false,
-                        Args = userStrokes,
-                        BackgroundReplacementColor = Color.Transparent,
                         ExportOptions = new PngOptions
                         {
                             ColorType = PngColorType.TruecolorWithAlpha,
-                            Source = new FileCreateSource(tempExportPath, false)
+                            Source = new FileCreateSource("temp.png", false)
+                        },
+                        BackgroundReplacementColor = Color.Transparent,
+                        Args = new AutoMaskingArgs
+                        {
+                            // Example user-defined strokes:
+                            // First array = background points, second array = foreground points
+                            ObjectsPoints = new Point[][]
+                            {
+                                new Point[] { new Point(10, 10), new Point(20, 20) }, // background strokes
+                                new Point[] { new Point(30, 30) }                     // foreground strokes
+                            }
                         }
                     };
 
-                    MaskingResult result = new ImageMasking(image).Decompose(options);
-
-                    using (RasterImage resultImage = (RasterImage)result[1].GetImage())
+                    // Perform masking
+                    using (MaskingResult results = new ImageMasking(image).Decompose(maskingOptions))
                     {
-                        resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-                    }
-
-                    if (File.Exists(tempExportPath))
-                    {
-                        File.Delete(tempExportPath);
+                        // Retrieve the foreground (masked) image
+                        using (RasterImage resultImage = (RasterImage)results[1].GetImage())
+                        {
+                            // Save the result as PNG with transparency
+                            resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                        }
                     }
                 }
+
+                // Clean up temporary file used by ExportOptions
+                if (File.Exists("temp.png"))
+                {
+                    File.Delete("temp.png");
+                }
+
+                Console.WriteLine($"Processed: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
