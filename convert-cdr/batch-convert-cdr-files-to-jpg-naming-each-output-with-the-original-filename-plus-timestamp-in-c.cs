@@ -1,19 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputDirectory = @"C:\InputCdr";
+        string outputDirectory = @"C:\OutputJpg";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputCdr";
-            string outputDirectory = @"C:\OutputJpg";
-
             // Get all CDR files in the input directory
             string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
 
@@ -26,18 +26,21 @@ class Program
                     return;
                 }
 
-                // Load the CDR image
+                // Build output file name with timestamp
+                string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_{timestamp}.jpg";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load CDR image and save as JPG
                 using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
                 {
-                    // Prepare output file name with timestamp
-                    string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                    string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_{timestamp}.jpg";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
+                    // Optional: cache data for better performance
+                    cdrImage.CacheData();
 
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save as JPEG
+                    // Save using JPEG options
                     JpegOptions jpegOptions = new JpegOptions();
                     cdrImage.Save(outputPath, jpegOptions);
                 }
