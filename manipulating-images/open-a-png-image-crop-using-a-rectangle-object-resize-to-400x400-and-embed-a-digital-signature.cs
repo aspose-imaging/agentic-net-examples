@@ -1,18 +1,21 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input/input.png";
-            string outputPath = "Output/output.png";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,18 +28,26 @@ class Program
             // Load the PNG image as a raster image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Crop using a rectangle (example: inset by 50 pixels on each side)
-                var cropRect = new Rectangle(50, 50, image.Width - 100, image.Height - 100);
+                // Cache data for better performance
+                if (!image.IsCached)
+                    image.CacheData();
+
+                // Crop the image using a rectangle (example values)
+                var cropRect = new Rectangle(50, 50, 200, 200);
                 image.Crop(cropRect);
 
-                // Resize to 400x400 pixels
+                // Resize the image to 400x400 pixels
                 image.Resize(400, 400);
 
-                // Embed a digital signature with a valid password (>=4 characters)
+                // Embed a digital signature with a valid password
                 image.EmbedDigitalSignature("secure123");
 
-                // Save the processed image
-                image.Save(outputPath);
+                // Save the processed image as PNG
+                var pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
