@@ -7,13 +7,13 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputFolder = @"C:\Images\InputWebP";
-        string outputFolder = @"C:\Images\OutputPDF";
-
         try
         {
-            // Ensure the output directory exists (unconditional as per rule)
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\InputWebP";
+            string outputFolder = @"C:\OutputPDF";
+
+            // Ensure the output directory exists
             Directory.CreateDirectory(outputFolder);
 
             // Get all WebP files in the input folder
@@ -28,19 +28,21 @@ class Program
                     return;
                 }
 
-                // Build the output PDF path (same file name, .pdf extension)
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
+                // Build the output PDF file path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".pdf");
 
-                // Ensure the directory for the output file exists (unconditional)
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the WebP image
+                // Load the WebP image and save as PDF
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Save as PDF using default PdfOptions
-                    image.Save(outputPath, new PdfOptions());
+                    PdfOptions pdfOptions = new PdfOptions();
+                    image.Save(outputPath, pdfOptions);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
