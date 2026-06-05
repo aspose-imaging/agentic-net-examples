@@ -10,27 +10,25 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.dcm";
+            string inputPath = "input.dcm";
+            string outputDir = "Output";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputDirectory = "Output";
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(outputDir);
 
             using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
             {
                 int pageIndex = 0;
-                foreach (DicomPage page in dicomImage.DicomPages)
+                foreach (var page in dicomImage.DicomPages)
                 {
-                    string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    using (PngOptions options = new PngOptions())
-                    {
-                        page.Save(outputPath, options);
-                    }
+                    string pngPath = Path.Combine(outputDir, $"page_{pageIndex}.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
+                    page.Save(pngPath, new PngOptions());
                     pageIndex++;
                 }
             }
