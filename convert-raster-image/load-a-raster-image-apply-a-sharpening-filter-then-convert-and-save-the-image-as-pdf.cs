@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.png";
-        string outputPath = @"C:\Images\sample.pdf";
+        string inputPath = @"C:\temp\sample.png";
+        string outputPath = @"C:\temp\sample.pdf";
 
         try
         {
@@ -24,24 +24,26 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
+            // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
+                // Cast to RasterImage to access filtering functionality
                 RasterImage rasterImage = (RasterImage)image;
 
                 // Apply a sharpen filter to the entire image
+                // Kernel size = 5, sigma = 4.0 (example values)
                 rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
                 // Prepare PDF export options
                 PdfOptions pdfOptions = new PdfOptions();
 
-                // Save the processed image as PDF
-                rasterImage.Save(outputPath, pdfOptions);
+                // Save the processed image as a PDF
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
