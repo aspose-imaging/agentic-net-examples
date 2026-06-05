@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -21,32 +21,38 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
+            Directory.CreateDirectory(outputDir);
+
             // Load BMP image
-            using (RasterImage bmpImage = Image.Load(inputPath) as RasterImage)
+            using (Image image = Image.Load(inputPath))
             {
-                if (bmpImage == null)
+                // Cast to RasterImage for pixel manipulation
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
                 {
-                    Console.Error.WriteLine("Failed to load BMP image.");
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
                     return;
                 }
 
-                // Apply a simple color filter: swap Red and Blue channels
-                for (int y = 0; y < bmpImage.Height; y++)
+                // Apply a simple custom color filter:
+                // Increase the red component and reduce the blue component for each pixel.
+                for (int y = 0; y < raster.Height; y++)
                 {
-                    for (int x = 0; x < bmpImage.Width; x++)
+                    for (int x = 0; x < raster.Width; x++)
                     {
-                        Color original = bmpImage.GetPixel(x, y);
-                        Color transformed = Color.FromArgb(original.A, original.B, original.G, original.R);
-                        bmpImage.SetPixel(x, y, transformed);
+                        Color original = raster.GetPixel(x, y);
+                        int newR = Math.Min(255, original.R + 50); // boost red
+                        int newB = Math.Max(0, original.B - 30);   // reduce blue
+                        Color filtered = Color.FromArgb(original.A, newR, original.G, newB);
+                        raster.SetPixel(x, y, filtered);
                     }
                 }
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                 // Save the filtered image as SVG with default options
-                var svgOptions = new SvgOptions();
-                bmpImage.Save(outputPath, svgOptions);
+                SvgOptions svgOptions = new SvgOptions();
+                raster.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
