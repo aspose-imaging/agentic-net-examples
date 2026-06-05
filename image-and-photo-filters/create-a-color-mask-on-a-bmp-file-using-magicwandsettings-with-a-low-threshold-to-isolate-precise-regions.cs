@@ -7,14 +7,14 @@ using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.bmp";
+        string outputPath = "output\\output.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input\\input.bmp";
-            string outputPath = "output\\output.bmp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,15 +25,14 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image as a raster image
+            // Load the BMP image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Create a mask using MagicWand with a low threshold for precise selection
-                MagicWandTool
-                    .Select(image, new MagicWandSettings(50, 50) { Threshold = 10 })
-                    .Apply();
+                // Create a magic wand mask with a low threshold for precise selection
+                var settings = new MagicWandSettings(10, 10) { Threshold = 10 };
+                MagicWandTool.Select(image, settings).Apply();
 
-                // Save the masked image back to BMP format
+                // Save the resulting image as BMP
                 image.Save(outputPath, new BmpOptions());
             }
         }
