@@ -1,9 +1,10 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -11,9 +12,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input DICOM file and output directory
             string inputPath = "input.dcm";
-            string outputPath = "output.png";
+            string outputDirectory = "output";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,58 +24,38 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(outputDirectory);
 
-            // Load DICOM image
-            using (var dicomImage = Image.Load(inputPath) as DicomImage)
+            // Load the DICOM image
+            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
             {
-                if (dicomImage == null)
+                // Iterate through each DICOM page
+                foreach (DicomPage dicomPage in dicomImage.DicomPages)
                 {
-                    Console.Error.WriteLine("Failed to load DICOM image.");
-                    return;
-                }
+                    // Load original ARGB32 pixel data from the DICOM page
+                    int[] originalPixels = dicomPage.LoadArgb32Pixels(dicomPage.Bounds);
 
-                // Extract pixel data from the first page (or the whole image if single page)
-                int[] originalPixels = dicomImage.LoadArgb32Pixels(dicomImage.Bounds);
+                    // Define PNG file path for this page
+                    string pngPath = Path.Combine(outputDirectory, $"page_{dicomPage.Index}.png");
 
-                // Save as PNG
-                dicomImage.Save(outputPath, new PngOptions());
+                    // Ensure directory for PNG exists (already created above)
+                    Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
 
-                // Load the saved PNG image
-                using (var pngImage = Image.Load(outputPath) as PngImage)
-                {
-                    if (pngImage == null)
+                    // Save the DICOM page as PNG
+                    dicomPage.Save(pngPath, new PngOptions());
+
+                    // Load the saved PNG image
+                    using (PngImage pngImage = (PngImage)Image.Load(pngPath))
                     {
-                        Console.Error.WriteLine("Failed to load PNG image.");
-                        return;
-                    }
+                        // Load ARGB32 pixel data from the PNG image
+                        int[] pngPixels = pngImage.LoadArgb32Pixels(pngImage.Bounds);
 
-                    // Extract pixel data from PNG
-                    int[] pngPixels = pngImage.LoadArgb32Pixels(pngImage.Bounds);
+                        // Compare pixel arrays
+                        bool pixelsUnchanged = originalPixels.Length == pngPixels.Length &&
+                                               originalPixels.SequenceEqual(pngPixels);
 
-                    // Compare pixel arrays
-                    bool identical = true;
-                    if (originalPixels.Length != pngPixels.Length)
-                    {
-                        identical = false;
+                        Console.WriteLine($"Page {dicomPage.Index}: pixel data unchanged = {pixelsUnchanged}");
                     }
-                    else
-                    {
-                        for (int i = 0; i < originalPixels.Length; i++)
-                        {
-                            if (originalPixels[i] != pngPixels[i])
-                            {
-                                identical = false;
-                                break;
-                            }
-                        }
-                    }
-
-                    // Output result
-                    if (identical)
-                        Console.WriteLine("Pixel data unchanged after conversion.");
-                    else
-                        Console.WriteLine("Pixel data differs after conversion.");
                 }
             }
         }
