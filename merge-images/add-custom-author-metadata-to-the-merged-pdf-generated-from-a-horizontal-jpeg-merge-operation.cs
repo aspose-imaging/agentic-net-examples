@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -22,7 +21,7 @@ class Program
                 "input3.jpg"
             };
 
-            // Validate input files
+            // Validate each input file
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -32,17 +31,14 @@ class Program
                 }
             }
 
-            // Output PDF path
-            string outputPdfPath = "output/merged.pdf";
-            // Temporary JPEG used as intermediate canvas
-            string tempJpegPath = "output/temp.jpg";
+            // Hardcoded output PDF file
+            string outputPath = "merged.pdf";
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(tempJpegPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect image sizes
-            List<Size> sizes = new List<Size>();
+            // Collect sizes of all input images
+            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
             foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
@@ -52,12 +48,25 @@ class Program
             }
 
             // Calculate canvas dimensions for horizontal merge
-            int newWidth = sizes.Sum(s => s.Width);
-            int newHeight = sizes.Max(s => s.Height);
+            int newWidth = 0;
+            int newHeight = 0;
+            foreach (var sz in sizes)
+            {
+                newWidth += sz.Width;
+                if (sz.Height > newHeight) newHeight = sz.Height;
+            }
 
-            // Create temporary JPEG canvas
-            Source jpegSource = new FileCreateSource(tempJpegPath, false);
-            JpegOptions jpegOptions = new JpegOptions { Source = jpegSource, Quality = 100 };
+            // Temporary bound JPEG file for canvas creation
+            string tempCanvasPath = "temp_canvas.jpg";
+            Source tempSource = new FileCreateSource(tempCanvasPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = tempSource, Quality = 100 };
+
+            // PDF options with custom author metadata
+            PdfOptions pdfOptions = new PdfOptions();
+            pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+            pdfOptions.PdfDocumentInfo.Author = "Custom Author";
+
+            // Create bound JPEG canvas
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
                 int offsetX = 0;
@@ -70,19 +79,9 @@ class Program
                         offsetX += img.Width;
                     }
                 }
-                // Save the merged JPEG
-                canvas.Save();
-            }
 
-            // Load the merged JPEG and save as PDF with author metadata
-            using (Image mergedImage = Image.Load(tempJpegPath))
-            {
-                PdfOptions pdfOptions = new PdfOptions();
-                pdfOptions.PdfDocumentInfo = new Aspose.Imaging.FileFormats.Pdf.PdfDocumentInfo
-                {
-                    Author = "Custom Author"
-                };
-                mergedImage.Save(outputPdfPath, pdfOptions);
+                // Save the merged canvas as PDF with metadata
+                canvas.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -91,3 +90,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to combine multiple product photos stored as JPEGs into a single horizontally‑aligned PDF catalog and embed the photographer’s name as author metadata for brand attribution.
+ * 2. When an application must create a printable marketing brochure by stitching together promotional images side‑by‑side and record the campaign manager’s name in the PDF metadata for compliance tracking.
+ * 3. When a legal firm wants to merge scanned evidence JPEGs into one PDF file, preserving the investigator’s name as the author metadata to maintain chain‑of‑custody documentation.
+ * 4. When a real‑estate portal generates a property showcase PDF by horizontally merging room‑by‑room JPEG images and automatically adds the listing agent’s name as author metadata for contact reference.
+ * 5. When an educational platform assembles lecture slide screenshots into a single PDF worksheet and includes the instructor’s name as author metadata to credit the content creator.
+ */
