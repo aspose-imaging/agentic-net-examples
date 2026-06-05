@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\input\sample.otg";
-            string outputPath = @"C:\output\sample.pdf";
+            string inputPath = @"C:\Input\sample.otg";
+            string outputPath = @"C:\Output\sample.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,31 +20,26 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
                 // Configure rasterization options for OTG
-                var otgRasterOptions = new OtgRasterizationOptions
+                OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
                 {
-                    PageSize = image.Size // Preserve original size
+                    // Preserve original page size
+                    PageSize = image.Size
                 };
 
                 // Set up PDF save options and attach rasterization options
-                var pdfOptions = new PdfOptions
+                PdfOptions pdfOptions = new PdfOptions
                 {
-                    VectorRasterizationOptions = otgRasterOptions
+                    VectorRasterizationOptions = rasterOptions
                 };
 
-                // Optional: enforce PDF/A compliance to embed fonts
-                // pdfOptions.PdfCoreOptions = new PdfCoreOptions
-                // {
-                //     PdfCompliance = PdfComplianceVersion.PdfA1b
-                // };
-
-                // Save as PDF
+                // Save the image as PDF with embedded fonts
                 image.Save(outputPath, pdfOptions);
             }
         }
