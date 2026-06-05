@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\sample.gif";
+        string outputPath = @"c:\temp\sample_contrast_lossy.gif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.gif";
-            string outputPath = @"C:\temp\output\sample_contrast_lossy.gif";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,23 +21,23 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to GifImage to access GIF-specific methods
+                // Cast to GifImage to access GIF‑specific methods
                 GifImage gifImage = (GifImage)image;
 
-                // Increase contrast (value range: -100 to 100)
+                // Enhance contrast (value range: -100 to 100)
                 gifImage.AdjustContrast(50f);
 
-                // Prepare lossy GIF save options
+                // Configure lossy GIF compression
                 GifOptions saveOptions = new GifOptions
                 {
-                    // Enable lossy compression; 80 is a recommended value
-                    MaxDiff = 80
+                    MaxDiff = 80,               // Enable lossy compression
+                    DoPaletteCorrection = true // Improve palette quality
                 };
 
                 // Save the high‑contrast GIF with lossy compression
@@ -46,6 +46,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
