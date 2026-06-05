@@ -7,42 +7,36 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputDirectory = @"C:\InputBmp";
+        string outputDirectory = @"C:\OutputPdf";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\Input";
-            string outputDirectory = @"C:\Images\Output";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // Retrieve all BMP files from the input directory
+            // Get all BMP files in the input directory
             string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
 
             foreach (string inputPath in bmpFiles)
             {
-                // Verify the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Create a unique timestamp prefix
+                // Build unique output file name with timestamp prefix
                 string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                 string outputPath = Path.Combine(outputDirectory, $"{timestamp}_{fileNameWithoutExt}.pdf");
 
-                // Ensure the directory for the output file exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the BMP image
+                // Load BMP image and save as PDF
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Set up PDF export options
                     var pdfOptions = new PdfOptions();
-
-                    // Save the image as a PDF file
                     image.Save(outputPath, pdfOptions);
                 }
             }
