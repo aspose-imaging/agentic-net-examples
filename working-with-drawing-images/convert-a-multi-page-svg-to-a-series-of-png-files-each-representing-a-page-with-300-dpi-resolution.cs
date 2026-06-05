@@ -2,89 +2,67 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input SVG path
-            string inputPath = "input.svg";
+            string inputPath = "Input/multipage.svg";
+            string outputDir = "Output";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Output directory for PNG pages
-            string outputDir = "output";
-
-            // Ensure output directory exists
             Directory.CreateDirectory(outputDir);
 
-            // Load the SVG (could be multipage)
             using (Image image = Image.Load(inputPath))
             {
-                // Try to treat the image as a multipage image
-                if (image is IMultipageImage multipageImage && multipageImage.PageCount > 0)
+                var multipage = image as IMultipageImage;
+                if (multipage == null)
                 {
-                    int pageIndex = 0;
-                    foreach (Image page in multipageImage.Pages)
+                    string outputPath = Path.Combine(outputDir, "page_1.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    var pngOptions = new PngOptions
                     {
-                        // Prepare PNG save options with 300 DPI
-                        PngOptions pngOptions = new PngOptions
+                        ResolutionSettings = new ResolutionSetting(300, 300),
+                        VectorRasterizationOptions = new VectorRasterizationOptions
                         {
-                            ResolutionSettings = new ResolutionSetting(300, 300)
-                        };
+                            BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height
+                        }
+                    };
 
-                        // Configure vector rasterization options for the current page
-                        SvgRasterizationOptions vectorOptions = new SvgRasterizationOptions
-                        {
-                            PageWidth = page.Width,
-                            PageHeight = page.Height,
-                            BackgroundColor = Color.White
-                        };
-                        pngOptions.VectorRasterizationOptions = vectorOptions;
-
-                        // Build output file path for the current page
-                        string outputPath = Path.Combine(outputDir, $"page_{pageIndex + 1}.png");
-
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the page as PNG
-                        page.Save(outputPath, pngOptions);
-
-                        // Dispose the page image
-                        page.Dispose();
-
-                        pageIndex++;
-                    }
+                    image.Save(outputPath, pngOptions);
                 }
                 else
                 {
-                    // Single-page SVG handling
-                    PngOptions pngOptions = new PngOptions
+                    int pageCount = multipage.PageCount;
+                    for (int i = 0; i < pageCount; i++)
                     {
-                        ResolutionSettings = new ResolutionSetting(300, 300)
-                    };
+                        string outputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    SvgRasterizationOptions vectorOptions = new SvgRasterizationOptions
-                    {
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        BackgroundColor = Color.White
-                    };
-                    pngOptions.VectorRasterizationOptions = vectorOptions;
+                        var pngOptions = new PngOptions
+                        {
+                            ResolutionSettings = new ResolutionSetting(300, 300),
+                            VectorRasterizationOptions = new VectorRasterizationOptions
+                            {
+                                BackgroundColor = Color.White,
+                                PageWidth = image.Width,
+                                PageHeight = image.Height
+                            },
+                            MultiPageOptions = new MultiPageOptions(new IntRange(i, 1))
+                        };
 
-                    string outputPath = Path.Combine(outputDir, "page_1.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    image.Save(outputPath, pngOptions);
+                        image.Save(outputPath, pngOptions);
+                    }
                 }
             }
         }
@@ -94,3 +72,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application must generate high‑resolution printable assets from a multi‑page SVG diagram, a developer can use this C# code with Aspose.Imaging to export each page as a 300 DPI PNG file.
+ * 2. When an e‑learning platform needs to convert multi‑page vector illustrations into raster images for offline PDF packaging, the code converts each SVG page to a 300 DPI PNG suitable for embedding.
+ * 3. When a desktop publishing workflow requires extracting individual pages from a multi‑page SVG logo set and saving them as PNG thumbnails at 300 DPI for preview galleries, this snippet automates the process.
+ * 4. When a reporting service must transform SVG charts into high‑quality PNG images for inclusion in printed reports, the code iterates through the SVG pages and saves them with 300 DPI resolution using Aspose.Imaging for .NET.
+ * 5. When a mobile app backend needs to serve rasterized PNG versions of each page of a multi‑page SVG map at 300 DPI for devices that cannot render SVG, the provided C# example performs the conversion efficiently.
+ */
