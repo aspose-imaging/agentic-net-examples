@@ -1,8 +1,7 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -14,44 +13,54 @@ class Program
             string inputDirectory = "Input";
             string outputDirectory = "Output";
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.png");
-
-            foreach (string inputPath in files)
+            if (!Directory.Exists(inputDirectory))
             {
-                if (!File.Exists(inputPath))
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string overlayPath = Path.Combine(inputDirectory, "overlay.png");
+            if (!File.Exists(overlayPath))
+            {
+                Console.Error.WriteLine($"Overlay file not found: {overlayPath}");
+                return;
+            }
+
+            using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
+            {
+                string[] files = Directory.GetFiles(inputDirectory, "*.png");
+                foreach (string inputPath in files)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Aspose.Imaging.Image loadedImage = Aspose.Imaging.Image.Load(inputPath))
-                using (Aspose.Imaging.RasterImage background = (Aspose.Imaging.RasterImage)loadedImage)
-                {
-                    var overlayOptions = new PngOptions
+                    if (!File.Exists(inputPath))
                     {
-                        Source = new FileCreateSource(Path.GetTempFileName(), false)
-                    };
-
-                    using (Aspose.Imaging.Image overlayImage = Aspose.Imaging.Image.Create(overlayOptions, background.Width, background.Height))
-                    using (Aspose.Imaging.RasterImage overlay = (Aspose.Imaging.RasterImage)overlayImage)
-                    {
-                        Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(overlay);
-                        graphics.Clear(Aspose.Imaging.Color.Black);
-
-                        background.Blend(new Aspose.Imaging.Point(0, 0), overlay, 64);
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        continue;
                     }
 
-                    var jpegOptions = new JpegOptions
+                    if (string.Equals(inputPath, overlayPath, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    using (RasterImage image = (RasterImage)Image.Load(inputPath))
                     {
-                        Source = new FileCreateSource(outputPath, false),
-                        Quality = 90
-                    };
-                    background.Save(outputPath, jpegOptions);
+                        image.Blend(new Point(0, 0), overlay, 64);
+
+                        string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        JpegOptions jpegOptions = new JpegOptions
+                        {
+                            Source = new FileCreateSource(outputPath, false),
+                            Quality = 90
+                        };
+
+                        image.Save(outputPath, jpegOptions);
+                    }
                 }
             }
         }
