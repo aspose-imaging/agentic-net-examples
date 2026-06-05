@@ -7,12 +7,12 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "Input/sample.jpg";
+        string outputPath = "Output/output.pdf";
+
         try
         {
-            // Define input and output file paths
-            string inputPath = "Input/sample.jpg";
-            string outputPath = "Output/sample.pdf";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,16 +26,16 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF saving options
+                // Set up PDF options (default settings)
                 var pdfOptions = new PdfOptions();
 
-                // Save the image as PDF
+                // Save the image as PDF, handling any exceptions in the outer try-catch
                 image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
         {
-            // Log any unexpected errors
+            // Log any errors that occur during processing or saving
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
