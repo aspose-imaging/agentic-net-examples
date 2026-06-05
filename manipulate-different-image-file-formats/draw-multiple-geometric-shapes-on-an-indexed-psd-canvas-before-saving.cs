@@ -12,75 +12,79 @@ class Program
     {
         try
         {
-            // Output PSD file path (hard‑coded)
+            // Output PSD file path
             string outputPath = @"C:\temp\output.psd";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Configure PSD options for an indexed image
             PsdOptions psdOptions = new PsdOptions();
             psdOptions.Source = new FileCreateSource(outputPath, false);
             psdOptions.ColorMode = ColorModes.Indexed;
-            // Simple palette with a few colors
-            psdOptions.Palette = new ColorPalette(new Color[]
+            psdOptions.CompressionMethod = CompressionMethod.RLE;
+            psdOptions.ChannelBitsCount = 8;   // 8 bits per channel
+            psdOptions.ChannelsCount = 1;      // Indexed uses a single channel
+
+            // Build a simple 256‑color palette (first few entries are defined, rest are transparent)
+            Color[] baseColors = new Color[]
             {
+                Color.Black,
+                Color.White,
                 Color.Red,
                 Color.Green,
                 Color.Blue,
-                Color.White,
-                Color.Black
-            });
-
-            // Create the PSD canvas (800x600)
-            using (Image image = Image.Create(psdOptions, 800, 600))
+                Color.Yellow,
+                Color.Magenta,
+                Color.Cyan
+            };
+            Color[] fullPalette = new Color[256];
+            for (int i = 0; i < fullPalette.Length; i++)
             {
-                // Initialize graphics for drawing
+                fullPalette[i] = i < baseColors.Length ? baseColors[i] : Color.Transparent;
+            }
+            psdOptions.Palette = new ColorPalette(fullPalette);
+
+            // Create the indexed PSD canvas (output file is already bound)
+            using (Image image = Image.Create(psdOptions, 500, 500))
+            {
+                // Initialize graphics (do NOT wrap in using)
                 Graphics graphics = new Graphics(image);
+
+                // Clear background
                 graphics.Clear(Color.White);
 
-                // Pen for outlines
-                Pen blackPen = new Pen(Color.Black, 2);
+                // Draw a black line
+                graphics.DrawLine(new Pen(Color.Black, 2), new Point(50, 50), new Point(450, 50));
 
-                // Rectangle outline
-                graphics.DrawRectangle(blackPen, new Rectangle(50, 50, 300, 200));
-
-                // Filled rectangle
-                using (SolidBrush redBrush = new SolidBrush(Color.Red))
+                // Draw and fill a red rectangle
+                graphics.DrawRectangle(new Pen(Color.Red, 2), new Rectangle(100, 100, 300, 200));
+                using (SolidBrush rectBrush = new SolidBrush(Color.Cyan))
                 {
-                    graphics.FillRectangle(redBrush, new Rectangle(400, 50, 200, 150));
+                    graphics.FillRectangle(rectBrush, new Rectangle(110, 110, 280, 180));
                 }
 
-                // Ellipse outline
-                graphics.DrawEllipse(blackPen, new Rectangle(50, 300, 200, 150));
-
-                // Filled ellipse
-                using (SolidBrush blueBrush = new SolidBrush(Color.Blue))
+                // Draw and fill a green ellipse
+                graphics.DrawEllipse(new Pen(Color.Green, 2), new Rectangle(150, 250, 200, 100));
+                using (SolidBrush ellipseBrush = new SolidBrush(Color.Yellow))
                 {
-                    graphics.FillEllipse(blueBrush, new Rectangle(300, 300, 250, 150));
+                    graphics.FillEllipse(ellipseBrush, new Rectangle(160, 260, 180, 80));
                 }
 
-                // Line
-                graphics.DrawLine(blackPen, new Point(600, 400), new Point(750, 550));
-
-                // Polygon outline
+                // Draw and fill a purple polygon
                 Point[] polygonPoints = new Point[]
                 {
-                    new Point(100, 500),
-                    new Point(150, 450),
-                    new Point(200, 500),
-                    new Point(175, 550),
-                    new Point(125, 550)
+                    new Point(250, 150),
+                    new Point(300, 200),
+                    new Point(200, 200)
                 };
-                graphics.DrawPolygon(blackPen, polygonPoints);
-
-                // Filled polygon
-                using (SolidBrush greenBrush = new SolidBrush(Color.Green))
+                graphics.DrawPolygon(new Pen(Color.Purple, 2), polygonPoints);
+                using (SolidBrush polyBrush = new SolidBrush(Color.Orange))
                 {
-                    graphics.FillPolygon(greenBrush, polygonPoints);
+                    graphics.FillPolygon(polyBrush, polygonPoints);
                 }
 
-                // Save the PSD (output is already bound to the source)
+                // Save the image (output file is already bound)
                 image.Save();
             }
         }
@@ -90,3 +94,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a lightweight PSD thumbnail with basic vector shapes for a web‑based asset preview, they can use this code to draw shapes on an indexed 8‑bit canvas and save it as a compressed PSD file.
+ * 2. When creating a batch of printable color‑separated plates where only a limited palette is allowed, this example lets the developer draw geometric guides on an indexed PSD and export it with RLE compression.
+ * 3. When building a game level editor that stores background maps as PSD files with a fixed 256‑color palette, the code provides a quick way to render walls, platforms, and obstacles as shapes on the indexed canvas.
+ * 4. When automating the production of corporate brand guidelines that require simple shape diagrams embedded in PSD mockups with a predefined palette, developers can use this snippet to draw the diagrams and save them in the required format.
+ * 5. When developing a scientific reporting tool that overlays measurement markers on scanned images and needs to keep file size low by using an indexed PSD, this code enables drawing those markers as geometric shapes before saving.
+ */
