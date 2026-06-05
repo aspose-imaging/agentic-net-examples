@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output.pdf";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.jpg";
+            string outputPath = @"C:\Images\output.pdf";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -38,10 +38,8 @@ class Program
                 // Perform the crop
                 image.Crop(cropArea);
 
-                // Prepare PDF save options
-                PdfOptions pdfOptions = new PdfOptions();
-
                 // Save the cropped image as PDF
+                PdfOptions pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
         }
