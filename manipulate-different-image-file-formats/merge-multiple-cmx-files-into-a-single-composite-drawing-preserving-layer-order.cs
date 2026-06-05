@@ -1,10 +1,8 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -13,23 +11,16 @@ class Program
     {
         try
         {
-            // Hardcoded input CMX file paths
-            string[] cmxPaths = new[]
-            {
-                @"C:\Images\input1.cmx",
-                @"C:\Images\input2.cmx",
-                @"C:\Images\input3.cmx"
-            };
+            // Hardcoded input CMX files and output PNG file
+            string[] inputPaths = new[] { "input1.cmx", "input2.cmx", "input3.cmx" };
+            string outputPath = "output.png";
 
-            // Hardcoded output path
-            string outputPath = @"C:\Images\composite.png";
-
-            // Verify input files exist
-            foreach (string path in cmxPaths)
+            // Validate input files
+            foreach (string inputPath in inputPaths)
             {
-                if (!File.Exists(path))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {path}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
             }
@@ -37,52 +28,69 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load first CMX to obtain canvas dimensions
-            int canvasWidth, canvasHeight;
-            using (CmxImage firstCmx = (CmxImage)Image.Load(cmxPaths[0]))
+            // Collect sizes of all CMX images
+            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            foreach (string inputPath in inputPaths)
             {
-                canvasWidth = firstCmx.Width;
-                canvasHeight = firstCmx.Height;
+                using (CmxImage cmx = (CmxImage)Aspose.Imaging.Image.Load(inputPath))
+                {
+                    sizes.Add(new Aspose.Imaging.Size(cmx.Width, cmx.Height));
+                }
             }
 
-            // Create output source and PNG options
-            Source outputSource = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions { Source = outputSource };
-
-            // Create raster canvas bound to the output source
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
+            // Determine canvas size (maximum width and height)
+            int canvasWidth = 0;
+            int canvasHeight = 0;
+            foreach (var sz in sizes)
             {
-                // Process each CMX file in order
-                foreach (string cmxPath in cmxPaths)
+                if (sz.Width > canvasWidth) canvasWidth = sz.Width;
+                if (sz.Height > canvasHeight) canvasHeight = sz.Height;
+            }
+
+            // Create temporary raster images from each CMX
+            List<string> tempRasterPaths = new List<string>();
+            foreach (string inputPath in inputPaths)
+            {
+                using (CmxImage cmx = (CmxImage)Aspose.Imaging.Image.Load(inputPath))
                 {
-                    // Temporary raster file for the current CMX
-                    string tempRasterPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".png");
+                    string tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
 
-                    // Rasterize CMX to PNG using vector rasterization options
-                    using (CmxImage cmx = (CmxImage)Image.Load(cmxPath))
+                    // Options for rasterizing CMX to PNG
+                    PngOptions pngOptions = new PngOptions
                     {
-                        Source tempSource = new FileCreateSource(tempRasterPath, false);
-                        PngOptions tempOptions = new PngOptions { Source = tempSource };
-                        tempOptions.VectorRasterizationOptions = new CmxRasterizationOptions();
-                        cmx.Save(tempRasterPath, tempOptions);
-                    }
+                        Source = new FileCreateSource(tempPath, false),
+                        VectorRasterizationOptions = new CmxRasterizationOptions()
+                    };
 
-                    // Load the rasterized image and merge onto the canvas
-                    using (RasterImage raster = (RasterImage)Image.Load(tempRasterPath))
-                    {
-                        Rectangle bounds = new Rectangle(0, 0, raster.Width, raster.Height);
-                        canvas.SaveArgb32Pixels(bounds, raster.LoadArgb32Pixels(raster.Bounds));
-                    }
+                    cmx.Save(tempPath, pngOptions);
+                    tempRasterPaths.Add(tempPath);
+                }
+            }
 
-                    // Delete temporary file
-                    if (File.Exists(tempRasterPath))
+            // Create the output canvas (PNG)
+            FileCreateSource canvasSource = new FileCreateSource(outputPath, false);
+            PngOptions canvasOptions = new PngOptions { Source = canvasSource };
+            using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(canvasOptions, canvasWidth, canvasHeight))
+            {
+                // Merge each rasterized CMX onto the canvas preserving order
+                foreach (string rasterPath in tempRasterPaths)
+                {
+                    using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(rasterPath))
                     {
-                        File.Delete(tempRasterPath);
+                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(0, 0, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                     }
                 }
 
-                // Save the composite image (canvas is already bound to output source)
+                // Save the final composite image
                 canvas.Save();
+            }
+
+            // Clean up temporary raster files
+            foreach (string tempPath in tempRasterPaths)
+            {
+                try { File.Delete(tempPath); } catch { }
             }
         }
         catch (Exception ex)
@@ -91,3 +99,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a CAD workflow requires merging several CorelDRAW CMX files into one composite PNG while preserving the original layer stacking order.
+ * 2. When an automated report generator needs to combine multiple CMX drawings of different dimensions into a single raster image for web preview.
+ * 3. When a batch processing script must validate the existence of CMX source files, calculate the maximum canvas size, and rasterize each file before compositing them.
+ * 4. When a .NET application has to create a temporary raster representation of each CMX, overlay them in the correct sequence, and export the final image as a PNG for archival.
+ * 5. When a graphics pipeline needs to ensure the output directory exists, handle file‑system errors, and produce a single PNG that reflects the combined layers of multiple CMX inputs.
+ */
