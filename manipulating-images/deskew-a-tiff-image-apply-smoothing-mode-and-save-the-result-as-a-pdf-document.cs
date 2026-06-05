@@ -3,18 +3,17 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.tif";
-        string outputPath = @"C:\Images\deskewed.pdf";
+        string inputPath = @"C:\Images\input.tif";
+        string outputPath = @"C:\Images\output.pdf";
 
-        // Ensure input file exists
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,27 +26,20 @@ class Program
         try
         {
             // Load the TIFF image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Deskew the image using NormalizeAngle
-                if (image is RasterImage rasterImage)
-                {
-                    // Do not resize, use LightGray as background
-                    rasterImage.NormalizeAngle(false, Color.LightGray);
-                }
+                // Deskew the image (do not resize, use light gray background)
+                image.NormalizeAngle(false, Color.LightGray);
 
                 // Prepare PDF save options with smoothing mode
                 var pdfOptions = new PdfOptions
                 {
                     VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        // Apply anti-alias smoothing
-                        SmoothingMode = SmoothingMode.AntiAlias,
-                        // Set page size to match the image dimensions
                         PageWidth = image.Width,
                         PageHeight = image.Height,
-                        // Use white background for the PDF page
-                        BackgroundColor = Color.White
+                        BackgroundColor = Color.White,
+                        SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias
                     }
                 };
 
