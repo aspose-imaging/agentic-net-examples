@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -14,22 +14,32 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string[] inputPaths = new[] { "input1.jpg", "input2.jpg", "input3.jpg" };
-            string outputPath = "Output/merged_with_border.jpg";
+            string[] inputPaths = new string[]
+            {
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
+            string outputPath = "merged_with_border.jpg";
 
             // Validate input files
-            foreach (var path in inputPaths)
+            foreach (string inputPath in inputPaths)
             {
-                if (!File.Exists(path))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {path}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
             }
 
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            const int border = 5;
+
             // Collect sizes of all input images
             List<Size> sizes = new List<Size>();
-            foreach (var path in inputPaths)
+            foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
@@ -37,29 +47,19 @@ class Program
                 }
             }
 
-            // Define border thickness
-            int border = 5;
-
-            // Calculate canvas dimensions including border
-            int canvasWidth = sizes.Sum(s => s.Width) + 2 * border;
-            int canvasHeight = sizes.Max(s => s.Height) + 2 * border;
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Calculate canvas dimensions with border
+            int totalWidth = sizes.Sum(s => s.Width);
+            int maxHeight = sizes.Max(s => s.Height);
+            int canvasWidth = totalWidth + 2 * border;
+            int canvasHeight = maxHeight + 2 * border;
 
             // Create JPEG canvas bound to the output file
-            Source src = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions { Source = src, Quality = 100 };
-
+            Source fileSource = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = fileSource, Quality = 100 };
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
-                // Fill background with white (border color)
-                Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Color.White);
-
-                // Merge images horizontally inside the border
                 int offsetX = border;
-                foreach (var path in inputPaths)
+                foreach (string path in inputPaths)
                 {
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
@@ -69,7 +69,7 @@ class Program
                     }
                 }
 
-                // Save the final image (bound canvas)
+                // Save the bound image
                 canvas.Save();
             }
         }
@@ -79,3 +79,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to create a product catalog thumbnail that combines several JPEG product photos side‑by‑side and adds a consistent 5‑pixel border for visual separation, this code automates the merge and border addition using Aspose.Imaging for .NET.
+ * 2. When generating a social‑media collage of event snapshots in C#, the code merges the JPEG images horizontally and applies a uniform border to ensure the final image meets platform layout guidelines.
+ * 3. When building an automated report generator that stitches together chart images into a single JPEG banner, the developer can use this snippet to align the charts, add a 5‑pixel border, and save the result with high quality.
+ * 4. When preparing a printable banner that combines multiple advertisement JPEGs, the code provides a quick way to merge the images, pad them with a border for bleed, and output a ready‑to‑print file.
+ * 5. When creating a web‑gallery preview that displays a series of JPEG thumbnails in a single row with a subtle border to improve readability, this example shows how to perform the merge and border rendering in a C# application.
+ */
