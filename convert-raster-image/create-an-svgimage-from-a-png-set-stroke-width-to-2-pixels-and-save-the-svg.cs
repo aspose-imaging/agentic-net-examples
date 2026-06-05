@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
 
@@ -11,7 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output/output.svg";
+            string outputPath = "output.svg";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -23,22 +24,23 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load PNG image as RasterImage
-            using (Aspose.Imaging.RasterImage pngImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            // Load the PNG image as a raster image
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                int width = pngImage.Width;
-                int height = pngImage.Height;
+                int width = raster.Width;
+                int height = raster.Height;
+                int dpi = 96; // Standard DPI
 
-                // Create SVG graphics canvas
-                SvgGraphics2D graphics = new SvgGraphics2D(width, height, 96);
+                // Create an SVG graphics canvas with the same dimensions
+                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-                // Draw the PNG onto the SVG
-                graphics.DrawImage(pngImage, new Aspose.Imaging.Point(0, 0));
+                // Draw the raster image onto the SVG canvas
+                graphics.DrawImage(raster, new Point(0, 0));
 
                 // Set stroke width to 2 pixels by drawing a rectangle border
-                graphics.DrawRectangle(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2), 0, 0, width, height);
+                graphics.DrawRectangle(new Pen(Color.Black, 2), 0, 0, width, height);
 
-                // Finalize SVG image
+                // Finalize the SVG image and save it
                 using (SvgImage svgImage = graphics.EndRecording())
                 {
                     svgImage.Save(outputPath);
