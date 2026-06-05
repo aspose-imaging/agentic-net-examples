@@ -10,54 +10,73 @@ class Program
     {
         try
         {
-            // Hardcoded paths
-            string baseImagePath = "base.bmp";
-            string outputDir = "output";
-
-            // Ensure output directory exists
+            // Output directory for all BMP files
+            string outputDir = "Output";
             Directory.CreateDirectory(outputDir);
 
-            // Create base BMP with a simple rectangle shape
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(baseImagePath, false);
-            int width = 300;
+            // Base image dimensions
+            int width = 200;
             int height = 200;
 
-            using (Image baseImage = Image.Create(bmpOptions, width, height))
+            // Path for the base image (drawn once, then reused)
+            string basePath = Path.Combine(outputDir, "base.bmp");
+            Directory.CreateDirectory(Path.GetDirectoryName(basePath));
+
+            // Create base BMP image and draw a simple rectangle shape
+            BmpOptions baseOptions = new BmpOptions();
+            baseOptions.BitsPerPixel = 24;
+            baseOptions.Source = new FileCreateSource(basePath, false);
+            using (Image baseImage = Image.Create(baseOptions, width, height))
             {
                 Graphics graphics = new Graphics(baseImage);
                 graphics.Clear(Color.White);
-                graphics.DrawRectangle(new Pen(Color.Black, 2), new Rectangle(50, 30, 200, 140));
-                baseImage.Save(); // Saves to baseImagePath because source is bound
+                graphics.DrawRectangle(new Pen(Color.Blue, 3), new Rectangle(50, 50, 100, 100));
+                // Save the created image (output is already bound via FileCreateSource)
+                baseImage.Save();
             }
 
-            // Define rotation/flip types to generate
-            RotateFlipType[] rotateTypes = new RotateFlipType[]
+            // Verify that the base image was created before loading it
+            if (!File.Exists(basePath))
+            {
+                Console.Error.WriteLine($"File not found: {basePath}");
+                return;
+            }
+
+            // Define the set of rotations to apply
+            RotateFlipType[] rotations = new RotateFlipType[]
             {
                 RotateFlipType.Rotate90FlipNone,
                 RotateFlipType.Rotate180FlipNone,
                 RotateFlipType.Rotate270FlipNone,
                 RotateFlipType.RotateNoneFlipX,
-                RotateFlipType.RotateNoneFlipY
+                RotateFlipType.RotateNoneFlipY,
+                RotateFlipType.Rotate90FlipX
             };
 
-            foreach (RotateFlipType rotateType in rotateTypes)
+            // Process each rotation, create a new BMP file
+            foreach (RotateFlipType rot in rotations)
             {
-                // Verify base image exists
-                if (!File.Exists(baseImagePath))
+                string outPath = Path.Combine(outputDir, $"rotated_{rot}.bmp");
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+
+                // Load the base image (input)
+                if (!File.Exists(basePath))
                 {
-                    Console.Error.WriteLine($"File not found: {baseImagePath}");
+                    Console.Error.WriteLine($"File not found: {basePath}");
                     return;
                 }
 
-                string outputPath = Path.Combine(outputDir, $"base.{rotateType}.bmp");
-
-                // Load, rotate/flip, and save
-                using (Image img = Image.Load(baseImagePath))
+                using (Image img = Image.Load(basePath))
                 {
-                    img.RotateFlip(rotateType);
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    img.Save(outputPath, new BmpOptions());
+                    // Apply rotation/flip
+                    img.RotateFlip(rot);
+
+                    // Save the rotated image to a new BMP file
+                    BmpOptions saveOptions = new BmpOptions();
+                    saveOptions.BitsPerPixel = 24;
+                    saveOptions.Source = new FileCreateSource(outPath, false);
+                    img.Save(outPath, saveOptions);
                 }
             }
         }
@@ -67,3 +86,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When generating a set of sprite sheets for a 2‑D game engine, a developer can use this code to create BMP files of a base shape rotated at different angles for animation frames.
+ * 2. When preparing test data for image‑processing algorithms that must handle various orientations, the code can batch‑produce BMP images with systematic rotations to validate rotation detection logic.
+ * 3. When producing printable labels or icons that need to be displayed in portrait and landscape modes, a developer can quickly generate BMP files with the required flipped and rotated versions.
+ * 4. When creating a catalog of product thumbnails that must appear correctly after user‑driven rotation, the code can pre‑render BMP images at common angles to improve UI responsiveness.
+ * 5. When building a machine‑learning dataset for shape‑recognition models, the code can generate multiple BMP samples of the same rectangle shape rotated and flipped to increase training diversity.
+ */

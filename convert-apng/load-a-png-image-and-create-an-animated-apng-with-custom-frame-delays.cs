@@ -10,11 +10,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output_animation.png";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output\\animation.apng";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,12 +25,13 @@ class Program
 
             using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
+                int[] frameDelays = { 100, 200, 300, 400 };
+
                 ApngOptions createOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100, // default frame time in ms
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    NumPlays = 0 // infinite looping
+                    DefaultFrameTime = (uint)frameDelays[0],
+                    ColorType = PngColorType.TruecolorWithAlpha
                 };
 
                 using (ApngImage apngImage = (ApngImage)Image.Create(
@@ -40,12 +41,12 @@ class Program
                 {
                     apngImage.RemoveAllFrames();
 
-                    // Add frames with custom delays
-                    apngImage.AddFrame(sourceImage, 100); // 100 ms
-                    apngImage.AddFrame(sourceImage, 200); // 200 ms
-                    apngImage.AddFrame(sourceImage, 300); // 300 ms
-                    apngImage.AddFrame(sourceImage, 200); // 200 ms
-                    apngImage.AddFrame(sourceImage, 100); // 100 ms
+                    foreach (int delay in frameDelays)
+                    {
+                        apngImage.AddFrame(sourceImage);
+                        ApngFrame lastFrame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
+                        lastFrame.FrameTime = delay;
+                    }
 
                     apngImage.Save();
                 }

@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -24,23 +24,34 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the APNG animation
-            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+            // Load the APNG image
+            using (Image apngImage = Image.Load(inputPath))
             {
                 // Save as GIF
-                var gifOptions = new GifOptions();
-                apng.Save(outputPath, gifOptions);
+                using (GifOptions gifOptions = new GifOptions())
+                {
+                    apngImage.Save(outputPath, gifOptions);
+                }
             }
 
-            // Verify the GIF was created
-            if (File.Exists(outputPath))
+            // Verify the resulting GIF
+            using (Image gifImage = Image.Load(outputPath))
             {
-                Console.WriteLine($"GIF saved successfully: {outputPath}");
-                Console.WriteLine("You can open this file in major browsers to verify playback.");
-            }
-            else
-            {
-                Console.Error.WriteLine("Failed to create the GIF file.");
+                if (gifImage is GifImage gif)
+                {
+                    if (gif.PageCount > 1)
+                    {
+                        Console.WriteLine("Verification passed: GIF contains multiple frames.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Verification warning: GIF does not contain multiple frames.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Verification warning: Loaded image is not a GIF.");
+                }
             }
         }
         catch (Exception ex)

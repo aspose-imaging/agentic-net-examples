@@ -9,10 +9,9 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.webp";
-        string outputPath = @"c:\temp\output.gif";
+        string inputPath = "input.webp";
+        string outputPath = "output.gif";
 
-        // Ensure any runtime exception is reported cleanly
         try
         {
             // Verify input file exists
@@ -22,20 +21,21 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists (creates current directory if none)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load WebP image from a memory stream
+            // Load the WebP image from a memory stream
             using (FileStream fileStream = File.OpenRead(inputPath))
             using (MemoryStream memoryStream = new MemoryStream())
             {
                 fileStream.CopyTo(memoryStream);
-                memoryStream.Position = 0; // reset position for reading
+                memoryStream.Position = 0; // reset stream position
 
                 using (WebPImage webPImage = new WebPImage(memoryStream))
                 {
-                    // Save as GIF
-                    webPImage.Save(outputPath, new GifOptions());
+                    // Save the image as GIF
+                    GifOptions gifOptions = new GifOptions(); // default options
+                    webPImage.Save(outputPath, gifOptions);
                 }
             }
         }

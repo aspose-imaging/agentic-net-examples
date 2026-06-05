@@ -21,22 +21,21 @@ class Program
             // Load the JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                // Ensure the loaded image is a raster image
-                var rasterImage = image as RasterImage;
-                if (rasterImage == null)
+                // Ensure the loaded image supports raster operations
+                if (image is RasterImage rasterImage)
                 {
-                    Console.Error.WriteLine("The loaded file is not a raster image.");
-                    return;
+                    // Password for digital signature extraction (empty if unknown)
+                    string password = "";
+
+                    // Analyze the digital signature confidence percentage
+                    int confidence = rasterImage.AnalyzePercentageDigitalSignature(password);
+
+                    Console.WriteLine($"Digital signature confidence: {confidence}%");
                 }
-
-                // Password used for digital signature extraction (empty if unknown)
-                string password = "";
-
-                // Analyze the digital signature confidence percentage
-                int confidence = rasterImage.AnalyzePercentageDigitalSignature(password);
-
-                // Output the result
-                Console.WriteLine($"Digital signature confidence: {confidence}%");
+                else
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                }
             }
         }
         catch (Exception ex)

@@ -9,43 +9,52 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.cdr";
+        string outputPath = "output.gif";
+
         try
         {
-            string inputPath = "input.cdr";
-            string outputPath = "output.gif";
-
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load CDR image
             using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
+                // Prepare GIF options with vector rasterization settings
+                GifOptions rasterOptions = new GifOptions
+                {
+                    VectorRasterizationOptions = new CdrRasterizationOptions
+                    {
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height
+                    }
+                };
+
+                // Rasterize CDR to GIF in memory
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    var rasterOptions = new GifOptions
-                    {
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            PageWidth = cdr.Width,
-                            PageHeight = cdr.Height,
-                            BackgroundColor = Aspose.Imaging.Color.White
-                        }
-                    };
-
                     cdr.Save(ms, rasterOptions);
                     ms.Position = 0;
 
+                    // Load the rasterized GIF
                     using (GifImage gif = (GifImage)Image.Load(ms))
                     {
-                        RasterImage raster = (RasterImage)gif;
-                        raster.AdjustContrast(-30f);
+                        // Reduce contrast (negative value lowers contrast)
+                        gif.AdjustContrast(-30f);
 
+                        // Verify transparency
                         bool hasTransparency = gif.HasTransparentColor;
                         Console.WriteLine($"Has transparency: {hasTransparency}");
 
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Save the final GIF
                         gif.Save(outputPath, new GifOptions());
                     }
                 }

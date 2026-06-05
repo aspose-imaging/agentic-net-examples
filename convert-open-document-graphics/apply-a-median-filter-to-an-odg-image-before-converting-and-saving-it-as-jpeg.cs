@@ -1,52 +1,64 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.odg";
-        string outputPath = "sample_converted.jpg";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
-            // Load the ODG image
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "Input/sample.odg";
+            string outputPath = "Output/sample.jpg";
+
+            if (!File.Exists(inputPath))
             {
-                // Cast to OdgImage to access pages
-                OdgImage odgImage = (OdgImage)image;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Assume the ODG has at least one page
-                if (odgImage.Pages.Length == 0)
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            string tempPngPath = Path.Combine(outputDir ?? string.Empty, "temp.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+
+            // Load ODG vector image and rasterize to PNG
+            using (Image vectorImage = Image.Load(inputPath))
+            {
+                var rasterOptions = new OdgRasterizationOptions
                 {
-                    Console.Error.WriteLine("No pages found in the ODG image.");
-                    return;
-                }
+                    BackgroundColor = Color.White,
+                    PageSize = vectorImage.Size
+                };
 
-                // Get the first page and treat it as a raster image
-                Image pageImage = odgImage.Pages[0];
-                RasterImage rasterPage = (RasterImage)pageImage;
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                // Apply a median filter with size 5 to the entire page
-                rasterPage.Filter(rasterPage.Bounds, new MedianFilterOptions(5));
+                vectorImage.Save(tempPngPath, pngOptions);
+            }
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Load rasterized PNG, apply median filter, and save as JPEG
+            using (Image rasterImage = Image.Load(tempPngPath))
+            {
+                var raster = (RasterImage)rasterImage;
+                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
 
-                // Save the filtered raster page as JPEG
-                rasterPage.Save(outputPath, new JpegOptions());
+                var jpegOptions = new JpegOptions();
+                raster.Save(outputPath, jpegOptions);
+            }
+
+            // Cleanup temporary file
+            if (File.Exists(tempPngPath))
+            {
+                File.Delete(tempPngPath);
             }
         }
         catch (Exception ex)

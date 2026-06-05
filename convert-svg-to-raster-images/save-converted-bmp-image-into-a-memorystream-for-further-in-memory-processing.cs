@@ -10,8 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input path
+            // Hardcoded input and output paths
             string inputPath = @"C:\temp\sample.bmp";
+            string outputPath = @"C:\temp\output\processed.bmp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,25 +21,25 @@ class Program
                 return;
             }
 
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
                 // Prepare BMP save options (default settings)
-                BmpOptions saveOptions = new BmpOptions();
+                BmpOptions bmpOptions = new BmpOptions();
 
-                // Save the image to a memory stream for further in‑memory processing
+                // Save the image to a MemoryStream for in‑memory processing
                 using (MemoryStream memoryStream = new MemoryStream())
                 {
-                    image.Save(memoryStream, saveOptions);
-
-                    // Example: output the size of the saved image in bytes
-                    Console.WriteLine($"Image saved to memory stream, size: {memoryStream.Length} bytes");
-
-                    // Reset stream position if further reading is required
-                    memoryStream.Position = 0;
-
-                    // Additional in‑memory processing can be performed here
+                    image.Save(memoryStream, bmpOptions);
+                    Console.WriteLine($"Image saved to memory stream. Length = {memoryStream.Length} bytes.");
+                    // Further in‑memory processing can be performed here
                 }
+
+                // Optionally, also save the image to a file using the same options
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)

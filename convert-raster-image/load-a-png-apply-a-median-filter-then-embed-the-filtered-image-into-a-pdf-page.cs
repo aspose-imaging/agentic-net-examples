@@ -10,32 +10,22 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output.pdf";
+            string outputPath = "output/output.pdf";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
-
-                // Apply median filter with size 5
                 raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
-
-                // Save the filtered image as a PDF page
-                PdfOptions pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                raster.Save(outputPath, new PdfOptions());
             }
         }
         catch (Exception ex)

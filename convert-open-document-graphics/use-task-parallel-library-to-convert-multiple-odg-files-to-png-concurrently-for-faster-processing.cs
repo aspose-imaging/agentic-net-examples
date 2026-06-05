@@ -3,7 +3,6 @@ using System.IO;
 using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -11,51 +10,49 @@ class Program
     {
         try
         {
-            // Hard‑coded list of ODG files to convert.
-            string[] inputPaths = new string[]
+            // Hard‑coded list of ODG files to convert
+            string[] inputFiles = new[]
             {
                 @"C:\Images\sample1.odg",
                 @"C:\Images\sample2.odg",
                 @"C:\Images\sample3.odg"
             };
 
-            // Process each file in parallel.
-            Parallel.ForEach(inputPaths, inputPath =>
+            // Process files in parallel
+            Parallel.ForEach(inputFiles, inputPath =>
             {
-                // Verify the input file exists.
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine the output PNG path (same folder, .png extension).
+                // Determine output PNG path
                 string outputPath = Path.ChangeExtension(inputPath, ".png");
 
-                // Ensure the output directory exists.
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the ODG image.
+                // Load ODG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Prepare rasterization options for ODG → raster image conversion.
+                    // Set rasterization options based on source image size
                     var rasterOptions = new OdgRasterizationOptions
                     {
-                        BackgroundColor = Color.White,
-                        PageSize = image.Size
+                        PageSize = image.Size,
+                        BackgroundColor = Color.White
                     };
 
-                    // Set up PNG save options and attach rasterization options.
+                    // Configure PNG save options
                     var pngOptions = new PngOptions
                     {
                         VectorRasterizationOptions = rasterOptions
                     };
 
-                    // Save the image as PNG.
+                    // Save as PNG
                     image.Save(outputPath, pngOptions);
                 }
-
-                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             });
         }
         catch (Exception ex)

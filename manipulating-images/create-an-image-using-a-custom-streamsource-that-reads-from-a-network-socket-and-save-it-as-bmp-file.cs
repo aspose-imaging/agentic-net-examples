@@ -3,37 +3,38 @@ using System.IO;
 using System.Net.Sockets;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded output path
-        string outputPath = "Output/image.bmp";
-
         try
         {
-            // Ensure output directory exists
+            // Hardcoded network endpoint
+            string host = "localhost";
+            int port = 9000;
+
+            // Hardcoded output file path
+            string outputPath = @"C:\Temp\output.bmp";
+
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Connect to a network socket (example: localhost:12345)
-            using (TcpClient client = new TcpClient("localhost", 12345))
-            using (NetworkStream netStream = client.GetStream())
+            // Connect to the server and read image data from the socket
+            using (TcpClient client = new TcpClient(host, port))
+            using (NetworkStream networkStream = client.GetStream())
+            using (MemoryStream memoryStream = new MemoryStream())
             {
-                // Create image options with a StreamSource based on the network stream
-                BmpOptions bmpOptions = new BmpOptions();
-                bmpOptions.Source = new StreamSource(netStream, false);
+                // Read all data from the network stream into a memory stream
+                networkStream.CopyTo(memoryStream);
+                memoryStream.Position = 0;
 
-                // Create a blank image of desired size
-                using (Image image = Image.Create(bmpOptions, 500, 500))
+                // Load the image from the received stream
+                using (Image image = Image.Load(memoryStream))
                 {
-                    // Optional drawing: fill background with a color
-                    Graphics graphics = new Graphics(image);
-                    graphics.Clear(Color.LightBlue);
-
-                    // Save the image as BMP
-                    image.Save(outputPath, new BmpOptions());
+                    // Save the loaded image as BMP to the specified file
+                    BmpOptions bmpOptions = new BmpOptions();
+                    image.Save(outputPath, bmpOptions);
                 }
             }
         }

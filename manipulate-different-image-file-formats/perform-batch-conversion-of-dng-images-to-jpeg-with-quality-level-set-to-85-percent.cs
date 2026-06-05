@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageLoadOptions;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dng;
 
 class Program
 {
@@ -14,13 +14,8 @@ class Program
             string inputDir = @"C:\Images\Input\";
             string outputDir = @"C:\Images\Output\";
 
-            // Ensure output directory exists (will also handle subfolders)
-            Directory.CreateDirectory(outputDir);
-
-            // Get all DNG files in the input directory
-            string[] dngFiles = Directory.GetFiles(inputDir, "*.dng", SearchOption.TopDirectoryOnly);
-
-            foreach (string inputPath in dngFiles)
+            // Process each DNG file in the input directory
+            foreach (string inputPath in Directory.GetFiles(inputDir, "*.dng"))
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -29,18 +24,18 @@ class Program
                     return;
                 }
 
-                // Build output file path with .jpg extension
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".jpg");
+                // Build the output JPEG path
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + ".jpg");
 
-                // Ensure the output directory exists (covers cases where outputPath may include subfolders)
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the DNG image
-                using (Image image = Image.Load(inputPath))
+                // Load the DNG image with default load options
+                using (Image image = Image.Load(inputPath, new DngLoadOptions()))
                 {
-                    // Prepare JPEG save options with quality set to 85
-                    JpegOptions jpegOptions = new JpegOptions
+                    // Set JPEG save options with quality 85
+                    var jpegOptions = new JpegOptions
                     {
                         Quality = 85
                     };
@@ -48,8 +43,6 @@ class Program
                     // Save as JPEG
                     image.Save(outputPath, jpegOptions);
                 }
-
-                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -58,3 +51,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a photographer needs to quickly generate web‑ready JPEG previews from a folder of RAW DNG files while preserving a specific compression quality, they can use this C# batch conversion code with Aspose.Imaging.
+ * 2. When an e‑commerce platform must convert product photos captured in DNG format to optimized JPEG images at 85 % quality for faster page loads, the code automates the process across the entire image directory.
+ * 3. When a digital archiving system requires periodic conversion of newly uploaded DNG scans into JPEGs for compatibility with legacy viewers, the script provides a reliable C# solution using Aspose.Imaging’s load and save options.
+ * 4. When a mobile app backend needs to preprocess incoming DNG uploads into JPEG thumbnails with a consistent quality setting before storing them in cloud storage, this batch conversion routine handles the file handling and quality control.
+ * 5. When a scientific imaging workflow demands converting large batches of DNG microscope images to JPEG for inclusion in reports while controlling compression artifacts, the example demonstrates how to set the JPEG quality to 85 % in C#.
+ */

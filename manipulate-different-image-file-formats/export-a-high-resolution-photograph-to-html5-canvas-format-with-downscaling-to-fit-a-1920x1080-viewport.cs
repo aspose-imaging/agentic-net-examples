@@ -9,7 +9,7 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input and output file paths
             string inputPath = @"C:\Images\HighResPhoto.jpg";
             string outputPath = @"C:\Images\ExportedCanvas.html";
 
@@ -27,28 +27,28 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Determine scaling factor to fit within 1920x1080 while preserving aspect ratio
-                double maxWidth = 1920.0;
-                double maxHeight = 1080.0;
-                double widthScale = maxWidth / image.Width;
-                double heightScale = maxHeight / image.Height;
-                double scale = Math.Min(widthScale, heightScale);
+                const int maxWidth = 1920;
+                const int maxHeight = 1080;
 
-                // If the image is already smaller than the viewport, keep original size
-                if (scale > 1.0) scale = 1.0;
+                double widthScale = (double)maxWidth / image.Width;
+                double heightScale = (double)maxHeight / image.Height;
+                double scale = Math.Min(1.0, Math.Min(widthScale, heightScale)); // Do not upscale
 
-                int newWidth = (int)(image.Width * scale);
-                int newHeight = (int)(image.Height * scale);
-
-                // Resize the image
-                image.Resize(newWidth, newHeight);
+                if (scale < 1.0)
+                {
+                    int newWidth = (int)(image.Width * scale);
+                    int newHeight = (int)(image.Height * scale);
+                    // Resize using high‑quality resampling
+                    image.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
+                }
 
                 // Prepare HTML5 Canvas export options
                 var canvasOptions = new Html5CanvasOptions
                 {
-                    FullHtmlPage = true // generate a full HTML page
+                    FullHtmlPage = true // generate a complete HTML page
                 };
 
-                // Save as HTML5 Canvas
+                // Save the image as an HTML5 Canvas file
                 image.Save(outputPath, canvasOptions);
             }
         }
@@ -58,3 +58,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When building a web gallery that must display high‑resolution photos on standard 1080p screens without slowing down the browser, a developer can use this code to downscale the image and export it as an HTML5 Canvas page.
+ * 2. When creating an online product catalog where each product image needs to be embedded directly into an HTML page for fast rendering, this snippet resizes the original JPEG and saves it as a self‑contained Canvas HTML file.
+ * 3. When developing a responsive e‑learning platform that shows large lecture slides on any device, the code ensures the slides are resized to fit a 1920×1080 viewport and delivered via HTML5 Canvas for smooth zoom and pan.
+ * 4. When integrating high‑resolution photography into a digital signage system that runs in a browser at 1080p resolution, the routine prepares the image by scaling it down and converting it to a Canvas HTML page to eliminate extra image requests.
+ * 5. When automating the generation of printable web‑based reports that embed full‑color photos, this program resizes the source picture to the target viewport and exports it as an HTML5 Canvas document for consistent cross‑browser display.
+ */

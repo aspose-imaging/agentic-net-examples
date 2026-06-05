@@ -1,65 +1,74 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDir = @"C:\Images\Input";
-        string outputDir = @"C:\Images\Output";
-
         try
         {
-            // Get all files in the input directory
-            string[] files = Directory.GetFiles(inputDir);
+            // Hardcoded input and output directories
+            string inputDir = @"C:\Images\Input\";
+            string outputDir = @"C:\Images\Output\";
 
-            // Define the filters to apply
-            var filters = new List<(string Name, Aspose.Imaging.ImageFilters.FilterOptions.FilterOptionsBase Options)>
+            // List of image files to process (hardcoded)
+            string[] files = new string[]
             {
-                ("Median", new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5)),
-                ("Bilateral", new Aspose.Imaging.ImageFilters.FilterOptions.BilateralSmoothingFilterOptions(5)),
-                ("Gaussian", new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0)),
-                ("GaussWiener", new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0)),
-                ("MotionWiener", new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0)),
-                ("Sharpen", new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0))
+                "sample1.png",
+                "sample2.png",
+                "sample3.png"
             };
 
-            foreach (string inputPath in files)
+            // Define filters to apply
+            var filters = new (string Name, Func<FilterOptionsBase> Options)[]
             {
-                // Verify input file exists
+                ("Median", () => new MedianFilterOptions(5)),
+                ("GaussianBlur", () => new GaussianBlurFilterOptions(5, 4.0)),
+                ("Sharpen", () => new SharpenFilterOptions(5, 4.0))
+            };
+
+            foreach (var fileName in files)
+            {
+                string inputPath = Path.Combine(inputDir, fileName);
+
+                // Input file existence check
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-
                 foreach (var filter in filters)
                 {
-                    // Load image as RasterImage
+                    // Load image
                     using (Image image = Image.Load(inputPath))
                     {
-                        RasterImage raster = (RasterImage)image;
+                        RasterImage rasterImage = (RasterImage)image;
+
+                        // Create filter options
+                        FilterOptionsBase options = filter.Options();
 
                         // Measure filter application time
-                        var stopwatch = new System.Diagnostics.Stopwatch();
-                        stopwatch.Start();
-                        raster.Filter(raster.Bounds, filter.Options);
-                        stopwatch.Stop();
+                        Stopwatch sw = Stopwatch.StartNew();
+                        rasterImage.Filter(rasterImage.Bounds, options);
+                        sw.Stop();
 
-                        Console.WriteLine($"Applied {filter.Name} filter to {inputPath} in {stopwatch.ElapsedMilliseconds} ms");
+                        // Prepare output path
+                        string outputFileName = $"{Path.GetFileNameWithoutExtension(fileName)}_{filter.Name}.png";
+                        string outputPath = Path.Combine(outputDir, outputFileName);
 
-                        // Prepare output path and ensure directory exists
-                        string outputPath = Path.Combine(outputDir, $"{fileNameWithoutExt}_{filter.Name}.png");
+                        // Ensure output directory exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save the filtered image as PNG
-                        raster.Save(outputPath, new PngOptions());
+                        // Save filtered image
+                        rasterImage.Save(outputPath);
+
+                        // Log duration
+                        Console.WriteLine($"Applied {filter.Name} to {fileName} in {sw.ElapsedMilliseconds} ms. Saved to {outputPath}");
                     }
                 }
             }
@@ -70,3 +79,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to profile the performance of median, Gaussian blur, and sharpen filters on a batch of PNG images to ensure the processing pipeline meets SLA requirements.
+ * 2. When building an automated image‑enhancement service that applies multiple filters to uploaded JPEG files and must log the execution time of each filter for cost estimation.
+ * 3. When optimizing a desktop C# application that uses Aspose.Imaging to process large raster images and wants to compare the runtime of different filter options before selecting the most efficient one.
+ * 4. When creating a CI/CD test that validates that recent changes to the Aspose.Imaging filter algorithms do not introduce regressions by measuring filter execution times on a predefined set of sample images.
+ * 5. When generating a performance report for a cloud‑based image‑processing microservice that applies median, Gaussian blur, and sharpen filters to PNG assets and needs precise Stopwatch measurements for each step.
+ */

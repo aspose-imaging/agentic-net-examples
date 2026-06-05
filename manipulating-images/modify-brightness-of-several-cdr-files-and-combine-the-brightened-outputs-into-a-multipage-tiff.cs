@@ -2,10 +2,9 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -15,83 +14,70 @@ class Program
         try
         {
             // Hardcoded input CDR file paths
-            string[] inputPaths = {
-                "input1.cdr",
-                "input2.cdr",
-                "input3.cdr"
-            };
+            string cdrPath1 = @"C:\Images\file1.cdr";
+            string cdrPath2 = @"C:\Images\file2.cdr";
+            string cdrPath3 = @"C:\Images\file3.cdr";
 
-            // Hardcoded output TIFF path
-            string outputPath = "output.tif";
-
-            // Validate input files
-            foreach (string inputPath in inputPaths)
-            {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-            }
+            // Hardcoded output multipage TIFF path
+            string outputPath = @"C:\Images\combined.tif";
 
             // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            TiffImage tiffImage = null;
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            // Validate input files
+            if (!File.Exists(cdrPath1)) { Console.Error.WriteLine($"File not found: {cdrPath1}"); return; }
+            if (!File.Exists(cdrPath2)) { Console.Error.WriteLine($"File not found: {cdrPath2}"); return; }
+            if (!File.Exists(cdrPath3)) { Console.Error.WriteLine($"File not found: {cdrPath3}"); return; }
 
-            foreach (string cdrPath in inputPaths)
+            // Array of input paths for iteration
+            string[] inputPaths = new[] { cdrPath1, cdrPath2, cdrPath3 };
+
+            TiffImage finalTiff = null;
+            TiffOptions finalOptions = null;
+
+            foreach (var cdrPath in inputPaths)
             {
-                // Load CDR canvas
+                // Load CDR vector image
                 using (CdrImage cdr = (CdrImage)Image.Load(cdrPath))
                 {
-                    // Rasterize CDR to PNG in memory
+                    // Rasterize CDR to a TIFF image in memory
                     using (MemoryStream ms = new MemoryStream())
                     {
-                        var pngOptions = new PngOptions
+                        TiffOptions rasterOptions = new TiffOptions(TiffExpectedFormat.Default);
+                        rasterOptions.VectorRasterizationOptions = new CdrRasterizationOptions
                         {
-                            VectorRasterizationOptions = new CdrRasterizationOptions
-                            {
-                                PageWidth = cdr.Width,
-                                PageHeight = cdr.Height
-                            }
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
                         };
-                        cdr.Save(ms, pngOptions);
+                        cdr.Save(ms, rasterOptions);
                         ms.Position = 0;
 
-                        // Load rasterized PNG as RasterImage
-                        using (RasterImage raster = (RasterImage)Image.Load(ms))
+                        // Load rasterized TIFF
+                        using (TiffImage rasterTiff = (TiffImage)Image.Load(ms))
                         {
-                            // Adjust brightness (example value: 50)
-                            raster.AdjustBrightness(50);
+                            // Adjust brightness (example value: +40)
+                            rasterTiff.AdjustBrightness(40);
 
-                            if (tiffImage == null)
+                            // Create final multipage TIFF on first iteration
+                            if (finalTiff == null)
                             {
-                                // First frame creates the TIFF image
-                                tiffImage = (TiffImage)Image.Create(tiffOptions, raster.Width, raster.Height);
-                                tiffImage.SavePixels(tiffImage.Bounds, raster.LoadPixels(raster.Bounds));
+                                finalOptions = new TiffOptions(TiffExpectedFormat.Default);
+                                finalOptions.Source = new FileCreateSource(outputPath, false);
+                                finalOptions.Photometric = TiffPhotometrics.Rgb;
+                                finalOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+                                finalTiff = (TiffImage)Image.Create(finalOptions, rasterTiff.Width, rasterTiff.Height);
                             }
-                            else
-                            {
-                                // Add subsequent frames
-                                tiffImage.AddFrame(new TiffFrame(tiffOptions, raster.Width, raster.Height));
-                                tiffImage.ActiveFrame.SavePixels(tiffImage.ActiveFrame.Bounds, raster.LoadPixels(raster.Bounds));
-                            }
+
+                            // Add the processed page to the multipage TIFF
+                            finalTiff.AddPage(rasterTiff);
                         }
                     }
                 }
             }
 
-            if (tiffImage != null)
-            {
-                // Save the multipage TIFF
-                tiffImage.Save(outputPath, tiffOptions);
-                tiffImage.Dispose();
-            }
+            // Save the multipage TIFF (output is already bound to the source)
+            finalTiff?.Save();
+            finalTiff?.Dispose();
         }
         catch (Exception ex)
         {

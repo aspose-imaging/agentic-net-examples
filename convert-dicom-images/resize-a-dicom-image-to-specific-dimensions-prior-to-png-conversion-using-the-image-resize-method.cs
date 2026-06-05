@@ -3,17 +3,18 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample.dicom";
-        string outputPath = @"c:\temp\resized.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.dicom";
+            string outputPath = @"C:\Images\resized.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,15 +25,15 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Desired dimensions
+            const int newWidth = 800;
+            const int newHeight = 600;
+
             // Load the DICOM image
             using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
             {
-                // Desired dimensions
-                int newWidth = 800;   // example width
-                int newHeight = 600;  // example height
-
-                // Resize using Bilinear resampling
-                dicomImage.Resize(newWidth, newHeight, ResizeType.BilinearResample);
+                // Resize using NearestNeighbour resampling
+                dicomImage.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
 
                 // Save as PNG
                 dicomImage.Save(outputPath, new PngOptions());

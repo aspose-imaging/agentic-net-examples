@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -10,69 +8,24 @@ class Program
     {
         try
         {
-            string inputFolder = @"C:\Icons\Input";
-            string outputFolder = @"C:\Icons\Output";
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
 
-            if (!Directory.Exists(inputFolder))
+            if (!File.Exists(inputPath))
             {
-                Directory.CreateDirectory(inputFolder);
-                Console.WriteLine($"Input directory created at: {inputFolder}. Add files and rerun.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(outputFolder);
-
-            string[] svgFiles = Directory.GetFiles(inputFolder, "*.svg");
-
-            foreach (var file in svgFiles)
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
             {
-                string inputPath = file;
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                Directory.CreateDirectory(outputDir);
+            }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileName + ".png");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image svgImage = Image.Load(inputPath))
-                {
-                    var rasterOptions = new SvgRasterizationOptions();
-                    rasterOptions.PageSize = svgImage.Size;
-
-                    var pngOptions = new PngOptions();
-                    pngOptions.VectorRasterizationOptions = rasterOptions;
-
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        svgImage.Save(ms, pngOptions);
-                        ms.Position = 0;
-                        using (RasterImage raster = (RasterImage)Image.Load(ms))
-                        {
-                            int shadowOffset = 5;
-                            int canvasWidth = raster.Width + shadowOffset;
-                            int canvasHeight = raster.Height + shadowOffset;
-
-                            using (Image canvas = Image.Create(pngOptions, canvasWidth, canvasHeight))
-                            {
-                                Graphics g = new Graphics(canvas);
-                                g.Clear(Color.Transparent);
-
-                                using (SolidBrush shadowBrush = new SolidBrush(Color.FromArgb(128, 0, 0, 0)))
-                                {
-                                    g.FillRectangle(shadowBrush, shadowOffset, shadowOffset, raster.Width, raster.Height);
-                                }
-
-                                g.DrawImage(raster, new Point(0, 0));
-
-                                canvas.Save(outputPath, pngOptions);
-                            }
-                        }
-                    }
-                }
+            using (Image image = Image.Load(inputPath))
+            {
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -81,3 +34,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to programmatically copy or convert a JPEG file to another location while ensuring the destination folder exists, they can use this Aspose.Imaging code to load and save the image.
+ * 2. When an automated build process must validate that a source image file is present before performing any image manipulation, this snippet provides a simple existence check and error handling.
+ * 3. When a web application generates thumbnails on the fly and wants to reuse the original JPEG data without altering its quality, the code demonstrates how to load the original and save it directly.
+ * 4. When a desktop utility needs to batch rename or relocate image assets while preserving the original format, the example shows how to load each file with Aspose.Imaging and write it to the new path.
+ * 5. When a migration script moves image files from a legacy directory structure to a new one and must create missing directories automatically, this code illustrates the required C# file system and Aspose.Imaging operations.
+ */

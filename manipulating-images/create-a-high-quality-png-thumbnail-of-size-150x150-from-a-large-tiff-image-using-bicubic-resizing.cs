@@ -8,29 +8,29 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\large.tif";
+        string outputPath = @"C:\Images\thumbnail.png";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\large.tif";
-            string outputPath = @"C:\Images\thumb.png";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TIFF image
             using (TiffImage image = (TiffImage)Image.Load(inputPath))
             {
-                // Resize to 150x150 using bicubic (CubicBSpline) resampling
-                image.Resize(150, 150, ResizeType.CubicBSpline);
+                // Resize to 150x150 using bicubic (CubicConvolution) resampling
+                image.Resize(150, 150, ResizeType.CubicConvolution);
 
-                // Save as PNG
+                // Save as PNG with default options
                 image.Save(outputPath, new PngOptions());
             }
         }

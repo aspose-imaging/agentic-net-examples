@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.wmf";
-        string outputPath = @"C:\Images\output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.wmf";
+            string outputPath = @"C:\Images\sample.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,14 +27,14 @@ class Program
             // Load the WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options with transparent background
+                // Configure rasterization to produce a transparent background
                 var rasterOptions = new WmfRasterizationOptions
                 {
                     PageSize = image.Size,
-                    BackgroundColor = Aspose.Imaging.Color.Transparent
+                    BackgroundColor = Color.Transparent
                 };
 
-                // Set PNG options to use the rasterization settings
+                // Set PNG options with the rasterization settings
                 var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions

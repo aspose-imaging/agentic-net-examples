@@ -1,39 +1,51 @@
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = ""; // No input file needed for this example
+        string outputPath = @"C:\Temp\custom_scanned.tif";
+
         try
         {
-            // Output file path
-            string outputPath = "output\\custom.tif";
+            // Input validation (skip if no input is required)
+            if (!string.IsNullOrEmpty(inputPath) && !File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure frame options with CCITT Group 4 compression
+            // Configure TIFF options for the frame
             TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-            frameOptions.BitsPerSample = new ushort[] { 1 };
-            frameOptions.ByteOrder = TiffByteOrder.LittleEndian;
-            frameOptions.Compression = TiffCompressions.CcittFax4;
-            frameOptions.Photometric = TiffPhotometrics.MinIsBlack;
-            frameOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+            frameOptions.Compression = TiffCompressions.CcittFax4; // CCITT Group 4 compression
+            frameOptions.Photometric = TiffPhotometrics.MinIsBlack; // B/W photometric
+            frameOptions.BitsPerSample = new ushort[] { 1 }; // 1 bit per pixel
 
-            // Create a TIFF frame with custom dimensions
-            TiffFrame frame = new TiffFrame(frameOptions, 1024, 768);
+            // Custom dimensions (e.g., 2480x3508 for an A4 page at 300 DPI)
+            int width = 2480;
+            int height = 3508;
 
-            // Create TIFF image from the frame and set DPI values
-            using (TiffImage tiffImage = new TiffImage(frame))
+            // Create the TIFF frame with the specified options and dimensions
+            TiffFrame customFrame = new TiffFrame(frameOptions, width, height);
+
+            // Set DPI values for scanning quality (e.g., 300 DPI)
+            customFrame.HorizontalResolution = 300;
+            customFrame.VerticalResolution = 300;
+
+            // Create a TIFF image containing the custom frame
+            using (TiffImage tiffImage = new TiffImage(customFrame))
             {
-                tiffImage.HorizontalResolution = 300; // DPI X
-                tiffImage.VerticalResolution = 300;   // DPI Y
-
-                // Save the TIFF image
+                // Save the TIFF image to the output path
                 tiffImage.Save(outputPath);
             }
         }
@@ -43,3 +55,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a high‑resolution black‑and‑white scanned document as a compact TIFF file using CCITT Group 4 compression for efficient storage.
+ * 2. When an application must create multi‑page TIFF archives of legal papers where each page is sized to A4 dimensions at 300 DPI and saved with minimal file size.
+ * 3. When a medical imaging system requires producing DICOM‑compatible TIFF frames with exact pixel dimensions and DPI to ensure accurate measurements.
+ * 4. When a batch processing tool has to convert scanned forms into single‑page, 1‑bit TIFF images with custom width and height for downstream OCR pipelines.
+ * 5. When a developer is building a document management solution that programmatically creates blank TIFF templates with specific resolution settings for later content insertion.
+ */

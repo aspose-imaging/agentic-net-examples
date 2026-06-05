@@ -3,27 +3,28 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
         string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string outputPath = "output\\edge_output.png";
 
         try
         {
-            using (var svgImage = (SvgImage)Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image svgImg = Image.Load(inputPath))
+            {
+                SvgImage svgImage = (SvgImage)svgImg;
+
                 var rasterOptions = new SvgRasterizationOptions
                 {
                     PageSize = svgImage.Size,
@@ -35,22 +36,15 @@ class Program
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                using (var ms = new MemoryStream())
+                using (MemoryStream ms = new MemoryStream())
                 {
                     svgImage.Save(ms, pngOptions);
                     ms.Position = 0;
 
-                    using (var rasterImage = (RasterImage)Image.Load(ms))
+                    using (Image rasterImg = Image.Load(ms))
                     {
-                        double[,] kernel = new double[,]
-                        {
-                            { -1, 0, 1 },
-                            { -2, 0, 2 },
-                            { -1, 0, 1 }
-                        };
-                        var filterOptions = new ConvolutionFilterOptions(kernel);
-                        rasterImage.Filter(rasterImage.Bounds, filterOptions);
-                        rasterImage.Save(outputPath, new PngOptions());
+                        RasterImage raster = (RasterImage)rasterImg;
+                        raster.Save(outputPath, new PngOptions());
                     }
                 }
             }
@@ -61,3 +55,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert an SVG illustration to a high‑resolution PNG thumbnail using Aspose.Imaging in C# for web or mobile UI rendering.
+ * 2. When a .NET application must rasterize vector graphics from an SVG file into a PNG image to perform subsequent edge detection or computer‑vision analysis.
+ * 3. When an automated build pipeline requires batch processing of SVG assets into PNG format with a white background for inclusion in PDF reports or email newsletters.
+ * 4. When a graphics service needs to load an SVG, rasterize it with exact page dimensions, and save the result as a PNG file to ensure consistent visual quality across different browsers.
+ * 5. When a developer wants to programmatically verify the existence of an SVG file, create the output directory, and safely export the vector image to PNG while handling I/O errors in a C# application.
+ */

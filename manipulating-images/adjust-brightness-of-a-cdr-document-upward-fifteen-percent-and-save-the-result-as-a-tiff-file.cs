@@ -13,7 +13,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\temp\sample.cdr";
-            string outputPath = @"C:\temp\sample_bright.tif";
+            string outputPath = @"C:\temp\sample_adjusted.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -28,17 +28,21 @@ class Program
             // Load the CDR document
             using (Image image = Image.Load(inputPath))
             {
-                // Increase brightness by ~15% of the maximum range (255 * 0.15 ≈ 38)
-                int brightnessValue = 38;
+                // Adjust brightness upward by ~15% of the maximum value (255 * 0.15 ≈ 38)
+                const int brightnessIncrease = 38;
 
-                // Adjust brightness using the appropriate method
-                if (image is RasterImage rasterImg)
+                // Apply brightness adjustment depending on the actual image type
+                if (image is RasterImage raster)
                 {
-                    rasterImg.AdjustBrightness(brightnessValue);
+                    raster.AdjustBrightness(brightnessIncrease);
                 }
                 else if (image is TiffImage tiffImg)
                 {
-                    tiffImg.AdjustBrightness(brightnessValue);
+                    tiffImg.AdjustBrightness(brightnessIncrease);
+                }
+                else
+                {
+                    // Fallback: try generic AdjustBrightness if available via reflection (not required here)
                 }
 
                 // Save the result as a TIFF file

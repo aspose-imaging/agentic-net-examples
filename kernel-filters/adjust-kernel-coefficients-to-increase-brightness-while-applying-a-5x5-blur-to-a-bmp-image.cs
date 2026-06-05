@@ -1,35 +1,37 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.bmp";
-        string outputPath = "output.bmp";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Apply a 5x5 Gaussian blur (size=5, sigma=1.0)
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.0));
+                var filterOptions = new GaussWienerFilterOptions(5, 4.0);
+                filterOptions.Brightness = 1.2; // increase brightness
 
-                // Increase brightness (value range -255 to 255)
-                raster.AdjustBrightness(30);
+                rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
-                raster.Save(outputPath);
+                var saveOptions = new BmpOptions();
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -38,3 +40,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to enhance the visibility of scanned documents by brightening and softly blurring BMP images before OCR processing.
+ * 2. When an application must prepare legacy BMP graphics for web display by applying a 5×5 Gaussian blur and increasing brightness to improve visual appeal.
+ * 3. When a batch‑processing tool has to normalize lighting conditions across a collection of BMP screenshots by adjusting kernel coefficients for brightness and blur.
+ * 4. When a game asset pipeline requires smoothing and brightening BMP textures to reduce harsh edges and improve in‑game lighting.
+ * 5. When a medical imaging system must pre‑process BMP X‑ray images with a Gauss‑Wiener filter to reduce noise while making details clearer through brightness enhancement.
+ */

@@ -1,26 +1,24 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputFolder = @"C:\InputBmp";
-        string outputFolder = @"C:\OutputSvg";
-
         try
         {
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputFolder);
+            // Hardcoded input and output directories
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-            // Get all BMP files in the input folder
-            string[] bmpFiles = Directory.GetFiles(inputFolder, "*.bmp");
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
 
-            foreach (string inputPath in bmpFiles)
+            // Process each BMP file in the input directory
+            foreach (string inputPath in Directory.GetFiles(inputDir, "*.bmp"))
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -29,28 +27,27 @@ class Program
                     return;
                 }
 
-                // Determine output file path (same name with .svg extension)
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".svg";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
+                // Determine output SVG path
+                string outputPath = Path.Combine(outputDir,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".svg");
 
-                // Ensure the directory for the output file exists
+                // Ensure output directory exists (unconditional as per rules)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the BMP image
+                // Load BMP image
                 using (Image image = Image.Load(inputPath))
                 {
                     // Cast to RasterImage for filtering and resizing
                     RasterImage rasterImage = (RasterImage)image;
 
-                    // Apply median filter with size 5 to the whole image
+                    // Apply median filter with size 5
                     rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
                     // Resize to 300x300 pixels
                     rasterImage.Resize(300, 300);
 
-                    // Save as SVG using SvgOptions (raster image will be embedded)
-                    SvgOptions svgOptions = new SvgOptions();
-                    rasterImage.Save(outputPath, svgOptions);
+                    // Save as SVG using default SvgOptions
+                    rasterImage.Save(outputPath, new SvgOptions());
                 }
             }
         }

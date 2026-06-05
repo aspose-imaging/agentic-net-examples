@@ -5,45 +5,51 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded list of TIFF files to process
-            string[] inputPaths = {
-                @"C:\Images\sample1.tif",
-                @"C:\Images\sample2.tif"
-            };
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            foreach (string inputPath in inputPaths)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify the input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files)
+            {
+                string ext = Path.GetExtension(inputPath).ToLowerInvariant();
+                if (ext != ".tif" && ext != ".tiff")
+                {
+                    continue;
+                }
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Determine output path (same name with .apng.png extension)
-                string outputPath = Path.ChangeExtension(inputPath, ".apng.png");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
 
-                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the TIFF image
-                using (Image tiffImage = Image.Load(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Compute frame delay based on image dimensions
-                    uint frameDelay = (uint)((tiffImage.Width + tiffImage.Height) / 2);
-
-                    // Set up APNG options with the calculated default frame time
-                    ApngOptions apngOptions = new ApngOptions
-                    {
-                        DefaultFrameTime = frameDelay
-                    };
-
-                    // Export the multi‑page TIFF as an APNG animation
-                    tiffImage.Save(outputPath, apngOptions);
+                    uint frameDelay = (uint)(image.Width + image.Height);
+                    image.Save(outputPath, new ApngOptions { DefaultFrameTime = frameDelay });
                 }
             }
         }

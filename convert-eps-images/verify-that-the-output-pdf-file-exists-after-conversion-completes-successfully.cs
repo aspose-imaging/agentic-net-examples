@@ -7,36 +7,37 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded relative paths
+        string inputPath = Path.Combine("Input", "sample.jpg");
+        string outputPath = Path.Combine("Output", "sample.pdf");
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded relative input and output paths
-            string inputPath = "Input/sample.jpg";
-            string outputPath = "Output/output.pdf";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the source image and convert to PDF
+            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
+                // Save as PDF
                 image.Save(outputPath, new PdfOptions());
             }
 
-            // Verify that the PDF file was created
+            // Verify that the PDF was created
             if (File.Exists(outputPath))
             {
-                Console.WriteLine($"PDF file successfully created: {outputPath}");
+                Console.WriteLine("PDF file created successfully.");
             }
             else
             {
-                Console.Error.WriteLine($"Failed to create PDF file: {outputPath}");
+                Console.WriteLine("Failed to create PDF file.");
             }
         }
         catch (Exception ex)

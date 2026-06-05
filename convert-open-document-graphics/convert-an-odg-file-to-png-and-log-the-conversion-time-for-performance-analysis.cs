@@ -8,35 +8,47 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "sample.odg";
-        string outputPath = "sample.png";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.odg";
+            string outputPath = @"C:\Images\sample.png";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Start timing the conversion
+            // Measure conversion time
             Stopwatch sw = Stopwatch.StartNew();
 
-            // Load the ODG image and save it as PNG
+            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
+                // Prepare PNG save options with ODG rasterization settings
                 PngOptions pngOptions = new PngOptions();
+
+                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+                {
+                    // Preserve original size
+                    PageSize = image.Size,
+                    // Optional: set background color for transparent areas
+                    BackgroundColor = Color.White
+                };
+
+                pngOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save as PNG
                 image.Save(outputPath, pngOptions);
             }
 
-            // Stop timing and report the elapsed time
             sw.Stop();
-            Console.WriteLine($"Conversion completed in {sw.ElapsedMilliseconds} ms.");
+            Console.WriteLine($"Conversion completed in {sw.Elapsed.TotalMilliseconds} ms.");
         }
         catch (Exception ex)
         {

@@ -3,8 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging;
 
 class Program
 {
@@ -12,8 +10,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\multipage.eps";
-            string outputPath = "Output\\multipage.pdf";
+            string inputPath = "input.eps";
+            string outputPath = "output/output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -23,20 +21,24 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (EpsImage image = (EpsImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                var options = new PdfOptions
+                var pdfOptions = new PdfOptions();
+
+                if (image is VectorImage)
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    var vectorOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
                         PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
-                };
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    };
+                    pdfOptions.VectorRasterizationOptions = vectorOptions;
+                }
 
-                // Preserve all pages (MultiPageOptions left null)
-                image.Save(outputPath, options);
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)

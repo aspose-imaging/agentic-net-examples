@@ -1,8 +1,8 @@
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,59 +10,52 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = "Input";
-            string outputDir = "Output";
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Validate input directory
-            if (!Directory.Exists(inputDir))
+            if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputDir);
-                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Get all EMF and WMF files
-            var files = Directory.GetFiles(inputDir, "*.*")
-                .Where(f => f.EndsWith(".emf", StringComparison.OrdinalIgnoreCase) ||
-                            f.EndsWith(".wmf", StringComparison.OrdinalIgnoreCase))
-                .ToArray();
-
-            foreach (var inputPath in files)
+            if (!Directory.Exists(outputDirectory))
             {
-                // Check input file existence
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf");
+            string[] wmfFiles = Directory.GetFiles(inputDirectory, "*.wmf");
+            string[] allFiles = new string[emfFiles.Length + wmfFiles.Length];
+            emfFiles.CopyTo(allFiles, 0);
+            wmfFiles.CopyTo(allFiles, emfFiles.Length);
+
+            foreach (string inputPath in allFiles)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Prepare output path
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
-
-                // Ensure output directory for this file exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the vector image (EMF or WMF)
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Configure PNG options with uniform DPI
-                    PngOptions pngOptions = new PngOptions
+                    var vectorOptions = new VectorRasterizationOptions
                     {
-                        // Set DPI to 300x300
-                        ResolutionSettings = new ResolutionSetting(300, 300),
-                        // Rasterization options for vector formats
-                        VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            PageSize = image.Size,
-                            BackgroundColor = Color.White
-                        }
+                        PageSize = image.Size,
+                        BackgroundColor = Aspose.Imaging.Color.White
                     };
 
-                    // Save as PNG
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = vectorOptions,
+                        ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300, 300) // uniform DPI
+                    };
+
                     image.Save(outputPath, pngOptions);
                 }
             }
@@ -73,3 +66,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert a batch of legacy vector graphics (EMF and WMF) into web‑friendly PNG images with a consistent DPI for display on a website.
+ * 2. When an automation script must process user‑uploaded EMF/WMF files and generate high‑resolution PNG thumbnails for a document management system.
+ * 3. When a reporting tool requires rasterizing mixed vector formats into PNGs to embed them in PDF reports with uniform scaling.
+ * 4. When a migration project moves Windows Metafile assets to a cloud storage solution that only supports PNG, ensuring all images retain the same resolution.
+ * 5. When a desktop application needs to pre‑render vector icons from EMF and WMF files into PNG sprites for faster UI loading on different screen densities.
+ */

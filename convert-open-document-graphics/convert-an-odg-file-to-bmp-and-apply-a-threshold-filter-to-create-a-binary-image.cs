@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -12,8 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Images\sample.odg";
-            string rasterOutputPath = @"C:\Images\sample.bmp";
-            string binaryOutputPath = @"C:\Images\sample_binary.bmp";
+            string outputPath = @"C:\Images\sample_binary.bmp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,36 +21,43 @@ class Program
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(rasterOutputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(binaryOutputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load ODG image
-            using (Image odgImage = Image.Load(inputPath))
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
             {
-                // Rasterize ODG to BMP
-                var bmpOptions = new BmpOptions
+                // Cast to OdgImage for rasterization options
+                OdgImage odgImage = (OdgImage)image;
+
+                // Set up rasterization options for BMP output
+                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
                 {
-                    BitsPerPixel = 24
+                    BackgroundColor = Color.White,
+                    PageSize = odgImage.Size
                 };
-                odgImage.Save(rasterOutputPath, bmpOptions);
+
+                // BMP save options using the rasterization settings
+                BmpOptions bmpOptions = new BmpOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save the rasterized image as BMP
+                odgImage.Save(outputPath, bmpOptions);
             }
 
-            // Load the rasterized BMP as a RasterImage
-            using (Image bmpImage = Image.Load(rasterOutputPath))
+            // Load the saved BMP to apply binary threshold
+            using (Image bmpImage = Image.Load(outputPath))
             {
                 // Cast to RasterImage to access BinarizeOtsu
-                var raster = (RasterImage)bmpImage;
+                RasterImage raster = (RasterImage)bmpImage;
 
-                // Apply Otsu threshold to create binary image
+                // Apply Otsu thresholding to create a binary image
                 raster.BinarizeOtsu();
 
-                // Save the binary image
-                var bmpOptions = new BmpOptions
-                {
-                    BitsPerPixel = 1 // 1-bit per pixel for binary image
-                };
-                raster.Save(binaryOutputPath, bmpOptions);
+                // Save the binary image (overwrites the previous BMP)
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)

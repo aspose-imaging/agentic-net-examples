@@ -6,57 +6,47 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Set up base, input and output directories
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            // Hardcoded input and output directories
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-            // Ensure input directory exists
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
 
             // Get all EMF files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
+            string[] emfFiles = Directory.GetFiles(inputDir, "*.emf");
 
-            foreach (var inputPath in files)
+            foreach (string inputPath in emfFiles)
             {
-                // Verify the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Build the output JPEG path
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".jpg");
+                // Build output file path with .jpg extension
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".jpg");
 
-                // Ensure the output directory for this file exists
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EMF image and save as progressive JPEG
+                // Load the EMF image
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Configure JPEG options with progressive compression
                     JpegOptions jpegOptions = new JpegOptions
                     {
-                        CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
-                        Quality = 90 // Adjust quality as needed
+                        CompressionType = JpegCompressionMode.Progressive,
+                        Quality = 100
                     };
 
+                    // Save the image as JPEG
                     image.Save(outputPath, jpegOptions);
                 }
             }
@@ -67,3 +57,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to migrate a legacy collection of vector EMF graphics to web‑friendly JPEG images with progressive loading for faster page rendering.
+ * 2. When an automated build process must generate high‑quality JPEG thumbnails from EMF diagrams stored in a shared folder for inclusion in reports.
+ * 3. When a Windows desktop application has to batch convert user‑uploaded EMF files to JPEG while preserving image quality and enabling progressive compression for email attachments.
+ * 4. When a server‑side service processes design assets, converting EMF logos to JPEG format with 100 % quality and progressive encoding to reduce bandwidth usage on mobile devices.
+ * 5. When a migration script needs to ensure all EMF files in a directory are saved as JPEGs with progressive compression before archiving them to a cloud storage bucket.
+ */

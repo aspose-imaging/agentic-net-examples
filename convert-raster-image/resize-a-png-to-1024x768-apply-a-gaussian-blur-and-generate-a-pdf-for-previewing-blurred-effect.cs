@@ -32,15 +32,16 @@ class Program
                 // Resize to 1024x768
                 image.Resize(1024, 768);
 
-                // Apply Gaussian blur to the entire image
+                // Apply Gaussian blur filter
                 RasterImage raster = (RasterImage)image;
                 raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
                 // Save the blurred image as PNG
                 raster.Save(outputPngPath, new PngOptions());
 
-                // Save a PDF preview of the blurred image
-                raster.Save(outputPdfPath, new PdfOptions());
+                // Save the blurred image as PDF for preview
+                PdfOptions pdfOptions = new PdfOptions();
+                raster.Save(outputPdfPath, pdfOptions);
             }
         }
         catch (Exception ex)

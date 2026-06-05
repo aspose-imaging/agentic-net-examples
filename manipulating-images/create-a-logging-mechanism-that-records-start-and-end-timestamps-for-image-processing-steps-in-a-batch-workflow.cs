@@ -3,57 +3,59 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Logger
-{
-    // Simple logger that writes messages with timestamps to the console.
-    public static void Log(string message)
-    {
-        Console.WriteLine($"{DateTime.Now:O} - {message}");
-    }
-}
-
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output directories.
-            string inputDirectory = @"C:\Images\Input";
-            string outputDirectory = @"C:\Images\Output";
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Get all PNG files in the input directory.
-            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.png");
-
-            foreach (string inputPath in inputFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify the input file exists.
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory);
+
+            foreach (string inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     continue;
                 }
 
-                // Determine output file path.
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + "_processed.png");
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
 
-                // Ensure the output directory exists.
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Log start timestamp.
-                Logger.Log($"Start processing: {inputPath}");
+                DateTime stepStart = DateTime.Now;
+                Console.WriteLine($"Start processing '{inputPath}' at {stepStart:O}");
 
-                // Load the image, perform any processing, and save.
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Example processing could be added here.
-                    // For demonstration, we simply save the image with default PNG options.
+                    DateTime loadTime = DateTime.Now;
+                    Console.WriteLine($"Loaded '{inputPath}' at {loadTime:O}");
+
                     image.Save(outputPath, new PngOptions());
+
+                    DateTime saveTime = DateTime.Now;
+                    Console.WriteLine($"Saved '{outputPath}' at {saveTime:O}");
                 }
 
-                // Log end timestamp.
-                Logger.Log($"Finished processing: {inputPath}");
+                DateTime stepEnd = DateTime.Now;
+                Console.WriteLine($"Finished processing '{inputPath}' at {stepEnd:O}");
+                Console.WriteLine();
             }
         }
         catch (Exception ex)

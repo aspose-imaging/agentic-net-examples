@@ -17,9 +17,9 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output\\result.png";
+            string outputPath = "output.png";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -29,55 +29,47 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define a PointF array for the manual mask
-            PointF[] maskPoints = new PointF[]
-            {
-                new PointF(30, 30),
-                new PointF(80, 30),
-                new PointF(80, 80),
-                new PointF(30, 80)
-            };
-
-            // Build the manual mask using the point array
+            // Create a manual mask using graphics shapes
             GraphicsPath manualMask = new GraphicsPath();
             Figure figure = new Figure();
-            figure.AddShape(new PolygonShape(maskPoints));
+            figure.AddShape(new EllipseShape(new RectangleF(50, 50, 40, 40)));
+            figure.AddShape(new RectangleShape(new RectangleF(10, 20, 50, 30)));
             manualMask.AddFigure(figure);
 
-            // Export options for PNG with transparency
+            // Set manual masking arguments
+            ManualMaskingArgs maskArgs = new ManualMaskingArgs
+            {
+                Mask = manualMask
+            };
+
+            // Export options for PNG output
             PngOptions exportOptions = new PngOptions
             {
                 ColorType = PngColorType.TruecolorWithAlpha,
                 Source = new StreamSource(new MemoryStream())
             };
 
-            // Set up manual masking arguments
-            ManualMaskingArgs manualMaskingArgs = new ManualMaskingArgs
+            // Configure masking options
+            MaskingOptions maskingOptions = new MaskingOptions
             {
-                Mask = manualMask
+                Method = SegmentationMethod.Manual,
+                Decompose = false,
+                Args = maskArgs,
+                BackgroundReplacementColor = Color.Orange,
+                ExportOptions = exportOptions
             };
 
             // Load the source image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Configure masking options
-                MaskingOptions maskingOptions = new MaskingOptions
-                {
-                    Method = SegmentationMethod.Manual,
-                    Decompose = false,
-                    Args = manualMaskingArgs,
-                    BackgroundReplacementColor = Color.Transparent,
-                    ExportOptions = exportOptions
-                };
-
-                // Perform masking
+                // Perform manual masking
                 ImageMasking masking = new ImageMasking(image);
                 using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
                 {
                     // Save the foreground segment (index 1) to the output file
-                    using (Image resultImage = maskingResult[1].GetImage())
+                    using (RasterImage resultImage = (RasterImage)maskingResult[1].GetImage())
                     {
-                        resultImage.Save(outputPath);
+                        resultImage.Save(outputPath, exportOptions);
                     }
                 }
             }

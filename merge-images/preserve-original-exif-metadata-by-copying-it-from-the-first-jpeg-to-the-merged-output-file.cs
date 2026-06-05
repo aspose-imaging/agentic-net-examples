@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -32,44 +33,54 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir ?? ".");
 
-            // Collect sizes
+            // Collect image sizes and preserve EXIF from the first image
             List<Size> sizes = new List<Size>();
+            Aspose.Imaging.Exif.ExifData firstExifData = null;
 
-            foreach (string path in inputPaths)
+            // Load first image to capture EXIF and size
+            using (RasterImage firstImg = (RasterImage)Image.Load(inputPaths[0]))
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                sizes.Add(firstImg.Size);
+                firstExifData = firstImg.ExifData;
+            }
+
+            // Load remaining images to collect sizes
+            for (int i = 1; i < inputPaths.Length; i++)
+            {
+                using (RasterImage img = (RasterImage)Image.Load(inputPaths[i]))
                 {
                     sizes.Add(img.Size);
                 }
             }
 
             // Calculate canvas dimensions for horizontal merge
-            int newWidth = 0;
-            int newHeight = 0;
-            foreach (var sz in sizes)
-            {
-                newWidth += sz.Width;
-                if (sz.Height > newHeight) newHeight = sz.Height;
-            }
+            int newWidth = sizes.Sum(s => s.Width);
+            int newHeight = sizes.Max(s => s.Height);
 
-            // Create output source and JPEG options
-            Source outputSource = new FileCreateSource(outputPath, false);
+            // Prepare JPEG options with bound output source
             JpegOptions jpegOptions = new JpegOptions()
             {
-                Source = outputSource,
-                Quality = 100,
-                KeepMetadata = true
+                Source = new FileCreateSource(outputPath, false),
+                Quality = 100
             };
 
-            // Create canvas bound to the output file
+            // Create JPEG canvas bound to the output file
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
-                int offsetX = 0;
-                foreach (string path in inputPaths)
+                // Copy EXIF metadata from the first image if it is JPEG EXIF
+                if (firstExifData is Aspose.Imaging.Exif.JpegExifData jpegExif)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    canvas.ExifData = jpegExif;
+                }
+
+                // Merge images horizontally
+                int offsetX = 0;
+                foreach (string imgPath in inputPaths)
+                {
+                    using (RasterImage img = (RasterImage)Image.Load(imgPath))
                     {
                         Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
@@ -77,7 +88,7 @@ class Program
                     }
                 }
 
-                // Save the bound image
+                // Save the bound canvas (output file already bound via options)
                 canvas.Save();
             }
         }
@@ -87,3 +98,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a photographer needs to stitch several JPEG photos into a single panoramic image while retaining the original camera settings and GPS coordinates stored in the first photo’s EXIF metadata.
+ * 2. When an e‑commerce platform merges product view images into a composite thumbnail and must preserve the original exposure and orientation data for compliance with image‑catalog standards.
+ * 3. When a real‑estate agency combines interior room photos into a brochure layout and wants to keep the first image’s EXIF timestamps for accurate property listing timelines.
+ * 4. When a social‑media app creates a collage from user‑uploaded JPEGs and needs to retain the first picture’s copyright and author information embedded in EXIF for legal attribution.
+ * 5. When a medical imaging system assembles multiple diagnostic JPEG scans into a single report page while preserving the first scan’s patient metadata stored in EXIF tags.
+ */

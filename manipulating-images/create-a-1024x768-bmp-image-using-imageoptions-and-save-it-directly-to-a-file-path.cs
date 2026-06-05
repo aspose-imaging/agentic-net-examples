@@ -8,27 +8,26 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\output.bmp";
-
         try
         {
+            // Hardcoded output path
+            string outputPath = @"C:\temp\output.bmp";
+
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up BMP creation options with the target file as source
+            // Set up BMP creation options
             BmpOptions bmpOptions = new BmpOptions
             {
+                BitsPerPixel = 24, // 24‑bpp color
                 Source = new FileCreateSource(outputPath, false)
             };
 
-            // Create a 1024x768 BMP image
+            // Create a 1024x768 BMP image and save it directly to the specified file
             using (Image image = Image.Create(bmpOptions, 1024, 768))
             {
-                // Optionally, you could draw on the image here using Graphics
-
-                // Save the image to the specified path
-                image.Save();
+                // No additional drawing needed; the image is saved as is
+                image.Save(); // Saves to the path defined in bmpOptions.Source
             }
         }
         catch (Exception ex)

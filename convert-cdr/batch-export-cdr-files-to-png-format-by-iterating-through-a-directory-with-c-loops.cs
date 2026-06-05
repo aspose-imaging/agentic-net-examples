@@ -4,56 +4,56 @@ using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+namespace BatchCdrToPng
 {
-    static void Main()
+    class Program
     {
-        try
+        static void Main()
         {
             // Hardcoded input and output directories
             string inputDirectory = @"C:\InputCdr";
             string outputDirectory = @"C:\OutputPng";
 
-            // Get all CDR files in the input directory
-            foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.cdr"))
+            try
             {
-                // Verify the input file exists
-                if (!File.Exists(inputPath))
+                // Get all CDR files in the input directory
+                foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.cdr"))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Load the CDR image
-                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
-                {
-                    // Cache the whole document to avoid repeated I/O
-                    cdrImage.CacheData();
-
-                    // Process each page in the CDR file
-                    for (int pageIndex = 0; pageIndex < cdrImage.PageCount; pageIndex++)
+                    // Verify the input file exists
+                    if (!File.Exists(inputPath))
                     {
-                        // Retrieve the page and cache its data
-                        CdrImagePage page = (CdrImagePage)cdrImage.Pages[pageIndex];
-                        page.CacheData();
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
 
-                        // Build the output PNG file path
-                        string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}.page{pageIndex}.png";
-                        string outputPath = Path.Combine(outputDirectory, outputFileName);
+                    // Load the CDR image
+                    using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+                    {
+                        // Ensure all pages are cached (optional but improves performance)
+                        cdrImage.CacheData();
 
-                        // Ensure the output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        int pageIndex = 0;
+                        foreach (CdrImagePage page in cdrImage.Pages)
+                        {
+                            // Prepare output file path for each page
+                            string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{pageIndex}.png";
+                            string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                        // Save the page as PNG
-                        PngOptions pngOptions = new PngOptions();
-                        page.Save(outputPath, pngOptions);
+                            // Ensure the output directory exists
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                            // Save the page as PNG
+                            page.Save(outputPath, new PngOptions());
+
+                            pageIndex++;
+                        }
                     }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }

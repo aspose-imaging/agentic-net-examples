@@ -1,7 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -13,55 +11,45 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string[] inputPaths = new string[]
-            {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
-            };
+            string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
             string outputPath = "output.jpg";
 
-            // Validate input files
-            foreach (string path in inputPaths)
+            foreach (var inputPath in inputPaths)
             {
-                if (!File.Exists(path))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {path}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect image sizes
-            List<(int Width, int Height)> sizes = new List<(int, int)>();
-            foreach (string path in inputPaths)
+            int maxWidth = 0;
+            int totalHeight = 0;
+            foreach (var path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    sizes.Add((img.Width, img.Height));
+                    if (img.Width > maxWidth) maxWidth = img.Width;
+                    totalHeight += img.Height;
                 }
             }
 
-            // Calculate canvas size for vertical merge
-            int canvasWidth = sizes.Max(s => s.Width);
-            int canvasHeight = sizes.Sum(s => s.Height);
-
-            // Create JPEG options
-            Source src = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions()
+            FileCreateSource source = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions
             {
-                Source = src,
-                Quality = 90
+                Source = source,
+                Quality = 90,
+                ColorType = JpegCompressionColorMode.YCbCr,
+                HorizontalSampling = new byte[] { 2, 1, 1 },
+                VerticalSampling = new byte[] { 2, 1, 1 }
             };
 
-            // Create JPEG canvas bound to the output file
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, maxWidth, totalHeight))
             {
                 int offsetY = 0;
-                foreach (string path in inputPaths)
+                foreach (var path in inputPaths)
                 {
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
@@ -71,7 +59,6 @@ class Program
                     }
                 }
 
-                // Save the bound image
                 canvas.Save();
             }
         }
@@ -81,3 +68,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application needs to generate a single JPEG photo strip from multiple user‑uploaded images while keeping the file size low, developers can use this code to vertically merge the pictures and apply 4:2:0 subsampling with Aspose.Imaging for .NET.
+ * 2. When an e‑commerce platform creates a product‑comparison image that stacks several product photos in a column, the code ensures the combined JPEG uses YCbCr color mode and reduced chroma resolution to optimize bandwidth.
+ * 3. When a reporting tool assembles scanned invoice pages into one continuous JPEG document, the vertical merge with JpegOptions and 4:2:0 subsampling helps meet email attachment size limits.
+ * 4. When a mobile game captures a sequence of in‑game screenshots and needs to bundle them into a single JPEG leaderboard image, this approach merges the frames vertically and compresses them efficiently for faster sharing.
+ * 5. When a digital signage system prepares a tall banner by stitching together multiple advertisement banners, the code creates a high‑quality JPEG with reduced chroma data, minimizing storage while preserving visual fidelity.
+ */

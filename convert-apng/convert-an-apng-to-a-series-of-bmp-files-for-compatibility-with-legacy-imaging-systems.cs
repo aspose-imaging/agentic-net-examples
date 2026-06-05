@@ -3,55 +3,51 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input APNG file and output directory
+        // Hardcoded input and output paths
         string inputPath = "input.apng";
-        string outputDir = "output_frames";
+        string outputDirectory = "output";
 
         try
         {
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
+            // Ensure the output directory exists (creates if missing)
+            Directory.CreateDirectory(outputDirectory);
 
             // Load the APNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to multipage interface to access frames
-                if (image is IMultipageImage multipageImage)
+                // Cast to ApngImage to access frames
+                ApngImage apngImage = (ApngImage)image;
+                int frameCount = apngImage.PageCount;
+
+                // Iterate over each frame and save as BMP
+                for (int i = 0; i < frameCount; i++)
                 {
-                    int frameCount = multipageImage.PageCount;
+                    // Build output file path for the current frame
+                    string outputPath = Path.Combine(outputDirectory, $"frame_{i:D4}.bmp");
 
-                    for (int i = 0; i < frameCount; i++)
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Extract the frame as a RasterImage
+                    using (RasterImage frame = (RasterImage)apngImage.Pages[i])
                     {
-                        // Retrieve the current frame as a raster image
-                        RasterImage frame = (RasterImage)multipageImage.Pages[i];
-
-                        // Build output BMP file path
-                        string outputPath = Path.Combine(outputDir, $"frame_{i + 1}.bmp");
-
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the frame as BMP
+                        // Save the frame as BMP using default BmpOptions
                         BmpOptions bmpOptions = new BmpOptions();
                         frame.Save(outputPath, bmpOptions);
                     }
-                }
-                else
-                {
-                    Console.Error.WriteLine("The loaded image does not support multiple pages.");
-                    return;
                 }
             }
         }

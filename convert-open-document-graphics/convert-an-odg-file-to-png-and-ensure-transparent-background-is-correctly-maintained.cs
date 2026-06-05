@@ -2,45 +2,44 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.odg";
+        string outputPath = @"C:\Images\sample.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.odg";
-            string outputPath = "sample.png";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options to keep transparency
-                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+                // Configure PNG save options with rasterization settings
+                var pngOptions = new PngOptions();
+
+                var rasterOptions = new OdgRasterizationOptions
                 {
-                    BackgroundColor = Aspose.Imaging.Color.Transparent,
+                    // Preserve transparency by setting a transparent background
+                    BackgroundColor = Color.Transparent,
+                    // Optional: keep original page size
                     PageSize = image.Size
                 };
 
-                // Set PNG save options with the rasterization settings
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save as PNG preserving transparent background
+                // Save the image as PNG
                 image.Save(outputPath, pngOptions);
             }
         }

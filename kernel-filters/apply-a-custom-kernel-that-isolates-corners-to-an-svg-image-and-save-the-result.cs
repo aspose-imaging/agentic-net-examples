@@ -8,64 +8,53 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.svg";
         string outputPath = "output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the SVG image
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image svgImage = Image.Load(inputPath))
             {
-                // Prepare rasterization options for SVG to PNG conversion
                 var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = svgImage.Size
+                    PageWidth = svgImage.Width,
+                    PageHeight = svgImage.Height,
+                    BackgroundColor = Aspose.Imaging.Color.White
                 };
 
-                // PNG save options with vector rasterization
                 var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Rasterize SVG to a memory stream
-                using (var memoryStream = new MemoryStream())
+                using (var ms = new MemoryStream())
                 {
-                    svgImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                    // Load the rasterized image as a RasterImage
-                    using (Image rasterImageContainer = Image.Load(memoryStream))
+                    using (Image rasterImageContainer = Image.Load(ms))
                     {
                         var rasterImage = (RasterImage)rasterImageContainer;
 
-                        // Define a custom kernel that isolates corners (edge detection)
-                        double[,] kernel = new double[3, 3]
+                        double[,] kernel = new double[,]
                         {
-                            { -1, -1, -1 },
-                            { -1,  8, -1 },
-                            { -1, -1, -1 }
+                            { 1, 0, 1 },
+                            { 0, 0, 0 },
+                            { 1, 0, 1 }
                         };
 
-                        // Create convolution filter options with the custom kernel
-                        var convolutionOptions = new ConvolutionFilterOptions(kernel);
+                        var filterOptions = new ConvolutionFilterOptions(kernel);
+                        rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
-                        // Apply the filter to the entire image
-                        rasterImage.Filter(rasterImage.Bounds, convolutionOptions);
-
-                        // Save the filtered image to the output path
-                        rasterImage.Save(outputPath, new PngOptions());
+                        rasterImage.Save(outputPath);
                     }
                 }
             }
@@ -76,3 +65,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert an SVG logo to a PNG thumbnail and use Aspose.Imaging’s convolution filter in C# to highlight the logo’s corners for a UI preview.
+ * 2. When an e‑commerce site automatically rasterizes SVG product illustrations to PNG and applies a custom corner‑isolating kernel to make the edges stand out in promotional emails.
+ * 3. When a GIS application loads SVG map symbols, rasterizes them with Aspose.Imaging, and runs a corner‑detecting convolution filter to improve visual separation of marker edges on the final PNG map.
+ * 4. When a game asset pipeline processes SVG icons, uses C# to rasterize them to PNG and applies a custom kernel that isolates corners, creating a stylized effect for in‑game UI elements.
+ * 5. When a document automation system extracts SVG diagrams, converts them to PNG with Aspose.Imaging, and runs a corner‑isolation filter to aid OCR or subsequent image‑analysis steps.
+ */

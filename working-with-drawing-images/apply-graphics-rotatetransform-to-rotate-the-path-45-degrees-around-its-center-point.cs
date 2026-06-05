@@ -2,47 +2,40 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output/output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Output file path (hardcoded)
-            string outputPath = "output.png";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Create PNG options with a file source bound to the output path
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a 500x500 image
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            using (Image image = Image.Load(inputPath))
             {
-                // Initialize Graphics for drawing
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
 
-                // Rotate the graphics 45 degrees (around origin)
-                graphics.RotateTransform(45f, MatrixOrder.Prepend);
-
-                // Build a simple path (a rectangle)
                 GraphicsPath path = new GraphicsPath();
                 Figure figure = new Figure();
                 figure.AddShape(new RectangleShape(new RectangleF(100f, 100f, 200f, 200f)));
                 path.AddFigure(figure);
 
-                // Draw the path with a black pen
-                Pen pen = new Pen(Color.Black, 2);
-                graphics.DrawPath(pen, path);
+                graphics.RotateTransform(45f);
 
-                // Save the image (already bound to the output file)
-                image.Save();
+                graphics.DrawPath(new Pen(Color.Black, 2), path);
+
+                PngOptions pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -51,3 +44,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to rotate a rectangular logo by 45 degrees in a PNG file for a branding overlay using Aspose.Imaging’s Graphics.RotateTransform in C#.
+ * 2. When a developer wants to generate a rotated thumbnail of a scanned document to match a specific page layout, applying a 45‑degree rotation to the image path before saving as PNG.
+ * 3. When a developer must create a rotated UI icon (e.g., a compass needle) by drawing a rectangle shape, rotating it around its center, and exporting the result with Aspose.Imaging for .NET.
+ * 4. When a developer is preparing product images for a catalog and needs to align product boxes at a 45‑degree angle to showcase perspective, using GraphicsPath and RotateTransform.
+ * 5. When a developer is building an automated batch process that corrects the orientation of batch‑processed PNG graphics by rotating each image’s path 45 degrees around its center point.
+ */

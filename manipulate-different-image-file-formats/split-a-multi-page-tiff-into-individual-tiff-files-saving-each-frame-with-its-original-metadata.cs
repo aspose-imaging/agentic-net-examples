@@ -5,44 +5,44 @@ using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output locations
-        string inputPath = @"C:\temp\multipage.tif";
-        string outputDirectory = @"C:\temp\output";
-
         try
         {
-            // Verify that the source file exists
+            // Hardcoded input and output directory paths
+            string inputPath = "input.tif";
+            string outputDir = "output_frames";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(outputDirectory);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
 
             // Load the multi‑page TIFF
-            using (TiffImage multiPage = (TiffImage)Image.Load(inputPath))
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Iterate through each frame in the source image
-                for (int i = 0; i < multiPage.Frames.Length; i++)
+                // Iterate through each frame
+                for (int i = 0; i < tiffImage.Frames.Length; i++)
                 {
-                    // Retrieve the current frame
-                    TiffFrame frame = multiPage.Frames[i];
+                    // Copy the current frame to preserve its data and metadata
+                    TiffFrame copiedFrame = TiffFrame.CopyFrame(tiffImage.Frames[i]);
 
-                    // Create a new TiffImage that contains only this frame
-                    using (TiffImage singlePage = new TiffImage(frame))
+                    // Create a new single‑frame TIFF image
+                    using (TiffImage singleFrameTiff = new TiffImage(copiedFrame))
                     {
-                        // Build the output file path
-                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.tif");
+                        // Build output file path for this frame
+                        string outputPath = Path.Combine(outputDir, $"frame_{i + 1}.tif");
 
-                        // Ensure the directory for the output file exists
+                        // Ensure the directory for this file exists (unconditional call as required)
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save the single‑frame TIFF, preserving its metadata
-                        singlePage.Save(outputPath);
+                        // Save the single‑frame TIFF
+                        singleFrameTiff.Save(outputPath);
                     }
                 }
             }
@@ -53,3 +53,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a medical imaging system receives a multi‑page DICOM‑converted TIFF scan and must store each slice as a separate TIFF file while preserving patient metadata for downstream analysis.
+ * 2. When a document management workflow needs to extract individual scanned pages from a multi‑page TIFF archive to index each page separately in a search engine, keeping the original EXIF and TIFF tags intact.
+ * 3. When a GIS application processes a multi‑band satellite TIFF and wants to save each band as its own single‑frame TIFF for independent rendering, retaining geospatial metadata.
+ * 4. When an e‑commerce platform receives bulk product catalog images packaged as a multi‑page TIFF and must generate separate TIFF files for each product image while preserving color profile information.
+ * 5. When an archival system migrates historical newspaper microfilm stored as multi‑page TIFFs and requires each page to be saved as an individual TIFF with original metadata for compliance and retrieval.
+ */

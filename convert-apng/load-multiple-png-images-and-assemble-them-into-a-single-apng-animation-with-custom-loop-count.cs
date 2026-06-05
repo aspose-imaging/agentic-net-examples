@@ -2,26 +2,27 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string[] inputPaths = { "Input\\image1.png", "Input\\image2.png", "Input\\image3.png" };
-        string outputPath = "Output\\animation.apng";
-
         try
         {
-            // Validate each input file
-            foreach (var inputPath in inputPaths)
+            // Input PNG files
+            string[] inputPaths = new string[] { "frame1.png", "frame2.png", "frame3.png" };
+            // Output APNG file
+            string outputPath = "output/animation.apng";
+
+            // Validate input files
+            foreach (var path in inputPaths)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
             }
@@ -29,42 +30,34 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the first image to obtain canvas size
-            using (RasterImage firstImage = (RasterImage)Image.Load(inputPaths[0]))
+            // Create source and APNG options
+            Source source = new FileCreateSource(outputPath, false);
+            ApngOptions options = new ApngOptions
             {
-                int width = firstImage.Width;
-                int height = firstImage.Height;
+                Source = source,
+                DefaultFrameTime = 100, // milliseconds per frame
+                ColorType = PngColorType.TruecolorWithAlpha,
+                NumPlays = 3 // custom loop count
+            };
 
-                // Create APNG options with custom loop count
-                Source source = new FileCreateSource(outputPath, false);
-                ApngOptions options = new ApngOptions
+            // Load first image to obtain dimensions
+            using (RasterImage first = (RasterImage)Image.Load(inputPaths[0]))
+            {
+                // Create APNG canvas bound to the output file
+                using (ApngImage apng = (ApngImage)Image.Create(options, first.Width, first.Height))
                 {
-                    Source = source,
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    NumPlays = 3 // custom loop count
-                };
-
-                // Create the APNG canvas
-                using (ApngImage apng = (ApngImage)Image.Create(options, width, height))
-                {
-                    // Remove the default frame that exists upon creation
                     apng.RemoveAllFrames();
 
                     // Add each PNG as a frame
-                    foreach (var inputPath in inputPaths)
+                    foreach (var path in inputPaths)
                     {
-                        using (RasterImage frame = (RasterImage)Image.Load(inputPath))
+                        using (RasterImage frame = (RasterImage)Image.Load(path))
                         {
-                            // Resize if dimensions differ from canvas
-                            if (frame.Width != width || frame.Height != height)
-                            {
-                                frame.Resize(width, height, ResizeType.NearestNeighbourResample);
-                            }
                             apng.AddFrame(frame);
                         }
                     }
 
-                    // Save the assembled APNG
+                    // Save the animation
                     apng.Save();
                 }
             }

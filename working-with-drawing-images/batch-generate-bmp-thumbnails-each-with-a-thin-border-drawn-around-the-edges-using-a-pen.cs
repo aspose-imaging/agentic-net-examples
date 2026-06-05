@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -9,62 +10,65 @@ class Program
     {
         try
         {
-            // Input and output directories (hardcoded)
-            string inputDir = "Input";
-            string outputDir = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Validate input directory
-            if (!Directory.Exists(inputDir))
+            if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputDir);
-                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDir))
+            if (!Directory.Exists(outputDirectory))
             {
-                Directory.CreateDirectory(outputDir);
+                Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all files in the input directory
-            string[] files = Directory.GetFiles(inputDir);
-            foreach (string inputPath in files)
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (var inputPath in files)
             {
-                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     continue;
                 }
 
-                // Prepare output path
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + "_thumb.bmp");
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Determine thumbnail size (max 100x100 while preserving aspect ratio)
-                    const int maxThumbWidth = 100;
-                    const int maxThumbHeight = 100;
-                    double ratio = Math.Min((double)maxThumbWidth / image.Width, (double)maxThumbHeight / image.Height);
-                    int thumbWidth = (int)(image.Width * ratio);
-                    int thumbHeight = (int)(image.Height * ratio);
+                    RasterImage raster = image as RasterImage;
+                    if (raster == null)
+                    {
+                        Console.Error.WriteLine($"Unsupported image format: {inputPath}");
+                        continue;
+                    }
 
-                    // Resize to thumbnail dimensions
-                    image.Resize(thumbWidth, thumbHeight);
+                    if (!raster.IsCached)
+                        raster.CacheData();
 
-                    // Draw a thin black border around the image
-                    Graphics graphics = new Graphics(image);
+                    // Create thumbnail with max dimension 150 pixels
+                    int maxSize = 150;
+                    double scale = Math.Min((double)maxSize / raster.Width, (double)maxSize / raster.Height);
+                    int thumbWidth = (int)(raster.Width * scale);
+                    int thumbHeight = (int)(raster.Height * scale);
+                    raster.Resize(thumbWidth, thumbHeight);
+
+                    // Draw thin black border
+                    Graphics graphics = new Graphics(raster);
                     Pen pen = new Pen(Color.Black, 1);
-                    graphics.DrawRectangle(pen, 0, 0, image.Width - 1, image.Height - 1);
+                    graphics.DrawRectangle(pen, 0, 0, raster.Width - 1, raster.Height - 1);
 
-                    // Save as BMP
-                    image.Save(outputPath, new BmpOptions());
+                    // Prepare output path
+                    string fileName = Path.GetFileNameWithoutExtension(inputPath) + "_thumb.bmp";
+                    string outputPath = Path.Combine(outputDirectory, fileName);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (BmpOptions bmpOptions = new BmpOptions())
+                    {
+                        image.Save(outputPath, bmpOptions);
+                    }
                 }
             }
         }
@@ -74,3 +78,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to create a gallery of small preview images for a web portal, generating BMP thumbnails with a uniform thin border drawn by a Pen to maintain visual consistency.
+ * 2. When an e‑commerce site must display product photos as quick‑load thumbnails on mobile devices, resizing original images to 150 px and using a Pen to add a thin border for separation.
+ * 3. When a desktop application processes scanned documents in various formats and requires batch conversion to BMP thumbnails with a Pen‑drawn border for inclusion in a PDF index.
+ * 4. When a digital asset management system automatically creates low‑resolution previews of high‑resolution BMP files for faster browsing, adding a subtle Pen‑drawn border to highlight each thumbnail.
+ * 5. When a reporting tool needs to embed small BMP images with a consistent frame into generated PDFs or Excel sheets, resizing and drawing a border with a Pen around each image in a batch operation.
+ */

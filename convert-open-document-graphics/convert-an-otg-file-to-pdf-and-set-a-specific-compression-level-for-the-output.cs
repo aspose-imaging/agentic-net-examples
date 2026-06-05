@@ -8,44 +8,45 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample.pdf";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\sample.pdf";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF save options with desired compression
-                var pdfOptions = new PdfOptions
+                // Configure rasterization options for OTG
+                OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
                 {
-                    PdfCoreOptions = new PdfCoreOptions
-                    {
-                        // Set compression to Flate (you can change to another enum value as needed)
-                        Compression = PdfImageCompressionOptions.Flate
-                    }
-                };
-
-                // Set vector rasterization options for OTG rendering
-                var otgRasterOptions = new OtgRasterizationOptions
-                {
-                    // Preserve original page size
                     PageSize = image.Size
                 };
-                pdfOptions.VectorRasterizationOptions = otgRasterOptions;
 
-                // Save the image as PDF using the configured options
+                // Set PDF compression options
+                PdfCoreOptions pdfCoreOptions = new PdfCoreOptions
+                {
+                    Compression = PdfImageCompressionOptions.Flate // Desired compression level
+                };
+
+                // Prepare PDF save options
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    PdfCoreOptions = pdfCoreOptions,
+                    VectorRasterizationOptions = otgRasterizationOptions
+                };
+
+                // Save the image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }

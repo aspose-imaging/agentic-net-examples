@@ -4,19 +4,17 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cmx";
-        string outputPath = @"C:\Images\output.jpg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.cmx";
+            string outputPath = @"C:\Images\output.jpg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,30 +25,20 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load CMX image
+            // Load the CMX image
             using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
             {
-                // Configure rasterization options with a solid background color
-                CmxRasterizationOptions rasterOptions = new CmxRasterizationOptions
-                {
-                    // Example background color (white). Change as needed.
-                    BackgroundColor = Color.White,
-                    // Optional: set page size or resolution if required
-                    // PageWidth = 800,
-                    // PageHeight = 600,
-                    // ResolutionSettings = new ResolutionSetting(300)
-                };
-
-                // Configure JPEG save options and attach rasterization options
+                // Configure JPEG save options with a custom background color
                 JpegOptions jpegOptions = new JpegOptions
                 {
-                    // Use default quality; adjust if needed
-                    Quality = 90,
-                    // Attach rasterization options for vector conversion
-                    VectorRasterizationOptions = rasterOptions
+                    // Set background color for transparent regions (e.g., white)
+                    VectorRasterizationOptions = new CmxRasterizationOptions
+                    {
+                        BackgroundColor = Color.White
+                    }
                 };
 
-                // Save as JPEG with the specified options
+                // Save as JPEG
                 cmxImage.Save(outputPath, jpegOptions);
             }
         }

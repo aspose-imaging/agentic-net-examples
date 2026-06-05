@@ -10,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.apng";
+            string inputPath = @"C:\Images\source.png";
+            string outputPath = @"C:\Images\output_apng.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,11 +26,13 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure APNG options: custom frame delay and loop count
+                // Configure APNG options: custom loop count and frame delay
                 var apngOptions = new ApngOptions
                 {
-                    DefaultFrameTime = 200, // frame duration in milliseconds
-                    NumPlays = 3            // number of animation loops (0 = infinite)
+                    // Number of times the animation should loop (0 = infinite)
+                    NumPlays = 3,
+                    // Default frame duration in milliseconds
+                    DefaultFrameTime = 200
                 };
 
                 // Save as APNG with the configured options

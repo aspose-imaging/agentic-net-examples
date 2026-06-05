@@ -3,37 +3,48 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Watermark;
+using Aspose.Imaging.Watermark.Options;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output/output.png";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output/cleaned.png";
-
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            // Load the PNG image
+            using (var image = Image.Load(inputPath))
             {
-                PngImage pngImage = (PngImage)image;
+                var pngImage = (PngImage)image;
 
-                GraphicsPath mask = new GraphicsPath();
-                Figure figure = new Figure();
-                figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
+                // Define an elliptical mask using GraphicsPath
+                var mask = new GraphicsPath();
+                var figure = new Figure();
+                // Example ellipse coordinates (x, y, width, height)
+                figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 150)));
                 mask.AddFigure(figure);
 
-                var options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask);
+                // Use default ContentAwareFill options
+                var options = new ContentAwareFillWatermarkOptions(mask);
 
-                using (RasterImage result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options))
+                // Remove the watermark
+                using (var result = WatermarkRemover.PaintOver(pngImage, options))
                 {
+                    // Save the processed image
                     result.Save(outputPath);
                 }
             }

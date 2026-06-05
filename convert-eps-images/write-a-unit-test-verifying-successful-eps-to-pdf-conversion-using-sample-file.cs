@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -40,7 +40,7 @@ class Program
             }
             else
             {
-                Console.Error.WriteLine("EPS to PDF conversion failed: output file not created.");
+                Console.Error.WriteLine("Conversion failed: output file not created.");
             }
         }
         catch (Exception ex)

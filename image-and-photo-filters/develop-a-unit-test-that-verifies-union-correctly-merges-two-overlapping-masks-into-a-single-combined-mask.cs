@@ -1,63 +1,59 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        string outputDir = Path.GetDirectoryName(outputPath);
+        if (string.IsNullOrEmpty(outputDir))
+        {
+            outputDir = ".";
+        }
+        Directory.CreateDirectory(outputDir);
+
         try
         {
-            string inputPath = Path.Combine(Path.GetTempPath(), "dummy_input.txt");
-            string outputPath = Path.Combine(Path.GetTempPath(), "dummy_output.txt");
-
-            // Ensure input file exists
-            File.WriteAllText(inputPath, string.Empty);
-            if (!File.Exists(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                RectangleMask mask1 = new RectangleMask(10, 10, 50, 50);
+                RectangleMask mask2 = new RectangleMask(30, 30, 50, 50);
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                ImageBitMask unionMask = mask1.Union(mask2);
 
-            // Create two grayscale masks of size 100x100
-            ImageGrayscaleMask mask1 = new ImageGrayscaleMask(100, 100);
-            ImageGrayscaleMask mask2 = new ImageGrayscaleMask(100, 100);
+                bool test1 = unionMask.IsOpaque(15, 15);
+                bool test2 = unionMask.IsOpaque(75, 75);
+                bool test3 = unionMask.IsOpaque(35, 35);
+                bool test4 = unionMask.IsOpaque(0, 0);
 
-            // Fill mask1 with an opaque rectangle (10,10)-(39,39)
-            for (int y = 10; y < 40; y++)
-            {
-                for (int x = 10; x < 40; x++)
+                if (!test1 || !test2 || !test3 || test4)
                 {
-                    mask1[x, y] = 255;
+                    Console.Error.WriteLine("Union mask verification failed.");
+                    return;
                 }
-            }
 
-            // Fill mask2 with an opaque rectangle (30,30)-(69,69) overlapping mask1
-            for (int y = 30; y < 70; y++)
-            {
-                for (int x = 30; x < 70; x++)
+                unionMask.ApplyTo(image);
+
+                PngOptions pngOptions = new PngOptions
                 {
-                    mask2[x, y] = 255;
-                }
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                image.Save(outputPath, pngOptions);
             }
-
-            // Perform union of the two masks
-            ImageGrayscaleMask unionMask = mask1.Union(mask2);
-            bool insideBoth = unionMask.IsOpaque(35, 35); // overlapped area
-            bool onlyMask1 = unionMask.IsOpaque(15, 15); // only in mask1
-            bool onlyMask2 = unionMask.IsOpaque(60, 60); // only in mask2
-            bool outside = unionMask.IsOpaque(5, 5);    // outside both
-
-            Console.WriteLine(insideBoth && onlyMask1 && onlyMask2 && !outside
-                ? "Union test passed"
-                : "Union test failed");
-
-            // Cleanup temporary files
-            if (File.Exists(inputPath)) File.Delete(inputPath);
-            if (File.Exists(outputPath)) File.Delete(outputPath);
         }
         catch (Exception ex)
         {

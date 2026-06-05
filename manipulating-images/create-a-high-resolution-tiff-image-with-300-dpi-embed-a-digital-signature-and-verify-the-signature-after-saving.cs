@@ -11,33 +11,45 @@ class Program
     {
         try
         {
-            // Define output path for the high‑resolution TIFF image
-            string outputPath = "output/highres.tif";
+            // Hardcoded output path
+            string outputPath = "output\\highres.tif";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create TIFF options with default format
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            // Configure TIFF options
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+            tiffOptions.Compression = TiffCompressions.Lzw;
+            tiffOptions.Photometric = TiffPhotometrics.Rgb;
+            tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
 
-            // Create a new TIFF image of size 1000x1000 pixels
-            using (Image image = Image.Create(tiffOptions, 1000, 1000))
+            // Create a blank 500x500 TIFF image
+            using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, 500, 500))
             {
-                // Set the resolution to 300 DPI
-                ((RasterImage)image).SetResolution(300, 300);
+                // Set resolution to 300 DPI
+                tiffImage.SetResolution(300, 300);
 
-                // Embed a digital signature using a password
-                ((RasterCachedImage)image).EmbedDigitalSignature("secure123");
+                // Embed a digital signature with a valid password
+                string password = "secure123";
+                tiffImage.EmbedDigitalSignature(password);
 
                 // Save the image to the specified path
-                image.Save(outputPath, tiffOptions);
+                tiffImage.Save(outputPath, tiffOptions);
             }
 
-            // Load the saved image to verify the digital signature
-            using (Image loadedImage = Image.Load(outputPath))
+            // Verify that the file was created
+            if (!File.Exists(outputPath))
             {
-                bool isSigned = ((RasterCachedImage)loadedImage).IsDigitalSigned("secure123", 80);
-                Console.WriteLine($"Signature valid: {isSigned}");
+                Console.Error.WriteLine($"File not found: {outputPath}");
+                return;
+            }
+
+            // Load the saved image and verify the digital signature
+            using (TiffImage loadedImage = (TiffImage)Image.Load(outputPath))
+            {
+                bool isSigned = loadedImage.IsDigitalSigned("secure123", 0);
+                Console.WriteLine($"Signature verification result: {isSigned}");
             }
         }
         catch (Exception ex)

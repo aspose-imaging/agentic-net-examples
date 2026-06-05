@@ -9,11 +9,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.gif";
-            string outputPath = @"C:\Images\output.lossy.gif";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\input.gif";
+            string outputPath = @"C:\temp\output.lossy.gif";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,17 +26,18 @@ class Program
             // Load the source GIF image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure GIF options for lossy compression
-                GifOptions options = new GifOptions
+                // Configure GIF save options for lossy compression
+                GifOptions saveOptions = new GifOptions
                 {
-                    MaxDiff = 80,               // Recommended value for effective lossy compression
-                    DoPaletteCorrection = true,
-                    Interlaced = false
+                    // Recommended value for noticeable size reduction while preserving quality
+                    MaxDiff = 80
                 };
 
-                // Save the image using the lossy options
-                image.Save(outputPath, options);
+                // Save the image with lossy compression
+                image.Save(outputPath, saveOptions);
             }
+
+            Console.WriteLine("Compression completed successfully.");
         }
         catch (Exception ex)
         {
@@ -44,3 +45,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web developer needs to reduce the bandwidth of animated GIF banners for faster page loads, they can use this C# code with Aspose.Imaging to apply lossy compression and halve the file size.
+ * 2. When an email marketing specialist wants to attach a smaller GIF animation to newsletters without noticeably degrading visual quality, they can run this script to generate a compressed .lossy.gif.
+ * 3. When a mobile app developer must meet strict app bundle size limits, they can employ the code to shrink GIF assets by approximately 50 % before packaging the app.
+ * 4. When a content management system (CMS) integrates automatic image optimization, this snippet can be called to compress user‑uploaded GIFs on the server side using Aspose.Imaging’s MaxDiff setting.
+ * 5. When a game developer needs to preload animated sprites while minimizing memory usage, they can use this example to create a lossy GIF version that loads faster and consumes less RAM.
+ */

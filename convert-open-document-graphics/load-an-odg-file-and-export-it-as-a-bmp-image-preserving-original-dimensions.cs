@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -14,30 +13,30 @@ class Program
 
         try
         {
-            // Verify that the input ODG file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image using Aspose.Imaging
+            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options to preserve the original dimensions
-                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
-                {
-                    BackgroundColor = Color.White, // optional background
-                    PageSize = image.Size           // keep original size
-                };
-
-                // Configure BMP save options and attach the rasterization options
+                // Prepare BMP export options with rasterization matching original size
                 BmpOptions bmpOptions = new BmpOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    // Set vector rasterization options for ODG
+                    VectorRasterizationOptions = new OdgRasterizationOptions
+                    {
+                        // Preserve original dimensions
+                        PageSize = image.Size,
+                        // Optional: set background color if needed
+                        BackgroundColor = Color.White
+                    }
                 };
 
                 // Save the image as BMP
@@ -46,7 +45,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

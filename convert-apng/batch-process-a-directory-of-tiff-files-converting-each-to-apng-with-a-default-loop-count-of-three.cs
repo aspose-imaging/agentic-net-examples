@@ -10,28 +10,29 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
 
             // Get all TIFF files in the input directory
-            string[] tiffFiles = Directory.GetFiles(inputDir, "*.tif");
+            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
 
             foreach (string inputPath in tiffFiles)
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build output file path (same name with .png extension)
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                // Build the output file path (same name with .png extension)
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure output directory exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load TIFF image and save as APNG with 3 loops
+                // Load the TIFF image and save it as APNG with 3 loops
                 using (Image image = Image.Load(inputPath))
                 {
                     var apngOptions = new ApngOptions

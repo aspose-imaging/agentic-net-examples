@@ -3,34 +3,40 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.jpg";
-            string outputPath = "Output/sample_converted.png";
-
-            // Validate input file existence
+            // Hardcoded input image path
+            string inputPath = "Input/sample.bmp";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Hardcoded output path (simulating HTTP response stream)
+            string outputPath = "Output/converted.png";
+
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image, convert to PNG, and write to the HTTP response stream (simulated with MemoryStream)
+            // Load the source image
             using (Image image = Image.Load(inputPath))
-            using (var pngOptions = new PngOptions())
-            using (var responseStream = new MemoryStream())
             {
-                image.Save(responseStream, pngOptions);
-                // Simulate sending the response: output the size of the generated PNG
-                Console.WriteLine($"PNG image written to response stream. Size: {responseStream.Length} bytes.");
+                // Configure PNG save options
+                PngOptions pngOptions = new PngOptions
+                {
+                    CompressionLevel = 9 // maximum compression
+                };
+
+                // Write the PNG directly to the response stream (here a FileStream simulates the HTTP response)
+                using (FileStream responseStream = new FileStream(outputPath, FileMode.Create))
+                {
+                    image.Save(responseStream, pngOptions);
+                }
             }
         }
         catch (Exception ex)

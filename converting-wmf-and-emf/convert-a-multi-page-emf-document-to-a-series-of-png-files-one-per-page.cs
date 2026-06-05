@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,66 +9,64 @@ class Program
     {
         try
         {
-            // Hardcoded input EMF file path
             string inputPath = "input.emf";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the EMF document
             using (Image image = Image.Load(inputPath))
             {
-                // Try to treat the image as a multipage vector image
                 IMultipageImage multipage = image as IMultipageImage;
-
-                if (multipage == null)
+                if (multipage == null || multipage.PageCount == 0)
                 {
-                    // Single‑page EMF: export to one PNG
-                    string outputPath = "output_page_1.png";
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                    string outputPath = Path.Combine("output", "page_1.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    PngOptions pngOptions = new PngOptions
+                    var options = new PngOptions();
+
+                    if (image is VectorImage)
                     {
-                        // Configure rasterization of the vector page
-                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        var vectorOptions = new VectorRasterizationOptions
                         {
-                            PageSize = image.Size,
                             BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height,
                             TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                             SmoothingMode = SmoothingMode.None
-                        }
-                    };
+                        };
+                        options.VectorRasterizationOptions = vectorOptions;
+                    }
 
-                    image.Save(outputPath, pngOptions);
+                    image.Save(outputPath, options);
                 }
                 else
                 {
-                    // Multi‑page EMF: export each page to a separate PNG
-                    int pageCount = multipage.PageCount;
-
-                    for (int i = 0; i < pageCount; i++)
+                    for (int i = 0; i < multipage.PageCount; i++)
                     {
-                        string outputPath = $"output_page_{i + 1}.png";
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                        string outputPath = Path.Combine("output", $"page_{i + 1}.png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        PngOptions pngOptions = new PngOptions
+                        var options = new PngOptions
                         {
-                            VectorRasterizationOptions = new VectorRasterizationOptions
-                            {
-                                PageSize = image.Size,
-                                BackgroundColor = Color.White,
-                                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                                SmoothingMode = SmoothingMode.None
-                            },
-                            // Export only the current page
                             MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1))
                         };
 
-                        image.Save(outputPath, pngOptions);
+                        if (image is VectorImage)
+                        {
+                            var vectorOptions = new VectorRasterizationOptions
+                            {
+                                BackgroundColor = Color.White,
+                                PageWidth = image.Width,
+                                PageHeight = image.Height,
+                                TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                                SmoothingMode = SmoothingMode.None
+                            };
+                            options.VectorRasterizationOptions = vectorOptions;
+                        }
+
+                        image.Save(outputPath, options);
                     }
                 }
             }

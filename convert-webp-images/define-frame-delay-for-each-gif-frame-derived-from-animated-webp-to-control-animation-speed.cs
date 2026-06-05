@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -12,69 +12,55 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "Input/animation.webp";
             string outputPath = "Output/animation.gif";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the animated WebP image
-            using (WebPImage webpImage = (WebPImage)Image.Load(inputPath))
+            // Load animated WebP
+            using (WebPImage webp = (WebPImage)Image.Load(inputPath))
             {
-                IMultipageImage multipage = webpImage as IMultipageImage;
-                if (multipage == null || multipage.PageCount == 0)
+                // Ensure there are frames
+                if (webp.PageCount == 0)
                 {
                     Console.Error.WriteLine("No frames found in the WebP image.");
                     return;
                 }
 
-                // Prepare frame delay values (example: 100ms per frame)
-                ushort[] frameDelays = new ushort[multipage.PageCount];
-                for (int i = 0; i < frameDelays.Length; i++)
+                // Create an empty GIF image using the first frame as a base
+                using (RasterImage firstFrame = (RasterImage)webp.Pages[0])
+                using (GifFrameBlock firstBlock = new GifFrameBlock(firstFrame))
+                using (GifImage gif = new GifImage(firstBlock))
                 {
-                    frameDelays[i] = 100; // 100 ms for each frame
-                }
+                    // Set delay for the first frame (example: 100 ms)
+                    firstBlock.FrameTime = 100;
 
-                // Load the first frame to initialize the GIF image
-                using (RasterImage firstRaster = (RasterImage)webpImage.Pages[0])
-                {
-                    using (GifImage gifImage = new GifImage(new GifFrameBlock((ushort)firstRaster.Width, (ushort)firstRaster.Height)))
+                    // Process remaining frames
+                    for (int i = 1; i < webp.PageCount; i++)
                     {
-                        // Copy first frame pixels
-                        using (GifFrameBlock firstBlock = new GifFrameBlock((ushort)firstRaster.Width, (ushort)firstRaster.Height))
+                        using (RasterImage frame = (RasterImage)webp.Pages[i])
+                        using (GifFrameBlock block = new GifFrameBlock(frame))
                         {
-                            var pixels = firstRaster.LoadPixels(firstRaster.Bounds);
-                            firstBlock.SavePixels(firstBlock.Bounds, pixels);
-                            gifImage.AddPage(firstBlock);
-                            gifImage.ActiveFrame.FrameTime = frameDelays[0];
+                            // Example: set each frame delay to 80 ms
+                            block.FrameTime = 80;
+                            gif.AddPage(block);
                         }
-
-                        // Process remaining frames
-                        for (int i = 1; i < multipage.PageCount; i++)
-                        {
-                            using (RasterImage raster = (RasterImage)webpImage.Pages[i])
-                            {
-                                using (GifFrameBlock block = new GifFrameBlock((ushort)raster.Width, (ushort)raster.Height))
-                                {
-                                    var pixels = raster.LoadPixels(raster.Bounds);
-                                    block.SavePixels(block.Bounds, pixels);
-                                    gifImage.AddPage(block);
-                                    gifImage.ActiveFrame.FrameTime = frameDelays[i];
-                                }
-                            }
-                        }
-
-                        // Save the resulting GIF with default options
-                        gifImage.Save(outputPath, new GifOptions());
                     }
+
+                    // Optional: set loop count (0 = infinite)
+                    GifOptions gifOptions = new GifOptions
+                    {
+                        LoopsCount = 0
+                    };
+
+                    // Save the GIF
+                    gif.Save(outputPath, gifOptions);
                 }
             }
         }

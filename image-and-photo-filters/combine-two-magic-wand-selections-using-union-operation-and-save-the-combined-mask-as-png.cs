@@ -12,33 +12,33 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "output\\combined_mask.png";
-
-        // Check input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+        string outputPath = "output_mask.png";
 
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the source image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // First magic wand selection at point (120, 80)
+                // Create first magic wand selection at (120, 80)
                 var firstMask = MagicWandTool.Select(image, new MagicWandSettings(120, 80));
 
-                // Union with a second selection at point (300, 200)
+                // Union with second magic wand selection at (300, 200)
                 var combinedMask = firstMask.Union(new MagicWandSettings(300, 200));
 
                 // Apply the combined mask to the image
                 combinedMask.Apply();
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the result as PNG
+                // Save the resulting mask as a PNG image
                 image.Save(outputPath, new PngOptions());
             }
         }

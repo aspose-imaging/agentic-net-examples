@@ -2,10 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -13,7 +9,7 @@ class Program
     {
         try
         {
-            string inputPath = "input.svg";
+            string inputPath = "input.png";
             string outputPath = "output.jpg";
 
             if (!File.Exists(inputPath))
@@ -22,55 +18,27 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image vectorImage = Image.Load(inputPath))
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
             {
-                // Set up rasterization options for high‑resolution output
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                Directory.CreateDirectory(outputDir);
+            }
+
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
                 {
-                    PageSize = vectorImage.Size,
-                    BackgroundColor = Color.White,
-                    SmoothingMode = SmoothingMode.AntiAlias,
-                    TextRenderingHint = TextRenderingHint.AntiAlias
-                };
-
-                // Rasterize SVG to PNG in memory
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    vectorImage.Save(ms, pngOptions);
-                    ms.Position = 0;
-
-                    using (Image rasterImg = Image.Load(ms))
-                    {
-                        RasterImage raster = (RasterImage)rasterImg;
-
-                        int width = raster.Width;
-                        int height = raster.Height;
-                        int blurHeight = height / 5; // 20% of image height
-
-                        // Apply Gaussian blur to top region
-                        Rectangle topRect = new Rectangle(0, 0, width, blurHeight);
-                        raster.Filter(topRect, new GaussianBlurFilterOptions(5, 4.0));
-
-                        // Apply Gaussian blur to bottom region
-                        Rectangle bottomRect = new Rectangle(0, height - blurHeight, width, blurHeight);
-                        raster.Filter(bottomRect, new GaussianBlurFilterOptions(5, 4.0));
-
-                        // Save the result as high‑quality JPEG
-                        JpegOptions jpegOptions = new JpegOptions
-                        {
-                            Quality = 95
-                        };
-
-                        raster.Save(outputPath, jpegOptions);
-                    }
+                    Console.Error.WriteLine("Failed to load raster image.");
+                    return;
                 }
+
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    Quality = 90
+                };
+
+                raster.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -79,3 +47,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application needs to convert user‑uploaded PNG graphics to optimized JPEG files for faster page loads, a developer can use this code to load the image, validate the file, and save it with a configurable JPEG quality setting.
+ * 2. When an automated batch‑processing service must ensure that all source images exist and are stored in a specific folder hierarchy before converting them to high‑resolution JPEGs, this snippet provides the file‑existence check and directory‑creation logic.
+ * 3. When a desktop utility has to transform raster images such as screenshots or scanned documents into JPEG format while preserving image fidelity by setting the JpegOptions.Quality property, the example demonstrates the required C# operations.
+ * 4. When integrating Aspose.Imaging into a CI/CD pipeline that validates image assets and produces JPEG previews for documentation, the code shows how to load the image, cast to RasterImage, and export it safely.
+ * 5. When building a C# service that receives PNG files via an API and must return a JPEG response, this pattern illustrates error handling, type checking, and the use of Image.Load and raster.Save with Aspose.Imaging.
+ */

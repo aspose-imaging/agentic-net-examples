@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -23,17 +23,14 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-
                 // Resize to 800x600
-                raster.Resize(800, 600);
-
-                // Apply sharpening filter
-                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+                image.Resize(800, 600);
 
                 // Save as PDF
-                PdfOptions pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)

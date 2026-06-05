@@ -3,50 +3,42 @@ using System.IO;
 using System.Net.Sockets;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded paths
+        string inputPath = @"C:\Images\sample.otg";
+        string outputPath = @"C:\Images\output.jpg";
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            // Hard‑coded input OTG file path
-            string inputPath = @"C:\Images\sample.otg";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
             // Load the OTG image
-            using (Image otgImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG save options
-                JpegOptions jpegOptions = new JpegOptions();
-
-                // Set rasterization options so the vector OTG is rendered to raster before JPEG encoding
-                OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
+                // Prepare JPEG save options
+                var jpegOptions = new JpegOptions
                 {
-                    PageSize = otgImage.Size
+                    Quality = 90 // optional quality setting
                 };
-                jpegOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Network destination (replace with actual server/port as needed)
-                string server = "127.0.0.1";
-                int port = 9000;
-
-                // Connect to the server and obtain a network stream
-                using (TcpClient client = new TcpClient())
+                // Connect to a TCP server (replace with actual host/port as needed)
+                using (TcpClient client = new TcpClient("localhost", 9000))
+                using (NetworkStream networkStream = client.GetStream())
                 {
-                    client.Connect(server, port);
-                    using (NetworkStream netStream = client.GetStream())
-                    {
-                        // Save the JPEG directly into the network stream
-                        otgImage.Save(netStream, jpegOptions);
-                    }
+                    // Save the image as JPEG directly to the network stream
+                    image.Save(networkStream, jpegOptions);
                 }
             }
         }

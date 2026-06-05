@@ -5,13 +5,13 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.odg";
-            string outputPath = @"C:\Images\sample.svg";
+            string inputPath = "input.odg";
+            string outputPath = "output.svg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,19 +23,20 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
+            // Load ODG image and convert to SVG
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG export options with vector rasterization settings
-                SvgOptions svgOptions = new SvgOptions();
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                var rasterOptions = new OdgRasterizationOptions
                 {
-                    PageSize = image.Size,
-                    BackgroundColor = Color.White
+                    BackgroundColor = Color.White,
+                    PageSize = image.Size
                 };
-                svgOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save as SVG preserving vector information
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
                 image.Save(outputPath, svgOptions);
             }
         }

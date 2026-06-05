@@ -1,9 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageLoadOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -11,10 +10,10 @@ class Program
     {
         try
         {
-            // Hardcoded paths
-            string inputPath = "input.cmx";
-            string outputPath = "output.jpg";
-            string configPath = "config.txt";
+            // Hard‑coded input, output and configuration file paths
+            string inputPath = @"C:\Images\sample.cmx";
+            string outputPath = @"C:\Images\output.jpg";
+            string configPath = @"C:\Images\jpeg_quality.txt";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,30 +22,30 @@ class Program
                 return;
             }
 
-            // Verify config file exists (optional, default quality will be used if missing)
-            int quality = 90; // default quality
+            // Verify configuration file exists (optional)
+            int jpegQuality = 90; // default quality
             if (File.Exists(configPath))
             {
-                string text = File.ReadAllText(configPath).Trim();
-                if (int.TryParse(text, out int parsed) && parsed >= 1 && parsed <= 100)
+                string txt = File.ReadAllText(configPath);
+                if (int.TryParse(txt.Trim(), out int q) && q >= 1 && q <= 100)
                 {
-                    quality = parsed;
+                    jpegQuality = q;
                 }
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load CMX image with specific load options
+            // Load the CMX image using CMX load options
             using (Image image = Image.Load(inputPath, new CmxLoadOptions()))
             {
-                // Prepare JPEG save options with custom quality
+                // Prepare JPEG save options with the desired quality
                 JpegOptions saveOptions = new JpegOptions
                 {
-                    Quality = quality
+                    Quality = jpegQuality
                 };
 
-                // Save as JPEG
+                // Save the image as JPEG
                 image.Save(outputPath, saveOptions);
             }
         }

@@ -1,10 +1,7 @@
 using System;
 using System.IO;
-using System.Net.Http;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,40 +9,26 @@ class Program
     {
         try
         {
-            // Hardcoded input URL and output path
+            // Hardcoded input URL and output file path
             string inputUrl = "https://example.com/sample.emf";
             string outputPath = "output.png";
 
-            // Validate input URL by attempting to download (no file existence check for URLs)
-            // Validate output path directory
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(string.IsNullOrEmpty(outputDir) ? "." : outputDir);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Download EMF image from network stream
-            using (HttpClient httpClient = new HttpClient())
-            using (Stream networkStream = httpClient.GetStreamAsync(inputUrl).Result)
-            using (Image image = Image.Load(networkStream))
+            // Download EMF image from the network stream
+            using (var httpClient = new System.Net.Http.HttpClient())
+            using (var inputStream = httpClient.GetStreamAsync(inputUrl).Result)
+            // Load the EMF image from the stream
+            using (Image image = Image.Load(inputStream))
             {
-                // Prepare PNG options with vector rasterization for EMF
+                // Set PNG save options
                 PngOptions pngOptions = new PngOptions();
-                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-                pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Simulate response stream (replace with actual response stream in real scenario)
-                using (Stream responseStream = new MemoryStream())
+                // Save the image directly to the output stream (file)
+                using (FileStream outputStream = new FileStream(outputPath, FileMode.Create))
                 {
-                    // Save PNG to response stream
-                    image.Save(responseStream, pngOptions);
-
-                    // For demonstration, also write the stream to a file
-                    responseStream.Position = 0;
-                    using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                    {
-                        responseStream.CopyTo(fileStream);
-                    }
+                    image.Save(outputStream, pngOptions);
                 }
             }
         }

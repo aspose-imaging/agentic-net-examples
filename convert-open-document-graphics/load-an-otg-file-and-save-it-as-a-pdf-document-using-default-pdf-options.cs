@@ -10,36 +10,31 @@ class Program
         try
         {
             // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample.pdf";
+            string inputPath = "C:\\Images\\sample.otg";
+            string outputPath = "C:\\Images\\sample.pdf";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
-            Directory.CreateDirectory(outputDir);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare rasterization options for vector image
-                OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
+                // Configure rasterization options for OTG
+                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions();
+                otgOptions.PageSize = image.Size; // Preserve original size
 
-                // Prepare PDF save options and assign rasterization options
-                PdfOptions pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                // Set up PDF save options and attach rasterization options
+                PdfOptions pdfOptions = new PdfOptions();
+                pdfOptions.VectorRasterizationOptions = otgOptions;
 
-                // Save as PDF
+                // Save the image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }

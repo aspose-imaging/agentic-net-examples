@@ -2,18 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.bmp";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"c:\temp\input.png";
-            string outputPath = @"c:\temp\output.bmp";
-
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,10 +27,10 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Offsets for cropping: left, right, top, bottom
-                int leftOffset = 10;
-                int rightOffset = 10;
-                int topOffset = 20;
-                int bottomOffset = 20;
+                int leftOffset = 10;   // pixels to remove from the left
+                int rightOffset = 10;  // pixels to remove from the right
+                int topOffset = 20;    // pixels to remove from the top
+                int bottomOffset = 20; // pixels to remove from the bottom
 
                 // Crop the image using the specified offsets
                 image.Crop(leftOffset, rightOffset, topOffset, bottomOffset);
@@ -45,6 +44,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

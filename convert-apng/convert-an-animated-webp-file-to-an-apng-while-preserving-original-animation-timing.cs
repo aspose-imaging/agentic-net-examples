@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.webp";
-        string outputPath = "output/output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\animation.webp";
+            string outputPath = @"C:\Images\animation_apng.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,7 +26,7 @@ class Program
             // Load the animated WebP image
             using (Image image = Image.Load(inputPath))
             {
-                // Save as APNG preserving original animation timing
+                // Save as APNG, preserving original frame timings
                 image.Save(outputPath, new ApngOptions());
             }
         }

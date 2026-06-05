@@ -6,44 +6,37 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.png";
-
-        // Ensure any runtime exception is reported without crashing
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            // Output file path (hardcoded)
+            string outputPath = @"C:\temp\offcenter_oval.png";
 
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Set PNG options with a file create source bound to the output path
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
+
+            // Create a 400x300 image canvas
+            using (Image image = Image.Create(pngOptions, 400, 300))
             {
-                // Create a Graphics object for drawing
+                // Initialize graphics for the image
                 Graphics graphics = new Graphics(image);
 
-                // Clear the surface (optional, keep original background if not needed)
-                // graphics.Clear(Color.Wheat);
+                // Clear the canvas with white background
+                graphics.Clear(Color.White);
 
-                // Define a pen for the ellipse
-                Pen pen = new Pen(Color.Black, 2);
+                // Define a blue pen with thickness 3
+                Pen pen = new Pen(Color.Blue, 3);
 
                 // Draw an off‑center oval using location and size parameters
-                // x = 100, y = 150 define the upper‑left corner of the bounding rectangle
-                // width = 200, height = 100 define the size of the oval
-                graphics.DrawEllipse(pen, 100f, 150f, 200f, 100f);
+                graphics.DrawEllipse(pen, 50f, 30f, 200f, 100f);
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the modified image
-                image.Save(outputPath);
+                // Save the image (already bound to the output file)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -52,3 +45,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When generating a PNG badge with Aspose.Imaging where a blue off‑center oval is drawn behind a logo to create a decorative background.
+ * 2. When producing a printable invoice image using C# and Aspose.Imaging and needing a blue oval highlight positioned away from the page center to draw attention to a field.
+ * 3. When building a custom chart component in .NET that plots data points as off‑center ellipses on a 400×300 canvas using the Graphics.DrawEllipse overload.
+ * 4. When automating UI mock‑up creation and requiring an off‑center oval overlay to indicate a focus area on a screenshot saved as a PNG file.
+ * 5. When designing a game asset pipeline that renders off‑center ovals as part of sprite masks with Aspose.Imaging before writing the images to disk.
+ */

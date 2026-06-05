@@ -18,15 +18,24 @@ class Program
                 @"C:\Images\Input2.otg"
             };
 
-            // Process each file asynchronously
-            Task[] tasks = new Task[inputFiles.Length];
-            for (int i = 0; i < inputFiles.Length; i++)
+            foreach (string inputPath in inputFiles)
             {
-                string inputPath = inputFiles[i];
-                tasks[i] = ProcessFileAsync(inputPath);
-            }
+                // Verify input file exists
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
 
-            await Task.WhenAll(tasks);
+                // Determine output BMP path
+                string outputPath = Path.ChangeExtension(inputPath, ".bmp");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Asynchronously process conversion
+                await ConvertOtgToBmpAsync(inputPath, outputPath);
+            }
         }
         catch (Exception ex)
         {
@@ -34,38 +43,28 @@ class Program
         }
     }
 
-    private static async Task ProcessFileAsync(string inputPath)
+    private static async Task ConvertOtgToBmpAsync(string inputPath, string outputPath)
     {
-        // Verify input file exists
-        if (!File.Exists(inputPath))
+        await Task.Run(() =>
         {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Determine output BMP path
-        string outputPath = Path.ChangeExtension(inputPath, ".bmp");
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-        // Load the OTG image asynchronously
-        using (Image image = await Task.Run(() => Image.Load(inputPath)))
-        {
-            // Configure rasterization options
-            var otgRasterOptions = new OtgRasterizationOptions
+            // Load OTG image
+            using (Image image = Image.Load(inputPath))
             {
-                PageSize = image.Size
-            };
+                // Set rasterization options for OTG
+                var otgOptions = new OtgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
 
-            // Configure BMP save options
-            var bmpOptions = new BmpOptions
-            {
-                VectorRasterizationOptions = otgRasterOptions
-            };
+                // Configure BMP save options
+                var bmpOptions = new BmpOptions
+                {
+                    VectorRasterizationOptions = otgOptions
+                };
 
-            // Save the image as BMP asynchronously
-            await Task.Run(() => image.Save(outputPath, bmpOptions));
-        }
+                // Save as BMP
+                image.Save(outputPath, bmpOptions);
+            }
+        });
     }
 }

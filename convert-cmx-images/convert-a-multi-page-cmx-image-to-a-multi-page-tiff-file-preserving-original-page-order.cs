@@ -4,14 +4,13 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
     static void Main(string[] args)
     {
         string inputPath = "input.cmx";
-        string outputPath = "output/output.tif";
+        string outputPath = "output\\output.tif";
 
         try
         {
@@ -23,20 +22,21 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                VectorRasterizationOptions rasterOptions = new VectorRasterizationOptions
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = cmx.Width,
-                    PageHeight = cmx.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    }
                 };
-                tiffOptions.VectorRasterizationOptions = rasterOptions;
 
-                cmx.Save(outputPath, tiffOptions);
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)

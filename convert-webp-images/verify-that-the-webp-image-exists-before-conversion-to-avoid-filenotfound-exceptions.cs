@@ -1,19 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\test.webp";
+        string outputPath = @"c:\temp\test.output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"c:\temp\test.webp";
-            string outputPath = @"c:\temp\test.output.png";
-
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {

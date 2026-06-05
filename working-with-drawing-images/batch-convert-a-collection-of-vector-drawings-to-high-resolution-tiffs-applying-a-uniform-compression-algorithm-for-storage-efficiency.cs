@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -10,54 +11,68 @@ class Program
     {
         try
         {
+            // Define input and output directories relative to the current working directory
             string baseDir = Directory.GetCurrentDirectory();
-            string inputDir = Path.Combine(baseDir, "Input");
-            string outputDir = Path.Combine(baseDir, "Output");
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            if (!Directory.Exists(inputDir))
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputDir);
-                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            if (!Directory.Exists(outputDir))
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDirectory))
             {
-                Directory.CreateDirectory(outputDir);
+                Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDir);
-            foreach (var inputPath in files)
+            // Get all files from the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files)
             {
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + ".tif");
+                // Prepare output path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".tif");
 
+                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+                // Load the source image
                 using (Image image = Image.Load(inputPath))
                 {
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    tiffOptions.Compression = TiffCompressions.Lzw;
-                    tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                    tiffOptions.Photometric = TiffPhotometrics.Rgb;
-                    tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-
-                    VectorRasterizationOptions rasterOptions = new VectorRasterizationOptions
+                    // Common TIFF options: high resolution and LZW compression
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                     {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width * 2,
-                        PageHeight = image.Height * 2,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
+                        Compression = TiffCompressions.Lzw,
+                        ResolutionSettings = new ResolutionSetting(300, 300) // 300 DPI for high resolution
                     };
-                    tiffOptions.VectorRasterizationOptions = rasterOptions;
 
+                    // If the source is a vector image, set rasterization options
+                    if (image is VectorImage)
+                    {
+                        tiffOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
+                        };
+                    }
+
+                    // Save as TIFF with the configured options
                     image.Save(outputPath, tiffOptions);
                 }
             }
@@ -68,3 +83,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer must archive a large collection of SVG or AI vector drawings as high‑resolution, lossless TIFF files with uniform LZW compression to meet regulatory storage requirements.
+ * 2. When an e‑commerce platform needs to batch convert designer‑provided EPS product illustrations into 300 dpi TIFFs for print‑ready catalogs while minimizing file size.
+ * 3. When a medical imaging system requires converting vector‑based anatomical diagrams into high‑quality TIFFs with CCITT Group 4 compression for integration into PACS archives.
+ * 4. When a digital asset management tool automates the migration of legacy vector assets into searchable TIFF thumbnails, applying consistent compression to reduce storage costs.
+ * 5. When a publishing workflow needs to transform a folder of mixed vector formats (SVG, WMF, EMF) into high‑resolution TIFFs for pre‑press proofing, ensuring all files use the same compression algorithm for consistent file handling.
+ */

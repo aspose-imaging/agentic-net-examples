@@ -9,12 +9,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output/result.gif";
-
         try
         {
+            // Hard‑coded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output/output.gif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,18 +22,19 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image, refine the mask, and save as GIF
+            // Load the image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
                 // Create a mask with Magic Wand, subtract an unwanted rectangle,
-                // feather the edges, and apply the mask to the image
-                MagicWandTool.Select(image, new MagicWandSettings(100, 100))
-                    .Subtract(new RectangleMask(50, 50, 200, 100))
-                    .GetFeathered(new FeatheringSettings() { Size = 3 })
-                    .Apply();
+                // feather the edges, and apply it to the image
+                var mask = MagicWandTool.Select(image, new MagicWandSettings(100, 100))
+                    .Subtract(new RectangleMask(200, 200, 100, 100))
+                    .GetFeathered(new FeatheringSettings() { Size = 3 });
+
+                mask.Apply();
 
                 // Save the result as GIF
                 image.Save(outputPath, new GifOptions());

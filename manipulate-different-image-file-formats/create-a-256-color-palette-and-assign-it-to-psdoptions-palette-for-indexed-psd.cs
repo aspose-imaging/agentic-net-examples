@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,36 +11,34 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.psd";
+            // Output path for the indexed PSD file
+            string outputPath = "output/output.psd";
 
-            // Validate input file existence
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
+            // Create PSD options for an indexed color image
+            PsdOptions psdOptions = new PsdOptions();
+            psdOptions.ColorMode = ColorModes.Indexed;
+            psdOptions.CompressionMethod = CompressionMethod.RLE;
+            psdOptions.ChannelsCount = (short)1;          // Indexed images have one channel
+            psdOptions.ChannelBitsCount = (short)8;      // 8 bits per channel
+            psdOptions.Palette = ColorPaletteHelper.Create8BitGrayscale(false); // 256‑color palette
+            psdOptions.Source = new FileCreateSource(outputPath, false);
+            psdOptions.Version = 6; // Default PSD version
+
+            int width = 200;
+            int height = 200;
+
+            // Create the PSD image bound to the output file
+            using (Image image = Image.Create(psdOptions, width, height))
             {
-                // Generate a 256‑color palette from the source image
-                IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette((RasterImage)image, 256);
+                // Fill the image with a solid color using Graphics
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.LightGray);
 
-                // Configure PSD options for indexed color mode
-                PsdOptions psdOptions = new PsdOptions
-                {
-                    ColorMode = ColorModes.Indexed,
-                    Palette = palette,
-                    CompressionMethod = CompressionMethod.RLE
-                };
-
-                // Save the image as an indexed PSD
-                image.Save(outputPath, psdOptions);
+                // Save the bound image
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -48,3 +47,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a lightweight PSD file with a limited 256‑color grayscale palette for web preview or thumbnail generation.
+ * 2. When converting high‑resolution images to an indexed color PSD to reduce file size while preserving compatibility with Photoshop version 6.
+ * 3. When creating programmatic PSD assets for a design pipeline that require a single 8‑bit channel and RLE compression for faster loading.
+ * 4. When building a C# application that must export graphics as indexed PSD files for legacy systems that only support 256 colors.
+ * 5. When automating the production of PSD mock‑ups with a fixed grayscale palette to ensure consistent color mapping across multiple documents.
+ */

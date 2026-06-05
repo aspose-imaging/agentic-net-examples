@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Drawing;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
@@ -7,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\vector_rasterized.png";
+        string outputPath = @"C:\Images\vector_rasterized_gausswiener.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\vector_rasterized.png";
-            string outputPath = @"C:\Images\vector_rasterized_GaussWiener.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,22 +22,24 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
+            // Load the image and apply Gauss‑Wiener filter with default parameters
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage to access filtering capabilities
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gauss‑Wiener filter with default parameters
+                // Apply the filter to the whole image bounds
                 rasterImage.Filter(rasterImage.Bounds, new GaussWienerFilterOptions());
 
-                // Save the filtered image
+                // Save the processed image
                 rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

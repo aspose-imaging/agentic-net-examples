@@ -24,27 +24,28 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set a default font to be used when a required font is missing
-            FontSettings.DefaultFontName = "Arial";
-
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options for ODG
-                var rasterOptions = new OdgRasterizationOptions
+                // Configure font substitution:
+                // Load system font folders so missing fonts can be resolved
+                string[] systemFontFolders = FontSettings.GetDefaultFontsFolders();
+                FontSettings.SetFontsFolders(systemFontFolders, true);
+                // Set a default fallback font name
+                FontSettings.DefaultFontName = "Arial";
+
+                // Prepare rasterization options for PNG output
+                var rasterOptions = new PngOptions
                 {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageSize = image.Size
+                    }
                 };
 
-                // Set up PNG save options with the rasterization settings
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Save the image using the configured options
-                image.Save(outputPath, pngOptions);
+                // Save the image with the configured options
+                image.Save(outputPath, rasterOptions);
             }
         }
         catch (Exception ex)
@@ -53,3 +54,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a company needs to convert OpenDocument graphics (ODG) created with proprietary fonts into PNG thumbnails for a web portal, and the target machines may not have those fonts installed.
+ * 2. When an automated document processing pipeline must render ODG diagrams to PNG images on a server that lacks the original font files, requiring fallback to a standard font like Arial.
+ * 3. When a developer builds a C# desktop application that allows users to preview ODG drawings as PNGs, and the app must handle missing fonts gracefully by substituting system fonts.
+ * 4. When migrating legacy ODG assets to a cloud storage solution that only supports raster formats, and the conversion code must ensure consistent text appearance despite absent custom fonts.
+ * 5. When generating printable PNG reports from ODG charts in a batch job, and the job must guarantee that any missing fonts are replaced with a default font to avoid rendering errors.
+ */

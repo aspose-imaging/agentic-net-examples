@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.eps";
-            string outputPath = @"C:\Images\sample.pdf";
+            string inputPath = "Sample.eps";
+            string outputPath = "Sample.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,22 +23,22 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load EPS image
             using (var image = (EpsImage)Image.Load(inputPath))
             {
-                // Configure PDF options with PDF 1.7 compatibility (closest available is PDF 1.5)
-                var pdfOptions = new PdfOptions
+                // Configure PDF options with PDF version 1.7 compatibility (closest available is PDF 1.5)
+                var options = new PdfOptions
                 {
                     PdfCoreOptions = new PdfCoreOptions
                     {
-                        PdfCompliance = PdfComplianceVersion.Pdf15 // PDF 1.5 is the nearest supported version
+                        PdfCompliance = PdfComplianceVersion.Pdf15
                     }
                 };
 
                 // Save as PDF
-                image.Save(outputPath, pdfOptions);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)

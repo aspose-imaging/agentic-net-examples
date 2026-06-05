@@ -14,9 +14,9 @@ class Program
         // List of PSD files to process
         string[] psdFiles = new string[]
         {
-            "image1.psd",
-            "image2.psd",
-            "image3.psd"
+            "sample1.psd",
+            "sample2.psd",
+            "sample3.psd"
         };
 
         try
@@ -33,22 +33,22 @@ class Program
                     return;
                 }
 
-                // Determine output path (PNG with same base name)
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".png");
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                 // Load the PSD image
                 using (Image image = Image.Load(inputPath))
                 {
                     // Cast to RasterImage to access AdjustGamma
                     RasterImage rasterImage = (RasterImage)image;
 
-                    // Apply gamma correction (example gamma value)
-                    rasterImage.AdjustGamma(2.2f);
+                    // Apply gamma correction (same value for all channels)
+                    rasterImage.AdjustGamma(2.0f);
 
-                    // Save as PNG
+                    // Build output path with PNG extension
+                    string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".png");
+
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the adjusted image as PNG
                     rasterImage.Save(outputPath, new PngOptions());
                 }
             }

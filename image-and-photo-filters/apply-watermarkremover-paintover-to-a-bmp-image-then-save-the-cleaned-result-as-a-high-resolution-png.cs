@@ -3,49 +3,49 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.bmp";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.bmp";
-            string outputPath = "output.png";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists (null‑safe)
             string outputDir = Path.GetDirectoryName(outputPath);
             if (!string.IsNullOrEmpty(outputDir))
                 Directory.CreateDirectory(outputDir);
 
-            // Load the BMP image
-            using (var image = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
                 var bmpImage = (BmpImage)image;
 
-                // Define a mask using a graphics path (ellipse covering most of the image)
+                // Define a simple rectangular mask for the watermark area
                 var mask = new GraphicsPath();
                 var figure = new Figure();
-                figure.AddShape(new EllipseShape(new RectangleF(50, 50, bmpImage.Width - 100, bmpImage.Height - 100)));
+                figure.AddShape(new RectangleShape(new RectangleF(50, 50, 200, 200)));
                 mask.AddFigure(figure);
 
-                // Create Telea algorithm options with the mask
+                // Use Telea algorithm for watermark removal
                 var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
 
                 // Remove the watermark
                 var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(bmpImage, options);
 
-                // Save the cleaned result as a high‑resolution PNG
-                var pngOptions = new PngOptions();
+                // Save the cleaned image as high‑resolution PNG
+                var pngOptions = new PngOptions
+                {
+                    ResolutionSettings = new ResolutionSetting(300, 300)
+                };
                 result.Save(outputPath, pngOptions);
             }
         }

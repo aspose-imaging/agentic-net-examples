@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
@@ -25,14 +24,13 @@ class Program
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                ImageBitMask mask = MagicWandTool.Select(image, new MagicWandSettings(50, 50));
+                var mask = MagicWandTool
+                    .Select(image, new MagicWandSettings(120, 100))
+                    .GetFeathered(new FeatheringSettings() { Size = 0 });
+
                 mask.Apply();
 
-                BmpOptions bmpOptions = new BmpOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-                image.Save(outputPath, bmpOptions);
+                image.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)

@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.cmx";
-        string outputPath = @"C:\temp\sample.jpg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.cmx";
+            string outputPath = @"C:\Images\output.jpg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,19 +20,19 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CMX image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG save options with quality 90
-                JpegOptions jpegOptions = new JpegOptions
+                // Configure JPEG options with quality set to 90
+                var jpegOptions = new JpegOptions
                 {
                     Quality = 90
                 };
 
-                // Save as JPEG
+                // Save the image as JPEG
                 image.Save(outputPath, jpegOptions);
             }
         }

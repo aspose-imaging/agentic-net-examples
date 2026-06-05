@@ -10,65 +10,55 @@ class Program
     {
         try
         {
-            // Define base, input and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Validate input directory
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add EMF files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all EMF files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.emf");
 
-            foreach (var inputPath in files)
+            foreach (string inputPath in files)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Prepare output PNG path
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
 
-                // Ensure output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load EMF image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Configure PNG export options
-                    PngOptions pngOptions = new PngOptions
-                    {
-                        // Set 300 DPI resolution
-                        ResolutionSettings = new ResolutionSetting(300, 300),
-                        // Use lossless compression (PNG is lossless; set compression level as desired)
-                        PngCompressionLevel = PngCompressionLevel.ZipLevel0
-                    };
-
-                    // Set vector rasterization options for proper rendering of EMF
-                    var vectorOptions = new VectorRasterizationOptions
+                    var vectorOptions = new EmfRasterizationOptions
                     {
                         PageSize = image.Size,
                         BackgroundColor = Color.White
                     };
-                    pngOptions.VectorRasterizationOptions = vectorOptions;
 
-                    // Save as PNG
-                    image.Save(outputPath, pngOptions);
+                    using (var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = vectorOptions,
+                        ResolutionSettings = new ResolutionSetting(300, 300),
+                        PngCompressionLevel = PngCompressionLevel.ZipLevel9,
+                        ColorType = PngColorType.TruecolorWithAlpha
+                    })
+                    {
+                        image.Save(outputPath, pngOptions);
+                    }
                 }
             }
         }
@@ -78,3 +68,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑convert a library of Windows Metafile (EMF) vector graphics into high‑resolution PNG images at 300 DPI with lossless compression for printing or publishing.
+ * 2. When an automated build pipeline must generate web‑ready PNG thumbnails from EMF diagrams while preserving exact dimensions and a white background using Aspose.Imaging in C#.
+ * 3. When a document management system has to process uploaded EMF files in bulk and store them as PNG files with consistent 300 DPI resolution for archival compliance.
+ * 4. When a GIS or CAD application requires exporting vector map layers saved as EMF into raster PNG format for integration with raster‑based reporting tools.
+ * 5. When a legacy Windows application outputs reports in EMF and a modern .NET service must transform those reports into PNG files with 300 DPI resolution for high‑quality PDF generation.
+ */

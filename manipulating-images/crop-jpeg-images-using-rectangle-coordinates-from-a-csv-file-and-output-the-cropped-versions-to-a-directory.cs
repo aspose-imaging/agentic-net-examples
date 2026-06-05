@@ -1,77 +1,70 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded paths
-        string csvPath = @"C:\Images\crop_data.csv";
-        string inputDirectory = @"C:\Images\Input";
-        string outputDirectory = @"C:\Images\Output";
-
         try
         {
-            // Ensure CSV file exists
+            // Hardcoded paths
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
+            string csvPath = "crop_data.csv";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Read CSV lines
             if (!File.Exists(csvPath))
             {
                 Console.Error.WriteLine($"File not found: {csvPath}");
                 return;
             }
 
-            // Read all lines from the CSV (expected format: filename,left,top,width,height)
-            string[] lines = File.ReadAllLines(csvPath);
-            foreach (string line in lines)
+            var lines = File.ReadAllLines(csvPath);
+            foreach (var line in lines)
             {
-                // Skip empty lines
                 if (string.IsNullOrWhiteSpace(line))
                     continue;
 
-                // Split CSV fields
-                string[] parts = line.Split(',');
+                // Expected CSV format: filename,x,y,width,height
+                var parts = line.Split(',');
                 if (parts.Length < 5)
-                {
-                    Console.Error.WriteLine($"Invalid CSV line: {line}");
-                    continue;
-                }
+                    continue; // Skip malformed lines
 
                 string fileName = parts[0].Trim();
-                int left = int.Parse(parts[1].Trim());
-                int top = int.Parse(parts[2].Trim());
+                int x = int.Parse(parts[1].Trim());
+                int y = int.Parse(parts[2].Trim());
                 int width = int.Parse(parts[3].Trim());
                 int height = int.Parse(parts[4].Trim());
 
-                // Build full input path and verify existence
                 string inputPath = Path.Combine(inputDirectory, fileName);
+                string outputPath = Path.Combine(outputDirectory, fileName);
+
+                // Input file existence check
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load the image using Aspose.Imaging
+                // Ensure output subdirectory exists
+                string outputDir = Path.GetDirectoryName(outputPath);
+                if (!string.IsNullOrEmpty(outputDir))
+                {
+                    Directory.CreateDirectory(outputDir);
+                }
+
+                // Load, crop, and save
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to access Crop method
-                    RasterImage rasterImage = (RasterImage)image;
-
-                    // Define cropping rectangle
-                    Rectangle cropArea = new Rectangle(left, top, width, height);
-
-                    // Perform cropping
-                    rasterImage.Crop(cropArea);
-
-                    // Prepare output path
-                    string outputFileName = Path.GetFileNameWithoutExtension(fileName) + "_cropped.jpg";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the cropped image as JPEG
-                    rasterImage.Save(outputPath, new JpegOptions());
+                    RasterImage raster = (RasterImage)image;
+                    Rectangle cropRect = new Rectangle(x, y, width, height);
+                    raster.Crop(cropRect);
+                    raster.Save(outputPath);
                 }
             }
         }

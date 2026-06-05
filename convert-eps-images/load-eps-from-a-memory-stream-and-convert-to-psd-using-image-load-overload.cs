@@ -7,43 +7,34 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.eps";
         string outputPath = "output.psd";
 
         try
         {
-            // Verify that the input EPS file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load EPS data into a memory stream
-            using (FileStream fileStream = File.OpenRead(inputPath))
-            using (MemoryStream memoryStream = new MemoryStream())
+            byte[] epsData = File.ReadAllBytes(inputPath);
+            using (var memoryStream = new MemoryStream(epsData))
+            using (var image = Image.Load(memoryStream))
             {
-                fileStream.CopyTo(memoryStream);
-                memoryStream.Position = 0; // Reset position for reading
-
-                // Load the image from the memory stream
-                using (Image image = Image.Load(memoryStream))
-                {
-                    // Prepare PSD save options (default settings)
-                    PsdOptions psdOptions = new PsdOptions();
-
-                    // Save the image as PSD
-                    image.Save(outputPath, psdOptions);
-                }
+                // Save as PSD using default options
+                var psdOptions = new PsdOptions();
+                image.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

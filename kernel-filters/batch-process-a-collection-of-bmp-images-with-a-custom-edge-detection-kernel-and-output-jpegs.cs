@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -9,12 +8,10 @@ class Program
     {
         try
         {
-            // Set up input and output directories (relative to current directory)
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure input directory exists; create if missing and exit
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -22,55 +19,41 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all files (filter later for BMP)
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+            string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
 
             foreach (string inputPath in files)
             {
-                // Process only BMP files
-                if (!string.Equals(Path.GetExtension(inputPath), ".bmp", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare output path with .jpg extension
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".jpg";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".jpg");
 
-                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load BMP image
-                using (Image image = Image.Load(inputPath))
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
                 {
-                    RasterImage raster = (RasterImage)image;
+                    Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)image;
 
-                    // Define custom edge detection kernel
                     double[,] kernel = new double[,]
                     {
                         { -1, -1, -1 },
-                        { -1,  8, -1 },
+                        { -1, 8, -1 },
                         { -1, -1, -1 }
                     };
+                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 0, 1);
+                    rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
-                    // Apply convolution filter with the custom kernel
-                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                    raster.Filter(raster.Bounds, filterOptions);
-
-                    // Save as JPEG
                     var jpegOptions = new JpegOptions();
-                    raster.Save(outputPath, jpegOptions);
+                    rasterImage.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -80,3 +63,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to automatically enhance scanned engineering drawings stored as BMP files by highlighting edges before archiving them as compressed JPEGs.
+ * 2. When a photo‑processing service must convert a large batch of legacy BMP product photos into web‑ready JPEGs while applying an edge‑detection filter to improve visual sharpness.
+ * 3. When an automated quality‑control pipeline requires extracting contour information from BMP microscopy images and saving the results as JPEG thumbnails for quick review.
+ * 4. When a desktop application needs to prepare BMP screenshots for inclusion in documentation by detecting edges and reducing file size through JPEG conversion.
+ * 5. When a GIS tool processes BMP elevation maps, applies a custom convolution kernel to emphasize terrain ridges, and outputs the processed layers as JPEG tiles for faster rendering.
+ */

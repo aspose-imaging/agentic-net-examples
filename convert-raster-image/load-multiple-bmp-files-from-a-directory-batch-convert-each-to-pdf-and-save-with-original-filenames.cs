@@ -7,19 +7,18 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputDirectory = @"C:\Images\Bmp";
+        string outputDirectory = @"C:\Images\Pdf";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
+            // Get all BMP files in the input directory
+            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
 
-            // Ensure the base output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Process each BMP file in the input directory
-            foreach (string inputPath in Directory.GetFiles(inputDir, "*.bmp"))
+            foreach (string inputPath in bmpFiles)
             {
-                // Verify the input file exists
+                // Verify that the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,20 +26,17 @@ class Program
                 }
 
                 // Build the output PDF path using the original filename
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".pdf");
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure the directory for the output file exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the BMP image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Configure PDF export options
-                    PdfOptions pdfOptions = new PdfOptions
-                    {
-                        MultiPageOptions = null // Single-page BMP, no multipage handling needed
-                    };
+                    // Set up PDF export options
+                    var pdfOptions = new PdfOptions();
 
                     // Save the image as PDF
                     image.Save(outputPath, pdfOptions);

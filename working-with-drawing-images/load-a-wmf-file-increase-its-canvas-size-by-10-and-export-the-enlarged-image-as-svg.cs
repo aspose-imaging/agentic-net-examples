@@ -3,7 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf.Graphics;
+using Aspose.Imaging;
 
 class Program
 {
@@ -28,31 +28,33 @@ class Program
             // Load the WMF image
             using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
             {
-                // Calculate new canvas size (increase by 10%)
-                int newWidth = (int)(wmfImage.Width * 1.10);
-                int newHeight = (int)(wmfImage.Height * 1.10);
+                // Increase canvas size by 10%
+                int extraWidth = (int)(wmfImage.Width * 0.1);
+                int extraHeight = (int)(wmfImage.Height * 0.1);
+                int newWidth = wmfImage.Width + extraWidth;
+                int newHeight = wmfImage.Height + extraHeight;
 
-                // Resize the canvas
+                // Resize the canvas (adds space to the right and bottom)
                 wmfImage.ResizeCanvas(new Rectangle(0, 0, newWidth, newHeight));
 
-                // Prepare SVG save options
-                SvgOptions saveOptions = new SvgOptions
+                // Set up SVG save options
+                SvgOptions svgOptions = new SvgOptions
                 {
                     TextAsShapes = true
                 };
 
-                // Configure rasterization options for the enlarged canvas
+                // Configure rasterization options for WMF to SVG conversion
                 WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
                 {
-                    BackgroundColor = Aspose.Imaging.Color.WhiteSmoke,
-                    PageSize = new Size(newWidth, newHeight),
-                    RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
+                    BackgroundColor = Color.WhiteSmoke,
+                    PageSize = wmfImage.Size,
+                    RenderMode = WmfRenderMode.Auto
                 };
 
-                saveOptions.VectorRasterizationOptions = rasterOptions;
+                svgOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save as SVG
-                wmfImage.Save(outputPath, saveOptions);
+                // Save the enlarged image as SVG
+                wmfImage.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -61,3 +63,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to embed legacy WMF illustrations into a modern web page and must add extra white space around the graphic for responsive layout, they can load the WMF, enlarge the canvas by 10 %, and save it as SVG.
+ * 2. When converting corporate branding assets stored as WMF to scalable SVG files while preserving original dimensions plus a margin for print bleed, this code resizes the canvas and outputs a vector‑friendly format.
+ * 3. When an automated build pipeline must generate SVG thumbnails of WMF diagrams with a consistent padding for documentation PDFs, the script loads the WMF, expands the canvas, and exports the result as SVG.
+ * 4. When a C# application needs to programmatically increase the drawing area of a WMF chart before converting it to SVG for inclusion in an interactive dashboard, the code performs the canvas resize and vector conversion.
+ * 5. When a migration tool has to batch‑process legacy WMF icons, add a 10 % border to meet UI design guidelines, and store them as SVG for cross‑platform use, this snippet provides the required image processing steps.
+ */

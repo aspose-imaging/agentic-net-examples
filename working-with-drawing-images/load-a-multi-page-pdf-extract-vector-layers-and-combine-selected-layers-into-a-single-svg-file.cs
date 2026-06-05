@@ -1,7 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
@@ -12,58 +10,33 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.pdf";
-            string outputPath = "output/output.svg";
+            string outputPath = "output.svg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the PDF document
-            using (Image pdfImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                IMultipageImage multipage = pdfImage as IMultipageImage;
-                if (multipage == null)
-                {
-                    Console.Error.WriteLine("The input file is not a multipage vector image.");
-                    return;
-                }
-
-                // Select the first two pages (adjust as needed)
-                int pagesToTake = Math.Min(2, multipage.PageCount);
-                List<Image> selectedPages = new List<Image>();
-                for (int i = 0; i < pagesToTake; i++)
-                {
-                    selectedPages.Add(multipage.Pages[i]);
-                }
-
-                // Calculate canvas size for vertical stacking
-                int canvasWidth = selectedPages.Max(p => p.Width);
-                int canvasHeight = selectedPages.Sum(p => p.Height);
-
-                // Create SVG canvas
                 SvgOptions svgOptions = new SvgOptions();
-                using (SvgImage svgCanvas = new SvgImage(svgOptions, canvasWidth, canvasHeight))
-                {
-                    // Draw each selected page onto the SVG canvas
-                    Graphics graphics = new Graphics(svgCanvas);
-                    int offsetY = 0;
-                    foreach (var page in selectedPages)
-                    {
-                        graphics.DrawImage(page, new Point(0, offsetY));
-                        offsetY += page.Height;
-                    }
 
-                    // Save the combined SVG
-                    svgCanvas.Save(outputPath, svgOptions);
+                if (image is IMultipageImage multipage && multipage.PageCount > 2)
+                {
+                    svgOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, 2));
                 }
+
+                VectorRasterizationOptions rasterOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Color.White
+                };
+                svgOptions.VectorRasterizationOptions = rasterOptions;
+
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -72,3 +45,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert the first three pages of a multi‑page PDF into a single scalable SVG for responsive web display, they can use this Aspose.Imaging C# code.
+ * 2. When an application must extract vector layers from a PDF and preserve them as editable SVG paths for a graphic‑design workflow, the snippet demonstrates how to rasterize with a white background and save the result.
+ * 3. When generating print‑ready assets from a PDF brochure, a developer can select specific pages and output them as high‑quality SVG files using the MultiPageOptions and VectorRasterizationOptions shown.
+ * 4. When building a document‑to‑vector conversion service that needs to programmatically combine selected PDF pages into one SVG for downstream processing, this code provides the necessary file‑format handling in .NET.
+ * 5. When creating an automated pipeline that extracts vector graphics from legal or engineering PDFs and stores them as SVG for archival or further analysis, the example illustrates the required steps with Aspose.Imaging for .NET.
+ */

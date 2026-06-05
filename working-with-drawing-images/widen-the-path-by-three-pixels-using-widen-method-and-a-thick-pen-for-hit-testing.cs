@@ -11,46 +11,43 @@ class Program
     {
         try
         {
-            // Output file path (hard‑coded)
-            string outputPath = "output.png";
+            // Output file path
+            string outputPath = "output\\widened_path.png";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set PNG options and bind the output stream
+            // Set up PNG options with a file create source
             PngOptions pngOptions = new PngOptions();
-            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+            pngOptions.Source = new FileCreateSource(outputPath);
+
+            // Create a new image canvas
+            using (Image image = Image.Create(pngOptions, 200, 200))
             {
-                pngOptions.Source = new StreamSource(stream);
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // Create a blank image
-                using (Image image = Image.Create(pngOptions, 400, 300))
-                {
-                    // Obtain a graphics object for drawing
-                    Graphics graphics = new Graphics(image);
-                    graphics.Clear(Color.White);
+                // Build a graphics path containing a rectangle shape
+                GraphicsPath path = new GraphicsPath();
+                Figure figure = new Figure();
+                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 100f, 100f)));
+                path.AddFigure(figure);
 
-                    // Build a simple path (a rectangle)
-                    GraphicsPath path = new GraphicsPath();
-                    Figure figure = new Figure();
-                    figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
-                    path.AddFigure(figure);
+                // Draw the original path with a thin black pen
+                Pen thinPen = new Pen(Color.Black, 1);
+                graphics.DrawPath(thinPen, path);
 
-                    // Draw the original path with a thin blue pen
-                    Pen thinPen = new Pen(Color.Blue, 1);
-                    graphics.DrawPath(thinPen, path);
+                // Widen the path by 3 pixels using a thick red pen (hit testing)
+                Pen thickPen = new Pen(Color.Red, 3);
+                path.Widen(thickPen);
 
-                    // Widen the path by 3 pixels using a thick red pen (for hit‑testing)
-                    Pen thickPen = new Pen(Color.Red, 3);
-                    path.Widen(thickPen);
+                // Draw the widened path with a blue pen to visualize the result
+                Pen widenedPen = new Pen(Color.Blue, 1);
+                graphics.DrawPath(widenedPen, path);
 
-                    // Draw the widened path with a green pen to visualize the result
-                    Pen widenedPen = new Pen(Color.Green, 1);
-                    graphics.DrawPath(widenedPen, path);
-
-                    // Save the image (the stream is already bound)
-                    image.Save();
-                }
+                // Save the image (output is already bound to the file)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -59,3 +56,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to create a PNG thumbnail with a selectable rectangle that can be hit‑tested accurately, they can widen the path by three pixels using a thick Pen before rendering.
+ * 2. When building a custom UI control in C# that requires visual feedback for mouse hover over a shape, the Widen method expands the hit‑test region without changing the displayed outline.
+ * 3. When generating printable diagrams where the clickable area must be larger than the visible line, widening the GraphicsPath with a red Pen ensures reliable click detection while keeping the original thin black border.
+ * 4. When implementing a map editor that stores vector shapes in PNG files, using path.Widen with a thick Pen lets the engine detect user selections even if the shape’s stroke is only 1 pixel wide.
+ * 5. When creating an image processing pipeline that overlays annotations on a 200×200 canvas and needs precise hit testing for automated QA, widening the path by three pixels provides a robust detection zone for the rectangle.
+ */

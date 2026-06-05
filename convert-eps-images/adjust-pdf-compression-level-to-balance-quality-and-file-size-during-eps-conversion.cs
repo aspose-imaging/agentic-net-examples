@@ -9,12 +9,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Sample.eps";
-        string outputPath = "Sample.pdf";
-
         try
         {
+            // Hardcoded input and output file paths
+            string inputPath = "Sample.eps";
+            string outputPath = "Sample.pdf";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,15 +28,15 @@ class Program
             // Load EPS image
             using (var image = (EpsImage)Image.Load(inputPath))
             {
-                // Configure PDF options with balanced compression
+                // Configure PDF options with desired compression
                 var pdfOptions = new PdfOptions
                 {
                     PdfCoreOptions = new PdfCoreOptions
                     {
-                        // Use Flate compression for good size reduction without quality loss
+                        // Use Flate compression for a good balance of size and quality
                         Compression = PdfImageCompressionOptions.Flate,
-                        // Set JPEG quality in case JPEG compression is used for images
-                        JpegQuality = 85
+                        // Optional: adjust JPEG quality if JPEG compression is used
+                        // JpegQuality = 85
                     }
                 };
 

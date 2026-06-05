@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
@@ -8,7 +10,7 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
+            // Hardcoded input and output folders
             string inputFolder = @"C:\InputWmf";
             string outputFolder = @"C:\OutputBmp";
 
@@ -24,17 +26,30 @@ class Program
                     return;
                 }
 
-                // Build the output BMP file path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".bmp";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
+                // Build the output BMP path preserving the original file name
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileName + ".bmp");
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the WMF image and save it as BMP
+                // Load the WMF image
                 using (Image image = Image.Load(inputPath))
                 {
-                    image.Save(outputPath);
+                    // Set rasterization options to keep original dimensions
+                    var rasterOptions = new WmfRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    };
+
+                    // Configure BMP save options with the rasterization settings
+                    var bmpOptions = new BmpOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions
+                    };
+
+                    // Save as BMP
+                    image.Save(outputPath, bmpOptions);
                 }
             }
         }

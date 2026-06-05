@@ -2,17 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.eps";
+        string outputPath = "thumbnail.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.eps";
-            string outputPath = "output.jpg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,17 +24,15 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image, resize to 150x150, and save as JPEG
-            using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+            // Load EPS image
+            using (var epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Resize using nearest-neighbour resampling
-                image.Resize(150, 150, ResizeType.NearestNeighbourResample);
+                // Resize to 150x150 pixels
+                epsImage.Resize(150, 150, ResizeType.NearestNeighbourResample);
 
-                // JPEG save options (default settings)
+                // Save as JPEG
                 var jpegOptions = new JpegOptions();
-
-                // Save the resized image as JPEG
-                image.Save(outputPath, jpegOptions);
+                epsImage.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -42,3 +41,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When building a web portal that lists vector graphics, a developer can use this C# code with Aspose.Imaging to generate 150 × 150 pixel JPEG thumbnails of EPS files for fast preview in the browser.
+ * 2. When creating a digital asset management system, the code helps produce small JPEG preview images from high‑resolution EPS logos so users can quickly identify assets without loading the full vector file.
+ * 3. When sending EPS artwork as email attachments, a developer can generate a 150 × 150 pixel JPEG thumbnail to embed in the message body, giving recipients a visual cue of the content.
+ * 4. When designing a desktop application that displays a gallery of vector icons, this snippet converts each EPS icon into a 150 × 150 pixel JPEG thumbnail for use as UI buttons or menu items.
+ * 5. When implementing a search‑indexing pipeline, the code creates uniform 150 × 150 pixel JPEG thumbnails from EPS documents so the search engine can display consistent image previews in results.
+ */

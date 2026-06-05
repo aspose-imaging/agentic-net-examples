@@ -2,17 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.odg";
+        string outputPath = @"C:\temp\sample.bmp";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\sample.odg";
-            string outputPath = @"C:\Images\sample.bmp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,20 +27,20 @@ class Program
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set rasterization options with white background
-                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+                // Configure rasterization options with white background
+                OdgRasterizationOptions rasterizationOptions = new OdgRasterizationOptions
                 {
-                    BackgroundColor = Color.White,
+                    BackgroundColor = Aspose.Imaging.Color.White,
                     PageSize = image.Size
                 };
 
-                // Configure BMP save options
+                // Set BMP save options and attach rasterization options
                 BmpOptions saveOptions = new BmpOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = rasterizationOptions
                 };
 
-                // Save as BMP
+                // Save the rasterized image as BMP
                 image.Save(outputPath, saveOptions);
             }
         }

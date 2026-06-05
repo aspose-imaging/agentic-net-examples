@@ -1,15 +1,14 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output file paths
         string inputPath = "input.bmp";
         string outputPath = "output.bmp";
 
@@ -23,19 +22,26 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
-            using (Image image = Image.Load(inputPath))
+            // Load BMP image as RasterImage
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage to access the Rotate method with background color
-                RasterImage rasterImage = (RasterImage)image;
+                // Cache data for better performance (optional)
+                if (!image.IsCached)
+                    image.CacheData();
 
-                // Rotate 120 degrees, resize proportionally, fill empty corners with a custom color
-                rasterImage.Rotate(120f, true, Color.LightBlue);
+                // Rotate 120 degrees, resize proportionally, fill empty corners with red background
+                image.Rotate(120f, true, Color.FromArgb(255, 255, 0, 0));
 
-                // Save the rotated image as BMP
-                rasterImage.Save(outputPath, new BmpOptions());
+                // Prepare BMP save options with bound source
+                BmpOptions options = new BmpOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                // Save the rotated image
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)

@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.otg";
-        string outputPath = @"C:\temp\output.jpg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\Result\sample.jpg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,22 +27,22 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Configure OTG rasterization options
-                OtgRasterizationOptions otgRasterOptions = new OtgRasterizationOptions
+                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
                 {
                     // Preserve original page size
                     PageSize = image.Size
                 };
 
-                // Configure JPEG save options with desired compression level
+                // Configure JPEG save options
                 JpegOptions jpegOptions = new JpegOptions
                 {
-                    // JPEG quality (1-100). Adjust as needed for compression.
+                    // Set JPEG quality (compression level) between 1 and 100
                     Quality = 80,
-                    // Attach the rasterization options so the vector OTG is rasterized correctly
-                    VectorRasterizationOptions = otgRasterOptions
+                    // Assign the vector rasterization options for proper OTG rendering
+                    VectorRasterizationOptions = otgOptions
                 };
 
-                // Save the image as JPEG using the configured options
+                // Save the image as JPEG using the defined options
                 image.Save(outputPath, jpegOptions);
             }
         }

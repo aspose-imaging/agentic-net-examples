@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Temp\input.svg";
-            string outputPath = @"C:\Temp\output.png";
+            string inputPath = @"C:\temp\input.svg";
+            string outputPath = @"C:\temp\output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,22 +27,19 @@ class Program
             // Load the SVG image
             using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
             {
-                // Configure rasterization options to align DPI (use default DPI and 1:1 scaling)
+                // Configure rasterization options to align horizontal and vertical DPI
                 SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
                 {
-                    // Preserve original size
+                    // Preserve original dimensions
                     PageSize = svgImage.Size,
-                    // Ensure no scaling so DPI remains consistent
+                    // Uniform scaling ensures same DPI on both axes
                     ScaleX = 1.0f,
                     ScaleY = 1.0f,
-                    // Optional: set a neutral background color
-                    BackgroundColor = Color.White,
-                    // Enable antialiasing for better quality
-                    SmoothingMode = SmoothingMode.AntiAlias,
-                    TextRenderingHint = TextRenderingHint.AntiAlias
+                    // Optional background color
+                    BackgroundColor = Color.White
                 };
 
-                // Set up PNG save options with the rasterization settings
+                // Set PNG save options with the rasterization configuration
                 PngOptions pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterizationOptions

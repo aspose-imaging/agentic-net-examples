@@ -3,17 +3,16 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Cmx;
 
-class Program
+public class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.cmx";
-        string outputPath = @"C:\Images\output.cmx";
-
-        // Ensure any runtime exception is reported cleanly
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.cmx";
+            string outputPath = "output.cmx";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,20 +20,18 @@ class Program
                 return;
             }
 
-            // Load the CMX image
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CMX drawing
             using (CmxImage image = (CmxImage)Image.Load(inputPath))
             {
-                // Calculate new dimensions (scale uniformly by factor of 2)
+                // Scale uniformly by a factor of two
                 int newWidth = image.Width * 2;
                 int newHeight = image.Height * 2;
-
-                // Resize the image; this scales drawing and line thickness proportionally
                 image.Resize(newWidth, newHeight);
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the scaled image
+                // Save the scaled drawing
                 image.Save(outputPath);
             }
         }
@@ -44,3 +41,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a CAD engineer needs to double the size of a legacy CMX drawing for printing on larger format paper while preserving line thickness, they can use this C# Aspose.Imaging code.
+ * 2. When a manufacturing workflow requires converting a small CMX schematic into a higher‑resolution version for detailed inspection on a touchscreen display, the uniform scaling routine simplifies the process.
+ * 3. When a GIS developer must upscale a CMX map to match a new coordinate grid without distorting line weights, the image.Resize call in C# provides a quick solution.
+ * 4. When an archival system needs to store CMX drawings at twice their original dimensions to meet a client’s branding guidelines, the Aspose.Imaging CmxImage class handles the resize automatically.
+ * 5. When a software vendor integrates CMX support into a .NET reporting tool and wants to enlarge diagrams for slide presentations while keeping stroke widths consistent, this code performs the required scaling.
+ */

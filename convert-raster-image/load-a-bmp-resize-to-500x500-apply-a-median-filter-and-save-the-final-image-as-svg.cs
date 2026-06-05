@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -10,18 +10,18 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hard‑coded input and output file paths
             string inputPath = @"C:\Images\input.bmp";
             string outputPath = @"C:\Images\output.svg";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the BMP image
@@ -30,21 +30,12 @@ class Program
                 // Resize to 500x500 pixels
                 image.Resize(500, 500);
 
-                // Apply a median filter (size 5) to the whole image
+                // Apply a median filter (kernel size 5) to the entire image
                 RasterImage raster = (RasterImage)image;
                 raster.Filter(raster.Bounds, new MedianFilterOptions(5));
 
-                // Prepare SVG save options with rasterization settings
-                var rasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-                var svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
-
                 // Save the processed image as SVG
+                SvgOptions svgOptions = new SvgOptions();
                 image.Save(outputPath, svgOptions);
             }
         }

@@ -3,6 +3,8 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
@@ -10,9 +12,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Temp\input.emf";
-            string outputPath = @"C:\Temp\output.tif";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.emf";
+            string outputPath = @"C:\Images\sample.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,18 +29,23 @@ class Program
             // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure TIFF options for CCITT Group 4 (Fax4) compression, 1-bit B/W
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                // Set up rasterization options for the EMF source
+                var rasterOptions = new EmfRasterizationOptions
                 {
-                    BitsPerSample = new ushort[] { 1 },
-                    Compression = TiffCompressions.CcittFax4,
-                    Photometric = TiffPhotometrics.MinIsBlack,
-                    // Optional: set byte order, planar configuration if needed
-                    ByteOrder = TiffByteOrder.LittleEndian,
-                    PlanarConfiguration = TiffPlanarConfigs.Contiguous
+                    PageSize = image.Size,
+                    BackgroundColor = Color.White
                 };
 
-                // Save the image as TIFF with the specified options
+                // Configure TIFF options for CCITT Group 4 (Fax4) compression (black‑and‑white)
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.TiffCcittFax4)
+                {
+                    BitsPerSample = new ushort[] { 1 },                     // 1 bit per pixel
+                    Compression = TiffCompressions.CcittFax4,              // CCITT Group 4
+                    Photometric = TiffPhotometrics.MinIsBlack,             // 0 = black, 1 = white
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save the rasterized image as TIFF
                 image.Save(outputPath, tiffOptions);
             }
         }

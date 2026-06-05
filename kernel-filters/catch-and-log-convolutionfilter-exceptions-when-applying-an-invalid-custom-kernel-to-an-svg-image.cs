@@ -2,7 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,60 +11,56 @@ class Program
     {
         try
         {
-            // Hardcoded paths
+            // Hardcoded input and output paths
             string inputPath = "input.svg";
-            string tempPngPath = "temp\\temp.png";
-            string outputPath = "output\\output.png";
+            string outputPath = "output.png";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load SVG and rasterize to a temporary PNG
-            using (Image svgImage = Image.Load(inputPath))
+            // Load the SVG image
+            using (Image svgImg = Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions
+                // Cast to SvgImage to satisfy using directive
+                SvgImage svg = (SvgImage)svgImg;
+
+                // Rasterize SVG to PNG in memory
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Color.White
-                };
+                    PngOptions pngOptions = new PngOptions();
+                    svgImg.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                    // Load rasterized image
+                    using (Image rasterImg = Image.Load(ms))
+                    {
+                        RasterImage raster = (RasterImage)rasterImg;
 
-                svgImage.Save(tempPngPath, pngOptions);
-            }
+                        // Create an invalid convolution kernel (non‑square)
+                        double[,] invalidKernel = new double[2, 3];
 
-            // Load the rasterized PNG and apply an invalid convolution filter
-            using (Image rasterImg = Image.Load(tempPngPath))
-            {
-                var raster = (RasterImage)rasterImg;
+                        // Attempt to apply convolution filter and catch any exception
+                        try
+                        {
+                            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(invalidKernel);
+                            raster.Filter(raster.Bounds, filterOptions);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.Error.WriteLine($"Convolution filter error: {ex.Message}");
+                        }
 
-                // Create an invalid (non‑square) kernel
-                double[,] invalidKernel = new double[2, 3];
-                invalidKernel[0, 0] = 0; invalidKernel[0, 1] = 1; invalidKernel[0, 2] = 0;
-                invalidKernel[1, 0] = 1; invalidKernel[1, 1] = -4; invalidKernel[1, 2] = 1;
-
-                try
-                {
-                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(invalidKernel));
+                        // Save the (possibly unchanged) raster image
+                        raster.Save(outputPath, pngOptions);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"Convolution filter error: {ex.Message}");
-                }
-
-                // Save the (possibly unchanged) image
-                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -72,3 +69,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application allows users to upload SVG graphics and apply custom convolution kernels for artistic effects, developers need to catch and log exceptions to prevent crashes from invalid non‑square kernels.
+ * 2. When an automated batch job converts SVG logos to PNG thumbnails and applies edge‑detection filters, exception handling ensures that malformed kernel definitions are recorded without halting the entire process.
+ * 3. When a desktop tool lets designers experiment with custom blur or emboss kernels on vector illustrations, logging convolution filter errors helps diagnose why a particular kernel configuration fails.
+ * 4. When a CI/CD pipeline validates image processing scripts that rasterize SVG files and apply security‑oriented sharpening filters, catching exceptions provides clear feedback on invalid kernel parameters.
+ * 5. When an IoT device generates SVG diagrams and applies real‑time noise‑reduction filters before transmitting PNG images, exception logging guarantees that any incorrect kernel size is captured for remote debugging.
+ */

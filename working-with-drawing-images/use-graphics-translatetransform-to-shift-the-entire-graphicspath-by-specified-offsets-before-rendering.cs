@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
@@ -11,38 +12,37 @@ class Program
     {
         try
         {
-            // Output file path
-            string outputPath = "output.png";
+            string inputPath = @"input.png";
+            string outputPath = @"output.png";
 
-            // Ensure output directory exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set PNG options with a bound output source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a 400x400 image canvas
-            using (Image image = Image.Create(pngOptions, 400, 400))
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                // Initialize graphics for the image
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                PngOptions pngOptions = new PngOptions();
+                pngOptions.Source = new FileCreateSource(outputPath, false);
 
-                // Build a graphics path with a rectangle and an ellipse
-                GraphicsPath path = new GraphicsPath();
-                Figure figure = new Figure();
-                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 100f, 100f)));
-                figure.AddShape(new EllipseShape(new RectangleF(200f, 50f, 100f, 150f)));
-                path.AddFigure(figure);
+                using (Image canvas = Image.Create(pngOptions, sourceImage.Width, sourceImage.Height))
+                {
+                    Graphics graphics = new Graphics(canvas);
+                    graphics.Clear(Color.White);
 
-                // Translate the entire path by (30, 40)
-                graphics.TranslateTransform(30f, 40f);
+                    GraphicsPath path = new GraphicsPath();
+                    Figure figure = new Figure();
+                    figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
+                    path.AddFigure(figure);
 
-                // Draw the translated path
-                graphics.DrawPath(new Pen(Color.Blue, 2), path);
+                    graphics.TranslateTransform(100f, 50f);
+                    graphics.DrawPath(new Pen(Color.Blue, 3), path);
 
-                // Save the image (output is already bound to the file)
-                image.Save();
+                    canvas.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -51,3 +51,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to place a rectangular watermark at a specific offset on a PNG image by translating the GraphicsPath before rendering with Aspose.Imaging for .NET.
+ * 2. When a developer wants to reposition a logo or badge on a raster canvas by applying Graphics.TranslateTransform to shift the shape’s coordinates prior to drawing.
+ * 3. When a developer generates a PNG report page and must align diagram elements with custom margins by translating the entire GraphicsPath.
+ * 4. When a developer creates a thumbnail preview and uses a translation transform to center a rectangle shape relative to the image dimensions before saving.
+ * 5. When a developer simulates drag‑and‑drop positioning of UI components by shifting a GraphicsPath with specified X/Y offsets and exporting the result as a PNG file.
+ */

@@ -1,42 +1,48 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageLoadOptions;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input/sample.cmx";
-        string outputPath = "Output/sample.pdf";
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\Images\sample.cmx";
+        string outputPath = @"C:\Images\sample.pdf";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            if (!File.Exists(inputPath))
+            // Load the CMX image with CMX‑specific load options
+            var loadOptions = new CmxLoadOptions();
+            using (Image image = Image.Load(inputPath, loadOptions))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Prepare PDF export options
+                var pdfOptions = new PdfOptions();
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
-            {
-                var pdfOptions = new PdfOptions
+                // Configure vector rasterization for CMX to PDF conversion
+                var rasterOptions = new CmxRasterizationOptions
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = cmx.Width,
-                        PageHeight = cmx.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    }
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
+                    Positioning = PositioningTypes.DefinedByDocument
                 };
 
-                cmx.Save(outputPath, pdfOptions);
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save the image as PDF; Aspose.Imaging embeds fonts as subsets by default
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)

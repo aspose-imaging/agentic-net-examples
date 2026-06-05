@@ -2,15 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = "sample.odg";
-        string outputPath = "sample_converted.jpg";
+        string inputPath = @"C:\temp\sample.odg";
+        string outputPath = @"C:\temp\sample.jpg";
 
         try
         {
@@ -27,19 +27,20 @@ class Program
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare JPEG save options with progressive compression
-                JpegOptions jpegOptions = new JpegOptions
+                // Configure JPEG options for progressive encoding
+                var jpegOptions = new JpegOptions
                 {
-                    CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
-                    Quality = 100 // Maximum quality
+                    CompressionType = JpegCompressionMode.Progressive,
+                    Quality = 100 // Maximum quality (1-100)
                 };
 
-                // Save the image as JPEG using the specified options
+                // Save the image as JPEG using the configured options
                 image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

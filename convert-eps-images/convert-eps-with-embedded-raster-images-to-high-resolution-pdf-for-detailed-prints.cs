@@ -1,17 +1,17 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.eps";
-        string outputPath = "output.pdf";
+        string inputPath = "Sample.eps";
+        string outputPath = "Sample.pdf";
 
         try
         {
@@ -25,20 +25,19 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load EPS image
+            // Load EPS image and convert to high‑resolution PDF
             using (var image = (EpsImage)Image.Load(inputPath))
             {
-                // Configure PDF options (e.g., PDF/A-1b compliance for high-quality prints)
-                var pdfOptions = new PdfOptions
+                var options = new PdfOptions
                 {
                     PdfCoreOptions = new PdfCoreOptions
                     {
+                        // Use PDF/A‑1b compliance for reliable printing
                         PdfCompliance = PdfComplianceVersion.PdfA1b
                     }
                 };
 
-                // Save as high‑resolution PDF
-                image.Save(outputPath, pdfOptions);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)

@@ -2,41 +2,44 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\temp\input.jpg";
+        string outputPath = @"C:\temp\output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.jpg";
-            string outputPath = @"C:\temp\output.png";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load image from a FileStream
+            // Open the source image via a FileStream
             using (FileStream inputStream = File.OpenRead(inputPath))
+            // Load the image from the stream
             using (Image image = Image.Load(inputStream))
             {
-                // Example resize dimensions (half the original size)
+                // Determine new dimensions (example: half the original size)
                 int newWidth = image.Width / 2;
                 int newHeight = image.Height / 2;
 
                 // Apply bicubic (cubic convolution) resizing
                 image.Resize(newWidth, newHeight, ResizeType.CubicConvolution);
 
-                // Save resized image to a new FileStream
+                // Prepare the output stream
                 using (FileStream outputStream = File.Open(outputPath, FileMode.Create))
                 {
+                    // Save the resized image as PNG
                     var pngOptions = new PngOptions();
                     image.Save(outputStream, pngOptions);
                 }
@@ -44,6 +47,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

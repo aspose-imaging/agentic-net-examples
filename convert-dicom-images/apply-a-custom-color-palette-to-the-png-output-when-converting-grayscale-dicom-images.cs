@@ -1,21 +1,20 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.dcm";
+        string outputPath = @"C:\Images\output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.dcm";
-            string outputPath = "output.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -29,27 +28,26 @@ class Program
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage for DICOM-specific operations
-                DicomImage dicomImage = (DicomImage)image;
+                // If the image is a DICOM image, convert it to grayscale
+                if (image is DicomImage dicomImage)
+                {
+                    dicomImage.Grayscale();
+                }
 
-                // Ensure the image is in grayscale (optional, safe for already grayscale images)
-                dicomImage.Grayscale();
-
-                // Prepare PNG save options with a custom palette
-                PngOptions pngOptions = new PngOptions
+                // Prepare PNG save options with a custom grayscale palette
+                var pngOptions = new PngOptions
                 {
                     // Use indexed color so the palette is applied
                     ColorType = PngColorType.IndexedColor,
-
-                    // Generate a palette based on the image content (custom palette)
-                    Palette = ColorPaletteHelper.GetCloseImagePalette(
-                        (RasterImage)dicomImage,
-                        256,
-                        PaletteMiningMethod.Histogram)
+                    // Optional: enable progressive encoding and maximum compression
+                    Progressive = true,
+                    CompressionLevel = 9,
+                    // Apply a custom 8‑bit grayscale palette
+                    Palette = ColorPaletteHelper.Create8BitGrayscale(false)
                 };
 
-                // Save the PNG with the custom palette
-                dicomImage.Save(outputPath, pngOptions);
+                // Save the image as PNG with the specified options
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)

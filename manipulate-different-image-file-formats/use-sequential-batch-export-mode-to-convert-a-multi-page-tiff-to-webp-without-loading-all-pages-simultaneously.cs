@@ -3,55 +3,40 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\multi_page.tif";
-            string outputDirectory = @"C:\Images\WebPOutput";
-            string outputBaseName = Path.Combine(outputDirectory, "page");
+            string inputPath = "input.tif";
+            string outputPath = "output\\converted.webp";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputBaseName));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the multi‑page TIFF image
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Set batch processing action for each page
+                // Process pages sequentially to avoid loading all at once
                 tiffImage.PageExportingAction = delegate (int index, Image page)
                 {
-                    // Optional: force garbage collection to free previous page resources
+                    // Example per-page operation
                     GC.Collect();
-
-                    // Build output file name for the current page
-                    string outputPath = $"{outputBaseName}_{index}.webp";
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the current page as a WebP image
-                    page.Save(outputPath, new WebPOptions());
                 };
 
-                // Trigger the batch processing by invoking Save on the TIFF.
-                // The actual TIFF output is not needed; we save to a temporary file.
-                string tempTiffPath = Path.Combine(outputDirectory, "temp.tif");
-                Directory.CreateDirectory(Path.GetDirectoryName(tempTiffPath));
-                tiffImage.Save(tempTiffPath);
-                // Optionally delete the temporary file
-                try { File.Delete(tempTiffPath); } catch { /* ignore */ }
+                WebPOptions webpOptions = new WebPOptions
+                {
+                    Lossless = false,
+                    Quality = 80
+                };
+
+                tiffImage.Save(outputPath, webpOptions);
             }
         }
         catch (Exception ex)
@@ -60,3 +45,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert scanned multi‑page TIFF documents into lightweight WebP images for faster web delivery while keeping memory usage low.
+ * 2. When building a C# service that processes large TIFF archives from medical imaging equipment and must export each page as a compressed WebP without loading the entire file into RAM.
+ * 3. When creating an automated batch job that transforms multi‑page TIFF invoices into WebP thumbnails for preview in a portal, using Aspose.Imaging’s sequential page exporting to avoid out‑of‑memory errors.
+ * 4. When integrating a document management system that receives multi‑page TIFF uploads and needs to store them as WebP files for mobile apps, leveraging the PageExportingAction to handle each page individually.
+ * 5. When developing a cloud‑based image pipeline that streams multi‑page TIFF files from storage and converts them to WebP on‑the‑fly, using sequential batch export mode to ensure scalability and low latency.
+ */

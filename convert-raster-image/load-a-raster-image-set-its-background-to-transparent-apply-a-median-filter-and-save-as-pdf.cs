@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.pdf";
+            string inputPath = @"C:\Images\sample.png";
+            string outputPath = @"C:\Images\sample.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))

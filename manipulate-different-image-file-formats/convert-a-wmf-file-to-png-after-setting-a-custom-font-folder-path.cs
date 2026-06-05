@@ -1,18 +1,16 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = "input.wmf";
-            string outputPath = "output.png";
-            string fontFolder = "fonts";
+            string inputPath = "Input/input.wmf";
+            string outputPath = "Output/output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -22,30 +20,11 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            var loadOptions = new LoadOptions();
-            loadOptions.AddCustomFontSource((object[] args) =>
-            {
-                string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
-                var fonts = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-
-                if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
-                {
-                    foreach (var file in Directory.GetFiles(fontsPath))
-                    {
-                        byte[] data = File.ReadAllBytes(file);
-                        string name = Path.GetFileNameWithoutExtension(file);
-                        fonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
-                    }
-                }
-
-                return fonts.ToArray();
-            }, fontFolder);
-
-            using (Image image = Image.Load(inputPath, loadOptions))
+            using (Image image = Image.Load(inputPath))
             {
                 var rasterOptions = new WmfRasterizationOptions
                 {
-                    BackgroundColor = Aspose.Imaging.Color.White,
+                    BackgroundColor = Color.White,
                     PageWidth = image.Width,
                     PageHeight = image.Height
                 };
@@ -64,3 +43,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a legacy Windows Metafile (WMF) diagram needs to be displayed on a web page that only supports raster images, a developer can use this code to convert the WMF to a PNG with a white background.
+ * 2. When an automated report generation system must embed vector graphics from WMF files into PDF or HTML outputs that require PNG thumbnails, this snippet provides the conversion step.
+ * 3. When migrating an old desktop application’s assets to a cross‑platform mobile app, developers can batch‑process WMF icons into PNGs using this code to ensure consistent sizing and background.
+ * 4. When a document management workflow receives user‑uploaded WMF files and needs to store preview images in a searchable image store, the code converts each WMF to a PNG while preserving the original dimensions.
+ * 5. When a CI/CD pipeline validates that all WMF resources are correctly rendered with custom fonts, developers can extend this example to set a font folder and then generate PNGs for visual regression testing.
+ */

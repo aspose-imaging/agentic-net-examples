@@ -1,18 +1,19 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\input\sample.odg";
-            string outputPath = @"C:\output\sample.pdf";
+            // Define input, output and fonts directories
+            string inputPath = Path.Combine("Input", "sample.odg");
+            string outputPath = Path.Combine("Output", "sample.pdf");
+            string fontsPath = Path.Combine("Fonts");
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,30 +25,40 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Optional: set custom fonts folder to ensure required fonts are available
-            // Here we use the system fonts folder; adjust as needed.
-            string systemFontsFolder = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
-            Aspose.Imaging.FontSettings.SetFontsFolder(systemFontsFolder);
-            Aspose.Imaging.FontSettings.UpdateFonts();
+            // Load options with custom font source
+            var loadOptions = new Aspose.Imaging.ImageLoadOptions.OdLoadOptions();
+            loadOptions.AddCustomFontSource(args =>
+            {
+                string path = args.Length > 0 ? args[0]?.ToString() : string.Empty;
+                var fontList = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+                {
+                    foreach (var file in Directory.GetFiles(path))
+                    {
+                        string name = Path.GetFileNameWithoutExtension(file);
+                        byte[] data = File.ReadAllBytes(file);
+                        fontList.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
+                    }
+                }
+                return fontList.ToArray();
+            }, fontsPath);
 
-            // Load the ODG image
-            using (Image image = Image.Load(inputPath))
+            // Load the ODG image with the custom fonts
+            using (Image image = Image.Load(inputPath, loadOptions))
             {
                 // Configure rasterization options for ODG
-                OdgRasterizationOptions rasterizationOptions = new OdgRasterizationOptions
+                var rasterOptions = new OdgRasterizationOptions
                 {
-                    BackgroundColor = Aspose.Imaging.Color.White,
+                    BackgroundColor = Color.White,
                     PageSize = image.Size
                 };
 
-                // Set up PDF save options and attach rasterization options
-                PdfOptions pdfOptions = new PdfOptions
+                // Set PDF save options
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
-
-                // Save as PDF
-                image.Save(outputPath, pdfOptions);
+                    pdfOptions.VectorRasterizationOptions = rasterOptions;
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)

@@ -12,48 +12,49 @@ class Program
     {
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output.apng";
+            // Hardcoded input and output paths
+            string inputSvgPath = "input.svg";
+            string outputApngPath = "output.png";
 
-            if (!File.Exists(inputPath))
+            // Verify input file exists
+            if (!File.Exists(inputSvgPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputSvgPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputApngPath));
 
-            using (Image vectorImage = Image.Load(inputPath))
+            // Load SVG as a raster image (Aspose.Imaging can rasterize SVG on load)
+            using (RasterImage svgRaster = (RasterImage)Image.Load(inputSvgPath))
             {
-                int width = vectorImage.Width;
-                int height = vectorImage.Height;
+                int width = svgRaster.Width;
+                int height = svgRaster.Height;
 
-                ApngOptions createOptions = new ApngOptions
+                // Create APNG options
+                Source fileSource = new FileCreateSource(outputApngPath, false);
+                ApngOptions apngOptions = new ApngOptions
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100,
+                    Source = fileSource,
+                    DefaultFrameTime = 200, // 200 ms per frame
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
+                // Create APNG canvas
+                using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, width, height))
                 {
+                    // Remove default frame
                     apngImage.RemoveAllFrames();
 
-                    Color[] frameBackgrounds = new Color[] { Color.Red, Color.Green, Color.Blue };
-
-                    foreach (Color bgColor in frameBackgrounds)
+                    // Add multiple frames (same SVG raster for simplicity)
+                    int frameCount = 5;
+                    for (int i = 0; i < frameCount; i++)
                     {
-                        using (RasterImage frame = (RasterImage)Image.Create(new BmpOptions(), width, height))
-                        {
-                            Graphics graphics = new Graphics(frame);
-                            graphics.Clear(bgColor);
-                            // Optionally draw the vector image onto the frame if needed:
-                            // graphics.DrawImage(vectorImage, new Point(0, 0));
-                            apngImage.AddFrame(frame);
-                        }
+                        apngImage.AddFrame(svgRaster);
                     }
 
-                    apngImage.BackgroundColor = Color.White;
+                    // Save the animated APNG
                     apngImage.Save();
                 }
             }

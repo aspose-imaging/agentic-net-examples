@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputFolder = @"C:\Images\Input";
-        string outputFolder = @"C:\Images\Output";
-
         try
         {
+            // Hardcoded input and output folders
+            string inputFolder = @"C:\Images\Input";
+            string outputFolder = @"C:\Images\Output";
+
             // Get all PNG files in the input folder
             string[] pngFiles = Directory.GetFiles(inputFolder, "*.png");
 
@@ -26,23 +26,23 @@ class Program
                     return;
                 }
 
-                // Determine output PDF path
+                // Determine the output PDF path
                 string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
                 string outputPath = Path.Combine(outputFolder, outputFileName);
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the PNG image, apply median filter, and save as PDF
+                // Load the PNG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to access filtering
+                    // Cast to RasterImage to apply filters
                     RasterImage rasterImage = (RasterImage)image;
 
-                    // Apply median filter with size 5 to the whole image
+                    // Apply a median filter with size 5 to the whole image
                     rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
-                    // Prepare PDF save options
+                    // Prepare PDF export options
                     PdfOptions pdfOptions = new PdfOptions();
 
                     // Save the filtered image as PDF

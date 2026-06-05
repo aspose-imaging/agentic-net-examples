@@ -2,17 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.svg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.svg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,24 +25,23 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the raster image
-            using (Image rasterImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG save options
+                // Prepare SVG save options with rasterization settings
                 var saveOptions = new SvgOptions();
 
-                // Configure rasterization options with background color
                 var rasterizationOptions = new SvgRasterizationOptions
                 {
-                    // Set background to light gray
+                    // Set background color to light gray
                     BackgroundColor = Aspose.Imaging.Color.LightGray,
                     // Use the original image size as page size
-                    PageSize = rasterImage.Size
+                    PageSize = image.Size
                 };
 
                 saveOptions.VectorRasterizationOptions = rasterizationOptions;
 
-                // Save as SVG with background
-                rasterImage.Save(outputPath, saveOptions);
+                // Save as SVG
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)

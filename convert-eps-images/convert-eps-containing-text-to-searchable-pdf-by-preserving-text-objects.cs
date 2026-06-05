@@ -3,14 +3,15 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "Input\\sample.eps";
-        string outputPath = "Output\\sample.pdf";
+        string inputPath = "input.eps";
+        string outputPath = "output.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -24,10 +25,10 @@ class Program
 
         try
         {
-            // Load EPS image (fully qualified type, no using for its namespace)
-            using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+            // Load EPS image
+            using (var image = (EpsImage)Image.Load(inputPath))
             {
-                // Configure PDF options with PDF/A-1b compliance
+                // Configure PDF saving options (e.g., PDF/A-1b compliance)
                 var pdfOptions = new PdfOptions
                 {
                     PdfCoreOptions = new PdfCoreOptions

@@ -2,17 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.otg";
+        string outputPath = @"C:\Images\output.bmp";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\output.bmp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,21 +25,23 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
-            using (Image otgImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare BMP save options (default compression preserves transparency)
-                BmpOptions bmpOptions = new BmpOptions();
-
-                // Configure rasterization options for vector formats
-                OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
+                // Set up rasterization options to match the source size
+                var otgRasterizationOptions = new OtgRasterizationOptions
                 {
-                    // Preserve original size
-                    PageSize = otgImage.Size
+                    PageSize = image.Size
                 };
-                bmpOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save as BMP
-                otgImage.Save(outputPath, bmpOptions);
+                // Configure BMP options with transparency support (Bitfields compression)
+                var bmpOptions = new BmpOptions
+                {
+                    Compression = BitmapCompression.Bitfields,
+                    VectorRasterizationOptions = otgRasterizationOptions
+                };
+
+                // Save as BMP preserving transparency
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)

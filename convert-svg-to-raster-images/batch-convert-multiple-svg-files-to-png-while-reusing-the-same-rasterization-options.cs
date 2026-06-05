@@ -1,57 +1,56 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input folder and SVG files to process
-            string inputFolder = @"C:\Images\Input";
-            string[] svgFiles = new[]
-            {
-                "image1.svg",
-                "image2.svg",
-                "image3.svg"
-            };
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Prepare a single instance of rasterization options to be reused
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            // Reuse the same rasterization options for all SVG files
             SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+            // Example: set a white background (optional)
+            // rasterOptions.BackgroundColor = Aspose.Imaging.Color.White;
 
-            // Loop through each SVG file
-            foreach (string fileName in svgFiles)
+            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+            foreach (string inputPath in files)
             {
-                string inputPath = Path.Combine(inputFolder, fileName);
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load the SVG image
-                using (Image image = Image.Load(inputPath))
-                {
-                    // Set page size based on the loaded image (first iteration sets it, subsequent reuse)
-                    rasterOptions.PageSize = image.Size;
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Prepare PNG save options with the shared rasterization options
-                    PngOptions pngOptions = new PngOptions
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+                {
+                    PngOptions saveOptions = new PngOptions
                     {
                         VectorRasterizationOptions = rasterOptions
                     };
-
-                    // Determine output path (same name with .png extension)
-                    string outputPath = inputPath + ".png";
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the rasterized PNG
-                    image.Save(outputPath, pngOptions);
+                    image.Save(outputPath, saveOptions);
                 }
             }
         }

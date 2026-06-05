@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
@@ -11,7 +12,7 @@ class Program
         try
         {
             string inputPath = "Input/sample.eps";
-            string outputPath = "Output/result.psd";
+            string outputPath = "Output/sample.psd";
 
             if (!File.Exists(inputPath))
             {
@@ -21,10 +22,10 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (EpsImage eps = (EpsImage)Image.Load(inputPath))
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                PsdOptions psdOptions = new PsdOptions();
-                eps.Save(outputPath, psdOptions);
+                var psdOptions = new PsdOptions();
+                epsImage.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)

@@ -7,13 +7,13 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths (relative)
-        string inputPath = Path.Combine("Input", "sample.otg");
-        string outputPath = Path.Combine("Output", "sample.pdf");
-
         try
         {
-            // Validate input file existence
+            // Define input and output paths
+            string inputPath = "Input\\sample.otg";
+            string outputPath = "Output\\sample.pdf";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,8 +26,8 @@ class Program
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure OTG rasterization options (margins, background, page size)
-                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
+                // Configure OTG rasterization options
+                var otgOptions = new OtgRasterizationOptions
                 {
                     PageSize = image.Size,
                     BorderX = 50, // horizontal margin
@@ -35,11 +35,11 @@ class Program
                     BackgroundColor = Color.White
                 };
 
-                // Configure PDF options with custom DPI
-                PdfOptions pdfOptions = new PdfOptions
+                // Configure PDF save options with custom DPI
+                var pdfOptions = new PdfOptions
                 {
                     VectorRasterizationOptions = otgOptions,
-                    ResolutionSettings = new ResolutionSetting(300, 300) // DPI X, DPI Y
+                    ResolutionSettings = new ResolutionSetting(300, 300) // DPI X=300, Y=300
                 };
 
                 // Save as PDF

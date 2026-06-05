@@ -9,27 +9,35 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.cmx";
+        string outputPath = "output.jpg";
+
         try
         {
-            string inputPath = Path.Combine("Input", "sample.cmx");
-            string outputPath = Path.Combine("Output", "sample.jpg");
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
+            Directory.CreateDirectory(outputDir);
 
-            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
             {
-                JpegOptions jpegOptions = new JpegOptions
+                int width = cmx.Width;
+                int height = cmx.Height;
+
+                var jpegOptions = new JpegOptions
                 {
-                    KeepMetadata = true
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        PageWidth = width,
+                        PageHeight = height
+                    }
                 };
 
-                cmxImage.Save(outputPath, jpegOptions);
+                cmx.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)

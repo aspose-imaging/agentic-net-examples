@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.svg";
+        string inputPath = "input.png";
+        string outputPath = "output.svg";
 
         try
         {
@@ -20,32 +20,33 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists (creates if missing)
+            string outDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outDir ?? ".");
 
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG export options
-                SvgOptions saveOptions = new SvgOptions();
-
-                // Configure rasterization options with transparent background
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                // Configure SVG rasterization options with transparent background
+                var rasterizationOptions = new SvgRasterizationOptions
                 {
-                    // Set background to transparent
-                    BackgroundColor = Aspose.Imaging.Color.Transparent,
-                    // Use the original image size as page size
+                    BackgroundColor = Color.Transparent,
                     PageSize = image.Size
                 };
 
-                saveOptions.VectorRasterizationOptions = rasterOptions;
+                // Set up SVG save options
+                var saveOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
 
-                // Save as SVG
+                // Save the image as SVG
                 image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

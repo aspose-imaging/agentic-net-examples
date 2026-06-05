@@ -8,29 +8,29 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.dcm";
-        string outputPath = @"C:\Images\output.bmp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.dcm";
+        string outputPath = @"C:\temp\output.bmp";
 
         try
         {
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the DICOM image
             using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
             {
-                // Resize to 800x600 using Bilinear resampling
+                // Resize to 800x600 using bilinear resampling
                 dicomImage.Resize(800, 600, ResizeType.BilinearResample);
 
-                // Save the resized image as BMP
+                // Save as BMP
                 dicomImage.Save(outputPath, new BmpOptions());
             }
         }
@@ -40,3 +40,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a medical imaging application needs to convert DICOM scans into BMP files for display on legacy Windows viewers, a developer can use this code to load, resize, and export the images.
+ * 2. When integrating radiology data into a hospital’s electronic health record system that only accepts BMP thumbnails, the code resizes the DICOM image to 800 × 600 and saves it in the required format.
+ * 3. When building a batch processing tool that prepares DICOM images for machine‑learning models that expect fixed‑size BMP inputs, this snippet handles loading, resizing, and conversion in C#.
+ * 4. When a telemedicine platform must generate uniformly sized preview images from DICOM files for web browsers that do not support DICOM, the code provides a simple way to produce 800 × 600 BMP snapshots.
+ * 5. When a developer needs to archive DICOM studies as BMP files with a standard resolution for compliance reporting, this example demonstrates how to verify file paths, resize, and save the images using Aspose.Imaging for .NET.
+ */

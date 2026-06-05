@@ -8,40 +8,42 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.wmf";
+        string outputPath = @"C:\Images\output.bmp";
+
+        // Ensure any runtime exception is reported without crashing
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.wmf";
-            string outputPath = @"C:\Images\output.bmp";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the WMF image
-            using (Image image = Image.Load(inputPath))
+            using (Image wmfImage = Image.Load(inputPath))
             {
-                // Configure rasterization for vector to bitmap conversion
-                var rasterOptions = new WmfRasterizationOptions
+                // Prepare rasterization options for vector to raster conversion
+                var rasterizationOptions = new WmfRasterizationOptions
                 {
-                    PageSize = image.Size
+                    PageSize = wmfImage.Size,
+                    BackgroundColor = Color.White // optional: set background color
                 };
 
-                // Set BMP save options with 24‑bit color depth
+                // Configure BMP save options with 24‑bit color depth
                 var bmpOptions = new BmpOptions
                 {
                     BitsPerPixel = 24,
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = rasterizationOptions
                 };
 
-                // Save as BMP
-                image.Save(outputPath, bmpOptions);
+                // Save the image as a 24‑bit BMP
+                wmfImage.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)

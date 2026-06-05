@@ -1,59 +1,58 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded paths
+        string inputDirectory = @"C:\Images\Input";
+        string auditFilePath = @"C:\Images\Audit\audit.txt";
+        string password = "YourPassword"; // password used for signature verification
+
+        // Ensure audit directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(auditFilePath));
+
         try
         {
-            // Hardcoded input image paths
-            string[] inputPaths = new string[]
+            // Get all files in the input directory (including subfolders)
+            string[] imageFiles = Directory.GetFiles(inputDirectory, "*.*", SearchOption.AllDirectories);
+
+            foreach (string inputPath in imageFiles)
             {
-                "cloudstorage/image1.jpg",
-                "cloudstorage/image2.png",
-                "cloudstorage/image3.tif"
-            };
-
-            // Password used for digital signature verification
-            string password = "SecretPassword";
-
-            // Audit log file path
-            string auditFilePath = "audit/mismatches.txt";
-
-            // Ensure audit directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(auditFilePath));
-
-            using (var auditWriter = new StreamWriter(auditFilePath, true))
-            {
-                foreach (var inputPath in inputPaths)
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Verify input file exists
-                    if (!File.Exists(inputPath))
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Load the image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Cast to RasterImage to access IsDigitalSigned
+                    bool isSigned = false;
+                    if (image is RasterImage rasterImage)
                     {
-                        Console.Error.WriteLine($"File not found: {inputPath}");
-                        return;
+                        // Perform fast digital signature check (default threshold)
+                        isSigned = rasterImage.IsDigitalSigned(password);
+                    }
+                    else if (image is RasterCachedImage cachedImage)
+                    {
+                        isSigned = cachedImage.IsDigitalSigned(password);
+                    }
+                    else if (image is RasterCachedMultipageImage cachedMultiPageImage)
+                    {
+                        isSigned = cachedMultiPageImage.IsDigitalSigned(password);
                     }
 
-                    // Load image and check digital signature
-                    using (Image image = Image.Load(inputPath))
+                    // Log mismatches
+                    if (!isSigned)
                     {
-                        // Cast to RasterImage to access IsDigitalSigned
-                        var raster = image as RasterImage;
-                        if (raster != null)
-                        {
-                            bool signed = raster.IsDigitalSigned(password);
-                            if (!signed)
-                            {
-                                auditWriter.WriteLine($"{DateTime.UtcNow:u} - Signature mismatch: {inputPath}");
-                            }
-                        }
-                        else
-                        {
-                            // If not a raster image, treat as unsigned
-                            auditWriter.WriteLine($"{DateTime.UtcNow:u} - Unable to verify (non-raster): {inputPath}");
-                        }
+                        string logEntry = $"{DateTime.UtcNow:u} - Signature mismatch: {inputPath}{Environment.NewLine}";
+                        File.AppendAllText(auditFilePath, logEntry);
                     }
                 }
             }

@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\source.png";
-        string outputPath = @"C:\Images\Thumbnails\thumb.pdf";
+        string inputPath = @"C:\Images\sample.png";
+        string outputPath = @"C:\Images\Thumbnail\sample.pdf";
 
         try
         {
@@ -31,13 +31,14 @@ class Program
                 RasterImage rasterImage = (RasterImage)image;
 
                 // Apply Gaussian blur (radius 5, sigma 4.0) to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
+                rasterImage.Filter(rasterImage.Bounds, blurOptions);
 
                 // Resize to 200x200 pixels
                 rasterImage.Resize(200, 200);
 
                 // Prepare PDF export options
-                PdfOptions pdfOptions = new PdfOptions();
+                var pdfOptions = new PdfOptions();
 
                 // Save the processed image as PDF
                 rasterImage.Save(outputPath, pdfOptions);

@@ -4,16 +4,17 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             string inputPath = "input.svg";
-            string outputPath = "output/output.apng";
+            string outputPath = "output.apng";
 
             if (!File.Exists(inputPath))
             {
@@ -23,52 +24,46 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            const int animationDurationMs = 2000; // total animation duration
-            const int frameDurationMs = 100;      // duration per frame
-            int frameCount = animationDurationMs / frameDurationMs;
-            float angleStep = 360f / frameCount;
+            const int animationDuration = 1000; // total duration in ms
+            const int frameDuration = 100; // duration per frame in ms
+            int numFrames = animationDuration / frameDuration;
 
-            using (Image vectorImage = Image.Load(inputPath))
+            ApngOptions apngOptions = new ApngOptions
             {
-                int width = vectorImage.Width;
-                int height = vectorImage.Height;
+                Source = new FileCreateSource(outputPath, false),
+                DefaultFrameTime = (uint)frameDuration,
+                ColorType = PngColorType.TruecolorWithAlpha
+            };
 
-                ApngOptions createOptions = new ApngOptions
+            using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, 0, 0))
+            {
+                apngImage.RemoveAllFrames();
+
+                for (int i = 0; i < numFrames; i++)
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = (uint)frameDurationMs,
-                    ColorType = PngColorType.TruecolorWithAlpha
-                };
+                    float angle = 360f * i / numFrames;
 
-                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
-                {
-                    apngImage.RemoveAllFrames();
-
-                    for (int i = 0; i < frameCount; i++)
+                    using (Image vectorImage = Image.Load(inputPath))
                     {
-                        float angle = i * angleStep;
-
-                        // Load a fresh copy of the SVG for each frame
-                        using (Image tempVector = Image.Load(inputPath))
+                        using (MemoryStream ms = new MemoryStream())
                         {
-                            tempVector.Rotate(angle);
-
-                            using (MemoryStream ms = new MemoryStream())
+                            PngOptions pngOptions = new PngOptions
                             {
-                                // Rasterize the rotated SVG to PNG in memory
-                                tempVector.Save(ms, new PngOptions());
-                                ms.Position = 0;
+                                VectorRasterizationOptions = new SvgRasterizationOptions { PageSize = vectorImage.Size }
+                            };
+                            vectorImage.Save(ms, pngOptions);
+                            ms.Position = 0;
 
-                                using (RasterImage frame = (RasterImage)Image.Load(ms))
-                                {
-                                    apngImage.AddFrame(frame);
-                                }
+                            using (RasterImage rasterFrame = (RasterImage)Image.Load(ms))
+                            {
+                                rasterFrame.Rotate(angle, true, Color.Transparent);
+                                apngImage.AddFrame(rasterFrame);
                             }
                         }
                     }
-
-                    apngImage.Save();
                 }
+
+                apngImage.Save();
             }
         }
         catch (Exception ex)

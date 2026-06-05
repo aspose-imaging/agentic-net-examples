@@ -1,6 +1,9 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -20,49 +23,41 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputZipPath));
 
-            using (FileStream inputFs = new FileStream(inputZipPath, FileMode.Open, FileAccess.Read))
-            using (System.IO.Compression.ZipArchive inputArchive = new System.IO.Compression.ZipArchive(inputFs, System.IO.Compression.ZipArchiveMode.Read))
-            using (FileStream outputFs = new FileStream(outputZipPath, FileMode.Create, FileAccess.Write))
-            using (System.IO.Compression.ZipArchive outputArchive = new System.IO.Compression.ZipArchive(outputFs, System.IO.Compression.ZipArchiveMode.Create))
+            using (FileStream inputZipStream = File.OpenRead(inputZipPath))
+            using (System.IO.Compression.ZipArchive inputZip = new System.IO.Compression.ZipArchive(inputZipStream, System.IO.Compression.ZipArchiveMode.Read))
+            using (FileStream outputZipStream = new FileStream(outputZipPath, FileMode.Create))
+            using (System.IO.Compression.ZipArchive outputZip = new System.IO.Compression.ZipArchive(outputZipStream, System.IO.Compression.ZipArchiveMode.Create))
             {
-                foreach (var entry in inputArchive.Entries)
+                foreach (var entry in inputZip.Entries)
                 {
                     if (string.IsNullOrEmpty(entry.Name))
                         continue; // skip directories
 
+                    string ext = Path.GetExtension(entry.Name).ToLowerInvariant();
+                    if (ext != ".png" && ext != ".jpg" && ext != ".jpeg" && ext != ".bmp" && ext != ".gif" && ext != ".tif" && ext != ".tiff")
+                        continue; // skip non-image files
+
                     using (Stream entryStream = entry.Open())
-                    using (Aspose.Imaging.Image loadedImage = Aspose.Imaging.Image.Load(entryStream))
+                    using (RasterImage image = (RasterImage)Image.Load(entryStream))
                     {
-                        Aspose.Imaging.RasterImage overlay = (Aspose.Imaging.RasterImage)loadedImage;
-                        int width = overlay.Width;
-                        int height = overlay.Height;
-
-                        // Create a blank canvas with white background
-                        StreamSource canvasSource = new StreamSource(new MemoryStream());
-                        PngOptions pngOptions = new PngOptions() { Source = canvasSource };
-                        using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(pngOptions, width, height))
+                        // Create a semi‑transparent red overlay
+                        FileCreateSource overlaySource = new FileCreateSource("overlay.tmp", false);
+                        BmpOptions overlayOpts = new BmpOptions { Source = overlaySource };
+                        using (RasterImage overlay = (RasterImage)Image.Create(overlayOpts, image.Width, image.Height))
                         {
-                            int[] whitePixels = new int[width * height];
-                            int whiteArgb = Aspose.Imaging.Color.FromArgb(255, 255, 255, 255).ToArgb();
-                            for (int i = 0; i < whitePixels.Length; i++)
-                                whitePixels[i] = whiteArgb;
+                            Graphics overlayGraphics = new Graphics(overlay);
+                            overlayGraphics.Clear(Aspose.Imaging.Color.FromArgb(128, 255, 0, 0));
 
-                            canvas.SaveArgb32Pixels(new Aspose.Imaging.Rectangle(0, 0, width, height), whitePixels);
+                            // Alpha blend overlay onto the original image
+                            image.Blend(new Point(0, 0), overlay, 128);
+                        }
 
-                            // Blend the overlay image onto the canvas with 50% opacity
-                            canvas.Blend(new Aspose.Imaging.Point(0, 0), overlay, 128);
-
-                            // Save blended image to the output zip
-                            using (MemoryStream ms = new MemoryStream())
-                            {
-                                canvas.Save(ms, pngOptions);
-                                ms.Position = 0;
-                                var outEntry = outputArchive.CreateEntry(entry.FullName);
-                                using (Stream outStream = outEntry.Open())
-                                {
-                                    ms.CopyTo(outStream);
-                                }
-                            }
+                        // Save blended image into the output zip as PNG
+                        var outEntry = outputZip.CreateEntry(entry.FullName);
+                        using (Stream outEntryStream = outEntry.Open())
+                        {
+                            PngOptions pngOpts = new PngOptions();
+                            image.Save(outEntryStream, pngOpts);
                         }
                     }
                 }

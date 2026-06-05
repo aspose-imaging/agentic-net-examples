@@ -1,8 +1,8 @@
 using System;
 using System.IO;
+using System.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -11,58 +11,49 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.svg";
+            string rasterPath = @"C:\temp\input.png";
+            string outputPath = @"C:\temp\output.svg";
 
             // Verify input file exists
-            if (!File.Exists(inputPath))
+            if (!File.Exists(rasterPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {rasterPath}");
                 return;
             }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
-            using (Image raster = Image.Load(inputPath))
+            // Load raster image to obtain its dimensions
+            int width, height;
+            using (Image rasterImage = Image.Load(rasterPath))
             {
-                // Create an SVG image with the same dimensions as the raster
-                using (SvgImage svgImage = new SvgImage(raster.Width, raster.Height))
-                {
-                    // Configure SVG options with a callback that forces embedding of resources as Base64
-                    SvgOptions svgOptions = new SvgOptions
-                    {
-                        Callback = new Base64ResourceKeeperCallback()
-                    };
+                width = rasterImage.Width;
+                height = rasterImage.Height;
+            }
 
-                    // Save the self‑contained SVG
-                    svgImage.Save(outputPath, svgOptions);
-                }
+            // Read raster image bytes and convert to Base64
+            byte[] rasterBytes = File.ReadAllBytes(rasterPath);
+            string base64Data = Convert.ToBase64String(rasterBytes);
+            string mimeType = "image/png"; // Adjust if using a different raster format
+
+            // Build SVG content with embedded Base64 image
+            string svgContent = $@"<?xml version=""1.0"" encoding=""UTF-8""?>
+<svg xmlns=""http://www.w3.org/2000/svg"" width=""{width}"" height=""{height}"">
+    <image href=""data:{mimeType};base64,{base64Data}"" width=""{width}"" height=""{height}"" />
+</svg>";
+
+            // Load SVG from the generated string
+            using (var svgStream = new MemoryStream(Encoding.UTF8.GetBytes(svgContent)))
+            using (var svgImage = new SvgImage(svgStream))
+            {
+                // Save the self‑contained SVG
+                svgImage.Save(outputPath);
             }
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
-        }
-    }
-
-    // Callback that forces image resources to be embedded as Base64 data URIs
-    private class Base64ResourceKeeperCallback : SvgResourceKeeperCallback
-    {
-        public override string OnImageResourceReady(byte[] imageData, SvgImageType imageType,
-            string suggestedFileName, ref bool useEmbeddedImage)
-        {
-            // Indicate that the image should be embedded
-            useEmbeddedImage = true;
-            // Returning an empty string tells Aspose to embed the image directly
-            return string.Empty;
-        }
-
-        public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
-        {
-            // No special handling needed for the SVG document itself
-            return string.Empty;
         }
     }
 }

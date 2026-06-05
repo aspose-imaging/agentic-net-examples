@@ -10,49 +10,41 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.svg";
-            string outputPath = @"C:\temp\output.png";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\input.svg";
+            string outputPath = @"C:\Images\output.png";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the SVG image
-            using (Image image = Image.Load(inputPath))
+            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
             {
-                // Cast to SvgImage for access to Size if needed
-                SvgImage svgImage = (SvgImage)image;
-
                 // Configure rasterization options with custom page size
                 SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
                 {
-                    // Set custom width and height (in pixels)
-                    PageWidth = 800,   // custom width
-                    PageHeight = 600,  // custom height
-
-                    // Optional: preserve aspect ratio if one dimension is zero
-                    // PageWidth = 0, // would preserve aspect ratio based on height
-                    // PageHeight = 0 // would preserve aspect ratio based on width
-
-                    // You can also set other options, e.g., background color
-                    // BackgroundColor = Color.White
+                    // Set desired width and height (in pixels). If set to 0, aspect ratio is preserved.
+                    PageWidth = 800f,
+                    PageHeight = 600f,
+                    // Optional: set a background color
+                    BackgroundColor = Color.White
                 };
 
-                // Set up PNG save options and attach rasterization options
+                // Prepare PNG save options and attach the rasterization options
                 PngOptions saveOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterizationOptions
                 };
 
                 // Save the rasterized image
-                image.Save(outputPath, saveOptions);
+                svgImage.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)

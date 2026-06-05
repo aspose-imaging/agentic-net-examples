@@ -29,18 +29,16 @@ class Program
 
             foreach (int threshold in thresholds)
             {
-                // Load the source JPEG as a raster image
                 using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
                 {
-                    // Prepare export options for the mask (PNG with alpha)
-                    PngOptions exportOptions = new PngOptions
+                    string tempMaskPath = Path.Combine(outputDir, $"mask_{threshold}.png");
+                    var exportOptions = new PngOptions
                     {
                         ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new StreamSource(new MemoryStream())
+                        Source = new FileCreateSource(tempMaskPath, false)
                     };
 
-                    // Configure masking options (GraphCut algorithm)
-                    MaskingOptions maskingOptions = new MaskingOptions
+                    var maskingOptions = new MaskingOptions
                     {
                         Method = SegmentationMethod.GraphCut,
                         Decompose = false,
@@ -49,21 +47,25 @@ class Program
                         ExportOptions = exportOptions
                     };
 
-                    // (Optional) Use the threshold value to influence the process.
-                    // Here we simply embed it in the output filename; real threshold logic
-                    // would depend on a specific algorithm which is not exposed directly.
-
-                    // Perform masking
-                    ImageMasking masking = new ImageMasking(sourceImage);
-                    using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
+                    using (MaskingResult maskingResult = new ImageMasking(sourceImage).Decompose(maskingOptions))
+                    using (RasterImage foregroundMask = (RasterImage)maskingResult[1].GetMask())
                     {
-                        // Obtain the foreground mask
-                        using (RasterImage mask = maskingResult[1].GetMask())
+                        foregroundMask.Resize(sourceImage.Width, sourceImage.Height, ResizeType.NearestNeighbourResample);
+                        ImageMasking.ApplyMask(sourceImage, foregroundMask, maskingOptions);
+
+                        string outputPath = Path.Combine(outputDir, $"result_threshold_{threshold}.png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        var finalSaveOptions = new PngOptions
                         {
-                            string outputPath = Path.Combine(outputDir, $"mask_{threshold}.png");
-                            // Ensure the directory exists (already created above)
-                            mask.Save(outputPath, exportOptions);
-                        }
+                            ColorType = PngColorType.TruecolorWithAlpha,
+                            Source = new FileCreateSource(outputPath, false)
+                        };
+                        sourceImage.Save(outputPath, finalSaveOptions);
+                    }
+
+                    if (File.Exists(tempMaskPath))
+                    {
+                        File.Delete(tempMaskPath);
                     }
                 }
             }

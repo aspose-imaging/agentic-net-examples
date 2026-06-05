@@ -3,87 +3,64 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Svg;
 
-namespace EmfToSvgExport
+class Program
 {
-    // Callback that embeds raster resources as Base64 data URIs
-    class Base64SvgResourceKeeperCallback : SvgResourceKeeperCallback
+    static void Main(string[] args)
     {
-        public override string OnImageResourceReady(byte[] imageData, SvgImageType imageType, string suggestedFileName, ref bool useEmbeddedImage)
+        try
         {
-            // Force embedding of the image
-            useEmbeddedImage = true;
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.emf";
+            string outputPath = @"C:\temp\output.svg";
 
-            // Convert image bytes to Base64 string
-            string base64 = Convert.ToBase64String(imageData);
-
-            // Determine MIME type based on the image type
-            string mime = imageType switch
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                SvgImageType.Jpeg => "image/jpeg",
-                SvgImageType.Png => "image/png",
-                SvgImageType.Gif => "image/gif",
-                SvgImageType.Bmp => "image/bmp",
-                SvgImageType.Tiff => "image/tiff",
-                _ => "application/octet-stream"
-            };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Return a data URI that will be written directly into the SVG
-            return $"data:{mime};base64,{base64}";
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EMF image
+            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+            {
+                // Configure SVG save options
+                SvgOptions saveOptions = new SvgOptions
+                {
+                    TextAsShapes = true // Render text as shapes
+                };
+
+                // Configure rasterization options for EMF
+                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                {
+                    BackgroundColor = Color.WhiteSmoke,
+                    PageSize = emfImage.Size,
+                    RenderMode = EmfRenderMode.Auto,
+                    BorderX = 0,
+                    BorderY = 0
+                };
+
+                saveOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save as SVG; embedded raster images are encoded as Base64 by default
+                emfImage.Save(outputPath, saveOptions);
+            }
         }
-    }
-
-    class Program
-    {
-        static void Main()
+        catch (Exception ex)
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Images\test.emf";
-            string outputPath = @"C:\Images\test.svg";
-
-            try
-            {
-                // Verify that the input file exists
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the EMF image
-                using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
-                {
-                    // Prepare SVG save options
-                    var svgOptions = new SvgOptions
-                    {
-                        TextAsShapes = true,
-                        Callback = new Base64SvgResourceKeeperCallback()
-                    };
-
-                    // Configure rasterization options for EMF
-                    var rasterOptions = new EmfRasterizationOptions
-                    {
-                        PageSize = emfImage.Size,
-                        BackgroundColor = Color.WhiteSmoke,
-                        RenderMode = EmfRenderMode.Auto,
-                        BorderX = 0,
-                        BorderY = 0
-                    };
-
-                    svgOptions.VectorRasterizationOptions = rasterOptions;
-
-                    // Save as SVG with embedded images encoded as Base64
-                    emfImage.Save(outputPath, svgOptions);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert legacy Windows Metafile (EMF) diagrams into web‑friendly SVG files that can be displayed in browsers without external image dependencies.
+ * 2. When an application must embed raster images from an EMF into the resulting SVG as Base64 strings to ensure a single self‑contained file for email or API transmission.
+ * 3. When a reporting tool generates charts as EMF and the developer wants to export them to scalable SVG for inclusion in PDF or HTML reports while preserving text as shapes.
+ * 4. When a document conversion service processes batch EMF assets and requires automated C# code to rasterize them with a white‑smoke background and save them as SVG with embedded images for archival.
+ * 5. When a GIS or CAD system exports map symbols stored in EMF and the developer needs to embed those symbols directly into SVG for use in responsive web mapping applications.
+ */

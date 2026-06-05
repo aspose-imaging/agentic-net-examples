@@ -2,49 +2,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample.svg";
-
+        // Wrap the whole logic in a try-catch to handle unexpected errors gracefully.
         try
         {
-            // Verify input file exists
+            // Hard‑coded input and output file paths.
+            string inputPath = @"C:\Input\sample.otg";
+            string outputPath = @"C:\Output\sample.svg";
+
+            // Verify that the input OTG file exists.
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists (creates it if necessary).
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the OTG image
+            // Load the OTG image.
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG export options
-                var svgOptions = new SvgOptions
+                // Prepare SVG export options.
+                SvgOptions svgOptions = new SvgOptions
                 {
-                    // Preserve original metadata (including layer names if stored as metadata)
+                    // Preserve original metadata (including layer names) in the SVG.
                     KeepMetadata = true,
-                    // Configure rasterization for vector content
+
+                    // Configure rasterization options specific to OTG files.
                     VectorRasterizationOptions = new OtgRasterizationOptions
                     {
+                        // Use the original image size for the SVG page.
                         PageSize = image.Size
                     }
                 };
 
-                // Save as SVG
+                // Save the image as SVG.
                 image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
         {
+            // Output any runtime error without crashing the program.
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

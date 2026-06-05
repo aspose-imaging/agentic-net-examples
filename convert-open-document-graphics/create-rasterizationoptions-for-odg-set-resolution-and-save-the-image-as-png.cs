@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
@@ -10,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "sample.odg";
-            string outputPath = "output.png";
+            string inputPath = "Input/sample.odg";
+            string outputPath = "Output/sample.png";
 
             if (!File.Exists(inputPath))
             {
@@ -19,12 +20,23 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (Image image = Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                OdgImage odgImage = (OdgImage)image;
+
+                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageSize = image.Size
+                };
+
+                using (PngOptions pngOptions = new PngOptions())
+                {
+                    pngOptions.VectorRasterizationOptions = rasterOptions;
+                    image.Save(outputPath, pngOptions);
+                }
             }
         }
         catch (Exception ex)

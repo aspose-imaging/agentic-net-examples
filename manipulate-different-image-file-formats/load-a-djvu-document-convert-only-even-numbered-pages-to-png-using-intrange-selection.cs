@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "sample.djvu";
+        string outputDir = "output";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.djvu";
-            string outputDir = @"C:\temp\output\";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,35 +21,46 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(outputDir);
 
-            // Load the DjVu document from a file stream
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            // Open the DjVu file as a stream
+            using (Stream stream = File.OpenRead(inputPath))
             {
-                // Iterate through all pages
-                foreach (DjvuPage page in djvuImage.Pages)
+                // Load DjVu image from the stream
+                using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    // Process only even‑numbered pages
-                    if (page.PageNumber % 2 != 0)
-                        continue;
+                    // Iterate through all pages
+                    foreach (DjvuPage djvuPage in djvuImage.Pages)
+                    {
+                        // Process only even-numbered pages
+                        if (djvuPage.PageNumber % 2 == 0)
+                        {
+                            // Build output file path
+                            string outputPath = Path.Combine(outputDir, $"page_{djvuPage.PageNumber}.png");
 
-                    // Build the output file path for the current page
-                    string outputPath = Path.Combine(outputDir, $"page_{page.PageNumber}.png");
+                            // Ensure the directory for the output file exists
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the page as a PNG image
-                    page.Save(outputPath, new PngOptions());
+                            // Save the page as PNG
+                            djvuPage.Save(outputPath, new PngOptions());
+                        }
+                    }
                 }
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to extract only the even‑numbered pages from a multi‑page DjVu document and save them as high‑quality PNG images for web preview.
+ * 2. When an archival system must convert selected pages of scanned DjVu files to PNG thumbnails while ignoring odd pages to reduce storage.
+ * 3. When a batch‑processing tool automates the conversion of every second page of a DjVu e‑book into PNG for use in a mobile reading app.
+ * 4. When a document‑management workflow extracts even pages from DjVu contracts to generate PNG assets for OCR processing.
+ * 5. When a reporting service generates PNG screenshots of even‑numbered DjVu pages to embed in PDF summaries or email attachments.
+ */

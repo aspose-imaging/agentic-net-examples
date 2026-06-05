@@ -10,37 +10,37 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.svg";
-            string outputPath = @"C:\Images\output.png";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\input.svg";
+            string outputPath = @"C:\temp\output.png";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load SVG image
+            // Load the SVG image
             using (SvgImage svgImage = new SvgImage(inputPath))
             {
-                // Configure rasterization options with transparent background
+                // Configure rasterization options with a transparent background
                 SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
                     BackgroundColor = Aspose.Imaging.Color.Transparent,
                     PageSize = svgImage.Size
                 };
 
-                // Set PNG save options
+                // Set PNG save options and attach rasterization options
                 PngOptions pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save as PNG with transparent background
+                // Save the rasterized PNG image
                 svgImage.Save(outputPath, pngOptions);
             }
         }

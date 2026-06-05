@@ -30,14 +30,14 @@ class Program
                 // Default rasterization options
                 SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions();
 
-                // PNG save options with vector rasterization settings
-                PngOptions pngOptions = new PngOptions
+                // PNG save options with rasterization settings
+                PngOptions saveOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterizationOptions
                 };
 
                 // Save the rasterized image
-                svgImage.Save(outputPath, pngOptions);
+                svgImage.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)

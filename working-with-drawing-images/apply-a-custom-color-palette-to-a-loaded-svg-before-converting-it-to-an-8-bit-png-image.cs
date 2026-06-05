@@ -9,49 +9,44 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.svg";
         string outputPath = "output.png";
 
+        // Ensure input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Verify that the input SVG file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to SvgImage to access SetPalette
-                var svgImage = image as SvgImage;
-                if (svgImage == null)
+                if (image is SvgImage svgImage)
                 {
-                    Console.Error.WriteLine("Loaded image is not an SVG.");
-                    return;
+                    // Create a custom 8‑bit palette (you can replace this with any custom palette)
+                    IColorPalette customPalette = ColorPaletteHelper.Create8Bit();
+
+                    // Apply the palette and update colors
+                    svgImage.SetPalette(customPalette, true);
                 }
 
-                // Create an 8‑bit palette (256 colors)
-                var palette = Aspose.Imaging.ColorPaletteHelper.Create8Bit();
-
-                // Apply the custom palette to the SVG; updateColors = true
-                svgImage.SetPalette(palette, true);
-
-                // Prepare PNG options for 8‑bit indexed color output
+                // Prepare PNG options for 8‑bit indexed color
                 var pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.IndexedColor,
-                    Palette = palette,
-                    // Optional: set compression level (0‑9)
-                    CompressionLevel = 9
+                    // Use the same palette for the PNG output
+                    Palette = ColorPaletteHelper.Create8Bit()
                 };
 
-                // Save the rasterized image as an 8‑bit PNG
+                // Save the image as an 8‑bit PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -61,3 +56,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application must generate low‑size thumbnail PNGs from user‑uploaded SVG icons while preserving brand colors using a custom 8‑bit palette.
+ * 2. When a mobile game needs to convert vector assets (SVG) to indexed‑color PNGs for faster loading and reduced memory footprint on low‑end devices.
+ * 3. When an e‑commerce platform wants to batch‑process product vector illustrations into web‑optimized 8‑bit PNGs with a specific corporate color scheme.
+ * 4. When a reporting tool has to embed SVG charts into PDF documents that only support indexed PNG images, requiring palette mapping via Aspose.Imaging for .NET.
+ * 5. When a legacy printing system only accepts 8‑bit PNG files, and developers must translate modern SVG logos into that format while applying a custom palette to match printer color profiles.
+ */

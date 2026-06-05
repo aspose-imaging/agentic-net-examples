@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
@@ -24,27 +26,22 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
+            // Load the PNG image (preserves alpha channel)
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
-                // Create Emboss3x3 convolution filter options
-                var embossFilter = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
+                // Apply Emboss3x3 convolution filter while preserving alpha
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-                // Apply the filter to the entire image, preserving alpha channel
-                raster.Filter(raster.Bounds, embossFilter);
-
-                // Prepare PNG save options with alpha support
-                var saveOptions = new PngOptions
+                // Set PNG save options to keep alpha channel
+                PngOptions options = new PngOptions
                 {
-                    ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.TruecolorWithAlpha
+                    ColorType = PngColorType.TruecolorWithAlpha
                 };
 
                 // Save the processed image
-                raster.Save(outputPath, saveOptions);
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -53,3 +50,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web developer wants to add a subtle embossed effect to UI icons while keeping their transparent backgrounds intact for responsive design.
+ * 2. When a game artist needs to process PNG sprites with an emboss filter but must retain the alpha channel so the characters blend correctly with the game scene.
+ * 3. When a marketing team prepares product thumbnails with a 3‑x‑3 emboss effect and requires the images to remain transparent for overlay on various promotional backgrounds.
+ * 4. When a mobile app developer generates embossed PNG assets for button states and must preserve transparency to avoid visual artifacts on different screen sizes.
+ * 5. When a PDF generation service applies an emboss filter to PNG logos before embedding them in documents, ensuring the logo’s transparent background remains unchanged.
+ */

@@ -11,9 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.webp";
-            string tempWebPPath = @"C:\Images\temp_quality.webp";
-            string outputPdfPath = @"C:\Images\output.pdf";
+            string inputPath = @"C:\Images\sample.webp";
+            string outputPath = @"C:\Images\output.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,35 +21,40 @@ class Program
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(tempWebPPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define WebP options with desired quality (e.g., 75)
-            var webpOptions = new WebPOptions
+            // Load the WebP image
+            using (Image webpImage = Image.Load(inputPath))
             {
-                Lossless = false,
-                Quality = 75f
-            };
-
-            // Load the original WebP image
-            using (Image originalImage = Image.Load(inputPath))
-            {
-                // Re‑save the image with the specified quality to a temporary WebP file
-                originalImage.Save(tempWebPPath, webpOptions);
-            }
-
-            // Load the quality‑adjusted WebP image
-            using (Image adjustedImage = Image.Load(tempWebPPath))
-            {
-                // Save the image as PDF (resolution can be controlled via ResolutionSettings if needed)
-                var pdfOptions = new PdfOptions
+                // OPTIONAL: Re‑encode the image with a specific quality before PDF conversion.
+                // This step creates an in‑memory WebP with the desired quality.
+                var tempWebpOptions = new WebPOptions
                 {
-                    // Example: set resolution to 150 DPI
-                    ResolutionSettings = new ResolutionSetting(150.0, 150.0)
+                    Lossless = false,   // use lossy compression
+                    Quality = 80f       // desired quality (0‑100)
                 };
 
-                adjustedImage.Save(outputPdfPath, pdfOptions);
+                using (var ms = new MemoryStream())
+                {
+                    // Save to memory stream with the specified quality
+                    webpImage.Save(ms, tempWebpOptions);
+                    ms.Position = 0; // reset stream position for reading
+
+                    // Load the re‑encoded WebP from the memory stream
+                    using (Image reencodedImage = Image.Load(ms))
+                    {
+                        // Prepare PDF save options with desired resolution
+                        var pdfOptions = new PdfOptions
+                        {
+                            // Set resolution to control output size and quality
+                            ResolutionSettings = new ResolutionSetting(300.0, 300.0)
+                        };
+
+                        // Save the image as PDF
+                        reencodedImage.Save(outputPath, pdfOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)

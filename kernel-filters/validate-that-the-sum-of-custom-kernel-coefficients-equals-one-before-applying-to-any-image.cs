@@ -1,62 +1,47 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define a custom convolution kernel
-            double[,] kernel = new double[,]
+            using (Image image = Image.Load(inputPath))
             {
-                { 0.0, 0.5, 0.0 },
-                { 0.5, -2.0, 0.5 },
-                { 0.0, 0.5, 0.0 }
-            };
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
 
-            // Validate that the sum of kernel coefficients equals 1
-            double sum = 0.0;
-            foreach (double value in kernel)
-                sum += value;
+                double[,] kernel = new double[,]
+                {
+                    { 0.0, -1.0, 0.0 },
+                    { -1.0, 5.0, -1.0 },
+                    { 0.0, -1.0, 0.0 }
+                };
 
-            if (Math.Abs(sum - 1.0) > 1e-6)
-            {
-                Console.Error.WriteLine("Kernel coefficients must sum to 1.");
-                return;
-            }
+                double sum = kernel.Cast<double>().Sum();
+                if (Math.Abs(sum - 1.0) > 1e-6)
+                {
+                    Console.Error.WriteLine($"Kernel sum is {sum}, which is not 1. Filter will not be applied.");
+                    raster.Save(outputPath);
+                    return;
+                }
 
-            // Load the image, apply the filter, and save the result
-            using (Image img = Image.Load(inputPath))
-            {
-                RasterImage raster = (RasterImage)img;
-
-                // Create filter options with the custom kernel
-                var filterOptions = new ConvolutionFilterOptions(kernel);
-
-                // Apply the filter to the entire image
-                raster.Filter(raster.Bounds, filterOptions);
-
-                // Save the processed image as PNG
-                raster.Save(outputPath, new PngOptions());
+                var options = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 3);
+                raster.Filter(raster.Bounds, options);
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -65,3 +50,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer wants to apply a custom sharpening convolution kernel to a PNG image but must ensure the kernel is normalized so the overall brightness of the image remains unchanged.
+ * 2. When building an automated image‑processing pipeline that loads raster images, validates custom filter coefficients, and saves the filtered result to a specific output folder.
+ * 3. When integrating Aspose.Imaging in a C# desktop application that lets users upload photos, apply user‑defined filters, and the code must reject kernels whose sum deviates from 1 to avoid over‑exposure.
+ * 4. When performing batch processing of scanned documents where each file is checked for existence, a normalized convolution filter is applied, and the processed TIFF or PNG is saved without corrupting the original data.
+ * 5. When creating a unit test for image‑filter logic that verifies the code correctly aborts the filter operation if the sum of the kernel coefficients is not exactly one, preventing unintended image artifacts.
+ */

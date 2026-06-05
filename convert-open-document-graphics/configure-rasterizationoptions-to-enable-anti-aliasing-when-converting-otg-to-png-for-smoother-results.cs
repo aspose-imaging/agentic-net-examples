@@ -1,38 +1,47 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.otg";
+        string outputPath = @"C:\Images\result.png";
+
         try
         {
-            string inputPath = "Input\\sample.otg";
-            string outputPath = "Output\\sample.png";
-
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            // Load the OTG image
+            using (Image image = Image.Load(inputPath))
             {
-                var otgRasterOptions = new Aspose.Imaging.ImageOptions.OtgRasterizationOptions
+                // Configure rasterization options with anti‑aliasing
+                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
                 {
                     PageSize = image.Size,
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
+                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias
                 };
 
-                using (var pngOptions = new Aspose.Imaging.ImageOptions.PngOptions())
+                // Set PNG save options and attach rasterization options
+                PngOptions pngOptions = new PngOptions
                 {
-                    pngOptions.VectorRasterizationOptions = otgRasterOptions;
-                    image.Save(outputPath, pngOptions);
-                }
+                    VectorRasterizationOptions = otgOptions
+                };
+
+                // Save the image as PNG
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)

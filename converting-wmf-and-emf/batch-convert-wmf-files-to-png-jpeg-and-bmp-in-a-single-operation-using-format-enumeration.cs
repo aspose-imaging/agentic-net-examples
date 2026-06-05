@@ -1,74 +1,53 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Base directories
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
 
-            // Ensure input directory exists
-            if (!Directory.Exists(inputDirectory))
+            // Ensure the output base directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Get all WMF files in the input directory
+            string[] wmfFiles = Directory.GetFiles(inputDirectory, "*.wmf");
+
+            foreach (string inputPath in wmfFiles)
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            // Get all files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            // Define target formats
-            var formatMap = new Dictionary<string, Action<Image, string>>
-            {
-                { "png", (img, outPath) => img.Save(outPath, new PngOptions()) },
-                { "jpg", (img, outPath) => img.Save(outPath, new JpegOptions()) },
-                { "bmp", (img, outPath) => img.Save(outPath, new BmpOptions()) }
-            };
-
-            foreach (var filePath in files)
-            {
-                // Process only WMF files
-                if (!string.Equals(Path.GetExtension(filePath), ".wmf", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                // Validate input file existence
-                if (!File.Exists(filePath))
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                using (Image image = Image.Load(filePath))
+                // Load the WMF image
+                using (Image image = Image.Load(inputPath))
                 {
-                    foreach (var kvp in formatMap)
-                    {
-                        string extension = kvp.Key;
-                        var saveAction = kvp.Value;
+                    // Prepare output paths for each desired format
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
 
-                        string outputFileName = Path.GetFileNameWithoutExtension(filePath) + "." + extension;
-                        string outputPath = Path.Combine(outputDirectory, outputFileName);
+                    // PNG
+                    string pngPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
+                    image.Save(pngPath, new PngOptions());
 
-                        // Ensure output directory exists for each file
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // JPEG
+                    string jpegPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
+                    Directory.CreateDirectory(Path.GetDirectoryName(jpegPath));
+                    image.Save(jpegPath, new JpegOptions());
 
-                        // Save in the target format
-                        saveAction(image, outputPath);
-                    }
+                    // BMP
+                    string bmpPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".bmp");
+                    Directory.CreateDirectory(Path.GetDirectoryName(bmpPath));
+                    image.Save(bmpPath, new BmpOptions());
                 }
             }
         }

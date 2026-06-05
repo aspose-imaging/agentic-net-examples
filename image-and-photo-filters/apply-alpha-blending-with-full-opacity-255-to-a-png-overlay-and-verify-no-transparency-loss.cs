@@ -8,14 +8,12 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string backgroundPath = "background.png";
-        string overlayPath = "overlay.png";
-        string outputPath = "result.png";
-
         try
         {
-            // Verify input files exist
+            string backgroundPath = "background.png";
+            string overlayPath = "overlay.png";
+            string outputPath = "result.png";
+
             if (!File.Exists(backgroundPath))
             {
                 Console.Error.WriteLine($"File not found: {backgroundPath}");
@@ -27,23 +25,21 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load background and overlay images as RasterImage instances
             using (RasterImage background = (RasterImage)Image.Load(backgroundPath))
             using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
             {
                 // Blend overlay onto background with full opacity (255)
                 background.Blend(new Point(0, 0), overlay, 255);
 
-                // Prepare PNG save options with bound source
-                FileCreateSource source = new FileCreateSource(outputPath, false);
-                PngOptions options = new PngOptions { Source = source };
-
-                // Save the blended image
+                // Save blended image as PNG
+                PngOptions options = new PngOptions();
+                options.Source = new FileCreateSource(outputPath, false);
                 background.Save(outputPath, options);
             }
+
+            Console.WriteLine("Blending completed successfully.");
         }
         catch (Exception ex)
         {

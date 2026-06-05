@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Sample.eps";
-            string outputPath = "Sample.pdf";
+            string inputPath = @"C:\Input\sample.eps";
+            string outputPath = @"C:\Output\sample.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,7 +23,7 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load EPS image
             using (var image = (EpsImage)Image.Load(inputPath))
@@ -37,10 +37,10 @@ class Program
                     },
                     PdfDocumentInfo = new PdfDocumentInfo
                     {
-                        Author = "MyApp",
-                        Title = image.Title ?? "Converted EPS",
+                        Title = "Converted EPS Document",
+                        Author = "Document Tracking System",
                         Subject = "EPS to PDF conversion",
-                        Keywords = $"Creator={image.Creator};Created={image.CreationDate:O}"
+                        Keywords = "EPS,PDF,Tracking"
                     }
                 };
 

@@ -9,6 +9,7 @@ class Program
     {
         try
         {
+            // Batch directory setup (atomic block)
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
@@ -26,27 +27,38 @@ class Program
             }
 
             string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
-            foreach (var inputPath in files)
+
+            foreach (string inputPath in files)
             {
+                // Input file existence check
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    RasterImage raster = (RasterImage)image;
-                    if (!raster.IsCached) raster.CacheData();
+                    if (!image.IsCached)
+                        image.CacheData();
 
-                    raster.Resize(800, 800);
-                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
+                    // Resize to 800x800 using nearest neighbour resampling
+                    image.Resize(800, 800, ResizeType.NearestNeighbourResample);
 
-                    PdfOptions pdfOptions = new PdfOptions();
-                    image.Save(outputPath, pdfOptions);
+                    // Apply sharpening filter
+                    image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
+
+                    // Save as PDF
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        image.Save(outputPath, pdfOptions);
+                    }
                 }
             }
         }

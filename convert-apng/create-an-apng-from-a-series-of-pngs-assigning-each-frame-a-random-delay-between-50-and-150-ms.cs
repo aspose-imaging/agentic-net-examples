@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -13,9 +12,8 @@ class Program
     {
         try
         {
-            // Hardcoded input PNG files and output APNG path
-            string[] inputPaths = { "frame1.png", "frame2.png", "frame3.png", "frame4.png" };
-            string outputPath = "output_animation.png";
+            // Hardcoded input PNG file paths
+            string[] inputPaths = { "frame1.png", "frame2.png", "frame3.png" };
 
             // Verify each input file exists
             foreach (string path in inputPaths)
@@ -27,25 +25,30 @@ class Program
                 }
             }
 
+            // Hardcoded output APNG path (includes a directory)
+            string outputPath = "output\\animation.apng";
+
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the first image to obtain dimensions
-            using (RasterImage firstImage = (RasterImage)Image.Load(inputPaths[0]))
+            // Load the first image to obtain canvas dimensions
+            using (RasterImage first = (RasterImage)Image.Load(inputPaths[0]))
             {
-                // Create APNG options with bound output source
-                Source outputSource = new FileCreateSource(outputPath, false);
-                ApngOptions apngOptions = new ApngOptions
+                int width = first.Width;
+                int height = first.Height;
+
+                // Configure APNG creation options
+                ApngOptions createOptions = new ApngOptions
                 {
-                    Source = outputSource,
+                    Source = new FileCreateSource(outputPath, false),
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                // Create the APNG canvas
-                using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, firstImage.Width, firstImage.Height))
+                // Create the APNG canvas bound to the output file
+                using (ApngImage apng = (ApngImage)Image.Create(createOptions, width, height))
                 {
-                    // Remove the default empty frame
-                    apngImage.RemoveAllFrames();
+                    // Remove the default single frame
+                    apng.RemoveAllFrames();
 
                     Random rnd = new Random();
 
@@ -54,13 +57,13 @@ class Program
                     {
                         using (RasterImage frame = (RasterImage)Image.Load(path))
                         {
-                            int delayMs = rnd.Next(50, 151); // 50 to 150 inclusive
-                            apngImage.AddFrame(frame, (uint)delayMs);
+                            uint delay = (uint)rnd.Next(50, 151); // Random delay in ms
+                            apng.AddFrame(frame, delay);
                         }
                     }
 
                     // Save the bound APNG image
-                    apngImage.Save();
+                    apng.Save();
                 }
             }
         }

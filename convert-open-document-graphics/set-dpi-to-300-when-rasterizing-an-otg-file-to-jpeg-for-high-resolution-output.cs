@@ -8,13 +8,13 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\input\sample.otg";
-        string outputPath = @"C:\output\sample.jpg";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.otg";
+            string outputPath = @"C:\temp\output.jpg";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,20 +27,20 @@ class Program
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG save options with 300 dpi resolution
-                var jpegOptions = new JpegOptions
+                // Configure OTG rasterization options (preserve original size)
+                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
                 {
-                    ResolutionSettings = new ResolutionSetting(300.0, 300.0),
-                    ResolutionUnit = ResolutionUnit.Inch
-                };
-
-                // Set vector rasterization options for OTG conversion
-                var otgRasterOptions = new OtgRasterizationOptions
-                {
-                    // Preserve the original page size
                     PageSize = image.Size
                 };
-                jpegOptions.VectorRasterizationOptions = otgRasterOptions;
+
+                // Configure JPEG save options with 300 DPI
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    VectorRasterizationOptions = otgOptions,
+                    ResolutionSettings = new ResolutionSetting(300.0, 300.0),
+                    ResolutionUnit = ResolutionUnit.Inch,
+                    Quality = 100 // optional: maximum quality
+                };
 
                 // Save the rasterized image as JPEG
                 image.Save(outputPath, jpegOptions);

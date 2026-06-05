@@ -1,47 +1,34 @@
 using System;
 using System.IO;
-using System.Threading.Tasks;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\sample.djvu";
-        string outputDirectory = @"C:\Temp\Output";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input/sample.djvu";
+            string outputDirectory = "Output";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Open the DjVu file stream
-            using (Stream stream = File.OpenRead(inputPath))
+            Directory.CreateDirectory(outputDirectory);
+
+            using (FileStream stream = File.OpenRead(inputPath))
             {
-                // Load the DjVu document
                 using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    // Process each page in parallel
-                    Parallel.ForEach(djvuImage.Pages, pageObj =>
+                    System.Threading.Tasks.Parallel.ForEach(djvuImage.Pages, pageObj =>
                     {
-                        // Cast to DjvuPage
-                        DjvuPage djvuPage = pageObj as DjvuPage;
-                        if (djvuPage == null) return;
-
-                        // Build output file path for this page
-                        string outputPath = Path.Combine(outputDirectory, $"sample.{djvuPage.PageNumber}.png");
-
-                        // Ensure the output directory exists
+                        var djvuPage = (DjvuPage)pageObj;
+                        string outputPath = Path.Combine(outputDirectory, $"page_{djvuPage.PageNumber}.png");
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the page as PNG
                         djvuPage.Save(outputPath, new PngOptions());
                     });
                 }
@@ -53,3 +40,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to quickly convert every page of a multi‑page DjVu document into high‑quality PNG images for web preview, using Aspose.Imaging and Parallel.ForEach to speed up the process.
+ * 2. When an archival system must extract and store each page of scanned DjVu files as separate PNG files for downstream OCR or indexing pipelines, leveraging C# multithreading for efficiency.
+ * 3. When a desktop application has to batch‑process large DjVu manuals into PNG thumbnails for a document viewer’s navigation pane, employing Aspose.Imaging’s DjvuImage and parallel page conversion.
+ * 4. When a cloud service receives DjVu uploads and must generate PNG assets for each page on the fly, using the provided code to handle file I/O, page enumeration, and concurrent saving.
+ * 5. When a developer wants to integrate DjVu‑to‑PNG conversion into a CI/CD build step that validates visual assets, using the example to read the DjVu stream, iterate pages, and save PNGs in parallel.
+ */

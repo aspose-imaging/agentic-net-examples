@@ -1,10 +1,10 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -12,6 +12,7 @@ class Program
     {
         try
         {
+            // Input/Output directory setup
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
@@ -28,68 +29,65 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            var jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg")
-                .Concat(Directory.GetFiles(inputDirectory, "*.jpeg"))
-                .ToArray();
+            // Get all files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            if (jpegFiles.Length == 0)
-            {
-                Console.WriteLine("No JPEG files found.");
-                return;
-            }
-
-            List<RasterImage> images = new List<RasterImage>();
+            // Collect sizes of grayscale JPEGs
             List<Size> sizes = new List<Size>();
-
-            foreach (var file in jpegFiles)
+            foreach (string filePath in files)
             {
-                if (!File.Exists(file))
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {file}");
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
 
-                RasterImage img = (RasterImage)Image.Load(file);
-                var rci = img as RasterCachedImage;
-                if (rci != null)
-                {
-                    if (!rci.IsCached) rci.CacheData();
-                    rci.Grayscale();
-                }
-                else
+                using (JpegImage img = (JpegImage)Image.Load(filePath))
                 {
                     img.Grayscale();
+                    sizes.Add(new Size(img.Width, img.Height));
                 }
-
-                images.Add(img);
-                sizes.Add(img.Size);
             }
 
-            int totalWidth = sizes.Sum(s => s.Width);
-            int maxHeight = sizes.Max(s => s.Height);
+            if (sizes.Count == 0)
+            {
+                Console.WriteLine("No images found to process.");
+                return;
+            }
 
-            string outputPath = Path.Combine(outputDirectory, "merged.pdf");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Calculate canvas dimensions for horizontal merge
+            int totalWidth = 0;
+            int maxHeight = 0;
+            foreach (Size sz in sizes)
+            {
+                totalWidth += sz.Width;
+                if (sz.Height > maxHeight) maxHeight = sz.Height;
+            }
 
-            PdfOptions pdfOptions = new PdfOptions();
-            pdfOptions.Source = new FileCreateSource(outputPath, false);
-
-            using (RasterImage canvas = (RasterImage)Image.Create(pdfOptions, totalWidth, maxHeight))
+            // Create an unbound raster canvas
+            using (RasterImage canvas = (RasterImage)Image.Create(new JpegOptions(), totalWidth, maxHeight))
             {
                 int offsetX = 0;
-                foreach (var img in images)
+                foreach (string filePath in files)
                 {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
+                    using (JpegImage img = (JpegImage)Image.Load(filePath))
+                    {
+                        img.Grayscale();
+                        Rectangle destRect = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
+                        offsetX += img.Width;
+                    }
                 }
 
-                canvas.Save();
-            }
+                // Prepare output PDF path
+                string outputPath = Path.Combine(outputDirectory, "merged.pdf");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            foreach (var img in images)
-            {
-                img.Dispose();
+                // Save canvas as PDF
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    canvas.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -98,3 +96,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to create a printable PDF brochure that shows product JPEG photos in grayscale side‑by‑side, this code converts each image, merges them horizontally, and exports the result as a PDF.
+ * 2. When a developer wants to generate a compact PDF report of scanned receipts by first applying a grayscale conversion to each JPEG and then stitching them together horizontally for easy comparison.
+ * 3. When a developer must prepare a medical imaging PDF that displays multiple X‑ray JPEGs in grayscale on a single horizontal canvas for quick radiologist review.
+ * 4. When a developer is automating the production of an architectural portfolio PDF where each design JPEG is standardized to grayscale and combined horizontally for a consistent visual layout.
+ * 5. When a developer is building an audit‑trail document that consolidates security‑camera snapshot JPEGs into a single grayscale PDF, merging the images horizontally to preserve chronological order.
+ */

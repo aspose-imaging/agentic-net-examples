@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.tif";
+        string outputPath = @"C:\Images\output.tif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.tif";
-            string outputPath = @"C:\Images\output.tif";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,32 +26,31 @@ class Program
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Align horizontal and vertical DPI
-                if (image is TiffImage tiffImg)
+                // Cast to TiffImage (a RasterImage derivative)
+                TiffImage tiffImage = image as TiffImage;
+                if (tiffImage == null)
                 {
-                    // Align each frame in a TIFF image
-                    foreach (TiffFrame frame in tiffImg.Frames)
-                    {
-                        frame.AlignResolutions();
-                    }
-                }
-                else if (image is RasterImage rasterImg)
-                {
-                    // For non‑TIFF raster images, make DPI values equal
-                    double hRes = rasterImg.HorizontalResolution;
-                    double vRes = rasterImg.VerticalResolution;
-                    if (Math.Abs(hRes - vRes) > 0.0001)
-                    {
-                        // Use the larger DPI to avoid shrinking the image
-                        double targetDpi = Math.Max(hRes, vRes);
-                        rasterImg.SetResolution(targetDpi, targetDpi);
-                    }
+                    Console.Error.WriteLine("The loaded image is not a TIFF image.");
+                    return;
                 }
 
-                // TODO: Apply correction filters here (e.g., AutoBrightnessContrast)
+                // Align horizontal and vertical DPI if they differ
+                double hDpi = tiffImage.HorizontalResolution;
+                double vDpi = tiffImage.VerticalResolution;
+
+                if (Math.Abs(hDpi - vDpi) > 0.001)
+                {
+                    // Use the SetResolution method to make both DPI values equal.
+                    // Here we choose the larger of the two to preserve detail.
+                    double targetDpi = Math.Max(hDpi, vDpi);
+                    tiffImage.SetResolution(targetDpi, targetDpi);
+                }
+
+                // Example placeholder for any correction filters that might be applied
+                // (e.g., tiffImage.SomeFilter();)
 
                 // Save the processed image
-                image.Save(outputPath);
+                tiffImage.Save(outputPath);
             }
         }
         catch (Exception ex)

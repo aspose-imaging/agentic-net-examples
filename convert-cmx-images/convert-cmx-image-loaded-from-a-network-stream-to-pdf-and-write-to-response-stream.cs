@@ -3,55 +3,67 @@ using System.IO;
 using System.Net.Http;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
+    // Converts a CMX image obtained from a network stream to PDF and writes it to the provided response stream.
+    static void ConvertCmxToPdf(Stream responseStream)
+    {
+        // Hardcoded source URL and temporary file locations.
+        string inputUrl = "http://example.com/sample.cmx";
+        string tempCmxPath = Path.Combine(Path.GetTempPath(), "sample.cmx");
+        string outputPdfPath = Path.Combine(Path.GetTempPath(), "output.pdf");
+
+        // Download the CMX file to a temporary location.
+        using (HttpClient client = new HttpClient())
+        using (HttpResponseMessage httpResponse = client.GetAsync(inputUrl).Result)
+        using (Stream networkStream = httpResponse.Content.ReadAsStreamAsync().Result)
+        using (FileStream fileStream = new FileStream(tempCmxPath, FileMode.Create, FileAccess.Write))
+        {
+            networkStream.CopyTo(fileStream);
+        }
+
+        // Verify that the temporary CMX file exists.
+        if (!File.Exists(tempCmxPath))
+        {
+            Console.Error.WriteLine($"File not found: {tempCmxPath}");
+            return;
+        }
+
+        // Ensure the output directory exists before any save operation.
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+
+        // Load the CMX image using Aspose.Imaging.
+        using (Image cmxImage = Image.Load(tempCmxPath))
+        {
+            // Prepare PDF save options.
+            var pdfOptions = new PdfOptions();
+
+            // Save the image as PDF into a memory stream.
+            using (MemoryStream pdfMemory = new MemoryStream())
+            {
+                cmxImage.Save(pdfMemory, pdfOptions);
+                pdfMemory.Position = 0;
+
+                // Write the PDF data to the provided response stream.
+                pdfMemory.CopyTo(responseStream);
+            }
+        }
+    }
+
     static void Main()
     {
         try
         {
-            // Hardcoded input and output paths (required by the safety rules)
-            string inputPath = @"c:\temp\placeholder.cmx";
-            string outputPath = @"c:\temp\output.pdf";
+            // For demonstration purposes, write the PDF to a file that represents the HTTP response.
+            string responseFilePath = "C:\\temp\\response.pdf";
 
-            // Verify that the input file exists (exactly as specified)
-            if (!File.Exists(inputPath))
+            // Ensure the directory for the response file exists.
+            Directory.CreateDirectory(Path.GetDirectoryName(responseFilePath));
+
+            using (FileStream responseStream = new FileStream(responseFilePath, FileMode.Create, FileAccess.Write))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists (unconditionally)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // URL of the CMX image to load from a network stream
-            string url = "https://example.com/sample.cmx";
-
-            // Download the CMX image into a stream
-            using (HttpClient client = new HttpClient())
-            using (Stream networkStream = client.GetStreamAsync(url).Result)
-            {
-                // Load the CMX image from the network stream
-                using (CmxImage cmxImage = (CmxImage)Image.Load(networkStream))
-                {
-                    // Optional: cache all data to avoid further reads
-                    cmxImage.CacheData();
-
-                    // Prepare PDF save options
-                    PdfOptions pdfOptions = new PdfOptions();
-
-                    // Save the image as PDF to the output file (simulating a response stream)
-                    using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                    {
-                        cmxImage.Save(fileStream, pdfOptions);
-                    }
-
-                    // If running inside an ASP.NET context, you could write directly to the response:
-                    // HttpResponse response = HttpContext.Current.Response;
-                    // response.ContentType = "application/pdf";
-                    // cmxImage.Save(response.OutputStream, pdfOptions);
-                }
+                ConvertCmxToPdf(responseStream);
             }
         }
         catch (Exception ex)

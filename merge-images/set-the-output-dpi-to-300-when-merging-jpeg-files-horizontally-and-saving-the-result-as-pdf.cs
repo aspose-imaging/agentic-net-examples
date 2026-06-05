@@ -1,12 +1,9 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -14,73 +11,68 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath1 = "Input/image1.jpg";
-            string inputPath2 = "Input/image2.jpg";
-            string outputPath = "Output/merged.pdf";
+            // Hardcoded input JPEG files
+            string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
+            // Hardcoded output PDF file
+            string outputPath = "merged.pdf";
 
             // Validate input files
-            if (!File.Exists(inputPath1))
+            foreach (string path in inputPaths)
             {
-                Console.Error.WriteLine($"File not found: {inputPath1}");
-                return;
-            }
-            if (!File.Exists(inputPath2))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath2}");
-                return;
+                if (!File.Exists(path))
+                {
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
+                }
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir);
 
-            // Collect image sizes
+            // Collect sizes of all input images
             List<Size> sizes = new List<Size>();
-            using (JpegImage img1 = (JpegImage)Image.Load(inputPath1))
+            foreach (string path in inputPaths)
             {
-                sizes.Add(img1.Size);
-            }
-            using (JpegImage img2 = (JpegImage)Image.Load(inputPath2))
-            {
-                sizes.Add(img2.Size);
+                using (RasterImage img = (RasterImage)Image.Load(path))
+                {
+                    sizes.Add(img.Size);
+                }
             }
 
             // Calculate canvas dimensions for horizontal merge
-            int newWidth = sizes.Sum(s => s.Width);
-            int newHeight = sizes.Max(s => s.Height);
-
-            // Create a temporary JPEG canvas with 300 DPI
-            string tempCanvasPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp_canvas.jpg");
-            Directory.CreateDirectory(Path.GetDirectoryName(tempCanvasPath));
-            Source tempSource = new FileCreateSource(tempCanvasPath, false);
-            JpegOptions jpegOptions = new JpegOptions()
+            int newWidth = 0;
+            int newHeight = 0;
+            foreach (Size sz in sizes)
             {
-                Source = tempSource,
-                Quality = 100,
-                ResolutionSettings = new ResolutionSetting(300, 300),
-                ResolutionUnit = ResolutionUnit.Inch
+                newWidth += sz.Width;
+                if (sz.Height > newHeight) newHeight = sz.Height;
+            }
+
+            // Create canvas with 300 DPI resolution
+            JpegOptions canvasOptions = new JpegOptions
+            {
+                ResolutionSettings = new ResolutionSetting(300, 300)
             };
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
+
+            using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, newWidth, newHeight))
             {
-                // Merge first image
                 int offsetX = 0;
-                using (JpegImage img1 = (JpegImage)Image.Load(inputPath1))
+                foreach (string path in inputPaths)
                 {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img1.Width, img1.Height);
-                    canvas.SaveArgb32Pixels(bounds, img1.LoadArgb32Pixels(img1.Bounds));
-                    offsetX += img1.Width;
+                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    {
+                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                        offsetX += img.Width;
+                    }
                 }
 
-                // Merge second image
-                using (JpegImage img2 = (JpegImage)Image.Load(inputPath2))
+                // Save merged canvas as PDF with 300 DPI
+                PdfOptions pdfOptions = new PdfOptions
                 {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img2.Width, img2.Height);
-                    canvas.SaveArgb32Pixels(bounds, img2.LoadArgb32Pixels(img2.Bounds));
-                    offsetX += img2.Width;
-                }
-
-                // Save the merged canvas as PDF
-                PdfOptions pdfOptions = new PdfOptions();
+                    ResolutionSettings = new ResolutionSetting(300, 300)
+                };
                 canvas.Save(outputPath, pdfOptions);
             }
         }
@@ -90,3 +82,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a publishing workflow needs to combine multiple high‑resolution product photos into a single printable PDF brochure, a developer can use this code to merge the JPEGs side‑by‑side and enforce a 300 DPI output for crisp print quality.
+ * 2. When an e‑learning platform generates printable study guides from scanned lecture slides stored as JPEGs, the code can stitch the images horizontally into a PDF with 300 DPI to meet standard academic printing requirements.
+ * 3. When a real‑estate agency creates property flyers by aligning room‑by‑room JPEG snapshots in a single landscape PDF, the developer can apply this snippet to ensure the final document retains 300 DPI for high‑quality marketing prints.
+ * 4. When a legal document management system needs to archive multiple scanned signatures saved as JPEGs into a single PDF file, the code guarantees a 300 DPI resolution so the signatures remain legible in printed records.
+ * 5. When a manufacturing quality‑control system compiles side‑by‑side JPEG images of component inspections into a PDF report, the developer can use this example to produce a 300 DPI PDF that satisfies ISO printing standards.
+ */

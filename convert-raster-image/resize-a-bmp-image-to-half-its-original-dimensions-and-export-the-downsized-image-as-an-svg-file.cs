@@ -2,17 +2,15 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.bmp";
-        string outputPath = @"C:\temp\output.svg";
+        string inputPath = @"C:\Images\source.bmp";
+        string outputPath = @"C:\Images\resized.svg";
 
-        // Ensure any runtime exception is reported cleanly
         try
         {
             // Verify input file exists
@@ -22,7 +20,10 @@ class Program
                 return;
             }
 
-            // Load the BMP image
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load BMP image
             using (Image image = Image.Load(inputPath))
             {
                 // Calculate half size
@@ -32,20 +33,18 @@ class Program
                 // Resize the image
                 image.Resize(newWidth, newHeight);
 
-                // Prepare SVG rasterization options using the resized image size
+                // Prepare SVG save options with rasterization settings
                 var rasterizationOptions = new SvgRasterizationOptions
                 {
-                    PageSize = image.Size
+                    PageSize = new Size(newWidth, newHeight)
                 };
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the resized image as SVG
                 var svgOptions = new SvgOptions
                 {
                     VectorRasterizationOptions = rasterizationOptions
                 };
+
+                // Save as SVG
                 image.Save(outputPath, svgOptions);
             }
         }

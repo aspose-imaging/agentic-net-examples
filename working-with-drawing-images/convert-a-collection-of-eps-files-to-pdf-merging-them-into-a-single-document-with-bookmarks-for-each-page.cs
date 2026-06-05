@@ -3,7 +3,6 @@ using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,18 +10,17 @@ class Program
     {
         try
         {
-            // Hardcoded input EPS file paths
-            string[] epsPaths = new string[]
-            {
+            string[] epsPaths = {
                 "input1.eps",
                 "input2.eps",
                 "input3.eps"
             };
 
-            // Hardcoded output PDF path
-            string outputPdfPath = "merged_output.pdf";
+            string outputPath = "output/merged.pdf";
 
-            // Validate each input file
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            List<Image> images = new List<Image>();
             foreach (var path in epsPaths)
             {
                 if (!File.Exists(path))
@@ -30,47 +28,20 @@ class Program
                     Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
+
+                Image epsImage = Image.Load(path);
+                images.Add(epsImage);
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPdfPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
+            using (Image pdfDocument = Image.Create(images.ToArray(), true))
             {
-                Directory.CreateDirectory(outputDir);
+                pdfDocument.Save(outputPath, new PdfOptions());
             }
 
-            // List to hold temporary PDF page files
-            List<string> tempPdfPages = new List<string>();
-
-            // Convert each EPS to a single-page PDF
-            foreach (var epsPath in epsPaths)
+            foreach (var img in images)
             {
-                string tempPdf = Path.GetTempFileName();
-                using (Image image = Image.Load(epsPath))
-                {
-                    var pdfOptions = new PdfOptions();
-                    image.Save(tempPdf, pdfOptions);
-                }
-                tempPdfPages.Add(tempPdf);
+                img.Dispose();
             }
-
-            // Simple merge: concatenate PDF byte streams (note: this is a placeholder and may not produce a valid PDF with proper bookmarks)
-            using (var outputStream = new FileStream(outputPdfPath, FileMode.Create, FileAccess.Write))
-            {
-                foreach (var pagePath in tempPdfPages)
-                {
-                    byte[] pageBytes = File.ReadAllBytes(pagePath);
-                    outputStream.Write(pageBytes, 0, pageBytes.Length);
-                }
-            }
-
-            // Cleanup temporary files
-            foreach (var tempPath in tempPdfPages)
-            {
-                try { File.Delete(tempPath); } catch { }
-            }
-
-            Console.WriteLine($"Merged PDF created at: {outputPdfPath}");
         }
         catch (Exception ex)
         {
@@ -78,3 +49,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer must batch‑convert a series of vector‑based EPS illustrations into a single PDF portfolio with page‑level bookmarks for easy navigation in client presentations.
+ * 2. When an automated build pipeline needs to merge EPS logo assets from multiple design teams into one searchable PDF report using C# and Aspose.Imaging.
+ * 3. When a web application offers users the ability to upload several EPS schematics and receive a consolidated PDF document with bookmarks for each schematic page.
+ * 4. When a document‑management system has to archive engineering EPS drawings as a single PDF file, preserving each drawing as a separate bookmarked page for quick retrieval.
+ * 5. When a marketing workflow requires combining EPS banner files into one PDF brochure, adding bookmarks so sales staff can jump directly to each product section.
+ */

@@ -13,7 +13,7 @@ class Program
 
         try
         {
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,8 +26,11 @@ class Program
             // Load the CDR file
             using (Image image = Image.Load(inputPath))
             {
-                // Set JPEG options (default options are sufficient for basic conversion)
-                var jpegOptions = new JpegOptions();
+                // Configure JPEG save options
+                var jpegOptions = new JpegOptions
+                {
+                    Quality = 90 // Adjust quality as needed
+                };
 
                 // Save the image as JPEG
                 image.Save(outputPath, jpegOptions);

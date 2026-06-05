@@ -1,9 +1,8 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -11,104 +10,60 @@ class Program
     {
         try
         {
-            // Hardcoded input/output paths for safety checks
-            string inputPath = "input.jpg";
+            // Hardcoded paths and blob URL
+            string blobUrl = "https://example.blob.core.windows.net/container/sample.png";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            // Download image from Azure Blob Storage
+            using (var httpClient = new System.Net.Http.HttpClient())
+            {
+                var data = httpClient.GetByteArrayAsync(blobUrl).Result;
+                System.IO.File.WriteAllBytes(inputPath, data);
+            }
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputPath = "output\\output.jpg";
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Hardcoded HTTP prefix
-            string prefix = "http://localhost:5000/";
+            // Load, apply a simple filter, and save
+            using (var image = (PngImage)Image.Load(inputPath))
+            {
+                image.AdjustBrightness(20); // example filter
+                image.Save(outputPath);
+            }
 
-            // Initialize HttpListener
+            // Serve the processed image via HTTP
             using (var listener = new System.Net.HttpListener())
             {
-                listener.Prefixes.Add(prefix);
+                listener.Prefixes.Add("http://localhost:5000/");
                 listener.Start();
-                Console.WriteLine($"Listening on {prefix}");
+                Console.WriteLine("Listening on http://localhost:5000/ ...");
 
                 while (true)
                 {
-                    // Wait for an incoming request
                     var context = listener.GetContext();
-                    var request = context.Request;
                     var response = context.Response;
 
-                    // Expect a query parameter "url" containing the Azure Blob URL
-                    string blobUrl = request.QueryString["url"];
-                    if (string.IsNullOrEmpty(blobUrl))
+                    if (File.Exists(outputPath))
                     {
-                        response.StatusCode = 400; // Bad Request
-                        using (var writer = new StreamWriter(response.OutputStream))
-                        {
-                            writer.Write("Missing 'url' query parameter.");
-                        }
-                        response.Close();
-                        continue;
+                        var bytes = File.ReadAllBytes(outputPath);
+                        response.ContentType = "image/png";
+                        response.ContentLength64 = bytes.Length;
+                        response.OutputStream.Write(bytes, 0, bytes.Length);
+                    }
+                    else
+                    {
+                        response.StatusCode = 404;
                     }
 
-                    // Download the image from the blob URL
-                    using (var httpClient = new System.Net.Http.HttpClient())
-                    {
-                        System.Net.Http.HttpResponseMessage httpResponse;
-                        try
-                        {
-                            httpResponse = httpClient.GetAsync(blobUrl).Result;
-                        }
-                        catch
-                        {
-                            response.StatusCode = 500;
-                            using (var writer = new StreamWriter(response.OutputStream))
-                            {
-                                writer.Write("Error retrieving the image from the provided URL.");
-                            }
-                            response.Close();
-                            continue;
-                        }
-
-                        if (!httpResponse.IsSuccessStatusCode)
-                        {
-                            response.StatusCode = (int)httpResponse.StatusCode;
-                            using (var writer = new StreamWriter(response.OutputStream))
-                            {
-                                writer.Write($"Failed to retrieve image. HTTP {(int)httpResponse.StatusCode}");
-                            }
-                            response.Close();
-                            continue;
-                        }
-
-                        using (var inputStream = httpResponse.Content.ReadAsStreamAsync().Result)
-                        {
-                            // Load image using Aspose.Imaging
-                            using (Image image = Image.Load(inputStream))
-                            {
-                                // Prepare JPEG options for output
-                                var jpegOptions = new JpegOptions
-                                {
-                                    Quality = 90
-                                };
-
-                                // Save processed image to a memory stream
-                                using (var outputStream = new MemoryStream())
-                                {
-                                    image.Save(outputStream, jpegOptions);
-                                    byte[] imageBytes = outputStream.ToArray();
-
-                                    // Return the image bytes in the HTTP response
-                                    response.ContentType = "image/jpeg";
-                                    response.ContentLength64 = imageBytes.Length;
-                                    response.OutputStream.Write(imageBytes, 0, imageBytes.Length);
-                                    response.OutputStream.Flush();
-                                    response.Close();
-                                }
-                            }
-                        }
-                    }
+                    response.OutputStream.Close();
                 }
             }
         }
@@ -118,3 +73,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web service must fetch a PNG image from Azure Blob Storage, adjust its brightness, and deliver the modified image to browsers via an HTTP endpoint.
+ * 2. When building a C# microservice that processes user‑uploaded images stored in Azure, applies simple filters like brightness adjustment, and returns the result as a PNG response.
+ * 3. When creating a lightweight image‑processing API that reads images from a cloud blob, performs on‑the‑fly transformations with Aspose.Imaging, and streams the output to client applications.
+ * 4. When implementing a server‑side thumbnail generator that pulls high‑resolution PNG files from Azure, tweaks visual properties, saves a cached version, and serves it over HTTP.
+ * 5. When developing a diagnostic tool that validates image availability in Azure Blob Storage, applies a quick visual enhancement, and exposes the processed file through a local HTTP listener for testing.
+ */

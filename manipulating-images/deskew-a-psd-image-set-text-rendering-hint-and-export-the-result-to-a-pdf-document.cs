@@ -2,10 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
@@ -15,11 +11,10 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = Path.Combine("Input", "sample.psd");
-            string outputPath = Path.Combine("Output", "result.pdf");
-            string tempTiffPath = Path.Combine("Output", "temp.tif");
+            string inputPath = "Input\\sample.psd";
+            string outputPath = "Output\\result.pdf";
 
-            // Input file existence check
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -29,41 +24,21 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load PSD image
-            using (Image psdImage = Image.Load(inputPath))
+            // Load the PSD image
+            using (Image image = Image.Load(inputPath))
             {
-                // Save PSD as temporary TIFF for deskewing
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                psdImage.Save(tempTiffPath, tiffOptions);
-            }
-
-            // Load temporary TIFF and deskew
-            using (TiffImage tiffImage = (TiffImage)Image.Load(tempTiffPath))
-            {
-                // Deskew the image
-                tiffImage.NormalizeAngle(false, Color.White);
-
-                // Prepare PDF options with text rendering hint
-                var pdfOptions = new PdfOptions
+                // Configure PDF export options with text rendering hint
+                PdfOptions pdfOptions = new PdfOptions
                 {
                     VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None,
-                        BackgroundColor = Color.White,
-                        PageWidth = tiffImage.Width,
-                        PageHeight = tiffImage.Height
+                        SmoothingMode = SmoothingMode.None
                     }
                 };
 
-                // Save the deskewed image to PDF
-                tiffImage.Save(outputPath, pdfOptions);
-            }
-
-            // Cleanup temporary TIFF file
-            if (File.Exists(tempTiffPath))
-            {
-                File.Delete(tempTiffPath);
+                // Save the result as PDF
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)

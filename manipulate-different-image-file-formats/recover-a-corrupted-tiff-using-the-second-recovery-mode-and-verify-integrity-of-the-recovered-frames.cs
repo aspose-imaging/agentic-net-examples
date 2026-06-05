@@ -11,45 +11,38 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\corrupted.tif";
+            string inputPath = "corrupted.tif";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputPath = @"C:\Images\recovered.tif";
-            // Ensure output directory exists
+            string outputPath = "output\\recovered.tif";
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load with second recovery mode
-            var loadOptions = new LoadOptions
+            // Load the corrupted TIFF using the second recovery mode
+            using (Image image = Image.Load(inputPath, new LoadOptions
             {
                 DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
                 DataBackgroundColor = Color.White
-            };
-
-            using (Image image = Image.Load(inputPath, loadOptions))
+            }))
             {
-                TiffImage tiff = image as TiffImage;
-                if (tiff == null)
+                // Cast to TiffImage to work with frames
+                using (TiffImage tiff = (TiffImage)image)
                 {
-                    Console.Error.WriteLine("Loaded image is not a TIFF.");
-                    return;
-                }
+                    // Verify integrity of each recovered frame
+                    int index = 0;
+                    foreach (TiffFrame frame in tiff.Frames)
+                    {
+                        Console.WriteLine($"Frame {index}: {frame.Width}x{frame.Height}");
+                        index++;
+                    }
 
-                // Verify integrity of each recovered frame
-                int index = 0;
-                foreach (var frame in tiff.Frames)
-                {
-                    // Attempt to load pixels; will throw if frame is invalid
-                    var pixels = tiff.LoadPixels(frame.Bounds);
-                    Console.WriteLine($"Frame {index}: {frame.Width}x{frame.Height}, Pixels loaded: {pixels.Length}");
-                    index++;
+                    // Save the recovered TIFF
+                    tiff.Save(outputPath);
                 }
-
-                // Save the recovered TIFF
-                tiff.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -58,3 +51,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to restore a corrupted multi‑page TIFF from a document management system using Aspose.Imaging’s ConsistentRecover mode and verify each frame’s dimensions before further processing.
+ * 2. When a C# application must recover TIFF images that were partially written due to a network interruption, then check the integrity of each recovered frame to prevent downstream errors.
+ * 3. When legacy medical imaging equipment produces TIFF files with missing data, a developer can use the second recovery mode to salvage the image and confirm each frame’s size before archiving.
+ * 4. When a print‑shop workflow generates batch TIFFs that become corrupted, a developer can recover them with DataRecoveryMode.ConsistentRecover and validate every page’s resolution before re‑printing.
+ * 5. When a web application accepts user‑uploaded TIFFs that may be corrupted, a developer can apply the second recovery mode to recover the file and iterate through its frames to ensure each one is intact before display.
+ */

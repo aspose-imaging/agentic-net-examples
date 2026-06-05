@@ -12,45 +12,43 @@ class Program
     {
         try
         {
-            // Hardcoded input DjVu files
-            string[] inputFiles = new[]
+            // Hardcoded list of DjVu files to convert
+            string[] inputFiles = new string[]
             {
-                @"C:\Input\sample1.djvu",
-                @"C:\Input\sample2.djvu",
-                @"C:\Input\sample3.djvu"
+                @"C:\Input\doc1.djvu",
+                @"C:\Input\doc2.djvu",
+                @"C:\Input\doc3.djvu"
             };
 
             // Process each file in parallel
             Parallel.ForEach(inputFiles, inputPath =>
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output TIFF path
-                string outputDirectory = @"C:\Output";
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".tif";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                // Determine the output TIFF path (same folder, same name with .tif extension)
+                string outputPath = Path.ChangeExtension(inputPath, ".tif");
 
-                // Ensure output directory exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load DjVu document
+                // Load the DjVu document and save it as a multipage TIFF
                 using (FileStream stream = File.OpenRead(inputPath))
-                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+                using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    // Configure TIFF save options for multipage output
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                    {
-                        Compression = TiffCompressions.Deflate,
-                        BitsPerSample = new ushort[] { 1 },
-                        MultiPageOptions = new DjvuMultiPageOptions()
-                    };
+                    // Configure TIFF save options
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    tiffOptions.Compression = TiffCompressions.Deflate;
+                    // Optional: set 1-bit per sample for B/W conversion
+                    tiffOptions.BitsPerSample = new ushort[] { 1 };
+                    // Enable multipage export
+                    tiffOptions.MultiPageOptions = new DjvuMultiPageOptions();
 
-                    // Save as multipage TIFF
+                    // Save the DjVu image as a multipage TIFF
                     djvuImage.Save(outputPath, tiffOptions);
                 }
             });
@@ -61,3 +59,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a document management system needs to batch‑convert archived DjVu scans into searchable multipage TIFF files for archival storage, a developer can use this C# code with Aspose.Imaging to process many files in parallel.
+ * 2. When a legal firm wants to quickly transform a collection of DjVu case files into high‑compression, 1‑bit per sample TIFF images for e‑discovery platforms, the parallel conversion routine speeds up the workflow.
+ * 3. When an OCR pipeline requires input as multipage TIFFs but the source documents are supplied as DjVu, developers can employ this code to load each DjVu, apply Deflate compression, and save as TIFF in a single pass.
+ * 4. When a cloud‑based image service must generate TIFF previews for multiple DjVu ebooks simultaneously to improve user download times, the Parallel.ForEach approach distributes the workload across CPU cores.
+ * 5. When a batch‑processing job needs to ensure that output directories exist and handle missing DjVu files gracefully while converting each document to a compressed multipage TIFF, this example provides the necessary error handling and file‑system logic.
+ */

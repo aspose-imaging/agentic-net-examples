@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = @"C:\Images\Input";
-        string outputDirectory = @"C:\Images\Output";
-
         try
         {
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
+
             // Ensure the output directory exists
             Directory.CreateDirectory(outputDirectory);
 
@@ -22,18 +22,18 @@ class Program
             int index = 1;
             foreach (string inputPath in bmpFiles)
             {
-                // Verify the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output PDF file path with a sequential numeric suffix
-                string outputPath = Path.Combine(outputDirectory, $"output_{index}.pdf");
-                index++;
+                // Build output file path with sequential numeric suffix
+                string outputFileName = $"output_{index}.pdf";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure the directory for the output file exists (unconditional as required)
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the BMP image
@@ -42,9 +42,11 @@ class Program
                     // Set up PDF export options
                     PdfOptions pdfOptions = new PdfOptions();
 
-                    // Save the image as PDF
+                    // Save as PDF
                     image.Save(outputPath, pdfOptions);
                 }
+
+                index++;
             }
         }
         catch (Exception ex)

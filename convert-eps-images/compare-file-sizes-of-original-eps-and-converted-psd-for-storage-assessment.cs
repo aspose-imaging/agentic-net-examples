@@ -2,29 +2,28 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Temp\sample.eps";
-        string outputPath = @"C:\Temp\sample_converted.psd";
+        string inputPath = "input.eps";
+        string outputPath = "output.psd";
+
+        // Path safety checks
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load EPS image
+            // Load the EPS image
             using (Image image = Image.Load(inputPath))
             {
                 // Prepare PSD save options (default settings)
@@ -34,13 +33,12 @@ class Program
                 image.Save(outputPath, psdOptions);
             }
 
-            // Retrieve file sizes
+            // Compare file sizes
             long epsSize = new FileInfo(inputPath).Length;
             long psdSize = new FileInfo(outputPath).Length;
 
-            // Output size comparison
-            Console.WriteLine($"Original EPS size: {epsSize} bytes");
-            Console.WriteLine($"Converted PSD size: {psdSize} bytes");
+            Console.WriteLine($"EPS file size: {epsSize} bytes");
+            Console.WriteLine($"PSD file size: {psdSize} bytes");
         }
         catch (Exception ex)
         {

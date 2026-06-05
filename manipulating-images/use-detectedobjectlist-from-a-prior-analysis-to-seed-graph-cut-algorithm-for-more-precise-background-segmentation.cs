@@ -13,24 +13,28 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.jpg";
-            string outputPath = "output.png";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                var assumedObjects = new List<AssumedObjectData>();
-                assumedObjects.Add(new AssumedObjectData(DetectedObjectType.Human, new Rectangle(100, 100, 150, 300)));
-                assumedObjects.Add(new AssumedObjectData(DetectedObjectType.Other, new Rectangle(300, 200, 80, 120)));
+                var assumedObjects = new List<AssumedObjectData>
+                {
+                    new AssumedObjectData(DetectedObjectType.Human, new Rectangle(120, 80, 200, 400)),
+                    new AssumedObjectData(DetectedObjectType.Other, new Rectangle(350, 150, 180, 220))
+                };
+
+                string tempPath = Path.GetTempFileName();
 
                 var options = new AutoMaskingGraphCutOptions
                 {
@@ -42,17 +46,20 @@ class Program
                     ExportOptions = new PngOptions
                     {
                         ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new StreamSource(new MemoryStream())
+                        Source = new FileCreateSource(tempPath, false)
                     },
                     BackgroundReplacementColor = Color.Transparent
                 };
 
-                var masking = new ImageMasking(image);
-                MaskingResult maskingResult = masking.Decompose(options);
-
-                using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
+                using (MaskingResult results = new ImageMasking(image).Decompose(options))
+                using (RasterImage resultImage = (RasterImage)results[1].GetImage())
                 {
-                    foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                }
+
+                if (File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
                 }
             }
         }

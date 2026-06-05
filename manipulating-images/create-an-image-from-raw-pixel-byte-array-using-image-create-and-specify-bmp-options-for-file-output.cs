@@ -3,52 +3,41 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.raw";
-        string outputPath = @"C:\temp\output.bmp";
-
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            // Output file path (hard‑coded)
+            string outputPath = @"C:\temp\output.bmp";
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define image dimensions (example: 100x100)
+            // Image dimensions
             int width = 100;
             int height = 100;
 
-            // Read raw pixel data (assumed 32‑bpp ARGB, 4 bytes per pixel)
-            byte[] rawBytes = File.ReadAllBytes(inputPath);
-
-            // Convert byte array to int[] pixel array
+            // Raw pixel data (32‑bit ARGB). Fill the whole image with solid red.
             int[] pixels = new int[width * height];
-            int bytesToCopy = Math.Min(rawBytes.Length, pixels.Length * 4);
-            Buffer.BlockCopy(rawBytes, 0, pixels, 0, bytesToCopy);
+            int red = unchecked((int)0xFFFF0000); // A=255, R=255, G=0, B=0
+            for (int i = 0; i < pixels.Length; i++)
+                pixels[i] = red;
 
-            // Set BMP creation options
+            // BMP creation options
             BmpOptions bmpOptions = new BmpOptions
             {
-                BitsPerPixel = 24,
-                Compression = BitmapCompression.Rgb,
-                Source = new FileCreateSource(outputPath, false)
+                BitsPerPixel = 24, // 24‑bpp BMP
+                // Define where the image will be created
+                Source = new Aspose.Imaging.Sources.FileCreateSource(outputPath, false)
             };
 
-            // Create the image from the pixel array
+            // Create the image from the raw pixel array
             using (Image image = Image.Create(bmpOptions, width, height, pixels))
             {
-                // Save the image to the specified BMP file
+                // Persist the image to disk
                 image.Save();
             }
         }

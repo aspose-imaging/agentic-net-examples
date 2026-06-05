@@ -1,6 +1,6 @@
 using System;
-using System.IO;
 using System.Diagnostics;
+using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -24,39 +24,36 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
+            // Measure conversion time
+            Stopwatch sw = Stopwatch.StartNew();
+
+            // Load SVG image
             using (Image image = Image.Load(inputPath))
             {
                 // Configure rasterization options
-                var rasterOptions = new SvgRasterizationOptions
+                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
                 {
-                    // Preserve original size
-                    PageSize = image.Size,
-                    // Optional: set background color if needed
-                    BackgroundColor = Color.White
+                    PageSize = image.Size
                 };
 
                 // Configure PNG save options
-                var pngOptions = new PngOptions
+                PngOptions saveOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = rasterizationOptions
                 };
 
-                // Measure rasterization duration
-                var stopwatch = Stopwatch.StartNew();
-
                 // Save rasterized PNG
-                image.Save(outputPath, pngOptions);
-
-                stopwatch.Stop();
-
-                // Get output file size
-                long fileSize = new FileInfo(outputPath).Length;
-
-                // Log duration and size
-                Console.WriteLine($"Rasterization completed in {stopwatch.ElapsedMilliseconds} ms");
-                Console.WriteLine($"Output file size: {fileSize} bytes");
+                image.Save(outputPath, saveOptions);
             }
+
+            sw.Stop();
+
+            // Log duration in milliseconds
+            Console.WriteLine($"Conversion duration: {sw.ElapsedMilliseconds} ms");
+
+            // Log output file size
+            long fileSize = new FileInfo(outputPath).Length;
+            Console.WriteLine($"Output file size: {fileSize} bytes");
         }
         catch (Exception ex)
         {

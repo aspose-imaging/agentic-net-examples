@@ -10,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.psd";
-            string outputPath = "output.pdf";
+            string inputPath = "C:\\temp\\input.psd";
+            string outputPath = "C:\\temp\\output.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -32,8 +32,8 @@ class Program
                     rasterImage.AdjustGamma(1.1f, 1.0f, 0.9f);
                 }
 
-                // Save as PDF
-                var pdfOptions = new PdfOptions();
+                // Export to PDF
+                PdfOptions pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
         }

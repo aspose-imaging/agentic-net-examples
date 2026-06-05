@@ -9,48 +9,43 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = @"C:\temp\input.bmp";
             string outputPath = @"C:\temp\output.svg";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load BMP as a raster image
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Load pixel data (ARGB format)
-                int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
-
-                // Invert colors (preserve alpha)
-                for (int i = 0; i < pixels.Length; i++)
+                // Ensure the image is a raster image for pixel manipulation
+                RasterImage raster = image as RasterImage;
+                if (raster != null)
                 {
-                    int argb = pixels[i];
-                    int a = (argb >> 24) & 0xFF;
-                    int r = (argb >> 16) & 0xFF;
-                    int g = (argb >> 8) & 0xFF;
-                    int b = argb & 0xFF;
+                    // Load pixel data
+                    Aspose.Imaging.Color[] pixels = raster.LoadPixels(raster.Bounds);
+                    int[] invertedArgb = new int[pixels.Length];
 
-                    r = 255 - r;
-                    g = 255 - g;
-                    b = 255 - b;
+                    for (int i = 0; i < pixels.Length; i++)
+                    {
+                        var c = pixels[i];
+                        int a = c.A;
+                        int r = 255 - c.R;
+                        int g = 255 - c.G;
+                        int b = 255 - c.B;
+                        invertedArgb[i] = (a << 24) | (r << 16) | (g << 8) | b;
+                    }
 
-                    pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
+                    // Save the inverted pixels back to the image
+                    raster.SaveArgb32Pixels(raster.Bounds, invertedArgb);
                 }
 
-                // Write inverted pixel data back to the image
-                raster.SaveArgb32Pixels(raster.Bounds, pixels);
-
-                // Save the inverted image as SVG
-                var svgOptions = new SvgOptions();
-                raster.Save(outputPath, svgOptions);
+                // Save the (now inverted) image as SVG
+                image.Save(outputPath, new SvgOptions());
             }
         }
         catch (Exception ex)

@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\test.svg";
-        string outputPath = @"C:\temp\test.output.png";
-
         try
         {
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\test.svg";
+            string outputPath = @"C:\temp\test.output.png";
+
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,17 +27,15 @@ class Program
             // Load the SVG image
             using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
             {
-                // Configure rasterization options
-                var rasterizationOptions = new SvgRasterizationOptions
+                // Configure rasterization options and disable anti‑aliasing
+                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
                 {
-                    // Set the page size to match the SVG dimensions
                     PageSize = svgImage.Size,
-                    // Disable anti‑aliasing for better performance
-                    SmoothingMode = SmoothingMode.None
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.None // disable anti‑aliasing
                 };
 
                 // Set up PNG save options with the rasterization settings
-                var pngOptions = new PngOptions
+                PngOptions pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterizationOptions
                 };

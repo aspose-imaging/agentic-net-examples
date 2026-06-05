@@ -27,21 +27,21 @@ class Program
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options with a transparent background
-                var rasterOptions = new SvgRasterizationOptions
+                // Configure SVG rasterization options with a transparent background
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
                     BackgroundColor = Aspose.Imaging.Color.Transparent,
                     PageSize = image.Size
                 };
 
                 // Set up SVG save options
-                var svgOptions = new SvgOptions
+                SvgOptions saveOptions = new SvgOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
                 // Save the image as SVG without background
-                image.Save(outputPath, svgOptions);
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)

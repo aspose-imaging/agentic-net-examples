@@ -8,54 +8,46 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Image svgImage = Image.Load(inputPath))
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
             {
-                // Rasterization options for SVG
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-                rasterOptions.PageSize = svgImage.Size;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // PNG options with vector rasterization
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.VectorRasterizationOptions = rasterOptions;
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Rasterize SVG to a memory stream
+            using (Image vectorImage = Image.Load(inputPath))
+            {
+                // Rasterize SVG to PNG in memory
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    svgImage.Save(ms, pngOptions);
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new SvgRasterizationOptions { PageSize = vectorImage.Size }
+                    };
+                    vectorImage.Save(ms, pngOptions);
                     ms.Position = 0;
 
-                    using (Image rasterImg = Image.Load(ms))
+                    using (Image rasterImage = Image.Load(ms))
                     {
-                        RasterImage raster = (RasterImage)rasterImg;
+                        RasterImage raster = (RasterImage)rasterImage;
 
-                        // Custom diagonal edge‑detection kernel (3x3)
+                        // Custom diagonal edge‑detection kernel
                         double[,] kernel = new double[,]
                         {
-                            { -2, -1, 0 },
+                            { -1, -1, 0 },
                             { -1,  0, 1 },
-                            {  0,  1, 2 }
+                            {  0,  1, 1 }
                         };
+                        var convOptions = new ConvolutionFilterOptions(kernel);
 
-                        // Apply convolution filter
-                        ConvolutionFilterOptions convOptions = new ConvolutionFilterOptions(kernel);
                         raster.Filter(raster.Bounds, convOptions);
-
-                        // Save the filtered raster image as PNG
-                        PngOptions saveOptions = new PngOptions();
-                        raster.Save(outputPath, saveOptions);
+                        raster.Save(outputPath, new PngOptions());
                     }
                 }
             }
@@ -66,3 +58,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert an SVG diagram to a PNG thumbnail while highlighting diagonal edges for better visual inspection in a web dashboard.
+ * 2. When an image‑processing pipeline must apply a custom diagonal edge‑detection filter to vector graphics before feeding them into a machine‑learning model that expects raster input.
+ * 3. When a reporting tool generates SVG charts and the developer wants to emphasize trend lines by rasterizing the SVG and applying a convolution kernel to accentuate diagonal edges in the final PNG export.
+ * 4. When a mobile app downloads SVG icons, the backend uses C# and Aspose.Imaging to rasterize them and apply a diagonal edge filter so the icons appear sharper on low‑resolution screens.
+ * 5. When a quality‑control system needs to detect misaligned components in SVG schematics, the code rasterizes the SVG and runs a custom diagonal edge‑detection filter to expose alignment errors in a PNG snapshot.
+ */

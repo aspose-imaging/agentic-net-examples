@@ -2,48 +2,47 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.svg";
+            string inputPath = "Input\\sample.png";
+            string outputPath = "Output\\result.svg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (string.IsNullOrEmpty(outputDir))
-                outputDir = ".";
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
-            using (Image rasterImage = Image.Load(inputPath))
+            using (Image loadedImage = Image.Load(inputPath))
             {
-                // Prepare SVG rasterization options with white background
-                var rasterizationOptions = new SvgRasterizationOptions
-                {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageSize = rasterImage.Size
-                };
+                RasterImage raster = (RasterImage)loadedImage;
 
-                // Prepare SVG save options
-                var svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
+                // Create SVG graphics canvas with same dimensions as raster image
+                var graphics = new Aspose.Imaging.FileFormats.Svg.Graphics.SvgGraphics2D(raster.Width, raster.Height, 96);
 
-                // Save as SVG
-                rasterImage.Save(outputPath, svgOptions);
+                // Fill background with white
+                var whitePen = new Pen(Color.White, 0);
+                var whiteBrush = new SolidBrush(Color.White);
+                graphics.FillRectangle(whitePen, whiteBrush, 0, 0, raster.Width, raster.Height);
+
+                // Draw the raster image onto the SVG canvas
+                graphics.DrawImage(raster, new Point(0, 0));
+
+                // Finalize SVG image
+                using (SvgImage svgImage = graphics.EndRecording())
+                {
+                    svgImage.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)

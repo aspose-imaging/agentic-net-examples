@@ -1,17 +1,20 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Png; // Adjust if using other formats
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded paths
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+        // Password longer than four characters
+        string password = "StrongPass123";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,40 +25,51 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
+            // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access digital signature methods
-                var rasterImage = image as RasterImage;
-                if (rasterImage == null)
+                // Try to embed the digital signature based on the actual image type
+                if (image is RasterImage rasterImage)
                 {
-                    Console.Error.WriteLine("Loaded image does not support raster operations.");
+                    rasterImage.EmbedDigitalSignature(password);
+                    rasterImage.Save(outputPath);
+                }
+                else if (image is RasterCachedImage cachedImage)
+                {
+                    cachedImage.EmbedDigitalSignature(password);
+                    cachedImage.Save(outputPath);
+                }
+                else if (image is RasterCachedMultipageImage multiPageImage)
+                {
+                    multiPageImage.EmbedDigitalSignature(password);
+                    multiPageImage.Save(outputPath);
+                }
+                else
+                {
+                    Console.Error.WriteLine("Unsupported image type for digital signature embedding.");
                     return;
                 }
-
-                // Embed a digital signature with a password longer than four characters
-                string password = "StrongPass123";
-                rasterImage.EmbedDigitalSignature(password);
-
-                // Save the signed image
-                rasterImage.Save(outputPath);
             }
 
-            // Load the signed image to verify the signature
-            using (Image signedImage = Image.Load(outputPath))
+            // Load the saved image to verify the signature
+            using (Image savedImage = Image.Load(outputPath))
             {
-                var rasterImage = signedImage as RasterImage;
-                if (rasterImage == null)
+                bool isSigned = false;
+
+                if (savedImage is RasterImage savedRaster)
                 {
-                    Console.Error.WriteLine("Signed image does not support raster operations.");
-                    return;
+                    isSigned = savedRaster.IsDigitalSigned(password);
+                }
+                else if (savedImage is RasterCachedImage savedCached)
+                {
+                    isSigned = savedCached.IsDigitalSigned(password);
+                }
+                else if (savedImage is RasterCachedMultipageImage savedMulti)
+                {
+                    isSigned = savedMulti.IsDigitalSigned(password);
                 }
 
-                string password = "StrongPass123";
-                bool isSigned = rasterImage.IsDigitalSigned(password);
-                Console.WriteLine(isSigned
-                    ? "Digital signature verified successfully."
-                    : "Digital signature verification failed.");
+                Console.WriteLine($"Signature valid: {isSigned}");
             }
         }
         catch (Exception ex)

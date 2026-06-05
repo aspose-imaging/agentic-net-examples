@@ -2,59 +2,56 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            // Hard‑coded input and output directories
+            string inputFolder = @"C:\Images\Input";
+            string outputFolder = @"C:\Images\Output";
 
-            if (!Directory.Exists(inputDirectory))
+            // Get all BMP files in the input folder
+            string[] bmpFiles = Directory.GetFiles(inputFolder, "*.bmp");
+
+            foreach (string inputPath in bmpFiles)
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
-
-            foreach (string inputPath in files)
-            {
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+                // Load the BMP image
                 using (Image image = Image.Load(inputPath))
                 {
-                    image.Resize(1024, 768);
-
-                    var rasterOptions = new SvgRasterizationOptions
+                    // Resize to 1024x768 using the RasterImage Resize method
+                    if (image is RasterImage rasterImage)
                     {
-                        BackgroundColor = Color.White,
-                        PageSize = image.Size
-                    };
+                        rasterImage.Resize(1024, 768);
+                    }
 
+                    // Build the output SVG file path
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".svg");
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Prepare SVG save options with rasterization settings matching the new size
                     var svgOptions = new SvgOptions
                     {
-                        VectorRasterizationOptions = rasterOptions
+                        VectorRasterizationOptions = new SvgRasterizationOptions
+                        {
+                            PageSize = new Size(1024, 768)
+                        }
                     };
 
+                    // Save the resized image as SVG
                     image.Save(outputPath, svgOptions);
                 }
             }

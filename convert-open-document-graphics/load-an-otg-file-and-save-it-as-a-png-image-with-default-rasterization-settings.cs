@@ -9,18 +9,18 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input\\sample.otg";
-            string outputPath = "output\\sample.png";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\sample.png";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
@@ -29,9 +29,10 @@ class Program
                 // Prepare PNG save options with default rasterization settings
                 PngOptions pngOptions = new PngOptions();
 
-                // Configure rasterization options to match the source image size
+                // Configure rasterization options for vector formats
                 OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
                 {
+                    // Use the source image size as the page size
                     PageSize = image.Size
                 };
                 pngOptions.VectorRasterizationOptions = rasterOptions;

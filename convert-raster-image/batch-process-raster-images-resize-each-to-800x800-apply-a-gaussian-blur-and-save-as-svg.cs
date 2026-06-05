@@ -10,11 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = "InputImages";
-            string outputDir = "OutputSvgs";
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-            // Validate input directory
             if (!Directory.Exists(inputDir))
             {
                 Directory.CreateDirectory(inputDir);
@@ -22,50 +20,38 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
+            if (!Directory.Exists(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
 
-            // Get all files in the input directory
             string[] files = Directory.GetFiles(inputDir);
-
             foreach (string inputPath in files)
             {
-                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare output path with .svg extension
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".svg");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + ".svg");
 
-                // Ensure output directory for the file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the raster image
-                using (Image image = Image.Load(inputPath))
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    // Cast to RasterImage for processing
-                    RasterImage raster = (RasterImage)image;
+                    image.Resize(800, 800, ResizeType.NearestNeighbourResample);
+                    image.Filter(image.Bounds, new GaussianBlurFilterOptions() { Radius = 5 });
 
-                    // Resize to 800x800
-                    raster.Resize(800, 800);
-
-                    // Apply Gaussian blur (radius 5, sigma 4.0)
-                    raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                    // Prepare SVG save options with vector rasterization settings
-                    var svgOptions = new SvgOptions();
-                    var vectorOptions = new SvgRasterizationOptions
+                    SvgOptions saveOptions = new SvgOptions
                     {
-                        PageSize = raster.Size
+                        VectorRasterizationOptions = new SvgRasterizationOptions
+                        {
+                            PageSize = image.Size
+                        }
                     };
-                    svgOptions.VectorRasterizationOptions = vectorOptions;
-
-                    // Save as SVG
-                    image.Save(outputPath, svgOptions);
+                    image.Save(outputPath, saveOptions);
                 }
             }
         }

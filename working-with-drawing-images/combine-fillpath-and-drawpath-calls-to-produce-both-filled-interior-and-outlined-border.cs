@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
 
@@ -10,43 +9,35 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded output path
         string outputPath = @"C:\temp\output.png";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Set up PNG options with a file create source bound to the output path
-            var pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a new image canvas
+            var pngOptions = new PngOptions();
             using (Image image = Image.Create(pngOptions, 500, 500))
             {
-                // Initialize graphics for drawing
-                var graphics = new Graphics(image);
-                graphics.Clear(Color.Wheat);
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // Build a graphics path with a rectangle and an ellipse
-                var path = new GraphicsPath();
-                var figure = new Figure();
+                GraphicsPath path = new GraphicsPath();
+                Figure figure = new Figure();
                 figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
-                figure.AddShape(new EllipseShape(new RectangleF(100f, 100f, 200f, 200f)));
+                figure.AddShape(new EllipseShape(new RectangleF(100f, 100f, 200f, 150f)));
                 path.AddFigure(figure);
 
-                // Fill the interior of the path
-                using (var brush = new SolidBrush(Color.Yellow))
+                using (SolidBrush brush = new SolidBrush())
                 {
+                    brush.Color = Color.LightBlue;
+                    brush.Opacity = 100;
                     graphics.FillPath(brush, path);
                 }
 
-                // Draw the outline of the same path
-                graphics.DrawPath(new Pen(Color.Black, 2), path);
+                Pen outlinePen = new Pen(Color.Red, 2);
+                graphics.DrawPath(outlinePen, path);
 
-                // Save the image (output path already bound)
-                image.Save();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -55,3 +46,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When creating a PNG badge that uses a GraphicsPath to define a light‑blue rectangle and ellipse and needs a red Pen outline to match corporate branding.
+ * 2. When generating image‑based reports that require filled geometric annotations drawn with a SolidBrush and then outlined with a Pen to improve readability on a white background.
+ * 3. When producing dynamic map markers saved as PNG files where the marker shape is filled via FillPath and highlighted with DrawPath to ensure visibility over varying map tiles.
+ * 4. When building thumbnail previews for a design tool that display complex shapes using FillPath for interior shading and DrawPath for a crisp border, helping users recognize the shape at a glance.
+ * 5. When exporting user‑drawn shapes from a C# application to a PNG image, using FillPath and DrawPath together so the shapes retain their fill color and a sharp outline for high‑resolution printing.
+ */

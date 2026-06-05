@@ -33,19 +33,25 @@ class Program
         }
     }
 
-    // Asynchronous conversion of a WMF file to JPEG
-    private static Task ConvertWmfToJpegAsync(string inputPath, string outputPath)
+    // Asynchronous conversion using Task.Run
+    static Task ConvertWmfToJpegAsync(string inputPath, string outputPath)
     {
         return Task.Run(() =>
         {
             // Load the WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare JPEG save options (default settings)
-                var jpegOptions = new JpegOptions();
+                // Configure rasterization options based on the source image size
+                var rasterOptions = new WmfRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
 
-                // Ensure the output directory exists (redundant safety)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Set JPEG options with the rasterization settings
+                var jpegOptions = new JpegOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
                 // Save the image as JPEG
                 image.Save(outputPath, jpegOptions);

@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
@@ -13,15 +14,28 @@ class Program
             string inputPath = "Input/sample.cdr";
             string outputPath = "Output/sample.png";
 
+            string inputDirectory = Path.GetDirectoryName(inputPath);
+            string outputDirectory = Path.GetDirectoryName(outputPath);
+
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
                 var pngOptions = new PngOptions
                 {
@@ -29,12 +43,12 @@ class Program
                     VectorRasterizationOptions = new CdrRasterizationOptions
                     {
                         BackgroundColor = Color.Transparent,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height
                     }
                 };
 
-                image.Save(outputPath, pngOptions);
+                cdr.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)

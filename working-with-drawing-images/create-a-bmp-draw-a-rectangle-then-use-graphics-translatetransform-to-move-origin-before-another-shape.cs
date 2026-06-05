@@ -2,48 +2,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Output BMP file path (hard‑coded)
-            string outputPath = @"c:\temp\output.bmp";
+            // Output BMP file path
+            string outputPath = @"C:\temp\output.bmp";
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a file source bound to the output path
-            Source source = new FileCreateSource(outputPath, false);
+            // Set BMP options and bind to output file
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Set BMP options with the source
-            BmpOptions bmpOptions = new BmpOptions() { Source = source };
-
-            // Create a BMP canvas of size 400x300
-            using (Image image = Image.Create(bmpOptions, 400, 300))
+            // Create image canvas
+            using (Image image = Image.Create(bmpOptions, 500, 500))
             {
-                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
-
-                // Optional: clear background to white
                 graphics.Clear(Color.White);
 
-                // Draw first rectangle (blue)
+                // Draw first rectangle at original origin
                 Pen pen1 = new Pen(Color.Blue, 3);
-                graphics.DrawRectangle(pen1, new Rectangle(50, 50, 200, 100));
+                graphics.DrawRectangle(pen1, new Rectangle(50, 50, 200, 150));
 
-                // Translate the origin by (100,150)
-                graphics.TranslateTransform(100, 150);
+                // Translate origin
+                graphics.TranslateTransform(100, 100);
 
-                // Draw second rectangle (red) after translation
+                // Draw second rectangle after translation
                 Pen pen2 = new Pen(Color.Red, 3);
-                graphics.DrawRectangle(pen2, new Rectangle(0, 0, 100, 50));
+                graphics.DrawRectangle(pen2, new Rectangle(0, 0, 200, 150));
 
-                // Save the bound image (output file is already bound via source)
+                // Save the image (output already bound)
                 image.Save();
             }
         }
@@ -53,3 +48,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a BMP report thumbnail with multiple positioned rectangles for a CAD preview using Aspose.Imaging for .NET.
+ * 2. When creating a printable label image where the first rectangle defines the margin and TranslateTransform shifts the origin to place a barcode box relative to the margin.
+ * 3. When building a UI mock‑up that visualizes component boundaries by drawing a base rectangle and then moving the coordinate system to overlay a highlighted area without recalculating absolute coordinates.
+ * 4. When automating the production of game level maps that require a background grid rectangle and a translated obstacle rectangle saved as a 24‑bit BMP file.
+ * 5. When developing a diagnostic tool that captures screen regions into BMP files, using TranslateTransform to align subsequent shapes with a reference point for easier comparison.
+ */

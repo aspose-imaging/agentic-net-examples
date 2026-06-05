@@ -3,44 +3,41 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = @"C:\temp\highres.png";
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            string outputPath = @"C:\temp\highres.png";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             PngOptions pngOptions = new PngOptions();
             pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            int width = 2000;
-            int height = 2000;
-
-            using (Image image = Image.Create(pngOptions, width, height))
+            using (Image image = Image.Create(pngOptions, 1200, 1200))
             {
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                Pen borderPen = new Pen(Color.Black, 5);
-                graphics.DrawRectangle(borderPen, new Rectangle(10, 10, width - 20, height - 20));
-
-                Pen ellipsePen = new Pen(Color.Red, 3);
-                graphics.DrawEllipse(ellipsePen, new Rectangle(100, 100, width - 200, height - 200));
-
-                Pen linePen = new Pen(Color.Blue, 2);
-                graphics.DrawLine(linePen, new Point(10, 10), new Point(width - 10, height - 10));
-
-                Pen polyPen = new Pen(Color.Green, 4);
-                graphics.DrawPolygon(polyPen, new[]
+                graphics.DrawRectangle(new Pen(Color.Blue, 5), new Rectangle(100, 100, 400, 300));
+                graphics.DrawEllipse(new Pen(Color.Red, 5), new Rectangle(600, 100, 300, 300));
+                graphics.DrawLine(new Pen(Color.Green, 3), new Point(50, 50), new Point(1150, 1150));
+                graphics.DrawPolygon(new Pen(Color.Purple, 4), new[]
                 {
-                    new Point(width / 2, 100),
-                    new Point(100, height - 100),
-                    new Point(width - 100, height - 100)
+                    new Point(200, 800),
+                    new Point(400, 600),
+                    new Point(600, 800),
+                    new Point(500, 1000),
+                    new Point(300, 1000)
                 });
+
+                using (SolidBrush brush = new SolidBrush(Color.Yellow))
+                {
+                    graphics.FillRectangle(brush, new Rectangle(100, 500, 200, 150));
+                }
 
                 image.Save();
             }
@@ -51,3 +48,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a high‑resolution PNG at 300 DPI with vector shapes for print‑ready marketing brochures, they can use this Aspose.Imaging for .NET code to draw crisp rectangles, ellipses, lines and filled polygons.
+ * 2. When an engineering application must export a scalable diagram such as a circuit layout as a lossless PNG file that preserves line thickness and color accuracy, this C# snippet creates a 1200 × 1200 pixel image with vector‑based drawing commands.
+ * 3. When a reporting tool requires a high‑quality chart or infographic embedded in a PDF, the code demonstrates how to programmatically render vector graphics onto a PNG canvas using Aspose.Imaging’s Graphics, Pen, and SolidBrush classes.
+ * 4. When an automated testing framework needs to produce visual verification assets with exact pixel dimensions and DPI settings, the example shows how to create and save a 300 DPI image file that can be compared pixel‑by‑pixel.
+ * 5. When a desktop application wants to generate custom icons or UI assets on the fly, this C# example illustrates how to draw geometric shapes with specific colors and line widths and save them as a high‑resolution PNG using Aspose.Imaging.
+ */

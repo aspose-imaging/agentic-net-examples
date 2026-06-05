@@ -9,43 +9,58 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"\\shared\images";
-            string outputDirectory = @"C:\temp\pdfs";
-
-            // Ensure the base output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // Process each BMP file in the input directory
-            foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.bmp"))
+            // Hardcoded list of BMP files on a network share
+            string[] inputPaths = new string[]
             {
-                // Verify the input file exists
+                @"\\fileserver\shared\images\image1.bmp",
+                @"\\fileserver\shared\images\image2.bmp",
+                @"\\fileserver\shared\images\image3.bmp"
+            };
+
+            // Corresponding output PDF paths
+            string[] outputPaths = new string[]
+            {
+                @"C:\temp\pdfs\image1.pdf",
+                @"C:\temp\pdfs\image2.pdf",
+                @"C:\temp\pdfs\image3.pdf"
+            };
+
+            for (int i = 0; i < inputPaths.Length; i++)
+            {
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
+
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Determine output PDF path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load BMP image and convert to PDF
+                // Load BMP image
                 using (Image image = Image.Load(inputPath))
                 {
-                    var pdfOptions = new PdfOptions();
-                    // Additional PDF options can be set here if needed
+                    // Prepare PDF options
+                    PdfOptions pdfOptions = new PdfOptions();
+
+                    // Save as PDF to the specified file
                     image.Save(outputPath, pdfOptions);
                 }
 
-                // Simulate streaming the PDF back to the client
+                // Optional: stream the generated PDF back to the client (simulated here)
+                // In a real server scenario, you would write the stream to the HTTP response.
                 using (FileStream pdfStream = new FileStream(outputPath, FileMode.Open, FileAccess.Read))
                 {
-                    // In a real server scenario, the stream would be written to the HTTP response.
-                    Console.WriteLine($"Streamed PDF for '{inputPath}'. Size: {pdfStream.Length} bytes.");
+                    // Example: read the PDF into a memory stream (could be sent over network)
+                    using (MemoryStream memory = new MemoryStream())
+                    {
+                        pdfStream.CopyTo(memory);
+                        // For demonstration, output the size of the PDF
+                        Console.WriteLine($"Generated PDF '{outputPath}' ({memory.Length} bytes)");
+                    }
                 }
             }
         }

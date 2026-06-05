@@ -1,22 +1,24 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded paths and password
-        string inputDirectory = @"C:\Images\Input";
-        string outputDirectory = @"C:\Images\Output";
-        string password = "SharedPassword123";
-
         try
         {
-            // Get all PNG files in the input directory
-            string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
+            // Hardcoded input and output directories
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            foreach (string inputPath in pngFiles)
+            // Get all PNG files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
+
+            foreach (string inputPath in files)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -25,28 +27,31 @@ class Program
                     return;
                 }
 
-                // Prepare output path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_signed.png";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                // Determine output path
+                string fileName = Path.GetFileName(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName);
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image, embed the digital signature, and save
-                using (Image image = Image.Load(inputPath))
+                // Load image as RasterImage, embed signature, and save
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to access EmbedDigitalSignature
-                    if (image is RasterImage rasterImage)
+                    // Embed digital signature with shared password
+                    image.EmbedDigitalSignature("sharedPassword");
+
+                    // Prepare PNG save options bound to the output file
+                    PngOptions saveOptions = new PngOptions
                     {
-                        rasterImage.EmbedDigitalSignature(password);
-                        rasterImage.Save(outputPath);
-                        Console.WriteLine($"Signed successfully: {inputPath} -> {outputPath}");
-                    }
-                    else
-                    {
-                        Console.Error.WriteLine($"Unsupported image type for file: {inputPath}");
-                    }
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+
+                    // Save the signed image
+                    image.Save(outputPath, saveOptions);
                 }
+
+                // Log success
+                Console.WriteLine($"Signed: {outputPath}");
             }
         }
         catch (Exception ex)

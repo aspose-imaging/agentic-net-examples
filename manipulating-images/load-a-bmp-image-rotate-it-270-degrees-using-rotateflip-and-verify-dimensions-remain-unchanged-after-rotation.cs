@@ -8,31 +8,30 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\temp\sample.bmp";
-            string outputPath = @"C:\temp\sample_rotated_270.bmp";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.bmp";
+            string outputPath = @"C:\Images\output_rotated.bmp";
 
-            // Verify the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
+            // Load BMP image, rotate, verify dimensions, and save
             using (Image image = Image.Load(inputPath))
             {
-                // Remember original dimensions
                 int originalWidth = image.Width;
                 int originalHeight = image.Height;
 
                 // Rotate 270 degrees clockwise without flipping
                 image.RotateFlip(RotateFlipType.Rotate270FlipNone);
 
-                // Verify dimensions remain unchanged after rotation
+                // Verify dimensions remain unchanged
                 if (image.Width != originalWidth || image.Height != originalHeight)
                 {
                     Console.Error.WriteLine("Dimensions changed after rotation.");

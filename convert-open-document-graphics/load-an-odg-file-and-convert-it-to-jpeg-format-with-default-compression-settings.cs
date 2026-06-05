@@ -7,12 +7,13 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "sample.odg";
-        string outputPath = "sample_converted.jpg";
-
+        // Wrap the whole logic to catch unexpected errors
         try
         {
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\temp\sample.odg";
+            string outputPath = @"C:\temp\sample.jpg";
+
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,13 +27,16 @@ class Program
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Save the image as JPEG using default compression settings
-                image.Save(outputPath, new JpegOptions());
+                // Use default JPEG options (default compression settings)
+                var jpegOptions = new JpegOptions();
+
+                // Save the image as JPEG
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
+            // Report any runtime exception without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

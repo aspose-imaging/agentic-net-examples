@@ -11,38 +11,62 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.gif";
-            string outputPath = @"C:\temp\output.gif";
+            // Hardcoded input GIF frame paths
+            string frame1 = "frame1.gif";
+            string frame2 = "frame2.gif";
+            string frame3 = "frame3.gif";
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Hardcoded output animated GIF path
+            string outputPath = "output.gif";
+
+            // Validate input files
+            if (!File.Exists(frame1))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {frame1}");
+                return;
+            }
+            if (!File.Exists(frame2))
+            {
+                Console.Error.WriteLine($"File not found: {frame2}");
+                return;
+            }
+            if (!File.Exists(frame3))
+            {
+                Console.Error.WriteLine($"File not found: {frame3}");
                 return;
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the GIF image
-            using (Image image = Image.Load(inputPath))
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                GifImage gif = (GifImage)image;
+                Directory.CreateDirectory(outputDir);
+            }
 
-                // Adjust gamma for each frame to balance luminance
-                float gammaValue = 1.2f; // example gamma coefficient
-                for (int i = 0; i < gif.PageCount; i++)
+            // Load the first frame, adjust gamma, and create the animated GIF with its first frame
+            using (GifImage firstGif = (GifImage)Image.Load(frame1))
+            {
+                firstGif.AdjustGamma(0.8f); // Adjust gamma for balanced luminance
+
+                using (GifImage animatedGif = new GifImage((GifFrameBlock)firstGif.ActiveFrame))
                 {
-                    // Set active frame
-                    gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
-                    // Apply gamma correction
-                    gif.AdjustGamma(gammaValue);
-                }
+                    // Load and add remaining frames
+                    string[] otherFrames = { frame2, frame3 };
+                    foreach (string path in otherFrames)
+                    {
+                        using (GifImage frameGif = (GifImage)Image.Load(path))
+                        {
+                            frameGif.AdjustGamma(0.8f);
+                            animatedGif.AddPage((RasterImage)frameGif);
+                        }
+                    }
 
-                // Save the adjusted animated GIF
-                GifOptions options = new GifOptions();
-                gif.Save(outputPath, options);
+                    // Set infinite looping (0 means infinite in GIF spec)
+                    animatedGif.LoopsCount = 0;
+
+                    // Save the animated GIF with default options
+                    animatedGif.Save(outputPath, new GifOptions());
+                }
             }
         }
         catch (Exception ex)

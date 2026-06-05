@@ -1,62 +1,49 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        // Path safety checks
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the source image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // ------------------------------------------------------------
-                // 1. Create a mask using the Magic Wand tool based on a point.
-                // ------------------------------------------------------------
-                // Example point (120, 100); you can change coordinates as needed.
-                var magicMask = MagicWandTool.Select(image, new MagicWandSettings(120, 100));
+                // Create a mask using Magic Wand at a specific point
+                var magicMask = MagicWandTool
+                    .Select(image, new MagicWandSettings(100, 100));
 
-                // ------------------------------------------------------------
-                // 2. Create a manually defined polygon mask.
-                //    For simplicity, we use a RectangleMask to represent the polygon.
-                // ------------------------------------------------------------
-                // Rectangle positioned at (200,200) with width=150 and height=100.
-                var polygonMask = new RectangleMask(200, 200, 150, 100);
+                // Manually create a polygon mask (approximated here with a rectangle mask)
+                var polygonMask = new RectangleMask(150, 150, 200, 100);
 
-                // ------------------------------------------------------------
-                // 3. Combine the two masks using Union.
-                // ------------------------------------------------------------
-                var compositeMask = magicMask.Union(polygonMask);
+                // Combine the Magic Wand mask with the manual polygon mask using Union
+                var combinedMask = magicMask.Union(polygonMask);
 
                 // Apply the combined mask to the image
-                compositeMask.Apply();
+                combinedMask.Apply();
 
-                // ------------------------------------------------------------
-                // 4. Save the resulting image.
-                // ------------------------------------------------------------
-                image.Save(outputPath, new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha
-                });
+                // Save the resulting image with transparency support
+                image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
             }
         }
         catch (Exception ex)

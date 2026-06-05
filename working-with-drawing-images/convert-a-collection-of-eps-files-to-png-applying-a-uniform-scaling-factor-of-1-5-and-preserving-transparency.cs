@@ -10,15 +10,27 @@ class Program
     {
         try
         {
-            // Hardcoded collection of EPS input files and corresponding PNG output files
-            var files = new (string input, string output)[]
+            // Hardcoded collection of EPS input files
+            string[] inputPaths = new string[]
             {
-                ("C:\\Images\\input1.eps", "C:\\Images\\output1.png"),
-                ("C:\\Images\\input2.eps", "C:\\Images\\output2.png")
+                @"C:\Images\Input1.eps",
+                @"C:\Images\Input2.eps",
+                @"C:\Images\Input3.eps"
             };
 
-            foreach (var (inputPath, outputPath) in files)
+            // Corresponding output PNG files
+            string[] outputPaths = new string[]
             {
+                @"C:\Images\Output1.png",
+                @"C:\Images\Output2.png",
+                @"C:\Images\Output3.png"
+            };
+
+            for (int i = 0; i < inputPaths.Length; i++)
+            {
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
+
                 // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
@@ -26,20 +38,20 @@ class Program
                     return;
                 }
 
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EPS image
+                // Load EPS image
                 using (var image = (EpsImage)Image.Load(inputPath))
                 {
-                    // Compute new dimensions applying a scaling factor of 1.5
-                    int newWidth = (int)(image.Width * 1.5);
-                    int newHeight = (int)(image.Height * 1.5);
+                    // Calculate new dimensions with scaling factor 1.5
+                    int newWidth = (int)Math.Round(image.Width * 1.5);
+                    int newHeight = (int)Math.Round(image.Height * 1.5);
 
-                    // Resize the image (LanczosResample provides high-quality scaling)
+                    // Resize using default interpolation (NearestNeighbourResample)
                     image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
-                    // Save the resized image as PNG, preserving transparency
+                    // Save as PNG preserving transparency
                     var pngOptions = new PngOptions();
                     image.Save(outputPath, pngOptions);
                 }
@@ -51,3 +63,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a graphic designer needs to generate high‑resolution web‑ready PNG thumbnails from a batch of vector EPS logos while enlarging them by 150 % and keeping the transparent background intact.
+ * 2. When an e‑commerce platform must automatically convert product illustration EPS files into PNG assets for mobile apps, applying a uniform 1.5 scaling factor to match the device’s pixel density and preserve alpha channel transparency.
+ * 3. When a publishing workflow requires bulk conversion of EPS artwork into PNG images for print‑on‑demand PDFs, scaling each image proportionally by 1.5 and ensuring the background remains transparent for overlay use.
+ * 4. When a GIS application imports EPS map symbols and needs to export them as scaled PNG icons with preserved transparency for use in interactive web maps.
+ * 5. When a marketing automation script processes a collection of EPS banners, resizing them by 150 % and saving them as PNG files so they can be displayed on email newsletters without losing transparent areas.
+ */

@@ -10,9 +10,8 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input path
             string inputPath = "input.apng";
-            string outputDirectory = "frames";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,29 +20,34 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // Load the animated APNG
+            // Load the APNG image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to ApngImage to access frames
-                ApngImage apng = (ApngImage)image;
-
-                // Iterate over each frame and save as a separate PNG
-                for (int i = 0; i < apng.PageCount; i++)
+                ApngImage apng = image as ApngImage;
+                if (apng == null)
                 {
-                    // Retrieve the frame
-                    ApngFrame frame = (ApngFrame)apng.Pages[i];
+                    Console.Error.WriteLine("The loaded file is not an APNG image.");
+                    return;
+                }
 
-                    // Build output file path
-                    string outputPath = Path.Combine(outputDirectory, $"frame_{i:D4}.png");
+                int frameCount = apng.PageCount;
 
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Iterate through each frame and save as a separate PNG file
+                for (int i = 0; i < frameCount; i++)
+                {
+                    // Retrieve the frame as a RasterImage
+                    using (RasterImage frame = (RasterImage)apng.Pages[i])
+                    {
+                        // Hardcoded output path for each frame
+                        string outputPath = $"frame_{i:D4}.png";
 
-                    // Save the frame as PNG
-                    frame.Save(outputPath, new PngOptions());
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                        // Save the frame as PNG
+                        frame.Save(outputPath, new PngOptions());
+                    }
                 }
             }
         }

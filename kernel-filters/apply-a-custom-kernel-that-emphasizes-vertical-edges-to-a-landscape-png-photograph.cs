@@ -1,36 +1,28 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
-                // Define a vertical edge detection kernel (Sobel operator)
                 double[,] kernel = new double[,]
                 {
                     { -1, 0, 1 },
@@ -38,18 +30,11 @@ class Program
                     { -1, 0, 1 }
                 };
 
-                // Apply the custom convolution filter to the entire image
-                raster.Filter(raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
 
-                // Prepare PNG save options with a FileCreateSource
-                PngOptions saveOptions = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                raster.Filter(raster.Bounds, filterOptions);
 
-                // Save the processed image
-                image.Save(outputPath, saveOptions);
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -58,3 +43,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer wants to enhance the vertical outlines of a landscape photograph stored as a PNG file before publishing it on a website, they can apply this vertical edge convolution filter using Aspose.Imaging for .NET.
+ * 2. When building an automated image preprocessing pipeline that prepares raw PNG scenery shots for computer‑vision analysis, the code can be used to emphasize vertical edges to improve feature detection.
+ * 3. When creating a desktop application that lets users sharpen the silhouette of trees and buildings in a PNG panorama, the vertical edge kernel can be applied with C# and Aspose.Imaging to produce a clearer visual effect.
+ * 4. When generating printable map overlays where vertical contours such as cliffs or road edges need to be highlighted, developers can run this filter on the PNG raster to accentuate those lines.
+ * 5. When integrating a batch‑processing tool that converts a folder of landscape PNG images into edge‑enhanced versions for artistic filters, the code provides a simple way to apply the vertical edge convolution across each image.
+ */

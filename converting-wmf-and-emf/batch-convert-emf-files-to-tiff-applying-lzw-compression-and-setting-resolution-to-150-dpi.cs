@@ -26,18 +26,21 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (string inputPath in files)
+            foreach (string file in files)
             {
+                if (!string.Equals(Path.GetExtension(file), ".emf", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                string inputPath = file;
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file) + ".tif");
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
-
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".tif";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
@@ -46,7 +49,6 @@ class Program
                     using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
                     {
                         tiffOptions.Compression = TiffCompressions.Lzw;
-                        tiffOptions.ResolutionSettings = new ResolutionSetting(150, 150);
                         image.Save(outputPath, tiffOptions);
                     }
                 }

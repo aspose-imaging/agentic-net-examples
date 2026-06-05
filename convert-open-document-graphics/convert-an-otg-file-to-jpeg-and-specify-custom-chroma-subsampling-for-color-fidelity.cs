@@ -22,22 +22,20 @@ class Program
 
             using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                using (JpegOptions jpegOptions = new JpegOptions())
+                JpegOptions jpegOptions = new JpegOptions
                 {
-                    jpegOptions.HorizontalSampling = new byte[] { 2, 1, 1 };
-                    jpegOptions.VerticalSampling = new byte[] { 2, 1, 1 };
-                    jpegOptions.ColorType = JpegCompressionColorMode.YCbCr;
-
-                    VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
+                    Quality = 90,
+                    HorizontalSampling = new byte[] { 2, 2, 2 },
+                    VerticalSampling = new byte[] { 2, 2, 2 },
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Aspose.Imaging.Color.White,
                         PageWidth = image.Width,
                         PageHeight = image.Height
-                    };
-                    jpegOptions.VectorRasterizationOptions = vectorOptions;
+                    }
+                };
 
-                    image.Save(outputPath, jpegOptions);
-                }
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)

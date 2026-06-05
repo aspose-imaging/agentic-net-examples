@@ -2,54 +2,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Wrap the whole logic in a try/catch to handle unexpected errors gracefully.
         try
         {
-            // Hardcoded input BMP file path.
-            string inputPath = @"C:\temp\input.bmp";
+            // Hardcoded input and output paths
+            string inputPath = "sample.bmp";
+            string outputPath = "output/sample.jpg";
 
-            // Hardcoded output JPEG file path.
-            string outputPath = @"C:\temp\output.jpg";
-
-            // Desired JPEG quality (1-100).
-            int quality = 85;
-
-            // Verify that the input file exists.
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary).
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure JPEG save options.
-            JpegOptions saveOptions = new JpegOptions
-            {
-                Quality = quality,
-                BitsPerChannel = 8,
-                CompressionType = JpegCompressionMode.Progressive,
-                ResolutionSettings = new ResolutionSetting(96.0, 96.0),
-                ResolutionUnit = ResolutionUnit.Inch
-            };
-
-            // Load the BMP image and save it as JPEG using the configured options.
+            // Load BMP image
             using (Image image = Image.Load(inputPath))
             {
-                image.Save(outputPath, saveOptions);
+                // Configure JPEG save options with desired quality
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    Quality = 85 // Adjust quality (1-100) as needed
+                };
+
+                // Save as JPEG
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
         {
-            // Output any unexpected error message.
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a C# developer needs to reduce the file size of high‑resolution BMP screenshots for faster web page loading, they can use Aspose.Imaging to convert the BMP to a JPEG with a configurable quality setting.
+ * 2. When building a .NET desktop application that archives scanned documents, the code enables automatic conversion of BMP scans to JPEGs while preserving visual fidelity by adjusting the compression level.
+ * 3. When creating an email‑sending service in C#, the developer can transform BMP attachments into JPEG format with a chosen quality to stay within attachment size limits.
+ * 4. When a photo‑management tool must generate thumbnail previews, the BMP images can be batch‑converted to JPEG using Aspose.Imaging’s JpegOptions to control the balance between image clarity and storage space.
+ * 5. When integrating a cloud‑based image‑processing API, the code allows the service to accept BMP uploads and return JPEG outputs with a specified quality, ensuring consistent results across different client applications.
+ */

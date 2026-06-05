@@ -9,25 +9,17 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
-
-            // List of raster image file names to process
-            string[] files = new[]
+            // Hardcoded input files and output directory
+            string[] inputFiles = new[]
             {
-                "image1.png",
-                "image2.jpg",
-                "image3.bmp"
-                // add more file names as needed
+                @"C:\Images\image1.png",
+                @"C:\Images\image2.jpg",
+                @"C:\Images\image3.bmp"
             };
+            string outputDirectory = @"C:\Images\SvgOutput";
 
-            foreach (string fileName in files)
+            foreach (string inputPath in inputFiles)
             {
-                // Build full input and output paths
-                string inputPath = Path.Combine(inputDir, fileName);
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".svg");
-
                 // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
@@ -35,27 +27,28 @@ class Program
                     return;
                 }
 
+                // Determine output SVG path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
+
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the raster image
+                // Load, resize, and save as SVG
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Resize to 1024x1024 (ignoring aspect ratio)
+                    // Resize to 1024x1024
                     image.Resize(1024, 1024);
 
                     // Prepare SVG save options with rasterization settings
-                    var rasterizationOptions = new SvgRasterizationOptions
+                    var svgOptions = new SvgOptions();
+                    var rasterOptions = new SvgRasterizationOptions
                     {
-                        PageSize = image.Size // set page size to match resized image
+                        PageSize = image.Size // Set page size to match resized image
                     };
+                    svgOptions.VectorRasterizationOptions = rasterOptions;
 
-                    var svgOptions = new SvgOptions
-                    {
-                        VectorRasterizationOptions = rasterizationOptions
-                    };
-
-                    // Save as SVG
+                    // Save the image as SVG
                     image.Save(outputPath, svgOptions);
                 }
             }

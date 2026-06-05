@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -13,7 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\output\sample.jpg";
+            string outputPath = @"C:\Images\output.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -28,16 +27,18 @@ class Program
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
+                // Prepare rasterization options for OTG
+                OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
+
                 // Configure JPEG options with progressive compression
-                var jpegOptions = new JpegOptions
+                JpegOptions jpegOptions = new JpegOptions
                 {
                     CompressionType = JpegCompressionMode.Progressive,
                     Quality = 90,
-                    // Set vector rasterization options for OTG conversion
-                    VectorRasterizationOptions = new OtgRasterizationOptions
-                    {
-                        PageSize = image.Size
-                    }
+                    VectorRasterizationOptions = otgRasterizationOptions
                 };
 
                 // Save as JPEG

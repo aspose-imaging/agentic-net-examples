@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.bmp";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.svg";
+            string outputPath = @"C:\Images\output.bmp";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,14 +28,14 @@ class Program
             using (SvgImage svgImage = new SvgImage(inputPath))
             {
                 // Configure rasterization options with a white background
-                var rasterizationOptions = new SvgRasterizationOptions
+                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
                 {
                     BackgroundColor = Aspose.Imaging.Color.White,
-                    PageSize = svgImage.Size
+                    PageSize = svgImage.Size // Preserve original size
                 };
 
-                // Set BMP save options and attach rasterization options
-                var bmpOptions = new BmpOptions
+                // Set up BMP save options and attach rasterization options
+                BmpOptions bmpOptions = new BmpOptions
                 {
                     VectorRasterizationOptions = rasterizationOptions
                 };

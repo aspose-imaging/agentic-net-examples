@@ -1,20 +1,17 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample.png";
-        string outputPath = @"c:\temp\sample.Sharpened.png";
-
         try
         {
+            // Hardcoded input and output file paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,21 +25,14 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering
-                RasterImage rasterImage = (RasterImage)image;
+                // Cast to RasterImage for filtering
+                RasterImage raster = (RasterImage)image;
 
-                // Prepare convolution filter options using the built‑in sharpen kernel (3x3)
-                // Parameters: kernel matrix, factor, bias
-                var sharpenOptions = new ConvolutionFilterOptions(
-                    ConvolutionFilter.Sharpen3x3, // 3x3 sharpen kernel
-                    factor: 1.0,                  // scaling factor
-                    bias: 0);                     // bias
+                // Apply Sharpen filter with kernel size 5 and sigma 4.0
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
 
-                // Apply the filter to the whole image
-                rasterImage.Filter(rasterImage.Bounds, sharpenOptions);
-
-                // Save the processed image as PNG
-                rasterImage.Save(outputPath);
+                // Save the filtered image
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -51,3 +41,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to enhance the details of a scanned PNG document before OCR by applying a sharpen filter with a 5‑pixel kernel and sigma 4.0.
+ * 2. When an e‑commerce platform wants to automatically improve product photo clarity by sharpening PNG images during upload using Aspose.Imaging’s ConvolutionFilter.
+ * 3. When a desktop application processes user‑generated PNG screenshots and requires a quick C# routine to sharpen edges for better visual inspection.
+ * 4. When a batch image‑processing service must ensure consistent sharpness across PNG assets by programmatically loading, filtering, and saving them with Aspose.Imaging.
+ * 5. When a game developer prepares PNG texture atlases and needs to apply a predefined sharpen filter to enhance texture details before packaging.
+ */

@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -22,13 +21,20 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
+                PdfOptions pdfOptions = new PdfOptions
                 {
-                    pdfOptions.KeepMetadata = true;
-                    cmxImage.Save(outputPath, pdfOptions);
-                }
+                    KeepMetadata = true,
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = cmx.Width,
+                        PageHeight = cmx.Height
+                    }
+                };
+
+                cmx.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)

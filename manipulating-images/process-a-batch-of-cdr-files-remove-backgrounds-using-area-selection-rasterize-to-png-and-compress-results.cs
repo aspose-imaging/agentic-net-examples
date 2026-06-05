@@ -3,64 +3,60 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\Input";
-            string outputDirectory = @"C:\Images\Output";
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-            // Ensure output directory exists (will also handle subfolders)
-            Directory.CreateDirectory(outputDirectory);
-
-            // Get all CDR files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.cdr");
-
-            foreach (string inputPath in inputFiles)
+            if (!Directory.Exists(inputDir))
             {
-                // Verify input file exists
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            string[] files = Directory.GetFiles(inputDir, "*.cdr");
+            foreach (var inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Determine output file path (same name with .png extension)
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                // Ensure the directory for the output file exists
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the CDR image
-                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+                using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
                 {
-                    // Remove background (using default settings)
-                    cdrImage.RemoveBackground();
+                    cdr.RemoveBackground(new RemoveBackgroundSettings());
 
-                    // Set up PNG rasterization options
-                    var pngOptions = new PngOptions
+                    PngOptions pngOptions = new PngOptions
                     {
-                        // Optional: set compression level if needed
-                        // CompressionLevel = PngCompressionLevel.BestCompression,
-
-                        // Configure vector rasterization for CDR
-                        VectorRasterizationOptions = new CdrRasterizationOptions
-                        {
-                            // Example: preserve original size
-                            PageWidth = 0,
-                            PageHeight = 0,
-                            // Optional: set background color for rasterized image
-                            BackgroundColor = Color.White
-                        }
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        PngCompressionLevel = PngCompressionLevel.ZipLevel9,
+                        Source = new FileCreateSource(outputPath, false)
                     };
 
-                    // Save the rasterized PNG image
-                    cdrImage.Save(outputPath, pngOptions);
+                    pngOptions.VectorRasterizationOptions = new CdrRasterizationOptions
+                    {
+                        BackgroundColor = Color.Transparent,
+                        PageSize = cdr.Size
+                    };
+
+                    cdr.Save(outputPath, pngOptions);
                 }
             }
         }

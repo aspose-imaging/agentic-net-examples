@@ -3,62 +3,38 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input\\sample.djvu";
-        string outputPath = "Output\\output.gif";
-
         try
         {
+            string inputPath = "Input/sample.djvu";
+            string outputDirectory = "Output";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(outputDirectory);
 
             using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvu = new DjvuImage(stream))
             {
-                using (DjvuImage djvu = new DjvuImage(stream))
+                int pagesToConvert = Math.Min(10, djvu.PageCount);
+
+                for (int i = 0; i < pagesToConvert; i++)
                 {
-                    int pagesToConvert = Math.Min(10, djvu.PageCount);
-                    GifImage gif = null;
-
-                    for (int i = 0; i < pagesToConvert; i++)
+                    using (DjvuPage page = (DjvuPage)djvu.Pages[i])
                     {
-                        DjvuPage page = (DjvuPage)djvu.Pages[i];
-                        if (!page.IsCached)
-                            page.CacheData();
+                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.gif");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        GifFrameBlock frame = new GifFrameBlock((ushort)page.Width, (ushort)page.Height);
-                        frame.FrameTime = 200; // custom delay (in hundredths of a second)
-
-                        Graphics graphics = new Graphics(frame);
-                        graphics.DrawImage(page, 0, 0);
-
-                        if (i == 0)
-                        {
-                            gif = new GifImage(frame);
-                        }
-                        else
-                        {
-                            gif.AddPage(frame);
-                        }
-                    }
-
-                    if (gif != null)
-                    {
-                        using (gif)
-                        {
-                            GifOptions gifOptions = new GifOptions();
-                            gif.Save(outputPath, gifOptions);
-                        }
+                        var gifOptions = new GifOptions();
+                        page.Save(outputPath, gifOptions);
                     }
                 }
             }
@@ -69,3 +45,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to extract the first ten pages of a DjVu document and generate GIF images for a web gallery preview.
+ * 2. When an application must batch convert DjVu pages to GIF files with a custom frame delay for inclusion in an e‑learning module.
+ * 3. When a document management system requires converting DjVu scans into lightweight GIF thumbnails to improve browsing performance.
+ * 4. When a legacy workflow reads a DjVu file stream in C# and saves up to ten pages as GIFs for archival in a .NET environment.
+ * 5. When a developer wants to automate the conversion of DjVu pages to GIF format to embed them in email newsletters without using external tools.
+ */

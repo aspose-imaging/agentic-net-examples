@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.svg";
-        string outputPath = @"C:\temp\output.bmp";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.svg";
+            string outputPath = @"C:\temp\output.bmp";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,19 +27,18 @@ class Program
             // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options for low quality (no smoothing)
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                // Prepare rasterization options with low quality (no smoothing)
+                var rasterizationOptions = new SvgRasterizationOptions
                 {
                     PageSize = image.Size,
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.None,
-                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                    BackgroundColor = Aspose.Imaging.Color.White
+                    SmoothingMode = SmoothingMode.None
                 };
 
-                // Set BMP save options with the rasterization options
-                BmpOptions bmpOptions = new BmpOptions
+                // Prepare BMP save options and attach rasterization options
+                var bmpOptions = new BmpOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    BitsPerPixel = 24,
+                    VectorRasterizationOptions = rasterizationOptions
                 };
 
                 // Save as BMP

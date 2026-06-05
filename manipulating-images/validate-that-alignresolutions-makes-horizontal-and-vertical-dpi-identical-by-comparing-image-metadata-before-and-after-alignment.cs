@@ -11,7 +11,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Images\sample.tif";
-            string outputPath = @"C:\Images\output\aligned_sample.tif";
+            string outputPath = @"C:\Images\sample_aligned.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,7 +26,6 @@ class Program
             // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to TiffImage to access AlignResolutions
                 TiffImage tiff = image as TiffImage;
                 if (tiff == null)
                 {
@@ -34,7 +33,7 @@ class Program
                     return;
                 }
 
-                // Capture DPI values before alignment
+                // Capture resolution before alignment
                 double hBefore = tiff.HorizontalResolution;
                 double vBefore = tiff.VerticalResolution;
                 Console.WriteLine($"Before AlignResolutions: Horizontal DPI = {hBefore}, Vertical DPI = {vBefore}");
@@ -42,22 +41,16 @@ class Program
                 // Align horizontal and vertical resolutions
                 tiff.AlignResolutions();
 
-                // Capture DPI values after alignment
+                // Capture resolution after alignment
                 double hAfter = tiff.HorizontalResolution;
                 double vAfter = tiff.VerticalResolution;
                 Console.WriteLine($"After AlignResolutions: Horizontal DPI = {hAfter}, Vertical DPI = {vAfter}");
 
-                // Validate that DPI values are now identical
-                if (Math.Abs(hAfter - vAfter) < 0.0001)
-                {
-                    Console.WriteLine("Validation passed: Horizontal and vertical DPI are identical after alignment.");
-                }
-                else
-                {
-                    Console.WriteLine("Validation failed: DPI values are still different after alignment.");
-                }
+                // Verify that the resolutions are now identical
+                bool identical = Math.Abs(hAfter - vAfter) < 0.0001;
+                Console.WriteLine($"Resolution identical after alignment: {identical}");
 
-                // Save the modified image
+                // Save the aligned image
                 tiff.Save(outputPath);
             }
         }

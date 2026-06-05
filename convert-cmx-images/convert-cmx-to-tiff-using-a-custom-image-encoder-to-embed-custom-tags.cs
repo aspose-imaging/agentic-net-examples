@@ -2,7 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
@@ -10,31 +11,32 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.cmx";
-            string outputPath = @"C:\temp\output.tif";
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Images\sample.cmx";
+            string outputPath = @"C:\Images\output.tif";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CMX image
-            using (Image image = Image.Load(inputPath))
+            using (Image cmxImage = Image.Load(inputPath))
             {
-                // Prepare TIFF save options
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                // Configure TIFF save options
+                TiffOptions tiffOptions = new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default);
 
-                // Example of embedding a custom tag (using a standard tag for illustration)
+                // Example of embedding a custom tag: set a known TIFF field (ImageDescription)
+                // In a real scenario you could use AddTag/AddTags to add proprietary tags.
                 tiffOptions.ImageDescription = "Converted from CMX with custom metadata";
 
-                // Save as TIFF with the specified options
-                image.Save(outputPath, tiffOptions);
+                // Save the image as TIFF using the configured options
+                cmxImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)

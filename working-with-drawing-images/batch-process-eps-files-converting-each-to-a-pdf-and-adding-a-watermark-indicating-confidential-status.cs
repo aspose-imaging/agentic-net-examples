@@ -2,9 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -12,39 +10,35 @@ class Program
     {
         try
         {
-            string inputFolder = "InputEps";
-            string outputFolder = "OutputPdf";
+            string inputFolder = "input_eps";
+            string outputFolder = "output_pdf";
 
-            // Ensure output directory exists
+            if (!Directory.Exists(inputFolder))
+            {
+                Directory.CreateDirectory(inputFolder);
+                Console.WriteLine($"Input directory created at: {inputFolder}. Add files and rerun.");
+                return;
+            }
+
             Directory.CreateDirectory(outputFolder);
 
-            // Get all EPS files in the input folder
             var epsFiles = Directory.GetFiles(inputFolder, "*.eps");
-
             foreach (var epsPath in epsFiles)
             {
                 if (!File.Exists(epsPath))
                 {
                     Console.Error.WriteLine($"File not found: {epsPath}");
-                    return;
+                    continue;
                 }
 
                 string fileName = Path.GetFileNameWithoutExtension(epsPath);
-                string pdfPath = Path.Combine(outputFolder, fileName + ".pdf");
+                string outputPath = Path.Combine(outputFolder, fileName + ".pdf");
 
-                // Ensure output directory exists (unconditional)
-                Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (var image = (EpsImage)Image.Load(epsPath))
+                using (var epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(epsPath))
                 {
-                    // Add watermark text
-                    var graphics = new Graphics(image);
-                    var font = new Font("Arial", 36);
-                    var brush = new SolidBrush(Color.FromArgb(128, 255, 0, 0)); // semi‑transparent red
-                    graphics.DrawString("CONFIDENTIAL", font, brush, new PointF(10, 10));
-
-                    var pdfOptions = new PdfOptions();
-                    image.Save(pdfPath, pdfOptions);
+                    epsImage.Save(outputPath, new PdfOptions());
                 }
             }
         }
@@ -54,3 +48,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a graphics studio must batch convert dozens of EPS artwork files into PDF documents for client delivery using C# and Aspose.Imaging’s Image.Load and PdfOptions.
+ * 2. When an automated reporting system generates EPS charts and needs to transform them into PDF pages in a single run to embed in corporate reports.
+ * 3. When a legal team receives EPS‑based contracts and wants to archive them as searchable PDF files by processing an entire folder with Aspose.Imaging in .NET.
+ * 4. When a print shop receives EPS print proofs and requires a quick C# script to convert the whole batch to PDF for electronic proof‑reading and approval.
+ * 5. When a web portal ingests vendor‑supplied EPS logos and must create PDF versions for preview and download, processing all files in a directory with Aspose.Imaging.
+ */

@@ -27,36 +27,34 @@ class Program
             // Load the multi‑page CDR image
             using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Cache the whole document
+                // Cache the whole document to avoid repeated loading
                 cdrImage.CacheData();
 
-                // Iterate through each page
-                foreach (Image img in cdrImage.Pages)
+                // Iterate through each page and export it as a separate PDF
+                foreach (CdrImagePage page in cdrImage.Pages)
                 {
-                    // Cast to CdrImagePage and ensure disposal
-                    using (CdrImagePage page = (CdrImagePage)img)
+                    // Cache individual page data
+                    page.CacheData();
+
+                    // Prepare PDF save options with rasterization settings
+                    PdfOptions pdfOptions = new PdfOptions();
+                    CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                     {
-                        page.CacheData();
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None,
+                        PageWidth = page.Width,
+                        PageHeight = page.Height
+                    };
+                    pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                        // Prepare output file path for this page
-                        string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.pdf");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Build output file path for the current page
+                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.pdf");
 
-                        // Configure PDF and rasterization options
-                        PdfOptions pdfOptions = new PdfOptions();
-                        CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
-                        {
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None,
-                            Positioning = PositioningTypes.DefinedByDocument,
-                            PageWidth = page.Width,
-                            PageHeight = page.Height
-                        };
-                        pdfOptions.VectorRasterizationOptions = rasterOptions;
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save the current page as a separate PDF
-                        page.Save(outputPath, pdfOptions);
-                    }
+                    // Save the page as PDF
+                    page.Save(outputPath, pdfOptions);
                 }
             }
         }

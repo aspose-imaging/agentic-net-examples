@@ -25,41 +25,55 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                var maskingOptions = new AutoMaskingGraphCutOptions
+                // Export options for the masking process
+                using (PngOptions exportOptions = new PngOptions
                 {
-                    Args = new AutoMaskingArgs
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    Source = new StreamSource(new MemoryStream())
+                })
+                {
+                    // Auto‑masking options with user‑defined strokes
+                    AutoMaskingGraphCutOptions options = new AutoMaskingGraphCutOptions
                     {
-                        ObjectsPoints = new Point[][]
+                        CalculateDefaultStrokes = false,
+                        FeatheringRadius = 3,
+                        Method = SegmentationMethod.GraphCut,
+                        Decompose = false,
+                        ExportOptions = exportOptions,
+                        BackgroundReplacementColor = Color.Transparent,
+                        Args = new AutoMaskingArgs
                         {
-                            new Point[] { new Point(30, 30), new Point(30, 60), new Point(60, 30) },
-                            new Point[] { new Point(120, 120), new Point(150, 150) }
+                            ObjectsPoints = new Point[][]
+                            {
+                                // Background strokes
+                                new Point[] { new Point(50, 50), new Point(60, 50) },
+                                // Foreground strokes
+                                new Point[] { new Point(100, 100), new Point(110, 110) }
+                            }
                         }
-                    },
-                    CalculateDefaultStrokes = false,
-                    FeatheringRadius = 3,
-                    Method = SegmentationMethod.GraphCut,
-                    Decompose = false,
-                    BackgroundReplacementColor = Color.Transparent,
-                    ExportOptions = new PngOptions
+                    };
+
+                    using (MaskingResult maskingResult = new ImageMasking(image).Decompose(options))
                     {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new StreamSource(new MemoryStream())
+                        using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
+                        {
+                            // Align DPI (make horizontal and vertical resolution equal)
+                            double dpi = Math.Max(foreground.HorizontalResolution, foreground.VerticalResolution);
+                            foreground.HorizontalResolution = dpi;
+                            foreground.VerticalResolution = dpi;
+
+                            // Save the masked image as PNG
+                            using (PngOptions saveOptions = new PngOptions
+                            {
+                                ColorType = PngColorType.TruecolorWithAlpha
+                            })
+                            {
+                                foreground.Save(outputPath, saveOptions);
+                            }
+                        }
                     }
-                };
-
-                using (MaskingResult maskingResult = new ImageMasking(sourceImage).Decompose(maskingOptions))
-                using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
-                {
-                    float targetDpi = (float)Math.Max(foreground.HorizontalResolution, foreground.VerticalResolution);
-                    foreground.HorizontalResolution = targetDpi;
-                    foreground.VerticalResolution = targetDpi;
-
-                    foreground.Save(outputPath, new PngOptions
-                    {
-                        ColorType = PngColorType.TruecolorWithAlpha
-                    });
                 }
             }
         }

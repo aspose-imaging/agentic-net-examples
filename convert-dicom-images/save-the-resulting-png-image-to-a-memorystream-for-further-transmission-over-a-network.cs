@@ -7,38 +7,40 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input path
-        string inputPath = @"C:\temp\sample.bmp";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
-            // Load the image from the file system
+            // Hardcoded input file path
+            string inputPath = @"C:\temp\sample.bmp";
+
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Load the image from the specified path
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PNG save options (default settings)
+                // Example operation: rotate the image 180 degrees around the X axis
+                image.RotateFlip(RotateFlipType.Rotate180FlipX);
+
+                // Set up PNG save options (default settings)
                 PngOptions pngOptions = new PngOptions();
 
-                // Save the image to a memory stream for network transmission
+                // Save the processed image to a memory stream
                 using (MemoryStream memoryStream = new MemoryStream())
                 {
                     image.Save(memoryStream, pngOptions);
 
-                    // Example usage: display the size of the generated PNG data
-                    Console.WriteLine($"PNG image size in bytes: {memoryStream.Length}");
-                    
-                    // The memoryStream now contains the PNG data and can be sent over a network
+                    // The memory stream now contains the PNG data ready for transmission
+                    Console.WriteLine($"PNG image saved to memory stream, size: {memoryStream.Length} bytes");
                 }
             }
         }
         catch (Exception ex)
         {
+            // Output any unexpected errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
