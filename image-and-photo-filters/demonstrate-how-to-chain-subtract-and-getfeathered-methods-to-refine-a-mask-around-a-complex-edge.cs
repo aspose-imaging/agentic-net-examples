@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
@@ -26,18 +24,22 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image and refine the mask using Subtract and GetFeathered
+            // Load image and refine mask using Subtract and GetFeathered
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
                 MagicWandTool
-                    .Select(image, new MagicWandSettings(100, 100))               // initial selection
-                    .Subtract(new MagicWandSettings(150, 150) { Threshold = 30 }) // remove unwanted area
-                    .Subtract(new RectangleMask(200, 200, 50, 50))                // further subtraction with rectangle
-                    .GetFeathered(new FeatheringSettings() { Size = 5 })         // soften edges
-                    .Apply();                                                    // apply mask to the image
+                    .Select(image, new MagicWandSettings(845, 128))
+                    // Subtract unwanted regions
+                    .Subtract(new MagicWandSettings(1482, 346) { Threshold = 69 })
+                    .Subtract(new RectangleMask(0, 0, 800, 150))
+                    .Subtract(new RectangleMask(0, 380, 600, 220))
+                    // Feather the mask edges
+                    .GetFeathered(new FeatheringSettings() { Size = 3 })
+                    // Apply the refined mask to the image
+                    .Apply();
 
-                // Save the result as PNG with alpha channel
-                image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                // Save the result
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
