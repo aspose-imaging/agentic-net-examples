@@ -10,15 +10,16 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\Images\WMF";
-            string outputFolder = @"C:\Images\JPEG";
+            // Hardcoded list of WMF files to convert
+            string[] inputFiles = new[]
+            {
+                @"C:\Images\sample1.wmf",
+                @"C:\Images\sample2.wmf",
+                @"C:\Images\sample3.wmf"
+            };
 
-            // Get all WMF files in the input folder
-            string[] wmfFiles = Directory.GetFiles(inputFolder, "*.wmf");
-
-            // Process files in parallel
-            Parallel.ForEach(wmfFiles, inputPath =>
+            // Parallel conversion
+            Parallel.ForEach(inputFiles, inputPath =>
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -27,9 +28,8 @@ class Program
                     return;
                 }
 
-                // Determine output JPEG path
-                string outputPath = Path.Combine(outputFolder,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
+                // Determine output path (same folder, .jpg extension)
+                string outputPath = inputPath + ".jpg";
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -37,9 +37,12 @@ class Program
                 // Load WMF image and save as JPEG
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Use default JPEG options
                     var jpegOptions = new JpegOptions();
                     image.Save(outputPath, jpegOptions);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             });
         }
         catch (Exception ex)
