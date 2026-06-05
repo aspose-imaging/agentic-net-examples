@@ -3,7 +3,7 @@
   "platform": "net",
   "framework": "net9.0",
   "package_version": "26.5.0",
-  "total_examples": 2863,
+  "total_examples": 2866,
   "total_categories": 17,
   "last_updated": "2026-06-05",
   "categories": [
@@ -1061,8 +1061,11 @@
     },
     {
       "name": "convert-raster-image",
-      "file_count": 138,
+      "file_count": 141,
       "all_files": [
+        "28506-load-a-bmp-apply-a-median-filter-and-generate-a-pdf-with-the-filtered-image-centered-on-the-page.cs",
+        "28518-batch-process-bmp-files-applying-a-uniform-border-of-5-pixels-and-convert-each-to-pdf.cs",
+        "28529-batch-process-bmp-files-applying-a-10-brightness-increase-and-convert-each-brightened-image-to-svg.cs",
         "apply-a-gaussian-blur-filter-to-a-raster-image-then-convert-the-filtered-image-to-pdf.cs",
         "batch-convert-a-folder-of-raster-images-to-pdf-preserving-original-filenames-and-using-default-settings.cs",
         "batch-convert-bmp-files-to-pdf-naming-each-output-file-with-a-sequential-numeric-suffix.cs",
@@ -1203,6 +1206,9 @@
         "resize-a-raster-image-using-lanczos-resampling-then-convert-the-high-quality-result-to-pdf.cs"
       ],
       "files": [
+        "28506-load-a-bmp-apply-a-median-filter-and-generate-a-pdf-with-the-filtered-image-centered-on-the-page.cs",
+        "28518-batch-process-bmp-files-applying-a-uniform-border-of-5-pixels-and-convert-each-to-pdf.cs",
+        "28529-batch-process-bmp-files-applying-a-10-brightness-increase-and-convert-each-brightened-image-to-svg.cs",
         "apply-a-gaussian-blur-filter-to-a-raster-image-then-convert-the-filtered-image-to-pdf.cs",
         "batch-convert-a-folder-of-raster-images-to-pdf-preserving-original-filenames-and-using-default-settings.cs",
         "batch-convert-bmp-files-to-pdf-naming-each-output-file-with-a-sequential-numeric-suffix.cs",
@@ -1229,37 +1235,38 @@
         "batch-process-png-images-resizing-each-to-500x500-pixels-before-converting-all-to-individual-pdf-documents.cs",
         "batch-process-raster-images-resize-each-to-1024x1024-apply-a-median-filter-and-save-as-svg-files.cs",
         "batch-process-raster-images-resize-each-to-800x800-apply-a-gaussian-blur-and-save-as-svg.cs",
-        "convert-a-bmp-image-to-pdf-and-write-the-pdf-directly-to-an-http-response-stream.cs",
-        "convert-a-bmp-image-to-pdf-using-image-save-with-exportformats-pdf-enumeration-for-explicit-format-control.cs",
-        "convert-a-png-to-svg-then-use-the-svg-as-a-source-to-generate-a-high-resolution-pdf.cs",
-        "create-an-svgimage-from-a-bmp-set-a-custom-viewbox-and-save-the-vector-output-as-svg.cs"
+        "convert-a-bmp-image-to-pdf-and-write-the-pdf-directly-to-an-http-response-stream.cs"
       ],
       "required_namespaces": [
+        "Aspose.Imaging",
         "System",
         "System.IO",
-        "Aspose.Imaging",
         "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging.ImageFilters.FilterOptions",
         "Aspose.Imaging.FileFormats.Svg",
         "Aspose.Imaging.FileFormats.Svg.Graphics",
-        "Aspose.Imaging.FileFormats.Pdf",
         "Aspose.Imaging.FileFormats.Png",
+        "Aspose.Imaging.FileFormats.Pdf",
         "Aspose.Imaging.Brushes",
-        "Aspose.Imaging.Shapes",
         "Aspose.Imaging.Sources",
         "Aspose.Imaging.FileFormats.Bmp",
+        "Aspose.Imaging.Shapes",
         "System.Threading.Tasks",
+        "Aspose.Imaging.FileFormats.Jpeg",
         "Aspose.Imaging.FileFormats",
         "System.Net",
         "System.IO.Compression",
-        "System.Drawing",
-        "System.Linq"
+        "System.Text",
+        "System.Xml.Linq",
+        "System.Collections.Generic"
       ],
       "key_apis": [
         "BmpImage",
         "BmpOptions",
         "GaussianBlurFilterOptions",
         "Graphics",
+        "JpegImage",
+        "JpegOptions",
         "LinearGradientBrush",
         "LoadOptions",
         "MaskingOptions",
@@ -1277,7 +1284,7 @@
         "VectorRasterizationOptions"
       ],
       "more_files": {
-        "count": 108,
+        "count": 111,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.5.0/convert-raster-image"
       }
     },
