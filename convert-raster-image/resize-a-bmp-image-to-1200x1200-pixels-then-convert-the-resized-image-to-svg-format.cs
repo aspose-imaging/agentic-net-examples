@@ -2,17 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\source.bmp";
+        string outputPath = @"C:\Images\resized.svg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\source.bmp";
-            string outputPath = @"C:\Images\result.svg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,23 +24,22 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image, resize it, and save as SVG
+            // Load BMP image
             using (Image image = Image.Load(inputPath))
             {
                 // Resize to 1200x1200 pixels
                 image.Resize(1200, 1200);
 
-                // Prepare SVG saving options
+                // Prepare SVG save options with rasterization settings
                 var svgOptions = new SvgOptions
                 {
-                    // Optional: set rasterization options if needed
                     VectorRasterizationOptions = new SvgRasterizationOptions
                     {
                         PageSize = image.Size
                     }
                 };
 
-                // Save the resized image as SVG
+                // Save as SVG
                 image.Save(outputPath, svgOptions);
             }
         }
