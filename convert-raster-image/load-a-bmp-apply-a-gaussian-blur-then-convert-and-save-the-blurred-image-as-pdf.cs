@@ -1,19 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.bmp";
+        string outputPath = @"C:\Images\output.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.bmp";
-            string outputPath = "output.pdf";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -30,11 +30,13 @@ class Program
                 // Cast to RasterImage to apply filters
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur (radius 5, sigma 4.0)
+                // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
                 rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Save the blurred image as PDF
+                // Prepare PDF save options
                 PdfOptions pdfOptions = new PdfOptions();
+
+                // Save the blurred image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
