@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -12,53 +12,30 @@ class Program
         string inputPath = @"C:\Images\sample.odg";
         string outputPath = @"C:\Images\sample_blur.jpg";
 
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Cast to RasterImage to apply raster filters
+                RasterImage rasterImage = (RasterImage)image;
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Apply Gaussian blur filter to the whole image
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-            // Load the ODG vector image
-            using (Image odgImage = Image.Load(inputPath))
-            {
-                // Rasterize the ODG to a raster image (PNG in memory)
-                using (var memoryStream = new MemoryStream())
-                {
-                    var pngOptions = new PngOptions
-                    {
-                        // Set rasterization options for ODG
-                        VectorRasterizationOptions = new OdgRasterizationOptions
-                        {
-                            // Preserve original size
-                            PageSize = odgImage.Size,
-                            BackgroundColor = Color.White
-                        }
-                    };
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save rasterized image to memory stream
-                    odgImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
-
-                    // Load the rasterized image
-                    using (Image rasterImage = Image.Load(memoryStream))
-                    {
-                        // Cast to RasterImage to apply filters
-                        var raster = (RasterImage)rasterImage;
-
-                        // Apply Gaussian blur filter (size=5, sigma=4.0) to the whole image
-                        raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                        // Save the processed image as JPEG
-                        var jpegOptions = new JpegOptions();
-                        raster.Save(outputPath, jpegOptions);
-                    }
-                }
+                // Save the processed image as JPEG
+                JpegOptions jpegOptions = new JpegOptions();
+                rasterImage.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
