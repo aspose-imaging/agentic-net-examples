@@ -9,12 +9,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.emf";
-        string outputPath = @"C:\Images\output.emf";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.emf";
+            string outputPath = @"C:\Images\output.emf";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,20 +22,17 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the EMF image
             using (MetaImage metaImage = (MetaImage)Image.Load(inputPath))
             {
-                // Cast to EmfImage for record manipulation
-                EmfImage emfImage = (EmfImage)metaImage;
-
-                // Add a background rectangle with the desired color (e.g., white)
-                AddBackgroundRectangleEmf(emfImage, Color.White);
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Add a background rectangle of the specified color
+                AddBackgroundRectangleEmf((EmfImage)metaImage, Color.Blue);
 
                 // Save the modified image
-                emfImage.Save(outputPath);
+                metaImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -44,24 +41,17 @@ class Program
         }
     }
 
-    /// <summary>
-    /// Inserts a rectangle filled with the specified background color at the beginning of the EMF records.
-    /// This effectively replaces unwanted background regions with the chosen color.
-    /// </summary>
-    /// <param name="image">The EMF image to modify.</param>
-    /// <param name="color">The background color to apply.</param>
+    // Inserts a rectangle filled with the given color at the beginning of the EMF records
     public static void AddBackgroundRectangleEmf(EmfImage image, Color color)
     {
-        // Ensure the image data is cached before modifying records
         image.CacheData();
 
-        // If there are no records, nothing to modify
         if (image.Records.Count < 1)
         {
             return;
         }
 
-        // Create a rectangle that covers the entire image bounds
+        // Create rectangle covering the whole image bounds
         EmfRectangle rectangle = new EmfRectangle
         {
             Box = image.Header.EmfHeader.Bounds
@@ -71,7 +61,7 @@ class Program
         EmfCreateBrushIndirect brush = new EmfCreateBrushIndirect
         {
             LogBrush = new EmfLogBrushEx(),
-            IhBrush = 1 // Object handle index (starts at 1)
+            IhBrush = 1 // Object handle starts at 1
         };
         brush.LogBrush.Argb32ColorRef = color.ToArgb();
 
@@ -87,8 +77,7 @@ class Program
             ObjectHandle = 1
         };
 
-        // Insert the new records at the beginning of the record list
-        // Insert order: brush, select brush, rectangle, delete brush
+        // Insert records at the beginning of the EMF stream
         image.Records.Insert(1, brush);
         image.Records.Insert(2, selectObject);
         image.Records.Insert(3, rectangle);
