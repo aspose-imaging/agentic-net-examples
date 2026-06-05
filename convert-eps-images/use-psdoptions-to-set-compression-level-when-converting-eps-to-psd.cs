@@ -10,11 +10,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input and output file paths
             string inputPath = @"C:\temp\sample.eps";
             string outputPath = @"C:\temp\output.psd";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,17 +27,14 @@ class Program
             // Load the EPS image
             using (Image image = Image.Load(inputPath))
             {
-                // Set PSD options, including compression method
+                // Configure PSD saving options
                 PsdOptions psdOptions = new PsdOptions
                 {
-                    CompressionMethod = CompressionMethod.RLE, // Use RLE compression
-                    ColorMode = ColorModes.Rgb,                // Set color mode (optional)
-                    ChannelBitsCount = 8,                      // Bits per channel (optional)
-                    ChannelsCount = 4,                         // Number of channels (optional)
-                    Version = 6                                // PSD version (optional)
+                    // Set desired compression method (e.g., RLE)
+                    CompressionMethod = CompressionMethod.RLE
                 };
 
-                // Save the image as PSD with the specified options
+                // Save the image as PSD using the specified options
                 image.Save(outputPath, psdOptions);
             }
         }
