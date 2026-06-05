@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "sample.dicom";
-            string outputPath = "output\\sample.filtered.png";
+            string inputPath = "c:\\temp\\sample.dicom";
+            string outputPath = "c:\\temp\\sample.filtered.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -30,7 +30,7 @@ class Program
             {
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Apply a median filter (size = 5) to the whole image
+                // Apply a median filter (size 5) to the whole image
                 dicomImage.Filter(dicomImage.Bounds, new MedianFilterOptions(5));
 
                 // Save the filtered image as PNG
