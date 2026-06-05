@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.cmx";
-            string outputPath = @"C:\temp\output.jpg";
+            string inputPath = @"C:\Images\sample.cmx";
+            string outputPath = @"C:\Images\output.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -29,14 +29,14 @@ class Program
             using (Image image = Image.Load(inputPath, new CmxLoadOptions()))
             {
                 // Configure JPEG save options for progressive encoding
-                JpegOptions jpegOptions = new JpegOptions
+                JpegOptions saveOptions = new JpegOptions
                 {
                     CompressionType = JpegCompressionMode.Progressive,
                     Quality = 90 // optional quality setting
                 };
 
-                // Save as progressive JPEG
-                image.Save(outputPath, jpegOptions);
+                // Save as JPEG
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
