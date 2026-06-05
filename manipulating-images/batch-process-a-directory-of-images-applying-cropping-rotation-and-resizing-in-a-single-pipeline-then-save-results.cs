@@ -1,42 +1,41 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Core;
+using Aspose.Imaging.FileFormats.Core.Photo.Hdr;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
+        // Hard‑coded input and output directories
         string inputDirectory = @"C:\Images\Input";
         string outputDirectory = @"C:\Images\Output";
 
         try
         {
-            // Get all files in the input directory (you can adjust the search pattern as needed)
-            string[] inputFiles = Directory.GetFiles(inputDirectory);
-
-            foreach (string inputPath in inputFiles)
+            // Enumerate all files in the input directory
+            foreach (string filePath in Directory.GetFiles(inputDirectory))
             {
-                // Verify that the input file exists
-                if (!File.Exists(inputPath))
+                // Verify the input file exists
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
 
                 // Load the image
-                using (Image image = Image.Load(inputPath))
+                using (Image image = Image.Load(filePath))
                 {
                     // ----- Cropping -----
-                    // Crop to the central rectangle (half width and half height)
-                    var cropRect = new Rectangle(
-                        image.Width / 4,
-                        image.Height / 4,
-                        image.Width / 2,
-                        image.Height / 2);
+                    // Example: crop 10% from each side
+                    int cropLeft = image.Width / 10;
+                    int cropTop = image.Height / 10;
+                    int cropWidth = image.Width - 2 * cropLeft;
+                    int cropHeight = image.Height - 2 * cropTop;
+                    var cropRect = new Rectangle(cropLeft, cropTop, cropWidth, cropHeight);
                     image.Crop(cropRect);
 
                     // ----- Rotation -----
@@ -44,13 +43,14 @@ class Program
                     image.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
                     // ----- Resizing -----
-                    // Resize to 50% of the current dimensions
+                    // Example: resize to 50% of the current dimensions
                     int newWidth = image.Width / 2;
                     int newHeight = image.Height / 2;
+                    // The Resize method is part of Aspose.Imaging's image operations
                     image.Resize(newWidth, newHeight);
 
                     // Prepare output path
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_processed" + Path.GetExtension(inputPath);
+                    string outputFileName = Path.GetFileNameWithoutExtension(filePath) + "_processed" + Path.GetExtension(filePath);
                     string outputPath = Path.Combine(outputDirectory, outputFileName);
 
                     // Ensure the output directory exists
