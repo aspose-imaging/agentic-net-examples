@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
@@ -30,20 +31,36 @@ class Program
                 using (MemoryStream ms = new MemoryStream())
                 {
                     // Rasterize CDR to PNG in memory
-                    cdr.Save(ms, new PngOptions());
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        Source = new StreamSource(ms),
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
+                        }
+                    };
+                    cdr.Save(ms, pngOptions);
                     ms.Position = 0;
 
                     using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
+                        // Verify alpha channel
+                        if (raster.HasAlpha)
+                        {
+                            Console.WriteLine("Alpha channel is present.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("No alpha channel.");
+                        }
+
                         // Reduce brightness
                         raster.AdjustBrightness(-50);
 
-                        // Verify alpha channel
-                        bool hasAlpha = raster.HasAlpha;
-                        Console.WriteLine($"Alpha channel present: {hasAlpha}");
-
                         // Save as TIFF
                         TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                        tiffOptions.Source = new FileCreateSource(outputPath, false);
                         raster.Save(outputPath, tiffOptions);
                     }
                 }
