@@ -11,20 +11,16 @@ class Program
         // Load the source image.
         using (Image image = Image.Load(inputPath))
         {
-            // Prepare PNG save options (default settings).
+            // Prepare PNG save options (default settings are sufficient here).
             PngOptions pngOptions = new PngOptions();
 
-            // Create a memory stream to hold the PNG data.
-            MemoryStream pngStream = new MemoryStream();
+            // Save the image into a memory stream.
+            MemoryStream stream = new MemoryStream();
+            image.Save(stream, pngOptions);
 
-            // Save the image as PNG into the memory stream.
-            image.Save(pngStream, pngOptions);
-
-            // Reset the stream position so it can be read from the beginning.
-            pngStream.Position = 0;
-
-            // Return the stream to the caller (caller is responsible for disposing it).
-            return pngStream;
+            // Reset the position so the caller can read from the beginning.
+            stream.Position = 0;
+            return stream;
         }
     }
 
@@ -43,17 +39,17 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists.
+            // Perform the conversion.
+            MemoryStream pngStream = ConvertToPngMemoryStream(inputPath);
+            Console.WriteLine($"PNG stream length: {pngStream.Length}");
+
+            // Ensure the output directory exists before writing the file.
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Perform the conversion.
-            using (MemoryStream pngStream = ConvertToPngMemoryStream(inputPath))
+            // Write the memory stream to a physical PNG file (optional demonstration).
+            using (FileStream file = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
             {
-                // Write the PNG data from the memory stream to the output file.
-                using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                {
-                    pngStream.CopyTo(fileStream);
-                }
+                pngStream.CopyTo(file);
             }
         }
         catch (Exception ex)
