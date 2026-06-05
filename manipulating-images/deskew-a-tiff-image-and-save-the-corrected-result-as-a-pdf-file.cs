@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging;
 
 class Program
@@ -11,8 +10,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.tif";
-        string outputPath = @"C:\temp\output.pdf";
+        string inputPath = @"C:\Images\input.tif";
+        string outputPath = @"C:\Images\output.pdf";
 
         try
         {
@@ -29,11 +28,12 @@ class Program
             // Load the TIFF image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Deskew the image (do not resize, use LightGray as background)
+                // Deskew the image (do not resize, use light gray background)
                 image.NormalizeAngle(false, Color.LightGray);
 
                 // Save the corrected image as PDF
-                image.Save(outputPath, new PdfOptions());
+                var pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
