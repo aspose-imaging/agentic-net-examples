@@ -2,18 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Temp\input.jpg";
+        string outputPath = @"C:\Temp\output_300dpi.jpg";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output_300dpi.jpg";
-
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,20 +24,19 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source JPEG image
+            // Configure JPEG save options with 300 DPI resolution
+            JpegOptions saveOptions = new JpegOptions
+            {
+                // Set horizontal and vertical resolution to 300 dots per inch
+                ResolutionSettings = new ResolutionSetting(300.0, 300.0),
+                ResolutionUnit = ResolutionUnit.Inch,
+                // Optional: set quality to maximum
+                Quality = 100
+            };
+
+            // Load the source image and save it with the specified options
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG save options with 300 DPI resolution
-                JpegOptions saveOptions = new JpegOptions
-                {
-                    // Set horizontal and vertical DPI to 300
-                    ResolutionSettings = new ResolutionSetting(300.0, 300.0),
-                    ResolutionUnit = ResolutionUnit.Inch,
-                    // Optional: set quality to maximum
-                    Quality = 100
-                };
-
-                // Save the image with the specified DPI
                 image.Save(outputPath, saveOptions);
             }
         }

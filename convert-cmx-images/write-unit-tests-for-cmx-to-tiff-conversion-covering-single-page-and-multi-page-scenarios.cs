@@ -2,104 +2,79 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-class CmxToTiffTests
+class Program
 {
-    // Hardcoded input and output paths
-    private const string SinglePageInputPath = "TestData/single_page.cmx";
-    private const string SinglePageOutputPath = "Output/single_page.tiff";
-
-    private const string MultiPageInputPath = "TestData/multi_page.cmx";
-    private const string MultiPageOutputPath = "Output/multi_page.tiff";
-
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(SinglePageOutputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(MultiPageOutputPath));
+            // Hardcoded input and output paths for single‑page conversion
+            string singleInputPath = "single_page.cmx";
+            string singleOutputPath = "single_page.tif";
 
-            // Run tests
-            var tester = new CmxToTiffTests();
-            tester.TestSinglePageConversion();
-            tester.TestMultiPageConversion();
+            // Hardcoded input and output paths for multi‑page conversion
+            string multiInputPath = "multi_page.cmx";
+            string multiOutputPath = "multi_page.tif";
 
-            Console.WriteLine("All tests completed.");
+            // Validate input files
+            if (!File.Exists(singleInputPath))
+            {
+                Console.Error.WriteLine($"File not found: {singleInputPath}");
+                return;
+            }
+            if (!File.Exists(multiInputPath))
+            {
+                Console.Error.WriteLine($"File not found: {multiInputPath}");
+                return;
+            }
+
+            // Ensure output directories exist (guard against null/empty directory name)
+            string singleOutDir = Path.GetDirectoryName(singleOutputPath);
+            if (!string.IsNullOrWhiteSpace(singleOutDir))
+            {
+                Directory.CreateDirectory(singleOutDir);
+            }
+
+            string multiOutDir = Path.GetDirectoryName(multiOutputPath);
+            if (!string.IsNullOrWhiteSpace(multiOutDir))
+            {
+                Directory.CreateDirectory(multiOutDir);
+            }
+
+            // ---------- Single‑page CMX → TIFF ----------
+            using (CmxImage cmxSingle = (CmxImage)Image.Load(singleInputPath))
+            {
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                cmxSingle.Save(singleOutputPath, tiffOptions);
+            }
+
+            // Verify single‑page TIFF frames
+            using (TiffImage tiffSingle = (TiffImage)Image.Load(singleOutputPath))
+            {
+                Console.WriteLine($"Single‑page TIFF frames: {tiffSingle.Frames.Length}");
+            }
+
+            // ---------- Multi‑page CMX → TIFF ----------
+            using (CmxImage cmxMulti = (CmxImage)Image.Load(multiInputPath))
+            {
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                // Preserve all pages; no MultiPageOptions needed for full export
+                cmxMulti.Save(multiOutputPath, tiffOptions);
+            }
+
+            // Verify multi‑page TIFF frames
+            using (TiffImage tiffMulti = (TiffImage)Image.Load(multiOutputPath))
+            {
+                Console.WriteLine($"Multi‑page TIFF frames: {tiffMulti.Frames.Length}");
+            }
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
-        }
-    }
-
-    // Test conversion of a single‑page CMX file to TIFF
-    public void TestSinglePageConversion()
-    {
-        // Verify input file exists
-        if (!File.Exists(SinglePageInputPath))
-        {
-            Console.Error.WriteLine($"File not found: {SinglePageInputPath}");
-            return;
-        }
-
-        // Load the CMX image
-        using (Image cmxImage = Image.Load(SinglePageInputPath))
-        {
-            // Prepare TIFF save options (default format)
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-            // Save as TIFF
-            cmxImage.Save(SinglePageOutputPath, tiffOptions);
-        }
-
-        // Verify output file was created
-        if (File.Exists(SinglePageOutputPath))
-        {
-            Console.WriteLine("Single‑page conversion succeeded.");
-        }
-        else
-        {
-            Console.Error.WriteLine("Single‑page conversion failed: output file not found.");
-        }
-    }
-
-    // Test conversion of a multi‑page CMX file to TIFF (all pages)
-    public void TestMultiPageConversion()
-    {
-        // Verify input file exists
-        if (!File.Exists(MultiPageInputPath))
-        {
-            Console.Error.WriteLine($"File not found: {MultiPageInputPath}");
-            return;
-        }
-
-        // Load the CMX image
-        using (Image cmxImage = Image.Load(MultiPageInputPath))
-        {
-            // Prepare TIFF save options
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-            // If the source image supports multipage, export all pages
-            if (cmxImage is IMultipageImage multipage && multipage.PageCount > 1)
-            {
-                // Export all pages (0 to PageCount-1)
-                tiffOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, multipage.PageCount));
-            }
-
-            // Save as TIFF
-            cmxImage.Save(MultiPageOutputPath, tiffOptions);
-        }
-
-        // Verify output file was created
-        if (File.Exists(MultiPageOutputPath))
-        {
-            Console.WriteLine("Multi‑page conversion succeeded.");
-        }
-        else
-        {
-            Console.Error.WriteLine("Multi‑page conversion failed: output file not found.");
         }
     }
 }

@@ -2,60 +2,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageLoadOptions;
 using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input/sample.cmx";
-            string outputDirectory = "Output";
+            string inputPath = "sample.cmx";
+            string outputDirectory = "output";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load CMX image
-            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Load CMX image with optimal memory usage hint
+            var loadOptions = new CmxLoadOptions
+            {
+                OptimalMemoryUsage = true
+            };
+
+            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath, loadOptions))
             {
                 int pageIndex = 0;
-                foreach (Image page in cmx.Pages)
+                foreach (Image page in cmxImage.Pages)
                 {
-                    pageIndex++;
-                    string pageOutputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.png");
-
-                    // Ensure directory for the page exists (already created above)
-                    Directory.CreateDirectory(Path.GetDirectoryName(pageOutputPath));
-
-                    // Configure rasterization options for the page
-                    var pngOptions = new PngOptions
+                    // Cast to CmxImagePage for saving
+                    using (CmxImagePage cmxPage = (CmxImagePage)page)
                     {
-                        VectorRasterizationOptions = new CmxRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = page.Width,
-                            PageHeight = page.Height,
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None
-                        }
-                    };
+                        string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.png");
 
-                    // Save the page as PNG
-                    page.Save(pageOutputPath, pngOptions);
+                        // Ensure directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Release resources for the current page
-                    page.Dispose();
-                    GC.Collect();
+                        // Save the page as PNG
+                        cmxPage.Save(outputPath, new PngOptions());
+                    }
+
+                    pageIndex++;
                 }
             }
         }

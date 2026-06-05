@@ -6,15 +6,15 @@ using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.cmx";
+        string outputPath = @"C:\temp\sample.tif";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "input.cmx";
-            string outputPath = "output.tif";
-
-            // Verify that the input CMX file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,7 +27,7 @@ class Program
             // Load the CMX image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up default TIFF options (default compression)
+                // Prepare default TIFF save options
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
                 // Save the image as a single‑page TIFF

@@ -10,11 +10,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.png";
-            string outputPath = "C:\\temp\\output.tif";
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\temp\input.png";
+            string outputPath = @"C:\temp\output.tif";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,19 +27,19 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up TIFF options for CCITT Group 4 compression (monochrome)
+                // Configure TIFF options for 1‑bit monochrome with CCITT Group 4 compression
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.Compression = TiffCompressions.CcittFax4;          // CCITT Group 4
-                tiffOptions.BitsPerSample = new ushort[] { 1 };               // 1 bit per pixel
-                tiffOptions.Photometric = TiffPhotometrics.MinIsBlack;       // Black is 0
-                tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+                tiffOptions.BitsPerSample = new ushort[] { 1 };                         // 1 bit per pixel
+                tiffOptions.Compression = TiffCompressions.CcittFax4;                  // CCITT Group 4
+                tiffOptions.Photometric = TiffPhotometrics.MinIsBlack;                // Black = 0, White = 1
 
-                // Save the image as a TIFF with the specified options
+                // Save the image as a TIFF using the configured options
                 image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }

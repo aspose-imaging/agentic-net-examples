@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "sample.cmx";
-        string outputPath = "preview\\sample_thumbnail.png";
+        string inputPath = "input.cmx";
+        string outputPath = "output\\thumbnail.png";
 
         try
         {
@@ -22,16 +22,17 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CMX image
             using (CmxImage image = (CmxImage)Image.Load(inputPath))
             {
-                // Resize to thumbnail size (e.g., 100x100)
-                image.Resize(100, 100);
+                // Resize to thumbnail size (e.g., 200x200). Adjust as needed.
+                image.Resize(200, 200);
 
-                // Save the resized thumbnail as PNG
-                image.Save(outputPath, new PngOptions());
+                // Save the thumbnail as PNG
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)

@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -12,9 +11,9 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.cmx";
-        string outputPath = "output.tif";
+        string outputPath = "output/output.tif";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,17 +25,17 @@ class Program
 
         try
         {
-            // Load CMX image
-            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
+            // Load the CMX image
+            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
             {
-                // Rotate 90 degrees clockwise (no flip)
-                cmx.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                // Rotate/flip the image as needed
+                cmxImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
                 // Prepare TIFF save options
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
-                // Save rotated image as TIFF
-                cmx.Save(outputPath, tiffOptions);
+                // Save the rotated image as TIFF
+                cmxImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)

@@ -12,7 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\temp\input.jpg";
-            string outputPath = @"C:\temp\output.tif";
+            string outputPath = @"C:\temp\output_lzw.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,26 +27,26 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure TIFF options for LZW compression
+                // Set up TIFF options with LZW compression
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 tiffOptions.Compression = TiffCompressions.Lzw;
                 tiffOptions.Predictor = TiffPredictor.Horizontal; // improves LZW compression
 
-                // Save the image as TIFF with the specified options
+                // Save the image as TIFF using the specified options
                 image.Save(outputPath, tiffOptions);
             }
 
             // Compare file sizes to verify reduction
             long originalSize = new FileInfo(inputPath).Length;
-            long tiffSize = new FileInfo(outputPath).Length;
+            long newSize = new FileInfo(outputPath).Length;
 
-            if (tiffSize < originalSize)
+            if (newSize < originalSize)
             {
-                Console.WriteLine($"Success: TIFF size reduced from {originalSize} to {tiffSize} bytes.");
+                Console.WriteLine($"Success: File size reduced from {originalSize} bytes to {newSize} bytes.");
             }
             else
             {
-                Console.WriteLine($"Warning: TIFF size ({tiffSize} bytes) is not smaller than original ({originalSize} bytes).");
+                Console.WriteLine($"Warning: Output file size ({newSize} bytes) is not smaller than original ({originalSize} bytes).");
             }
         }
         catch (Exception ex)
