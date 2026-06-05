@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ProgressManagement;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ProgressManagement;
 
 class Program
 {
@@ -13,71 +13,51 @@ class Program
         string inputDirectory = @"C:\InputDicom";
         string outputDirectory = @"C:\OutputPng";
 
-        // Overall progress reporter
-        IProgress<double> overallProgress = new Progress<double>(p =>
-            Console.WriteLine($"Overall progress: {p:F2}%"));
+        // Progress reporter using IProgress<T>
+        IProgress<ProgressEventHandlerInfo> progress = new Progress<ProgressEventHandlerInfo>(info =>
+        {
+            Console.WriteLine($"{info.EventType}: {info.Value}/{info.MaxValue}");
+        });
 
         try
         {
             // Get all DICOM files in the input directory
             string[] dicomFiles = Directory.GetFiles(inputDirectory, "*.dcm");
 
-            int totalFiles = dicomFiles.Length;
-            int processedFiles = 0;
-
             foreach (string inputPath in dicomFiles)
             {
-                // Input file existence check
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Progress handler for loading the DICOM image
-                LoadOptions loadOptions = new LoadOptions
+                // Load the DICOM image with progress reporting
+                using (DicomImage dicomImage = (DicomImage)Image.Load(
+                    inputPath,
+                    new LoadOptions { ProgressEventHandler = progress.Report }))
                 {
-                    ProgressEventHandler = info =>
-                    {
-                        // Report load progress as a percentage of the current file
-                        double percent = (double)info.Value / info.MaxValue * 100.0;
-                        Console.WriteLine($"Loading {Path.GetFileName(inputPath)}: {percent:F2}%");
-                    }
-                };
-
-                // Load the DICOM image
-                using (Image image = Image.Load(inputPath, loadOptions))
-                {
-                    // Cast to DicomImage to access pages
-                    DicomImage dicomImage = (DicomImage)image;
-
+                    // Process each page of the DICOM image
                     foreach (DicomPage page in dicomImage.DicomPages)
                     {
-                        // Build output file name
-                        string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{page.Index}.png";
-                        string outputPath = Path.Combine(outputDirectory, outputFileName);
+                        // Build output PNG file path
+                        string baseName = Path.GetFileNameWithoutExtension(inputPath);
+                        string outputPath = Path.Combine(
+                            outputDirectory,
+                            $"{baseName}_{page.Index}.png");
 
                         // Ensure output directory exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Progress handler for saving the PNG page
-                        PngOptions pngOptions = new PngOptions
+                        // Save the page as PNG with progress reporting
+                        var pngOptions = new PngOptions
                         {
-                            ProgressEventHandler = info =>
-                            {
-                                double percent = (double)info.Value / info.MaxValue * 100.0;
-                                Console.WriteLine($"Saving {outputFileName}: {percent:F2}%");
-                            }
+                            ProgressEventHandler = progress.Report
                         };
-
-                        // Save the page as PNG
                         page.Save(outputPath, pngOptions);
                     }
                 }
-
-                // Update overall progress after each file
-                processedFiles++;
-                overallProgress.Report((double)processedFiles / totalFiles * 100.0);
             }
         }
         catch (Exception ex)
