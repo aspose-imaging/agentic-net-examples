@@ -6,14 +6,14 @@ using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.bmp";
+        string outputPath = "output.svg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.svg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,30 +21,29 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            var outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir ?? ".");
-
-            // Load raster image
+            // Load the raster image
             using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
+                // Create an SVG graphics context with the same dimensions as the raster image
                 int width = raster.Width;
                 int height = raster.Height;
                 int dpi = 96;
+                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-                // Create SVG graphics context
-                var graphics = new SvgGraphics2D(width, height, dpi);
+                // Create a pen with a dash pattern
+                Pen dashedPen = new Pen(Color.Black, 2);
+                dashedPen.DashPattern = new float[] { 5, 5 }; // 5 units dash, 5 units gap
 
-                // Create a pen with dash pattern
-                Pen pen = new Pen(Color.Black, 2);
-                pen.DashPattern = new float[] { 5, 5 };
+                // Draw a diagonal line using the dashed pen
+                graphics.DrawLine(dashedPen, 0, 0, width, height);
 
-                // Draw a rectangle with dashed border
-                graphics.DrawRectangle(pen, 0, 0, width, height);
-
-                // Finalize SVG image
+                // Obtain the final SVG image
                 using (SvgImage svgImage = graphics.EndRecording())
                 {
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the SVG file
                     svgImage.Save(outputPath);
                 }
             }
