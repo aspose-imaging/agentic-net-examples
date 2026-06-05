@@ -2,35 +2,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.psd";
+        string outputPath = "output.png";
+
+        // Validate input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.psd";
-            string outputPath = "output.png";
-
-            if (!File.Exists(inputPath))
+            // Load the PSD image
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Cast to RasterImage for processing
+                RasterImage raster = (RasterImage)image;
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Deskew the image (do not resize canvas, fill background with white)
+                raster.NormalizeAngle(false, Color.White);
 
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
-            {
-                raster.NormalizeAngle(false, Color.LightGray);
+                // Adjust brightness (positive value brightens)
                 raster.AdjustBrightness(30);
 
-                PngOptions pngOptions = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                // Prepare PNG save options
+                PngOptions pngOptions = new PngOptions();
 
+                // Save the processed image as PNG
                 raster.Save(outputPath, pngOptions);
             }
         }
