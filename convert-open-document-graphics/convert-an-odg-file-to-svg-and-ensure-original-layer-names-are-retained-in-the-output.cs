@@ -9,7 +9,7 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hard‑coded input and output paths
             string inputPath = @"C:\temp\sample.odg";
             string outputPath = @"C:\temp\sample.svg";
 
@@ -26,17 +26,18 @@ class Program
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options for SVG output
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-
-                // Configure SVG options, keeping metadata (layer names)
+                // Prepare SVG export options
                 var svgOptions = new SvgOptions
                 {
-                    VectorRasterizationOptions = rasterOptions,
-                    KeepMetadata = true
+                    // Preserve original metadata (including layer names)
+                    KeepMetadata = true,
+                    // Set rasterization options so the page size matches the source
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size,
+                        // Optional: keep background transparent
+                        BackgroundColor = Color.Transparent
+                    }
                 };
 
                 // Save as SVG
