@@ -1,7 +1,8 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
+using System.Diagnostics;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,40 +11,48 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string inputFolder = "InputEps";
+            string outputFolder = "OutputPng";
+
+            // Validate input directory
+            if (!Directory.Exists(inputFolder))
+            {
+                Directory.CreateDirectory(inputFolder);
+                Console.WriteLine($"Input directory created at: {inputFolder}. Add files and rerun.");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputFolder);
 
             // Get all EPS files in the input directory
-            string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
+            string[] epsFiles = Directory.GetFiles(inputFolder, "*.eps");
 
-            foreach (string epsPath in epsFiles)
+            foreach (string inputPath in epsFiles)
             {
-                // Validate input file existence
-                if (!File.Exists(epsPath))
+                // Validate each input file
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {epsPath}");
-                    continue;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Prepare output path
-                string outputFileName = Path.GetFileNameWithoutExtension(epsPath) + ".png";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".png");
 
-                // Ensure output directory exists
+                // Ensure output directory for the file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Measure conversion duration
-                DateTime startTime = DateTime.Now;
+                Stopwatch sw = Stopwatch.StartNew();
 
-                using (Image image = Image.Load(epsPath))
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
                 {
                     image.Save(outputPath, new PngOptions());
                 }
 
-                DateTime endTime = DateTime.Now;
-                double durationMs = (endTime - startTime).TotalMilliseconds;
+                sw.Stop();
 
-                Console.WriteLine($"{epsPath} converted in {durationMs} ms");
+                Console.WriteLine($"{fileNameWithoutExt}: {sw.ElapsedMilliseconds} ms");
             }
         }
         catch (Exception ex)
