@@ -10,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output file paths
-            string inputPath = "input.otg";
-            string outputPath = "output.bmp";
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\sample.bmp";
 
             // Verify that the input file exists
             if (!File.Exists(inputPath))
@@ -28,12 +28,12 @@ class Program
             {
                 // Prepare BMP save options with OTG rasterization settings
                 var bmpOptions = new BmpOptions();
-                var otgRasterizationOptions = new OtgRasterizationOptions
+                var otgRasterization = new OtgRasterizationOptions
                 {
-                    // Preserve the original size of the OTG image
+                    // Preserve original size
                     PageSize = image.Size
                 };
-                bmpOptions.VectorRasterizationOptions = otgRasterizationOptions;
+                bmpOptions.VectorRasterizationOptions = otgRasterization;
 
                 // Save the image as BMP
                 image.Save(outputPath, bmpOptions);
