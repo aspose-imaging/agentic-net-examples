@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.odg";
+        string outputPath = @"C:\Images\sample.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.odg";
-            string outputPath = "output\\converted.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,18 +27,16 @@ class Program
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set rasterization options for vector to raster conversion
-                var rasterOptions = new OdgRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
-                };
-
-                // Configure PNG save options with maximum lossless compression
+                // Prepare PNG save options with maximum compression
                 var pngOptions = new PngOptions
                 {
-                    CompressionLevel = 9,
-                    VectorRasterizationOptions = rasterOptions
+                    CompressionLevel = 9, // maximum compression (0-9)
+                    // Set rasterization options for vector source
+                    VectorRasterizationOptions = new OdgRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageSize = image.Size
+                    }
                 };
 
                 // Save as PNG
