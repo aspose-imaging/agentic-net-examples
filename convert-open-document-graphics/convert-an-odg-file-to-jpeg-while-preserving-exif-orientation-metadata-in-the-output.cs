@@ -21,21 +21,14 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (OdgImage odgImage = (OdgImage)Image.Load(inputPath))
             {
-                var rasterOptions = new OdgRasterizationOptions
+                JpegOptions jpegOptions = new JpegOptions
                 {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
+                    KeepMetadata = true
                 };
 
-                var jpegOptions = new JpegOptions
-                {
-                    KeepMetadata = true,
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                image.Save(outputPath, jpegOptions);
+                odgImage.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
