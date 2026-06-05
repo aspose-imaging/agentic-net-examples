@@ -2,51 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
         string inputPath = "input.cdr";
         string outputPath = "output.png";
 
-        // Path safety checks
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+        // Ensure any runtime exception is reported cleanly
         try
         {
-            // Load the vector image (CDR)
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Load the CDR file as a generic Image, then cast to VectorImage
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG options with transparency
-                var pngOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.Transparent,
-                        PageSize = image.Size
-                    }
-                };
+                // Cast to VectorImage to access background removal functionality
+                var vectorImage = (VectorImage)image;
 
-                // Remove background if the image is a vector type
-                if (image is VectorImage vectorImage)
-                {
-                    vectorImage.RemoveBackground(new RemoveBackgroundSettings());
-                }
+                // Remove the background using default settings
+                vectorImage.RemoveBackground();
 
-                // Save the result as PNG with transparent background
-                image.Save(outputPath, pngOptions);
+                // Prepare PNG save options
+                var pngOptions = new PngOptions();
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the processed image
+                vectorImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
