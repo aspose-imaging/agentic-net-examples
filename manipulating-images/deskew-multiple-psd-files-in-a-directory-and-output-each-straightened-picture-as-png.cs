@@ -1,39 +1,28 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output directories
+        string inputDir = @"C:\Images\InputPsd";
+        string outputDir = @"C:\Images\OutputPng";
+
         try
         {
-            // Define input and output directories
-            string inputDir = "Input";
-            string outputDir = "Output";
-
-            // Validate input directory
-            if (!Directory.Exists(inputDir))
-            {
-                Directory.CreateDirectory(inputDir);
-                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
-                return;
-            }
-
             // Ensure output directory exists
-            if (!Directory.Exists(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(outputDir);
 
             // Get all PSD files in the input directory
-            string[] files = Directory.GetFiles(inputDir, "*.psd");
+            string[] psdFiles = Directory.GetFiles(inputDir, "*.psd", SearchOption.TopDirectoryOnly);
 
-            foreach (string inputPath in files)
+            foreach (string inputPath in psdFiles)
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -42,27 +31,25 @@ class Program
                     return;
                 }
 
-                // Construct output file path with PNG extension
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + ".png");
+                // Build the corresponding output PNG path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png");
 
-                // Ensure the output directory for this file exists
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the PSD image as a raster image
-                using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+                // Load the PSD image, deskew, and save as PNG
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Deskew the image without resizing the canvas
-                    raster.NormalizeAngle(false, Color.LightGray);
-
-                    // Prepare PNG save options
-                    PngOptions pngOptions = new PngOptions
+                    // Cast to RasterImage to access NormalizeAngle
+                    if (image is RasterImage rasterImage)
                     {
-                        Source = new FileCreateSource(outputPath, false)
-                    };
+                        // Deskew without resizing, using LightGray as background
+                        rasterImage.NormalizeAngle(false, Color.LightGray);
+                    }
 
-                    // Save the deskewed image as PNG
-                    raster.Save(outputPath, pngOptions);
+                    // Save as PNG (extension determines format)
+                    image.Save(outputPath);
                 }
             }
         }
