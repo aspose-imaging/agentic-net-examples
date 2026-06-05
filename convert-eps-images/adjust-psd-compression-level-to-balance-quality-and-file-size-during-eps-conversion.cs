@@ -28,14 +28,10 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Configure PSD saving options with balanced compression (RLE)
-                var psdOptions = new PsdOptions
+                PsdOptions psdOptions = new PsdOptions
                 {
                     CompressionMethod = CompressionMethod.RLE,
-                    // Optional: set color mode and bits per channel for typical use
-                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb,
-                    ChannelBitsCount = 8,
-                    ChannelsCount = 4,
-                    Version = 6
+                    // Optional: keep other defaults (e.g., ColorMode, ChannelBitsCount)
                 };
 
                 // Save as PSD using the configured options
