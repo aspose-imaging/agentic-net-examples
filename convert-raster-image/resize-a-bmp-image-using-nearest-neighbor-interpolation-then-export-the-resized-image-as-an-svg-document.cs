@@ -9,11 +9,11 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Images\source.bmp";
-            string outputPath = @"C:\Images\resized.svg";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.bmp";
+            string outputPath = @"C:\Images\sample_resized.svg";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,12 +26,12 @@ class Program
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Example resize: reduce dimensions by half
-                int newWidth = image.Width / 2;
-                int newHeight = image.Height / 2;
+                // Define new dimensions (example: double the size)
+                int newWidth = image.Width * 2;
+                int newHeight = image.Height * 2;
 
-                // Resize using nearest‑neighbor interpolation (default, but explicit here)
-                image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+                // Resize using default NearestNeighbourResample
+                image.Resize(newWidth, newHeight);
 
                 // Save the resized image as SVG
                 var svgOptions = new SvgOptions();
