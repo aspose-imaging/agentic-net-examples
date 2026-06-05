@@ -10,10 +10,10 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputFolder = @"C:\OTGFiles";
-            string outputFolder = @"C:\OTGFiles\PdfOutput";
+            string inputFolder = @"C:\OtgInput";
+            string outputFolder = @"C:\PdfOutput";
 
-            // Ensure the output directory exists
+            // Ensure the output directory exists (will also handle subfolders)
             Directory.CreateDirectory(outputFolder);
 
             // Get all .otg files in the input folder
@@ -28,10 +28,9 @@ class Program
                     return;
                 }
 
-                // Determine the output PDF path
-                string outputPath = Path.Combine(
-                    outputFolder,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                // Determine output PDF path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
 
                 // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -39,15 +38,19 @@ class Program
                 // Load the OTG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Prepare PDF save options with OTG rasterization settings
-                    PdfOptions pdfOptions = new PdfOptions();
-                    OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
+                    // Set up rasterization options for OTG
+                    OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
                     {
                         PageSize = image.Size
                     };
-                    pdfOptions.VectorRasterizationOptions = otgRasterization;
 
-                    // Save the image as PDF
+                    // Configure PDF save options
+                    PdfOptions pdfOptions = new PdfOptions
+                    {
+                        VectorRasterizationOptions = otgRasterizationOptions
+                    };
+
+                    // Save as PDF
                     image.Save(outputPath, pdfOptions);
                 }
             }
