@@ -9,49 +9,51 @@ class Program
     {
         try
         {
-            // Define input and output directories (relative to the current directory)
             string baseDir = Directory.GetCurrentDirectory();
-            string inputDir = Path.Combine(baseDir, "Input");
-            string outputDir = Path.Combine(baseDir, "Output");
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Get all EMF files in the input directory
-            string[] files = Directory.GetFiles(inputDir, "*.emf");
-
-            foreach (string inputPath in files)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify the input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
+
+            foreach (var inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare the output PDF path
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".pdf");
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
 
-                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EMF image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Configure PDF options with vector rasterization settings
-                    var pdfOptions = new PdfOptions();
-                    var vectorOptions = new VectorRasterizationOptions
+                    var pdfOptions = new PdfOptions
                     {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
+                        }
                     };
-                    pdfOptions.VectorRasterizationOptions = vectorOptions;
 
-                    // Save as PDF
                     image.Save(outputPath, pdfOptions);
                 }
             }
@@ -62,3 +64,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate printable PDF reports from a collection of vector EMF diagrams stored in a folder.
+ * 2. When an application must archive engineering schematics by converting each EMF file to a PDF with the original dimensions preserved.
+ * 3. When a workflow automates the preparation of marketing assets, turning multiple EMF logos into individual PDF files for client delivery.
+ * 4. When a document management system imports vector graphics and requires batch conversion of EMF files to PDF for consistent viewing across platforms.
+ * 5. When a C# utility script is needed to migrate legacy EMF artwork into PDF format while maintaining a white background and exact page size.
+ */
