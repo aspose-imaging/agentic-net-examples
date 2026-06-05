@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
@@ -12,7 +12,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.jpg";
-        string outputMaskPath = "mask.png";
+        string outputPath = "mask.png";
 
         try
         {
@@ -24,24 +24,23 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputMaskPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the JPEG image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Create a mask using MagicWandTool based on a sample pixel (e.g., 100,100)
-                // Adjust the coordinates and threshold as needed
-                ImageMask mask = MagicWandTool.Select(image, new MagicWandSettings(100, 100));
+                // Create a mask using MagicWandTool based on a sample pixel (e.g., 120,100)
+                // Adjust the coordinates as needed for your specific image
+                MagicWandTool
+                    .Select(image, new MagicWandSettings(120, 100))
+                    .Apply(); // Apply the mask to the source image
 
-                // Apply the mask to the source image
-                mask.Apply();
-
-                // Save the resulting mask as a PNG with alpha channel
+                // Save the resulting image (with mask applied) as PNG with alpha channel
                 var pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
-                image.Save(outputMaskPath, pngOptions);
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
