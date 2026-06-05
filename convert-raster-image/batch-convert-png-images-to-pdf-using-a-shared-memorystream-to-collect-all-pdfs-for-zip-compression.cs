@@ -12,23 +12,36 @@ class Program
         {
             // Hardcoded input directory containing PNG files
             string inputDirectory = @"C:\Images\Input";
-
             // Hardcoded output ZIP file path
             string outputZipPath = @"C:\Images\Output\converted.zip";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputZipPath));
 
-            // MemoryStream that will hold the ZIP archive
-            using (MemoryStream zipStream = new MemoryStream())
+            // Verify input directory exists
+            if (!Directory.Exists(inputDirectory))
             {
-                // Create a ZIP archive in the MemoryStream
-                using (ZipArchive zipArchive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
+                Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
+                return;
+            }
+
+            // Get all PNG files in the input directory (non‑recursive)
+            string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
+            if (pngFiles.Length == 0)
+            {
+                Console.Error.WriteLine("No PNG files found to process.");
+                return;
+            }
+
+            // Shared memory stream that will hold the ZIP archive
+            using (MemoryStream zipMemoryStream = new MemoryStream())
+            {
+                // Create a ZIP archive in the shared memory stream
+                using (ZipArchive zipArchive = new ZipArchive(zipMemoryStream, ZipArchiveMode.Create, true))
                 {
-                    // Enumerate all PNG files in the input directory
-                    foreach (string pngPath in Directory.GetFiles(inputDirectory, "*.png"))
+                    foreach (string pngPath in pngFiles)
                     {
-                        // Verify the PNG file exists
+                        // Verify each PNG file exists before processing
                         if (!File.Exists(pngPath))
                         {
                             Console.Error.WriteLine($"File not found: {pngPath}");
@@ -38,20 +51,18 @@ class Program
                         // Load the PNG image
                         using (Image image = Image.Load(pngPath))
                         {
-                            // Prepare PDF export options (default options are sufficient)
+                            // Prepare PDF export options (default compression)
                             PdfOptions pdfOptions = new PdfOptions();
 
-                            // Save the image as PDF into a temporary MemoryStream
+                            // Save the image as PDF into a temporary memory stream
                             using (MemoryStream pdfStream = new MemoryStream())
                             {
                                 image.Save(pdfStream, pdfOptions);
-                                pdfStream.Position = 0; // Reset stream position for reading
+                                pdfStream.Position = 0; // Reset for reading
 
                                 // Create a ZIP entry for this PDF
-                                string entryName = Path.GetFileNameWithoutExtension(pngPath) + ".pdf";
-                                ZipArchiveEntry entry = zipArchive.CreateEntry(entryName, CompressionLevel.Optimal);
-
-                                // Write the PDF bytes into the ZIP entry
+                                string pdfFileName = Path.GetFileNameWithoutExtension(pngPath) + ".pdf";
+                                ZipArchiveEntry entry = zipArchive.CreateEntry(pdfFileName, CompressionLevel.Optimal);
                                 using (Stream entryStream = entry.Open())
                                 {
                                     pdfStream.CopyTo(entryStream);
@@ -61,14 +72,16 @@ class Program
                     }
                 }
 
-                // Write the completed ZIP archive to the output file
-                Directory.CreateDirectory(Path.GetDirectoryName(outputZipPath));
+                // Write the ZIP archive from memory to the output file
+                // Ensure the output directory exists (already called above)
                 using (FileStream fileStream = new FileStream(outputZipPath, FileMode.Create, FileAccess.Write))
                 {
-                    zipStream.Position = 0;
-                    zipStream.CopyTo(fileStream);
+                    zipMemoryStream.Position = 0;
+                    zipMemoryStream.CopyTo(fileStream);
                 }
             }
+
+            Console.WriteLine("Batch conversion completed successfully.");
         }
         catch (Exception ex)
         {
