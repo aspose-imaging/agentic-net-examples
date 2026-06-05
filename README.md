@@ -6,7 +6,7 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 4519 |
+| Total Examples | 4639 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
 | Last Updated | 2026-06-05 |
@@ -45,7 +45,7 @@ README.md
 | [Convert CMX Images](./convert-cmx-images/) | 68 | 100.0% | [agents.md](./convert-cmx-images/agents.md) |
 | [Convert DICOM Images](./convert-dicom-images/) | 60 | 100.0% | [agents.md](./convert-dicom-images/agents.md) |
 | [Convert EPS Images](./convert-eps-images/) | 120 | 100.0% | [agents.md](./convert-eps-images/agents.md) |
-| [Convert Open Document Graphics](./convert-open-document-graphics/) | 120 | 100.0% | [agents.md](./convert-open-document-graphics/agents.md) |
+| [Convert Open Document Graphics](./convert-open-document-graphics/) | 240 | 100.0% | [agents.md](./convert-open-document-graphics/agents.md) |
 | [Convert Raster Image](./convert-raster-image/) | 276 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
 | [Convert SVG to Raster Images](./convert-svg-to-raster-images/) | 80 | 100.0% | [agents.md](./convert-svg-to-raster-images/agents.md) |
 | [Convert webp Images](./convert-webp-images/) | 60 | 100.0% | [agents.md](./convert-webp-images/agents.md) |
@@ -114,7 +114,7 @@ All examples are compiler-validated against the target NuGet version before bein
 
 | Version | Total Examples | Pass Rate | Framework |
 |---------|---------------|-----------|----------|
-| 26.5.0 | 4519 | 100.0% | net9.0 |
+| 26.5.0 | 4639 | 100.0% | net9.0 |
 
 Pass rate is enforced by the agent pipeline — only examples that pass both `dotnet build` and `dotnet run` are committed.
 
@@ -133,4 +133,4 @@ To trigger validation:
 Each pipeline run ships telemetry to a central metrics store including examples discovered, passed and failed per category, LLM token usage, MCP and LLM API call counts, and pipeline duration.
 
 ---
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260605_073031` | 2026-06-05*
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260605_075808` | 2026-06-05*
