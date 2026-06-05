@@ -3880,14 +3880,13 @@
         "System",
         "System.IO",
         "Aspose.Imaging.ImageOptions",
-        "Aspose.Imaging.Sources",
         "System.Collections.Generic",
-        "Aspose.Imaging.FileFormats.Jpeg",
         "Aspose.Imaging",
+        "Aspose.Imaging.Sources",
+        "Aspose.Imaging.FileFormats.Jpeg",
         "System.Linq",
-        "Aspose.Imaging.FileFormats.Png",
         "Aspose.Imaging.FileFormats.Pdf",
-        "System.Net.Http",
+        "Aspose.Imaging.FileFormats.Png",
         "Aspose.Imaging.Brushes"
       ],
       "key_apis": [
