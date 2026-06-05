@@ -6,34 +6,45 @@ using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.wmf";
-        string outputPath = "output.jpg";
-
         try
         {
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Images\sample.wmf";
+            string outputPath = @"C:\Images\sample_300dpi.jpg";
+
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
+            // Load the WMF image
+            using (Image image = Image.Load(inputPath))
             {
-                var rasterOptions = new WmfRasterizationOptions
+                // Prepare rasterization options for the WMF source
+                var wmfRasterOptions = new WmfRasterizationOptions
                 {
-                    PageSize = wmfImage.Size
+                    // Use the original image size as the page size
+                    PageSize = image.Size
                 };
 
+                // Configure JPEG save options with 300 dpi resolution
                 var jpegOptions = new JpegOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    // Set the desired DPI for the output JPEG
+                    ResolutionSettings = new ResolutionSetting(300.0, 300.0),
+                    // Attach the vector rasterization options
+                    VectorRasterizationOptions = wmfRasterOptions
                 };
 
-                wmfImage.Save(outputPath, jpegOptions);
+                // Save the rasterized image as JPEG
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
