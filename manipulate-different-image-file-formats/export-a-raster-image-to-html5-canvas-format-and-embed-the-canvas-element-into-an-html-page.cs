@@ -2,64 +2,54 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.png";
-        string canvasTagPath = @"C:\Images\canvas_tag.html";
-        string finalHtmlPath = @"C:\Images\output.html";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(canvasTagPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(finalHtmlPath));
+        string inputPath = "input.png";
+        string outputPath = "output/Canvas.html";
 
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Export only the canvas tag (no full HTML page)
+                // Configure HTML5 Canvas export options
                 var options = new Html5CanvasOptions
                 {
-                    FullHtmlPage = false,
-                    VectorRasterizationOptions = new SvgRasterizationOptions()
+                    // Generate a full HTML page containing the canvas element
+                    FullHtmlPage = true
                 };
 
-                image.Save(canvasTagPath, options);
+                // Save as HTML5 Canvas
+                image.Save(outputPath, options);
             }
-
-            // Read the generated canvas tag
-            string canvasTag = File.ReadAllText(canvasTagPath);
-
-            // Build a full HTML page that embeds the canvas tag
-            string htmlContent = @"<!DOCTYPE html>
-<html>
-<head>
-    <meta charset=""UTF-8"">
-    <title>Canvas Image</title>
-</head>
-<body>
-    " + canvasTag + @"
-</body>
-</html>";
-
-            // Write the final HTML page
-            File.WriteAllText(finalHtmlPath, htmlContent);
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web developer wants to display a PNG diagram on a dynamic web page without relying on external image files, they can use this C# code to convert the raster image into an HTML5 Canvas element embedded in a full HTML page.
+ * 2. When an e‑learning platform needs to embed interactive graphics that can be programmatically manipulated with JavaScript, the code allows exporting the source image to a canvas‑based HTML page using Aspose.Imaging’s Html5CanvasOptions.
+ * 3. When a reporting tool must generate self‑contained HTML reports that include raster charts, the snippet converts the chart PNG into a canvas element so the report can be viewed offline without separate image assets.
+ * 4. When a mobile‑first website requires responsive rendering of legacy raster assets, developers can run this code to transform the PNG into a scalable HTML5 Canvas that adapts to different screen sizes.
+ * 5. When an automated build pipeline has to produce preview pages for design assets, the example shows how to load a PNG in C#, export it to a full HTML page with a canvas tag, and store it in a designated output folder.
+ */
