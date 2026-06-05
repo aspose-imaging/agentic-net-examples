@@ -1,17 +1,17 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.ImageLoadOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageLoadOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.cdr";
-        string outputPath = "output\\output.png";
+        string inputPath = "sample.cdr";
+        string outputPath = "output.png";
 
         try
         {
@@ -25,32 +25,41 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR file into a byte array
-            byte[] cdrData = File.ReadAllBytes(inputPath);
+            // Load CDR file into a byte array
+            byte[] cdrBytes = File.ReadAllBytes(inputPath);
 
             // Create a memory stream from the byte array
-            using (var inputStream = new MemoryStream(cdrData))
+            using (MemoryStream inputStream = new MemoryStream(cdrBytes))
             {
-                // Initialize load options (default)
-                var loadOptions = new CdrLoadOptions();
+                // Initialize load options for CDR format
+                CdrLoadOptions loadOptions = new CdrLoadOptions();
 
-                // Load CDR image from the stream
-                using (var cdrImage = new CdrImage(inputStream, loadOptions))
+                // Load the CDR image from the stream
+                using (CdrImage cdrImage = new CdrImage(inputStream, loadOptions))
                 {
-                    // Optional: cache all data to avoid lazy loading
+                    // Optional: cache data to avoid lazy loading
                     cdrImage.CacheData();
 
                     // Prepare a memory stream for the PNG output
-                    using (var outputStream = new MemoryStream())
+                    using (MemoryStream pngStream = new MemoryStream())
                     {
-                        // Set PNG save options (default)
-                        var pngOptions = new PngOptions();
+                        // Set PNG save options (default settings)
+                        PngOptions pngOptions = new PngOptions();
 
-                        // Save the image as PNG into the memory stream
-                        cdrImage.Save(outputStream, pngOptions);
+                        // Save the CDR image as PNG into the memory stream
+                        cdrImage.Save(pngStream, pngOptions);
 
-                        // Example usage: display the size of the generated PNG data
-                        Console.WriteLine($"PNG data size: {outputStream.Length} bytes");
+                        // Reset stream position for further reading or copying
+                        pngStream.Position = 0;
+
+                        // Optionally write the PNG data to a file
+                        using (FileStream fileOut = File.Open(outputPath, FileMode.Create, FileAccess.Write))
+                        {
+                            pngStream.CopyTo(fileOut);
+                        }
+
+                        // At this point, pngStream contains the PNG data in memory
+                        // It can be used further as needed
                     }
                 }
             }
