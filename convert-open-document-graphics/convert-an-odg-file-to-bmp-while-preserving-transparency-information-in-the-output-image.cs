@@ -2,47 +2,34 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\sample.bmp";
-
-        // Path safety checks
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.odg";
+        string outputPath = @"C:\temp\output.bmp";
 
         try
         {
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare BMP save options with transparency support
-                var bmpOptions = new BmpOptions
-                {
-                    // Bitfields compression preserves alpha channel
-                    Compression = BitmapCompression.Bitfields,
-                    // Set rasterization options for vector ODG source
-                    VectorRasterizationOptions = new OdgRasterizationOptions
-                    {
-                        // Transparent background to keep original transparency
-                        BackgroundColor = Color.Transparent,
-                        // Use the source image size for rasterization
-                        PageSize = image.Size
-                    }
-                };
+                // Prepare BMP save options (default compression Bitfields preserves transparency)
+                BmpOptions bmpOptions = new BmpOptions();
 
-                // Save as BMP
+                // Save the image as BMP
                 image.Save(outputPath, bmpOptions);
             }
         }
