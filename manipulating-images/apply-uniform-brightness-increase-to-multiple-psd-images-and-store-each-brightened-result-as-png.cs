@@ -10,13 +10,14 @@ class Program
     {
         try
         {
-            // Hardcoded input PSD files and corresponding output PNG files
+            // Hardcoded input PSD files
             string[] inputPaths = new string[]
             {
                 @"C:\Images\input1.psd",
                 @"C:\Images\input2.psd"
             };
 
+            // Corresponding output PNG files
             string[] outputPaths = new string[]
             {
                 @"C:\Images\output1.png",
@@ -41,15 +42,15 @@ class Program
                 // Load the PSD image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Adjust brightness if the image supports raster operations
+                    // Adjust brightness if the image supports it
                     if (image is RasterImage rasterImage)
                     {
-                        // Increase brightness uniformly (value range: -255 to 255)
+                        // Increase brightness uniformly (range -255 to 255)
                         rasterImage.AdjustBrightness(50);
                     }
 
                     // Save the brightened image as PNG
-                    var pngOptions = new PngOptions();
+                    PngOptions pngOptions = new PngOptions();
                     image.Save(outputPath, pngOptions);
                 }
             }
