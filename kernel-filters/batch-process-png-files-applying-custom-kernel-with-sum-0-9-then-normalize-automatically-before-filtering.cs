@@ -1,6 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -12,7 +15,7 @@ class Program
             string inputDirectory = "Input";
             string outputDirectory = "Output";
 
-            // Ensure input directory exists
+            // Validate input directory
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -31,44 +34,63 @@ class Program
 
             foreach (string inputPath in files)
             {
-                // Validate input file existence
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare output path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_filtered.png";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                // Determine output file path
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + "_filtered.png");
 
-                // Ensure output directory for this file exists
+                // Ensure output directory for the file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image
+                // Load the image as RasterImage
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage for filtering
                     RasterImage raster = (RasterImage)image;
 
-                    // Define a 3x3 custom kernel
+                    // Define a custom kernel with sum 0.9
                     double[,] kernel = new double[,]
                     {
-                        { 0, -0.9, 0 },
-                        { -0.9, 4.5, -0.9 },
-                        { 0, -0.9, 0 }
+                        { 0.05, 0.10, 0.05 },
+                        { 0.10, 0.30, 0.10 },
+                        { 0.05, 0.10, 0.05 }
                     };
 
-                    // Apply convolution filter with the custom kernel
-                    raster.Filter(raster.Bounds,
-                        new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+                    // Compute the sum of the kernel elements
+                    double sum = 0.0;
+                    for (int i = 0; i < kernel.GetLength(0); i++)
+                    {
+                        for (int j = 0; j < kernel.GetLength(1); j++)
+                        {
+                            sum += kernel[i, j];
+                        }
+                    }
 
-                    // Save the filtered image
-                    image.Save(outputPath);
+                    // Normalize the kernel so that its sum becomes 1.0
+                    if (Math.Abs(sum) > 1e-6)
+                    {
+                        for (int i = 0; i < kernel.GetLength(0); i++)
+                        {
+                            for (int j = 0; j < kernel.GetLength(1); j++)
+                            {
+                                kernel[i, j] /= sum;
+                            }
+                        }
+                    }
+
+                    // Apply the convolution filter with the normalized kernel
+                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+
+                    // Save the filtered image as PNG
+                    PngOptions saveOptions = new PngOptions();
+                    raster.Save(outputPath, saveOptions);
                 }
             }
-
-            Console.WriteLine("Batch processing completed.");
         }
         catch (Exception ex)
         {
@@ -76,3 +98,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑enhance a collection of product‑catalog PNG images by applying a custom sharpening kernel that preserves overall brightness (sum 0.9) and automatically normalizes the result before saving the filtered files.
+ * 2. When an application must preprocess scanned PNG documents for OCR by reducing noise with a custom convolution filter whose coefficients sum to 0.9 and then normalizing the pixel values to improve text recognition accuracy.
+ * 3. When a game‑asset pipeline requires converting dozens of PNG sprite sheets using a custom edge‑detection kernel with a total weight of 0.9, followed by automatic normalization to keep sprite colors consistent across all frames.
+ * 4. When a medical‑imaging tool needs to batch‑apply a low‑contrast enhancement filter to PNG radiology images, using a custom kernel with sum 0.9 and built‑in normalization to maintain diagnostic image intensity levels.
+ * 5. When a web‑service automates the preparation of PNG icons for responsive design, applying a custom blur‑sharpen hybrid kernel (sum 0.9) and letting the library normalize the output so each icon retains the original visual balance.
+ */
