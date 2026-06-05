@@ -23,16 +23,16 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
+            // Load ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure SVG rasterization options (page size matches source)
+                // Set up SVG rasterization options
                 var vectorOptions = new SvgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
 
-                // Set up SVG save options; Aspose.Imaging embeds necessary CSS styles by default
+                // Configure SVG save options
                 var svgOptions = new SvgOptions
                 {
                     VectorRasterizationOptions = vectorOptions
@@ -40,6 +40,16 @@ class Program
 
                 // Save as SVG
                 image.Save(outputPath, svgOptions);
+            }
+
+            // Embed simple CSS into the generated SVG for consistent appearance
+            string svgContent = File.ReadAllText(outputPath);
+            int insertPos = svgContent.IndexOf('>');
+            if (insertPos != -1)
+            {
+                string css = "\n<style type=\"text/css\">\n    svg { font-family: Arial, sans-serif; }\n</style>\n";
+                svgContent = svgContent.Insert(insertPos + 1, css);
+                File.WriteAllText(outputPath, svgContent);
             }
         }
         catch (Exception ex)
