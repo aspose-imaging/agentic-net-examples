@@ -10,78 +10,62 @@ class Program
     {
         try
         {
-            // Hardcoded paths
-            string inputSvgPath = "input.svg";
-            string overlayImagePath = "overlay.png";
+            // Hardcoded input and output paths
+            string svgPath = "input.svg";
+            string overlayPath = "overlay.png";
             string outputPath = "output.png";
+            string tempPngPath = "temp_output.png";
 
             // Validate input files
-            if (!File.Exists(inputSvgPath))
+            if (!File.Exists(svgPath))
             {
-                Console.Error.WriteLine($"File not found: {inputSvgPath}");
+                Console.Error.WriteLine($"File not found: {svgPath}");
                 return;
             }
-            if (!File.Exists(overlayImagePath))
+            if (!File.Exists(overlayPath))
             {
-                Console.Error.WriteLine($"File not found: {overlayImagePath}");
+                Console.Error.WriteLine($"File not found: {overlayPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath) ?? ".");
 
-            // Temporary PNG path for rasterized SVG
-            string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp_svg.png");
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-
-            // Rasterize SVG to PNG (temporary file)
-            using (Image svgImage = Image.Load(inputSvgPath))
+            // Convert SVG to a temporary PNG file
+            using (Image svgImage = Image.Load(svgPath))
             {
-                var rasterOptions = new SvgRasterizationOptions
+                PngOptions pngOptions = new PngOptions();
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
                     PageSize = svgImage.Size
                 };
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                pngOptions.VectorRasterizationOptions = rasterOptions;
                 svgImage.Save(tempPngPath, pngOptions);
             }
 
-            // Load rasterized SVG and overlay image
-            using (RasterImage baseImage = (RasterImage)Image.Load(tempPngPath))
-            using (RasterImage overlayImage = (RasterImage)Image.Load(overlayImagePath))
+            // Load the rasterized SVG and the overlay image
+            using (RasterImage baseImg = (RasterImage)Image.Load(tempPngPath))
+            using (RasterImage overlayImg = (RasterImage)Image.Load(overlayPath))
             {
-                // Prepare output source and options
-                Source outputSource = new FileCreateSource(outputPath, false);
-                var outputOptions = new PngOptions { Source = outputSource };
-
-                // Create canvas bound to output file
-                using (RasterImage canvas = (RasterImage)Image.Create(outputOptions, baseImage.Width, baseImage.Height))
+                // Create the final PNG canvas bound to the output file
+                Source outSource = new FileCreateSource(outputPath, false);
+                PngOptions outOptions = new PngOptions { Source = outSource };
+                using (RasterImage canvas = (RasterImage)Image.Create(outOptions, baseImg.Width, baseImg.Height))
                 {
-                    // Copy base image onto canvas
+                    // Copy base image pixels onto the canvas
                     canvas.SaveArgb32Pixels(
-                        new Rectangle(0, 0, baseImage.Width, baseImage.Height),
-                        baseImage.LoadArgb32Pixels(baseImage.Bounds));
+                        new Rectangle(0, 0, baseImg.Width, baseImg.Height),
+                        baseImg.LoadArgb32Pixels(baseImg.Bounds));
 
-                    // Define overlay position
-                    int overlayX = 50;
-                    int overlayY = 50;
-
-                    // Overlay second image
+                    // Overlay the second image at position (0,0)
                     canvas.SaveArgb32Pixels(
-                        new Rectangle(overlayX, overlayY, overlayImage.Width, overlayImage.Height),
-                        overlayImage.LoadArgb32Pixels(overlayImage.Bounds));
+                        new Rectangle(0, 0, overlayImg.Width, overlayImg.Height),
+                        overlayImg.LoadArgb32Pixels(overlayImg.Bounds));
 
-                    // Save final image
+                    // Save the bound image
                     canvas.Save();
                 }
-            }
-
-            // Clean up temporary file
-            if (File.Exists(tempPngPath))
-            {
-                File.Delete(tempPngPath);
             }
         }
         catch (Exception ex)
