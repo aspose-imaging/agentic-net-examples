@@ -9,7 +9,7 @@ class Program
     {
         try
         {
-            // Hard‑coded input TIFF files (replace with actual paths as needed)
+            // Hard‑coded input TIFF files (adjust paths as needed)
             string[] inputPaths = new[]
             {
                 @"C:\Images\part1.tif",
@@ -17,7 +17,7 @@ class Program
                 @"C:\Images\part3.tif"
             };
 
-            // Hard‑coded output TIFF file
+            // Hard‑coded output file
             string outputPath = @"C:\Images\combined.tif";
 
             // Verify each input file exists
@@ -30,23 +30,25 @@ class Program
                 }
             }
 
-            // Load the first TIFF – this will become the destination image
-            TiffImage combinedTiff = (TiffImage)Image.Load(inputPaths[0]);
-
-            // Append remaining TIFFs frame‑by‑frame
-            for (int i = 1; i < inputPaths.Length; i++)
-            {
-                TiffImage sourceTiff = (TiffImage)Image.Load(inputPaths[i]);
-                combinedTiff.Add(sourceTiff);          // Preserve frames and their EXIF data
-                sourceTiff.Dispose();                  // Release resources of the source image
-            }
-
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Save the concatenated multi‑page TIFF
-            combinedTiff.Save(outputPath);
-            combinedTiff.Dispose();
+            // Load the first TIFF image – this will become the destination image
+            using (TiffImage combinedImage = (TiffImage)Image.Load(inputPaths[0]))
+            {
+                // Append remaining TIFF images frame‑by‑frame
+                for (int i = 1; i < inputPaths.Length; i++)
+                {
+                    using (TiffImage nextImage = (TiffImage)Image.Load(inputPaths[i]))
+                    {
+                        // Add all frames (including their EXIF metadata) from nextImage
+                        combinedImage.Add(nextImage);
+                    }
+                }
+
+                // Save the concatenated multi‑page TIFF
+                combinedImage.Save(outputPath);
+            }
         }
         catch (Exception ex)
         {
@@ -54,3 +56,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a medical imaging system needs to combine multiple DICOM‑exported TIFF scans into a single multi‑page TIFF for patient records while keeping each scan’s EXIF metadata intact.
+ * 2. When a legal firm archives scanned contract pages as a single TIFF file but must retain the original capture dates and camera settings stored in EXIF for evidentiary purposes.
+ * 3. When a publishing workflow merges separate high‑resolution TIFF illustrations into one document for print production, ensuring the color profile and resolution metadata are preserved.
+ * 4. When a construction company consolidates daily site‑photo TIFFs into a chronological multi‑page archive, keeping GPS coordinates and timestamps from EXIF for project tracking.
+ * 5. When a museum digitization project stitches individual TIFF scans of artwork panels into a single file for cataloging, while maintaining each panel’s provenance metadata embedded in EXIF.
+ */
