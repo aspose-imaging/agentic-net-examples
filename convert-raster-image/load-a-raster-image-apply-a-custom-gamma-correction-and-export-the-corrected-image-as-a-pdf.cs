@@ -10,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"c:\temp\sample.png";
-            string outputPath = @"c:\temp\sample_gamma.pdf";
+            string inputPath = @"C:\temp\sample.png";
+            string outputPath = @"C:\temp\sample_gamma.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,20 +20,20 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to RasterImage to access AdjustGamma
-                RasterImage raster = (RasterImage)image;
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Apply gamma correction (same value for R, G, B)
-                raster.AdjustGamma(2.2f);
+                // Apply custom gamma correction (same value for all channels)
+                rasterImage.AdjustGamma(2.2f);
 
                 // Save the corrected image as PDF
-                raster.Save(outputPath, new PdfOptions());
+                rasterImage.Save(outputPath, new PdfOptions());
             }
         }
         catch (Exception ex)
