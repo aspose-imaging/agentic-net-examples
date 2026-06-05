@@ -10,9 +10,9 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.png";
-        string outputPath = @"C:\Images\Result\sample.pdf";
+        string outputPath = @"C:\Images\sample_filtered.pdf";
 
-        // Verify input file exists
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,15 +27,17 @@ class Program
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
+                // Cast to RasterImage to access filtering
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply a median filter with a kernel size of 5 to the whole image
+                // Apply a median filter with size 5 to the whole image
                 rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
-                // Save the filtered image directly as a PDF page
+                // Prepare PDF save options
                 PdfOptions pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+
+                // Save the filtered image as a PDF page
+                rasterImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
