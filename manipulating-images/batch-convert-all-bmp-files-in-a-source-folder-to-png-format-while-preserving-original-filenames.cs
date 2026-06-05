@@ -7,39 +7,39 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded source and destination folders
+        string sourceFolder = @"C:\Images\BmpSource";
+        string destinationFolder = @"C:\Images\PngOutput";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\Images\Input";
-            string outputFolder = @"C:\Images\Output";
-
-            // Get all BMP files in the input folder
-            string[] bmpFiles = Directory.GetFiles(inputFolder, "*.bmp");
+            // Get all BMP files in the source folder
+            string[] bmpFiles = Directory.GetFiles(sourceFolder, "*.bmp", SearchOption.TopDirectoryOnly);
 
             foreach (string inputPath in bmpFiles)
             {
-                // Verify the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Load the BMP image
+                // Build output path with same filename but .png extension
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(destinationFolder, fileNameWithoutExt + ".png");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load BMP image and save as PNG
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Build the output PNG path preserving the original filename
-                    string outputPath = Path.Combine(
-                        outputFolder,
-                        Path.GetFileNameWithoutExtension(inputPath) + ".png");
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the image as PNG
                     var pngOptions = new PngOptions();
                     image.Save(outputPath, pngOptions);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
