@@ -9,11 +9,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "C:\\temp\\sample.odg";
-            string outputPath = "C:\\temp\\sample.png";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.odg";
+            string outputPath = @"C:\Images\sample.png";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,7 +26,7 @@ class Program
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set PNG options with progressive (interlaced) encoding
+                // Configure PNG options for progressive (interlaced) rendering
                 PngOptions pngOptions = new PngOptions
                 {
                     Progressive = true
@@ -38,7 +38,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
