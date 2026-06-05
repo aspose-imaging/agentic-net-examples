@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -10,79 +11,76 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputDir = "Input";
+            string outputDir = "Output";
+            string fontDir = "Fonts";
 
-            if (!Directory.Exists(inputDirectory))
+            if (!Directory.Exists(inputDir))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
                 return;
             }
 
-            if (!Directory.Exists(outputDirectory))
+            if (!Directory.Exists(outputDir))
             {
-                Directory.CreateDirectory(outputDirectory);
+                Directory.CreateDirectory(outputDir);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            string fontFolder = Path.Combine(baseDir, "Fonts");
-            if (!Directory.Exists(fontFolder))
+            if (!Directory.Exists(fontDir))
             {
-                Directory.CreateDirectory(fontFolder);
+                Directory.CreateDirectory(fontDir);
             }
 
-            foreach (string inputPath in files)
+            var files = Directory.GetFiles(inputDir, "*.wmf");
+            foreach (var inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                if (!string.Equals(Path.GetExtension(inputPath), ".wmf", StringComparison.OrdinalIgnoreCase))
-                {
                     continue;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.ChangeExtension(Path.GetFileName(inputPath), ".jpg"));
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 var loadOptions = new LoadOptions();
                 loadOptions.AddCustomFontSource((args) =>
                 {
-                    string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
-                    var fonts = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-                    if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
+                    var result = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                    if (args.Length > 0)
                     {
-                        foreach (var fontFile in Directory.GetFiles(fontsPath))
+                        string fontsPath = args[0]?.ToString() ?? string.Empty;
+                        if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
                         {
-                            byte[] data = File.ReadAllBytes(fontFile);
-                            string name = Path.GetFileNameWithoutExtension(fontFile);
-                            fonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
+                            foreach (var fontFile in Directory.GetFiles(fontsPath))
+                            {
+                                byte[] fontBytes = File.ReadAllBytes(fontFile);
+                                string fontName = Path.GetFileNameWithoutExtension(fontFile);
+                                result.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+                            }
                         }
                     }
-                    return fonts.ToArray();
-                }, fontFolder);
+                    return result.ToArray();
+                }, fontDir);
 
-                using (var image = Image.Load(inputPath, loadOptions))
+                using (Image image = Image.Load(inputPath, loadOptions))
                 {
-                    var rasterOptions = new WmfRasterizationOptions
+                    var vectorOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
-                        PageSize = image.Size
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
                     };
 
-                    using (var jpegOptions = new JpegOptions
+                    var jpegOptions = new JpegOptions
                     {
-                        Quality = 90,
-                        VectorRasterizationOptions = rasterOptions
-                    })
-                    {
-                        image.Save(outputPath, jpegOptions);
-                    }
+                        VectorRasterizationOptions = vectorOptions
+                    };
+
+                    image.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -92,3 +90,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert a large collection of legacy Windows Metafile (WMF) diagrams into web‑friendly JPEG images while ensuring that custom corporate fonts are applied during rendering.
+ * 2. When an automated build pipeline must generate thumbnail previews of WMF icons stored in a source folder and output them as JPEG files for inclusion in documentation portals.
+ * 3. When a migration tool has to replace outdated WMF assets with high‑resolution JPEGs in a content management system, using a specific font directory to preserve brand typography.
+ * 4. When a desktop application processes user‑uploaded WMF drawings in bulk, applying a custom font set from a network share before saving the results as JPEG for further editing.
+ * 5. When a reporting service needs to batch render WMF charts with organization‑specific fonts into JPEG format for email distribution or PDF embedding.
+ */
