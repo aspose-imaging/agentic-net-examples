@@ -26,22 +26,21 @@ class Program
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Determine new dimensions to fit within 2000px width while preserving aspect ratio
+                // Determine new dimensions while preserving aspect ratio
                 int maxWidth = 2000;
                 int newWidth = image.Width;
                 int newHeight = image.Height;
 
                 if (image.Width > maxWidth)
                 {
-                    double scale = (double)maxWidth / image.Width;
                     newWidth = maxWidth;
-                    newHeight = (int)Math.Round(image.Height * scale);
+                    newHeight = (int)Math.Round(image.Height * (newWidth / (double)image.Width));
                 }
 
-                // Resize if needed
+                // Resize only if scaling is needed
                 if (newWidth != image.Width || newHeight != image.Height)
                 {
-                    image.Resize(newWidth, newHeight);
+                    image.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
                 }
 
                 // Prepare PDF export options
