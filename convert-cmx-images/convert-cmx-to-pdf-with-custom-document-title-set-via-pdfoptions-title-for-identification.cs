@@ -2,49 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input/sample.cmx";
+        string outputPath = "Output/sample.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = Path.Combine("Input", "sample.cmx");
-            string outputPath = Path.Combine("Output", "sample.pdf");
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load CMX image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF options with custom title
-                PdfOptions pdfOptions = new PdfOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    PdfDocumentInfo = new PdfDocumentInfo
-                    {
-                        Title = "Custom Document Title"
-                    },
-                    VectorRasterizationOptions = new CmxRasterizationOptions
+                    // Set custom document title
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                    pdfOptions.PdfDocumentInfo.Title = "Custom Document Title";
+
+                    // Configure vector rasterization options
+                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
                         TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    }
-                };
+                        SmoothingMode = SmoothingMode.None,
+                        Positioning = PositioningTypes.DefinedByDocument
+                    };
 
-                // Save as PDF
-                image.Save(outputPath, pdfOptions);
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
