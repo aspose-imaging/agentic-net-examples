@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
 
@@ -11,11 +10,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.svg";
+
         try
         {
-            // Hardcoded input raster image path
-            string inputPath = @"C:\temp\source.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,30 +23,22 @@ class Program
                 return;
             }
 
-            // Hardcoded output SVG path
-            string outputPath = @"C:\temp\output.svg";
-
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image to obtain its dimensions
+            // Load the raster image
             using (Image rasterImage = Image.Load(inputPath))
             {
-                // Create an SVG graphics canvas with the same size as the raster image
-                int width = rasterImage.Width;
-                int height = rasterImage.Height;
-                int dpi = 96; // standard screen DPI
+                // Create an SVG graphics context with the same dimensions as the raster image
+                var graphics = new SvgGraphics2D(rasterImage.Width, rasterImage.Height, 96);
 
-                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
+                // Set stroke width to 3 pixels (black color)
+                var pen = new Pen(Color.Black, 3);
 
-                // Draw the raster image onto the SVG canvas
-                graphics.DrawImage((RasterImage)rasterImage, new Point(0, 0), new Size(width, height));
+                // Draw a rectangle border around the image area
+                graphics.DrawRectangle(pen, 0, 0, rasterImage.Width, rasterImage.Height);
 
-                // Draw a rectangle border around the image with a 3‑pixel stroke
-                Pen borderPen = new Pen(Color.Black, 3);
-                graphics.DrawRectangle(borderPen, 0, 0, width, height);
-
-                // Finalize the SVG image
+                // Finalize SVG recording and obtain the SvgImage
                 using (SvgImage svgImage = graphics.EndRecording())
                 {
                     // Save the SVG file
