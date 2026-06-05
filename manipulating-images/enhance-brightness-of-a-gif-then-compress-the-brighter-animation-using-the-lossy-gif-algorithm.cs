@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"c:\temp\input.gif";
-            string outputPath = @"c:\temp\output.lossy.gif";
+            string inputPath = @"C:\temp\input.gif";
+            string outputPath = @"C:\temp\output.lossy.gif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -30,27 +30,23 @@ class Program
                 // Cast to GifImage to access GIF-specific methods
                 GifImage gifImage = (GifImage)image;
 
-                // Enhance brightness (value range: -255 to 255)
+                // Increase brightness (value range: -255 to 255)
                 gifImage.AdjustBrightness(50);
 
-                // Prepare GIF save options for lossy compression
+                // Configure lossy GIF compression options
                 GifOptions saveOptions = new GifOptions
                 {
-                    // Enable palette correction for better color quality
+                    // Enable palette correction for better visual quality
                     DoPaletteCorrection = true,
-                    // Optional: make the GIF interlaced
-                    Interlaced = true,
-                    // Set maximum pixel difference to trigger lossy compression
+                    // Set maximum pixel difference to trigger lossy compression (recommended 80)
                     MaxDiff = 80,
-                    // Optional: set color resolution (bits per color - 1)
-                    ColorResolution = 7
+                    // Optional: keep interlacing off
+                    Interlaced = false
                 };
 
-                // Save the brighter GIF using lossy compression
+                // Save the brighter image using lossy compression
                 gifImage.Save(outputPath, saveOptions);
             }
-
-            Console.WriteLine("Processing completed successfully.");
         }
         catch (Exception ex)
         {
