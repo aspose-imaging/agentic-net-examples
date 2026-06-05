@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -10,11 +11,11 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPngPath = "Input/image.png";
-            string intermediateSvgPath = "Output/image.svg";
-            string outputPdfPath = "Output/image.pdf";
+            string inputPngPath = "Input/sample.png";
+            string intermediateSvgPath = "Output/sample.svg";
+            string outputPdfPath = "Output/sample.pdf";
 
-            // Validate input PNG exists
+            // Validate input PNG file
             if (!File.Exists(inputPngPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPngPath}");
@@ -28,18 +29,20 @@ class Program
             // Convert PNG to SVG
             using (Image pngImage = Image.Load(inputPngPath))
             {
-                var svgRasterOptions = new SvgRasterizationOptions
+                // Set up SVG export options with rasterization settings
+                SvgOptions svgOptions = new SvgOptions
                 {
-                    PageSize = pngImage.Size
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = pngImage.Size
+                    }
                 };
-                var svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = svgRasterOptions
-                };
+
+                // Save as SVG
                 pngImage.Save(intermediateSvgPath, svgOptions);
             }
 
-            // Validate SVG was created
+            // Validate generated SVG file
             if (!File.Exists(intermediateSvgPath))
             {
                 Console.Error.WriteLine($"File not found: {intermediateSvgPath}");
@@ -49,16 +52,13 @@ class Program
             // Convert SVG to high‑resolution PDF
             using (Image svgImage = Image.Load(intermediateSvgPath))
             {
-                var pdfOptions = new PdfOptions
+                PdfOptions pdfOptions = new PdfOptions
                 {
+                    // Set high DPI for the PDF output
                     ResolutionSettings = new ResolutionSetting(300, 300)
                 };
-                var pdfRasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = svgImage.Size
-                };
-                pdfOptions.VectorRasterizationOptions = pdfRasterOptions;
 
+                // Save as PDF
                 svgImage.Save(outputPdfPath, pdfOptions);
             }
         }
