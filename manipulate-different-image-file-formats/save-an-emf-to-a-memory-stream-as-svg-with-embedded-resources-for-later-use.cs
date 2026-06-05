@@ -1,42 +1,60 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
+    // Custom callback that forces all image resources to be embedded into the SVG.
+    class EmbeddedResourceCallback : SvgResourceKeeperCallback
+    {
+        public override string OnImageResourceReady(byte[] imageData, SvgImageType imageType, string suggestedFileName, ref bool useEmbeddedImage)
+        {
+            // Instruct the exporter to embed the image data directly.
+            useEmbeddedImage = true;
+            // No external file is created, so return null.
+            return null;
+        }
+
+        public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
+        {
+            // No external SVG file is written; the caller receives the data from the memory stream.
+            return null;
+        }
+    }
+
     static void Main()
     {
+        // Hard‑coded input path.
+        string inputPath = @"C:\temp\test.emf";
+
+        // Verify that the input file exists.
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            // Hardcoded input path
-            string inputPath = @"C:\Temp\test.emf";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Load the EMF image
+            // Load the EMF image.
             using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
             {
-                // Configure SVG save options
+                // Prepare SVG save options.
                 SvgOptions svgOptions = new SvgOptions
                 {
                     TextAsShapes = true,
-                    // Use default callback which keeps resources embedded
-                    Callback = new SvgResourceKeeperCallback()
+                    Callback = new EmbeddedResourceCallback()
                 };
 
-                // Set up EMF rasterization options
+                // Configure rasterization options for the EMF source.
                 EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
                 {
-                    PageSize = emfImage.Size,
                     BackgroundColor = Color.WhiteSmoke,
+                    PageSize = emfImage.Size,
                     RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
                     BorderX = 50,
                     BorderY = 50
@@ -44,15 +62,17 @@ class Program
 
                 svgOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save SVG to a memory stream
-                using (MemoryStream ms = new MemoryStream())
+                // Save the SVG into a memory stream.
+                using (MemoryStream svgStream = new MemoryStream())
                 {
-                    emfImage.Save(ms, svgOptions);
+                    emfImage.Save(svgStream, svgOptions);
 
-                    // Example: write the SVG from the memory stream to a file
-                    string outputPath = @"C:\Temp\test.output.svg";
+                    // At this point svgStream contains the SVG data with embedded resources.
+                    // The stream can be used later (e.g., written to a file, sent over a network, etc.).
+                    // Example: write to a file for verification (optional).
+                    string outputPath = @"C:\temp\test.output.svg";
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    File.WriteAllBytes(outputPath, ms.ToArray());
+                    File.WriteAllBytes(outputPath, svgStream.ToArray());
                 }
             }
         }
@@ -62,3 +82,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert Windows Metafile (EMF) charts into scalable SVG graphics for web dashboards without creating external image files.
+ * 2. When an application must embed all raster resources directly into an SVG payload to ensure the SVG can be sent over APIs or stored in a database as a single blob.
+ * 3. When generating printable vector reports from EMF logos and embedding them in SVG for responsive email newsletters that must render correctly on any client.
+ * 4. When a cloud service processes user‑uploaded EMF files and returns an in‑memory SVG stream for further manipulation or streaming to a front‑end without touching the file system.
+ * 5. When building a C# microservice that transforms legacy EMF icons into self‑contained SVG assets for inclusion in mobile app resource bundles.
+ */
