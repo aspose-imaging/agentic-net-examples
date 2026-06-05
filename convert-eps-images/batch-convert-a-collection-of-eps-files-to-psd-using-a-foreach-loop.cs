@@ -10,7 +10,7 @@ class Program
     {
         try
         {
-            // Hardcoded input EPS files
+            // Hardcoded collection of EPS files to convert
             string[] inputFiles = new string[]
             {
                 @"C:\Images\Input1.eps",
@@ -18,33 +18,28 @@ class Program
                 @"C:\Images\Input3.eps"
             };
 
-            // Hardcoded output directory
-            string outputDirectory = @"C:\Images\Converted";
-
-            foreach (string inputPath in inputFiles)
+            foreach (var inputPath in inputFiles)
             {
-                // Verify input file exists
+                // Verify that the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output PSD path
-                string outputPath = Path.Combine(
-                    outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".psd");
+                // Build the output path by changing the extension to .psd
+                string outputPath = Path.ChangeExtension(inputPath, ".psd");
 
-                // Ensure output directory exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load EPS image
+                // Load the EPS image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Prepare PSD save options
+                    // Create PSD save options (default settings)
                     var psdOptions = new PsdOptions();
 
-                    // Save as PSD
+                    // Save the image as PSD
                     image.Save(outputPath, psdOptions);
                 }
             }
