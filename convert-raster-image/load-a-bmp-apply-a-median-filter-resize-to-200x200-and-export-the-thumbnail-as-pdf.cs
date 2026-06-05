@@ -9,7 +9,7 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.bmp";
+            string inputPath = "Input\\source.bmp";
             string outputPath = "Output\\thumbnail.pdf";
 
             if (!File.Exists(inputPath))
@@ -23,9 +23,15 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
+
+                // Apply median filter with size 5
                 raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
+
+                // Resize to 200x200
                 raster.Resize(200, 200);
-                image.Save(outputPath, new PdfOptions());
+
+                // Save as PDF
+                raster.Save(outputPath, new PdfOptions());
             }
         }
         catch (Exception ex)
