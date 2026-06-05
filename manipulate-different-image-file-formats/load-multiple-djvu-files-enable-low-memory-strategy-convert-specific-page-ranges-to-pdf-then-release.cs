@@ -1,8 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,23 +11,20 @@ class Program
     {
         try
         {
-            // Hard‑coded input DjVu files
+            // Hardcoded input and output paths
             string[] inputPaths = {
                 @"C:\Data\doc1.djvu",
                 @"C:\Data\doc2.djvu"
             };
 
-            // Corresponding output PDF files
             string[] outputPaths = {
                 @"C:\Data\Result\doc1.pdf",
                 @"C:\Data\Result\doc2.pdf"
             };
 
-            // Page indexes to export for each file (0‑based)
-            int[][] pagesToExport = {
-                new int[] { 0, 1, 2 },   // first three pages of doc1.djvu
-                new int[] { 4, 5 }       // pages 5 and 6 of doc2.djvu
-            };
+            // Define page ranges to export (example: pages 1-3)
+            int[] pagesToExport = { 1, 2, 3 };
+            var multiPageOptions = new DjvuMultiPageOptions(pagesToExport);
 
             for (int i = 0; i < inputPaths.Length; i++)
             {
@@ -41,29 +39,20 @@ class Program
                 }
 
                 // Ensure output directory exists
-                string outputDir = Path.GetDirectoryName(outputPath);
-                Directory.CreateDirectory(outputDir ?? ".");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Low‑memory loading options (e.g., 1 MB buffer)
-                LoadOptions loadOptions = new LoadOptions
-                {
-                    BufferSizeHint = 1 * 1024 * 1024
-                };
+                // Load DjVu with low‑memory strategy (1 MB buffer)
+                var loadOptions = new LoadOptions { BufferSizeHint = 1 * 1024 * 1024 };
 
-                // Open the DjVu document with the low‑memory options
                 using (FileStream stream = File.OpenRead(inputPath))
-                using (DjvuImage djvuImage = new DjvuImage(stream, loadOptions))
+                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
                 {
-                    // Define which pages to export
-                    DjvuMultiPageOptions multiPageOptions = new DjvuMultiPageOptions(pagesToExport[i]);
-
-                    // Set up PDF saving options with the selected pages
-                    PdfOptions pdfOptions = new PdfOptions
+                    // Save selected pages to PDF
+                    var pdfOptions = new PdfOptions
                     {
                         MultiPageOptions = multiPageOptions
                     };
 
-                    // Save selected pages as a PDF
                     djvuImage.Save(outputPath, pdfOptions);
                 }
             }
@@ -74,3 +63,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a .NET application must batch‑convert large DjVu archives of scanned books into PDF while only extracting the first three chapters and keeping memory usage under 1 MB per file.
+ * 2. When a document‑management system needs to process user‑uploaded DjVu files on a server with limited RAM, converting selected pages to searchable PDF for downstream indexing.
+ * 3. When a legal‑tech solution has to generate PDF excerpts from multiple DjVu case files, preserving only the relevant pages to reduce storage and improve download speed.
+ * 4. When an e‑learning platform automates the creation of PDF handouts from DjVu lecture notes, selecting specific slides and ensuring the conversion runs on low‑memory cloud instances.
+ * 5. When a desktop utility built with C# and Aspose.Imaging must load several DjVu documents, apply a low‑memory buffer, export defined page ranges to PDF, and then release resources to avoid memory leaks.
+ */
