@@ -1,41 +1,50 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = @"C:\input\sample.cdr";
-        string outputPath = @"C:\output\sample.psd";
-
         try
         {
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Temp\sample.cdr";
+            string outputPath = @"C:\Temp\sample.psd";
+
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            // Load the CDR file
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                var psdOptions = new PsdOptions
+                // Access the first (and only) page
+                CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
+
+                // Prepare PSD save options with vector rasterization settings
+                PsdOptions psdOptions = new PsdOptions();
+
+                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
-                    CompressionMethod = CompressionMethod.RLE,
-                    ColorMode = ColorModes.Rgb,
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        PageWidth = cdr.Width,
-                        PageHeight = cdr.Height
-                    }
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
+                    PageWidth = page.Width,
+                    PageHeight = page.Height
                 };
 
-                cdr.Save(outputPath, psdOptions);
+                psdOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save the page as a PSD file, preserving layers
+                page.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)
