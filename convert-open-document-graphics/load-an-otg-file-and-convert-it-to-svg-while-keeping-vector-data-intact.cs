@@ -7,36 +7,36 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.otg";
+        string outputPath = "output/output.svg";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample.svg";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure SVG export options
+                // Prepare SVG export options
                 var svgOptions = new SvgOptions();
 
-                // Set vector rasterization options for SVG output
-                var rasterOptions = new SvgRasterizationOptions
+                // Configure vector rasterization to preserve vector data
+                var vectorOptions = new SvgRasterizationOptions
                 {
-                    PageSize = image.Size // preserve original size
+                    PageSize = image.Size
                 };
-                svgOptions.VectorRasterizationOptions = rasterOptions;
+                svgOptions.VectorRasterizationOptions = vectorOptions;
 
-                // Save the image as SVG, preserving vector data
+                // Save as SVG
                 image.Save(outputPath, svgOptions);
             }
         }
