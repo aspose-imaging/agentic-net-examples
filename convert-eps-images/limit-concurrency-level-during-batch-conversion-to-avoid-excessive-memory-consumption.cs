@@ -1,8 +1,8 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,55 +10,54 @@ class Program
     {
         try
         {
-            // Set up base directories
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            // Define input and output directories
+            string inputDir = Path.Combine(Directory.GetCurrentDirectory(), "Input");
+            string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Output");
 
-            // Ensure input directory exists
-            if (!Directory.Exists(inputDirectory))
+            // Ensure input directory exists; if not, create and exit
+            if (!Directory.Exists(inputDir))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
                 return;
             }
 
             // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
+            if (!Directory.Exists(outputDir))
             {
-                Directory.CreateDirectory(outputDirectory);
+                Directory.CreateDirectory(outputDir);
             }
 
-            // Get all files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+            // Get all files in input directory
+            string[] files = Directory.GetFiles(inputDir);
 
-            // Limit concurrency to 4 parallel operations
-            System.Threading.Tasks.Parallel.ForEach(
-                files,
-                new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = 4 },
-                (inputPath) =>
+            // Limit concurrency to avoid high memory usage
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 2 };
+
+            Parallel.ForEach(files, parallelOptions, inputPath =>
+            {
+                // Verify the file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Verify input file exists
-                    if (!File.Exists(inputPath))
-                    {
-                        Console.Error.WriteLine($"File not found: {inputPath}");
-                        return;
-                    }
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                    // Determine output path (convert to JPEG)
-                    string outputPath = Path.Combine(
-                        outputDirectory,
-                        Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
+                // Build output path with same file name but .png extension
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Ensure output directory exists (unconditionally as required)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Load and convert the image
-                    using (Image image = Image.Load(inputPath))
-                    {
-                        image.Save(outputPath, new JpegOptions());
-                    }
-                });
+                // Load image and save as PNG
+                using (Image image = Image.Load(inputPath))
+                {
+                    var pngOptions = new PngOptions();
+                    image.Save(outputPath, pngOptions);
+                }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+            });
         }
         catch (Exception ex)
         {
