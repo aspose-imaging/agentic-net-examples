@@ -3,83 +3,72 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
-            // Input directory containing JPEG files
             string inputDirectory = "InputImages";
-            // Output CSV file to store extracted EXIF data
-            string outputCsvPath = "Output\\exif_data.csv";
+            string outputFile = "Output/exif.csv";
+
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputCsvPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputFile) ?? ".");
 
-            // Prepare CSV writer
-            using (var writer = new StreamWriter(outputCsvPath, false))
+            using (var writer = new StreamWriter(outputFile, false))
             {
                 // Write CSV header
-                writer.WriteLine("FilePath,Make,Model,DateTimeOriginal,ExposureTime,FNumber,ISOSpeed,FocalLength,Orientation");
+                writer.WriteLine("FileName,TagName,TagValue");
 
-                // Get all JPEG files (case‑insensitive)
-                string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.*", SearchOption.AllDirectories);
-                foreach (string filePath in jpegFiles)
+                foreach (var filePath in Directory.GetFiles(inputDirectory, "*.jpg"))
                 {
-                    string ext = Path.GetExtension(filePath).ToLowerInvariant();
-                    if (ext != ".jpg" && ext != ".jpeg")
-                        continue;
-
-                    // Validate input file existence
                     if (!File.Exists(filePath))
                     {
                         Console.Error.WriteLine($"File not found: {filePath}");
                         return;
                     }
 
-                    // Load JPEG image
-                    using (JpegImage image = (JpegImage)Image.Load(filePath))
+                    using (var image = (JpegImage)Image.Load(filePath))
                     {
-                        // Access EXIF data
-                        var exifData = image.ExifData as Aspose.Imaging.Exif.JpegExifData;
-                        if (exifData == null)
+                        var exifData = image.ExifData;
+                        if (exifData != null)
                         {
-                            // No EXIF data; write empty fields
-                            writer.WriteLine($"{filePath},,,,,,,,");
-                            continue;
+                            var type = exifData.GetType();
+                            var props = type.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                            foreach (var prop in props)
+                            {
+                                var value = prop.GetValue(exifData);
+                                string valStr = value != null ? value.ToString().Replace("\"", "\"\"") : "NULL";
+                                string line = $"\"{Path.GetFileName(filePath)}\",\"{prop.Name}\",\"{valStr}\"";
+                                writer.WriteLine(line);
+                            }
                         }
-
-                        // Extract selected tags (null‑safe where applicable)
-                        string make = exifData.Make ?? "";
-                        string model = exifData.Model ?? "";
-                        string dateTimeOriginal = exifData.DateTimeOriginal ?? "";
-                        string exposureTime = exifData.ExposureTime != null ? exifData.ExposureTime.ToString() : "";
-                        string fNumber = exifData.FNumber != null ? exifData.FNumber.ToString() : "";
-                        string isoSpeed = exifData.ISOSpeed.ToString();
-                        string focalLength = exifData.FocalLength != null ? exifData.FocalLength.ToString() : "";
-                        string orientation = exifData.Orientation.ToString();
-
-                        // Write CSV line
-                        writer.WriteLine($"{filePath},{EscapeCsv(make)},{EscapeCsv(model)},{EscapeCsv(dateTimeOriginal)},{EscapeCsv(exposureTime)},{EscapeCsv(fNumber)},{EscapeCsv(isoSpeed)},{EscapeCsv(focalLength)},{EscapeCsv(orientation)}");
                     }
                 }
             }
+
+            Console.WriteLine($"EXIF data exported to {outputFile}");
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    // Helper to escape CSV fields containing commas or quotes
-    private static string EscapeCsv(string field)
-    {
-        if (field.Contains(",") || field.Contains("\"") || field.Contains("\n"))
-        {
-            field = field.Replace("\"", "\"\"");
-            return $"\"{field}\"";
-        }
-        return field;
-    }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a photographer needs to catalog camera settings from thousands of JPEG photos to generate statistical reports on aperture, shutter speed, and ISO using C# and Aspose.Imaging.
+ * 2. When an e‑commerce platform wants to verify image provenance by extracting GPS coordinates and timestamps from product photos before importing them into a SQL Server database.
+ * 3. When a digital forensics analyst must batch pull EXIF metadata from seized JPEG files to correlate timestamps with system logs in a relational database.
+ * 4. When a marketing team wants to analyze the distribution of device models used by customers by extracting the Make and Model EXIF tags from uploaded images via a .NET backend.
+ * 5. When a content management system needs to automatically populate image metadata tables for search indexing by reading EXIF fields from JPEG assets with Aspose.Imaging.
+ */
