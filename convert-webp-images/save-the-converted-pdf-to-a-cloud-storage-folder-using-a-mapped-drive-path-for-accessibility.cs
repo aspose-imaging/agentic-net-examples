@@ -10,10 +10,10 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input\\sample.jpg";
-            string outputPath = @"\\CloudServer\Share\Converted\sample.pdf";
+            string inputPath = "Input/sample.jpg";
+            string outputPath = @"\\Server\CloudStorage\Output\sample.pdf";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,13 +23,14 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image and save as PDF
+            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    image.Save(outputPath, pdfOptions);
-                }
+                // Create PDF save options
+                var pdfOptions = new PdfOptions();
+
+                // Save the image as PDF to the specified cloud storage path
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
