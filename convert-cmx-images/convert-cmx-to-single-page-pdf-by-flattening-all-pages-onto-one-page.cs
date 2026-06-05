@@ -1,84 +1,62 @@
 using System;
 using System.IO;
-using System.Linq;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\sample.cmx";
+        string outputPath = @"C:\Temp\sample_flattened.pdf";
+
+        // Ensure input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.cmx";
-            string outputPath = "output.pdf";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            // Load the CMX image
+            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
-
-            // Load CMX image
-            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
-            {
-                // First pass: determine canvas size by rasterizing each page to get dimensions
-                List<Size> pageSizes = new List<Size>();
-                foreach (Image page in cmx.Pages)
+                // Calculate combined dimensions of all pages
+                int maxWidth = 0;
+                int totalHeight = 0;
+                foreach (CmxImagePage page in cmxImage.Pages)
                 {
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        page.Save(ms, new PngOptions());
-                        ms.Position = 0;
-                        using (RasterImage raster = (RasterImage)Image.Load(ms))
-                        {
-                            pageSizes.Add(raster.Size);
-                        }
-                    }
+                    if (page.Width > maxWidth)
+                        maxWidth = page.Width;
+                    totalHeight += page.Height;
                 }
 
-                int canvasWidth = pageSizes.Max(s => s.Width);
-                int canvasHeight = pageSizes.Sum(s => s.Height);
-
-                // Create raster canvas (JPEG) to hold all pages vertically
-                JpegOptions jpegOptions = new JpegOptions() { Quality = 100 };
-                using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+                // Prepare PDF export options
+                var pdfOptions = new PdfOptions
                 {
-                    int offsetY = 0;
-                    // Second pass: rasterize each page again and copy pixels onto the canvas
-                    foreach (Image page in cmx.Pages)
+                    // No multipage options – all pages will be rendered onto a single PDF page
+                    MultiPageOptions = null,
+                    // Set the PDF page size to accommodate all CMX pages
+                    PageSize = new SizeF(maxWidth, totalHeight),
+                    // Configure vector rasterization to use the combined canvas size
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        using (MemoryStream ms = new MemoryStream())
-                        {
-                            page.Save(ms, new PngOptions());
-                            ms.Position = 0;
-                            using (RasterImage raster = (RasterImage)Image.Load(ms))
-                            {
-                                Rectangle bounds = new Rectangle(0, offsetY, raster.Width, raster.Height);
-                                canvas.SaveArgb32Pixels(bounds, raster.LoadArgb32Pixels(raster.Bounds));
-                                offsetY += raster.Height;
-                            }
-                        }
+                        PageWidth = maxWidth,
+                        PageHeight = totalHeight,
+                        BackgroundColor = Aspose.Imaging.Color.White,
+                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = Aspose.Imaging.SmoothingMode.None
                     }
+                };
 
-                    // Save the combined canvas as a single‑page PDF
-                    PdfOptions pdfOptions = new PdfOptions();
-                    canvas.Save(outputPath, pdfOptions);
-                }
+                // Save the flattened PDF
+                cmxImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
