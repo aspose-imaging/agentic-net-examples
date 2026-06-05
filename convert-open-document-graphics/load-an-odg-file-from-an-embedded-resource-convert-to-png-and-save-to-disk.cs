@@ -3,50 +3,58 @@ using System.IO;
 using System.Reflection;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input path (used only for existence check as per safety rules)
-            string inputPath = "Resources/sample.odg";
+            // Define base directories
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Verify the input file exists; if not, report and exit
+            // Ensure directories exist
+            Directory.CreateDirectory(inputDirectory);
+            Directory.CreateDirectory(outputDirectory);
+
+            // Define file paths
+            string inputPath = Path.Combine(inputDirectory, "sample.odg");
+            string outputPath = Path.Combine(outputDirectory, "sample.png");
+
+            // Write embedded ODG resource to input file if it does not exist
+            if (!File.Exists(inputPath))
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                // Adjust the resource name to match the actual embedded resource
+                using (Stream resourceStream = assembly.GetManifestResourceStream("Resources.sample.odg"))
+                {
+                    if (resourceStream == null)
+                    {
+                        Console.Error.WriteLine("Embedded resource not found.");
+                        return;
+                    }
+                    using (FileStream fileStream = new FileStream(inputPath, FileMode.Create, FileAccess.Write))
+                    {
+                        resourceStream.CopyTo(fileStream);
+                    }
+                }
+            }
+
+            // Input file existence check
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load ODG file from embedded resource
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            // Adjust the resource name to match the actual namespace and folder structure
-            string resourceName = "MyNamespace.Resources.sample.odg";
-
-            using (Stream resourceStream = assembly.GetManifestResourceStream(resourceName))
+            // Load ODG image and convert to PNG
+            using (Image image = Image.Load(inputPath))
             {
-                if (resourceStream == null)
-                {
-                    Console.Error.WriteLine($"Embedded resource not found: {resourceName}");
-                    return;
-                }
-
-                // Load the ODG image from the stream and cast to OdgImage
-                using (OdgImage odgImage = (OdgImage)Image.Load(resourceStream))
-                {
-                    // Hardcoded output path
-                    string outputPath = "output/sample.png";
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the image as PNG
-                    PngOptions pngOptions = new PngOptions();
-                    odgImage.Save(outputPath, pngOptions);
-                }
+                PngOptions pngOptions = new PngOptions();
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
