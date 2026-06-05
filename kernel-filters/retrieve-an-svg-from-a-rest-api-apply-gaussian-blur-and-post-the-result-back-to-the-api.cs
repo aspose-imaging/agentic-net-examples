@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Net.Http;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
@@ -10,82 +10,79 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded paths and URLs
+        string inputUrl = "https://example.com/api/input.svg";
+        string downloadPath = "downloaded.svg";
+        string tempPngPath = "temp.png";
+        string outputPath = "blurred.png";
+        string postUrl = "https://example.com/api/upload";
+
         try
         {
-            // Define URLs and temporary file paths
-            string downloadUrl = "https://example.com/input.svg";
-            string uploadUrl = "https://example.com/upload";
-            string tempSvgPath = Path.Combine(Path.GetTempPath(), "downloaded.svg");
-            string outputPath = Path.Combine(Path.GetTempPath(), "blurred.png");
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(downloadPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Download SVG from REST API
-            using (System.Net.Http.HttpClient httpClient = new System.Net.Http.HttpClient())
+            using (HttpClient httpClient = new HttpClient())
             {
-                using (System.IO.Stream downloadStream = httpClient.GetStreamAsync(downloadUrl).Result)
-                using (FileStream fileStream = new FileStream(tempSvgPath, FileMode.Create, FileAccess.Write))
-                {
-                    downloadStream.CopyTo(fileStream);
-                }
+                byte[] svgData = httpClient.GetByteArrayAsync(inputUrl).Result;
+                File.WriteAllBytes(downloadPath, svgData);
             }
 
-            // Verify the SVG file was saved
-            if (!File.Exists(tempSvgPath))
+            // Verify download succeeded
+            if (!File.Exists(downloadPath))
             {
-                Console.Error.WriteLine($"File not found: {tempSvgPath}");
+                Console.Error.WriteLine($"File not found: {downloadPath}");
                 return;
             }
 
-            // Load SVG image from the temporary file
-            using (FileStream svgFileStream = new FileStream(tempSvgPath, FileMode.Open, FileAccess.Read))
-            using (SvgImage svgImage = new SvgImage(svgFileStream))
+            // Load SVG and rasterize to PNG
+            using (Image svgImage = Image.Load(downloadPath))
             {
-                // Prepare rasterization options for PNG output
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-                rasterOptions.PageSize = svgImage.Size;
-
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Rasterize SVG to a memory stream
-                using (MemoryStream rasterStream = new MemoryStream())
-                {
-                    svgImage.Save(rasterStream, pngOptions);
-                    rasterStream.Position = 0;
-
-                    // Load rasterized image as RasterImage
-                    using (RasterImage rasterImage = (RasterImage)Image.Load(rasterStream))
-                    {
-                        // Apply Gaussian blur filter (radius 5, sigma 4.0)
-                        rasterImage.Filter(rasterImage.Bounds,
-                            new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-
-                        // Ensure output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the blurred image to PNG file
-                        rasterImage.Save(outputPath);
-                    }
-                }
+                var rasterOptions = new SvgRasterizationOptions { PageSize = svgImage.Size };
+                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
+                svgImage.Save(tempPngPath, pngOptions);
             }
 
-            // Verify the output file was created
+            // Verify rasterized PNG exists
+            if (!File.Exists(tempPngPath))
+            {
+                Console.Error.WriteLine($"File not found: {tempPngPath}");
+                return;
+            }
+
+            // Load raster PNG, apply Gaussian blur, and save result
+            using (Image rasterImage = Image.Load(tempPngPath))
+            {
+                RasterImage raster = (RasterImage)rasterImage;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                raster.Save(outputPath);
+            }
+
+            // Verify output exists
             if (!File.Exists(outputPath))
             {
                 Console.Error.WriteLine($"File not found: {outputPath}");
                 return;
             }
 
-            // Upload the blurred PNG back to the REST API
-            using (System.Net.Http.HttpClient httpClient = new System.Net.Http.HttpClient())
-            using (FileStream uploadStream = new FileStream(outputPath, FileMode.Open, FileAccess.Read))
+            // Post the blurred image back to the API
+            using (HttpClient httpClient = new HttpClient())
             {
-                System.Net.Http.StreamContent content = new System.Net.Http.StreamContent(uploadStream);
-                content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/png");
-                System.Net.Http.HttpResponseMessage response = httpClient.PostAsync(uploadUrl, content).Result;
-                // Optionally handle response
-                if (!response.IsSuccessStatusCode)
+                using (var content = new MultipartFormDataContent())
                 {
-                    Console.Error.WriteLine($"Upload failed: {response.StatusCode}");
+                    var fileBytes = File.ReadAllBytes(outputPath);
+                    var fileContent = new ByteArrayContent(fileBytes);
+                    fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/png");
+                    content.Add(fileContent, "file", Path.GetFileName(outputPath));
+
+                    var response = httpClient.PostAsync(postUrl, content).Result;
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        Console.Error.WriteLine($"Upload failed: {response.StatusCode}");
+                    }
                 }
             }
         }
@@ -95,3 +92,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web service needs to fetch a vector logo in SVG format, apply a soft Gaussian blur for a hover effect, and send the blurred PNG back to the API for storage.
+ * 2. When an e‑commerce platform wants to automatically generate blurred preview images of user‑uploaded SVG product designs by downloading them via a REST endpoint, rasterizing to PNG, applying blur, and posting the result.
+ * 3. When a marketing automation tool must retrieve SVG banners from a content API, apply a Gaussian blur to create background images, and upload the processed PNGs to the same API for later use in email campaigns.
+ * 4. When a mobile app backend processes SVG icons from a remote service, converts them to raster PNGs, adds a blur filter for UI consistency, and returns the modified images through a POST request.
+ * 5. When a document generation system pulls SVG diagrams from a REST API, softens them with a Gaussian blur to meet branding guidelines, and posts the blurred PNGs back to the API for inclusion in generated PDFs.
+ */
