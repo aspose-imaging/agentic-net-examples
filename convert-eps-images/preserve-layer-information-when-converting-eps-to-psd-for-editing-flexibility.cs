@@ -3,54 +3,41 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hard‑coded input and output file paths
+        string inputPath = "sample.eps";
+        string outputPath = "result.psd";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.eps";
-            string outputPath = "Output/sample.psd";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the EPS image
-            using (Image image = Image.Load(inputPath))
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Cast to EpsImage for clarity (optional)
-                EpsImage epsImage = (EpsImage)image;
-
-                // Prepare PSD save options
+                // Prepare PSD saving options (default settings preserve layers where possible)
                 PsdOptions psdOptions = new PsdOptions
                 {
-                    // Use RLE compression for reasonable file size
-                    CompressionMethod = CompressionMethod.RLE,
-                    // Preserve original colors (RGB)
-                    ColorMode = ColorModes.Rgb
+                    // Example: keep original metadata
+                    KeepMetadata = true,
+                    // Use default PSD version (6) and compression (RAW)
+                    Version = 6,
+                    CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.Raw
                 };
 
-                // Configure vector rasterization to keep layers (each vector object becomes a layer)
-                psdOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = epsImage.Width,
-                    PageHeight = epsImage.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
-
-                // Save as PSD preserving layer information
+                // Save the EPS as a PSD file
                 epsImage.Save(outputPath, psdOptions);
             }
         }
