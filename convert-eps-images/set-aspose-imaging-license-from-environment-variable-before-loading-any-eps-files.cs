@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.eps";
-        string outputPath = "output.png";
+        string inputPath = @"C:\Images\input.eps";
+        string outputPath = @"C:\Images\output.png";
 
         try
         {
@@ -28,17 +28,21 @@ class Program
             string licenseEnv = Environment.GetEnvironmentVariable("ASPOSE_IMAGING_LICENSE");
             if (!string.IsNullOrEmpty(licenseEnv) && File.Exists(licenseEnv))
             {
-                var license = new Aspose.Imaging.License();
+                var license = new License();
                 license.SetLicense(licenseEnv);
+            }
+            else
+            {
+                Console.Error.WriteLine("Aspose.Imaging license not found. Proceeding without a license.");
             }
 
             // Load EPS image with default load options
             using (var image = Image.Load(inputPath, new EpsLoadOptions()))
             {
-                // Resize the image (example dimensions)
-                image.Resize(400, 400, ResizeType.Mitchell);
+                // Example processing: resize the image
+                image.Resize(800, 600, ResizeType.Mitchell);
 
-                // Save as PNG using default PNG options
+                // Save the processed image as PNG
                 var pngOptions = new PngOptions();
                 image.Save(outputPath, pngOptions);
             }
