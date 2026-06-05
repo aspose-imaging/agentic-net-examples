@@ -6,43 +6,46 @@ using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output directories
+        string inputDirectory = @"C:\InputDicom";
+        string outputDirectory = @"C:\OutputPng";
+
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
-
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
+            // Get all DICOM files in the input directory
             string[] dicomFiles = Directory.GetFiles(inputDirectory, "*.dcm");
 
             foreach (string inputPath in dicomFiles)
             {
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+                // Prepare base name for output files
+                string baseFileName = Path.GetFileNameWithoutExtension(inputPath);
 
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+                // Open the DICOM file as a stream and load it
+                using (Stream stream = File.OpenRead(inputPath))
+                using (DicomImage dicomImage = new DicomImage(stream))
                 {
-                    dicomImage.Save(outputPath, new PngOptions());
+                    // Iterate through each page of the DICOM image
+                    foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                    {
+                        // Build output file name (preserve original name, add page index if multi‑page)
+                        string outputFileName = $"{baseFileName}_{dicomPage.Index}.png";
+                        string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the page as PNG
+                        dicomPage.Save(outputPath, new PngOptions());
+                    }
                 }
             }
         }
