@@ -17,76 +17,77 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(outputFolder);
 
-            // Get all image files in the input folder (common raster formats)
-            string[] files = Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly);
-            foreach (string inputPath in files)
+            // Process each image file in the input folder
+            foreach (string inputPath in Directory.GetFiles(inputFolder))
             {
-                // Validate input file existence
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
+                // Determine output file path with .svg extension
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".svg");
+
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Work only with raster images for cropping
-                    if (image is RasterImage rasterImage)
+                    // Cast to RasterImage to perform cropping
+                    RasterImage rasterImage = image as RasterImage;
+                    if (rasterImage == null)
                     {
-                        int width = rasterImage.Width;
-                        int height = rasterImage.Height;
-
-                        // Desired aspect ratio 16:9
-                        const int targetRatioWidth = 16;
-                        const int targetRatioHeight = 9;
-
-                        // Calculate target dimensions
-                        int targetWidth = height * targetRatioWidth / targetRatioHeight;
-                        int targetHeight = width * targetRatioHeight / targetRatioWidth;
-
-                        Rectangle cropArea;
-
-                        if (width > targetWidth)
-                        {
-                            // Crop horizontally: center the crop area
-                            int cropX = (width - targetWidth) / 2;
-                            cropArea = new Rectangle(cropX, 0, targetWidth, height);
-                        }
-                        else if (height > targetHeight)
-                        {
-                            // Crop vertically: center the crop area
-                            int cropY = (height - targetHeight) / 2;
-                            cropArea = new Rectangle(0, cropY, width, targetHeight);
-                        }
-                        else
-                        {
-                            // Image already matches or is smaller than the target ratio; no cropping needed
-                            cropArea = new Rectangle(0, 0, width, height);
-                        }
-
-                        // Perform cropping
-                        rasterImage.Crop(cropArea);
+                        Console.Error.WriteLine($"Unsupported image format for cropping: {inputPath}");
+                        continue;
                     }
 
-                    // Prepare output SVG path
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".svg";
-                    string outputPath = Path.Combine(outputFolder, outputFileName);
+                    // Calculate crop rectangle to achieve 16:9 aspect ratio (centered)
+                    int originalWidth = rasterImage.Width;
+                    int originalHeight = rasterImage.Height;
 
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Desired width based on height
+                    int targetWidth = (originalHeight * 16) / 9;
+                    // Desired height based on width
+                    int targetHeight = (originalWidth * 9) / 16;
 
-                    // Set up SVG save options with rasterization settings
+                    int cropWidth, cropHeight;
+                    if (targetWidth <= originalWidth)
+                    {
+                        // Height is the limiting factor
+                        cropWidth = targetWidth;
+                        cropHeight = originalHeight;
+                    }
+                    else
+                    {
+                        // Width is the limiting factor
+                        cropWidth = originalWidth;
+                        cropHeight = targetHeight;
+                    }
+
+                    // Center the crop rectangle
+                    int left = (originalWidth - cropWidth) / 2;
+                    int top = (originalHeight - cropHeight) / 2;
+                    var cropArea = new Rectangle(left, top, cropWidth, cropHeight);
+
+                    // Perform cropping
+                    rasterImage.Crop(cropArea);
+
+                    // Prepare SVG save options with rasterization settings
+                    var vectorOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = rasterImage.Size
+                    };
                     var svgOptions = new SvgOptions
                     {
-                        VectorRasterizationOptions = new SvgRasterizationOptions
-                        {
-                            PageSize = image.Size
-                        }
+                        VectorRasterizationOptions = vectorOptions
                     };
 
-                    // Save the (cropped) image as SVG
-                    image.Save(outputPath, svgOptions);
+                    // Save as SVG
+                    rasterImage.Save(outputPath, svgOptions);
                 }
             }
         }
