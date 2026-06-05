@@ -1,13 +1,12 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"c:\temp\sample.png";
         string outputPath = @"c:\temp\sample.grayscale.png";
 
@@ -23,7 +22,7 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image, apply grayscale, and save
+            // Load PNG, apply grayscale, and save
             using (PngImage pngImage = new PngImage(inputPath))
             {
                 pngImage.Grayscale();

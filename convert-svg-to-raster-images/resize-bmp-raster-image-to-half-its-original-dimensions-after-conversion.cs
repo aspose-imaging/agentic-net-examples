@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -26,14 +25,14 @@ class Program
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Calculate half dimensions
+                // Calculate half of the original dimensions
                 int newWidth = image.Width / 2;
                 int newHeight = image.Height / 2;
 
-                // Resize the image
+                // Resize the image using the default resampling method
                 image.Resize(newWidth, newHeight);
 
-                // Save the resized image as BMP
+                // Save the resized image back as BMP
                 image.Save(outputPath);
             }
         }

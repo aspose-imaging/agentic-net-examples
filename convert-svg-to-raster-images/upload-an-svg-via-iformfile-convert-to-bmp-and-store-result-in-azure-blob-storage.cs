@@ -2,46 +2,37 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input SVG path
-            string inputPath = Path.Combine("Input", "image.svg");
+            // Define input and output paths (relative to the executable directory)
+            string inputPath = Path.Combine("Input", "sample.svg");
+            // Verify that the input SVG file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Hardcoded output BMP path
-            string outputPath = Path.Combine("Output", "image.bmp");
+            string outputPath = Path.Combine("Output", "sample.bmp");
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load SVG image
+            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set rasterization options for vector to raster conversion
-                var rasterOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
-                };
-
-                // BMP save options with the rasterization settings
-                var bmpOptions = new BmpOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Save as BMP
+                // Convert and save as BMP
+                var bmpOptions = new BmpOptions();
                 image.Save(outputPath, bmpOptions);
             }
 
-            // TODO: Upload the BMP file at 'outputPath' to Azure Blob storage using appropriate SDK or HTTP request.
+            // TODO: Upload the BMP file to Azure Blob storage.
+            // In a real implementation, you would use Azure.Storage.Blobs SDK here.
         }
         catch (Exception ex)
         {

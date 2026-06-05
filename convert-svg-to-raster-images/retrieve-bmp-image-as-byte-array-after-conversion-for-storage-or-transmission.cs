@@ -2,17 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample.bmp";
-        string outputPath = @"c:\temp\output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.bmp";
+            string outputPath = @"C:\Images\output.bmp";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,20 +27,32 @@ class Program
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Define PNG save options (conversion)
-                PngOptions pngOptions = new PngOptions();
+                // Cast to BmpImage to access BMP‑specific operations
+                BmpImage bmpImage = (BmpImage)image;
 
-                // Save the converted image to a memory stream
+                // Example conversion: binarize using Otsu's method
+                bmpImage.BinarizeOtsu();
+
+                // Prepare BMP save options (monochrome palette)
+                BmpOptions saveOptions = new BmpOptions
+                {
+                    Palette = ColorPaletteHelper.CreateMonochrome(),
+                    BitsPerPixel = 1
+                };
+
+                // Save to a memory stream to obtain the byte array
+                byte[] imageBytes;
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    image.Save(ms, pngOptions);
-                    byte[] imageBytes = ms.ToArray();
-
-                    // Optionally, write the byte array to a file for verification
-                    File.WriteAllBytes(outputPath, imageBytes);
-
-                    Console.WriteLine($"Converted image size in bytes: {imageBytes.Length}");
+                    image.Save(ms, saveOptions);
+                    imageBytes = ms.ToArray();
                 }
+
+                // Optionally also save to a physical file
+                image.Save(outputPath, saveOptions);
+
+                // Demonstrate that we have the byte array
+                Console.WriteLine($"Byte array length: {imageBytes.Length}");
             }
         }
         catch (Exception ex)

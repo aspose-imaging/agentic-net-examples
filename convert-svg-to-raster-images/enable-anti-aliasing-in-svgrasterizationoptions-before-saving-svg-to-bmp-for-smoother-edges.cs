@@ -8,20 +8,20 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input\\test.svg";
-        string outputPath = "output\\test.bmp";
-
         try
         {
-            // Verify input file exists
+            // Hard‑coded input and output file paths
+            string inputPath = "input.svg";
+            string outputPath = "output\\output.bmp";
+
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists (creates it if necessary)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the SVG image
@@ -35,7 +35,7 @@ class Program
                     TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias
                 };
 
-                // Set BMP save options and attach rasterization options
+                // Set BMP save options and attach the rasterization options
                 BmpOptions bmpOptions = new BmpOptions
                 {
                     VectorRasterizationOptions = rasterOptions
@@ -47,6 +47,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
