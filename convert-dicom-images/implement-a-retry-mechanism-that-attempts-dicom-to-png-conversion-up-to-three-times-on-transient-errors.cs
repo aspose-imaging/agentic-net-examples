@@ -1,10 +1,8 @@
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -13,7 +11,7 @@ class Program
         try
         {
             string inputPath = "Input/sample.dcm";
-            string outputPath = "Output/sample.png";
+            string outputDirectory = "Output";
 
             if (!File.Exists(inputPath))
             {
@@ -21,39 +19,39 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(outputDirectory);
 
-            const int maxAttempts = 3;
-            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            int maxAttempts = 3;
+            int attempt = 0;
+            bool succeeded = false;
+
+            while (attempt < maxAttempts && !succeeded)
             {
                 try
                 {
                     using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
                     {
-                        if (dicom.DicomPages.Count() > 1)
+                        int pageIndex = 0;
+                        foreach (var page in dicom.DicomPages)
                         {
-                            int pageIndex = 0;
-                            foreach (var page in dicom.DicomPages)
-                            {
-                                string pageOutput = Path.Combine(
-                                    Path.GetDirectoryName(outputPath),
-                                    $"{Path.GetFileNameWithoutExtension(outputPath)}_{pageIndex}{Path.GetExtension(outputPath)}");
-
-                                page.Save(pageOutput, new PngOptions());
-                                pageIndex++;
-                            }
-                        }
-                        else
-                        {
-                            dicom.Save(outputPath, new PngOptions());
+                            string pageOutputPath = Path.Combine(outputDirectory, $"sample_page{pageIndex}.png");
+                            Directory.CreateDirectory(Path.GetDirectoryName(pageOutputPath));
+                            page.Save(pageOutputPath, new PngOptions());
+                            pageIndex++;
                         }
                     }
 
-                    break;
+                    succeeded = true;
                 }
-                catch (Exception ex) when (attempt < maxAttempts)
+                catch (Exception ex)
                 {
-                    Console.Error.WriteLine($"Attempt {attempt} failed: {ex.Message}. Retrying...");
+                    attempt++;
+                    if (attempt >= maxAttempts)
+                    {
+                        throw;
+                    }
+                    // Optionally log transient error and retry
+                    Console.Error.WriteLine($"Transient error occurred (attempt {attempt}): {ex.Message}");
                 }
             }
         }
