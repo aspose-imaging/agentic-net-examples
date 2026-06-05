@@ -8,20 +8,20 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.odg";
-        string outputPath = "output\\cropped.png";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.odg";
+        string outputPath = @"C:\temp\cropped.png";
 
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the ODG image
@@ -30,25 +30,21 @@ class Program
                 // Cast to OdgImage to access ODG-specific functionality
                 OdgImage odgImage = (OdgImage)image;
 
-                // Define the cropping rectangle (example values)
-                int left = 50;
-                int top = 50;
-                int width = 200;
-                int height = 200;
-                Aspose.Imaging.Rectangle cropArea = new Aspose.Imaging.Rectangle(left, top, width, height);
+                // Define the cropping rectangle (x, y, width, height)
+                // Adjust these values as needed for the specific region
+                Rectangle cropRect = new Rectangle(100, 100, 200, 200);
 
-                // Crop the image
-                odgImage.Crop(cropArea);
-
-                // Prepare PNG save options
-                PngOptions pngOptions = new PngOptions();
+                // Perform the crop operation
+                odgImage.Crop(cropRect);
 
                 // Save the cropped image as PNG
+                PngOptions pngOptions = new PngOptions();
                 odgImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
         {
+            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
