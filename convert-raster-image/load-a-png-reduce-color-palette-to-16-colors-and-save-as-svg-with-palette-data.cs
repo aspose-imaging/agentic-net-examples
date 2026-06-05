@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
@@ -10,35 +11,36 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
+            // Hard‑coded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.svg";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to work with palettes
+                // Cast to RasterImage to access pixel data
                 RasterImage raster = (RasterImage)image;
 
-                // Create a 16‑color palette using the histogram mining method
+                // Generate a 16‑color palette using the histogram mining method
                 IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette(
                     raster,
                     16,
                     PaletteMiningMethod.Histogram);
 
-                // Prepare SVG save options and assign the palette
-                var svgOptions = new SvgOptions
+                // Prepare SVG save options and attach the palette
+                SvgOptions svgOptions = new SvgOptions
                 {
+                    // The Palette property is available on ImageOptionsBase
                     Palette = palette
                 };
 
