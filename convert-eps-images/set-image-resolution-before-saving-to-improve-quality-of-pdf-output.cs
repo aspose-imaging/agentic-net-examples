@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
@@ -11,10 +10,10 @@ class Program
         try
         {
             // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output.pdf";
+            string inputPath = @"C:\temp\sample.bmp";
+            string outputPath = @"C:\temp\sample.pdf";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,13 +26,10 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF save options with higher resolution
+                // Create PDF options and set a higher resolution (e.g., 300 DPI)
                 PdfOptions pdfOptions = new PdfOptions
                 {
-                    // Set desired DPI (e.g., 300x300)
                     ResolutionSettings = new ResolutionSetting(300.0, 300.0),
-
-                    // Do not use the original image resolution; use the value above instead
                     UseOriginalImageResolution = false
                 };
 
