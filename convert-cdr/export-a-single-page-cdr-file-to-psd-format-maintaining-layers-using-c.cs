@@ -10,40 +10,35 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Temp\sample.cdr";
-            string outputPath = @"C:\Temp\sample.psd";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\input\sample.cdr";
+            string outputPath = @"C:\output\sample.psd";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CDR file
             using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Access the first (and only) page
+                // Get the first (and only) page
                 CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
 
-                // Prepare PSD save options with vector rasterization settings
-                PsdOptions psdOptions = new PsdOptions();
-
-                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+                // Prepare PSD save options
+                PsdOptions psdOptions = new PsdOptions
                 {
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
-                    PageWidth = page.Width,
-                    PageHeight = page.Height
+                    // Example settings (optional)
+                    // CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
+                    // ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb
                 };
 
-                psdOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Save the page as a PSD file, preserving layers
+                // Save the page as PSD, preserving layers
                 page.Save(outputPath, psdOptions);
             }
         }
@@ -53,3 +48,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a graphic designer needs to convert a CorelDRAW (CDR) single‑page illustration to an Adobe Photoshop (PSD) file while preserving editable layers for further editing in Photoshop using C# and Aspose.Imaging.
+ * 2. When an automated build pipeline must batch‑process CDR assets and generate PSD files for a marketing team, ensuring layer information is retained through Aspose.Imaging’s C# API.
+ * 3. When a web service receives user‑uploaded CDR files and must deliver downloadable PSD versions with intact layers for collaborative design workflows, implemented with C# and Aspose.Imaging.
+ * 4. When a legacy desktop application that only supports PSD files needs to import CDR drawings without flattening them, using C# code to load the CDR page and save it as a layered PSD.
+ * 5. When a digital asset management system requires programmatic conversion of single‑page CorelDRAW files to PSD format to maintain layer structure for archival and future editing, leveraging Aspose.Imaging for .NET in C#.
+ */
