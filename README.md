@@ -6,10 +6,10 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 2874 |
+| Total Examples | 2904 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
-| Last Updated | 2026-06-05 |
+| Last Updated | 2026-06-12 |
 
 ## Repository Structure
 
@@ -41,7 +41,7 @@ README.md
 |----------|----------|-----------|---------|
 | [Conversion](./conversion/) | 162 | 100.0% | [agents.md](./conversion/agents.md) |
 | [Convert APNG](./convert-apng/) | 51 | 100.0% | [agents.md](./convert-apng/agents.md) |
-| [Convert CDR](./convert-cdr/) | 30 | 100.0% | [agents.md](./convert-cdr/agents.md) |
+| [Convert CDR](./convert-cdr/) | 60 | 100.0% | [agents.md](./convert-cdr/agents.md) |
 | [Convert CMX Images](./convert-cmx-images/) | 34 | 100.0% | [agents.md](./convert-cmx-images/agents.md) |
 | [Convert DICOM Images](./convert-dicom-images/) | 30 | 100.0% | [agents.md](./convert-dicom-images/agents.md) |
 | [Convert EPS Images](./convert-eps-images/) | 60 | 100.0% | [agents.md](./convert-eps-images/agents.md) |
@@ -114,7 +114,7 @@ All examples are compiler-validated against the target NuGet version before bein
 
 | Version | Total Examples | Pass Rate | Framework |
 |---------|---------------|-----------|----------|
-| 26.6.0 | 2874 | 100.0% | net9.0 |
+| 26.6.0 | 2904 | 100.0% | net9.0 |
 
 Pass rate is enforced by the agent pipeline — only examples that pass both `dotnet build` and `dotnet run` are committed.
 
@@ -131,6 +131,7 @@ To trigger validation:
 ## Metrics
 
 Each pipeline run ships telemetry to a central metrics store including examples discovered, passed and failed per category, LLM token usage, MCP and LLM API call counts, and pipeline duration.
+
 
 ## Capability Matrix
 
@@ -181,3 +182,6 @@ You can run the library in evaluation mode; simply omit the `License` registrati
 
 ### Q: What image formats does Aspose.Imaging support  
 Aspose.Imaging for .NET supports raster formats (BMP, JPEG, PNG, TIFF, GIF, WebP), vector formats (SVG, EPS, WMF), medical formats (DICOM), and animated formats (APNG, animated GIF). The library also handles raw and proprietary formats through dedicated classes like `RawImage` and `DicomImage`. Check the official documentation for the full list of supported formats.
+
+---
+*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260612_145900` | 2026-06-12*
