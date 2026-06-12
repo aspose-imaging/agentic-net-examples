@@ -139,6 +139,3 @@ Each pipeline run ships telemetry to a central metrics store including examples 
 
 
 
-
----
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260605_145211` | 2026-06-05*
