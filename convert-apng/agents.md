@@ -135,6 +135,21 @@ Load the WEBP with `Image.Load`, cast to `IMultipageImage`, copy its frames into
 Loop through the folder, load each WEBP with `Image.Load`, create an `ApngImage` setting `ApngOptions.DefaultFrameDelay` to the desired uniform value, and save each as an .apng file. → See: `batch-convert-a-folder-of-webp-files-to-apng-format-applying-uniform-frame-delay.cs`
 
 
+
+### Q: How can I set custom frame delays for an APNG using timing values stored in a JSON file with Aspose.Imaging for .NET?  
+Parse the JSON, then create an `ApngImage` and assign each frame’s `Delay` via `ApngOptions.FrameDelay` based on the parsed values; load the source PNG with `Image.Load`. → See: adjust-apng-frame-delays-based-on-external-timing-data-stored-in-a-json-configuration-file.cs  
+
+### Q: How do I generate an animated APNG from a directory of PNG images ordered alphabetically using Aspose.Imaging in C#?  
+Retrieve PNG file names, sort them alphabetically, load each with `Image.Load`, add them as frames to an `ApngImage`, and save using `ApngOptions`. → See: create-an-apng-from-a-png-sequence-stored-in-a-directory-using-alphabetical-file-naming.cs  
+
+### Q: What is the simplest way to batch convert multiple SVG files into separate APNG files with the default frame delay using Aspose.Imaging for .NET?  
+Iterate over the SVG paths, load each SVG via `Image.Load`, create an `ApngImage` with default `ApngOptions` (which applies the default frame delay), and save each output file. → See: convert-a-batch-of-svg-files-into-individual-apng-animations-each-with-default-frame-delay.cs  
+
+### Q: How can I export every frame of an animated APNG to individual BMP files using Aspose.Imaging in C#?  
+Load the APNG with `Image.Load`, loop through its `Frames` collection, and save each frame using `BmpOptions` to a separate BMP file. → See: convert-an-apng-to-a-series-of-bmp-files-for-compatibility-with-legacy-imaging-systems.cs  
+
+### Q: How do I preserve each frame of an APNG as separate pages in a multi‑page TIFF using Aspose.Imaging for .NET?  
+Load the APNG, create a new `TiffImage`, add each APNG frame as a new page with `TiffOptions`, then save the combined TIFF. → See: convert-an-apng-to-a-series-of-tiff-images-preserving-each-frame-as-a-separate-page.cs
 ## Operations Covered
 - Adjust APNG frame delays using JSON timing data  
 - Convert animated WebP files to APNG in batch  
