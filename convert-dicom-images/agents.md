@@ -120,6 +120,21 @@ Wrap the `Image.Load` and `Save` calls inside `Task.Run` and `await` the task, a
 → See: `implement-asynchronous-dicom-to-png-conversion-using-task-run-to-avoid-blocking-the-ui-thread.cs`
 
 
+
+### Q: How do I apply a custom color palette to a PNG when converting a grayscale DICOM image using Aspose.Imaging in C#?  
+Load the DICOM with `Image.Load`, assign a `ColorPalette` to `PngOptions.ColorPalette`, then save via `image.Save(outputPath, pngOptions)`. → See: `apply-a-custom-color-palette-to-the-png-output-when-converting-grayscale-dicom-images.cs`
+
+### Q: How can I catch and log Aspose.Imaging CoreExceptions that occur during DICOM‑to‑PNG conversion in .NET?  
+Wrap the conversion in a try‑catch block catching `ImageProcessingException` or `ImageLoadException` from `Aspose.Imaging.CoreExceptions.ImageFormats` and log the exception details. → See: `capture-and-log-aspose-imaging-exceptions-when-a-dicom-to-png-conversion-fails-due-to-corrupted-data.cs`
+
+### Q: How do I configure the PNG compression level with PngOptions while converting a DICOM file to PNG using Aspose.Imaging?  
+Create a `PngOptions` object and set its `CompressionLevel` (e.g., `CompressionLevel.BestCompression`) before calling `image.Save(outputPath, pngOptions)`. → See: `configure-png-compression-level-in-pngoptions-to-balance-file-size-and-image-quality-during-conversion.cs`
+
+### Q: How can I include the original DICOM metadata in the PNG output for traceability using Aspose.Imaging in C#?  
+After loading the DICOM, copy its `Metadata` collection to `PngOptions.Metadata` and then save the image. → See: `configure-the-png-output-to-include-metadata-from-the-original-dicom-file-for-traceability.cs`
+
+### Q: How do I build a simple command‑line tool that accepts a DICOM file path argument and writes a PNG file using Aspose.Imaging?  
+Parse `args[0]` for the input path, verify the file, load it with `Image.Load`, and save using `image.Save(outputPath, new PngOptions())`. → See: `create-a-command-line-tool-that-accepts-a-dicom-file-path-and-outputs-a-png-file-to-a-folder.cs`
 ## Operations Covered
 - Load DICOM image from file  
 - Convert DICOM to PNG format  
