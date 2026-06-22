@@ -145,6 +145,21 @@ Use `new FileInfo(inputPath).Length` and `new FileInfo(outputPath).Length` after
 
 ### Q: What setting should I use to export a 16‑bit per channel PSD from an EPS file with Aspose.Imaging in .NET?  
 Assign `16` to the `BitsPerChannel` property of a `PsdOptions` object before calling `image.Save`. → See: convert-eps-to-psd-with-16-bit-per-channel-depth-for-high-quality-editing.cs
+
+### Q: How do I embed a thumbnail image in a PDF generated from an EPS file using Aspose.Imaging in C#?  
+Add a `PdfOptions` instance, set its `ThumbnailImage` property to a bitmap, and pass the options to `image.Save(outputPath, pdfOptions)`. → See: `embed-thumbnail-images-in-pdf-output-when-converting-eps-for-quick-previews.cs`
+
+### Q: What is the recommended way to release unmanaged resources after converting an EPS image with Aspose.Imaging in .NET?  
+Wrap the loaded `Image` in a `using` block or explicitly call `image.Dispose()` after saving the output. → See: `dispose-the-image-object-after-conversion-to-free-unmanaged-resources.cs`
+
+### Q: How can I catch and log errors that occur while saving a PDF after converting an EPS with Aspose.Imaging in C#?  
+Enclose the `image.Save(outputPath, pdfOptions)` call in a `try‑catch` block and write the exception details to a log or console. → See: `handle-exceptions-thrown-during-pdf-saving-with-appropriate-error-logging.cs`
+
+### Q: How do I limit the number of concurrent EPS‑to‑PDF conversions to avoid excessive memory consumption using Aspose.Imaging in C#?  
+Use `Parallel.ForEach` with a `ParallelOptions` object that sets `MaxDegreeOfParallelism` to the desired concurrency level. → See: `limit-concurrency-level-during-batch-conversion-to-avoid-excessive-memory-consumption.cs`
+
+### Q: How can I load an EPS file with default options into an Aspose.Imaging Image object in C#?  
+Call `Image.Load(inputPath)` without specifying load options; the method returns an `Image` instance ready for processing. → See: `load-eps-image-using-image-load-with-default-options-and-store-in-image-object.cs`
 ## Operations Covered
 - Add custom metadata to PDF after EPS conversion  
 - Set custom DPI before saving PDF to increase resolution  
