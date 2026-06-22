@@ -131,6 +131,21 @@ Create a `JpegOptions` object, set `Quality = 90`, then save the loaded `CmxImag
 Load the CMX from a `MemoryStream` using `Image.Load(memoryStream, new CmxLoadOptions())`, then save directly to another stream with `image.Save(tiffStream, new TiffOptions())`. → See: `use-aspose-imaging-to-convert-cmx-stream-from-memory-to-tiff-without-temporary-files.cs`
 
 
+
+### Q: How can I rotate a CMX image before converting it to TIFF using Image.RotateFlip in Aspose.Imaging for .NET?  
+Load the CMX with `Image.Load`, call `image.RotateFlip(RotateFlipType.Rotate90FlipNone)` (or the needed rotation), then save using `TiffOptions`. → See: `apply-rotation-to-cmx-image-before-converting-to-tiff-using-image-rotateflip-to-correct-orientation.cs`
+
+### Q: How do I enable progressive JPEG encoding when converting a CMX file to JPEG with Aspose.Imaging in C#?  
+Create a `JpegOptions` instance, set `options.Progressive = true`, and pass it to `image.Save(outputPath, options)`. → See: `convert-a-cmx-image-to-jpeg-format-with-progressive-encoding-enabled-for-smoother-loading.cs`
+
+### Q: How can I embed fonts as subsets to reduce file size when converting a CMX image to PDF using Aspose.Imaging for .NET?  
+Instantiate `PdfOptions`, set `options.SubsetFonts = true`, and use these options when calling `image.Save(pdfPath, options)`. → See: `convert-a-cmx-image-to-pdf-format-embedding-fonts-as-subsets-for-smaller-files.cs`
+
+### Q: How do I set the PDF page size to A4 while converting a CMX image to PDF with Aspose.Imaging in C#?  
+Create a `PdfOptions` object and assign `options.PageSize = PdfPageSize.A4` (or the appropriate size enum), then save the image with these options. → See: `convert-a-cmx-image-to-pdf-format-with-a4-page-size-using-pdfoptions.cs`
+
+### Q: How can I preserve the original page order when converting a multi‑page CMX to a multi‑page TIFF using Aspose.Imaging for .NET?  
+Load the CMX as a multi‑frame image, iterate through its pages in their natural order, and add each frame to a `TiffImage` using `TiffOptions` without reordering. → See: `convert-a-multi-page-cmx-image-to-a-multi-page-tiff-file-preserving-original-page-order.cs`
 ## Operations Covered
 - Rotate CMX image before TIFF conversion  
 - Convert CMX image to JPEG with quality setting  
