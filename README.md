@@ -132,7 +132,6 @@ To trigger validation:
 
 Each pipeline run ships telemetry to a central metrics store including examples discovered, passed and failed per category, LLM token usage, MCP and LLM API call counts, and pipeline duration.
 
-
 ## Capability Matrix
 
 | Operation                     | Formats Supported                                          | Examples Count | Key Classes                              |
@@ -182,7 +181,3 @@ You can run the library in evaluation mode; simply omit the `License` registrati
 
 ### Q: What image formats does Aspose.Imaging support  
 Aspose.Imaging for .NET supports raster formats (BMP, JPEG, PNG, TIFF, GIF, WebP), vector formats (SVG, EPS, WMF), medical formats (DICOM), and animated formats (APNG, animated GIF). The library also handles raw and proprietary formats through dedicated classes like `RawImage` and `DicomImage`. Check the official documentation for the full list of supported formats.
-
----
-
----
