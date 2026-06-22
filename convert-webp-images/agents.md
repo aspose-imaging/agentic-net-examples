@@ -133,6 +133,21 @@ Load the file with `Image.Load` and cast it to `WebPImage`; then check its `IsAn
 
 ### Q: How do I set the PDF page size to A4 when converting a WebP image to PDF with Aspose.Imaging in .NET?  
 Create a `PdfOptions` instance and assign `PdfOptions.PageSize = PageSize.A4` before calling `image.Save(outputPath, pdfOptions)`. This forces the generated PDF to use standard A4 dimensions. → See: configure-pdf-page-size-to
+
+### Q: How can I load a WebP image from a byte array and save it as a PDF using Aspose.Imaging in C#?  
+Load the image with `Image.Load(byte[])` and save it with `PdfOptions` (e.g., `image.Save(outputPath, new PdfOptions())`). → See: `convert-a-webp-image-read-as-a-byte-array-directly-to-pdf-using-image-load-overload.cs`
+
+### Q: How do I set a custom delay for each frame when converting an animated WebP to GIF with Aspose.Imaging in C#?  
+After loading the animated WebP, create a `GifOptions` object, add a `GifFrameDelayBlock` for each frame, and assign the desired delay values before saving. → See: `define-frame-delay-for-each-gif-frame-derived-from-animated-webp-to-control-animation-speed.cs`
+
+### Q: How can I perform an asynchronous batch conversion of WebP files to GIF with cancellation support using Aspose.Imaging in .NET?  
+Use `Task.Run` to process each file, pass a `CancellationToken` to the loop, and check `token.ThrowIfCancellationRequested()` inside the conversion logic. → See: `implement-cancellation-token-support-in-asynchronous-batch-conversion-of-webp-files-to-gif-for-responsive-ui.cs`
+
+### Q: How do I convert a WebP image that’s loaded from a MemoryStream directly to GIF without creating temporary files in C# with Aspose.Imaging?  
+Read the file into a `MemoryStream`, call `Image.Load(stream)`, then save using `GifOptions` to the target path. → See: `convert-a-webp-image-loaded-from-a-memory-stream-to-gif-without-creating-intermediate-files.cs`
+
+### Q: How can I adjust the output resolution or quality when saving a WebP image as PDF using Aspose.Imaging in C#?  
+Configure the `PdfOptions.RasterizationOptions` (e.g., `ResolutionX`, `ResolutionY`, `CompressionQuality`) before calling `image.Save(outputPath, pdfOptions)`. → See: `adjust-image-quality-before-saving-webp-as-pdf-to-control-output-resolution.cs`
 ## Operations Covered
 - Load WebP image from file  
 - Load WebP image from memory stream  
