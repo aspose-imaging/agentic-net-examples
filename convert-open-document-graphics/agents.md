@@ -155,6 +155,21 @@ Set `PdfOptions.DpiX`/`DpiY` and `PdfOptions.PageMargins` before calling `image.
 
 ### Q: How can I preserve transparency while converting an OTG file to BMP using Aspose.Imaging in .NET?  
 Load the OTG image, use `BmpOptions` with `ColorType = PngColorType.TruecolorWithAlpha` (or the default preserving alpha), and save the image as BMP. → See: `convert-an-otg-file-to-bmp-while-preserving-transparency-information-in-the-output-image.cs`
+
+### Q: How do I apply a threshold filter to an ODG image before saving it as a BMP using Aspose.Imaging in C#?  
+Use `Image.Load` to open the ODG, call `image.Filter(new ThresholdFilter())`, and then save with `BmpOptions` via `image.Save(outputPath, new BmpOptions())`. → See: `convert-an-odg-file-to-bmp-and-apply-a-threshold-filter-to-create-a-binary-image.cs`
+
+### Q: How can I set the PNG compression level to maximum when converting an ODG file to PNG with Aspose.Imaging for .NET?  
+Create a `PngOptions` object, set `CompressionLevel = PngCompressionLevel.Maximum`, and pass it to `image.Save(outputPath, pngOptions)`. → See: `convert-an-odg-file-to-png-and-set-lossless-compression-level-to-maximum-for-smallest-size.cs`
+
+### Q: How do I preserve original layer names when converting an ODG file to SVG using Aspose.Imaging in C#?  
+Load the ODG with `Image.Load`, configure `SvgOptions` with `KeepLayerNames = true`, and save the image using `image.Save(outputPath, svgOptions)`. → See: `convert-an-odg-file-to-svg-and-preserve-original-layer-names-in-the-output-file.cs`
+
+### Q: How can I add password protection to a PDF generated from an OTG file with Aspose.Imaging for .NET?  
+Load the OTG, create a `PdfOptions` instance, set `Password = "yourPassword"`, and save the document using `image.Save(outputPath, pdfOptions)`. → See: `convert-an-otg-file-to-pdf-and-add-password-protection-to-restrict-access.cs`
+
+### Q: How do I apply a median filter to an OTG image before converting and saving it as JPEG in C# with Aspose.Imaging?  
+After loading the OTG via
 ## Operations Covered
 - Apply Gaussian blur filter to ODG image  
 - Convert ODG image to JPEG format  
