@@ -179,6 +179,21 @@ Open a `FileStream`, set it as `BmpOptions.Source`, clear the canvas with `graph
 Create a `BmpImage`, get its `Graphics` object, and call `graphics.DrawBezier` repeatedly with calculated control points to produce the wave, then save the image. → See: `draw-a-series-of-bezier-curves-connecting-sequential-points-to-form-a-wave-pattern-on-bmp.cs`
 
 
+
+### Q: How can I add a cubic Bézier curve with custom control points to a PNG image using Aspose.Imaging in C#?  
+Create a `PngOptions` with a `FileCreateSource`, call `Image.Create` to get the canvas, then use `Graphics.DrawBezier` with the desired `PointF` control points. → See: `add-a-cubic-bezier-curve-to-the-same-figure-using-specified-control-points.cs`
+
+### Q: How do I render vector shapes from a full `GraphicsPath` onto a PNG file accurately with Aspose.Imaging in C#?  
+Build the shapes in a `GraphicsPath`, then call `Graphics.DrawPath` on an image created via `PngOptions` and `FileCreateSource`. → See: `apply-the-full-graphicspath-source-to-render-vector-shapes-onto-an-image-programmatically-accurately.cs`
+
+### Q: How can I batch‑process multiple size specifications to create BMP images each containing a centered square using Aspose.Imaging in C#?  
+Iterate over the width/height array, create each BMP with `BmpOptions` and `Image.Create`, and draw a centered square with `Graphics.DrawRectangle`. → See: `batch-process-a-collection-of-size-specifications-creating-bmps-each-containing-a-centered-square.cs`
+
+### Q: How do I clear a BMP image to light gray and then draw a red grid of lines using Aspose.Imaging in C#?  
+After creating a `BmpImage`, fill the background with a `SolidBrush` of light gray, and loop with `Graphics.DrawLine` using a red `Pen` to draw the grid. → See: `clear-a-bmp-image-to-light-gray-then-draw-multiple-red-lines-forming-a-grid.cs`
+
+### Q: How can I flatten a `GraphicsPath` to line segments for simplified rendering with Aspose.Imaging in C#?  
+Load the source image, call `GraphicsPath.Flatten()` to convert curves to straight segments, and then render the flattened path with `Graphics.DrawPath`. → See: `flatten-the-graphicspath-to-convert-curves-into-line-segments-for-simplified-rendering.cs`
 ## Operations Covered
 - Create a new PNG canvas and clear it with a color  
 - Add a cubic‑bezier curve to a figure using control points  
