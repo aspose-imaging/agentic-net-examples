@@ -287,6 +287,21 @@ Load the APNG using `ApngImage.Load`, then save the first frame with `new PngOpt
 Instantiate a `DicomImage` with `DicomImage.Load`, then call `Save("output.png", new PngOptions())`. The `DicomImage.Save` method performs the raster conversion to PNG. → See: `convert-a-dicom-image-to-a-desired-raster-format-using-the-net-imaging-library.cs`
 
 
+
+### Q: How can I convert a BigTIFF raster image to a PDF document while keeping the original image fidelity using Aspose.Imaging for .NET?  
+Load the BigTIFF with `Image.Load` and save it using `image.Save(outputPath, new PdfOptions())` which preserves the raster data. → See: `convert-a-bigtiff-raster-image-into-a-pdf-document-while-preserving-the-original-image-fidelity.cs`
+
+### Q: How do I preserve the alpha channel when converting a PNG with transparency to PDF in C# with Aspose.Imaging?  
+Load the PNG, create a `PdfOptions` instance, and call `image.Save(outputPath, pdfOptions)`; the PDF will retain the image’s alpha channel. → See: `convert-a-png-image-with-transparency-into-a-pdf-while-preserving-its-alpha-channel.cs`
+
+### Q: What is the code to convert an ODG (OpenDocument Graphic) file to PNG using Aspose.Imaging for .NET?  
+Use `Image.Load(inputPath)` to read the ODG and then `image.Save(outputPath, new PngOptions())` to write it as PNG. → See: `convert-an-odg-file-to-any-supported-image-format-using-the-net-imaging-library.cs`
+
+### Q: How can I specify custom width, height, and background color when converting an SVG file to PNG with Aspose.Imaging in C#?  
+Create a `PngOptions` object, set its `Width`, `Height`, and `BackgroundColor` properties, and pass it to `image.Save(outputPath, pngOptions)`. → See: `enumerate-all-supported-svg-input-options-available-for-png-conversion-including-dimensions-background-color-and-rendering-settings.cs`
+
+### Q: How do I convert an SVG file to a BMP image with a specific pixel format using Aspose.Imaging for .NET?  
+Load the SVG via `Image.Load`, configure a `BmpOptions` instance (e.g., `BitsPerPixel = 24`), and save with `image.Save(outputPath, bmpOptions)`. → See: `save-the-svg-output-after-conversion-to-a-bmp-image-ensuring-correct-pixel-format-and-file-integrity.cs`
 ## Operations Covered
 - Convert BigTIFF raster image to PDF  
 - Convert WebP image file to PDF  
