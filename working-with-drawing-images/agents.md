@@ -194,6 +194,12 @@ After creating a `BmpImage`, fill the background with a `SolidBrush` of light gr
 
 ### Q: How can I flatten a `GraphicsPath` to line segments for simplified rendering with Aspose.Imaging in C#?  
 Load the source image, call `GraphicsPath.Flatten()` to convert curves to straight segments, and then render the flattened path with `Graphics.DrawPath`. → See: `flatten-the-graphicspath-to-convert-curves-into-line-segments-for-simplified-rendering.cs`
+
+### Q: How can I create a new PNG image with specific width and height using Aspose.Imaging and save it directly to a file path in C#?  
+Use `PngOptions` with a `FileCreateSource` pointing to the desired path, then call `Image.Create(pngOptions, width, height)` to generate the image. → See: `add-a-cubic-bezier-curve-to-the-same-figure-using-specified-control-points.cs`
+
+### Q: How do I render an entire `GraphicsPath` onto a PNG image accurately with Aspose.Imaging in C#?  
+Load or create a `Graphics` object from the image, call `graphics.DrawPath(yourGraphicsPath)`, and save the image using the configured `PngOptions`. → See: `apply-the-full-graphic
 ## Operations Covered
 - Create a new PNG canvas and clear it with a color  
 - Add a cubic‑bezier curve to a figure using control points  
