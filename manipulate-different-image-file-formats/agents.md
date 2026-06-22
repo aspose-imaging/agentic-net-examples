@@ -206,6 +206,21 @@ Iterate through the directory, load each file with `Image.Load`, and call `image
 Use `BmpImage.Load` to open the file, access `image.Metadata.ExifData`, and serialize it with `JsonSerializer.Serialize` to a JSON file. → See: `extract-exif-metadata-from-a-bmp-file-and-write-the-details-to-a-json-document.cs`
 
 
+
+### Q: How do I extract clipping paths from a TIFF frame and export each path as an SVG file using Aspose.Imaging for .NET?  
+Use `TiffImage` to load the file, access `frame.PathResources.ClippingPaths`, and save each path with `SvgExportOptions`. → See: `access-clipping-paths-of-a-tiff-frame-via-pathresources-and-export-them-as-svg-files.cs`
+
+### Q: How can I apply dithering to a DICOM image while preserving all original metadata and save the result back as a DICOM file in C#?  
+Load the image with `DicomImage`, apply `DitheringOptions` via `image.Dither()`, then save using `DicomOptions` to keep metadata intact. → See: `apply-dithering-to-a-dicom-image-and-output-the-result-in-dicom-format-preserving-metadata-integrity.cs`
+
+### Q: How do I batch‑convert a folder of EMF files to SVG while keeping external image files referenced instead of embedding them with Aspose.Imaging?  
+Iterate over the EMF files, load each with `EmfImage`, and use `SvgExportOptions` with `ExportEmbeddedImages = false` before calling `image.Save()`. → See: `batch-convert-emf-files-to-svg-with-external-image-files-referenced.cs`
+
+### Q: How can I combine several single‑page TIFF images into one multi‑page TIFF while preserving metadata and ICC color profiles using Aspose.Imaging for .NET?  
+Create a `TiffImage` with `new TiffOptions(TiffExpectedFormat.MultiPage)`, add each source frame via `tiffImage.AddFrame(frame)`, and ensure `frame.Metadata` and `frame.ColorProfile` are copied before saving. → See: `combine-several-tiff-images-into-a-single-tiff-file-while-preserving-image-metadata-and-color-profiles.cs`
+
+### Q: How do I split a multi‑page EMF document into separate PNG files, one per page, using Aspose.Imaging in C#?  
+Load the EMF with `EmfImage`, loop through `image.PageCount`, and for each page call `image.Save(pagePath, new PngOptions())`. → See: `convert-a-multi-page-emf-document-to-separate-png-files-one-per-page.cs`
 ## Operations Covered
 - Extract clipping paths from TIFF frames  
 - Export TIFF clipping paths as SVG files  
