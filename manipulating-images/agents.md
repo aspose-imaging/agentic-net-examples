@@ -197,6 +197,17 @@ Create a `Rectangle` that represents the desired crop area, modify its `X` and `
 
 ### Q: How can I batch‑process all TIFF files in a folder, apply a Gaussian blur to each, and output each softened image as a PDF with Aspose.Imaging?  
 Iterate through the directory, load each TIFF via `Image.Load`, apply `new GaussianBlurFilter(radius)` with `image.ApplyFilter`, then save each result using `PdfOptions` to the output folder. → See: `batch-apply-gaussian-blur-to-all-tiff-files-in-a-folder-outputting-each-softened-image-as-pdf.cs`
+
+### Q: How can I batch‑verify digital signatures of images stored in a cloud folder and write any mismatches to an audit log using Aspose.Imaging for .NET?  
+Use `Image.Load` to open each file, call `image.VerifySignature(password)` for verification, and log the result with `File.AppendAllText`. → See: batch-verify-digital-signatures-of-images-in-cloud-storage-logging-any-mismatches-to-an-audit-file.cs  
+
+### Q: How do I compress all GIF files in a directory with lossy compression while keeping the original animation frame order in C#?  
+Create a `GifCompressionOptions` with `Lossy = true` and pass it to `GifImage.Save` for each file; the library preserves the frame sequence automatically. → See: compress-multiple-gif-files-in-a-directory-with-lossy-settings-preserving-each-animation-s-frame-order.cs  
+
+### Q: How can I embed a digital signature into a BMP image and then attempt verification with an incorrect password using Aspose.Imaging for .NET?  
+Set `BmpOptions.DigitalSignature` when saving the BMP, then call `image.VerifySignature(wrongPassword)` which will return false for a bad password. → See: create-a-bmp-image-embed-a-digital-signature-then-attempt-to-verify-the-signature-with-an-incorrect-password.cs  
+
+### Q: How do I set
 ## Operations Covered
 - Load PNG image from file  
 - Apply auto‑masking (graph‑cut) to PNG  
