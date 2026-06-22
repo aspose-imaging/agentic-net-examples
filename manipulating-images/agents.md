@@ -182,6 +182,21 @@ After masking, instantiate `MedianFilterOptions`, call `image.ApplyFilter(median
 Loop through the directory, load each file with `RasterImage.Load`, configure `AutoMaskingGraphCutOptions` with your custom strokes, apply `image.ApplyAutoMaskingGraphCut(options)`, and save the result using `new PngOptions()`. → See: `batch-process-a-folder-of-png-files-applying-auto-masking-graph-cut-with-user-defined-strokes-to-each.cs`
 
 
+
+### Q: How can I rotate a BMP image by 45 degrees, fill the empty background with white, and save the result using Aspose.Imaging for .NET?  
+Load the BMP with `Image.Load`, call `image.Rotate(45)` and set the background color via `image.BackgroundColor = Color.White` before saving with `BmpImage.Save`. → See: `apply-a-45-degree-rotation-to-a-bmp-image-with-white-background-fill-and-store-the-output-in-a-file.cs`
+
+### Q: How do I programmatically adjust brightness, contrast, and gamma of an APNG file and export the edited image as PNG in C#?  
+Use `ApngImage` to load the file, apply `ImageAdjustments.BrightnessContrastGamma(brightness, contrast, gamma)` and then save with `PngOptions`. → See: `apply-configurable-brightness-contrast-and-gamma-adjustments-to-apng-images-programmatically-within-the-net-environment.cs`
+
+### Q: How can I apply a Gaussian blur to a TIFF image, increase its brightness, and save the final picture as a PDF using Aspose.Imaging?  
+Load the TIFF with `Image.Load`, add a `GaussianBlurFilter` via `image.ApplyFilter(new GaussianBlurFilter(radius))`, adjust brightness with `ImageAdjustments.Brightness(image, value)`, and export using `PdfOptions`. → See: `apply-gaussian-blur-to-a-tiff-image-then-adjust-brightness-saving-the-final-picture-as-pdf.cs`
+
+### Q: How do I crop an image by shifting the crop region with offset values in Aspose.Imaging for .NET?  
+Create a `Rectangle` that represents the desired crop area, modify its `X` and `Y` with the offset, and call `image.Crop(rectangle)` before saving. → See: `apply-offset-based-cropping-to-images-shifting-the-crop-region-to-extract-desired-portions-efficiently.cs`
+
+### Q: How can I batch‑process all TIFF files in a folder, apply a Gaussian blur to each, and output each softened image as a PDF with Aspose.Imaging?  
+Iterate through the directory, load each TIFF via `Image.Load`, apply `new GaussianBlurFilter(radius)` with `image.ApplyFilter`, then save each result using `PdfOptions` to the output folder. → See: `batch-apply-gaussian-blur-to-all-tiff-files-in-a-folder-outputting-each-softened-image-as-pdf.cs`
 ## Operations Covered
 - Load PNG image from file  
 - Apply auto‑masking (graph‑cut) to PNG  
