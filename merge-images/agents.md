@@ -153,6 +153,21 @@ Use `Parallel.ForEach` to load each image with `JpegImage.Load`, draw them onto 
 → See: `implement-parallel-loading-of-jpeg-files-then-merge-them-vertically-and-save-the-composition-as-png.cs`
 
 
+
+### Q: How can I add a semi‑transparent watermark text to a horizontally merged JPEG using Aspose.Imaging for .NET?  
+Use a `Graphics` object with a `SolidBrush` whose `Opacity` is set (e.g., 0.5) to draw the watermark text after merging the images, then save the result with `JpegOptions`. → See: add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs  
+
+### Q: How do I center each JPEG on the canvas while performing a horizontal merge with Aspose.Imaging in C#?  
+Calculate the vertical offset for each source `RasterImage` based on the canvas height and draw the image at that Y‑position using `Graphics.DrawImage`, ensuring each picture is centered. → See: center-each-jpeg-image-on-the-canvas-while-merging-them-horizontally-to-create-a-balanced-composition.cs  
+
+### Q: How can I create a PDF from multiple JPEGs using JPEG2000 compression with Aspose.Imaging for .NET?  
+Load each JPEG into a `RasterImage`, add them as pages to a `PdfDocument`, and set `PdfOptions.Jpeg2000CompressionOptions` before calling `PdfDocument.Save`. → See: combine-jpeg-images-into-a-pdf-document-employing-the-jpeg2000-compression-format-while-maintaining-image-fidelity-and-document-integrity.cs  
+
+### Q: How do I embed an ICO file as the document icon when generating a PDF from JPEG images with Aspose.Imaging in C#?  
+Load the ICO file into an `Image` and assign it to `PdfDocumentOptions.Icon` on the `PdfDocument` before saving the PDF. → See: combine-jpg-images-into-a-pdf-document-embedding-an-ico-file-as-the-document-s-icon.cs  
+
+### Q: How can I convert a series of JPEG images to EMF format before merging them into a PDF using Aspose.Imaging for .NET?  
+Save each JPEG as an `EmfImage` using `EmfOptions`, then add the resulting EMF pages to a `PdfDocument` and call `PdfDocument.Save`. → See: combine-jpg-images-into-a-pdf-document-by-converting-them-to-emf-format-while-preserving-vector-fidelity.cs
 ## Operations Covered
 - Merge multiple JPEG images horizontally  
 - Merge multiple JPEG images vertically preserving order  
