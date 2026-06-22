@@ -135,6 +135,18 @@ After loading the DICOM, copy its `Metadata` collection to `PngOptions.Metadata`
 
 ### Q: How do I build a simple command‑line tool that accepts a DICOM file path argument and writes a PNG file using Aspose.Imaging?  
 Parse `args[0]` for the input path, verify the file, load it with `Image.Load`, and save using `image.Save(outputPath, new PngOptions())`. → See: `create-a-command-line-tool-that-accepts-a-dicom-file-path-and-outputs-a-png-file-to-a-folder.cs`
+
+### Q: How can I catch and handle Aspose.Imaging CoreExceptions when a DICOM file is corrupted during PNG conversion in C#?  
+Wrap the `Image.Load` and `image.Save` calls in a try‑catch block and catch `Aspose.Imaging.CoreExceptions.ImageFormats.ImageCorruptedException` (or the base `CoreException`) to log or react to the error. → See: `capture-and-log-aspose-imaging-exceptions-when-a-dicom-to-png-conversion-fails-due-to-corrupted-data.cs`
+
+### Q: How do I create a logging wrapper that records start and end timestamps for each DICOM‑to‑PNG conversion using Aspose.Imaging in .NET?  
+Implement a method that writes `DateTime.Now` before calling `Image.Load` and after `image.Save`, then logs the duration; call this wrapper for each file conversion. → See: `create-a-logging-wrapper-that-records-start-and-end-timestamps-for-each-dicom-to-png-conversion-operation.cs`
+
+### Q: How can I display a PNG preview in a Windows Forms app after converting a DICOM file with Aspose.Imaging in C#?  
+After saving the PNG, load it with `Image.Load` (or `Bitmap`) and assign it to a `PictureBox.Image` control to show the preview instantly. → See: `create-a-windows-forms-application-that-allows-users-to-select-dicom-files-and-view-generated-png-previews.cs`
+
+### Q: How do I enable Adam7 interlacing for the PNG output when converting a DICOM image using Aspose.Imaging in C#?  
+Set `PngOptions.InterlaceOption = PngInterlaceOption.Adam7` before calling `image.Save(outputPath, pngOptions)`. →
 ## Operations Covered
 - Load DICOM image from file  
 - Convert DICOM to PNG format  
