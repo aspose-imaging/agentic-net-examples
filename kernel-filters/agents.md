@@ -167,6 +167,21 @@ Instantiate **GaussianBlurFilterOptions**, set `Sigma = 1.5`, apply the filter v
 → See: `apply-a-gaussian-blur-filter-with-sigma-1-5-to-a-bmp-image-and-save-as-png.cs`
 
 
+
+### Q: How can I load an SVG, rasterize it, apply a Gaussian blur, and save the result as PNG using Aspose.Imaging in C#?  
+Load the SVG with `Image.Load`, rasterize it, apply `new GaussianBlurFilterOption(radius, sigma)` via `image.Filter`, then save with `PngOptions`. → See: `add-a-readme-example-that-walks-through-loading-an-svg-applying-gaussian-blur-and-saving.cs`
+
+### Q: How do I apply a blur filter to a WebP image and write the processed image as a PNG file with Aspose.Imaging for .NET?  
+Load the WebP using `Image.Load`, call `image.Filter(new BlurFilterOption(radius))`, and save the output with `new PngOptions()`. → See: `apply-a-blur-filter-to-a-webp-image-and-write-the-processed-image-to-a-new-file.cs`
+
+### Q: How can I use a custom convolution kernel with negative coefficients to sharpen a PNG image in C# using Aspose.Imaging?  
+Create a `ConvolutionFilterOption` supplying the kernel array (including negative values) and invoke `image.Filter` on the loaded PNG before saving. → See: `apply-a-custom-kernel-with-negative-coefficients-to-create-a-sharpening-effect-on-a-png.cs`
+
+### Q: How do I perform deconvolution on an EMF file and save the processed raster image using Aspose.Imaging in C#?  
+Load the EMF with `Image.Load`, rasterize it to a bitmap, apply `new DeconvolutionFilterOption()` via `image.Filter`, then save the result with appropriate image options. → See: `apply-a-deconvolution-filter-to-an-emf-image-and-write-the-processed-output-to-disk.cs`
+
+### Q: How can I apply a Gaussian blur to a DNG raw image and export it as PNG using Aspose.Imaging for .NET?  
+Load the DNG using `Image.Load` (optionally with `ImageLoadOptions`), apply `new GaussianBlurFilterOption(radius, sigma)` through `image.Filter`, and save the output with `PngOptions`. → See: `apply-a-gaussian-blur-filter-to-a-dng-image-and-write-the-processed-output-to-a-file.cs`
 ## Operations Covered
 - Load an SVG file  
 - Rasterize SVG to a raster image  
