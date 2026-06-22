@@ -150,6 +150,11 @@ Load the APNG with `Image.Load`, loop through its `Frames` collection, and save 
 
 ### Q: How do I preserve each frame of an APNG as separate pages in a multi‑page TIFF using Aspose.Imaging for .NET?  
 Load the APNG, create a new `TiffImage`, add each APNG frame as a new page with `TiffOptions`, then save the combined TIFF. → See: convert-an-apng-to-a-series-of-tiff-images-preserving-each-frame-as-a-separate-page.cs
+
+### Q: How can I extract the first frame of an animated APNG and save it as a static PNG using Aspose.Imaging for .NET?  
+Load the APNG with `Image.Load`, cast to `ApngImage`, take `Frames[0]` and save it with `PngOptions`. → See: `convert-an-animated-apng-to-a-static-png-by-extracting-the-first-frame-and-saving-it.cs`
+
+### Q: How do I convert an APNG into a series of BMP files for legacy imaging
 ## Operations Covered
 - Adjust APNG frame delays using JSON timing data  
 - Convert animated WebP files to APNG in batch  
