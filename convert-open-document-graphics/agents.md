@@ -140,6 +140,21 @@ Load the ODG with `Image.Load` and save it using `new SvgOptions()` (or `SvgRast
 Create a `MedianFilterOptions` object, assign it to `OtgRasterizationOptions`, and then save the image with `new BmpOptions()`. → See: `apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-bmp.cs`
 
 
+
+### Q: How can I apply a Gaussian blur filter to an ODG image before saving it as a JPEG using Aspose.Imaging in C#?  
+Use `Image.Load` to open the ODG, add a `GaussianBlurFilterOption` to the image’s `FilterOptions`, and then call `image.Save` with `JpegOptions`. → See: `apply-a-gaussian-blur-filter-to-an-odg-image-before-converting-and-saving-as-jpeg.cs`
+
+### Q: How do I set the JPEG output quality to 85 % when converting an ODG file to JPEG with Aspose.Imaging in .NET?  
+Create a `JpegOptions` instance, set its `Quality` property to 85, and pass it to `image.Save`. → See: `convert-an-odg-file-to-jpeg-and-set-the-output-quality-to-85-percent.cs`
+
+### Q: How can I embed XMP metadata into a PDF generated from an ODG file using Aspose.Imaging for .NET?  
+Load the ODG with `Image.Load`, create a `PdfOptions` object, assign the XMP XML string to its `XmpMetadata` property, and save the image as PDF. → See: `convert-an-odg-file-to-pdf-and-embed-xmp-metadata-for-enhanced-document-information.cs`
+
+### Q: How do I define custom DPI and page margins when converting an ODG document to PDF with Aspose.Imaging in C#?  
+Set `PdfOptions.DpiX`/`DpiY` and `PdfOptions.PageMargins` before calling `image.Save` with the `PdfOptions` instance. → See: `convert-an-odg-file-to-pdf-set-custom-dpi-and-define-page-margins-for-layout.cs`
+
+### Q: How can I preserve transparency while converting an OTG file to BMP using Aspose.Imaging in .NET?  
+Load the OTG image, use `BmpOptions` with `ColorType = PngColorType.TruecolorWithAlpha` (or the default preserving alpha), and save the image as BMP. → See: `convert-an-otg-file-to-bmp-while-preserving-transparency-information-in-the-output-image.cs`
 ## Operations Covered
 - Apply Gaussian blur filter to ODG image  
 - Convert ODG image to JPEG format  
