@@ -152,6 +152,21 @@ Enumerate BMP files, generate a timestamp string, build the output name, and for
 
 ### Q: How can I add a watermark that includes the current date to PDFs generated from raster images in a batch process with Aspose.Imaging for .NET?  
 After loading each raster image and creating a `PdfOptions`, use
+
+### Q: How do I apply a custom color filter to a BMP image and export the filtered result as a PDF using Aspose.Imaging for .NET?  
+Use `RasterImage.Load` to open the BMP, call `image.ApplyFilter(new CustomColorFilterOption(...))`, and save with `PdfOptions` via `image.Save(outputPath, new PdfOptions())`. → See: `load-a-bmp-apply-a-custom-color-filter-then-export-the-filtered-image-as-pdf.cs`
+
+### Q: How can I invert the colors of a BMP image and save the output as an SVG file with Aspose.Imaging for .NET?  
+Load the BMP with `RasterImage.Load`, apply `new ColorInversionFilterOption()` using `image.ApplyFilter`, then export using `SvgOptions` in `image.Save(outputPath, new SvgOptions())`. → See: `load-a-bmp-image-apply-a-color-inversion-filter-then-export-the-inverted-image-as-svg.cs`
+
+### Q: How do I batch‑resize raster images to 800 × 800, apply a Gaussian blur, and generate SVG files for each using Aspose.Imaging for .NET?  
+Iterate over files, load each with `RasterImage.Load`, call `image.Resize(800, 800)` and `image.ApplyFilter(new GaussianBlurFilterOption(radius))`, then save using `SvgOptions` (`image.Save(outputPath, new SvgOptions())`). → See: `batch-process-raster-images-resize-each-to-800x800-apply-a-gaussian-blur-and-save-as-svg.cs`
+
+### Q: How can I set a dash pattern for lines when converting a BMP to SVG with Aspose.Imaging for .NET?  
+Create an `SvgImage` from the BMP, obtain its `Graphics` object, configure a `Pen` with `DashPattern` (e.g., `pen.DashPattern = new float[] {5, 2}`), draw the raster content, and save the SVG via `svgImage.Save(outputPath)`. → See: `create-an-svgimage-from-a-bmp-set-stroke-dash-array-for-lines-and-save-the-svg-with-dashed-strokes.cs`
+
+### Q: How do I change the stroke width to 2 pixels for vector lines when generating an SVG from a PNG using Aspose.Imaging for .NET?  
+Load the PNG, create an `SvgImage`, use its `Graphics` to set `Pen.Width = 2` before drawing, and save the result with `svgImage.Save(outputPath)`. → See: `create-an-svgimage-from-a-p
 ## Operations Covered
 - Load BMP image from file  
 - Apply median filter to image  
