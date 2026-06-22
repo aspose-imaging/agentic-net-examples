@@ -136,6 +136,21 @@ Iterate through the CDR files, load each with `CdrImage`, and call `Save` with a
 
 ### Q: How can I combine multiple CDR documents into a single PDF while preserving page order using Aspose.Imaging in C#?  
 Load each CDR as a `CdrImage`, add its pages to a `PdfDocument`, and finally save the combined document with `PdfOptions`. → See: `combine-multiple-cdr-documents-into-a-single-pdf-preserving-page-order-via-c.cs`
+
+### Q: How can I convert a CDR file stored in a byte array to a PNG image using a memory stream with Aspose.Imaging in C#?  
+Load the byte array into a `MemoryStream`, create a `CdrImage` via `Image.Load`, then save it with `PngOptions` to another `MemoryStream`. → See: `convert-a-cdr-file-from-a-byte-array-to-png-and-output-to-a-memory-stream-in-c.cs`
+
+### Q: How do I convert a CDR file directly from a MemoryStream to a JPEG without creating temporary files in C#?  
+Initialize a `MemoryStream` with the CDR data, load it as a `CdrImage`, and call `Save` with `JpegOptions` writing the result to a second `MemoryStream`. → See: `convert-a-cdr-file-from-a-memory-stream-directly-to-jpg-without-intermediate-files-in-c.cs`
+
+### Q: How can I batch convert all CDR files in a directory to PNG using a simple foreach loop in C# with Aspose.Imaging?  
+Use `Directory.GetFiles` to enumerate `*.cdr` files, load each with `CdrImage`, and save each to PNG using `PngOptions` inside the `foreach` loop. → See: `batch-export-cdr-files-to-png-format-by-iterating-through-a-directory-with-c-loops.cs`
+
+### Q: How do I name each output JPEG with the original CDR filename plus a timestamp when batch converting with Aspose.Imaging in C#?  
+Within the conversion loop, build the output filename using `Path.GetFileNameWithoutExtension` and `DateTime.Now.ToString("yyyyMMddHHmmss")` before calling `Save` with `JpegOptions`. → See: `batch-convert-cdr-files-to-jpg-naming-each-output-with-the-original-filename-plus-timestamp-in-c.cs`
+
+### Q: How can I ensure the output folder exists before saving converted PNG files from CDR using Aspose.Imaging in C#?  
+Call `Directory.CreateDirectory(Path.GetDirectoryName(outputPath))` prior to invoking the `Save` method on the `CdrImage`. → See: `adjust-png-compression-to-maximum-while-converting-a-cdr-file-to-png-in-c.cs`
 ## Operations Covered
 - Convert CDR to PNG with maximum compression  
 - Convert CDR to PNG using lossless compression while preserving dimensions  
