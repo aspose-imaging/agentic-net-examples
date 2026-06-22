@@ -130,6 +130,21 @@ Use `PdfCoreOptions` with `VectorRasterizationOptions` set to `null` (or configu
 Iterate over the EPS file paths, load each with `Image.Load(epsPath)`, then call `image.Save(psdPath, new PsdOptions())` inside the loop. Dispose each `Image` after saving to free unmanaged resources. → See: `batch-convert-a-collection-of-eps-files-to-psd-using-a-foreach-loop.cs`
 
 
+
+### Q: How can I add custom metadata to a PDF generated from an EPS file using Aspose.Imaging in C#?  
+Add the metadata via the `PdfDocumentInfo` object obtained from the PDF image (e.g., `((PdfDocument)pdfImage).Info`) before calling `Save`. → See: add-custom-metadata-to-pdf-output-after-eps-conversion-for-document-tracking.cs  
+
+### Q: Which Aspose.Imaging property lets me control PSD compression level when converting an EPS to PSD in .NET C#?  
+Set the `CompressionMethod` property on a `PsdOptions` instance (e.g., `PsdCompressionMethod.RLE`) before invoking `image.Save`. → See: adjust-psd-compression-level-to-balance-quality-and-file-size-during-eps-conversion.cs  
+
+### Q: How do I ensure the output directory exists for each file when batch converting EPS to PSD with a foreach loop in C#?  
+Call `Directory.CreateDirectory(Path.GetDirectoryName(outputPath))` inside the loop before saving each PSD file. → See: batch-convert-a-collection-of-eps-files-to-psd-using-a-foreach-loop.cs  
+
+### Q: How can I retrieve and compare the file sizes of an original EPS and its converted PSD using Aspose.Imaging in C#?  
+Use `new FileInfo(inputPath).Length` and `new FileInfo(outputPath).Length` after conversion to obtain the sizes in bytes for comparison. → See: compare-file-sizes-of-original-eps-and-converted-psd-for-storage-assessment.cs  
+
+### Q: What setting should I use to export a 16‑bit per channel PSD from an EPS file with Aspose.Imaging in .NET?  
+Assign `16` to the `BitsPerChannel` property of a `PsdOptions` object before calling `image.Save`. → See: convert-eps-to-psd-with-16-bit-per-channel-depth-for-high-quality-editing.cs
 ## Operations Covered
 - Add custom metadata to PDF after EPS conversion  
 - Set custom DPI before saving PDF to increase resolution  
