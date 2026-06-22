@@ -134,6 +134,21 @@ Set the `AntiAliasing` property of `SvgRasterizationOptions` to `false` before a
 
 ### Q: How can I enable high‑quality vector rasterization when converting SVG to PNG with Aspose.Imaging in C#?  
 Set the `VectorRasterizationQuality` property of `SvgRasterizationOptions` to `VectorRasterizationQuality.High`, then use these options in `PngOptions` before saving. → See: `enable-high-quality-vector-rasterization-by-setting-svgrasterizationoptions-vectorrasterizationquality-to-high.cs`
+
+### Q: How can I catch and log detailed errors when loading an SVG with Aspose.Imaging in C#?  
+Wrap `Image.Load(inputPath)` in a try‑catch block and log `ex.Message` and `ex.StackTrace` to diagnose loading failures. → See: `catch-exceptions-during-svg-loading-and-log-error-details-for-troubleshooting.cs`
+
+### Q: How do I load an SVG and save it as PNG asynchronously using Aspose.Imaging in .NET?  
+Use an `async Main` (or method) and run `Image.Load(inputPath)` inside `Task.Run`, then call `image.Save(outputPath, new PngOptions())` after the await. → See: `implement-asynchronous-svg-loading-and-png-saving-using-async-await-pattern-for-non-blocking-i-o.cs`
+
+### Q: How can I embed a converted PNG into an HTML email body after SVG rasterization with Aspose.Imaging in C#?  
+Read the PNG into a byte array, convert it to a Base64 string, and insert it into an `<img src="data:image/png;base64,{data}" />` tag in the HTML file. → See: `embed-the-png-raster-image-into-an-html-email-body-after-conversion.cs`
+
+### Q: How can I batch‑convert several SVG files to BMP using a single `SvgRasterizationOptions` instance in C#?  
+Create one `SvgRasterizationOptions` object, set its width/height, then loop through the SVG files, loading each with `Image.Load` and saving with `BmpOptions` that reference the shared rasterization options. → See: `batch-convert-multiple-svg-files-to-bmp-using-a-single-svgrasterizationoptions-instance.cs`
+
+### Q: How do I build an ASP.NET Core controller action that accepts an uploaded SVG and returns a PNG using Aspose.Imaging?  
+Accept an `IFormFile` parameter, load the stream with `Image.Load`, configure `PngOptions`, and return `File(imageStream, "image/png")` from the action. → See: `create-an-asp-net-api-endpoint-that-accepts-uploaded-svg-and-returns-converted-png-as-file.cs`
 ## Operations Covered
 - Add text watermark to BMP image after SVG rasterization  
 - Rasterize SVG to BMP format  
