@@ -121,6 +121,21 @@ Create a `MemoryStream` containing the CDR bytes, load it via `CdrImage.Load(mem
 Call `CdrImage.LoadAsync` to read the CDR file, then `SaveAsync` with a `PdfOptions` instance to write the PDF. Both methods are awaitable and compatible with .NET 6/7 async patterns. → See: `use-asynchronous-methods-to-convert-a-cdr-file-to-pdf-improving-ui-responsiveness-in-c.cs`
 
 
+
+### Q: How can I set the PNG compression level to maximum when converting a CDR file to PNG with Aspose.Imaging in C#?  
+Use `PngOptions.CompressionLevel = PngCompressionLevel.Maximum` before calling `cdrImage.Save(outputPath, pngOptions)`. → See: `adjust-png-compression-to-maximum-while-converting-a-cdr-file-to-png-in-c.cs`
+
+### Q: How do I embed EXIF metadata into a JPEG while converting from a CDR file using Aspose.Imaging in C#?  
+Create a `JpegOptions` instance, assign the desired EXIF data to its `ExifData` property, and pass this options object to `cdrImage.Save(outputPath, jpegOptions)`. → See: `apply-a-custom-jpeg-encoder-setting-to-embed-exif-metadata-during-cdr-to-jpg-conversion-in-c.cs`
+
+### Q: How can I preserve the original dimensions and apply lossless compression when converting a CDR file to PNG with Aspose.Imaging in C#?  
+Instantiate `PngOptions` with `CompressionLevel = PngCompressionLevel.BestCompression` and save the `CdrImage` without modifying its `Width` or `Height`. → See: `apply-lossless-compression-to-a-cdr-to-png-conversion-while-maintaining-original-dimensions-in-c.cs`
+
+### Q: How do I batch convert a collection of CDR files to separate PSD files while keeping the original layer structure using Aspose.Imaging in C#?  
+Iterate through the CDR files, load each with `CdrImage`, and call `Save` with a new `PsdOptions()` which retains the layer hierarchy. → See: `batch-transform-a-collection-of-cdr-files-into-separate-psd-files-retaining-original-layer-structure-in-c.cs`
+
+### Q: How can I combine multiple CDR documents into a single PDF while preserving page order using Aspose.Imaging in C#?  
+Load each CDR as a `CdrImage`, add its pages to a `PdfDocument`, and finally save the combined document with `PdfOptions`. → See: `combine-multiple-cdr-documents-into-a-single-pdf-preserving-page-order-via-c.cs`
 ## Operations Covered
 - Convert CDR to PNG with maximum compression  
 - Convert CDR to PNG using lossless compression while preserving dimensions  
