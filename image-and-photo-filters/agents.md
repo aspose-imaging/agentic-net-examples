@@ -153,6 +153,21 @@ Open the JPEG via `RasterImage`, configure `ContentAwareFillWatermarkOptions` wi
 Load the PNG with `RasterImage`, call `image.RotateFlip(RotateFlipType.Rotate90FlipNone)`, blend the overlay using `Graphics.DrawImage` with alpha blending, and save using `GifOptions`. → See: `rotate-a-png-by-90-degrees-then-blend-a-semi-transparent-overlay-and-save-as-gif.cs`
 
 
+
+### Q: How can I remove a watermark from a PNG using the Telea algorithm and set the removal attempts to five with Aspose.Imaging for .NET?  
+Use `WatermarkRemovalOptions` with `TeleaAlgorithm` and set `RemovalAttempts = 5`, then call `image.RemoveWatermark(options)`. → See: 28729-remove-watermark-from-a-png-using-telea-algorithm-and-set-removal-attempts-to-five.cs  
+
+### Q: How do I isolate a region in an APNG based on pixel hue using a color‑similarity filter in C# with Aspose.Imaging?  
+Create a `ColorSimilarityFilterOptions` specifying the hue range, apply it with `image.ApplyFilter(options)`, and save the result. → See: apply-a-color-similarity-filter-to-isolate-a-region-within-an-apng-image-based-on-pixel-hue.cs  
+
+### Q: How can I apply a specific image filter to every frame of an animated APNG while preserving its animation using Aspose.Imaging for .NET?  
+Load the file as an `ApngImage`, iterate through `apng.Frames`, call `frame.ApplyFilter(filterOptions)` on each frame, and then save the `ApngImage`. → See: apply-a-specified-image-filter-to-an-apng-file-ensuring-correct-handling-of-its-animation-frames.cs  
+
+### Q: How do I blend an APNG image with a chosen solid color and opacity using an alpha‑blending filter in Aspose.Imaging C#?  
+Use `AlphaBlendingFilterOptions` to set the target color and opacity, then invoke `apng.ApplyFilter(alphaOptions)` on the loaded `ApngImage`. → See: apply-the-alpha-blending-filter-to-an-apng-image-to-blend-pixel-colors-based-on-their-alpha-values.cs  
+
+### Q: How can I combine two Magic Wand selections with a union operation and save the combined mask as a PNG using Aspose.Imaging for .NET?  
+Create two `ImageMask` objects via `MagicWand.SelectRegion`, call `mask1.Union(mask2)`, and save the resulting mask with `PngImage.Save`. → See: combine-two-magic-wand-selections-using-union-operation-and-save-the-combined-mask-as-png.cs
 ## Operations Covered
 - Remove watermark from PNG using Telea algorithm  
 - Set watermark removal attempts to five  
