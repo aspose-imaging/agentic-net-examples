@@ -221,6 +221,15 @@ Create a `TiffImage` with `new TiffOptions(TiffExpectedFormat.MultiPage)`, add e
 
 ### Q: How do I split a multi‑page EMF document into separate PNG files, one per page, using Aspose.Imaging in C#?  
 Load the EMF with `EmfImage`, loop through `image.PageCount`, and for each page call `image.Save(pagePath, new PngOptions())`. → See: `convert-a-multi-page-emf-document-to-separate-png-files-one-per-page.cs`
+
+### Q: How can I create a custom 256‑color palette and assign it to PsdOptions for saving an indexed PSD in C#?  
+Use `PsdOptions` and set its `Palette` property with a `ColorPalette` built from 256 `Color` entries, then save the image with `image.Save(outputPath, psdOptions)`. → See: `create-a-256-color-palette-and-assign-it-to-psdoptions-palette-for-indexed-psd.cs`
+
+### Q: How do I draw a rectangle shape on an indexed PSD canvas before saving the file using Aspose.Imaging for .NET?  
+Load or create an indexed PSD, obtain its `RasterImage`, create a `Graphics` object, call `graphics.DrawRectangle` with a `Pen`, then save using `PsdOptions`. → See: `draw-a-rectangle-shape-on-an-indexed-psd-canvas-before-saving-the-file.cs`
+
+### Q: How can I export each frame of a multi‑page TIFF to separate PNG files with Aspose.Imaging in C#?  
+Load the TIFF with `Image.Load`,
 ## Operations Covered
 - Extract clipping paths from TIFF frames  
 - Export TIFF clipping paths as SVG files  
