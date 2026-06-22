@@ -9,7 +9,7 @@
 | Total Examples | 2874 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
-| Last Updated | 2026-06-20 |
+| Last Updated | 2026-06-22 |
 
 ## Repository Structure
 
@@ -184,10 +184,3 @@ You can run the library in evaluation mode; simply omit the `License` registrati
 Aspose.Imaging for .NET supports raster formats (BMP, JPEG, PNG, TIFF, GIF, WebP), vector formats (SVG, EPS, WMF), medical formats (DICOM), and animated formats (APNG, animated GIF). The library also handles raw and proprietary formats through dedicated classes like `RawImage` and `DicomImage`. Check the official documentation for the full list of supported formats.
 
 ---
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260619_144907` | 2026-06-19*
-
----
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260619_154352` | 2026-06-19*
-
----
-*Maintained by [agent-aspose-imaging-examples](https://github.com/agent-aspose-imaging-examples) | Run `20260620_045646` | 2026-06-20*
