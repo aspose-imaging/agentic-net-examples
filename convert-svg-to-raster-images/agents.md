@@ -119,6 +119,21 @@ Instantiate a single `SvgRasterizationOptions` object, loop through the SVG file
 In the controller action, load the SVG with `SvgImage.Load`, configure `BmpOptions`, save the image to a `MemoryStream`, and return `File(stream, "image/bmp")` as a `FileResult`. → See: `integrate-svg-to-bmp-conversion-into-an-asp-net-core-controller-action-returning-a-fileresult.cs`
 
 
+
+### Q: How can I add a text watermark to a BMP image generated from an SVG using Aspose.Imaging in C#?  
+Load the SVG with `Image.Load`, rasterize it using `SvgRasterizationOptions` and `BmpOptions`, then create a `Graphics` object from the bitmap and call `DrawString` to place the watermark text. → See: `add-a-watermark-text-to-bmp-image-after-svg-rasterization-using-drawing-api.cs`
+
+### Q: How do I convert an SVG to a BMP file that uses a custom indexed color palette with Aspose.Imaging in .NET?  
+Create a `BmpOptions` instance, assign a `ColorPalette` to its `Palette` property, set its `Source` to a new `SvgRasterizationOptions`, and pass the options to `Image.Save`. → See: `convert-svg-to-bmp-using-an-indexed-color-palette-defined-in-bmpoptions.cs`
+
+### Q: How can I save an SVG as a PNG with the highest compression level using Aspose.Imaging in C#?  
+Use `PngOptions`, set its `CompressionLevel` to `CompressionLevel.Maximum`, and pass the options to `Image.Save` after loading the SVG. → See: `convert-svg-to-png-with-high-compression-by-setting-pngoptions-compressionlevel-to-maximum.cs`
+
+### Q: How do I improve SVG‑to‑PNG conversion performance by disabling anti‑aliasing in Aspose.Imaging?  
+Set the `AntiAliasing` property of `SvgRasterizationOptions` to `false` before assigning it to `PngOptions.Source` and saving the image. → See: `disable-anti-aliasing-in-svgrasterizationoptions-before-saving-svg-to-png-to-improve-performance.cs`
+
+### Q: How can I enable high‑quality vector rasterization when converting SVG to PNG with Aspose.Imaging in C#?  
+Set the `VectorRasterizationQuality` property of `SvgRasterizationOptions` to `VectorRasterizationQuality.High`, then use these options in `PngOptions` before saving. → See: `enable-high-quality-vector-rasterization-by-setting-svgrasterizationoptions-vectorrasterizationquality-to-high.cs`
 ## Operations Covered
 - Add text watermark to BMP image after SVG rasterization  
 - Rasterize SVG to BMP format  
