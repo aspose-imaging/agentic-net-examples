@@ -182,6 +182,21 @@ Load the EMF with `Image.Load`, rasterize it to a bitmap, apply `new Deconvoluti
 
 ### Q: How can I apply a Gaussian blur to a DNG raw image and export it as PNG using Aspose.Imaging for .NET?  
 Load the DNG using `Image.Load` (optionally with `ImageLoadOptions`), apply `new GaussianBlurFilterOption(radius, sigma)` through `image.Filter`, and save the output with `PngOptions`. → See: `apply-a-gaussian-blur-filter-to-a-dng-image-and-write-the-processed-output-to-a-file.cs`
+
+### Q: How can I apply a motion blur filter to a WMF image and save the result as PNG using Aspose.Imaging for .NET?  
+Use `Image.Load` to open the WMF, then add a `MotionBlurFilterOption` to the image’s `FilterOptions` collection, and finally save with `PngOptions`. → See: `apply-a-motion-blur-filter-to-a-wmf-image-and-write-the-processed-image-to-a-new-file.cs`
+
+### Q: How do I sharpen a DICOM image with Aspose.Imaging in C# and persist the processed file as DICOM?  
+Load the DICOM via `Image.Load`, apply a `SharpenFilterOption` through the image’s `FilterOptions`, and save using `DicomOptions`. → See: `apply-a-sharpen-filter-to-a-dicom-image-and-persist-the-processed-image-to-storage.cs`
+
+### Q: How can I use a built‑in kernel filter (e.g., Emboss) from Aspose.Imaging’s filter set on a PNG image?  
+After loading the PNG with `Image.Load`, add the desired `ConvolutionFilterOption` (such as `EmbossFilterOption`) to the image’s `FilterOptions`, then save the output. → See: `apply-a-kernel-filter-from-the-image-processing-filter-set-to-the-target-image.cs`
+
+### Q: How do I rasterize an EPS file to PNG, apply an edge‑detection filter, and save the processed image using Aspose.Imaging?  
+Load the EPS with `Image.Load`, rasterize it to a temporary PNG, apply an `EdgeDetectionFilterOption` via `FilterOptions`, and save the final PNG. → See: `apply-an-edge-detection-filter-to-an-eps-image-and-save-the-processed-output-to-a-file.cs`
+
+### Q: How can I load a DNG raw image with ImageLoadOptions before applying a Gaussian blur in Aspose.Imaging for C#?  
+Create an `ImageLoadOptions` instance for the DNG, pass it to `Image.Load`, then add a `GaussianBlurFilterOption` to the image’s `FilterOptions` and save as PNG. → See: `apply-a-gaussian-blur-filter-to-a-dng-image-and-write-the-processed-output-to-a-file.cs`
 ## Operations Covered
 - Load an SVG file  
 - Rasterize SVG to a raster image  
