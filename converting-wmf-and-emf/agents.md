@@ -121,6 +121,21 @@ Create a `WmfRasterizationOptions` object, set `ResolutionX` and `ResolutionY` t
 ### Q: How to embed an ICC color profile when converting an EMF to PNG using Asp
 
 
+
+### Q: How can I set a custom background color when converting a transparent EMF to JPEG with Aspose.Imaging in C#?  
+Use `JpegOptions` and set its `BackgroundColor` property before calling `image.Save(outputPath, jpegOptions)`. This fills transparent areas with the specified color during conversion. → See: `apply-a-custom-background-color-when-converting-transparent-emf-files-to-jpeg-format.cs`
+
+### Q: How do I apply a grayscale filter while converting an EMF to BMP using Aspose.Imaging for .NET?  
+Load the EMF with `Image.Load`, create a `BmpOptions` object, set `BmpOptions.ColorType = BmpColorType.Grayscale`, and save the image. The grayscale setting forces monochrome output. → See: `apply-a-grayscale-filter-during-conversion-of-emf-to-bmp-to-produce-monochrome-output.cs`
+
+### Q: How can I batch‑convert EMF files to TIFF with LZW compression and a resolution of 150 dpi using Aspose.Imaging?  
+Iterate over the EMF files, create a `TiffOptions` instance, set `Compression = TiffCompression.Lzw` and `Resolution = new Resolution(150)`, then call `image.Save(outputPath, tiffOptions)` for each file. This applies LZW compression and the desired DPI to all outputs. → See: `batch-convert-emf-files-to-tiff-applying-lzw-compression-and-setting-resolution-to-150-dpi.cs`
+
+### Q: How do I convert a multi‑page EMF document into separate PNG files, one per page, with Aspose.Imaging in C#?  
+Load the EMF as an `Image`, cast it to `IMultipageImage`, loop through `multipage.PageCount`, set `PngOptions` for each page, and call `multipage.Save(pagePath, pngOptions, pageIndex)`. Each iteration writes a single page to its own PNG file. → See: `convert-a-multi-page-emf-document-to-a-series-of-png-files-one-per-page.cs`
+
+### Q: How can I rasterize a WMF to PNG at half its original size using Aspose.Imaging?  
+Create `RasterizationOptions`, set `ScaleX = 0.5f` and `ScaleY = 0.5f`, assign them to `PngOptions`, then load the WMF and save with those options. The scaling factors reduce the rasterized image dimensions by 50 %. → See: `convert-a-wmf-file-to-png-and-apply-a-custom-scaling-factor-of-0-5-during-rasterization.cs`
 ## Operations Covered
 - Apply custom background color to transparent EMF  
 - Convert EMF images to JPEG format  
