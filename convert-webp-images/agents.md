@@ -127,6 +127,12 @@ Set `GifOptions.LoopCount = 0` (0 means infinite) before calling `image.Save(gif
 → See: `set-gif-loop-count-to-infinite-when-converting-animated-webp-to-ensure-continuous-playback.cs`
 
 
+
+### Q: How can I determine if a WebP image is animated before converting it to GIF using Aspose.Imaging in C#?  
+Load the file with `Image.Load` and cast it to `WebPImage`; then check its `IsAnimated` property. If true, proceed with the GIF conversion, otherwise treat it as a static image. → See: check-if-the-loaded-webp-image-is-animated-before-saving-it-as-a-gif.cs  
+
+### Q: How do I set the PDF page size to A4 when converting a WebP image to PDF with Aspose.Imaging in .NET?  
+Create a `PdfOptions` instance and assign `PdfOptions.PageSize = PageSize.A4` before calling `image.Save(outputPath, pdfOptions)`. This forces the generated PDF to use standard A4 dimensions. → See: configure-pdf-page-size-to
 ## Operations Covered
 - Load WebP image from file  
 - Load WebP image from memory stream  
