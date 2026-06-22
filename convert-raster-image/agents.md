@@ -143,6 +143,15 @@ Iterate through the PNG files, load each with `RasterImage.Load`, resize via `im
 → See: `batch-process-png-images-resizing-each-to-500x500-pixels-before-converting-all-to-individual-pdf-documents.cs`
 
 
+
+### Q: How can I apply a median filter to a BMP image and export the filtered result centered on a PDF page using Aspose.Imaging for .NET?  
+Load the BMP with `Image.Load`, apply `MedianFilter` via `image.ApplyFilter`, then create a `PdfOptions` object and set its `PageOptions` to center the image before saving with `image.Save(outputPath, pdfOptions)`. → See: 28506-load-a-bmp-apply-a-median-filter-and-generate-a-pdf-with-the-filtered-image-centered-on-the-page.cs  
+
+### Q: How do I batch‑convert all BMP files in a folder to PDF and prepend each output filename with a timestamp for uniqueness using Aspose.Imaging for .NET?  
+Enumerate BMP files, generate a timestamp string, build the output name, and for each file load it with `Image.Load` and save as PDF using `PdfOptions`. → See: batch-convert-bmp-images-to-pdf-naming-each-output-file-with-a-timestamp-prefix-for-uniqueness.cs  
+
+### Q: How can I add a watermark that includes the current date to PDFs generated from raster images in a batch process with Aspose.Imaging for .NET?  
+After loading each raster image and creating a `PdfOptions`, use
 ## Operations Covered
 - Load BMP image from file  
 - Apply median filter to image  
