@@ -168,6 +168,11 @@ Load the ICO file into an `Image` and assign it to `PdfDocumentOptions.Icon` on 
 
 ### Q: How can I convert a series of JPEG images to EMF format before merging them into a PDF using Aspose.Imaging for .NET?  
 Save each JPEG as an `EmfImage` using `EmfOptions`, then add the resulting EMF pages to a `PdfDocument` and call `PdfDocument.Save`. → See: combine-jpg-images-into-a-pdf-document-by-converting-them-to-emf-format-while-preserving-vector-fidelity.cs
+
+### Q: How can I combine several JPEG files into a single PNG image using the WMZ container format with Aspose.Imaging for .NET?  
+Load each JPEG, create a `WmfImage` with `WmzContainerFormat` set, draw the JPEGs onto it, and save the result with `PngOptions`. → See: `combine-jpg-images-into-a-single-png-file-efficiently-utilizing-the-wmz-container-format.cs`
+
+### Q: How do I vertically stack multiple JPEG images while preserving their original order and quality using Asp
 ## Operations Covered
 - Merge multiple JPEG images horizontally  
 - Merge multiple JPEG images vertically preserving order  
