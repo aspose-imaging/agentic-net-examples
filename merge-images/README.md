@@ -45,8 +45,8 @@ Add the Aspose.Imaging NuGet package and run the snippet – you’ll get a sing
 
 Examples and tasks in this folder:
 
-| Example |
-|---------|
+| Example | |
+|---------|---|
 | [add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs](./add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs) |
 | [add-custom-author-metadata-to-the-merged-pdf-generated-from-a-horizontal-jpeg-merge-operation.cs](./add-custom-author-metadata-to-the-merged-pdf-generated-from-a-horizontal-jpeg-merge-operation.cs) |
 | [align-all-merged-jpeg-images-to-the-top-left-corner-of-the-canvas-for-a-consistent-layout.cs](./align-all-merged-jpeg-images-to-the-top-left-corner-of-the-canvas-for-a-consistent-layout.cs) |
@@ -77,7 +77,7 @@ Examples and tasks in this folder:
 | [combine-jpg-images-into-a-png-output-while-applying-jpeg-compression-settings-during-the-merge.cs](./combine-jpg-images-into-a-png-output-while-applying-jpeg-compression-settings-during-the-merge.cs) |
 | [combine-jpg-images-into-a-single-pdf-document-employing-the-wmz-format-for-compression-and-packaging.cs](./combine-jpg-images-into-a-single-pdf-document-employing-the-wmz-format-for-compression-and-packaging.cs) |
 | [combine-jpg-images-into-a-single-pdf-document-using-the-cmx-format-to-maintain-color-fidelity.cs](./combine-jpg-images-into-a-single-pdf-document-using-the-cmx-format-to-maintain-color-fidelity.cs) |
-| *...and 105 more files — [View all ↗](https://github.com/aspose-imaging/agentic-net-examples/tree/main/merge-images)* |
+| | [**View all 135 examples ↗**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/merge-images) |
 
 ## Requirements
 - **Aspose.Imaging for .NET** – install via NuGet: `Install-Package Aspose.Imaging`
