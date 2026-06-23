@@ -29,8 +29,8 @@ Add the Aspose.Imaging package to your project and run the snippet on .NET 9 o
 
 Examples and tasks in this folder:
 
-| Example | |
-|---------|---|
+| Example |
+|---------|
 | [apply-rotation-to-cmx-image-before-converting-to-tiff-using-image-rotateflip-to-correct-orientation.cs](./apply-rotation-to-cmx-image-before-converting-to-tiff-using-image-rotateflip-to-correct-orientation.cs) |
 | [convert-a-cmx-image-to-jpeg-format-with-progressive-encoding-enabled-for-smoother-loading.cs](./convert-a-cmx-image-to-jpeg-format-with-progressive-encoding-enabled-for-smoother-loading.cs) |
 | [convert-a-cmx-image-to-jpeg-format-with-quality-set-to-90-using-jpegoptions.cs](./convert-a-cmx-image-to-jpeg-format-with-quality-set-to-90-using-jpegoptions.cs) |
@@ -61,7 +61,7 @@ Examples and tasks in this folder:
 | [save-converted-tiff-images-with-lzw-compression-and-verify-file-size-reduction.cs](./save-converted-tiff-images-with-lzw-compression-and-verify-file-size-reduction.cs) |
 | [set-dpi-of-output-jpeg-image-to-300-using-jpegoptions-resolutionx-and-resolutiony.cs](./set-dpi-of-output-jpeg-image-to-300-using-jpegoptions-resolutionx-and-resolutiony.cs) |
 | [use-aspose-imaging-to-convert-cmx-stream-from-memory-to-tiff-without-temporary-files.cs](./use-aspose-imaging-to-convert-cmx-stream-from-memory-to-tiff-without-temporary-files.cs) |
-| | [**View all 34 examples ↗**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-cmx-images) |
+[**View all 34 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-cmx-images)
 
 ## Requirements
 - **Aspose.Imaging for .NET** – install via NuGet: `dotnet add package Aspose.Imaging`
