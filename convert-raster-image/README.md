@@ -31,8 +31,8 @@ The snippet shows the most common raster image conversion: load → resize → s
 
 Examples and tasks in this folder:
 
-| Example |
-|---------|
+| Example | |
+|---------|---|
 | [load-a-bmp-apply-a-median-filter-and-generate-a-pdf-with-the-filtered-image-centered-on-the-page.cs](./load-a-bmp-apply-a-median-filter-and-generate-a-pdf-with-the-filtered-image-centered-on-the-page.cs) |
 | [batch-process-bmp-files-applying-a-uniform-border-of-5-pixels-and-convert-each-to-pdf.cs](./batch-process-bmp-files-applying-a-uniform-border-of-5-pixels-and-convert-each-to-pdf.cs) |
 | [batch-process-bmp-files-applying-a-10-brightness-increase-and-convert-each-brightened-image-to-svg.cs](./batch-process-bmp-files-applying-a-10-brightness-increase-and-convert-each-brightened-image-to-svg.cs) |
@@ -63,7 +63,7 @@ Examples and tasks in this folder:
 | [batch-process-raster-images-resize-each-to-1024x1024-apply-a-median-filter-and-save-as-svg-files.cs](./batch-process-raster-images-resize-each-to-1024x1024-apply-a-median-filter-and-save-as-svg-files.cs) |
 | [batch-process-raster-images-resize-each-to-800x800-apply-a-gaussian-blur-and-save-as-svg.cs](./batch-process-raster-images-resize-each-to-800x800-apply-a-gaussian-blur-and-save-as-svg.cs) |
 | [convert-a-bmp-image-to-pdf-and-write-the-pdf-directly-to-an-http-response-stream.cs](./convert-a-bmp-image-to-pdf-and-write-the-pdf-directly-to-an-http-response-stream.cs) |
-| *...and 111 more files — [View all ↗](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-raster-image)* |
+| | [**View all 141 examples ↗**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-raster-image) |
 
 ## Requirements
 - **Aspose.Imaging** NuGet package (`Install-Package Aspose.Imaging`)
