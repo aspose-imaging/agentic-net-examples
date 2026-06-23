@@ -148,6 +148,21 @@ Read the file into a `MemoryStream`, call `Image.Load(stream)`, then save using 
 
 ### Q: How can I adjust the output resolution or quality when saving a WebP image as PDF using Aspose.Imaging in C#?  
 Configure the `PdfOptions.RasterizationOptions` (e.g., `ResolutionX`, `ResolutionY`, `CompressionQuality`) before calling `image.Save(outputPath, pdfOptions)`. → See: `adjust-image-quality-before-saving-webp-as-pdf-to-control-output-resolution.cs`
+
+### Q: How can I verify that the width and height of a WebP image match those of the resulting GIF after conversion using Aspose.Imaging in C#?  
+Use `Image.Width` and `Image.Height` on the loaded `WebP` image and on the saved `GifImage` (or reload the GIF) to compare the dimensions. → See: `compare-original-webp-dimensions-with-resulting-gif-dimensions-to-ensure-size-consistency.cs`
+
+### Q: How do I set the DPI (horizontal and vertical resolution) of a PDF when converting a WebP image with Aspose.Imaging in .NET?  
+Create a `PdfOptions` instance and assign `ResolutionX` and `ResolutionY` (e.g., 300) before calling `image.Save(outputPath, pdfOptions)`. → See: `adjust-image-quality-before-saving-webp-as-pdf-to-control-output-resolution.cs`
+
+### Q: How can I speed up batch conversion of many WebP files to GIF by using Aspose.Imaging’s multithreading support in C#?  
+Wrap the conversion loop with `Parallel.ForEach` and use `Image.Load`/`image.Save` inside; Aspose.Imaging’s `Multithreading` namespace enables thread‑safe processing. → See: `implement-cancellation-token-support-in-asynchronous-batch-conversion-of-webp-files-to-gif-for-responsive-ui.cs`
+
+### Q: What is the recommended way to catch and log unexpected errors during a WebP‑to‑PDF conversion with Aspose.Imaging in C#?  
+Enclose the loading and saving code in a `try‑catch` block, catching `Exception` and writing the message to the console or a log file. → See: `implement-try-catch-blocks-around-conversion-code-to-handle-unexpected-runtime-errors-gracefully.cs`
+
+### Q: How do I ensure the output folder exists before saving a converted PDF from a WebP file using Aspose.Imaging in C#?  
+Call `Directory.CreateDirectory(Path.GetDirectoryName(outputPath))` prior to `image.Save`, which creates the directory if it’s missing. → See: `configure-pdf-page-size-to-a4-when-converting-webp-to-pdf-for-standard-document-layout.cs`
 ## Operations Covered
 - Load WebP image from file  
 - Load WebP image from memory stream  
