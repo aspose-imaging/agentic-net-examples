@@ -36,8 +36,8 @@ The snippet loads an image, sets JPEG‑specific options, and saves it as a new 
 
 Examples and tasks in this folder:
 
-| Example | |
-|---------|---|
+| Example |
+|---------|
 | [convert-a-bigtiff-raster-image-into-a-pdf-document-while-preserving-the-original-image-fidelity.cs](./convert-a-bigtiff-raster-image-into-a-pdf-document-while-preserving-the-original-image-fidelity.cs) |
 | [convert-a-bmp-image-file-into-a-pdf-document-maintaining-image-fidelity-and-appropriate-page-dimensions.cs](./convert-a-bmp-image-file-into-a-pdf-document-maintaining-image-fidelity-and-appropriate-page-dimensions.cs) |
 | [convert-a-cdr-file-to-the-specified-image-format-programmatically-using-a-net-application.cs](./convert-a-cdr-file-to-the-specified-image-format-programmatically-using-a-net-application.cs) |
@@ -68,7 +68,7 @@ Examples and tasks in this folder:
 | [convert-an-svg-image-to-a-gif-format-while-maintaining-visual-fidelity-and-transparency.cs](./convert-an-svg-image-to-a-gif-format-while-maintaining-visual-fidelity-and-transparency.cs) |
 | [convert-an-svg-image-to-a-tiff-file-preserving-visual-fidelity-and-supporting-optional-compression-settings.cs](./convert-an-svg-image-to-a-tiff-file-preserving-visual-fidelity-and-supporting-optional-compression-settings.cs) |
 | [convert-an-svg-image-to-bmp-format-preserving-visual-fidelity-and-supporting-custom-dimensions.cs](./convert-an-svg-image-to-bmp-format-preserving-visual-fidelity-and-supporting-custom-dimensions.cs) |
-| | [**View all 162 examples ↗**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/conversion) |
+[**View all 162 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/conversion)
 
 ## Requirements  
 
