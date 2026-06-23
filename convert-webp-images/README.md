@@ -39,8 +39,8 @@ Add the Aspose.Imaging NuGet package to your project and run the snippet – the
 
 Examples and tasks in this folder:
 
-| Example |
-|---------|
+| Example | |
+|---------|---|
 | [adjust-image-quality-before-saving-webp-as-pdf-to-control-output-resolution.cs](./adjust-image-quality-before-saving-webp-as-pdf-to-control-output-resolution.cs) |
 | [check-if-the-loaded-webp-image-is-animated-before-saving-it-as-a-gif.cs](./check-if-the-loaded-webp-image-is-animated-before-saving-it-as-a-gif.cs) |
 | [compare-original-webp-dimensions-with-resulting-gif-dimensions-to-ensure-size-consistency.cs](./compare-original-webp-dimensions-with-resulting-gif-dimensions-to-ensure-size-consistency.cs) |
