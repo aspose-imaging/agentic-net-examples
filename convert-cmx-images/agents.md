@@ -146,6 +146,11 @@ Create a `PdfOptions` object and assign `options.PageSize = PdfPageSize.A4` (or 
 
 ### Q: How can I preserve the original page order when converting a multi‑page CMX to a multi‑page TIFF using Aspose.Imaging for .NET?  
 Load the CMX as a multi‑frame image, iterate through its pages in their natural order, and add each frame to a `TiffImage` using `TiffOptions` without reordering. → See: `convert-a-multi-page-cmx-image-to-a-multi-page-tiff-file-preserving-original-page-order.cs`
+
+### Q: How can I merge all pages of a multi‑page CMX file into a single‑page TIFF using Aspose.Imaging for .NET?  
+Load the CMX with `Image.Load`, create a `TiffImage` and add each CMX page as a frame, then save with `Image.Save` and a `TiffOptions` instance. → See: `convert-a-multi-page-cmx-image-to-a-single-page-tiff-file-by-merging-pages.cs`
+
+### Q: How do I convert a CMX image to
 ## Operations Covered
 - Rotate CMX image before TIFF conversion  
 - Convert CMX image to JPEG with quality setting  
