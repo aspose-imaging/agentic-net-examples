@@ -200,6 +200,21 @@ Use `PngOptions` with a `FileCreateSource` pointing to the desired path, then ca
 
 ### Q: How do I render an entire `GraphicsPath` onto a PNG image accurately with Aspose.Imaging in C#?  
 Load or create a `Graphics` object from the image, call `graphics.DrawPath(yourGraphicsPath)`, and save the image using the configured `PngOptions`. → See: `apply-the-full-graphic
+
+### Q: How do I create a 600 × 400 PNG and draw a cubic Bézier curve with custom control points using Aspose.Imaging in C#?  
+Create a `PngOptions` with a `FileCreateSource`, call `Image.Create(pngOptions, 600, 400)`, then use `Graphics.DrawShape(new CubicBezierShape(...))` to add the curve. → See: add-a-cubic-bezier-curve-to-the-same-figure-using-specified-control-points.cs  
+
+### Q: How can I bind a PNG output file via `FileCreateSource` and render an entire `GraphicsPath` onto it with Aspose.Imaging?  
+Set `pngOptions.Source = new FileCreateSource(path, false)`, create the image, and call `GraphicsPathRenderer.Render(image, graphicsPath)` to paint the vector shapes. → See: apply-the-full-graphicspath-source-to-render-vector-shapes-onto-an-image-programmatically-accurately.cs  
+
+### Q: How do I batch‑process multiple width/height specifications to generate BMP files each containing a centered square using Aspose.Imaging?  
+Iterate over an array of size pairs, create each BMP with `BmpOptions` and `FileCreateSource`, then draw a square positioned at the center of the canvas using `Graphics.DrawRectangle`. → See: batch-process-a-collection-of-size-specifications-creating-bmps-each-containing-a-centered-square.cs  
+
+### Q: How can I rotate subsequent drawings after drawing a base rectangle on a BMP using `Graphics.RotateTransform` in Aspose.Imaging?  
+After drawing the initial rectangle, call `graphics.RotateTransform(angle)`; all following drawing calls (lines, shapes, etc.) will be rendered with the applied rotation. → See: create-a-bmp-draw-a-rectangle-then-use-graphics-rotatetransform-to-rotate-subsequent-drawings.cs  
+
+### Q: How do I render a `GraphicsPath` onto an ICO image file with Aspose.Imaging in C#?  
+Configure `IcoOptions` with a `FileCreateSource`, create the ICO image, and invoke `GraphicsPathRenderer.Render(icoImage, graphicsPath)` to paint the vector path onto the icon. → See: create-and-configure-graphics-instances-using-a-graphicspath-to-render-onto-an-ico-image.cs
 ## Operations Covered
 - Create a new PNG canvas and clear it with a color  
 - Add a cubic‑bezier curve to a figure using control points  
