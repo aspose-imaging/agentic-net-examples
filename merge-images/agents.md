@@ -173,6 +173,21 @@ Save each JPEG as an `EmfImage` using `EmfOptions`, then add the resulting EMF p
 Load each JPEG, create a `WmfImage` with `WmzContainerFormat` set, draw the JPEGs onto it, and save the result with `PngOptions`. → See: `combine-jpg-images-into-a-single-png-file-efficiently-utilizing-the-wmz-container-format.cs`
 
 ### Q: How do I vertically stack multiple JPEG images while preserving their original order and quality using Asp
+
+### Q: How can I specify the JPEG compression quality when saving a horizontally merged image with Aspose.Imaging in C#?  
+Set the `Quality` property on a `JpegOptions` instance and pass it to `Image.Save(outputPath, jpegOptions)`. This controls the output JPEG quality after the merge. → See: add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs  
+
+### Q: How do I embed JPEG2000 images into a PDF document while preserving fidelity using Aspose.Imaging for .NET?  
+Load each source JPEG as a `Jpeg2000Image`, then add the image to a `PdfDocument` using `PdfOptions` with `Compression = Jpeg2000Compression`. The PDF pages will contain the JPEG2000‑compressed images. → See: combine-jpeg-images-into-a-pdf-document-employing-the-jpeg2000-compression-format-while-maintaining-image-fidelity-and-document-integrity.cs  
+
+### Q: What is the process to convert JPEG files to EMF format before creating a PDF with Aspose.Imaging in C#?  
+Load each JPEG, save it to an EMF file using `EmfOptions`, then add the resulting EMF images to a `PdfDocument` via `PdfOptions`. This preserves vector fidelity in the final PDF. → See: combine-jpg-images-into-a-pdf-document-by-converting-them-to-emf-format-while-preserving-vector-fidelity.cs  
+
+### Q: How can I set a custom ICO file as the document icon for a PDF generated from JPEG images using Aspose.Imaging for .NET?  
+Load the ICO with `Image.Load`, assign it to `PdfDocumentInfo.Icon`, and attach the `PdfDocumentInfo` to `PdfOptions` before saving the PDF. The resulting PDF will display the specified icon. → See: combine-jpg-images-into-a-pdf-document-embedding-an-ico-file-as-the-document-s-icon.cs  
+
+### Q: How do I convert a series of JPEG images to a multi‑page TIFF and then generate a PDF from that TIFF using Aspose.Imaging in C#?  
+Create a `TiffImage` by adding each loaded JPEG as a new frame using `TiffOptions`, then open the TIFF and export it to PDF with `PdfOptions`. This two‑step conversion yields a PDF that
 ## Operations Covered
 - Merge multiple JPEG images horizontally  
 - Merge multiple JPEG images vertically preserving order  
