@@ -33,14 +33,41 @@ Add the Aspose.Imaging package to your project:
 dotnet add package Aspose.Imaging
 ```
 
-## All Examples
+## All Examples (40 total)
 
-| Example | Description |
-|---|---|
-| [load-an-svg-file-using-svgimage-class-and-configure-rasterization-dimensions-before-conversion.cs](./load-an-svg-file-using-svgimage-class-and-configure-rasterization-dimensions-before-conversion.cs) | Load an SVG file using `SvgImage` and configure custom rasterization width/height before saving as PNG. |
-| [save-the-loaded-svg-as-a-bmp-file-with-custom-width-and-height-settings.cs](./save-the-loaded-svg-as-a-bmp-file-with-custom-width-and-height-settings.cs) | Save the loaded SVG as a BMP file while specifying custom width and height via `SvgRasterizationOptions`. |
-| [save-the-loaded-svg-as-a-png-file-using-default-rasterization-options.cs](./save-the-loaded-svg-as-a-png-file-using-default-rasterization-options.cs) | Convert an SVG to PNG using the default rasterization settings (no extra configuration). |
-| *(additional examples may be added here)* |  |
+| Example |
+|---------|
+| [add-a-watermark-text-to-bmp-image-after-svg-rasterization-using-drawing-api.cs](./add-a-watermark-text-to-bmp-image-after-svg-rasterization-using-drawing-api.cs) |
+| [apply-grayscale-filter-to-png-raster-image-before-saving-the-output-file.cs](./apply-grayscale-filter-to-png-raster-image-before-saving-the-output-file.cs) |
+| [batch-convert-multiple-svg-files-to-bmp-using-a-single-svgrasterizationoptions-instance.cs](./batch-convert-multiple-svg-files-to-bmp-using-a-single-svgrasterizationoptions-instance.cs) |
+| [batch-convert-multiple-svg-files-to-png-while-reusing-the-same-rasterization-options.cs](./batch-convert-multiple-svg-files-to-png-while-reusing-the-same-rasterization-options.cs) |
+| [catch-exceptions-during-svg-loading-and-log-error-details-for-troubleshooting.cs](./catch-exceptions-during-svg-loading-and-log-error-details-for-troubleshooting.cs) |
+| [catch-exceptions-during-svg-saving-and-record-file-path-and-exception-message.cs](./catch-exceptions-during-svg-saving-and-record-file-path-and-exception-message.cs) |
+| [convert-svg-to-bmp-using-an-indexed-color-palette-defined-in-bmpoptions.cs](./convert-svg-to-bmp-using-an-indexed-color-palette-defined-in-bmpoptions.cs) |
+| [convert-svg-to-bmp-with-300-dpi-resolution-by-setting-bmpoptions-resolution-properties.cs](./convert-svg-to-bmp-with-300-dpi-resolution-by-setting-bmpoptions-resolution-properties.cs) |
+| [convert-svg-to-png-with-high-compression-by-setting-pngoptions-compressionlevel-to-maximum.cs](./convert-svg-to-png-with-high-compression-by-setting-pngoptions-compressionlevel-to-maximum.cs) |
+| [convert-svg-to-png-with-transparent-background-by-leaving-background-color-undefined.cs](./convert-svg-to-png-with-transparent-background-by-leaving-background-color-undefined.cs) |
+| [create-an-asp-net-api-endpoint-that-accepts-uploaded-svg-and-returns-converted-png-as-file.cs](./create-an-asp-net-api-endpoint-that-accepts-uploaded-svg-and-returns-converted-png-as-file.cs) |
+| [crop-png-raster-image-to-a-centered-square-region-after-conversion.cs](./crop-png-raster-image-to-a-centered-square-region-after-conversion.cs) |
+| [disable-anti-aliasing-in-svgrasterizationoptions-before-saving-svg-to-png-to-improve-performance.cs](./disable-anti-aliasing-in-svgrasterizationoptions-before-saving-svg-to-png-to-improve-performance.cs) |
+| [embed-the-bmp-raster-image-into-a-new-pdf-document-after-conversion.cs](./embed-the-bmp-raster-image-into-a-new-pdf-document-after-conversion.cs) |
+| [embed-the-png-raster-image-into-an-html-email-body-after-conversion.cs](./embed-the-png-raster-image-into-an-html-email-body-after-conversion.cs) |
+| [enable-anti-aliasing-in-svgrasterizationoptions-before-saving-svg-to-bmp-for-smoother-edges.cs](./enable-anti-aliasing-in-svgrasterizationoptions-before-saving-svg-to-bmp-for-smoother-edges.cs) |
+| [enable-high-quality-vector-rasterization-by-setting-svgrasterizationoptions-vectorrasterizationquality-to-high.cs](./enable-high-quality-vector-rasterization-by-setting-svgrasterizationoptions-vectorrasterizationquality-to-high.cs) |
+| [implement-a-using-block-to-ensure-proper-disposal-of-svgimage-and-option-objects.cs](./implement-a-using-block-to-ensure-proper-disposal-of-svgimage-and-option-objects.cs) |
+| [implement-asynchronous-svg-loading-and-png-saving-using-async-await-pattern-for-non-blocking-i-o.cs](./implement-asynchronous-svg-loading-and-png-saving-using-async-await-pattern-for-non-blocking-i-o.cs) |
+| [integrate-svg-to-bmp-conversion-into-an-asp-net-core-controller-action-returning-a-fileresult.cs](./integrate-svg-to-bmp-conversion-into-an-asp-net-core-controller-action-returning-a-fileresult.cs) |
+| [load-an-svg-file-using-svgimage-class-and-configure-rasterization-dimensions-before-conversion.cs](./load-an-svg-file-using-svgimage-class-and-configure-rasterization-dimensions-before-conversion.cs) |
+| [log-conversion-duration-in-milliseconds-and-output-file-size-after-each-svg-rasterization.cs](./log-conversion-duration-in-milliseconds-and-output-file-size-after-each-svg-rasterization.cs) |
+| [overlay-another-image-onto-png-output-after-converting-svg-to-png-for-composite-result.cs](./overlay-another-image-onto-png-output-after-converting-svg-to-png-for-composite-result.cs) |
+| [render-svg-to-bmp-with-white-background-color-defined-in-svgrasterizationoptions.cs](./render-svg-to-bmp-with-white-background-color-defined-in-svgrasterizationoptions.cs) |
+| [render-svg-to-png-with-transparent-background-by-disabling-background-color-in-options.cs](./render-svg-to-png-with-transparent-background-by-disabling-background-color-in-options.cs) |
+| [resize-bmp-raster-image-to-half-its-original-dimensions-after-conversion.cs](./resize-bmp-raster-image-to-half-its-original-dimensions-after-conversion.cs) |
+| [retrieve-bmp-image-as-byte-array-after-conversion-for-storage-or-transmission.cs](./retrieve-bmp-image-as-byte-array-after-conversion-for-storage-or-transmission.cs) |
+| [rotate-bmp-raster-image-ninety-degrees-clockwise-after-svg-conversion.cs](./rotate-bmp-raster-image-ninety-degrees-clockwise-after-svg-conversion.cs) |
+| [save-converted-bmp-image-into-a-memorystream-for-further-in-memory-processing.cs](./save-converted-bmp-image-into-a-memorystream-for-further-in-memory-processing.cs) |
+| [save-converted-png-image-into-a-memorystream-and-return-the-stream-to-the-caller.cs](./save-converted-png-image-into-a-memorystream-and-return-the-stream-to-the-caller.cs) |
+| *...and 10 more files — [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-svg-to-raster-images)* |
 
 ## Requirements
 - **Aspose.Imaging for .NET** – install via NuGet (`Aspose.Imaging`).  
