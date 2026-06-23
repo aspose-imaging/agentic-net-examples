@@ -36,8 +36,8 @@ The snippet loads an image, applies a predefined blur kernel, and saves the resu
 
 Examples and tasks in this folder:
 
-| Example | |
-|---------|---|
+| Example |
+|---------|
 | [add-a-readme-example-that-walks-through-loading-an-svg-applying-gaussian-blur-and-saving.cs](./add-a-readme-example-that-walks-through-loading-an-svg-applying-gaussian-blur-and-saving.cs) |
 | [adjust-kernel-coefficients-dynamically-based-on-user-input-in-a-desktop-ui-before-filtering.cs](./adjust-kernel-coefficients-dynamically-based-on-user-input-in-a-desktop-ui-before-filtering.cs) |
 | [adjust-kernel-coefficients-to-increase-brightness-while-applying-a-5x5-blur-to-a-bmp-image.cs](./adjust-kernel-coefficients-to-increase-brightness-while-applying-a-5x5-blur-to-a-bmp-image.cs) |
@@ -68,7 +68,7 @@ Examples and tasks in this folder:
 | [apply-a-blur-filter-to-an-avif-image-and-write-the-processed-image-back-to-storage.cs](./apply-a-blur-filter-to-an-avif-image-and-write-the-processed-image-back-to-storage.cs) |
 | [apply-a-blur-filter-to-an-emf-image-and-persist-the-processed-output-to-a-file.cs](./apply-a-blur-filter-to-an-emf-image-and-persist-the-processed-output-to-a-file.cs) |
 | [apply-a-blur-filter-to-an-emz-image-and-store-the-processed-output-file.cs](./apply-a-blur-filter-to-an-emz-image-and-store-the-processed-output-file.cs) |
-| | [**View all 464 examples ↗**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/kernel-filters) |
+[**View all 464 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/kernel-filters)
 
 ## Requirements
 - **Aspose.Imaging for .NET** – install via NuGet: `Install-Package Aspose.Imaging`
