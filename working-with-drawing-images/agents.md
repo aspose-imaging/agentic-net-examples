@@ -215,6 +215,21 @@ After drawing the initial rectangle, call `graphics.RotateTransform(angle)`; all
 
 ### Q: How do I render a `GraphicsPath` onto an ICO image file with Aspose.Imaging in C#?  
 Configure `IcoOptions` with a `FileCreateSource`, create the ICO image, and invoke `GraphicsPathRenderer.Render(icoImage, graphicsPath)` to paint the vector path onto the icon. → See: create-and-configure-graphics-instances-using-a-graphicspath-to-render-onto-an-ico-image.cs
+
+### Q: How do I bind a PNG output file with `FileCreateSource` and draw a cubic Bézier curve using custom control points in Aspose.Imaging C#?  
+Create a `PngOptions` object, set its `Source` to a `FileCreateSource` pointing to the output path, then use `Image.Create` and a `Graphics` instance to call `DrawBezier` with your control points. → See: `add-a-cubic-bezier-curve-to-the-same-figure-using-specified-control-points.cs`
+
+### Q: How can I configure `PngOptions` with a `FileCreateSource` to render a full `GraphicsPath` of vector shapes onto a PNG in Aspose.Imaging C#?  
+Instantiate `PngOptions`, assign `pngOptions.Source = new FileCreateSource(outputPath, false)`, create the image with `Image.Create`, and use `Graphics.DrawPath` to render the `GraphicsPath`. → See: `apply-the-full-graphicspath-source-to-render-vector-shapes-onto-an-image-programmatically-accurately.cs`
+
+### Q: How do I create a BMP image and draw a series of random‑colored lines using Aspose.Imaging in C#?  
+Use `BmpOptions` with a `FileCreateSource` to bind the output file, call `Image.Create` for the BMP canvas, then loop with `Graphics.DrawLine`, assigning a new `SolidBrush` of random `Color` for each line. → See: `create-a-bmp-image-set-background-to-white-then-draw-a-series-of-random-colored-lines.cs`
+
+### Q: How can I convert a multi‑page SVG document into a single PDF while preserving page order and vector fidelity with Aspose.Imaging in C#?  
+Load the SVG using `Image.Load`, set `PdfOptions` (e.g., `PdfOptions.VectorRasterizationOptions`), and call `image.Save(outputPdfPath, pdfOptions)`; Aspose.Imaging will combine all SVG pages into one PDF in the original order. → See: `convert-a-multi-page-svg-document-to-a-single-pdf-file-preserving-page-order-and-vector-fidelity.cs`
+
+### Q: How do I set the bits‑per‑pixel value for a BMP image before drawing shapes using Aspose.Imaging in C#?  
+Create a `BmpOptions` instance, assign `bmpOptions.BitsPerPixel = BitsPerPixel.Bit24` (or another enum value), then bind it with `FileCreateSource` and call `Image.Create` to obtain a BMP canvas ready for drawing. → See: `create-a-bmp-draw-a-rectangle-then-use-graphics-rotatetransform-to-rotate-subsequent-drawings.cs`
 ## Operations Covered
 - Create a new PNG canvas and clear it with a color  
 - Add a cubic‑bezier curve to a figure using control points  
