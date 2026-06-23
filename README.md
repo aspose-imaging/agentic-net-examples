@@ -191,5 +191,18 @@ You can run the library in evaluation mode; simply omit the `License` registrati
 ### Q: What image formats does Aspose.Imaging support  
 Aspose.Imaging for .NET supports raster formats (BMP, JPEG, PNG, TIFF, GIF, WebP), vector formats (SVG, EPS, WMF), medical formats (DICOM), and animated formats (APNG, animated GIF). The library also handles raw and proprietary formats through dedicated classes like `RawImage` and `DicomImage`. Check the official documentation for the full list of supported formats.
 
+## Related Agentic .NET Example Repositories
+
+Part of the Aspose agentic examples ecosystem — compiler-validated C# examples generated and maintained by AI agents:
+
+| Repository | Product |
+|------------|---------|
+| [aspose-pdf/agentic-net-examples](https://github.com/aspose-pdf/agentic-net-examples) | Aspose.PDF for .NET |
+| [aspose-words/agentic-net-examples](https://github.com/aspose-words/agentic-net-examples) | Aspose.Words for .NET |
+| [aspose-cells/agentic-net-examples](https://github.com/aspose-cells/agentic-net-examples) | Aspose.Cells for .NET |
+| [aspose-slides/agentic-net-examples](https://github.com/aspose-slides/agentic-net-examples) | Aspose.Slides for .NET |
+| [aspose-email/agentic-net-examples](https://github.com/aspose-email/agentic-net-examples) | Aspose.Email for .NET |
+| [aspose-barcode/agentic-net-examples](https://github.com/aspose-barcode/agentic-net-examples) | Aspose.BarCode for .NET |
+
 ---
 *Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-06-23*
