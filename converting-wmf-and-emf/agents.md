@@ -145,6 +145,18 @@ Create a `JpegOptions` instance, set its `Quality = 90`, configure `Rasterizatio
 
 ### Q: How can I limit the color palette to 256 colors when converting an EMF file to GIF with Aspose.Imaging in C#?  
 Instantiate `GifOptions`, set `ColorCount = 256`
+
+### Q: How can I batch convert WMF files to PNG, JPEG, and BMP in a single operation using Aspose.Imaging’s format enumeration in C#?  
+Load each WMF with `Image.Load` and call `image.Save` inside a loop, passing the appropriate `ImageOptions` (e.g., `PngOptions`, `JpegOptions`, `BmpOptions`) selected via `ExportImageFormat`. → See: batch-convert-wmf-files-to-png-jpeg-and-bmp-in-a-single-operation-using-format-enumeration.cs  
+
+### Q: How do I preserve the original dimensions when converting a folder of WMF files to BMP using Aspose.Imaging in C#?  
+Simply load each WMF with `Image.Load` and save it using `BmpOptions`; without altering width or height the library retains the source size automatically. → See: batch-process-a-folder-of-wmf-files-converting-each-to-bmp-while-preserving-original-dimensions.cs  
+
+### Q: How can I rasterize a WMF to PNG at half its original size using a custom scaling factor with Aspose.Imaging in C#?  
+After loading the WMF, set `PngOptions.VectorRasterizationOptions.ScaleX` and `ScaleY` to `0.5` before calling `image.Save`. → See: convert-a-wmf-file-to-png-and-apply-a-custom-scaling-factor-of-0-5-during-rasterization.cs  
+
+### Q: How do I embed EXIF camera metadata into a JPEG generated from an EMF file using Aspose.Imaging in C#?  
+Create `JpegOptions`, populate its `ExifData` (e.g., `CameraModel`, `DateTime`) and then save the loaded
 ## Operations Covered
 - Apply custom background color to transparent EMF  
 - Convert EMF images to JPEG format  
