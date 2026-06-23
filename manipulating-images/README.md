@@ -35,8 +35,8 @@ The snippet above shows the most common workflow: load → auto‑mask → save.
 
 Examples and tasks in this folder:
 
-| Example | |
-|---------|---|
+| Example |
+|---------|
 | [load-a-png-image-apply-auto-masking-graph-cut-with-default-strokes-and-save-as-png.cs](./load-a-png-image-apply-auto-masking-graph-cut-with-default-strokes-and-save-as-png.cs) |
 | [create-automaskinggraphcutoptions-with-custom-feathering-radius-apply-to-a-png-then-export-result.cs](./create-automaskinggraphcutoptions-with-custom-feathering-radius-apply-to-a-png-then-export-result.cs) |
 | [create-a-reusable-method-that-loads-a-raster-image-applies-auto-masking-median-filter-and-returns-processed-bitmap.cs](./create-a-reusable-method-that-loads-a-raster-image-applies-auto-masking-median-filter-and-returns-processed-bitmap.cs) |
@@ -67,7 +67,7 @@ Examples and tasks in this folder:
 | [apply-a-gaussian-wiener-filter-to-images-and-output-the-processed-results-in-apng-format.cs](./apply-a-gaussian-wiener-filter-to-images-and-output-the-processed-results-in-apng-format.cs) |
 | [apply-a-gaussian-wiener-filter-to-images-to-effectively-reduce-noise-while-preserving-edge-details.cs](./apply-a-gaussian-wiener-filter-to-images-to-effectively-reduce-noise-while-preserving-edge-details.cs) |
 | [apply-a-median-filter-to-images-and-output-the-results-in-apng-format-ensuring-pixel-level-noise-reduction.cs](./apply-a-median-filter-to-images-and-output-the-results-in-apng-format-ensuring-pixel-level-noise-reduction.cs) |
-| | [**View all 413 examples ↗**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/manipulating-images) |
+[**View all 413 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/manipulating-images)
 
 ## Requirements
 - **Aspose.Imaging** NuGet package (latest version)  
