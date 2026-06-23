@@ -155,6 +155,21 @@ Load the APNG, create a new `TiffImage`, add each APNG frame as a new page with 
 Load the APNG with `Image.Load`, cast to `ApngImage`, take `Frames[0]` and save it with `PngOptions`. → See: `convert-an-animated-apng-to-a-static-png-by-extracting-the-first-frame-and-saving-it.cs`
 
 ### Q: How do I convert an APNG into a series of BMP files for legacy imaging
+
+### Q: How do I adjust APNG frame delays using timing data from a JSON file in C# with Aspose.Imaging?  
+Parse the JSON, then iterate through `ApngImage.Frames` and set each frame’s `Delay` property before saving with `ApngOptions`. → See: adjust-apng-frame-delays-based-on-external-timing-data-stored-in-a-json-configuration-file.cs  
+
+### Q: How can I batch convert all WEBP images in a folder to APNG with a fixed 50 ms frame delay using Aspose.Imaging for .NET?  
+Loop through `Directory.GetFiles(..., "*.webp")`, load each file with `Image.Load`, create an `ApngOptions` with `DefaultFrameDelay = 5` (5 × 10 ms = 50 ms), and save as `.apng`. → See: batch-convert-a-folder-of-webp-files-to-apng-format-applying-uniform-frame-delay.cs  
+
+### Q: How to preserve original frame order and timing when converting animated WEBP files to APNG in C#?  
+Load the animated WEBP via `Image.Load`, copy each frame’s `DelayTime` to a new `ApngFrame` using `ApngImage.AddFrame`, then save with `ApngOptions`. → See: batch-convert-animated-webp-files-to-apng-preserving-original-frame-order-and-timing-metadata.cs  
+
+### Q: How can I generate a report that logs success or failure of each PNG‑sequence‑to‑APNG conversion in a batch process using Aspose.Imaging?  
+After converting each PNG sequence to an `ApngImage`, append the file name and conversion status to a `StringBuilder` (or file) and write the report once the loop finishes. → See: batch-process-png-sequences-into-apng-files-logging-each-conversion-s-success-status-to-a-report.cs  
+
+### Q: How do I set each APNG frame’s display duration based on the resolution of the corresponding TIFF page when converting a multi‑page TIFF to APNG in C#?  
+Load the multi‑page TIFF, iterate its pages, compute a delay from each page’s resolution, assign it to `ApngFrame.FrameDelay`, and save the result with `ApngOptions`. → See: convert-a-multi-page-tiff-to-apng-using-each-page-s-resolution-to-determine-frame-display-duration.cs
 ## Operations Covered
 - Adjust APNG frame delays using JSON timing data  
 - Convert animated WebP files to APNG in batch  
