@@ -160,6 +160,11 @@ Use `Parallel.ForEach` with a `ParallelOptions` object that sets `MaxDegreeOfPar
 
 ### Q: How can I load an EPS file with default options into an Aspose.Imaging Image object in C#?  
 Call `Image.Load(inputPath)` without specifying load options; the method returns an `Image` instance ready for processing. → See: `load-eps-image-using-image-load-with-default-options-and-store-in-image-object.cs`
+
+### Q: How can I set the rasterization DPI when loading an EPS file with Aspose.Imaging in C#?  
+Use `EpsLoadOptions` (or `ImageLoadOptions`) and assign `RasterizationOptions.DpiX` and `RasterizationOptions.DpiY` before calling `Image.Load`. This controls the resolution of the rasterized EPS image. → See: load-eps-image-using-image-load-with-default-options-and-store-in-image-object.cs  
+
+### Q: How do I convert a multi‑page EPS to a multi‑page PDF while preserving
 ## Operations Covered
 - Add custom metadata to PDF after EPS conversion  
 - Set custom DPI before saving PDF to increase resolution  
