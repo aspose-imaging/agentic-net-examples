@@ -121,7 +121,7 @@ The agent exposes a public REST API for programmatic access:
 
 All examples are compiler-validated against the target NuGet version before being committed. The benchmark is a 100% build pass rate across all generated examples.
 
-| Version | Total Examples | Pass Rate | Framework |
+| Version | Total Examples | 2874 | Framework |
 |---------|---------------|-----------|----------|
 | 26.6.0 | 2874 | 100.0% | net9.0 |
 
