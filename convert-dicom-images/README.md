@@ -26,8 +26,8 @@ Add the Aspose.Imaging package to your project and run the snippet on any .NET�
 
 Examples and tasks in this folder:
 
-| Example | |
-|---------|---|
+| Example |
+|---------|
 | [apply-a-custom-color-palette-to-the-png-output-when-converting-grayscale-dicom-images.cs](./apply-a-custom-color-palette-to-the-png-output-when-converting-grayscale-dicom-images.cs) |
 | [apply-a-median-filter-to-a-dicom-image-before-converting-it-to-png-to-reduce-noise.cs](./apply-a-median-filter-to-a-dicom-image-before-converting-it-to-png-to-reduce-noise.cs) |
 | [batch-convert-all-dicom-files-in-a-directory-to-png-format-while-preserving-original-filenames.cs](./batch-convert-all-dicom-files-in-a-directory-to-png-format-while-preserving-original-filenames.cs) |
@@ -58,6 +58,7 @@ Examples and tasks in this folder:
 | [validate-that-the-generated-png-files-are-viewable-in-standard-image-viewers-after-conversion.cs](./validate-that-the-generated-png-files-are-viewable-in-standard-image-viewers-after-conversion.cs) |
 | [validate-that-the-pixel-data-remains-unchanged-after-converting-a-dicom-image-to-png-format.cs](./validate-that-the-pixel-data-remains-unchanged-after-converting-a-dicom-image-to-png-format.cs) |
 | [write-a-powershell-script-that-invokes-the-net-conversion-library-to-process-dicom-files-in-bulk.cs](./write-a-powershell-script-that-invokes-the-net-conversion-library-to-process-dicom-files-in-bulk.cs) |
+[**View all 30 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-dicom-images)
 
 ## Requirements
 - **Aspose.Imaging for .NET** – install via NuGet: `dotnet add package Aspose.Imaging`
