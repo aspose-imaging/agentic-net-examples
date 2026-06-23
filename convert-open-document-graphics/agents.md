@@ -170,6 +170,21 @@ Load the OTG, create a `PdfOptions` instance, set `Password = "yourPassword"`, a
 
 ### Q: How do I apply a median filter to an OTG image before converting and saving it as JPEG in C# with Aspose.Imaging?  
 After loading the OTG via
+
+### Q: How can I set the radius of a Gaussian blur filter when converting an ODG to JPEG with Aspose.Imaging in C#?  
+Use `GaussianBlurFilterOptions` to specify the `Radius` before calling `image.ApplyFilter` and then save with `Image.Save`. → See: `apply-a-gaussian-blur-filter-to-an-odg-image-before-converting-and-saving-as-jpeg.cs`
+
+### Q: How do I specify the kernel size for a median filter while converting an OTG to JPEG using Aspose.Imaging in C#?  
+Create a `MedianFilterOptions` instance, set its `Size` property, apply it via `image.ApplyFilter`, and then save the image as JPEG. → See: `apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-jpeg.cs`
+
+### Q: How can I set a custom threshold value when converting an ODG to a binary BMP with Aspose.Imaging in C#?  
+Instantiate `ThresholdFilterOptions`, assign the desired `Threshold` value, apply the filter with `image.ApplyFilter`, and save the result as BMP. → See: `convert-an-odg-file-to-bmp-and-apply-a-threshold-filter-to-create-a-binary-image.cs`
+
+### Q: How do I use JpegOptions to define compression quality when saving an ODG as JPEG with Aspose.Imaging in C#?  
+Create a `JpegOptions` object, set its `Quality` property (e.g., 85), and pass it to `image.Save(outputPath, jpegOptions)`. → See: `convert-an-odg-file-to-jpeg-and-set-the-output-quality-to-85-percent.cs`
+
+### Q: How can I add custom XMP metadata fields to a PDF generated from an ODG using Aspose.Imaging in C#?  
+After loading the ODG, create a `PdfOptions` object, populate its `XmpMetadata` dictionary with custom key‑value pairs, and save the PDF with those options. → See: `convert-an-odg-file-to-pdf-and-embed-xmp-metadata-for-enhanced-document-information.cs`
 ## Operations Covered
 - Apply Gaussian blur filter to ODG image  
 - Convert ODG image to JPEG format  
