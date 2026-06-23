@@ -1,6 +1,15 @@
-# Aspose.Imaging for .NET - Agentic Examples
+# Aspose.Imaging for .NET — Agentic C# Examples
 
-> AI-generated, compiler-validated C# examples for the [Aspose.Imaging for .NET](https://products.aspose.com/imaging/net/) API.
+> Build-verified, standalone C# code examples for **[Aspose.Imaging for .NET](https://products.aspose.com/imaging/net/)** — a UI-agnostic backend API for image processing that integrates into any .NET application (ASP.NET Core, console, Azure Functions, Docker, and more). No UI dependencies required.
+
+## Resources
+
+| | Link |
+|--|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet | [nuget.org/packages/Aspose.Imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Try Online | [products.aspose.app/imaging](https://products.aspose.app/imaging/family/) |
 
 ## Statistics
 
@@ -9,7 +18,7 @@
 | Total Examples | 2874 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
-| Last Updated | 2026-06-22 |
+| Last Updated | 2026-06-23 |
 
 ## Repository Structure
 
@@ -182,15 +191,5 @@ You can run the library in evaluation mode; simply omit the `License` registrati
 ### Q: What image formats does Aspose.Imaging support  
 Aspose.Imaging for .NET supports raster formats (BMP, JPEG, PNG, TIFF, GIF, WebP), vector formats (SVG, EPS, WMF), medical formats (DICOM), and animated formats (APNG, animated GIF). The library also handles raw and proprietary formats through dedicated classes like `RawImage` and `DicomImage`. Check the official documentation for the full list of supported formats.
 
-
-## Resources
-
-| Resource | Link |
-|----------|------|
-| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
-| 📦 NuGet Package | [nuget.org/packages/Aspose.Imaging](https://www.nuget.org/packages/aspose.imaging) |
-| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
-| 🌐 Online Apps | [products.aspose.app/imaging](https://products.aspose.app/imaging/family/) |
-| 🤖 Agent API | [agent.json](/.well-known/agent.json) |
 ---
-*Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-06-22*
+*Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-06-23*
