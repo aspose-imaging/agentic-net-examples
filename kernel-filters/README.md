@@ -32,13 +32,41 @@ using (RasterImage image = (RasterImage)Image.Load("Templates/sample.png"))
 
 The snippet loads an image, applies a predefined blur kernel, and saves the result— the most common kernel filter operation.
 
-## All Examples
+## All Examples (464 total)
 
-| Example | Description |
-|---|---|
-| [load-a-png-image-from-the-templates-folder-and-apply-a-predefined-5x5-blur-box-filter.cs](./load-a-png-image-from-the-templates-folder-and-apply-a-predefined-5x5-blur-box-filter.cs) | Load a PNG image and apply a built‑in 5×5 blur box filter using `GaussianBlurFilterOptions`. |
-| [create-a-custom-3x3-convolution-matrix-and-apply-it-to-a-jpeg-image-loaded-from-disk.cs](./create-a-custom-3x3-convolution-matrix-and-apply-it-to-a-jpeg-image-loaded-from-disk.cs) | Build a custom 3×3 convolution matrix and apply it to a JPEG image with `ConvolutionFilterOptions`. |
-| [validate-that-a-custom-7x7-kernel-has-odd-dimensions-before-applying-it-to-a-png-file.cs](./validate-that-a-custom-7x7-kernel-has-odd-dimensions-befo) | Demonstrates validation of a 7×7 kernel’s odd dimensions before using it on a PNG file. |
+| Example |
+|---------|
+| [add-a-readme-example-that-walks-through-loading-an-svg-applying-gaussian-blur-and-saving.cs](./add-a-readme-example-that-walks-through-loading-an-svg-applying-gaussian-blur-and-saving.cs) |
+| [adjust-kernel-coefficients-dynamically-based-on-user-input-in-a-desktop-ui-before-filtering.cs](./adjust-kernel-coefficients-dynamically-based-on-user-input-in-a-desktop-ui-before-filtering.cs) |
+| [adjust-kernel-coefficients-to-increase-brightness-while-applying-a-5x5-blur-to-a-bmp-image.cs](./adjust-kernel-coefficients-to-increase-brightness-while-applying-a-5x5-blur-to-a-bmp-image.cs) |
+| [adjust-the-coefficients-of-the-emboss3x3-kernel-to-increase-edge-enhancement-strength-on-a-png-image.cs](./adjust-the-coefficients-of-the-emboss3x3-kernel-to-increase-edge-enhancement-strength-on-a-png-image.cs) |
+| [adjust-the-coefficients-of-the-emboss5x5-kernel-to-reduce-emboss-intensity-on-an-svg-image.cs](./adjust-the-coefficients-of-the-emboss5x5-kernel-to-reduce-emboss-intensity-on-an-svg-image.cs) |
+| [adjust-the-size-of-a-blur-box-kernel-from-3x3-to-7x7-to-increase-smoothing-on-bmp-file.cs](./adjust-the-size-of-a-blur-box-kernel-from-3x3-to-7x7-to-increase-smoothing-on-bmp-file.cs) |
+| [apply-a-3-3-high-pass-kernel-to-emphasize-edges-in-a-png-image.cs](./apply-a-3-3-high-pass-kernel-to-emphasize-edges-in-a-png-image.cs) |
+| [apply-a-3-3-laplacian-kernel-for-edge-detection-to-a-png-image.cs](./apply-a-3-3-laplacian-kernel-for-edge-detection-to-a-png-image.cs) |
+| [apply-a-blur-box-kernel-filter-to-the-image-to-achieve-uniform-smoothing-across-all-pixels.cs](./apply-a-blur-box-kernel-filter-to-the-image-to-achieve-uniform-smoothing-across-all-pixels.cs) |
+| [apply-a-blur-filter-to-a-bigtiff-image-and-store-the-processed-output-to-a-file.cs](./apply-a-blur-filter-to-a-bigtiff-image-and-store-the-processed-output-to-a-file.cs) |
+| [apply-a-blur-filter-to-a-bmp-image-and-store-the-processed-output-to-a-new-file.cs](./apply-a-blur-filter-to-a-bmp-image-and-store-the-processed-output-to-a-new-file.cs) |
+| [apply-a-blur-filter-to-a-cdr-image-and-write-the-processed-output-to-a-file.cs](./apply-a-blur-filter-to-a-cdr-image-and-write-the-processed-output-to-a-file.cs) |
+| [apply-a-blur-filter-to-a-dib-image-and-persist-the-modified-image-to-storage.cs](./apply-a-blur-filter-to-a-dib-image-and-persist-the-modified-image-to-storage.cs) |
+| [apply-a-blur-filter-to-a-dicom-image-and-write-the-processed-image-to-a-new-file.cs](./apply-a-blur-filter-to-a-dicom-image-and-write-the-processed-image-to-a-new-file.cs) |
+| [apply-a-blur-filter-to-a-djvu-image-and-persist-the-processed-output-to-a-file.cs](./apply-a-blur-filter-to-a-djvu-image-and-persist-the-processed-output-to-a-file.cs) |
+| [apply-a-blur-filter-to-a-dng-image-and-write-the-processed-output-to-a-new-file.cs](./apply-a-blur-filter-to-a-dng-image-and-write-the-processed-output-to-a-new-file.cs) |
+| [apply-a-blur-filter-to-a-gif-image-and-write-the-processed-image-back-to-storage.cs](./apply-a-blur-filter-to-a-gif-image-and-write-the-processed-image-back-to-storage.cs) |
+| [apply-a-blur-filter-to-a-jpeg-image-and-save-the-processed-output-file.cs](./apply-a-blur-filter-to-a-jpeg-image-and-save-the-processed-output-file.cs) |
+| [apply-a-blur-filter-to-a-jpeg2000-image-and-write-the-processed-output-to-a-new-file.cs](./apply-a-blur-filter-to-a-jpeg2000-image-and-write-the-processed-output-to-a-new-file.cs) |
+| [apply-a-blur-filter-to-a-png-image-and-write-the-processed-output-to-a-new-file.cs](./apply-a-blur-filter-to-a-png-image-and-write-the-processed-output-to-a-new-file.cs) |
+| [apply-a-blur-filter-to-a-psd-image-and-write-the-processed-image-back-to-storage.cs](./apply-a-blur-filter-to-a-psd-image-and-write-the-processed-image-back-to-storage.cs) |
+| [apply-a-blur-filter-to-a-tga-image-and-export-the-processed-file-preserving-its-original-format.cs](./apply-a-blur-filter-to-a-tga-image-and-export-the-processed-file-preserving-its-original-format.cs) |
+| [apply-a-blur-filter-to-a-tiff-image-and-write-the-processed-image-to-storage.cs](./apply-a-blur-filter-to-a-tiff-image-and-write-the-processed-image-to-storage.cs) |
+| [apply-a-blur-filter-to-a-webp-image-and-write-the-processed-image-to-a-new-file.cs](./apply-a-blur-filter-to-a-webp-image-and-write-the-processed-image-to-a-new-file.cs) |
+| [apply-a-blur-filter-to-a-wmf-image-and-save-the-processed-output-image.cs](./apply-a-blur-filter-to-a-wmf-image-and-save-the-processed-output-image.cs) |
+| [apply-a-blur-filter-to-a-wmz-image-and-save-the-processed-file-to-the-desired-location.cs](./apply-a-blur-filter-to-a-wmz-image-and-save-the-processed-file-to-the-desired-location.cs) |
+| [apply-a-blur-filter-to-an-apng-image-then-write-the-processed-output-to-disk.cs](./apply-a-blur-filter-to-an-apng-image-then-write-the-processed-output-to-disk.cs) |
+| [apply-a-blur-filter-to-an-avif-image-and-write-the-processed-image-back-to-storage.cs](./apply-a-blur-filter-to-an-avif-image-and-write-the-processed-image-back-to-storage.cs) |
+| [apply-a-blur-filter-to-an-emf-image-and-persist-the-processed-output-to-a-file.cs](./apply-a-blur-filter-to-an-emf-image-and-persist-the-processed-output-to-a-file.cs) |
+| [apply-a-blur-filter-to-an-emz-image-and-store-the-processed-output-file.cs](./apply-a-blur-filter-to-an-emz-image-and-store-the-processed-output-file.cs) |
+| *...and 434 more files — [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/main/kernel-filters)* |
 
 ## Requirements
 - **Aspose.Imaging for .NET** – install via NuGet: `Install-Package Aspose.Imaging`
