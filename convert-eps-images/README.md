@@ -29,8 +29,8 @@ The snippet loads an EPS file, creates PNG export options, and writes the result
 
 Examples and tasks in this folder:
 
-| Example | |
-|---------|---|
+| Example |
+|---------|
 | [add-custom-metadata-to-pdf-output-after-eps-conversion-for-document-tracking.cs](./add-custom-metadata-to-pdf-output-after-eps-conversion-for-document-tracking.cs) |
 | [add-custom-metadata-to-psd-output-after-eps-conversion-for-asset-management.cs](./add-custom-metadata-to-psd-output-after-eps-conversion-for-asset-management.cs) |
 | [adjust-pdf-compression-level-to-balance-quality-and-file-size-during-eps-conversion.cs](./adjust-pdf-compression-level-to-balance-quality-and-file-size-during-eps-conversion.cs) |
@@ -61,7 +61,7 @@ Examples and tasks in this folder:
 | [limit-concurrency-level-during-batch-conversion-to-avoid-excessive-memory-consumption.cs](./limit-concurrency-level-during-batch-conversion-to-avoid-excessive-memory-consumption.cs) |
 | [load-eps-from-a-byte-array-and-convert-to-pdf-using-image-load-overload.cs](./load-eps-from-a-byte-array-and-convert-to-pdf-using-image-load-overload.cs) |
 | [load-eps-from-a-memory-stream-and-convert-to-psd-using-image-load-overload.cs](./load-eps-from-a-memory-stream-and-convert-to-psd-using-image-load-overload.cs) |
-| | [**View all 60 examples ↗**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-eps-images) |
+[**View all 60 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-eps-images)
 
 ## Requirements  
 
