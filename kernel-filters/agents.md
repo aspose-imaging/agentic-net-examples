@@ -197,6 +197,9 @@ Load the EPS with `Image.Load`, rasterize it to a temporary PNG, apply an `EdgeD
 
 ### Q: How can I load a DNG raw image with ImageLoadOptions before applying a Gaussian blur in Aspose.Imaging for C#?  
 Create an `ImageLoadOptions` instance for the DNG, pass it to `Image.Load`, then add a `GaussianBlurFilterOption` to the image’s `FilterOptions` and save as PNG. → See: `apply-a-gaussian-blur-filter-to-a-dng-image-and-write-the-processed-output-to-a-file.cs`
+
+### Q: How can I rasterize an EMF file to PNG before applying a deconvolution filter using Aspose.Imaging in C#?  
+Load the EMF with `Image.Load`, save it to a temporary PNG via `image.Save(tempPath,
 ## Operations Covered
 - Load an SVG file  
 - Rasterize SVG to a raster image  
