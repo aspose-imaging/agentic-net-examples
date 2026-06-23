@@ -39,8 +39,8 @@ Add the Aspose.Imaging NuGet package to your project and run the snippet – the
 
 Examples and tasks in this folder:
 
-| Example | |
-|---------|---|
+| Example |
+|---------|
 | [adjust-image-quality-before-saving-webp-as-pdf-to-control-output-resolution.cs](./adjust-image-quality-before-saving-webp-as-pdf-to-control-output-resolution.cs) |
 | [check-if-the-loaded-webp-image-is-animated-before-saving-it-as-a-gif.cs](./check-if-the-loaded-webp-image-is-animated-before-saving-it-as-a-gif.cs) |
 | [compare-original-webp-dimensions-with-resulting-gif-dimensions-to-ensure-size-consistency.cs](./compare-original-webp-dimensions-with-resulting-gif-dimensions-to-ensure-size-consistency.cs) |
@@ -71,6 +71,7 @@ Examples and tasks in this folder:
 | [use-parallel-processing-to-accelerate-batch-conversion-of-webp-images-to-gif-across-multiple-cpu-cores.cs](./use-parallel-processing-to-accelerate-batch-conversion-of-webp-images-to-gif-across-multiple-cpu-cores.cs) |
 | [validate-that-the-output-gif-file-was-created-successfully-after-converting-from-webp.cs](./validate-that-the-output-gif-file-was-created-successfully-after-converting-from-webp.cs) |
 | [verify-that-the-webp-image-exists-before-conversion-to-avoid-filenotfound-exceptions.cs](./verify-that-the-webp-image-exists-before-conversion-to-avoid-filenotfound-exceptions.cs) |
+[**View all 30 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-webp-images)
 
 ## Requirements
 - **Aspose.Imaging for .NET** – install via NuGet: `dotnet add package Aspose.Imaging`
