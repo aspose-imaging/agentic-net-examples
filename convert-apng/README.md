@@ -33,8 +33,8 @@ The snippet demonstrates the most common operation: **creating an animated PNG i
 
 Examples and tasks in this folder:
 
-| Example | |
-|---------|---|
+| Example |
+|---------|
 | [adjust-apng-frame-delays-based-on-external-timing-data-stored-in-a-json-configuration-file.cs](./adjust-apng-frame-delays-based-on-external-timing-data-stored-in-a-json-configuration-file.cs) |
 | [batch-convert-a-collection-of-svg-files-to-apng-assigning-each-svg-a-random-frame-delay.cs](./batch-convert-a-collection-of-svg-files-to-apng-assigning-each-svg-a-random-frame-delay.cs) |
 | [batch-convert-a-folder-of-webp-files-to-apng-format-applying-uniform-frame-delay.cs](./batch-convert-a-folder-of-webp-files-to-apng-format-applying-uniform-frame-delay.cs) |
@@ -65,7 +65,7 @@ Examples and tasks in this folder:
 | [export-apng-animation-to-gif-format-while-reducing-color-palette-to-256-colors-for-compatibility.cs](./export-apng-animation-to-gif-format-while-reducing-color-palette-to-256-colors-for-compatibility.cs) |
 | [generate-an-apng-from-a-single-page-png-specifying-a-100-ms-delay-for-each-frame.cs](./generate-an-apng-from-a-single-page-png-specifying-a-100-ms-delay-for-each-frame.cs) |
 | [load-a-multi-page-tiff-assign-each-page-a-unique-frame-delay-and-compile-into-an-apng.cs](./load-a-multi-page-tiff-assign-each-page-a-unique-frame-delay-and-compile-into-an-apng.cs) |
-| | [**View all 51 examples ↗**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-apng) |
+[**View all 51 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-apng)
 
 ## Requirements  
 
