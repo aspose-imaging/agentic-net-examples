@@ -39,8 +39,8 @@ Add the Aspose.Imaging NuGet package to your project and run the snippet – the
 
 Examples and tasks in this folder:
 
-| Example | |
-|---------|---|
+| Example |
+|---------|
 | [apply-a-gaussian-blur-filter-to-an-odg-image-before-converting-and-saving-as-jpeg.cs](./apply-a-gaussian-blur-filter-to-an-odg-image-before-converting-and-saving-as-jpeg.cs) |
 | [apply-a-gaussian-blur-filter-to-an-otg-image-before-converting-and-saving-as-jpeg.cs](./apply-a-gaussian-blur-filter-to-an-otg-image-before-converting-and-saving-as-jpeg.cs) |
 | [apply-a-median-filter-to-an-odg-image-before-converting-and-saving-it-as-bmp.cs](./apply-a-median-filter-to-an-odg-image-before-converting-and-saving-it-as-bmp.cs) |
@@ -71,7 +71,7 @@ Examples and tasks in this folder:
 | [convert-an-odg-file-to-pdf-and-set-a-custom-author-property-in-the-document-metadata.cs](./convert-an-odg-file-to-pdf-and-set-a-custom-author-property-in-the-document-metadata.cs) |
 | [convert-an-odg-file-to-pdf-and-set-a-specific-compression-level-for-the-output.cs](./convert-an-odg-file-to-pdf-and-set-a-specific-compression-level-for-the-output.cs) |
 | [convert-an-odg-file-to-pdf-and-set-the-document-title-property-in-the-metadata.cs](./convert-an-odg-file-to-pdf-and-set-the-document-title-property-in-the-metadata.cs) |
-| | [**View all 120 examples ↗**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-open-document-graphics) |
+[**View all 120 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-open-document-graphics)
 
 ## Requirements
 - **Aspose.Imaging for .NET** – install via NuGet: `dotnet add package Aspose.Imaging`
