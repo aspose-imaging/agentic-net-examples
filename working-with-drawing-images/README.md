@@ -35,8 +35,8 @@ image.Save("output.bmp");
 
 Examples and tasks in this folder:
 
-| Example | |
-|---------|---|
+| Example |
+|---------|
 | [add-a-cubic-bezier-curve-to-the-same-figure-using-specified-control-points.cs](./add-a-cubic-bezier-curve-to-the-same-figure-using-specified-control-points.cs) |
 | [add-a-custom-figure-overlay-onto-a-gif-image-ensuring-proper-frame-alignment-and-animation-compatibility.cs](./add-a-custom-figure-overlay-onto-a-gif-image-ensuring-proper-frame-alignment-and-animation-compatibility.cs) |
 | [add-a-rectangle-shape-to-a-figure-using-figure-addshape-with-defined-coordinates.cs](./add-a-rectangle-shape-to-a-figure-using-figure-addshape-with-defined-coordinates.cs) |
@@ -67,7 +67,7 @@ Examples and tasks in this folder:
 | [batch-convert-svg-logos-to-ico-files-generating-windows-icon-sizes-of-16-32-48-and-256-pixels.cs](./batch-convert-svg-logos-to-ico-files-generating-windows-icon-sizes-of-16-32-48-and-256-pixels.cs) |
 | [batch-convert-wmf-graphics-to-png-applying-a-uniform-background-color-to-replace-transparent-areas.cs](./batch-convert-wmf-graphics-to-png-applying-a-uniform-background-color-to-replace-transparent-areas.cs) |
 | [batch-create-bmp-files-each-containing-a-rotated-version-of-the-same-base-shape.cs](./batch-create-bmp-files-each-containing-a-rotated-version-of-the-same-base-shape.cs) |
-| | [**View all 397 examples ↗**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/working-with-drawing-images) |
+[**View all 397 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/working-with-drawing-images)
 
 ## Requirements
 - **Aspose.Imaging** NuGet package (latest version)  
