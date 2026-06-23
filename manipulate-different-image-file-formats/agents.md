@@ -236,6 +236,14 @@ Load the CDR with `Image.Load`, apply `RotateFlip(RotateFlipType.Rotate90FlipNon
 
 ### Q: How do I apply Floyd‑Steinberg dithering to a DICOM image and save the result back as a DICOM file without losing any original metadata in C#?  
 Open the file with `DicomImage.Load`, call `dicomImage.Dither(DitheringAlgorithm.FloydSteinberg)`, and then `dicomImage.Save(outputPath, new DicomOptions())` to retain metadata. → See:
+
+### Q: How can I generate an indexed PSD from a PNG while preserving color fidelity using Aspose.Imaging for .NET?  
+Load the PNG with `RasterImage.Load`, create a `PsdOptions` with `IndexedColorMode` and assign a custom palette, then call `image.Save(outputPath, psdOptions)`. → See: generate-an-indexed-psd-file-from-source-image-data-ensuring-proper-palette-indexing-and-color-fidelity-compliance.cs  
+
+### Q: How do I apply Ordered dithering to a DICOM image and keep all original metadata when saving it back as DICOM in C#?  
+Open the file with `DicomImage.Load`, invoke `image.Dither(DitheringMethod.Ordered)`, and save using `DicomImageOptions` (which preserves metadata) via `image.Save(outputPath, dicomOptions)`. → See: apply-dithering-to-a-dicom-image-and-output-the-result-in-dicom-format-preserving-metadata-integrity.cs  
+
+### Q: How can
 ## Operations Covered
 - Extract clipping paths from TIFF frames  
 - Export TIFF clipping paths as SVG files  
