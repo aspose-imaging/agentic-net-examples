@@ -322,6 +322,21 @@ Load the SVG and use `BmpOptions` specifying `BitsPerPixel` (e.g., 24) before ca
 
 ### Q: What prerequisites and supported input formats are required for converting raster images to SVG with Aspose.Imaging in C#?  
 Reference the `Aspose.Imaging.Svg` assembly; supported raster inputs include PNG, JPEG, BMP, GIF, TIFF, etc., and conversion is performed by loading the image and saving it with `SvgImageOptions`. → See: determine-required-prerequisites-for-converting-raster-images-to-svg-format-including-dependencies-and-supported-input-specifications.cs
+
+### Q: How can I convert a BigTIFF raster image directly to a PDF while preserving the original image fidelity using Aspose.Imaging in C#?  
+Load the BigTIFF with `Image.Load`, create a `PdfOptions` instance, and call `image.Save(outputPath, pdfOptions)`. The PDF output retains the full resolution of the source raster. → See: `convert-a-bigtiff-raster-image-into-a-pdf-document-while-preserving-the-original-image-fidelity.cs`
+
+### Q: How do I preserve the alpha channel when converting a PNG with transparency to a PDF using Aspose.Imaging for .NET?  
+Load the PNG via `Image.Load`, configure a `PdfOptions` object (no flattening), and save with `image.Save(outputPath, pdfOptions)`. The library keeps the PNG’s transparency in the resulting PDF. → See: `convert-a-png-image-with-transparency-into-a-pdf-while-preserving-its-alpha-channel.cs`
+
+### Q: How can I generate an intermediate SVG from a BigTIFF file and then rasterize it to PNG using Aspose.Imaging in C#?  
+First load the BigTIFF and save it as SVG with `SvgOptions` to a temporary file, then load that SVG and export to PNG using `PngOptions`. This two‑step conversion maintains quality across formats. → See: `generate-a-raster-image-from-an-svg-source-derived-from-a-bigtiff-file-using-appropriate-conversion-settings.cs`
+
+### Q: How do I convert an SVG file to a BMP image with a specific pixel format (e.g., 24‑bpp RGB) using Aspose.Imaging for .NET?  
+Load the SVG, create a `BmpOptions` object, set `BmpOptions.BitsPerPixel = 24`, and call `image.Save(outputPath, bmpOptions)`. The resulting BMP uses the requested pixel format. → See: `save-the-svg-output-after-conversion-to-a-bmp-image-ensuring-correct-pixel-format-and-file-integrity.cs`
+
+### Q: How can I persist a transformed PNG image as an SVG file while maintaining visual fidelity and scalable vector properties using Aspose.Imaging in C#?  
+Load the PNG, configure `SvgOptions` (e.g., `SvgOptions.VectorRasterizationOptions`), and save with `image.Save(outputPath, svgOptions)`. The output SVG retains the original appearance and remains fully scalable. → See: `persist-the-transformed-image-to-an-svg-file-while-preserving-visual-fidelity-and-maintaining-scalable-vector-properties.cs`
 ## Operations Covered
 - Convert BigTIFF raster image to PDF  
 - Convert WebP image file to PDF  
