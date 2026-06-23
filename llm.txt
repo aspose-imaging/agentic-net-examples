@@ -32,6 +32,15 @@ and microservices — without requiring a display, desktop, or UI framework.
 - MCP-compatible — AI agents can connect and generate examples on demand
 - Pass rate: 100.0% across 2,874 examples
 
+## Related Agentic .NET Example Repositories
+
+- Aspose.PDF: https://github.com/aspose-pdf/agentic-net-examples
+- Aspose.Words: https://github.com/aspose-words/agentic-net-examples
+- Aspose.Cells: https://github.com/aspose-cells/agentic-net-examples
+- Aspose.Slides: https://github.com/aspose-slides/agentic-net-examples
+- Aspose.Email: https://github.com/aspose-email/agentic-net-examples
+- Aspose.BarCode: https://github.com/aspose-barcode/agentic-net-examples
+
 ## Categories
 
 - [conversion](./conversion/): 162 build-verified examples; instructions in [agents.md](./conversion/agents.md)
