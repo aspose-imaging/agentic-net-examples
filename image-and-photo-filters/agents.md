@@ -183,6 +183,21 @@ Load the APNG with `ApngImage`, use `ColorSimilarityFilterOptions` set to hue co
 
 ### Q: How can I blend pixel colors of an APNG according to their existing alpha values using Aspose.Imaging’s AlphaBlendingFilter in C#?
 Create an `AlphaBlendingFilter` that references each pixel’s alpha channel, apply it to every frame of the `ApngImage`, and then save the result. This merges colors based on original transparency. → See: `apply-the-alpha-blending-filter-to-an-apng-image-to-blend-pixel-colors-based-on-their-alpha-values.cs`
+
+### Q: How can I load an APNG file and iterate through its frames to apply a filter using Aspose.Imaging in C#?  
+Load the file with `Image.Load` and cast to `ApngImage`, then loop over `apng.Frames`, apply the desired filter to each frame, and finally call `apng.Save`. → See: `apply-a-specified-image-filter-to-an-apng-file-ensuring-correct-handling-of-its-animation-frames.cs`
+
+### Q: How do I apply an AlphaBlendingFilter with a custom solid color and 70% opacity to a PNG image using Aspose.Imaging for .NET?  
+Create an `AlphaBlendingFilter`, set its `Color` and `Opacity` (0.7), add the filter to the image’s `Filters` collection, and save the image. → See: `apply-an-alpha-blending-filter-to-an-image-using-the-provided-example-as-a-reference.cs`
+
+### Q: What is the recommended way to ensure the output directory exists before saving an image with Aspose.Imaging in C#?  
+Call `Directory.CreateDirectory(Path.GetDirectoryName(outputPath))` prior to `image.Save` to automatically create any missing folders. → See: `apply-the-remove-watermark-filter-to-eliminate-watermarks-from-images-regardless-of-supported-input-format.cs`
+
+### Q: How can I remove a watermark from a PNG using the default RemoveWatermarkFilter without specifying an algorithm in Aspose.Imaging for .NET?  
+Instantiate `RemoveWatermarkFilter` (no algorithm parameters), add it to the image’s `Filters` collection, then save the image. → See: `apply-the-remove-watermark-filter-to-eliminate-watermarks-from-images-regardless-of-supported-input-format.cs`
+
+### Q: How do I generate a mask PNG from a color‑similarity selection on an APNG using Aspose.Imaging's masking API in C#?  
+Use `ColorSimilarityMaskingOptions` (e.g., set `HueRange`), call `image.CreateMask` to obtain a mask, and save the mask as a PNG file. → See: `apply-a-color-similarity-filter-to-isolate-a-region-within-an-apng-image-based-on-pixel-hue.cs`
 ## Operations Covered
 - Remove watermark from PNG using Telea algorithm  
 - Set watermark removal attempts to five  
