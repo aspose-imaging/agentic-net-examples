@@ -165,6 +165,21 @@ Call `Image.Load(inputPath)` without specifying load options; the method returns
 Use `EpsLoadOptions` (or `ImageLoadOptions`) and assign `RasterizationOptions.DpiX` and `RasterizationOptions.DpiY` before calling `Image.Load`. This controls the resolution of the rasterized EPS image. → See: load-eps-image-using-image-load-with-default-options-and-store-in-image-object.cs  
 
 ### Q: How do I convert a multi‑page EPS to a multi‑page PDF while preserving
+
+### Q: How can I add a custom XMP metadata entry to a PDF generated from an EPS file using Aspose.Imaging in C#?  
+Use `PdfOptions` and assign an `XmpMetadata` object to its `Metadata` property before calling `image.Save(outputPath, pdfOptions)`. → See: add-custom-metadata-to-pdf-output-after-eps-conversion-for-document-tracking.cs  
+
+### Q: Which Aspose.Imaging property lets me choose the PSD compression method (e.g., RLE, ZIP) when converting an EPS to PSD in .NET C#?  
+Set the `CompressionMethod` property of `PsdOptions` to the desired `PsdCompressionMethod` enum value before saving the image. → See: adjust-psd-compression-level-to-balance-quality-and-file-size-during-eps-conversion.cs  
+
+### Q: How do I safely handle missing EPS files inside a foreach batch conversion loop without terminating the whole process in C#?  
+Wrap each iteration in a `try‑catch`, check `File.Exists` for the input path, log the error, and `continue` to the next file. → See: batch-convert-a-collection-of-eps-files-to-psd-using-a-foreach-loop.cs  
+
+### Q: After converting an EPS to PSD, how can I programmatically obtain the resulting file size in bytes using Aspose.Imaging in C#?  
+Create a `FileInfo` object for the output PSD path and read its `Length` property after the save operation. → See: compare-file-sizes-of-original-eps-and-converted-psd-for-storage-assessment.cs  
+
+### Q: How can I retrieve the width and height of an EPS image after loading it with Aspose.Imaging in C#?  
+Load the EPS with `Image.Load`, cast the result to `RasterImage`, and read its `Width` and `Height` properties. → See: load-eps-image-using-image-load-with-default-options-and-store-in-image-object.cs
 ## Operations Covered
 - Add custom metadata to PDF after EPS conversion  
 - Set custom DPI before saving PDF to increase resolution  
