@@ -26,8 +26,8 @@ Add the Aspose.Imaging package to your project and run the snippet on any .NETâ€
 
 Examples and tasks in this folder:
 
-| Example |
-|---------|
+| Example | |
+|---------|---|
 | [apply-a-custom-color-palette-to-the-png-output-when-converting-grayscale-dicom-images.cs](./apply-a-custom-color-palette-to-the-png-output-when-converting-grayscale-dicom-images.cs) |
 | [apply-a-median-filter-to-a-dicom-image-before-converting-it-to-png-to-reduce-noise.cs](./apply-a-median-filter-to-a-dicom-image-before-converting-it-to-png-to-reduce-noise.cs) |
 | [batch-convert-all-dicom-files-in-a-directory-to-png-format-while-preserving-original-filenames.cs](./batch-convert-all-dicom-files-in-a-directory-to-png-format-while-preserving-original-filenames.cs) |
