@@ -151,6 +151,12 @@ Load the CMX as a multi‑frame image, iterate through its pages in their natura
 Load the CMX with `Image.Load`, create a `TiffImage` and add each CMX page as a frame, then save with `Image.Save` and a `TiffOptions` instance. → See: `convert-a-multi-page-cmx-image-to-a-single-page-tiff-file-by-merging-pages.cs`
 
 ### Q: How do I convert a CMX image to
+
+### Q: How can I convert a single‑page CMX image to a TIFF file using the default compression with Aspose.Imaging in C#?  
+Load the CMX with `Image.Load`, create a `TiffOptions` object (no compression set) and call `image.Save(outputPath, tiffOptions)`. → See: `convert-a-single-page-cmx-image-to-a-single-page-tiff-file-with-default-compression.cs`
+
+### Q: How do I download a CMX file via HttpClient, convert it to PDF, and write the result directly to an ASP.NET response stream using Aspose.Imaging in C#?  
+Use `HttpClient.GetStreamAsync` to obtain the CMX stream, load it with `Image.Load`, then save to the response stream with `image.Save(responseStream, new PdfOptions())`. → See: `convert-cmx-image-loaded-from-a-network-stream-to-pdf-and
 ## Operations Covered
 - Rotate CMX image before TIFF conversion  
 - Convert CMX image to JPEG with quality setting  
