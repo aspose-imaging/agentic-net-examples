@@ -37,8 +37,8 @@ dotnet add package Aspose.Imaging
 
 Examples and tasks in this folder:
 
-| Example | |
-|---------|---|
+| Example |
+|---------|
 | [add-a-watermark-text-to-bmp-image-after-svg-rasterization-using-drawing-api.cs](./add-a-watermark-text-to-bmp-image-after-svg-rasterization-using-drawing-api.cs) |
 | [apply-grayscale-filter-to-png-raster-image-before-saving-the-output-file.cs](./apply-grayscale-filter-to-png-raster-image-before-saving-the-output-file.cs) |
 | [batch-convert-multiple-svg-files-to-bmp-using-a-single-svgrasterizationoptions-instance.cs](./batch-convert-multiple-svg-files-to-bmp-using-a-single-svgrasterizationoptions-instance.cs) |
@@ -69,7 +69,7 @@ Examples and tasks in this folder:
 | [rotate-bmp-raster-image-ninety-degrees-clockwise-after-svg-conversion.cs](./rotate-bmp-raster-image-ninety-degrees-clockwise-after-svg-conversion.cs) |
 | [save-converted-bmp-image-into-a-memorystream-for-further-in-memory-processing.cs](./save-converted-bmp-image-into-a-memorystream-for-further-in-memory-processing.cs) |
 | [save-converted-png-image-into-a-memorystream-and-return-the-stream-to-the-caller.cs](./save-converted-png-image-into-a-memorystream-and-return-the-stream-to-the-caller.cs) |
-| | [**View all 40 examples ↗**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-svg-to-raster-images) |
+[**View all 40 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-svg-to-raster-images)
 
 ## Requirements
 - **Aspose.Imaging for .NET** – install via NuGet (`Aspose.Imaging`).  
