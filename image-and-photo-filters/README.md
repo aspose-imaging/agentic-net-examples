@@ -38,8 +38,8 @@ Run the code after adding the **Aspose.Imaging** NuGet package (see Requirements
 
 Examples and tasks in this folder:
 
-| Example | |
-|---------|---|
+| Example |
+|---------|
 | [remove-watermark-from-a-png-using-telea-algorithm-and-set-removal-attempts-to-five.cs](./remove-watermark-from-a-png-using-telea-algorithm-and-set-removal-attempts-to-five.cs) |
 | [create-a-custom-selection-by-combining-magic-wand-union-and-subtraction-then-fill-with-solid-color.cs](./create-a-custom-selection-by-combining-magic-wand-union-and-subtraction-then-fill-with-solid-color.cs) |
 | [add-unit-tests-that-verify-mask-inversion-works-correctly-for-both-fully-white-and-fully-black-initial-masks.cs](./add-unit-tests-that-verify-mask-inversion-works-correctly-for-both-fully-white-and-fully-black-initial-masks.cs) |
@@ -70,7 +70,7 @@ Examples and tasks in this folder:
 | [apply-image-and-photo-filters-to-remove-watermarks-from-a-given-image-while-preserving-visual-quality.cs](./apply-image-and-photo-filters-to-remove-watermarks-from-a-given-image-while-preserving-visual-quality.cs) |
 | [apply-image-and-photo-filters-using-the-magic-wand-filter-to-a-specified-image.cs](./apply-image-and-photo-filters-using-the-magic-wand-filter-to-a-specified-image.cs) |
 | [apply-image-and-photo-filters-with-the-magic-wand-tool-to-an-image-file.cs](./apply-image-and-photo-filters-with-the-magic-wand-tool-to-an-image-file.cs) |
-| | [**View all 138 examples ↗**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/image-and-photo-filters) |
+[**View all 138 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/image-and-photo-filters)
 
 ## Requirements
 
