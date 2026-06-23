@@ -6,7 +6,7 @@
 - Pass Rate: 100.0%
 - NuGet Version: 26.6.0
 - Framework: net9.0
-- Last Updated: 2026-06-22
+- Last Updated: 2026-06-23
 - Agent API: https://faisalabad-examples-mcp.dynabic.com:7009/aspose-imaging/agentic-net-examples/.well-known/agent.json
 - MCP Server: http://faisalabad-examples-mcp.dynabic.com:7009/mcp/sse
 - OpenAPI Spec: http://faisalabad-examples-mcp.dynabic.com:7009/api/v1/openapi.json
@@ -14,6 +14,15 @@
 - Agent instructions: ./agents.md
 - Product documentation: https://docs.aspose.com/imaging/net/
 - API reference: https://reference.aspose.com/imaging/net/
+- NuGet package: https://www.nuget.org/packages/aspose.imaging
+- Release notes: https://releases.aspose.com/imaging/net/
+- Online apps: https://products.aspose.app/imaging/family/
+
+## About Aspose.Imaging for .NET
+
+Aspose.Imaging for .NET is a UI-agnostic backend API for image processing that integrates
+into any .NET application — ASP.NET Core, console apps, Azure Functions, Docker containers,
+and microservices — without requiring a display, desktop, or UI framework.
 
 ## What Makes These Examples Different
 
