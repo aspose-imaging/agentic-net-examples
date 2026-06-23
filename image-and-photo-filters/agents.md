@@ -168,6 +168,21 @@ Use `AlphaBlendingFilterOptions` to set the target color and opacity, then invok
 
 ### Q: How can I combine two Magic Wand selections with a union operation and save the combined mask as a PNG using Aspose.Imaging for .NET?  
 Create two `ImageMask` objects via `MagicWand.SelectRegion`, call `mask1.Union(mask2)`, and save the resulting mask with `PngImage.Save`. → See: combine-two-magic-wand-selections-using-union-operation-and-save-the-combined-mask-as-png.cs
+
+### Q: How can I apply a Median filter to a PNG image using Aspose.Imaging’s ImageFilters in C#?
+Use `MedianFilterOptions` with `ImageFilter.Apply` on the loaded `RasterImage`. This processes the PNG and saves the filtered result. → See: `apply-the-defined-image-filters-to-the-target-images-following-the-specifications-outlined-in-the-applying-filters-guidelines.cs`
+
+### Q: How do I blend an APNG with a solid color at a specific opacity using Aspose.Imaging’s AlphaBlendingFilter in .NET?
+Create an `AlphaBlendingFilter` specifying the target `Color` and `Opacity`, then apply it to each frame of the `ApngImage`. Save the modified APNG to preserve animation. → See: `blend-an-apng-image-with-a-chosen-color-and-opacity-using-an-image-filter.cs`
+
+### Q: How can I use Aspose.Imaging’s RemoveWatermarkFilter to delete watermarks from any supported image format in C#?
+Instantiate `RemoveWatermarkFilter`, configure its options (e.g., `RemovalAttempts`), and call `filter.Apply` on the loaded image regardless of format. Then save the cleaned image. → See: `apply-the-remove-watermark-filter-to-eliminate-watermarks-from-images-regardless-of-supported-input-format.cs`
+
+### Q: How do I apply a color‑similarity filter to an APNG based on pixel hue while keeping the animation intact in Aspose.Imaging for .NET?
+Load the APNG with `ApngImage`, use `ColorSimilarityFilterOptions` set to hue comparison, and apply it to each frame via `ImageFilter.Apply`. Finally, save the APNG to retain its frames. → See: `apply-a-color-similarity-filter-to-isolate-a-region-within-an-apng-image-based-on-pixel-hue.cs`
+
+### Q: How can I blend pixel colors of an APNG according to their existing alpha values using Aspose.Imaging’s AlphaBlendingFilter in C#?
+Create an `AlphaBlendingFilter` that references each pixel’s alpha channel, apply it to every frame of the `ApngImage`, and then save the result. This merges colors based on original transparency. → See: `apply-the-alpha-blending-filter-to-an-apng-image-to-blend-pixel-colors-based-on-their-alpha-values.cs`
 ## Operations Covered
 - Remove watermark from PNG using Telea algorithm  
 - Set watermark removal attempts to five  
