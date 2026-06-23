@@ -230,6 +230,12 @@ Load or create an indexed PSD, obtain its `RasterImage`, create a `Graphics` obj
 
 ### Q: How can I export each frame of a multi‑page TIFF to separate PNG files with Aspose.Imaging in C#?  
 Load the TIFF with `Image.Load`,
+
+### Q: How can I load a CorelDRAW (CDR) file, rotate it 90 degrees, and export it to PDF while preserving vector quality using Aspose.Imaging for .NET?  
+Load the CDR with `Image.Load`, apply `RotateFlip(RotateFlipType.Rotate90FlipNone)`, then save using `PdfOptions` via `image.Save(outputPath, pdfOptions)`. → See: `load-a-cdr-file-apply-rotation-then-convert-to-pdf-while-preserving-vector-quality.cs`
+
+### Q: How do I apply Floyd‑Steinberg dithering to a DICOM image and save the result back as a DICOM file without losing any original metadata in C#?  
+Open the file with `DicomImage.Load`, call `dicomImage.Dither(DitheringAlgorithm.FloydSteinberg)`, and then `dicomImage.Save(outputPath, new DicomOptions())` to retain metadata. → See:
 ## Operations Covered
 - Extract clipping paths from TIFF frames  
 - Export TIFF clipping paths as SVG files  
