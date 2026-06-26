@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
@@ -11,8 +13,9 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.odg";
-            string outputPath = "C:\\temp\\output.png";
+            string inputPath = @"C:\temp\sample.odg";
+            string jpegPath = @"C:\temp\temp.cmyk.jpg";
+            string outputPath = @"C:\temp\output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,24 +24,45 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(jpegPath));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Paths to ICC profile files (adjust as needed)
+            string rgbIccPath = @"C:\temp\iccprofiles\eciRGB_v2.icc";
+            string cmykIccPath = @"C:\temp\iccprofiles\ISOcoated_v2_FullGamut4.icc";
+
             // Load the ODG image
-            using (Image image = Image.Load(inputPath))
+            using (Image odgImage = Image.Load(inputPath))
             {
-                // Cast to OdgImage for ODG-specific operations
-                OdgImage odgImage = image as OdgImage;
+                // Save ODG as CMYK JPEG using custom ICC profiles
+                using (Stream rgbProfileStream = File.OpenRead(rgbIccPath))
+                using (Stream cmykProfileStream = File.OpenRead(cmykIccPath))
+                {
+                    JpegOptions jpegOptions = new JpegOptions
+                    {
+                        ColorType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionColorMode.Cmyk,
+                        RgbColorProfile = new Aspose.Imaging.Sources.StreamSource(rgbProfileStream),
+                        CmykColorProfile = new Aspose.Imaging.Sources.StreamSource(cmykProfileStream)
+                    };
 
-                // NOTE: Aspose.Imaging does not expose a direct method to set an ICC profile on ODG images.
-                // If needed, ICC handling would be performed via metadata or conversion steps.
-                // Here we proceed to save the image as PNG using default color handling.
+                    odgImage.Save(jpegPath, jpegOptions);
+                }
+            }
 
-                // Prepare PNG save options
+            // Load the CMYK JPEG and save it as PNG (ICC profiles are already applied)
+            using (JpegImage jpegImage = (JpegImage)Image.Load(jpegPath))
+            {
+                // Re-assign ICC profiles to ensure they are retained (optional)
+                using (Stream rgbProfileStream = File.OpenRead(rgbIccPath))
+                using (Stream cmykProfileStream = File.OpenRead(cmykIccPath))
+                {
+                    jpegImage.RgbColorProfile = new Aspose.Imaging.Sources.StreamSource(rgbProfileStream);
+                    jpegImage.CmykColorProfile = new Aspose.Imaging.Sources.StreamSource(cmykProfileStream);
+                }
+
                 PngOptions pngOptions = new PngOptions();
-
-                // Save the image as PNG
-                odgImage.Save(outputPath, pngOptions);
+                jpegImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -47,3 +71,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert an OpenDocument graphic (ODG) to a CMYK JPEG with custom ICC color profiles before generating a print‑ready PNG.
+ * 2. When a workflow requires embedding specific RGB and CMYK ICC profiles during image conversion to maintain color consistency across devices.
+ * 3. When an application must verify the existence of the source ODG file and automatically create output directories before processing images in C#.
+ * 4. When a developer wants to use Aspose.Imaging to load an ODG, apply professional color management, and save an intermediate CMYK JPEG prior to final PNG export.
+ * 5. When a .NET service automates batch conversion of ODG drawings to PNG while preserving color fidelity by applying industry‑standard ICC profiles.
+ */
