@@ -4,7 +4,7 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 3109 |
+| Total Examples | 3229 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
 | Last Updated | 2026-06-26 |
@@ -43,7 +43,7 @@ README.md
 | [Convert CMX Images](./convert-cmx-images/) | 68 | 100.0% | [agents.md](./convert-cmx-images/agents.md) |
 | [Convert DICOM Images](./convert-dicom-images/) | 60 | 100.0% | [agents.md](./convert-dicom-images/agents.md) |
 | [Convert EPS Images](./convert-eps-images/) | 120 | 100.0% | [agents.md](./convert-eps-images/agents.md) |
-| [Convert Open Document Graphics](./convert-open-document-graphics/) | 120 | 100.0% | [agents.md](./convert-open-document-graphics/agents.md) |
+| [Convert Open Document Graphics](./convert-open-document-graphics/) | 240 | 100.0% | [agents.md](./convert-open-document-graphics/agents.md) |
 | [Convert Raster Image](./convert-raster-image/) | 141 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
 | [Convert SVG to Raster Images](./convert-svg-to-raster-images/) | 40 | 100.0% | [agents.md](./convert-svg-to-raster-images/agents.md) |
 | [Convert webp Images](./convert-webp-images/) | 30 | 100.0% | [agents.md](./convert-webp-images/agents.md) |
@@ -112,7 +112,7 @@ All examples are compiler-validated against the target NuGet version before bein
 
 | Version | Total Examples | Pass Rate | Framework |
 |---------|---------------|-----------|----------|
-| 26.6.0 | 3109 | 100.0% | net9.0 |
+| 26.6.0 | 3229 | 100.0% | net9.0 |
 
 Pass rate is enforced by the agent pipeline — only examples that pass both `dotnet build` and `dotnet run` are committed.
 
