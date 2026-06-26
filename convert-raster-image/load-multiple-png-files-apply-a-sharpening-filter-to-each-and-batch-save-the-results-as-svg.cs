@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -15,15 +15,19 @@ class Program
             string outputDir = @"C:\Images\Output\";
 
             // List of PNG files to process
-            string[] inputFiles = new string[]
+            string[] pngFiles = new[]
             {
-                Path.Combine(inputDir, "image1.png"),
-                Path.Combine(inputDir, "image2.png"),
-                Path.Combine(inputDir, "image3.png")
+                "image1.png",
+                "image2.png",
+                "image3.png"
             };
 
-            foreach (string inputPath in inputFiles)
+            foreach (string fileName in pngFiles)
             {
+                // Build full input and output paths
+                string inputPath = Path.Combine(inputDir, fileName);
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".svg");
+
                 // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
@@ -31,23 +35,20 @@ class Program
                     return;
                 }
 
-                // Determine output SVG path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".svg");
-
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the PNG image
+                // Load PNG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Apply sharpening filter if the image is raster
-                    if (image is RasterImage raster)
+                    // Cast to RasterImage to apply filter
+                    if (image is RasterImage rasterImage)
                     {
-                        raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+                        // Apply sharpening filter to the whole image
+                        rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
                     }
 
-                    // Save the result as SVG
+                    // Save as SVG using default SvgOptions
                     image.Save(outputPath, new SvgOptions());
                 }
             }
@@ -58,3 +59,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑process a set of PNG assets, sharpen their details, and generate scalable SVG versions for responsive web design.
+ * 2. When an e‑commerce platform must improve product photo clarity by applying a sharpening filter to multiple PNG thumbnails before converting them to SVG icons for faster page loads.
+ * 3. When a GIS application requires converting high‑resolution PNG map tiles into sharpened SVG vectors to maintain visual quality at any zoom level.
+ * 4. When an automated build pipeline has to transform a collection of PNG UI mockups into sharpened SVG graphics for inclusion in a cross‑platform mobile app.
+ * 5. When a digital publishing workflow needs to enhance the sharpness of scanned PNG illustrations and export them as SVG files for print‑ready, resolution‑independent layouts.
+ */
