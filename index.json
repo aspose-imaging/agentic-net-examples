@@ -5,7 +5,7 @@
   "package_version": "26.6.0",
   "total_examples": 2874,
   "total_categories": 17,
-  "last_updated": "2026-06-12",
+  "last_updated": "2026-06-26",
   "categories": [
     {
       "name": "conversion",
@@ -371,15 +371,16 @@
         "Aspose.Imaging.FileFormats.Apng",
         "Aspose.Imaging.Sources",
         "Aspose.Imaging.FileFormats.Png",
-        "System.Collections.Generic",
-        "Aspose.Imaging.FileFormats.Gif",
         "Aspose.Imaging.FileFormats.Webp",
-        "System.Linq",
+        "System.Collections.Generic",
         "Aspose.Imaging.FileFormats.Svg",
         "Aspose.Imaging.FileFormats.Tiff",
+        "Aspose.Imaging.FileFormats.Gif",
         "System.Diagnostics",
-        "Aspose.Imaging.Brushes",
-        "Aspose.Imaging.FileFormats.Bmp"
+        "System.Text",
+        "Aspose.Imaging.FileFormats.Bmp",
+        "Aspose.Imaging.FileFormats.Jpeg",
+        "Aspose.Imaging.FileFormats.Tiff.Enums"
       ],
       "key_apis": [
         "ApngFrame",
