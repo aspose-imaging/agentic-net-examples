@@ -3,18 +3,17 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.otg";
+        string outputPath = @"C:\Images\output.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\output.bmp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -30,29 +29,28 @@ class Program
             {
                 // Prepare BMP save options with rasterization settings for OTG
                 BmpOptions bmpOptions = new BmpOptions();
-                OtgRasterizationOptions otgRasterOptions = new OtgRasterizationOptions
+                OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
                 {
-                    // Use the original OTG size for rasterization
-                    PageSize = otgImage.Size
+                    PageSize = otgImage.Size // preserve original size
                 };
-                bmpOptions.VectorRasterizationOptions = otgRasterOptions;
+                bmpOptions.VectorRasterizationOptions = otgRasterization;
 
-                // Rasterize OTG to a memory stream
-                using (MemoryStream rasterStream = new MemoryStream())
+                // Save the OTG image to a memory stream as a raster BMP
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    otgImage.Save(rasterStream, bmpOptions);
-                    rasterStream.Position = 0; // Reset stream for reading
+                    otgImage.Save(ms, bmpOptions);
+                    ms.Position = 0; // reset stream position for reading
 
-                    // Load the rasterized image
-                    using (Image rasterImage = Image.Load(rasterStream))
+                    // Load the rasterized BMP from the memory stream
+                    using (Image rasterImage = Image.Load(ms))
                     {
-                        // Cast to RasterImage to apply filters
+                        // Cast to RasterImage to access filtering methods
                         RasterImage raster = (RasterImage)rasterImage;
 
                         // Apply median filter with size 5 to the whole image
                         raster.Filter(raster.Bounds, new MedianFilterOptions(5));
 
-                        // Save the filtered raster image as BMP
+                        // Save the filtered image to the final BMP file
                         raster.Save(outputPath);
                     }
                 }
@@ -64,3 +62,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a CAD application needs to convert an OTG vector drawing to a BMP thumbnail while removing speckle noise, this code can rasterize the OTG file, apply a median filter, and save a clean bitmap.
+ * 2. When a document management system imports OTG schematics and must store them as BMP for legacy viewers, the median filter smooths isolated pixel artifacts before saving.
+ * 3. When a medical imaging workflow receives OTG annotations and wants to embed them in a BMP report, the code rasterizes the vector layer and uses a median filter to reduce scanning noise.
+ * 4. When a GIS tool exports OTG map overlays to BMP for use in raster‑based analysis, applying a median filter ensures the resulting bitmap has fewer outlier pixels that could affect analysis.
+ * 5. When an e‑learning platform converts OTG technical diagrams to BMP for web delivery and needs to improve visual quality by eliminating salt‑and‑pepper noise, this code performs the rasterization, median filtering, and saving steps automatically.
+ */
