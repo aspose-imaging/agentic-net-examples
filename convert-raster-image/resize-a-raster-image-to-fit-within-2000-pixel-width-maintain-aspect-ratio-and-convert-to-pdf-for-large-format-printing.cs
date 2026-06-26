@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\input\large_image.jpg";
+        string outputPath = @"C:\output\large_image.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\source.jpg";
-            string outputPath = @"C:\Images\output.pdf";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,27 +26,20 @@ class Program
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Determine new dimensions while preserving aspect ratio
-                int maxWidth = 2000;
-                int newWidth = image.Width;
-                int newHeight = image.Height;
+                const int maxWidth = 2000;
 
+                // Resize if width exceeds the maximum, preserving aspect ratio
                 if (image.Width > maxWidth)
                 {
-                    newWidth = maxWidth;
-                    newHeight = (int)Math.Round(image.Height * (newWidth / (double)image.Width));
-                }
-
-                // Resize only if scaling is needed
-                if (newWidth != image.Width || newHeight != image.Height)
-                {
-                    image.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
+                    int newWidth = maxWidth;
+                    int newHeight = (int)((double)image.Height * maxWidth / image.Width);
+                    image.Resize(newWidth, newHeight, ResizeType.BilinearResample);
                 }
 
                 // Prepare PDF export options
-                PdfOptions pdfOptions = new PdfOptions();
+                var pdfOptions = new PdfOptions();
 
-                // Save the resized image as PDF
+                // Save the image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -56,3 +49,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a printing service needs to take a high‑resolution JPEG photograph, shrink it to a maximum width of 2000 pixels while keeping the aspect ratio, and output a PDF ready for large‑format printers, a developer can use this C# Aspose.Imaging code.
+ * 2. When an e‑commerce platform automatically generates printable product catalogs, it can resize uploaded product images to fit within 2000 px width and convert them to PDF files using the shown C# image processing workflow.
+ * 3. When a digital signage system must prepare banner graphics for PDF‑based roll‑up displays, the code resizes the raster image to the required width and preserves proportions before saving as a PDF with Aspose.Imaging in C#.
+ * 4. When a corporate compliance tool archives scanned documents, it can limit each scanned JPEG to 2000 pixels wide, maintain the original aspect ratio, and store the result as a PDF for easy printing and filing.
+ * 5. When a mobile app backend receives user‑uploaded photos and needs to create print‑ready PDFs for on‑demand posters, the C# snippet resizes the image to the maximum width, keeps the aspect ratio, and converts it to a PDF using Aspose.Imaging.
+ */
