@@ -7,36 +7,43 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = @"C:\InputBmp";
-        string outputDirectory = @"C:\OutputPdf";
-
         try
         {
-            // Get all BMP files in the input directory
-            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\Images\BmpInput";
+            string outputDirectory = @"C:\Images\PdfOutput";
 
-            foreach (string inputPath in bmpFiles)
+            // Ensure the output directory exists (will also handle null path safely)
+            Directory.CreateDirectory(outputDirectory);
+
+            // Get all BMP files in the input directory
+            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp", SearchOption.TopDirectoryOnly);
+
+            // Process each BMP file
+            foreach (string bmpPath in bmpFiles)
             {
-                // Verify input file exists
-                if (!File.Exists(inputPath))
+                // Verify the input file exists
+                if (!File.Exists(bmpPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {bmpPath}");
                     return;
                 }
 
-                // Build unique output file name with timestamp prefix
+                // Create a unique timestamp prefix for the output file name
                 string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, $"{timestamp}_{fileNameWithoutExt}.pdf");
+                string outputFileName = $"{timestamp}_{Path.GetFileNameWithoutExtension(bmpPath)}.pdf";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure output directory exists
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load BMP image and save as PDF
-                using (Image image = Image.Load(inputPath))
+                // Load the BMP image
+                using (Image image = Image.Load(bmpPath))
                 {
-                    var pdfOptions = new PdfOptions();
+                    // Set up PDF export options
+                    PdfOptions pdfOptions = new PdfOptions();
+
+                    // Save the image as PDF
                     image.Save(outputPath, pdfOptions);
                 }
             }
@@ -47,3 +54,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to automatically convert a folder of legacy BMP screenshots into searchable PDF reports while ensuring each PDF has a unique timestamped filename.
+ * 2. When an application must archive scanned BMP documents to PDF format on a daily basis, using C# and Aspose.Imaging to generate timestamp‑prefixed files for version control.
+ * 3. When a batch processing script is required to migrate BMP assets from a legacy system to PDF for web publishing, creating unique filenames to avoid overwriting existing files.
+ * 4. When a Windows service needs to monitor an input directory, convert incoming BMP images to PDF, and store them in an output folder with a precise timestamp for audit trails.
+ * 5. When a developer wants to implement a one‑time data‑migration tool that reads BMP files, applies Aspose.Imaging PDF export options, and saves each result with a millisecond‑level timestamp to guarantee uniqueness.
+ */
