@@ -10,45 +10,50 @@ class Program
     {
         try
         {
-            // Hardcoded paths
-            string inputPath = @"C:\temp\input.otg";
-            string tempPngPath = @"C:\temp\temp.png";
-            string outputPath = @"C:\temp\output.jpg";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\sample.otg";
+            string outputPath = @"C:\temp\sample.filtered.jpg";
 
-            // Input file existence check
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure directories exist for temporary and final output
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Step 1: Load OTG image and rasterize to a temporary PNG
+            // Load the OTG image
             using (Image otgImage = Image.Load(inputPath))
             {
+                // Prepare PNG options with OTG rasterization settings
                 var pngOptions = new PngOptions();
                 var otgRasterOptions = new OtgRasterizationOptions
                 {
-                    PageSize = otgImage.Size
+                    PageSize = otgImage.Size // preserve original size
                 };
                 pngOptions.VectorRasterizationOptions = otgRasterOptions;
 
-                otgImage.Save(tempPngPath, pngOptions);
-            }
+                // Rasterize OTG to a memory stream (PNG)
+                using (var rasterStream = new MemoryStream())
+                {
+                    otgImage.Save(rasterStream, pngOptions);
+                    rasterStream.Position = 0; // reset for reading
 
-            // Step 2: Load the rasterized PNG, apply median filter, and save as JPEG
-            using (Image rasterImage = Image.Load(tempPngPath))
-            {
-                var raster = (RasterImage)rasterImage;
+                    // Load the rasterized image
+                    using (Image rasterImage = Image.Load(rasterStream))
+                    {
+                        var raster = (RasterImage)rasterImage;
 
-                // Apply median filter with size 5 to the whole image
-                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+                        // Apply median filter with size 5 to the whole image
+                        raster.Filter(raster.Bounds, new MedianFilterOptions(5));
 
-                var jpegOptions = new JpegOptions();
-                raster.Save(outputPath, jpegOptions);
+                        // Save the filtered image as JPEG
+                        var jpegOptions = new JpegOptions();
+                        raster.Save(outputPath, jpegOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -57,3 +62,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to clean up noise in a vector‑based OTG diagram before delivering it as a compressed JPEG for web publishing.
+ * 2. When an application must convert proprietary OTG artwork to a raster format, apply a median filter to smooth edges, and store the result as a JPEG thumbnail.
+ * 3. When a batch‑processing service processes CAD‑style OTG files, removes speckle artifacts with a size‑5 median filter, and saves the output for email attachment in JPEG.
+ * 4. When a mobile‑first workflow requires rasterizing an OTG logo, denoising it with a median filter, and exporting a JPEG that meets size constraints.
+ * 5. When a document‑generation tool needs to embed a filtered, rasterized version of an OTG image into a PDF by first saving it as a JPEG after noise reduction.
+ */
