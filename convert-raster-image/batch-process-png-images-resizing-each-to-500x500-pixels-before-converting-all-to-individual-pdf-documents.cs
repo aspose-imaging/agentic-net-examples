@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -11,14 +10,14 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\Input";
-            string outputDirectory = @"C:\Images\Output";
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
 
             // Get all PNG files in the input directory
-            string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
+            string[] pngFiles = Directory.GetFiles(inputDir, "*.png");
 
             foreach (string inputPath in pngFiles)
             {
@@ -29,24 +28,24 @@ class Program
                     return;
                 }
 
+                // Determine output PDF path
+                string outputPath = Path.Combine(outputDir,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+
+                // Ensure the output directory exists (unconditional as required)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 // Load the PNG image
-                using (PngImage pngImage = new PngImage(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
                     // Resize to 500x500 pixels
-                    pngImage.Resize(500, 500);
+                    image.Resize(500, 500);
 
-                    // Prepare output PDF path (same file name with .pdf extension)
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Set PDF export options
+                    // Prepare PDF export options
                     PdfOptions pdfOptions = new PdfOptions();
 
-                    // Save the resized image as a PDF document
-                    pngImage.Save(outputPath, pdfOptions);
+                    // Save as PDF
+                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -56,3 +55,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a retailer needs to generate product catalogs by converting a batch of high‑resolution PNG product photos into uniformly sized 500×500‑pixel PDF pages for printing.
+ * 2. When a medical imaging system must archive patient scans stored as PNG files, resizing them to a standard thumbnail size and saving each as an individual PDF for secure electronic health record integration.
+ * 3. When a marketing agency automates the preparation of social‑media assets by taking a folder of PNG graphics, scaling them to 500×500 pixels, and exporting each as a separate PDF for client review.
+ * 4. When an e‑learning platform processes instructor‑uploaded PNG diagrams, normalizes their dimensions to 500×500 pixels, and converts them to PDF files to embed consistently in course modules.
+ * 5. When a government agency digitizes scanned PNG documents, resizes them for uniformity, and creates individual PDF files for compliance‑ready archival and searchable records.
+ */
