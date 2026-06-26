@@ -589,13 +589,17 @@
         "Aspose.Imaging.FileFormats.Cmx",
         "Aspose.Imaging.FileFormats.Tiff.Enums",
         "Aspose.Imaging.FileFormats.Tiff",
+        "Aspose.Imaging.FileFormats.Pdf",
         "Aspose.Imaging.Sources",
-        "Aspose.Imaging.ImageLoadOptions",
         "Aspose.Imaging.FileFormats.Png",
         "Aspose.Imaging.FileFormats.Jpeg",
-        "Aspose.Imaging.FileFormats.Pdf",
+        "Aspose.Imaging.ImageLoadOptions",
+        "System.Threading.Tasks",
         "System.Net.Http",
-        "System.Threading.Tasks"
+        "Aspose.Imaging.FileFormats.Bmp",
+        "Aspose.Imaging.FileFormats.Gif",
+        "Aspose.Imaging.FileFormats.Webp",
+        "System.Linq"
       ],
       "key_apis": [
         "BmpOptions",
