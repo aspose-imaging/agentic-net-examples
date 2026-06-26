@@ -824,13 +824,18 @@
         "Aspose.Imaging.FileFormats.Pdf",
         "Aspose.Imaging.FileFormats.Psd",
         "Aspose.Imaging.FileFormats.Png",
-        "Aspose.Imaging.FileFormats.Tiff.Enums",
-        "System.Collections.Generic",
-        "System.Threading.Tasks",
-        "System.Diagnostics",
         "Aspose.Imaging.FileFormats.Tiff",
-        "Aspose.Imaging.Sources",
-        "Aspose.Imaging.FileFormats.Webp"
+        "Aspose.Imaging.CoreExceptions",
+        "Aspose.Imaging.CoreExceptions.ImageFormats",
+        "System.Collections.Generic",
+        "Aspose.Imaging.FileFormats.Svg",
+        "System.Threading.Tasks",
+        "System.Text",
+        "Aspose.Imaging.FileFormats.Jpeg",
+        "Aspose.Imaging.FileFormats.Bmp",
+        "Aspose.Imaging.FileFormats.Gif",
+        "Aspose.Imaging.FileFormats.Webp",
+        "Aspose.Imaging.FileFormats.Tiff.Enums"
       ],
       "key_apis": [
         "ApngOptions",
@@ -848,6 +853,7 @@
         "PngOptions",
         "PsdOptions",
         "PsdVectorizationOptions",
+        "TiffImage",
         "TiffOptions",
         "VectorRasterizationOptions"
       ],
