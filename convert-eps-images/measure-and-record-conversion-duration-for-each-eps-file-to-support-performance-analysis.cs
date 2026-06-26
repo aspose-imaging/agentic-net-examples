@@ -1,8 +1,8 @@
 using System;
 using System.IO;
-using System.Diagnostics;
+using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,50 +10,39 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = "InputEps";
-            string outputFolder = "OutputPng";
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-            // Validate input directory
-            if (!Directory.Exists(inputFolder))
+            string[] epsFiles = Directory.GetFiles(inputDir, "*.eps");
+            var logLines = new List<string>();
+
+            foreach (var inputPath in epsFiles)
             {
-                Directory.CreateDirectory(inputFolder);
-                Console.WriteLine($"Input directory created at: {inputFolder}. Add files and rerun.");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputFolder);
-
-            // Get all EPS files in the input directory
-            string[] epsFiles = Directory.GetFiles(inputFolder, "*.eps");
-
-            foreach (string inputPath in epsFiles)
-            {
-                // Validate each input file
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".png");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + ".png");
 
-                // Ensure output directory for the file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                Stopwatch sw = Stopwatch.StartNew();
-
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+                DateTime start = DateTime.Now;
+                using (Image image = Image.Load(inputPath))
                 {
                     image.Save(outputPath, new PngOptions());
                 }
+                TimeSpan duration = DateTime.Now - start;
 
-                sw.Stop();
-
-                Console.WriteLine($"{fileNameWithoutExt}: {sw.ElapsedMilliseconds} ms");
+                Console.WriteLine($"{inputPath} conversion took {duration.TotalMilliseconds} ms");
+                logLines.Add($"{inputPath},{duration.TotalMilliseconds}");
             }
+
+            string logPath = Path.Combine(outputDir, "conversion_times.csv");
+            Directory.CreateDirectory(Path.GetDirectoryName(logPath));
+            File.WriteAllLines(logPath, logLines);
         }
         catch (Exception ex)
         {
@@ -61,3 +50,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a print shop needs to batch‑convert customer EPS artwork to PNG thumbnails and track how long each conversion takes to ensure the rendering pipeline meets service‑level agreements.
+ * 2. When a web‑application processes uploaded EPS logos into PNGs for display and records conversion times in a CSV to identify performance bottlenecks on the server.
+ * 3. When a CI/CD pipeline validates that a new version of Aspose.Imaging does not degrade EPS‑to‑PNG conversion speed by logging the duration of each file conversion.
+ * 4. When a digital asset management system migrates legacy EPS files to PNG format and stores per‑file conversion durations for audit and capacity‑planning reports.
+ * 5. When a developer builds a monitoring tool that watches an input folder, converts incoming EPS files to PNG, and writes the elapsed milliseconds to a log for real‑time performance analytics.
+ */
