@@ -1381,20 +1381,21 @@
       "required_namespaces": [
         "System",
         "System.IO",
-        "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging",
+        "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging.FileFormats.Svg",
         "Aspose.Imaging.FileFormats.Bmp",
         "Aspose.Imaging.FileFormats.Png",
+        "Aspose.Imaging.Sources",
         "System.Diagnostics",
         "Aspose.Imaging.Brushes",
-        "Aspose.Imaging.Sources",
         "System.Threading.Tasks"
       ],
       "key_apis": [
         "BmpImage",
         "BmpOptions",
         "Graphics",
+        "Html5CanvasOptions",
         "PdfOptions",
         "PngImage",
         "PngOptions",
