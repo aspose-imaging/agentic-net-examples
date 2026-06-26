@@ -4,7 +4,7 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 3367 |
+| Total Examples | 3407 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
 | Last Updated | 2026-06-26 |
@@ -45,7 +45,7 @@ README.md
 | [Convert EPS Images](./convert-eps-images/) | 120 | 100.0% | [agents.md](./convert-eps-images/agents.md) |
 | [Convert Open Document Graphics](./convert-open-document-graphics/) | 240 | 100.0% | [agents.md](./convert-open-document-graphics/agents.md) |
 | [Convert Raster Image](./convert-raster-image/) | 279 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
-| [Convert SVG to Raster Images](./convert-svg-to-raster-images/) | 40 | 100.0% | [agents.md](./convert-svg-to-raster-images/agents.md) |
+| [Convert SVG to Raster Images](./convert-svg-to-raster-images/) | 80 | 100.0% | [agents.md](./convert-svg-to-raster-images/agents.md) |
 | [Convert webp Images](./convert-webp-images/) | 30 | 100.0% | [agents.md](./convert-webp-images/agents.md) |
 | [Converting WMF and EMF](./converting-wmf-and-emf/) | 29 | 100.0% | [agents.md](./converting-wmf-and-emf/agents.md) |
 | [Image and Photo Filters](./image-and-photo-filters/) | 138 | 100.0% | [agents.md](./image-and-photo-filters/agents.md) |
@@ -112,7 +112,7 @@ All examples are compiler-validated against the target NuGet version before bein
 
 | Version | Total Examples | Pass Rate | Framework |
 |---------|---------------|-----------|----------|
-| 26.6.0 | 3367 | 100.0% | net9.0 |
+| 26.6.0 | 3407 | 100.0% | net9.0 |
 
 Pass rate is enforced by the agent pipeline — only examples that pass both `dotnet build` and `dotnet run` are committed.
 
