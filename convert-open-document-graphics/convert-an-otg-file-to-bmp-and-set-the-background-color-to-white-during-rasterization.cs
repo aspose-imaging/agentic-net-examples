@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -9,9 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\output.bmp";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\sample.otg";
+            string outputPath = @"C:\temp\sample.bmp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -29,11 +30,11 @@ class Program
                 // Configure rasterization options with white background
                 OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
                 {
-                    BackgroundColor = Color.White,
+                    BackgroundColor = Aspose.Imaging.Color.White,
                     PageSize = image.Size
                 };
 
-                // Set up BMP save options and attach rasterization options
+                // Set up BMP save options and assign rasterization options
                 BmpOptions saveOptions = new BmpOptions
                 {
                     VectorRasterizationOptions = rasterOptions
@@ -49,3 +50,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert vector‑based OTG diagrams into raster BMP files for legacy Windows applications that only accept bitmap images.
+ * 2. When an automated document processing pipeline must render OTG charts with a white background to ensure consistent appearance on white‑paper reports before saving them as BMP for printing.
+ * 3. When a desktop application integrates Aspose.Imaging to let users export their OTG floor‑plan drawings as BMP thumbnails with a solid white background for quick previews.
+ * 4. When a batch conversion utility written in C# has to rasterize multiple OTG files to BMP while normalizing the background color to white to avoid transparency issues in downstream image editors.
+ * 5. When a web service needs to transform uploaded OTG graphics into BMP format with a white canvas so that the images can be displayed correctly in browsers that do not support vector formats.
+ */
