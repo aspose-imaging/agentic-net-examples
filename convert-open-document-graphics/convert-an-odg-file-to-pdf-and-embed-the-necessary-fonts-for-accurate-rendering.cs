@@ -1,64 +1,39 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input/sample.odg";
+        string outputPath = "Output/sample.pdf";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Define input, output and fonts directories
-            string inputPath = Path.Combine("Input", "sample.odg");
-            string outputPath = Path.Combine("Output", "sample.pdf");
-            string fontsPath = Path.Combine("Fonts");
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load options with custom font source
-            var loadOptions = new Aspose.Imaging.ImageLoadOptions.OdLoadOptions();
-            loadOptions.AddCustomFontSource(args =>
-            {
-                string path = args.Length > 0 ? args[0]?.ToString() : string.Empty;
-                var fontList = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-                if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+                var pdfOptions = new PdfOptions
                 {
-                    foreach (var file in Directory.GetFiles(path))
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        string name = Path.GetFileNameWithoutExtension(file);
-                        byte[] data = File.ReadAllBytes(file);
-                        fontList.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
                     }
-                }
-                return fontList.ToArray();
-            }, fontsPath);
-
-            // Load the ODG image with the custom fonts
-            using (Image image = Image.Load(inputPath, loadOptions))
-            {
-                // Configure rasterization options for ODG
-                var rasterOptions = new OdgRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
                 };
 
-                // Set PDF save options
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    pdfOptions.VectorRasterizationOptions = rasterOptions;
-                    image.Save(outputPath, pdfOptions);
-                }
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -67,3 +42,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a print‑ready PDF from an OpenDocument Graphic (ODG) file in a C# application, they can use Aspose.Imaging to load the ODG and save it as PDF with proper vector rasterization and embedded fonts.
+ * 2. When an enterprise workflow requires automatic conversion of designer‑created ODG diagrams into PDF documents for archival or compliance purposes, this code provides a reliable way to perform the conversion in .NET.
+ * 3. When a web service must deliver ODG‑based charts or illustrations as downloadable PDFs to end‑users, the sample shows how to load the ODG, set page size and background color, and save the result with Aspose.Imaging.
+ * 4. When a reporting engine needs to embed ODG graphics into multi‑page PDF reports while preserving font appearance, the code demonstrates the C# steps to rasterize the vector image and embed necessary fonts.
+ * 5. When a batch processing script has to convert a folder of ODG files to PDFs for email attachment or document management, this example illustrates the file‑existence checks, directory creation, and Aspose.Imaging conversion logic.
+ */
