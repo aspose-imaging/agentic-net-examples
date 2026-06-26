@@ -1,6 +1,6 @@
 {
   "name": "Aspose.Imaging for .NET Examples Agent",
-  "description": "AI agent that generates, compiles, and validates C# code examples for Aspose.Imaging for .NET 26.6.0. 3,229 build-verified examples across 17 categories.",
+  "description": "AI agent that generates, compiles, and validates C# code examples for Aspose.Imaging for .NET 26.6.0. 3,367 build-verified examples across 17 categories.",
   "version": "26.6.0",
   "url": "https://github.com/aspose-imaging/agentic-net-examples",
   "api_base_url": "http://faisalabad-examples-mcp.dynabic.com:7009",
@@ -67,7 +67,7 @@
     },
     {
       "name": "Convert Raster Image",
-      "examples": 141
+      "examples": 279
     },
     {
       "name": "Convert SVG to Raster Images",
