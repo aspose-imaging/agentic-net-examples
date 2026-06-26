@@ -1,0 +1,306 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Aspose.Imaging Examples Generator API",
+    "version": "26.6.0",
+    "description": "REST API for the Aspose.Imaging agentic .NET examples generator. Submit tasks, run categories, poll job status and retrieve results. All 2,955 generated examples are compiler-validated C# code for Aspose.Imaging for .NET.",
+    "contact": {
+      "name": "Aspose.Imaging Agent",
+      "url": "https://github.com/aspose-imaging/agentic-net-examples"
+    },
+    "x-mcp-endpoint": "http://faisalabad-examples-mcp.dynabic.com:7009/mcp/sse"
+  },
+  "servers": [
+    {
+      "url": "http://faisalabad-examples-mcp.dynabic.com:7009",
+      "description": "Aspose.Imaging Examples Agent"
+    }
+  ],
+  "paths": {
+    "/api/v1/run/prompt": {
+      "post": {
+        "summary": "Run a single prompt through the pipeline",
+        "operationId": "runPrompt",
+        "tags": [
+          "Pipeline"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "description": "Task description in plain English"
+                  },
+                  "category": {
+                    "type": "string",
+                    "description": "Category slug (optional)"
+                  }
+                },
+                "required": [
+                  "task"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Job accepted — poll /api/v1/status/{job_id}"
+          },
+          "400": {
+            "description": "Missing task"
+          }
+        }
+      }
+    },
+    "/api/v1/run/category": {
+      "post": {
+        "summary": "Run all tasks in a category",
+        "operationId": "runCategory",
+        "tags": [
+          "Pipeline"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "Conversion",
+                      "Convert APNG",
+                      "Convert CDR",
+                      "Convert CMX Images",
+                      "Convert DICOM Images",
+                      "Convert EPS Images",
+                      "Convert Open Document Graphics",
+                      "Convert Raster Image",
+                      "Convert SVG to Raster Images",
+                      "Convert webp Images",
+                      "Converting WMF and EMF",
+                      "Image and Photo Filters",
+                      "Kernel Filters",
+                      "Manipulate Different Image File Formats",
+                      "Manipulating Images",
+                      "Merge Images",
+                      "Working With Drawing Images"
+                    ],
+                    "description": "Category slug to run"
+                  }
+                },
+                "required": [
+                  "category"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Job accepted"
+          },
+          "400": {
+            "description": "Missing or invalid category"
+          }
+        }
+      }
+    },
+    "/api/v1/status/{job_id}": {
+      "get": {
+        "summary": "Poll job status and logs",
+        "operationId": "getJobStatus",
+        "tags": [
+          "Pipeline"
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job status: queued/running/done/error"
+          },
+          "404": {
+            "description": "Job not found"
+          }
+        }
+      }
+    },
+    "/api/v1/stats": {
+      "get": {
+        "summary": "Overall agent statistics",
+        "operationId": "getStats",
+        "tags": [
+          "Stats"
+        ],
+        "responses": {
+          "200": {
+            "description": "Pass rate, totals, category breakdown"
+          }
+        }
+      }
+    },
+    "/api/v1/results/{category}": {
+      "get": {
+        "summary": "Get results for a category",
+        "operationId": "getCategoryResults",
+        "tags": [
+          "Results"
+        ],
+        "parameters": [
+          {
+            "name": "category",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Conversion",
+                "Convert APNG",
+                "Convert CDR",
+                "Convert CMX Images",
+                "Convert DICOM Images",
+                "Convert EPS Images",
+                "Convert Open Document Graphics",
+                "Convert Raster Image",
+                "Convert SVG to Raster Images",
+                "Convert webp Images",
+                "Converting WMF and EMF",
+                "Image and Photo Filters",
+                "Kernel Filters",
+                "Manipulate Different Image File Formats",
+                "Manipulating Images",
+                "Merge Images",
+                "Working With Drawing Images"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task results with status and stems"
+          }
+        }
+      }
+    },
+    "/api/v1/categories": {
+      "get": {
+        "summary": "List all available categories",
+        "operationId": "getCategories",
+        "tags": [
+          "Categories"
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of category names and task counts"
+          }
+        }
+      }
+    },
+    "/api/v1/eval": {
+      "get": {
+        "summary": "Full evaluation report",
+        "operationId": "getEvalReport",
+        "tags": [
+          "Stats"
+        ],
+        "responses": {
+          "200": {
+            "description": "Per-category pass/fail breakdown"
+          }
+        }
+      }
+    },
+    "/api/v1/code/{filename}": {
+      "get": {
+        "summary": "Retrieve generated C# source code",
+        "operationId": "getCode",
+        "tags": [
+          "Code"
+        ],
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "C# source code as plain text"
+          }
+        }
+      }
+    },
+    "/llm.txt": {
+      "get": {
+        "summary": "LLM/AI manifest",
+        "operationId": "getLlmTxt",
+        "tags": [
+          "Discovery"
+        ],
+        "responses": {
+          "200": {
+            "description": "AI-readable repo manifest"
+          }
+        }
+      }
+    },
+    "/.well-known/agent.json": {
+      "get": {
+        "summary": "Agent discovery card",
+        "operationId": "getAgentCard",
+        "tags": [
+          "Discovery"
+        ],
+        "responses": {
+          "200": {
+            "description": "Standard agent card JSON"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Pipeline",
+      "description": "Submit and monitor example generation jobs"
+    },
+    {
+      "name": "Stats",
+      "description": "Agent statistics and evaluation reports"
+    },
+    {
+      "name": "Results",
+      "description": "Access generated example results"
+    },
+    {
+      "name": "Categories",
+      "description": "Browse available example categories"
+    },
+    {
+      "name": "Code",
+      "description": "Retrieve generated C# source code"
+    },
+    {
+      "name": "Discovery",
+      "description": "Agent discovery endpoints"
+    }
+  ]
+}
