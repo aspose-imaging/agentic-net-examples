@@ -21,7 +21,7 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
             {
                 var options = new PdfOptions
                 {
@@ -49,3 +49,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to automatically convert vector EPS artwork received from a designer into PDF/A‑1b compliant documents for archival or printing workflows using C# and Aspose.Imaging.
+ * 2. When an application must validate that a batch job successfully creates PDF files from EPS source files before moving them to a document management system.
+ * 3. When a web service processes user‑uploaded EPS files and returns a PDF version, requiring a unit test to ensure the conversion routine works without throwing exceptions.
+ * 4. When a CI/CD pipeline includes a test that checks the Aspose.Imaging EPS‑to‑PDF conversion produces an output file on disk, guaranteeing build stability for image processing features.
+ * 5. When a developer wants to confirm that the PdfOptions settings, such as PdfCoreOptions and PdfComplianceVersion.PdfA1b, are correctly applied during the EPS to PDF conversion in a .NET project.
+ */
