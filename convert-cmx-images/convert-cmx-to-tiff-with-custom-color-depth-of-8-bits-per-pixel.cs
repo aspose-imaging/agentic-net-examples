@@ -5,43 +5,46 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "Input/sample.cmx";
+        string outputPath = "Output/output.tif";
+
         try
         {
-            string inputPath = "input.cmx";
-            string outputPath = "output.tif";
-
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load CMX to obtain canvas size
+            // Load CMX vector image
             using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
             {
-                int width = cmx.Width;
-                int height = cmx.Height;
-
-                // Configure TIFF options for 8 bits per sample (24‑bit color)
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                tiffOptions.Photometric = TiffPhotometrics.Rgb;
-                tiffOptions.Compression = TiffCompressions.Lzw;
-                tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-
-                // Create TIFF image with same dimensions as CMX canvas
-                using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, width, height))
+                // Configure TIFF save options with 8 bits per sample
+                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
                 {
-                    // Save the TIFF image
-                    tiff.Save(outputPath);
+                    tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+                    tiffOptions.Photometric = TiffPhotometrics.Rgb;
+
+                    // Set rasterization options for vector conversion
+                    tiffOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = cmx.Width,
+                        PageHeight = cmx.Height
+                    };
+
+                    // Save as TIFF
+                    cmx.Save(outputPath, tiffOptions);
                 }
             }
         }
@@ -51,3 +54,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to archive legacy CorelDRAW CMX vector drawings as compact 8‑bit per channel TIFF files for long‑term storage or compliance.
+ * 2. When an application must generate printable TIFF images from CMX artwork while preserving RGB colors with 8‑bit depth for downstream publishing workflows.
+ * 3. When a batch conversion tool is required to transform CMX files into TIFF format to feed into image analysis or OCR engines that only accept 8‑bit TIFF inputs.
+ * 4. When integrating a C# service that receives CMX uploads and needs to rasterize them to 8‑bit TIFF for display in web browsers or mobile apps that support only raster images.
+ * 5. When a developer wants to convert CMX vector graphics to TIFF with custom rasterization settings (page size, background color) and enforce an 8‑bit per sample color depth for consistent rendering across different platforms.
+ */
