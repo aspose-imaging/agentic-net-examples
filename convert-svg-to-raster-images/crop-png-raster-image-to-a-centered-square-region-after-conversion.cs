@@ -12,35 +12,32 @@ class Program
 
         try
         {
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
+            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for cropping
-                RasterImage rasterImage = (RasterImage)image;
-
                 // Determine the size of the centered square
-                int side = Math.Min(rasterImage.Width, rasterImage.Height);
-                int left = (rasterImage.Width - side) / 2;
-                int top = (rasterImage.Height - side) / 2;
+                int side = Math.Min(image.Width, image.Height);
+                int left = (image.Width - side) / 2;
+                int top = (image.Height - side) / 2;
 
                 // Define the cropping rectangle
                 Rectangle cropArea = new Rectangle(left, top, side, side);
 
-                // Perform the crop
-                rasterImage.Crop(cropArea);
+                // Crop the image to the centered square
+                image.Crop(cropArea);
 
                 // Save the cropped image as PNG
-                rasterImage.Save(outputPath);
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -49,3 +46,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application needs to generate uniformly sized avatar thumbnails from user‑uploaded PNG photos, a developer can use this C# code to crop each image to a centered square before resizing.
+ * 2. When an e‑commerce platform must prepare product images for a mobile carousel that requires square PNG icons, the code can automatically trim the larger dimension and keep the central area.
+ * 3. When a desktop utility processes scanned documents saved as PNG and needs to extract the central portion for OCR, the developer can employ this cropping routine to isolate the region of interest.
+ * 4. When a game developer wants to convert arbitrary PNG textures into square sprites for consistent tile mapping, this snippet provides a quick C# solution to center‑crop the images.
+ * 5. When an automated batch job prepares profile pictures for a social network and must ensure all PNG files are square without distortion, the code can be integrated to perform the centered crop before saving.
+ */
