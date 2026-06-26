@@ -3,40 +3,31 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.otg";
-        string outputPath = "output/output.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the OTG image
+            string inputPath = "Input\\sample.otg";
+            string outputPath = "Output\\sample.svg";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG export options
-                var svgOptions = new SvgOptions();
+                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions();
+                otgOptions.PageSize = image.Size;
 
-                // Configure vector rasterization to preserve vector data
-                var vectorOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-                svgOptions.VectorRasterizationOptions = vectorOptions;
+                SvgOptions svgOptions = new SvgOptions();
+                svgOptions.VectorRasterizationOptions = otgOptions;
 
-                // Save as SVG
                 image.Save(outputPath, svgOptions);
             }
         }
@@ -46,3 +37,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to import an OTG (OpenType Graphics) font glyph file into a web application and serve it as scalable SVG graphics without losing vector quality.
+ * 2. When a C# backend service must batch‑convert legacy OTG vector assets to SVG for responsive UI design in cross‑platform mobile apps.
+ * 3. When an automated build pipeline has to transform OTG icons into SVG files for inclusion in a vector‑based UI component library using Aspose.Imaging.
+ * 4. When a document‑generation tool requires preserving vector paths while converting OTG diagrams to SVG for high‑resolution printing.
+ * 5. When a cloud‑based image processing API must accept OTG uploads and return SVG output to enable client‑side manipulation in JavaScript editors.
+ */
