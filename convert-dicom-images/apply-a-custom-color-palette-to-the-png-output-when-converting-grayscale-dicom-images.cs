@@ -9,12 +9,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.dcm";
-        string outputPath = @"C:\Images\output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.dcm";
+            string outputPath = @"C:\temp\output.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,25 +28,22 @@ class Program
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
-                // If the image is a DICOM image, convert it to grayscale
-                if (image is DicomImage dicomImage)
-                {
-                    dicomImage.Grayscale();
-                }
+                // Cast to RasterImage for palette operations
+                RasterImage raster = (RasterImage)image;
 
-                // Prepare PNG save options with a custom grayscale palette
+                // Create a custom 8‑bit grayscale palette
+                var customPalette = ColorPaletteHelper.Create8BitGrayscale(false);
+
+                // Configure PNG save options with indexed color and the custom palette
                 var pngOptions = new PngOptions
                 {
-                    // Use indexed color so the palette is applied
                     ColorType = PngColorType.IndexedColor,
-                    // Optional: enable progressive encoding and maximum compression
-                    Progressive = true,
+                    Palette = customPalette,
                     CompressionLevel = 9,
-                    // Apply a custom 8‑bit grayscale palette
-                    Palette = ColorPaletteHelper.Create8BitGrayscale(false)
+                    Progressive = true
                 };
 
-                // Save the image as PNG with the specified options
+                // Save as PNG using the specified options
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -56,3 +53,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a medical imaging application must export grayscale DICOM scans as small, web‑friendly PNG files with a specific 8‑bit grayscale palette for consistent display across browsers.
+ * 2. When a radiology research tool needs to batch‑convert DICOM images to indexed‑color PNGs to reduce file size while preserving the exact grayscale mapping defined by a custom palette.
+ * 3. When a hospital PACS integration requires converting DICOM images to PNG for inclusion in patient reports, ensuring the PNG uses the same grayscale tones as the original scan.
+ * 4. When a diagnostic AI pipeline extracts DICOM slices and saves them as PNGs with a predefined palette so that downstream image‑processing libraries can rely on a known color index.
+ * 5. When a legacy system that only supports indexed PNG images must display grayscale DICOM data, and the developer uses Aspose.Imaging to apply a custom palette during conversion.
+ */
