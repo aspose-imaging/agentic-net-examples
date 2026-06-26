@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.Sources;
 
@@ -11,71 +13,49 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input\\multi.tif";
-            string outputPath = "Output\\output.apng";
+            string inputPath = "Input/multipage.tif";
+            string outputPath = "Output/animation.apng";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the multi‑page TIFF
-            using (Image tiffImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                if (tiffImage is IMultipageImage multipage)
+                TiffImage tiffImage = (TiffImage)image;
+
+                int canvasWidth = tiffImage.Frames[0].Width;
+                int canvasHeight = tiffImage.Frames[0].Height;
+
+                ApngOptions apngOptions = new ApngOptions
                 {
-                    // Determine canvas size from the first page
-                    Image firstPage = multipage.Pages[0];
-                    int canvasWidth = firstPage.Width;
-                    int canvasHeight = firstPage.Height;
-                    firstPage.Dispose();
+                    Source = new FileCreateSource(outputPath, false),
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
 
-                    // Prepare APNG creation options
-                    ApngOptions createOptions = new ApngOptions
+                using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, canvasWidth, canvasHeight))
+                {
+                    apngImage.RemoveAllFrames();
+
+                    for (int i = 0; i < tiffImage.Frames.Length; i++)
                     {
-                        Source = new FileCreateSource(outputPath, false)
-                    };
+                        tiffImage.ActiveFrame = tiffImage.Frames[i];
+                        RasterImage rasterFrame = (RasterImage)tiffImage;
+                        apngImage.AddFrame(rasterFrame);
 
-                    // Create APNG image
-                    using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, canvasWidth, canvasHeight))
-                    {
-                        // Remove the default frame
-                        apngImage.RemoveAllFrames();
+                        ApngFrame apngFrame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
 
-                        // Add each TIFF page as a frame with duration based on its resolution
-                        for (int i = 0; i < multipage.PageCount; i++)
-                        {
-                            Image page = multipage.Pages[i];
-                            RasterImage rasterPage = (RasterImage)page;
+                        double dpi = tiffImage.HorizontalResolution > 0 ? tiffImage.HorizontalResolution : 72.0;
+                        uint frameDuration = (uint)Math.Max(10, Math.Round(1000.0 / dpi));
 
-                            // Add the raster page as a frame
-                            apngImage.AddFrame(rasterPage);
-
-                            // Retrieve the newly added frame
-                            ApngFrame apngFrame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
-
-                            // Calculate frame duration (ms) from horizontal resolution; fallback to 72 DPI if undefined
-                            double hDpi = rasterPage.HorizontalResolution > 0 ? rasterPage.HorizontalResolution : 72;
-                            int frameDuration = (int)(1000 / hDpi);
-                            apngFrame.FrameTime = frameDuration;
-
-                            // Dispose the page after use
-                            rasterPage.Dispose();
-                        }
-
-                        // Save the APNG file
-                        apngImage.Save();
+                        apngFrame.FrameTime = (int)frameDuration;
                     }
-                }
-                else
-                {
-                    Console.Error.WriteLine("The loaded image is not a multipage image.");
+
+                    apngImage.Save();
                 }
             }
         }
@@ -85,3 +65,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a medical imaging application needs to turn a multi‑page DICOM‑exported TIFF scan into an animated PNG for web‑based patient reports, preserving the scan’s DPI‑based timing.
+ * 2. When a GIS system exports layered satellite imagery as a multi‑page TIFF and wants to create an APNG slideshow where higher‑resolution tiles stay on screen longer.
+ * 3. When an e‑learning platform receives scanned lecture slides in a multi‑page TIFF and must generate an animated PNG that respects each slide’s original DPI to control slide display speed.
+ * 4. When a digital archiving tool converts scanned historical documents stored as multi‑page TIFFs into APNG animations, using the DPI of each page to set frame durations for smooth scrolling.
+ * 5. When a printing workflow creates proof animations from multi‑page TIFF proofs, converting them to APNG while using each page’s resolution to determine how long each frame appears in the preview.
+ */
