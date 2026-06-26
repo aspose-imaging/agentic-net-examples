@@ -1,64 +1,61 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\output.bmp";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the ODG image
-            using (Image odgImage = Image.Load(inputPath))
+            // Hardcoded input and output paths
+            string inputPath = Path.Combine("Input", "sample.odg");
+            string outputPath = Path.Combine("Output", "sample.bmp");
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                // Rasterize ODG to BMP in memory
-                using (var memoryStream = new MemoryStream())
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the ODG vector image
+            using (Image vectorImage = Image.Load(inputPath))
+            {
+                // Prepare rasterization options for BMP output
+                var rasterOptions = new OdgRasterizationOptions
                 {
-                    // Set up rasterization options for ODG
-                    var odgRasterOptions = new OdgRasterizationOptions
+                    BackgroundColor = Color.White,
+                    PageSize = vectorImage.Size
+                };
+
+                // Create BMP options with the rasterization settings
+                var bmpOptions = new BmpOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Rasterize the vector image into a memory stream
+                using (var ms = new MemoryStream())
+                {
+                    vectorImage.Save(ms, bmpOptions);
+                    ms.Position = 0;
+
+                    // Load the rasterized image
+                    using (Image rasterImageWrapper = Image.Load(ms))
                     {
-                        PageSize = odgImage.Size,
-                        BackgroundColor = Color.White
-                    };
+                        var rasterImage = (RasterImage)rasterImageWrapper;
 
-                    // BMP save options with vector rasterization
-                    var bmpSaveOptions = new BmpOptions
-                    {
-                        VectorRasterizationOptions = odgRasterOptions
-                    };
-
-                    // Save rasterized image to memory stream
-                    odgImage.Save(memoryStream, bmpSaveOptions);
-                    memoryStream.Position = 0;
-
-                    // Load the rasterized BMP image
-                    using (Image rasterImage = Image.Load(memoryStream))
-                    {
-                        // Cast to RasterImage to apply filters
-                        var raster = (RasterImage)rasterImage;
-
-                        // Apply median filter with size 5 to the whole image
-                        raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+                        // Apply median filter with kernel size 5
+                        rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
                         // Save the filtered image as BMP
-                        raster.Save(outputPath);
+                        rasterImage.Save(outputPath, new BmpOptions());
                     }
                 }
             }
@@ -69,3 +66,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to remove speckle noise from scanned ODG drawings before exporting them as BMP files for legacy Windows applications.
+ * 2. When a workflow requires converting ODG vector graphics to a raster BMP format while smoothing out pixelated artifacts caused by low‑resolution rasterization.
+ * 3. When an image‑processing pipeline must prepare ODG‑based floor plans for OCR or pattern‑recognition engines that expect a clean BMP input.
+ * 4. When a desktop publishing system has to generate BMP thumbnails of ODG illustrations and wants to apply a median filter to preserve edge detail while reducing color noise.
+ * 5. When a batch conversion tool must ensure that ODG diagrams retain visual quality after being rasterized to BMP for use in embedded systems with limited display capabilities.
+ */
