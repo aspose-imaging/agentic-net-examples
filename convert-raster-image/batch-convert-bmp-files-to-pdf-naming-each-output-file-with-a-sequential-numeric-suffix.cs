@@ -10,30 +10,28 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\Input";
-            string outputDirectory = @"C:\Images\Output";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            string inputDirectory = @"C:\InputBmp";
+            string outputDirectory = @"C:\OutputPdf";
 
             // Get all BMP files in the input directory
             string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
 
-            int index = 1;
-            foreach (string inputPath in bmpFiles)
+            // Process each BMP file
+            for (int i = 0; i < bmpFiles.Length; i++)
             {
-                // Verify input file exists
+                string inputPath = bmpFiles[i];
+
+                // Verify that the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build output file path with sequential numeric suffix
-                string outputFileName = $"output_{index}.pdf";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                // Build the output PDF path with a sequential numeric suffix (starting at 1)
+                string outputPath = Path.Combine(outputDirectory, $"{i + 1}.pdf");
 
-                // Ensure the directory for the output file exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the BMP image
@@ -42,11 +40,9 @@ class Program
                     // Set up PDF export options
                     PdfOptions pdfOptions = new PdfOptions();
 
-                    // Save as PDF
+                    // Save the image as PDF
                     image.Save(outputPath, pdfOptions);
                 }
-
-                index++;
             }
         }
         catch (Exception ex)
@@ -55,3 +51,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to archive a collection of scanned BMP documents as PDF files with simple numeric filenames for easy indexing, they can use this code.
+ * 2. When an automated build pipeline must convert legacy BMP assets into PDF reports for compliance documentation, the batch conversion with sequential naming streamlines the process.
+ * 3. When a desktop application must generate printable PDFs from user‑uploaded BMP images and store them in a folder with ordered numeric names, this snippet provides the required image processing logic.
+ * 4. When a migration script has to transform a directory of BMP graphics into PDF format for a content‑management system while preserving order through sequential file names, the code handles the conversion efficiently.
+ * 5. When a scheduled Windows service needs to process incoming BMP files, convert each to PDF, and save them with incremental numeric suffixes for downstream processing, this example demonstrates the necessary C# and Aspose.Imaging workflow.
+ */
