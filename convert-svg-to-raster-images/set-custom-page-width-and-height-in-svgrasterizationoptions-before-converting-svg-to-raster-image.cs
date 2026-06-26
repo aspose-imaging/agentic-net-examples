@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\input.svg";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
 
             // Verify that the input file exists
             if (!File.Exists(inputPath))
@@ -30,14 +30,14 @@ class Program
                 // Configure rasterization options with custom page size
                 SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
                 {
-                    // Set desired width and height (in pixels). If set to 0, aspect ratio is preserved.
+                    // Set custom width and height (in pixels)
                     PageWidth = 800f,
                     PageHeight = 600f,
-                    // Optional: set a background color
+                    // Optional: set background color
                     BackgroundColor = Color.White
                 };
 
-                // Prepare PNG save options and attach the rasterization options
+                // Prepare PNG save options and attach rasterization options
                 PngOptions saveOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterizationOptions
@@ -53,3 +53,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When generating thumbnail previews of user‑uploaded SVG logos for a web portal, a developer can set PageWidth and PageHeight in SvgRasterizationOptions to produce consistent 800×600 PNG thumbnails.
+ * 2. When creating printable product catalogs where SVG diagrams must fit a specific page layout, a developer uses custom page dimensions in SvgRasterizationOptions to rasterize the SVG to a PNG of the exact size required by the layout engine.
+ * 3. When integrating SVG assets into a Windows desktop application that expects bitmap resources of a fixed resolution, a developer sets the rasterization options’ PageWidth and PageHeight to match the target bitmap size before saving as PNG.
+ * 4. When automating batch conversion of SVG icons to high‑resolution PNG sprites for a mobile app, a developer defines custom page width and height in SvgRasterizationOptions to ensure each sprite meets the required pixel dimensions.
+ * 5. When performing server‑side image processing that overlays SVG graphics onto photographs, a developer controls the rasterized SVG size by configuring PageWidth and PageHeight in SvgRasterizationOptions so the overlay aligns correctly with the background image.
+ */
