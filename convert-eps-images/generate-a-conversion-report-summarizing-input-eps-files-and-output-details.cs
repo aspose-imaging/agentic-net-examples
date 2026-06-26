@@ -1,83 +1,76 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Define input and output directories
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            // Hardcoded list of EPS files to process
+            string[] inputPaths = { "sample1.eps", "sample2.eps" };
+            // Hardcoded output directory
+            string outputDir = "converted";
 
-            // Ensure directories exist
-            Directory.CreateDirectory(inputDirectory);
-            Directory.CreateDirectory(outputDirectory);
+            var report = new StringBuilder();
+            report.AppendLine("EPS Conversion Report");
+            report.AppendLine("----------------------");
 
-            // Get all EPS files in the input directory
-            string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
-
-            // Prepare a list to hold report lines
-            List<string> reportLines = new List<string>();
-            reportLines.Add("EPS Conversion Report");
-            reportLines.Add($"Generated on: {DateTime.Now}");
-            reportLines.Add("");
-
-            foreach (string epsPath in epsFiles)
+            foreach (var inputPath in inputPaths)
             {
-                // Validate input file existence
-                if (!File.Exists(epsPath))
+                // Verify that the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {epsPath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load EPS image
-                using (EpsImage epsImage = (EpsImage)Image.Load(epsPath))
+                // Load the EPS image
+                using (var image = (EpsImage)Image.Load(inputPath))
                 {
-                    // Extract metadata
-                    int width = epsImage.Width;
-                    int height = epsImage.Height;
-                    string title = epsImage.Title ?? "N/A";
-                    string creator = epsImage.Creator ?? "N/A";
+                    // Extract useful metadata
+                    string creator = image.Creator ?? "N/A";
+                    DateTime creationDate = image.CreationDate;
+                    string title = image.Title ?? "N/A";
+                    int width = image.Width;
+                    int height = image.Height;
 
-                    // Prepare output PNG path
-                    string pngFileName = Path.GetFileNameWithoutExtension(epsPath) + ".png";
-                    string pngPath = Path.Combine(outputDirectory, pngFileName);
+                    // Determine output PNG path
+                    string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
-                    // Ensure output directory for PNG exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save PNG preview
-                    epsImage.Save(pngPath, new PngOptions());
+                    // Configure rasterization options for EPS to PNG conversion
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new EpsRasterizationOptions
+                        {
+                            PageWidth = width,
+                            PageHeight = height
+                        }
+                    };
 
-                    // Add entry to report
-                    reportLines.Add($"File: {Path.GetFileName(epsPath)}");
-                    reportLines.Add($"  Dimensions: {width}x{height}");
-                    reportLines.Add($"  Title: {title}");
-                    reportLines.Add($"  Creator: {creator}");
-                    reportLines.Add($"  PNG Preview: {pngFileName}");
-                    reportLines.Add("");
+                    // Save the image as PNG
+                    image.Save(outputPath, pngOptions);
+
+                    // Append details to the report
+                    report.AppendLine($"Input: {inputPath}");
+                    report.AppendLine($"  Creator: {creator}");
+                    report.AppendLine($"  CreationDate: {creationDate}");
+                    report.AppendLine($"  Title: {title}");
+                    report.AppendLine($"  Dimensions: {width}x{height}");
+                    report.AppendLine($"  Output: {outputPath}");
+                    report.AppendLine();
                 }
             }
 
-            // Write report to file
-            string reportPath = Path.Combine(outputDirectory, "Report.txt");
-            Directory.CreateDirectory(Path.GetDirectoryName(reportPath));
-            using (StreamWriter writer = new StreamWriter(reportPath))
-            {
-                foreach (string line in reportLines)
-                {
-                    writer.WriteLine(line);
-                }
-            }
-
-            Console.WriteLine("Report generated successfully.");
+            // Output the conversion report
+            Console.WriteLine(report.ToString());
         }
         catch (Exception ex)
         {
@@ -85,3 +78,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑convert company EPS logos into PNGs for a website while capturing creator and creation date information for an audit report.
+ * 2. When an e‑commerce platform must transform EPS product illustrations into PNG thumbnails and log each file’s title, dimensions, and source metadata for inventory tracking.
+ * 3. When a publishing workflow requires converting EPS artwork to PNG for print‑to‑digital pipelines and generating a summary that records the original page size and author details.
+ * 4. When a mobile app team wants to rasterize EPS icons to PNG assets at their native resolution and produce a conversion log to verify that all expected files were processed.
+ * 5. When a document management system needs to archive EPS diagrams as PNG previews and store a concise report containing file paths, image dimensions, and metadata for future retrieval.
+ */
