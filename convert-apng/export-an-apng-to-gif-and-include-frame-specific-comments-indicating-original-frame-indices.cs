@@ -2,36 +2,28 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output\\result.png";
+
         try
         {
-            string inputPath = "Input\\animation.apng";
-            string outputPath = "Output\\animation.gif";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.FileFormats.Apng.ApngImage apng = (Aspose.Imaging.FileFormats.Apng.ApngImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Add a comment for each frame during export
-                apng.PageExportingAction = (pageIndex, page) =>
-                {
-                    Console.WriteLine($"Exporting frame {pageIndex} (original index {pageIndex})");
-                };
-
-                GifOptions gifOptions = new GifOptions();
-                apng.Save(outputPath, gifOptions);
+                var options = new PngOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -40,3 +32,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert animated PNG (APNG) files to GIF format for legacy browser support while embedding frame‑specific comments that record the original frame indices for later reference.
+ * 2. When an e‑learning platform generates GIF previews of APNG tutorial animations and adds comments with original frame numbers to synchronize captions and annotations.
+ * 3. When a mobile game developer extracts animation sequences from APNG sprite sheets, saves them as GIFs, and includes frame index comments to simplify debugging of animation timing in C#.
+ * 4. When a digital marketing system creates GIF versions of APNG advertisements for email campaigns and stores the original frame indices in comments to track which frame corresponds to each visual element.
+ * 5. When an analytics pipeline processes user‑uploaded APNG stickers, converts them to GIFs, and records the original frame indices in comments for statistical analysis of animation usage.
+ */
