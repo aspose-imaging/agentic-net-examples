@@ -11,9 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string filteredImagePath = "output/filtered.png";
-            string pdfOutputPath = "output/filtered.pdf";
+            string inputPath = @"C:\Images\sample.png";
+            string outputPath = @"C:\Images\output.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,27 +21,21 @@ class Program
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(filteredImagePath));
-            Directory.CreateDirectory(Path.GetDirectoryName(pdfOutputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
+            // Load the image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to RasterImage to apply filters
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur with size 5 and sigma 4.0 to the whole image
+                // Apply Gaussian blur filter (size = 5, sigma = 4.0) to the whole image
                 rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Save the filtered image (optional, can be omitted if only PDF is needed)
-                rasterImage.Save(filteredImagePath);
-
-                // Prepare PDF export options
-                PdfOptions pdfOptions = new PdfOptions();
-
                 // Save the filtered image as PDF
-                image.Save(pdfOutputPath, pdfOptions);
+                PdfOptions pdfOptions = new PdfOptions();
+                rasterImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -51,3 +44,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to soften the details of a PNG screenshot before embedding it in a PDF report for a client presentation.
+ * 2. When an application must automatically apply a Gaussian blur to scanned photos to protect privacy and then export the blurred images as searchable PDF files.
+ * 3. When a web service generates product catalogs by blurring background textures of PNG assets and converting them into PDF pages for printing.
+ * 4. When a medical imaging tool requires de‑identifying patient images with a Gaussian blur filter before saving them as PDF documents for compliance.
+ * 5. When a batch‑processing script has to prepare marketing visuals by applying a Gaussian blur to PNG logos and then bundle them into PDF flyers using C# and Aspose.Imaging.
+ */
