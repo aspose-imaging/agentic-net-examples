@@ -6,56 +6,29 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.otg";
-        string outputPath = "output\\converted.jpg";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the OTG image
-            using (Image otgImage = Image.Load(inputPath))
+            string inputPath = "Input/sample.otg";
+            string outputPath = "Output/sample.jpg";
+
+            if (!File.Exists(inputPath))
             {
-                // Preserve orientation value if present
-                var originalOrientation = otgImage.ExifData?.Orientation;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Set up rasterization options for OTG to JPEG conversion
-                var otgRasterOptions = new OtgRasterizationOptions
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                JpegOptions jpegOptions = new JpegOptions
                 {
-                    PageSize = otgImage.Size
+                    KeepMetadata = true
                 };
 
-                // JPEG save options with vector rasterization
-                var jpegOptions = new JpegOptions
-                {
-                    VectorRasterizationOptions = otgRasterOptions
-                };
-
-                // Save the rasterized image as JPEG
-                otgImage.Save(outputPath, jpegOptions);
-
-                // If the original image had EXIF orientation, copy it to the JPEG
-                if (originalOrientation.HasValue)
-                {
-                    // Reload the saved JPEG to set EXIF data
-                    using (JpegImage jpegImage = (JpegImage)Image.Load(outputPath))
-                    {
-                        jpegImage.ExifData.Orientation = originalOrientation.Value;
-                        // Overwrite the JPEG with updated EXIF orientation
-                        jpegImage.Save(outputPath);
-                    }
-                }
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -64,3 +37,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑convert proprietary OTG graphics from a CAD system into standard JPEG files for web preview while keeping the original EXIF orientation so images display correctly in browsers.
+ * 2. When an image‑processing pipeline must ingest OTG files from a legacy archive and output JPEGs for mobile apps, preserving metadata to maintain proper rotation on devices.
+ * 3. When a content‑management system imports user‑uploaded OTG assets and stores them as JPEG thumbnails, requiring the orientation metadata to be retained for accurate thumbnail rendering.
+ * 4. When a digital‑asset‑management tool automates conversion of OTG product photos to JPEG for e‑commerce catalogs, ensuring the EXIF orientation flag is kept so product images appear upright.
+ * 5. When a photo‑editing application offers an “Export as JPEG” feature for OTG files and needs to preserve EXIF orientation so downstream editors and viewers respect the original image rotation.
+ */
