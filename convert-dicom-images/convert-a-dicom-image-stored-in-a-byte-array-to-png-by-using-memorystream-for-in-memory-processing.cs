@@ -23,21 +23,26 @@ class Program
             }
 
             // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(string.IsNullOrEmpty(outputDir) ? "." : outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load DICOM data into a byte array
             byte[] dicomData = File.ReadAllBytes(inputPath);
 
             // Use MemoryStream for in‑memory processing
             using (MemoryStream inputStream = new MemoryStream(dicomData))
-            using (DicomImage dicomImage = new DicomImage(inputStream))
             {
-                // Save the image as PNG
-                using (FileStream outputStream = File.Open(outputPath, FileMode.Create, FileAccess.Write))
+                // Create DicomImage from the stream
+                using (DicomImage dicomImage = new DicomImage(inputStream))
                 {
-                    // Save the whole image; bounds can be empty (default) to use full image
-                    dicomImage.Save(outputStream, new PngOptions(), new Rectangle());
+                    // Prepare PNG save options
+                    PngOptions pngOptions = new PngOptions();
+
+                    // Save the entire image as PNG to the output file
+                    using (FileStream outputStream = File.OpenWrite(outputPath))
+                    {
+                        // Use empty rectangle to indicate full image bounds
+                        dicomImage.Save(outputStream, pngOptions, new Rectangle());
+                    }
                 }
             }
         }
@@ -47,3 +52,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a medical imaging web app must show a DICOM scan in browsers that only support PNG, developers can load the DICOM bytes into a MemoryStream and convert them to PNG on the fly.
+ * 2. When a hospital information system needs to archive diagnostic images as lossless PNG files while keeping the original DICOM data in memory, this code enables in‑memory conversion without creating temporary files.
+ * 3. When a telemedicine platform receives DICOM data over a network socket as a byte array and must generate a thumbnail PNG for patient portals, the MemoryStream approach provides fast server‑side image processing.
+ * 4. When a research tool extracts DICOM files stored in a database BLOB column and needs to export them as PNG for scientific publications, developers can read the BLOB into a byte array and use this code to create PNG images.
+ * 5. When a mobile health app downloads encrypted DICOM images as byte streams and must render them as PNG on the device without persisting the raw DICOM file, the in‑memory conversion using Aspose.Imaging simplifies the workflow.
+ */
