@@ -703,14 +703,13 @@
         "Aspose.Imaging.FileFormats.Png",
         "Aspose.Imaging.CoreExceptions.ImageFormats",
         "Aspose.Imaging.ImageFilters.FilterOptions",
-        "Aspose.Imaging.ProgressManagement",
-        "System.Linq",
         "System.Threading.Tasks",
         "Aspose.Imaging.FileFormats.Tiff.Enums"
       ],
       "key_apis": [
         "ApngOptions",
         "DicomImage",
+        "DicomOptions",
         "LoadOptions",
         "MedianFilterOptions",
         "PngImage",
