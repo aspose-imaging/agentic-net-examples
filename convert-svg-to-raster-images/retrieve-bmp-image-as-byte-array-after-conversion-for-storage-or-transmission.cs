@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.bmp";
+        string outputPath = @"C:\temp\output\converted.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.bmp";
-            string outputPath = @"C:\Images\output.bmp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,32 +27,33 @@ class Program
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to BmpImage to access BMP‑specific operations
-                BmpImage bmpImage = (BmpImage)image;
-
-                // Example conversion: binarize using Otsu's method
-                bmpImage.BinarizeOtsu();
-
-                // Prepare BMP save options (monochrome palette)
-                BmpOptions saveOptions = new BmpOptions
+                // Cast to BmpImage to access BMP‑specific operations (optional conversion)
+                if (image is BmpImage bmpImage)
                 {
-                    Palette = ColorPaletteHelper.CreateMonochrome(),
-                    BitsPerPixel = 1
-                };
+                    // Example conversion: binarize using Otsu method
+                    bmpImage.BinarizeOtsu();
+                }
 
-                // Save to a memory stream to obtain the byte array
-                byte[] imageBytes;
+                // Prepare BMP save options (default options are sufficient for most cases)
+                BmpOptions saveOptions = new BmpOptions();
+
+                // Save the image to a memory stream to obtain the byte array
                 using (MemoryStream ms = new MemoryStream())
                 {
                     image.Save(ms, saveOptions);
-                    imageBytes = ms.ToArray();
+                    byte[] imageBytes = ms.ToArray();
+
+                    // For demonstration, write the size of the byte array
+                    Console.WriteLine($"Byte array length: {imageBytes.Length}");
+
+                    // Optionally, also save to a physical file using the same options
+                    // (demonstrates the required output path handling)
+                    ms.Position = 0; // Reset stream position before re‑reading
+                    using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                    {
+                        ms.CopyTo(fileStream);
+                    }
                 }
-
-                // Optionally also save to a physical file
-                image.Save(outputPath, saveOptions);
-
-                // Demonstrate that we have the byte array
-                Console.WriteLine($"Byte array length: {imageBytes.Length}");
             }
         }
         catch (Exception ex)
@@ -61,3 +62,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to embed a processed BMP image into a database column as a BLOB for later retrieval.
+ * 2. When a developer wants to send a converted BMP over a Web API as a base‑64 encoded payload.
+ * 3. When a developer must cache a binarized BMP in memory to reuse it across multiple threads without writing temporary files.
+ * 4. When a developer is generating a thumbnail preview of a BMP and needs the byte array to embed it in a PDF document.
+ * 5. When a developer is integrating with a legacy system that accepts BMP data via a socket stream and requires the image as a byte array after Otsu binarization.
+ */
