@@ -1,6 +1,8 @@
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -8,9 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,20 +24,18 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the drawing image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            // Load the image
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
-                Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)image;
+                // Cast to RasterImage to access filtering methods
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Sharpen filter with kernel size 5 and sigma 4.0
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+                // Apply the 5x5 sharpen filter.
+                // SharpenFilterOptions with kernel size 5 and sigma 1.0 approximates the Sharpen5x5 kernel.
+                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 1.0));
 
-                // Save the result as PNG, preserving original brightness
-                PngOptions options = new PngOptions();
-                rasterImage.Save(outputPath, options);
+                // Save the processed image, preserving original brightness (filter does not alter overall brightness)
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -47,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to enhance the edges of a scanned technical drawing saved as PNG without altering its overall brightness, they can load the image with Aspose.Imaging, apply a 5x5 Sharpen filter, and save the result.
- * 2. When an automated batch process must improve the clarity of architectural blueprint images before archiving them, the code can read each PNG, sharpen it using a 5‑pixel kernel, and write the output while keeping the original luminance.
- * 3. When a web application generates preview thumbnails of user‑uploaded vector illustrations and wants to make fine details more visible, the developer can use this C# snippet to apply a Sharpen5x5 filter and preserve the original brightness.
- * 4. When a document management system needs to preprocess engineering schematics for OCR by sharpening the lines without brightening the background, the code demonstrates how to load, filter, and save PNG files with Aspose.Imaging.
- * 5. When a desktop utility aims to improve the visual quality of hand‑drawn sketches stored as PNG files while ensuring the colors remain unchanged, the developer can employ this raster image filtering approach in C#.
+ * 1. When a desktop application needs to automatically enhance scanned PNG documents by sharpening edges without changing overall brightness, this code can be used.
+ * 2. When a batch‑processing tool must improve the visual clarity of product photos stored as PNG files before uploading them to an e‑commerce site, the Sharpen5x5 filter can be applied with this snippet.
+ * 3. When a C# service processes user‑uploaded images and wants to apply a 5×5 convolution sharpen filter while preserving the original luminance for consistent UI appearance, the example shows how to do it.
+ * 4. When a reporting system generates PNG charts and requires a quick post‑processing step to make fine details more pronounced without altering the chart’s color balance, this code provides the solution.
+ * 5. When a Windows utility needs to clean up low‑resolution screenshots by sharpening them and saving the result to the same directory structure, the provided code demonstrates the necessary file‑handling and Aspose.Imaging calls.
  */
