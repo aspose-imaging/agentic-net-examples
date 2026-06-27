@@ -13,15 +13,15 @@ class Program
     {
         try
         {
-            // Hard‑coded paths
-            string inputPath = @"c:\temp\input.webp";
+            // Hardcoded paths
+            string inputWebP = @"c:\temp\input.webp";
             string bmpPath = @"c:\temp\intermediate.bmp";
             string tiffPath = @"c:\temp\output.tif";
 
             // Verify input file exists
-            if (!File.Exists(inputPath))
+            if (!File.Exists(inputWebP))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputWebP}");
                 return;
             }
 
@@ -30,32 +30,36 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(tiffPath));
 
             // Load WebP image
-            using (WebPImage webPImage = new WebPImage(inputPath))
+            using (WebPImage webPImage = new WebPImage(inputWebP))
             {
-                // Convert to BMP using BmpImage constructor (24‑bpp, RGB compression, 96 DPI)
+                // Convert to BMP using BmpImage constructor (raster image, 24‑bpp, RGB compression, 96 DPI)
                 using (BmpImage bmpImage = new BmpImage(
-                    webPImage,
+                    (RasterImage)webPImage,
                     24,
-                    BitmapCompression.Rgb,
+                    Aspose.Imaging.FileFormats.Bmp.BitmapCompression.Rgb,
                     96.0,
                     96.0))
                 {
-                    // Save intermediate BMP file
+                    // Save BMP to intermediate file
                     bmpImage.Save(bmpPath);
-
-                    // Prepare TIFF options with LZW compression
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                    {
-                        Compression = TiffCompressions.Lzw,
-                        BitsPerSample = new ushort[] { 8, 8, 8 },
-                        ByteOrder = TiffByteOrder.BigEndian,
-                        Photometric = TiffPhotometrics.Rgb,
-                        PlanarConfiguration = TiffPlanarConfigs.Contiguous
-                    };
-
-                    // Save as TIFF using the same BMP image instance
-                    bmpImage.Save(tiffPath, tiffOptions);
                 }
+            }
+
+            // Load the BMP we just saved
+            using (BmpImage bmpImage = (BmpImage)Image.Load(bmpPath))
+            {
+                // Prepare TIFF save options with LZW compression
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    BitsPerSample = new ushort[] { 8, 8, 8 },
+                    ByteOrder = TiffByteOrder.BigEndian,
+                    Compression = TiffCompressions.Lzw,
+                    Photometric = TiffPhotometrics.Rgb,
+                    PlanarConfiguration = TiffPlanarConfigs.Contiguous
+                };
+
+                // Save as TIFF with LZW compression
+                bmpImage.Save(tiffPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -67,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive web‑optimized WebP graphics in a lossless, LZW‑compressed TIFF format for long‑term storage while preserving original colors, they can use this code to convert WebP to BMP and then to TIFF.
- * 2. When an application must generate print‑ready high‑resolution TIFF files from WebP assets for a publishing workflow, the code provides the C# conversion and LZW compression needed for print compatibility.
- * 3. When a GIS system requires raster layers originally supplied as WebP to be imported as BMP before being saved as LZW‑compressed TIFF for compatibility with legacy mapping software, this snippet handles the format chain.
- * 4. When a medical‑imaging platform needs to transform WebP scans into BMP for pixel‑accurate manipulation and then store them as LZW‑compressed TIFF to meet archival standards, the code performs the necessary steps.
- * 5. When a cloud‑based image‑processing service must accept WebP uploads, convert them to an intermediate BMP to normalize bit depth, and finally deliver LZW‑compressed TIFF files to clients who request non‑lossy formats, this C# example provides the solution.
+ * 1. When a developer needs to archive web‑optimized images in a lossless, widely supported format for long‑term storage, they can convert WebP to BMP and then to LZW‑compressed TIFF using Aspose.Imaging for .NET.
+ * 2. When integrating a legacy printing system that only accepts BMP or TIFF files, a developer can use this code to transform incoming WebP assets into BMP and finally into a TIFF with LZW compression for efficient print rendering.
+ * 3. When preparing high‑resolution product photos for an e‑commerce catalog that requires TIFF files with lossless compression, developers can convert the original WebP images to BMP and then re‑encode them as LZW‑compressed TIFFs.
+ * 4. When migrating a digital asset management repository that stores images as TIFF for compliance, developers can automate the conversion of stored WebP files to BMP and then to LZW‑compressed TIFF to meet the repository’s format standards.
+ * 5. When building a medical imaging workflow that demands lossless TIFF files for diagnostic analysis, a developer can use this code to turn WebP scans into BMP and subsequently into LZW‑compressed TIFFs for accurate image preservation.
  */
