@@ -4,7 +4,7 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 3466 |
+| Total Examples | 3538 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
 | Last Updated | 2026-06-27 |
@@ -48,7 +48,7 @@ README.md
 | [Convert SVG to Raster Images](./convert-svg-to-raster-images/) | 80 | 100.0% | [agents.md](./convert-svg-to-raster-images/agents.md) |
 | [Convert webp Images](./convert-webp-images/) | 60 | 100.0% | [agents.md](./convert-webp-images/agents.md) |
 | [Converting WMF and EMF](./converting-wmf-and-emf/) | 58 | 100.0% | [agents.md](./converting-wmf-and-emf/agents.md) |
-| [Image and Photo Filters](./image-and-photo-filters/) | 138 | 100.0% | [agents.md](./image-and-photo-filters/agents.md) |
+| [Image and Photo Filters](./image-and-photo-filters/) | 210 | 100.0% | [agents.md](./image-and-photo-filters/agents.md) |
 | [Kernel Filters](./kernel-filters/) | 464 | 100.0% | [agents.md](./kernel-filters/agents.md) |
 | [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 600 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
 | [Manipulating Images](./manipulating-images/) | 413 | 100.0% | [agents.md](./manipulating-images/agents.md) |
@@ -112,7 +112,7 @@ All examples are compiler-validated against the target NuGet version before bein
 
 | Version | Total Examples | Pass Rate | Framework |
 |---------|---------------|-----------|----------|
-| 26.6.0 | 3466 | 100.0% | net9.0 |
+| 26.6.0 | 3538 | 100.0% | net9.0 |
 
 Pass rate is enforced by the agent pipeline — only examples that pass both `dotnet build` and `dotnet run` are committed.
 
