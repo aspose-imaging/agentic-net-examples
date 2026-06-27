@@ -21,30 +21,26 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to GifImage to access GIF-specific methods
                 GifImage gifImage = (GifImage)image;
 
                 // Increase brightness (value range: -255 to 255)
                 gifImage.AdjustBrightness(50);
 
-                // Configure lossy GIF compression options
+                // Configure lossy GIF saving options
                 GifOptions saveOptions = new GifOptions
                 {
-                    // Enable palette correction for better visual quality
-                    DoPaletteCorrection = true,
-                    // Set maximum pixel difference to trigger lossy compression (recommended 80)
-                    MaxDiff = 80,
-                    // Optional: keep interlacing off
-                    Interlaced = false
+                    DoPaletteCorrection = true, // improve palette quality
+                    Interlaced = true,          // optional interlacing
+                    MaxDiff = 80                // >0 enables lossy compression
                 };
 
-                // Save the brighter image using lossy compression
+                // Save the brighter GIF using lossy compression
                 gifImage.Save(outputPath, saveOptions);
             }
         }
@@ -54,3 +50,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When creating marketing email campaigns that include animated GIFs, a developer can brighten the animation to match brand colors and then apply lossy GIF compression to keep the email size under the provider’s limits.
+ * 2. When processing user‑uploaded GIF stickers for a chat app, a developer may need to increase visibility in low‑light scenes and compress the result with Aspose.Imaging’s lossy GIF algorithm to reduce bandwidth usage.
+ * 3. When generating thumbnail previews of GIF tutorials for a learning platform, a developer can boost the brightness for better readability and save the preview with lossy compression to speed up page loads.
+ * 4. When preparing animated GIFs for social media posts, a developer can use the code to adjust brightness for a consistent look across feeds and employ lossy GIF saving options to stay within platform file‑size restrictions.
+ * 5. When building a batch image‑processing pipeline that normalizes lighting in legacy GIF animations, a developer can apply the brightness adjustment and then use GifOptions with MaxDiff to compress the output for archival storage.
+ */
