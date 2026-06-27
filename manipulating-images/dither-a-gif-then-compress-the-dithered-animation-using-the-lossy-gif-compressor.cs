@@ -8,13 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.gif";
+        string outputPath = @"C:\temp\output_lossy.gif";
+
         try
         {
-            // Hardcoded file paths
-            string inputPath = @"C:\temp\input.gif";
-            string ditheredPath = @"C:\temp\output_dithered.gif";
-            string lossyPath = @"C:\temp\output_lossy.gif";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,35 +21,33 @@ class Program
                 return;
             }
 
-            // Load the original GIF and apply dithering
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
-                GifImage gif = (GifImage)image;
+                // Cast to GifImage to access GIF-specific methods
+                GifImage gifImage = (GifImage)image;
 
-                // Apply Floyd‑Steinberg dithering with an 8‑bit palette
-                gif.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
+                // Apply dithering (Floyd‑Steinberg, 8‑bit palette)
+                gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(ditheredPath));
-
-                // Save the dithered GIF (lossless)
-                gif.Save(ditheredPath);
-            }
-
-            // Load the dithered GIF for lossy compression
-            using (Image ditheredImage = Image.Load(ditheredPath))
-            {
-                // Configure lossy GIF options
-                GifOptions options = new GifOptions
+                // Prepare GIF save options with lossy compression
+                GifOptions saveOptions = new GifOptions
                 {
-                    MaxDiff = 80 // Recommended value for good lossy compression
+                    // Enable palette correction for better color matching
+                    DoPaletteCorrection = true,
+                    // Set maximum pixel difference to trigger lossy compression (recommended 80)
+                    MaxDiff = 80,
+                    // Optional: keep interlacing off
+                    Interlaced = false,
+                    // Optional: set color resolution (7 means 8 bits per channel)
+                    ColorResolution = 7
                 };
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(lossyPath));
-
-                // Save the GIF using lossy compression
-                ditheredImage.Save(lossyPath, options);
+                // Save the dithered image with lossy compression
+                gifImage.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -62,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to shrink an animated GIF for faster web loading by first applying Floyd‑Steinberg dithering and then using Aspose.Imaging’s lossy GIF compressor in C#.
- * 2. When an e‑commerce site wants to generate lightweight product animation thumbnails that stay under email size limits, the code dither‑processes the GIF and compresses it lossily.
- * 3. When a mobile app must cache animated stickers locally and minimize storage usage, the routine dithers the original GIF and saves it with a MaxDiff setting for lossy compression.
- * 4. When a digital marketing agency prepares GIF banners for a high‑traffic landing page and needs to balance color fidelity with bandwidth savings, they can dither the animation and apply lossy compression using Aspose.Imaging for .NET.
- * 5. When a game developer creates sprite animations in GIF format and wants to embed them in a Unity project with a reduced memory footprint, this C# code provides a simple way to dither and then compress the GIF lossily.
+ * 1. When a developer needs to shrink an animated GIF for faster web page loading by applying Floyd‑Steinberg dithering to an 8‑bit palette and then saving it with lossy GIF compression options such as MaxDiff and palette correction.
+ * 2. When a developer wants to reduce the attachment size of a GIF used in email newsletters while preserving acceptable visual quality by dithering the frames before applying lossy compression.
+ * 3. When a developer is optimizing GIF stickers for a mobile app, converting high‑color frames to a limited palette with dithering and then using lossy GIF settings to meet device memory constraints.
+ * 4. When a developer processes user‑uploaded GIFs on a server, ensuring each animation is dithered to a smaller palette and saved with lossy compression to stay within storage quotas.
+ * 5. When a developer prepares legacy GIF animations for a game UI, using Floyd‑Steinberg dithering followed by lossy GIF compression to balance file size and visual fidelity.
  */
