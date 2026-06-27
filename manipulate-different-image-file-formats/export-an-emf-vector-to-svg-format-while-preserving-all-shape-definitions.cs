@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
@@ -10,18 +10,18 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.emf";
-            string outputPath = "C:\\temp\\output.svg";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Temp\input.emf";
+            string outputPath = @"C:\Temp\output.svg";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EMF image
@@ -30,8 +30,7 @@ class Program
                 // Prepare SVG save options
                 SvgOptions saveOptions = new SvgOptions
                 {
-                    // Render all text as shapes to preserve appearance
-                    TextAsShapes = true
+                    TextAsShapes = true // Preserve text as vector shapes
                 };
 
                 // Configure rasterization options for EMF
@@ -39,12 +38,11 @@ class Program
                 {
                     BackgroundColor = Color.WhiteSmoke,
                     PageSize = emfImage.Size,
-                    RenderMode = EmfRenderMode.Auto,
-                    BorderX = 50, // horizontal margin
-                    BorderY = 50  // vertical margin
+                    RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
+                    BorderX = 0,
+                    BorderY = 0
                 };
 
-                // Assign rasterization options to SVG options
                 saveOptions.VectorRasterizationOptions = rasterizationOptions;
 
                 // Save as SVG
@@ -60,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy Windows Metafile (EMF) graphics into web‑friendly Scalable Vector Graphics (SVG) while keeping all original shapes intact for responsive UI rendering.
- * 2. When an automated reporting tool must embed high‑quality vector diagrams from EMF files into HTML dashboards without losing text styling, using Aspose.Imaging’s TextAsShapes option.
- * 3. When a batch processing pipeline has to migrate a library of engineering schematics stored as EMF into SVG format for cross‑platform viewing, preserving exact dimensions and margins.
- * 4. When a desktop application generates printable charts in EMF and wants to export them to SVG for inclusion in PDF documents while ensuring consistent background color and page size.
- * 5. When a CI/CD build script needs to validate that vector assets convert correctly by programmatically loading EMF images and saving them as SVG with rasterization settings for quality assurance testing.
+ * 1. When a developer needs to convert Windows Metafile (EMF) vector graphics from a legacy reporting system into scalable SVG files for web display while preserving every shape definition.
+ * 2. When an application must batch‑process engineering diagrams stored as EMF and export them to SVG so they can be edited in modern vector editors without losing text as vector shapes.
+ * 3. When a C# service integrates Aspose.Imaging to transform EMF logos embedded in PDF documents into SVG icons for responsive UI components.
+ * 4. When a developer wants to preserve the exact visual fidelity of EMF charts by rasterizing them with a custom background color and page size before saving as SVG for print‑ready workflows.
+ * 5. When an automated build pipeline needs to verify that EMF assets are correctly rendered as SVG vectors, using Aspose.Imaging’s EmfRasterizationOptions to ensure consistent border and rendering mode across platforms.
  */
