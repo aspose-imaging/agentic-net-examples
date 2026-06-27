@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -24,12 +25,13 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the JPEG image as a raster image
+            // Load the JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage for filtering
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Define a custom kernel (example 3x3 kernel)
+                // Define a custom kernel (example 3x3)
                 double[,] kernel = new double[,]
                 {
                     { 1, 2, 1 },
@@ -37,7 +39,7 @@ class Program
                     { 1, 2, 1 }
                 };
 
-                // Normalize the kernel so that the sum of coefficients equals 1
+                // Normalize kernel so that sum equals 1
                 double sum = 0;
                 foreach (double value in kernel)
                 {
@@ -55,14 +57,19 @@ class Program
                 }
 
                 // Create convolution filter options with the normalized kernel
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
 
-                // Apply the custom kernel to the entire image
-                raster.Filter(raster.Bounds, filterOptions);
+                // Apply the filter to the entire image
+                rasterImage.Filter(rasterImage.Bounds, convOptions);
 
-                // Save the processed image as JPEG
-                var jpegOptions = new JpegOptions();
-                raster.Save(outputPath, jpegOptions);
+                // Prepare JPEG save options
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                // Save the processed image
+                rasterImage.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -74,9 +81,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to apply a custom blur or sharpening effect to a JPEG photo and must ensure the filter does not change the overall brightness, they can normalize the kernel and use Aspose.Imaging’s ConvolutionFilterOptions in C#.
- * 2. When building an automated image‑processing pipeline that prepares product photos for an e‑commerce site, a developer can normalize a custom edge‑enhancement kernel and apply it to each JPEG to keep color balance consistent.
- * 3. When creating a desktop application that lets users apply artistic filters to their pictures, a developer can use the code to normalize a user‑defined 3×3 kernel and apply it to JPEG images without introducing artifacts.
- * 4. When implementing a batch‑processing tool that reduces JPEG noise using a custom smoothing kernel, a developer needs to normalize the coefficients so the filtered images retain the original exposure.
- * 5. When integrating Aspose.Imaging into a C# web service that generates thumbnails with a custom sharpening kernel, a developer must normalize the kernel to ensure the resulting JPEG thumbnails have uniform brightness.
+ * 1. When a developer needs to apply a custom Gaussian blur to a JPEG photo while preserving overall brightness, they can normalize the 3×3 kernel and use Aspose.Imaging’s ConvolutionFilterOptions in C#.
+ * 2. When building an automated image‑preprocessing pipeline that reduces high‑frequency noise in scanned JPEG documents, normalizing the filter coefficients ensures the filtered output does not become unintentionally darker or lighter.
+ * 3. When creating a web service that sharpens user‑uploaded JPEG images with a custom edge‑enhancement kernel, developers must normalize the kernel so the sum equals one before applying the convolution filter with Aspose.Imaging.
+ * 4. When integrating a photo‑editing feature into a .NET desktop application that applies a custom emboss effect to JPEG pictures, the code normalizes the kernel to maintain consistent exposure across the image.
+ * 5. When generating thumbnails for an e‑commerce platform and need to apply a custom smoothing filter to JPEG product images without altering their average color, developers use the normalized kernel and Aspose.Imaging’s convolution filter in C#.
  */
