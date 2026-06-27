@@ -1,25 +1,20 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath1 = @"C:\Images\image1.psd";
-        string inputPath2 = @"C:\Images\image2.psd";
-        string inputPath3 = @"C:\Images\image3.psd";
-        string outputPath = @"C:\Images\multipage.tif";
-
         try
         {
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Hardcoded input PSD file paths
+            string inputPath1 = @"C:\temp\image1.psd";
+            string inputPath2 = @"C:\temp\image2.psd";
+            string inputPath3 = @"C:\temp\image3.psd";
 
             // Verify each input file exists
             if (!File.Exists(inputPath1))
@@ -38,39 +33,32 @@ class Program
                 return;
             }
 
-            // Load the first PSD to obtain image dimensions
-            using (RasterImage firstPage = (RasterImage)Image.Load(inputPath1))
+            // Hardcoded output TIFF path
+            string outputPath = @"C:\temp\multipage.tif";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Create TIFF options for a new file
+            TiffOptions tiffOptions = new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default);
+            tiffOptions.Source = new Aspose.Imaging.Sources.FileCreateSource(outputPath, false);
+            tiffOptions.Photometric = Aspose.Imaging.FileFormats.Tiff.Enums.TiffPhotometrics.Rgb;
+            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+
+            // Load PSD images
+            using (RasterImage psd1 = (RasterImage)Image.Load(inputPath1))
+            using (RasterImage psd2 = (RasterImage)Image.Load(inputPath2))
+            using (RasterImage psd3 = (RasterImage)Image.Load(inputPath3))
+            // Create the TIFF image (initial size will be replaced by first added page)
+            using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, psd1.Width, psd1.Height))
             {
-                int width = firstPage.Width;
-                int height = firstPage.Height;
+                // Add each PSD as a new page
+                tiffImage.AddPage(psd1);
+                tiffImage.AddPage(psd2);
+                tiffImage.AddPage(psd3);
 
-                // Set up TIFF creation options
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.Source = new FileCreateSource(outputPath, false);
-                tiffOptions.Photometric = TiffPhotometrics.Rgb;
-                tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-
-                // Create an empty TIFF image with the dimensions of the first page
-                using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, width, height))
-                {
-                    // Add the first page (already loaded)
-                    tiffImage.AddPage(firstPage);
-
-                    // Load and add the second PSD page
-                    using (RasterImage secondPage = (RasterImage)Image.Load(inputPath2))
-                    {
-                        tiffImage.AddPage(secondPage);
-                    }
-
-                    // Load and add the third PSD page
-                    using (RasterImage thirdPage = (RasterImage)Image.Load(inputPath3))
-                    {
-                        tiffImage.AddPage(thirdPage);
-                    }
-
-                    // Save the multipage TIFF
-                    tiffImage.Save();
-                }
+                // Save the multipage TIFF
+                tiffImage.Save();
             }
         }
         catch (Exception ex)
@@ -82,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive a series of Photoshop PSD files as a single multipage TIFF for long‑term storage or compliance auditing.
- * 2. When a developer wants to generate a printable document that combines several design drafts (PSD) into one high‑resolution TIFF for a press workflow.
- * 3. When a developer must create a multipage TIFF to import into a document management system that only accepts TIFF while the source assets are PSD images.
- * 4. When a developer is building a batch conversion tool that consolidates multiple PSD pages into a single TIFF to reduce file‑handling overhead in a .NET application.
- * 5. When a developer needs to prepare a multipage TIFF for medical or scientific imaging archives where each PSD represents a separate slice or layer of a scanned specimen.
+ * 1. When a developer needs to use the AddPage method to merge several PSD images into a single multipage TIFF for archival or printing workflows.
+ * 2. When an application must generate a multi‑page TIFF by adding PSD pages with AddPage before saving to a printer that only accepts TIFF files.
+ * 3. When a web service converts client‑uploaded PSD files into one multipage TIFF using AddPage for easy preview in browsers that support TIFF.
+ * 4. When a batch‑processing tool consolidates PSD artwork from different product variants into a single TIFF file by adding each PSD as a page with AddPage.
+ * 5. When a digital asset management system stores related PSD files as a single multipage TIFF, using AddPage to reduce storage overhead and simplify metadata handling.
  */
