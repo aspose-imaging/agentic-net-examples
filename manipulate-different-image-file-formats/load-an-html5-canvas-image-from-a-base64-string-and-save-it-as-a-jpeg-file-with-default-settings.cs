@@ -6,29 +6,36 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input_base64.txt";
+        string outputPath = "output.jpg";
+
         try
         {
-            // Base64-encoded image data (replace with actual data)
-            string base64Image = "iVBORw0KGgoAAAANSUhEUgAAAAUA" +
-                                 "AAAFCAYAAACNbyblAAAAHElEQVQI12P4" +
-                                 "//8/w38GIAXDIBKE0DHxgljNBAAO" +
-                                 "9TXL0Y4OHwAAAABJRU5ErkJggg==";
-
-            // Convert the Base64 string to a byte array
-            byte[] imageBytes = Convert.FromBase64String(base64Image);
-
-            // Load the image from the memory stream
-            using (var memoryStream = new MemoryStream(imageBytes))
-            using (Image image = Image.Load(memoryStream))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Output JPEG file path (hard‑coded)
-                string outputPath = @"C:\Temp\output.jpg";
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Read the Base64 string from the input file
+            string base64String = File.ReadAllText(inputPath);
 
-                // Save the image as JPEG with default settings
-                image.Save(outputPath);
+            // Convert Base64 string to a byte array
+            byte[] imageBytes = Convert.FromBase64String(base64String);
+
+            // Load the image from the byte array using a memory stream
+            using (var memoryStream = new MemoryStream(imageBytes))
+            {
+                using (Image image = Image.Load(memoryStream))
+                {
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the image as JPEG with default settings
+                    image.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)
@@ -40,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application receives an HTML5 Canvas image as a Base64 string from a browser and needs to store it as a JPEG file on the server for later retrieval or display.
- * 2. When a desktop utility processes user‑generated Base64‑encoded PNG data and converts it to a standard JPEG format for compatibility with legacy image viewers.
- * 3. When an automated email system embeds a Canvas snapshot as Base64 and must decode and save it as a JPEG attachment before sending.
- * 4. When a cloud service ingests Base64 image payloads from API clients and requires conversion to JPEG files for efficient storage and CDN distribution.
- * 5. When a batch job reads Base64‑encoded images from a database, loads them into Aspose.Imaging, and saves each as a JPEG to generate thumbnails for a gallery.
+ * 1. When a web application receives a base64‑encoded HTML5 Canvas snapshot from a browser and needs to store it as a JPEG file on the server using C# and Aspose.Imaging.
+ * 2. When an API endpoint processes user‑uploaded canvas data encoded in base64 and must convert it to a standard image format for further analysis or archiving.
+ * 3. When a desktop utility reads a base64 string saved in a text file, loads it as an image, and saves it as a JPEG to integrate with existing image‑processing pipelines.
+ * 4. When a background service validates that a base64‑encoded image exists, decodes it, and writes a JPEG version to a network share for reporting purposes.
+ * 5. When a developer wants to quickly transform HTML5 Canvas output captured as base64 into a JPEG without manually handling image codecs, leveraging Aspose.Imaging’s Image.Load and Save methods.
  */
