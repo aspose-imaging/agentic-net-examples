@@ -10,33 +10,31 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "sample.djvu";
-        string outputPath = "output/output.tiff";
-
         try
         {
+            string inputPath = "Input/sample.djvu";
+            string outputDirectory = "Output";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(outputDirectory);
 
-            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
             {
-                foreach (Image page in djvu.Pages)
+                foreach (Image page in djvuImage.Pages)
                 {
-                    if (page is DjvuPage djvuPage)
-                    {
-                        djvuPage.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                    }
+                    page.RotateFlip(RotateFlipType.RotateNoneFlipX);
+
+                    string outputPath = Path.Combine(outputDirectory, $"page_{((DjvuPage)page).PageNumber}.tiff");
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    page.Save(outputPath, new TiffOptions(TiffExpectedFormat.TiffDeflateBw));
                 }
-
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffDeflateBw);
-                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions();
-
-                djvu.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert scanned book pages stored in a DjVu file into a searchable multi‑page TIFF while mirroring the pages for right‑to‑left languages.
- * 2. When an archival system requires batch processing of DjVu documents to create compressed black‑and‑white TIFF files with a horizontal flip to correct orientation before indexing.
- * 3. When a printing workflow must transform DjVu manuals into multi‑page TIFFs with lossless Deflate compression and flip each page to match printer feed direction.
- * 4. When a document management application needs to load a DjVu image, apply a horizontal flip to every page, and export it as a single TIFF file for compatibility with legacy software.
- * 5. When a legal e‑discovery tool has to preprocess DjVu evidence files by flipping pages and saving them as multi‑page TIFFs for OCR and review.
+ * 1. When a developer needs to extract each page of a scanned DjVu document and create horizontally flipped black‑and‑white TIFF files for archival storage.
+ * 2. When a document‑management system must preprocess DjVu pages by applying a left‑right flip before converting them to compressed TIFF for OCR processing.
+ * 3. When a printing workflow requires converting multi‑page DjVu files into individual TIFF images with a horizontal flip to match printer orientation.
+ * 4. When a digital library wants to generate searchable TIFF thumbnails from DjVu books while correcting page orientation using a flip operation.
+ * 5. When a batch‑processing tool has to load a DjVu file, apply RotateFlipType.RotateNoneFlipX to every page, and save the results as deflated BW TIFF files for downstream image analysis.
  */
