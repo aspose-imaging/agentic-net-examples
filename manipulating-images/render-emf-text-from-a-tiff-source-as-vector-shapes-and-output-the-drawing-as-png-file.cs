@@ -2,47 +2,40 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Images\source.tif";
-            string outputPath = @"C:\Images\result.png";
+            string inputPath = "input.tif";
+            string outputPath = "output.png";
 
-            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TIFF image (which may contain embedded EMF data)
-            using (Image image = Image.Load(inputPath))
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                // Configure PNG save options with vector rasterization.
-                // EmfRasterizationOptions will rasterize vector content (including EMF)
-                // while preserving text as shapes.
-                PngOptions pngOptions = new PngOptions
+                PngOptions pngOptions = new PngOptions();
+
+                EmfRasterizationOptions vectorOptions = new EmfRasterizationOptions
                 {
-                    VectorRasterizationOptions = new EmfRasterizationOptions
-                    {
-                        PageSize = image.Size,
-                        BackgroundColor = Color.White,
-                        RenderMode = EmfRenderMode.Auto
-                    }
+                    PageSize = tiff.Size,
+                    BackgroundColor = Color.White,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel
                 };
 
-                // Save the result as PNG
-                image.Save(outputPath, pngOptions);
+                pngOptions.VectorRasterizationOptions = vectorOptions;
+
+                tiff.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -54,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert multi‑page TIFF documents that embed EMF graphics into high‑resolution PNGs while preserving the original text as scalable vector shapes for printing or web display.
- * 2. When an application must extract embedded EMF annotations from scanned TIFF files and render them as crisp PNG thumbnails without losing vector quality.
- * 3. When a reporting tool generates TIFF images containing vector‑based charts and the developer wants to produce PNG images for inclusion in HTML emails, keeping the chart text sharp.
- * 4. When a migration script processes legacy TIFF archives with embedded EMF watermarks and needs to output PNG files that retain the watermark as vector outlines for later editing.
- * 5. When a desktop utility reads TIFF files from a scanner, rasterizes any EMF text layers using Aspose.Imaging’s EmfRasterizationOptions, and saves the result as PNG for downstream image‑analysis pipelines.
+ * 1. When a developer needs to convert multi‑page TIFF documents that contain EMF‑encoded text into high‑resolution PNG images while preserving the text as vector shapes for crisp rendering.
+ * 2. When an application must generate web‑ready PNG thumbnails from scanned TIFF files that include embedded EMF captions, ensuring the text remains sharp at any zoom level.
+ * 3. When a reporting tool has to export printed TIFF reports with vector‑based annotations to PNG format for inclusion in PDFs without losing text quality.
+ * 4. When a migration script has to batch‑process legacy TIFF assets containing EMF graphics and produce PNG assets that can be displayed on modern browsers.
+ * 5. When a GIS or CAD system requires converting TIFF maps with embedded EMF labels into PNG tiles while keeping the label text rendered as vectors for accurate scaling.
  */
