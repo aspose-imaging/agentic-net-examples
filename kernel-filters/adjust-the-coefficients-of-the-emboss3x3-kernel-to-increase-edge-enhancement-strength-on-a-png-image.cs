@@ -7,11 +7,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,22 +24,26 @@ class Program
             {
                 RasterImage raster = (RasterImage)image;
 
-                double[,] kernel = (double[,])Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3.Clone();
-                double strengthFactor = 1.5;
-                int rows = kernel.GetLength(0);
-                int cols = kernel.GetLength(1);
+                double[,] baseKernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3;
+
+                int rows = baseKernel.GetLength(0);
+                int cols = baseKernel.GetLength(1);
+                double[,] enhancedKernel = new double[rows, cols];
+                double strengthFactor = 2.0;
+
                 for (int i = 0; i < rows; i++)
                 {
                     for (int j = 0; j < cols; j++)
                     {
-                        kernel[i, j] *= strengthFactor;
+                        enhancedKernel[i, j] = baseKernel[i, j] * strengthFactor;
                     }
                 }
 
-                raster.Filter(raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(enhancedKernel);
+                raster.Filter(raster.Bounds, filterOptions);
 
-                raster.Save(outputPath, new PngOptions());
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -51,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to enhance the edges of product photos in PNG format for an e‑commerce website, they can increase the strength of the Emboss3x3 kernel using Aspose.Imaging in C#.
- * 2. When a desktop application needs to apply a stronger emboss effect to scanned documents before saving them as PNG files, the code can adjust the convolution kernel coefficients to boost edge definition.
- * 3. When a game developer wants to preprocess sprite sheets by intensifying the emboss filter to make outlines more pronounced in PNG assets, they can use this C# snippet with Aspose.Imaging.
- * 4. When an automated image‑processing pipeline must improve the visual contrast of architectural blueprints stored as PNGs by increasing edge enhancement, the adjustable kernel strength provides a simple solution.
- * 5. When a photo‑editing tool requires a customizable emboss effect that can be tuned at runtime for PNG images, developers can modify the Emboss3x3 kernel coefficients as shown to control the intensity of the effect.
+ * 1. When a developer needs to boost the edge‑enhancement of a PNG graphic for a web UI, they can multiply the Aspose.Imaging Emboss3x3 kernel coefficients to create a stronger emboss effect before saving the image.
+ * 2. When preparing product photos for an e‑commerce catalog, a developer may apply a heightened emboss filter using C# and Aspose.Imaging to make product outlines more pronounced in the final PNG files.
+ * 3. When generating stylized map tiles, a GIS programmer can increase the strength of the Emboss3x3 convolution kernel to accentuate terrain edges in PNG tiles for better visual contrast.
+ * 4. When creating printable marketing materials, a designer‑developer can use the code to intensify the emboss filter on PNG logos, ensuring the edges stand out after high‑resolution printing.
+ * 5. When building an image‑processing pipeline that detects structural details, a developer may adjust the Emboss3x3 kernel coefficients in C# with Aspose.Imaging to amplify edge detection before further analysis of PNG images.
  */
