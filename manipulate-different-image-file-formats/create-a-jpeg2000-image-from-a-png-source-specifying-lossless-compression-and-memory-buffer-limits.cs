@@ -1,48 +1,43 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\source.png";
+        string outputPath = @"C:\temp\output.jp2";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"c:\temp\input.png";
-            string outputPath = @"c:\temp\output.j2k";
-
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source PNG image
+            // Load the PNG image
             using (PngImage pngImage = (PngImage)Image.Load(inputPath))
             {
-                // Create a JPEG2000 image from the PNG raster image
-                using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(pngImage))
+                // Configure JPEG2000 options for lossless compression and buffer size hint
+                Jpeg2000Options jpeg2000Options = new Jpeg2000Options
                 {
-                    // Configure JPEG2000 options for lossless compression and buffer size hint
-                    Jpeg2000Options options = new Jpeg2000Options
-                    {
-                        // Irreversible = false (default) ensures lossless DWT 5-3 compression
-                        Irreversible = false,
-                        // Example buffer size hint (in bytes); adjust as needed
-                        BufferSizeHint = 10 * 1024 * 1024 // 10 MB
-                    };
+                    // Irreversible = false (default) ensures lossless DWT 5-3 compression
+                    Irreversible = false,
+                    // Example buffer size hint (in bytes)
+                    BufferSizeHint = 2 * 1024 * 1024 // 2 MB
+                };
 
-                    // Save the JPEG2000 image with the specified options
-                    jpeg2000Image.Save(outputPath, options);
-                }
+                // Save as JPEG2000 using the configured options
+                pngImage.Save(outputPath, jpeg2000Options);
             }
         }
         catch (Exception ex)
@@ -54,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive high‑resolution PNG graphics in a space‑efficient, lossless JPEG2000 format for long‑term storage or regulatory compliance.
- * 2. When a medical imaging application must convert diagnostic PNG scans to JPEG2000 without quality loss while controlling memory usage during the conversion.
- * 3. When a GIS system requires transforming PNG map tiles into JPEG2000 for faster streaming over limited bandwidth, ensuring lossless detail and setting a buffer limit to avoid out‑of‑memory errors.
- * 4. When an e‑learning platform wants to generate lossless JPEG2000 assets from PNG illustrations for inclusion in SCORM packages that support JPEG2000 compression.
- * 5. When a digital publishing workflow needs to batch‑process PNG artwork into JPEG2000 for print‑ready PDFs, using a buffer size hint to keep the conversion within server memory constraints.
+ * 1. When a developer needs to convert high‑resolution PNG assets to lossless JPEG2000 for archival storage while controlling memory usage with a buffer size hint.
+ * 2. When an application must generate JPEG2000 files from PNG graphics for web services that require lossless compression to preserve image quality during transmission.
+ * 3. When a batch‑processing tool has to transform PNG scans into JPEG2000 format to meet DICOM medical imaging standards without introducing compression artifacts.
+ * 4. When a desktop utility needs to create JPEG2000 thumbnails from PNG source images while ensuring the process stays within a 2 MB memory buffer.
+ * 5. When a cloud‑based image pipeline must convert PNG uploads to JPEG2000 with lossless DWT compression and explicit buffer limits to avoid out‑of‑memory errors.
  */
