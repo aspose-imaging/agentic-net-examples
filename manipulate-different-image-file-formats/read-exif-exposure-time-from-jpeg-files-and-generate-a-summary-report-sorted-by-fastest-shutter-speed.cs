@@ -11,66 +11,70 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG files
-            string[] inputFiles = { "photo1.jpg", "photo2.jpg", "photo3.jpg" };
-            // Hardcoded output report path
+            // Hardcoded input and output paths
+            string inputDirectory = "Input";
             string outputPath = "Output/report.txt";
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            var exposures = new List<(string File, double Value, string Text)>();
+            // Collect JPEG files (both .jpg and .jpeg)
+            var jpegFiles = new List<string>();
+            jpegFiles.AddRange(Directory.GetFiles(inputDirectory, "*.jpg"));
+            jpegFiles.AddRange(Directory.GetFiles(inputDirectory, "*.jpeg"));
 
-            foreach (var inputPath in inputFiles)
+            var records = new List<(string FileName, double Value, string Text)>();
+
+            foreach (var filePath in jpegFiles)
             {
-                if (!File.Exists(inputPath))
+                // Validate input file existence
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     continue;
                 }
 
-                using (JpegImage image = (JpegImage)Image.Load(inputPath))
+                // Load the JPEG image
+                using (JpegImage image = (JpegImage)Image.Load(filePath))
                 {
-                    var exif = image.ExifData;
-                    if (exif != null)
+                    var exifData = image.ExifData;
+                    if (exifData != null)
                     {
-                        var exposureObj = exif.ExposureTime;
-                        if (exposureObj != null)
+                        // ExposureTime may be a rational type; attempt to convert to double
+                        object exposureObj = exifData.ExposureTime;
+                        string exposureText = exposureObj?.ToString() ?? "N/A";
+                        double exposureValue = 0.0;
+
+                        try
                         {
-                            double value = 0;
-                            string text = exposureObj.ToString();
-
-                            // Attempt numeric conversion
-                            try
-                            {
-                                value = Convert.ToDouble(exposureObj);
-                            }
-                            catch
-                            {
-                                // Fallback parsing from string representation
-                                var numericPart = text.Split('(')[0];
-                                double.TryParse(numericPart, out value);
-                            }
-
-                            exposures.Add((Path.GetFileName(inputPath), value, text));
+                            exposureValue = Convert.ToDouble(exposureObj);
                         }
+                        catch
+                        {
+                            // If conversion fails, keep default value (0) which will sort last
+                        }
+
+                        records.Add((Path.GetFileName(filePath), exposureValue, exposureText));
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine($"No EXIF data: {filePath}");
                     }
                 }
             }
 
             // Sort by fastest shutter speed (smallest exposure time)
-            var sorted = exposures.OrderBy(e => e.Value).ToList();
+            var sortedRecords = records.OrderBy(r => r.Value).ToList();
 
-            var lines = new List<string>
+            // Prepare report lines
+            var reportLines = new List<string>();
+            foreach (var rec in sortedRecords)
             {
-                "Exposure Time Report (sorted by fastest shutter speed):"
-            };
-            foreach (var item in sorted)
-            {
-                lines.Add($"{item.File}: {item.Text}");
+                reportLines.Add($"{rec.FileName}: {rec.Text}");
             }
 
-            File.WriteAllLines(outputPath, lines);
+            // Write the summary report
+            File.WriteAllLines(outputPath, reportLines);
         }
         catch (Exception ex)
         {
@@ -81,9 +85,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer wants to audit a batch of JPEG images to identify which shots were captured with the fastest shutter speed, a developer can use this C# code with Aspose.Imaging to read EXIF exposure times and produce a sorted report.
- * 2. When a media archive needs to catalog image files by their exposure settings for quick retrieval of high‑speed action shots, the code extracts EXIF exposure time from JPEGs and generates a text summary ordered by fastest shutter speed.
- * 3. When a wildlife research project requires analyzing camera trap photos to determine which images were taken with the shortest exposure, developers can employ this snippet to parse JPEG EXIF data and rank the files by shutter speed.
- * 4. When an e‑commerce platform wants to showcase product photos taken with optimal motion blur control, the solution reads JPEG EXIF exposure values and creates a report that highlights the images with the quickest shutter times.
- * 5. When a digital forensics analyst needs to verify the sequence of events by comparing exposure times across multiple JPEG evidence files, the code reads the EXIF exposure time using Aspose.Imaging and outputs a sorted list of the fastest captures.
+ * 1. When a photographer wants to audit a batch of wedding photos to identify which shots were taken with the fastest shutter speed for motion analysis, they can run this C# code using Aspose.Imaging to read EXIF exposure times from JPEG files and produce a sorted report.
+ * 2. When a media archive needs to catalog thousands of historic newspaper scans and verify that high‑speed capture settings were used, the code can extract exposure time metadata from each JPEG and generate a summary list ordered by fastest shutter speed.
+ * 3. When a wildlife research team collects camera‑trap images and must quickly find the images captured with the shortest exposure to ensure clear motion capture, they can employ this script to read EXIF data from JPEGs and sort the results.
+ * 4. When a digital forensics analyst is examining a suspect’s photo collection and wants to pinpoint images taken with rapid shutter speeds that might indicate video‑like bursts, the program reads the exposure time tags and creates a ranked text report.
+ * 5. When an e‑commerce platform processes product photos and needs to confirm that all images were shot with a consistent fast shutter to avoid blur, the developer can use this code to extract and compare EXIF exposure times across JPEG files.
  */
