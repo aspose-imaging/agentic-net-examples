@@ -7,7 +7,7 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output locations
+        // Hardcoded paths
         string inputPath = "input.tif";
         string outputDirectory = "output_frames";
 
@@ -20,23 +20,22 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(outputDirectory);
 
             // Load the multi‑frame TIFF image
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                TiffFrame[] frames = tiffImage.Frames;
-
-                // Iterate over each frame and save it as an individual TIFF file
-                for (int i = 0; i < frames.Length; i++)
+                // Iterate over each frame
+                for (int i = 0; i < tiffImage.Frames.Length; i++)
                 {
                     // Create a new TiffImage containing only the current frame
-                    using (TiffImage singleFrameImage = new TiffImage(new TiffFrame[] { frames[i] }))
+                    using (TiffImage singleFrameImage = new TiffImage(tiffImage.Frames[i]))
                     {
+                        // Build output file path using the original frame index
                         string outputPath = Path.Combine(outputDirectory, $"frame_{i}.tif");
 
-                        // Ensure the directory for the output file exists
+                        // Ensure the directory for the output file exists (unconditional as required)
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                         // Save the single‑frame TIFF
@@ -54,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract individual pages from a multi‑frame TIFF scanned document for separate processing or archival, they can use this C# Aspose.Imaging code to split the file into per‑page TIFFs named by frame index.
- * 2. When an application must convert each frame of a multi‑page medical imaging TIFF (e.g., DICOM‑derived) into separate files for integration with other diagnostic tools, the code provides a straightforward way to save each frame as its own TIFF.
- * 3. When a workflow requires sending individual frames of a multi‑frame satellite imagery TIFF to different micro‑services for analysis, this snippet automates the extraction and naming of each frame in C#.
- * 4. When a developer is building a print‑ready PDF generator that needs separate TIFF files for each page of a scanned book, the example shows how to split the source TIFF and preserve the original order using frame indices.
- * 5. When a content management system must index each page of a multi‑page TIFF separately for search and retrieval, the code demonstrates how to programmatically break the TIFF into single‑frame images with predictable filenames.
+ * 1. When a medical imaging system receives a multi‑frame DICOM‑converted TIFF scan and needs to store each slice as an individual file for separate analysis.
+ * 2. When a document management workflow must extract each page of a scanned multi‑page TIFF contract into separate TIFF files to apply page‑level OCR or digital signatures.
+ * 3. When a GIS application processes a multi‑band satellite TIFF and wants to isolate each band as its own single‑frame TIFF for independent raster calculations.
+ * 4. When a printing service prepares a multi‑page TIFF brochure and must generate individual TIFF files to send to different printers or print queues.
+ * 5. When a software tester automates validation of animation frames stored in a multi‑frame TIFF and requires each frame saved separately to compare against expected images.
  */
