@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -11,37 +10,29 @@ class Program
     {
         try
         {
-            // Hardcoded input DjVu file and output directory
-            string inputPath = "sample.djvu";
-            string outputDir = "Output";
-
-            // Verify input file exists
+            string inputPath = "Input/sample.djvu";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
+            string outputDirectory = "Output";
 
-            // Load DjVu document
-            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvu = new DjvuImage(stream))
             {
-                // Iterate through each page
-                foreach (DjvuPage page in djvu.Pages)
+                foreach (Image img in djvu.Pages)
                 {
-                    // Rotate page 90 degrees clockwise, resize proportionally, white background
-                    page.Rotate(90f, true, Color.White);
+                    using (DjvuPage page = (DjvuPage)img)
+                    {
+                        // Rotate each page 90 degrees clockwise, resize proportionally, white background
+                        page.Rotate(90f, true, Color.White);
 
-                    // Build output file path for the page
-                    string outputPath = Path.Combine(outputDir, $"page_{page.PageNumber}.png");
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the rotated page as PNG
-                    page.Save(outputPath, new PngOptions());
+                        string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        page.Save(outputPath, new PngOptions());
+                    }
                 }
             }
         }
@@ -54,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each page of a multi‑page DjVu document, rotate it for proper orientation, and save it as a high‑quality PNG for web preview.
- * 2. When an archival system must convert scanned DjVu files into PNG thumbnails while correcting a 90‑degree misalignment on every page.
- * 3. When a document‑processing pipeline requires batch conversion of DjVu pages to PNG images with a white background after rotating them to match portrait layout.
- * 4. When a digital publishing tool needs to programmatically load a DjVu ebook, rotate each page clockwise, and output PNG files for inclusion in an e‑reader app.
- * 5. When a C# application must validate the existence of a DjVu source, create an output folder, and transform each rotated page into PNG using Aspose.Imaging for further analysis.
+ * 1. When a developer needs to display scanned archival documents originally saved as DjVu on a web page that only supports PNG images, they can rotate each page to correct orientation and convert it to PNG.
+ * 2. When an e‑learning platform receives multi‑page DjVu lecture notes that are scanned upside‑down, the code can rotate every page 90° clockwise and export them as PNG thumbnails for quick preview.
+ * 3. When a digital library wants to generate printable PNG versions of DjVu manuscripts while ensuring the pages are correctly oriented for printing, this routine rotates and saves each page as a high‑quality PNG.
+ * 4. When an automated document processing pipeline must extract each page of a DjVu file, apply a standard rotation, and store the results in a PNG folder for downstream OCR analysis, the code provides the needed transformation.
+ * 5. When a mobile app needs to cache rotated PNG images of DjVu comic book pages for faster rendering on devices that cannot render DjVu directly, this snippet rotates and converts each page to PNG files.
  */
