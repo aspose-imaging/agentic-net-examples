@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Watermark;
 using Aspose.Imaging.Watermark.Options;
 using Aspose.Imaging.Shapes;
@@ -21,44 +20,49 @@ class Program
                 return;
             }
 
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Define mask (example ellipse)
+            var mask = new GraphicsPath();
+            var figure = new Figure();
+            figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 200)));
+            mask.AddFigure(figure);
+
             using (var image = Image.Load(inputPath))
             {
-                var pngImage = (PngImage)image;
+                var raster = (RasterImage)image;
 
-                var mask = new GraphicsPath();
-                var figure = new Figure();
-                figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 200)));
-                mask.AddFigure(figure);
-
-                var contentOptions = new ContentAwareFillWatermarkOptions(mask)
+                var caOptions = new ContentAwareFillWatermarkOptions(mask)
                 {
                     MaxPaintingAttempts = 4
                 };
 
-                var start = DateTime.Now;
-                using (var result = WatermarkRemover.PaintOver(pngImage, contentOptions))
+                const double timeLimitSeconds = 5.0;
+                RasterImage result = null;
+                bool useTelea = false;
+
+                DateTime start = DateTime.Now;
+                using (var tempResult = WatermarkRemover.PaintOver(raster, caOptions))
                 {
-                    var elapsed = DateTime.Now - start;
-
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    if (elapsed > TimeSpan.FromSeconds(5))
+                    double elapsed = (DateTime.Now - start).TotalSeconds;
+                    if (elapsed > timeLimitSeconds)
                     {
-                        var teleaOptions = new TeleaWatermarkOptions(mask);
-                        using (var freshImage = Image.Load(inputPath))
-                        {
-                            var freshPng = (PngImage)freshImage;
-                            using (var fallbackResult = WatermarkRemover.PaintOver(freshPng, teleaOptions))
-                            {
-                                fallbackResult.Save(outputPath);
-                            }
-                        }
+                        useTelea = true;
                     }
                     else
                     {
-                        result.Save(outputPath);
+                        result = tempResult;
                     }
                 }
+
+                if (useTelea)
+                {
+                    var teleaOptions = new TeleaWatermarkOptions(mask);
+                    result = WatermarkRemover.PaintOver(raster, teleaOptions);
+                }
+
+                result.Save(outputPath);
+                result.Dispose();
             }
         }
         catch (Exception ex)
@@ -67,3 +71,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a C# application must automatically remove a logo or watermark from high‑resolution PNG files and guarantee completion within a strict time budget, using ContentAwareFill with a Telea fallback ensures the process never exceeds the limit.
+ * 2. When processing batches of scanned PDFs converted to raster images where some pages contain complex textures that cause ContentAwareFill to run slowly, the fallback to Telea provides a faster, albeit less precise, fill to keep the pipeline moving.
+ * 3. When building an image‑editing web service that accepts user‑uploaded images and needs to replace elliptical watermarks while preventing server time‑outs, the code switches to Telea after a 5‑second threshold.
+ * 4. When integrating Aspose.Imaging into a desktop tool that restores old photographs by painting over unwanted stamps, the developer can rely on the fallback mechanism to avoid long pauses on large images.
+ * 5. When creating an automated archival workflow that sanitizes PNG assets before publishing and must handle varying image complexities, the fallback to Telea guarantees that every file is processed even if ContentAwareFill exceeds the predefined processing time.
+ */
