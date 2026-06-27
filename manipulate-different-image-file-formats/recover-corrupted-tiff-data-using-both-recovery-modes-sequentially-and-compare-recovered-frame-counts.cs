@@ -2,74 +2,56 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded paths
-        string inputPath = @"C:\Temp\corrupted.tif";
-        string outputConsistentPath = @"C:\Temp\Recovered_Consistent.tif";
-        string outputMaximalPath = @"C:\Temp\Recovered_Maximal.tif";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
-            // ---------- Consistent Recovery ----------
-            // Load the corrupted TIFF using ConsistentRecover mode
-            var loadOptionsConsistent = new LoadOptions
+            string inputPath = "corrupted.tif";
+            string outputPathConsistent = "output\\recovered_consistent.tif";
+            string outputPathFull = "output\\recovered_full.tif";
+
+            if (!File.Exists(inputPath))
             {
-                DataRecoveryMode = DataRecoveryMode.ConsistentRecover
-            };
-
-            using (TiffImage tiffConsistent = (TiffImage)Image.Load(inputPath, loadOptionsConsistent))
-            {
-                // Get recovered frame count
-                int consistentFrames = tiffConsistent.Frames.Length;
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputConsistentPath));
-
-                // Save the recovered image
-                tiffConsistent.Save(outputConsistentPath);
-
-                Console.WriteLine($"Consistent recovery completed. Frames recovered: {consistentFrames}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // ---------- Maximal Recovery ----------
-            // Load the corrupted TIFF using MaximalRecover mode
-            var loadOptionsMaximal = new LoadOptions
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathConsistent));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathFull));
+
+            int consistentFrames = 0;
+            var consistentLoadOptions = new LoadOptions
             {
-                DataRecoveryMode = DataRecoveryMode.MaximalRecover
+                DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
+                DataBackgroundColor = Color.White
             };
-
-            using (TiffImage tiffMaximal = (TiffImage)Image.Load(inputPath, loadOptionsMaximal))
+            using (Image img = Image.Load(inputPath, consistentLoadOptions))
             {
-                // Get recovered frame count
-                int maximalFrames = tiffMaximal.Frames.Length;
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputMaximalPath));
-
-                // Save the recovered image
-                tiffMaximal.Save(outputMaximalPath);
-
-                Console.WriteLine($"Maximal recovery completed. Frames recovered: {maximalFrames}");
+                var tiff = (TiffImage)img;
+                consistentFrames = tiff.Frames.Length;
+                tiff.Save(outputPathConsistent);
             }
 
-            // ---------- Comparison ----------
-            // Load both recovered images to compare frame counts (optional, can reuse counts above)
-            // For demonstration, we just output that the process is finished.
-            Console.WriteLine("Recovery comparison finished.");
+            int fullFrames = 0;
+            var fullLoadOptions = new LoadOptions
+            {
+                DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
+                DataBackgroundColor = Color.White
+            };
+            using (Image img = Image.Load(inputPath, fullLoadOptions))
+            {
+                var tiff = (TiffImage)img;
+                fullFrames = tiff.Frames.Length;
+                tiff.Save(outputPathFull);
+            }
+
+            Console.WriteLine($"Consistent recovery frame count: {consistentFrames}");
+            Console.WriteLine($"Full recovery frame count: {fullFrames}");
         }
         catch (Exception ex)
         {
@@ -80,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system receives a corrupted multi‑page TIFF scan, a developer can use this code to recover the image with both ConsistentRecover and MaximalRecover modes and compare the number of frames restored.
- * 2. When a document management workflow encounters damaged TIFF attachments from legacy scanners, the code helps to automatically attempt two recovery strategies and log which approach yields more pages.
- * 3. When a GIS application needs to salvage satellite imagery stored as multi‑frame TIFF files after a storage failure, the developer can run this routine to recover as many image layers as possible and decide which mode provides the most complete dataset.
- * 4. When an archival software solution must validate the integrity of scanned historical documents, the code can load the corrupted TIFF with Aspose.Imaging, apply sequential recovery, and compare frame counts to determine if the file is usable.
- * 5. When a digital publishing pipeline processes batch TIFF files and some become corrupted during transfer, this snippet enables developers to programmatically recover the files, save separate Consistent and Maximal versions, and choose the version with the higher recovered frame count for further processing.
+ * 1. When a medical imaging system receives a partially corrupted multi‑page TIFF scan from an MRI device, a developer can use this code to attempt a consistent recovery first, then a full recovery, and compare frame counts to decide which version is usable.
+ * 2. When a digital archiving workflow encounters damaged TIFF documents from legacy scanners, the code helps restore as many pages as possible by applying both DataRecoveryMode options and verifying which mode retained more frames.
+ * 3. When a GIS application processes large satellite TIFF mosaics that may be truncated during transfer, developers can run the sequential recovery to ensure the maximum number of image tiles are recovered before further analysis.
+ * 4. When an e‑commerce platform imports product catalogs supplied as multi‑page TIFF files that sometimes get corrupted, this snippet allows the backend to automatically recover the images and log the difference in frame counts for quality monitoring.
+ * 5. When a printing service receives client‑submitted TIFF files with missing or damaged pages, the code enables the service to recover the document using consistent and full recovery modes and compare the recovered page counts to decide whether to request a new file from the client.
  */
