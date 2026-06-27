@@ -10,8 +10,8 @@ class Program
     {
         try
         {
-            // Hardcoded input path
-            string inputPath = @"C:\temp\sample.djvu";
+            // Hard‑coded input path
+            string inputPath = "C:\\temp\\sample.djvu";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,38 +23,31 @@ class Program
             // Load the DjVu document
             using (Image image = Image.Load(inputPath))
             {
-                DjvuImage djvuImage = image as DjvuImage;
-                if (djvuImage == null)
+                DjvuImage djvuImage = (DjvuImage)image;
+
+                // Iterate over all pages and process pages 1‑3
+                foreach (var page in djvuImage.Pages)
                 {
-                    Console.Error.WriteLine("Failed to load DjVu image.");
-                    return;
-                }
+                    if (page is DjvuPage djvuPage && djvuPage.PageNumber >= 1 && djvuPage.PageNumber <= 3)
+                    {
+                        // Apply Floyd‑Steinberg dithering with a 1‑bit palette
+                        djvuPage.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 1, null);
 
-                // Process up to the first three pages
-                int pagesToProcess = Math.Min(3, djvuImage.PageCount);
-                for (int i = 0; i < pagesToProcess; i++)
-                {
-                    // Retrieve the page
-                    var djvuPage = djvuImage.Pages[i] as DjvuPage;
-                    if (djvuPage == null)
-                        continue;
+                        // Construct output path for the BMP file
+                        string outputPath = $"C:\\temp\\output_page{djvuPage.PageNumber}.bmp";
 
-                    // Apply Floyd‑Steinberg dithering (1‑bit palette)
-                    djvuPage.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 1, null);
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Define output BMP path
-                    string outputPath = $@"C:\temp\output_page{i + 1}.bmp";
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the page as BMP
-                    djvuPage.Save(outputPath, new BmpOptions());
+                        // Save the processed page as BMP
+                        djvuPage.Save(outputPath, new BmpOptions());
+                    }
                 }
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -62,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract the first three pages of a DjVu document and save them as BMP files for compatibility with legacy Windows applications.
- * 2. When a developer wants to convert DjVu pages to 1‑bit monochrome BMP images using Floyd‑Steinberg dithering to reduce file size while preserving visual detail.
- * 3. When a developer must batch‑process scanned DjVu archives and generate printable BMP outputs for archival or OCR pipelines.
- * 4. When a developer requires a C# routine that validates the input DjVu file, handles missing pages, and creates the necessary output directories before saving images.
- * 5. When a developer is building a .NET utility that applies error‑diffusion dithering to DjVu pages before converting them to BMP for use in low‑color‑depth devices or embedded systems.
+ * 1. When a developer needs to extract the first three pages of a multi‑page DjVu document and generate high‑contrast 1‑bit BMP images for a legacy printing workflow.
+ * 2. When an application must convert scanned DjVu files to BMP format while applying Floyd‑Steinberg dithering to preserve visual detail on monochrome displays.
+ * 3. When a digital archiving system requires batch processing of DjVu files to produce BMP thumbnails of the initial pages for quick preview in a web portal.
+ * 4. When a developer is building a document‑to‑e‑ink pipeline that needs 1‑bit BMP output with error‑diffusion dithering from DjVu source pages.
+ * 5. When a Windows desktop utility must verify the existence of a DjVu file, extract pages 1‑3, and save them as BMP files with Floyd‑Steinberg dithering for downstream OCR processing.
  */
