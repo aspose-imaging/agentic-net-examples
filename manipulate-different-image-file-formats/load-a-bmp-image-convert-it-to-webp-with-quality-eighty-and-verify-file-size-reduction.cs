@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -12,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"c:\temp\input.bmp";
-            string outputPath = @"c:\temp\output.webp";
+            string inputPath = @"C:\Images\sample.bmp";
+            string outputPath = @"C:\Images\sample_converted.webp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,20 +24,18 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load BMP image
-            using (BmpImage bmpImage = new BmpImage(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Set WebP conversion options (lossy, quality 80)
+                // Save as WebP with quality 80 (lossy)
                 var webpOptions = new WebPOptions
                 {
                     Lossless = false,
                     Quality = 80f
                 };
-
-                // Save as WebP
-                bmpImage.Save(outputPath, webpOptions);
+                image.Save(outputPath, webpOptions);
             }
 
-            // Verify file size reduction
+            // Compare file sizes
             long originalSize = new FileInfo(inputPath).Length;
             long webpSize = new FileInfo(outputPath).Length;
 
@@ -60,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce storage costs by converting large BMP assets to smaller WebP files with controlled quality in a .NET batch processing job.
- * 2. When a web application must serve faster‑loading images by programmatically converting uploaded BMP screenshots to lossy WebP format at 80% quality using Aspose.Imaging for .NET.
- * 3. When an e‑commerce platform wants to optimize product photos by converting legacy BMP images to WebP and verifying that the file size actually decreased before publishing.
- * 4. When a desktop utility needs to automate image format migration from BMP to WebP while ensuring the conversion respects a specific quality setting and reports the size difference to the user.
- * 5. When a CI/CD pipeline includes a step that validates image compression efficiency by converting BMP test assets to WebP with quality 80 and checking that the output is smaller than the source.
+ * 1. When a developer needs to reduce storage costs by converting legacy BMP assets to smaller WebP files with controlled quality in a .NET application.
+ * 2. When an e‑commerce platform must generate web‑optimized product images from high‑resolution BMP scans to improve page load speed while verifying that the conversion actually shrinks the file size.
+ * 3. When a Windows desktop utility automates batch processing of scanned documents, converting each BMP to lossy WebP at 80 % quality and logging the size savings for audit purposes.
+ * 4. When a game developer wants to replace uncompressed BMP textures with compressed WebP equivalents in a C# pipeline and ensure the new assets are lighter than the originals.
+ * 5. When a content management system integrates Aspose.Imaging to migrate legacy BMP graphics to modern WebP format, using C# code to confirm that the conversion yields a smaller file before publishing.
  */
