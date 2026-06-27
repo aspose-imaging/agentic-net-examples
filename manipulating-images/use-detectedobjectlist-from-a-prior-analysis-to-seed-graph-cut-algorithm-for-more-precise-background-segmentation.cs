@@ -16,25 +16,23 @@ class Program
         string inputPath = "input.jpg";
         string outputPath = "output.png";
 
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
                 var assumedObjects = new List<AssumedObjectData>
                 {
-                    new AssumedObjectData(DetectedObjectType.Human, new Rectangle(120, 80, 200, 400)),
-                    new AssumedObjectData(DetectedObjectType.Other, new Rectangle(350, 150, 180, 220))
+                    new AssumedObjectData(DetectedObjectType.Human, new Rectangle(100, 100, 150, 300)),
+                    new AssumedObjectData(DetectedObjectType.Other, new Rectangle(300, 200, 80, 120))
                 };
-
-                string tempPath = Path.GetTempFileName();
 
                 var options = new AutoMaskingGraphCutOptions
                 {
@@ -46,20 +44,16 @@ class Program
                     ExportOptions = new PngOptions
                     {
                         ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new FileCreateSource(tempPath, false)
+                        Source = new StreamSource(new MemoryStream())
                     },
                     BackgroundReplacementColor = Color.Transparent
                 };
 
-                using (MaskingResult results = new ImageMasking(image).Decompose(options))
-                using (RasterImage resultImage = (RasterImage)results[1].GetImage())
-                {
-                    resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-                }
+                MaskingResult results = new ImageMasking(image).Decompose(options);
 
-                if (File.Exists(tempPath))
+                using (RasterImage foreground = (RasterImage)results[1].GetImage())
                 {
-                    File.Delete(tempPath);
+                    foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
             }
         }
@@ -69,3 +63,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When building an e‑commerce platform that automatically removes product backgrounds from JPEG photos and exports the results as transparent PNGs for catalog listings.
+ * 2. When creating a photo‑editing app that lets users quickly isolate people or objects in a portrait by providing rough bounding boxes and then applying a Graph Cut algorithm for precise masking.
+ * 3. When developing a social‑media image‑processing pipeline that replaces complex scene backgrounds with a solid color or transparency while preserving fine details like hair using assumed object rectangles.
+ * 4. When implementing an automated document‑scanning solution that separates scanned handwritten notes from the paper background by seeding the segmentation with detected text regions.
+ * 5. When integrating a machine‑learning workflow that supplies detected object coordinates to improve the accuracy of background removal before feeding the foreground PNGs into a downstream AI model.
+ */
