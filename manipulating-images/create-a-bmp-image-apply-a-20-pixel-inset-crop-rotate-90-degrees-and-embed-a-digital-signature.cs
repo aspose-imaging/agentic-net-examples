@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
@@ -10,27 +11,34 @@ class Program
     {
         try
         {
-            // Define output path (includes directory to satisfy Directory.CreateDirectory)
-            string outputPath = "output/output.bmp";
+            // Output BMP file path
+            string outputPath = "output.bmp";
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a BMP image with sufficient size (>=200x200)
-            using (BmpImage bmp = new BmpImage(300, 300))
+            // Create a file source bound to the output path
+            Source source = new FileCreateSource(outputPath, false);
+            BmpOptions options = new BmpOptions() { Source = source };
+
+            // Define canvas size (minimum 200x200 for digital signature)
+            int width = 200;
+            int height = 200;
+
+            // Create BMP canvas
+            using (BmpImage canvas = (BmpImage)Image.Create(options, width, height))
             {
-                // Apply a 20-pixel inset crop (left, right, top, bottom)
-                bmp.Crop(20, 20, 20, 20);
+                // Inset crop of 20 pixels on each side
+                canvas.Crop(20, 20, 20, 20);
 
-                // Rotate the image by 90 degrees
-                bmp.Rotate(90);
+                // Rotate 90 degrees clockwise
+                canvas.Rotate(90f, true, Color.White);
 
-                // Embed a digital signature with a valid password
-                bmp.EmbedDigitalSignature("secure123");
+                // Embed digital signature with a valid password
+                canvas.EmbedDigitalSignature("secure123");
 
-                // Save the processed image to the specified path
-                BmpOptions options = new BmpOptions();
-                bmp.Save(outputPath, options);
+                // Save the image (bound source, so just call Save)
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -39,3 +47,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When generating a printable ID badge in a Windows desktop app that must be saved as a BMP, trimmed to remove margins, rotated for landscape layout, and digitally signed for authenticity.
+ * 2. When preparing a scanned engineering drawing for archival, cropping a 20‑pixel border, rotating it to match the standard orientation, and embedding a password‑protected digital signature to meet compliance regulations.
+ * 3. When building a C# utility that creates thumbnail previews of legacy BMP assets, applying an inset crop to remove unwanted edges, rotating the image for UI display, and signing it to prevent tampering.
+ * 4. When automating the production of secure QR‑code stickers where the BMP background is cropped, rotated to align with printing equipment, and digitally signed to verify the source before distribution.
+ * 5. When developing a medical imaging workflow that outputs BMP scans, needs to remove a uniform border, rotate the image to the correct anatomical orientation, and embed a digital signature to ensure patient data integrity.
+ */
