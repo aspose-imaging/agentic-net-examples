@@ -1,5 +1,8 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 
@@ -9,29 +12,41 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.djvu";
+            // Hardcoded input and output paths
+            string inputPath = "sample.djvu";
             string outputDirectory = "Output";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(outputDirectory);
 
-            using (FileStream stream = File.OpenRead(inputPath))
+            // Load DjVu document
+            using (Stream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                using (DjvuImage djvuImage = new DjvuImage(stream))
-                {
-                    System.Threading.Tasks.Parallel.ForEach(djvuImage.Pages, pageObj =>
+                // Parallel conversion of each page to PNG
+                Parallel.ForEach(
+                    Enumerable.Range(0, djvuImage.PageCount),
+                    pageIndex =>
                     {
-                        var djvuPage = (DjvuPage)pageObj;
+                        // Retrieve the page
+                        DjvuPage djvuPage = (DjvuPage)djvuImage.Pages[pageIndex];
+
+                        // Construct output file path
                         string outputPath = Path.Combine(outputDirectory, $"page_{djvuPage.PageNumber}.png");
+
+                        // Ensure the directory for the output file exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save page as PNG
                         djvuPage.Save(outputPath, new PngOptions());
                     });
-                }
             }
         }
         catch (Exception ex)
@@ -43,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to quickly convert every page of a multi‑page DjVu document into high‑quality PNG images for web preview, using Aspose.Imaging and Parallel.ForEach to speed up the process.
- * 2. When an archival system must extract and store each page of scanned DjVu files as separate PNG files for downstream OCR or indexing pipelines, leveraging C# multithreading for efficiency.
- * 3. When a desktop application has to batch‑process large DjVu manuals into PNG thumbnails for a document viewer’s navigation pane, employing Aspose.Imaging’s DjvuImage and parallel page conversion.
- * 4. When a cloud service receives DjVu uploads and must generate PNG assets for each page on the fly, using the provided code to handle file I/O, page enumeration, and concurrent saving.
- * 5. When a developer wants to integrate DjVu‑to‑PNG conversion into a CI/CD build step that validates visual assets, using the example to read the DjVu stream, iterate pages, and save PNGs in parallel.
+ * 1. When a document management system must quickly generate preview thumbnails for every page of a multi‑page DjVu file, a developer can use this code to load the DjVu document and convert each page to PNG in parallel.
+ * 2. When a web application needs to serve high‑resolution PNG images of scanned books stored as DjVu, the parallel conversion reduces processing time and improves responsiveness.
+ * 3. When a batch‑processing pipeline has to archive DjVu archives as lossless PNG images for compliance or backup, this code enables multithreaded page‑by‑page conversion.
+ * 4. When an e‑learning platform wants to extract individual lesson slides from a DjVu presentation and store them as PNG files for offline viewing, the code provides a fast, thread‑safe solution.
+ * 5. When a digital forensics tool must render every page of a DjVu evidence file as PNG for analysis while minimizing CPU idle time, the Parallel.ForEach approach accelerates the conversion.
  */
