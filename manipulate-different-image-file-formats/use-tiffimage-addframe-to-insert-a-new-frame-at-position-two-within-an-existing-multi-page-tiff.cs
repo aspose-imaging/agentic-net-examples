@@ -2,47 +2,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\source.tif";
+        string outputPath = @"C:\Images\result.tif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.tif";
-            string outputPath = "C:\\temp\\output.tif";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
             // Load the existing multi‑page TIFF
-            using (Image image = Image.Load(inputPath))
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                TiffImage tiffImage = (TiffImage)image;
+                // Create a new frame to insert (could be any supported image)
+                // Here we load it from another TIFF file; adjust the path as needed
+                TiffFrame newFrame = new TiffFrame(@"C:\Images\newframe.tif");
 
-                // Define options for the new frame
-                TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-                frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                frameOptions.Photometric = TiffPhotometrics.Rgb;
-                frameOptions.Compression = TiffCompressions.None;
-
-                // Create a blank 100x100 frame
-                TiffFrame newFrame = new TiffFrame(frameOptions, 100, 100);
-
-                // Insert the new frame at index 2 (third position)
+                // Insert the new frame at index 2 (third position, zero‑based)
                 tiffImage.InsertFrame(2, newFrame);
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the modified TIFF
+                // Save the modified TIFF to the output path
                 tiffImage.Save(outputPath);
             }
         }
@@ -55,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a multi‑page scanned document and need to add a blank cover page as the third page of an existing TIFF file.
- * 2. When creating a multi‑page TIFF for a medical imaging report and must insert a new 100×100 annotation frame between the second and third image slices.
- * 3. When building a digital archive of engineering drawings and want to insert a placeholder frame at position two to reserve space for future revisions.
- * 4. When processing satellite imagery stored as a multi‑page TIFF and need to add a calibration frame after the second band without re‑encoding the whole file.
- * 5. When developing a C# application that merges PDF pages converted to TIFF and must insert an extra page at index two to comply with a regulatory page‑order requirement.
+ * 1. When generating a multi‑page scanned document and need to add a cover page after the title page, a developer can use InsertFrame to place the new TIFF frame at index 2.
+ * 2. When creating a medical imaging report that combines a new X‑ray image with existing patient scans, InsertFrame lets the developer insert the additional TIFF frame into the middle of the multi‑page file.
+ * 3. When building a digital archive of historical photographs and want to insert a newly digitized image between two existing pages, the code can insert the frame at position two without rewriting the whole TIFF.
+ * 4. When automating generation of a multi‑page invoice converted to TIFF and need to add a terms‑and‑conditions page after the item list, InsertFrame provides a simple C# way to add the extra frame at the correct index.
+ * 5. When developing a document management system that merges scanned forms and must insert a signature page into an existing multi‑page TIFF, the InsertFrame method allows precise placement of the new frame at the third page.
  */
