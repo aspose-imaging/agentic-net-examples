@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -10,11 +9,11 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = @"C:\temp\input.gif";
             string outputPath = @"C:\temp\output_dithered.gif";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,11 +26,10 @@ class Program
             // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to GifImage to access GIF‑specific members
                 GifImage gifImage = (GifImage)image;
 
-                // Apply Floyd‑Steinberg dithering with an 8‑bit palette
-                gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
+                // Apply Floyd‑Steinberg dithering with a 4‑bit palette (16 colors)
+                gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 4, null);
 
                 // Save the processed animation as a new GIF file
                 gifImage.Save(outputPath);
@@ -39,7 +37,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -47,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce the file size of an animated GIF while preserving visual quality by applying Floyd‑Steinberg dithering with an 8‑bit palette before saving it as a new GIF.
- * 2. When a C# application must convert a high‑color GIF animation to a web‑friendly 256‑color version for faster page loads using Aspose.Imaging’s Dither method.
- * 3. When a software tool needs to preprocess user‑uploaded GIFs to ensure consistent color depth across all frames, enabling reliable display on legacy browsers.
- * 4. When an image‑processing pipeline requires automated validation, dithering, and re‑encoding of GIF animations to meet a specific color‑palette constraint for printing or archival purposes.
- * 5. When a developer wants to programmatically load a GIF, apply error‑diffusion dithering, and write the result to a new file without manual image editing tools.
+ * 1. When a developer needs to compress an animated GIF to a 4‑bit (16‑color) palette while maintaining visual fidelity by applying Floyd‑Steinberg dithering in a C# .NET project.
+ * 2. When a web application must generate lightweight GIF animations for low‑bandwidth users by dither‑reducing the color count before serving the file.
+ * 3. When a desktop utility has to batch‑process user‑uploaded GIFs, converting them to a smaller palette with dithering to meet size constraints for email attachments.
+ * 4. When a game developer wants to import legacy GIF sprites and automatically apply dithering to match the limited color palette of retro graphics engines.
+ * 5. When an e‑learning platform needs to create optimized GIF tutorials that retain smooth animation after reducing colors with Floyd‑Steinberg dithering using Aspose.Imaging for .NET.
  */
