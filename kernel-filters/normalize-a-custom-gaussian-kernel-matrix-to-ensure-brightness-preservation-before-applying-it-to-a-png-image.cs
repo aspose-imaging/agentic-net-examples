@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
 
@@ -10,54 +11,60 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define a custom Gaussian kernel (example 5x5)
-            double[,] kernel = new double[,]
-            {
-                { 1, 4, 7, 4, 1 },
-                { 4, 16, 26, 16, 4 },
-                { 7, 26, 41, 26, 7 },
-                { 4, 16, 26, 16, 4 },
-                { 1, 4, 7, 4, 1 }
-            };
-
-            // Normalize the kernel so that its sum equals 1 (brightness preservation)
-            double sum = 0;
-            foreach (double value in kernel)
-                sum += value;
-
-            if (sum != 0)
-            {
-                int rows = kernel.GetLength(0);
-                int cols = kernel.GetLength(1);
-                for (int i = 0; i < rows; i++)
-                {
-                    for (int j = 0; j < cols; j++)
-                    {
-                        kernel[i, j] /= sum;
-                    }
-                }
-            }
-
+            // Load the PNG image as a raster image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Apply the normalized custom Gaussian kernel
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                // Define custom Gaussian kernel parameters
+                int kernelSize = 5;          // Must be odd and > 0
+                double sigma = 1.0;         // Positive non‑zero sigma
 
-                // Save the processed image
-                raster.Save(outputPath);
+                // Obtain the Gaussian kernel
+                double[,] kernel = ConvolutionFilter.GetGaussian(kernelSize, sigma);
+
+                // Normalize the kernel to preserve brightness (sum of elements = 1)
+                double sum = 0.0;
+                for (int i = 0; i < kernelSize; i++)
+                {
+                    for (int j = 0; j < kernelSize; j++)
+                    {
+                        sum += kernel[i, j];
+                    }
+                }
+
+                double[,] normalizedKernel = new double[kernelSize, kernelSize];
+                for (int i = 0; i < kernelSize; i++)
+                {
+                    for (int j = 0; j < kernelSize; j++)
+                    {
+                        normalizedKernel[i, j] = kernel[i, j] / sum;
+                    }
+                }
+
+                // Create convolution filter options with the normalized kernel
+                var filterOptions = new ConvolutionFilterOptions(normalizedKernel);
+
+                // Apply the filter to the entire image
+                rasterImage.Filter(rasterImage.Bounds, filterOptions);
+
+                // Save the result as PNG
+                var pngOptions = new PngOptions();
+                rasterImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -69,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce noise in a high‑resolution PNG screenshot while keeping the overall brightness unchanged, they can normalize a custom 5×5 Gaussian kernel and apply it with Aspose.Imaging’s ConvolutionFilterOptions.
- * 2. When building an automated batch‑processing tool that sharpens scanned PDF pages saved as PNGs, normalizing the Gaussian blur kernel ensures the blur does not darken the document before the sharpening step.
- * 3. When creating a medical imaging viewer that smooths ultrasound PNG images to hide speckle artifacts, a normalized Gaussian kernel preserves the diagnostic brightness levels across the image.
- * 4. When implementing a real‑time photo‑filter app that applies a custom blur effect to user‑uploaded PNG avatars, normalizing the kernel guarantees consistent exposure after the convolution operation.
- * 5. When developing a GIS map‑tiling service that pre‑processes PNG tiles with a Gaussian smoothing filter to reduce pixelation, kernel normalization prevents unintended brightness shifts in the rendered map.
+ * 1. When a developer wants to apply a custom Gaussian blur to a PNG image while keeping the overall brightness unchanged, they can use this code to normalize the kernel before convolution.
+ * 2. When building an image‑processing pipeline in C# that smooths scanned documents stored as PNG files without introducing darkening or lightening artifacts, the normalized Gaussian kernel ensures consistent exposure.
+ * 3. When creating a photo‑editing tool that lets users adjust the blur radius (kernel size) and sigma for PNG assets, normalizing the kernel guarantees that the filtered output retains the original image’s luminance.
+ * 4. When automating batch processing of PNG thumbnails for a web gallery and need to reduce noise with a Gaussian filter while preserving visual brightness across all images, this code provides the necessary normalization step.
+ * 5. When integrating Aspose.Imaging into a C# application that generates PNG graphics with custom blur effects for UI elements, normalizing the convolution matrix prevents unintended brightness shifts after the filter is applied.
  */
