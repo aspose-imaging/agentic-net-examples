@@ -3,7 +3,7 @@
   "platform": "net",
   "framework": "net9.0",
   "package_version": "26.6.0",
-  "total_examples": 2874,
+  "total_examples": 2877,
   "total_categories": 17,
   "last_updated": "2026-06-27",
   "categories": [
@@ -1611,7 +1611,7 @@
     },
     {
       "name": "image-and-photo-filters",
-      "file_count": 138,
+      "file_count": 141,
       "all_files": [
         "28729-remove-watermark-from-a-png-using-telea-algorithm-and-set-removal-attempts-to-five.cs",
         "28746-create-a-custom-selection-by-combining-magic-wand-union-and-subtraction-then-fill-with-solid-color.cs",
@@ -1671,6 +1671,7 @@
         "combine-two-masks-generated-from-different-points-using-union-then-apply-the-combined-mask-to-the-tiff-image.cs",
         "compare-memory-usage-of-magicwandtool-when-processing-a-4k-png-versus-a-1080p-jpeg-image.cs",
         "compare-the-output-quality-of-telea-algorithm-versus-default-contentawarefill-by-processing-the-same-watermark-image-twice.cs",
+        "compare-the-output-quality-of-telea-algorithm-versus-default-contentawarefill-by-processing-the-same-watermark.cs",
         "configure-the-magic-wand-filter-by-specifying-tolerance-fill-color-and-border-color-parameters.cs",
         "configure-the-remove-watermark-filter-by-defining-watermark-color-and-appropriate-threshold-parameters-clearly.cs",
         "convert-a-pdf-page-to-image-apply-watermark-removal-and-save-the-cleaned-image-as-jpeg.cs",
@@ -1688,6 +1689,7 @@
         "define-watermark-region-coordinates-50-50-200-100-and-apply-removal-filter-on-a-bmp-image.cs",
         "demonstrate-how-to-chain-subtract-and-getfeathered-methods-to-refine-a-mask-around-a-complex-edge.cs",
         "design-a-configuration-ui-that-lets-users-select-between-contentawarefill-and-telea-algorithms-before-watermark-removal.cs",
+        "design-a-configuration-ui-that-lets-users-select-between-contentawarefill-and-telea-algorithms-before-watermark.cs",
         "detect-and-eliminate-watermarks-from-images-using-the-remove-watermark-filter-for-any-supported-format.cs",
         "determine-the-available-image-filters-and-devise-a-strategy-for-applying-them-within-the-processing-pipeline.cs",
         "develop-a-unit-test-that-verifies-union-correctly-merges-two-overlapping-masks-into-a-single-combined-mask.cs",
@@ -1750,7 +1752,8 @@
         "utilize-image-processing-filters-to-detect-and-eliminate-watermarks-from-photos-within-a-given-image.cs",
         "validate-that-setting-a-very-low-threshold-does-not-produce-an-empty-mask-on-a-uniform-color-image.cs",
         "validate-the-image-output-after-watermark-removal-to-ensure-visual-integrity-and-expected-dimensions.cs",
-        "write-integration-tests-that-process-an-image-through-both-filters-and-compare-the-output-hashes-to-expected-values.cs"
+        "write-integration-tests-that-process-an-image-through-both-filters-and-compare-the-output-hashes-to-expected-values.cs",
+        "write-integration-tests-that-process-an-image-through-both-filters-and-compare-the-output-hashes-to-expected.cs"
       ],
       "files": [
         "28729-remove-watermark-from-a-png-using-telea-algorithm-and-set-removal-attempts-to-five.cs",
@@ -1792,26 +1795,23 @@
         "Aspose.Imaging.MagicWand",
         "Aspose.Imaging.FileFormats.Png",
         "Aspose.Imaging.MagicWand.ImageMasks",
-        "Aspose.Imaging.Sources",
         "Aspose.Imaging.Shapes",
+        "Aspose.Imaging.Sources",
         "Aspose.Imaging.Watermark",
         "Aspose.Imaging.Watermark.Options",
-        "Aspose.Imaging.FileFormats.Tiff",
+        "Aspose.Imaging.FileFormats.Tiff.Enums",
+        "Aspose.Imaging.FileFormats.Jpeg",
         "Aspose.Imaging.Masking",
         "Aspose.Imaging.Masking.Options",
         "Aspose.Imaging.Masking.Result",
-        "Aspose.Imaging.FileFormats.Tiff.Enums",
-        "Aspose.Imaging.FileFormats.Gif",
+        "Aspose.Imaging.FileFormats.Tiff",
         "Aspose.Imaging.FileFormats.Bmp",
-        "Aspose.Imaging.FileFormats.Jpeg",
+        "Aspose.Imaging.FileFormats.Gif",
         "Aspose.Imaging.Brushes",
         "Aspose.Imaging.FileFormats.Pdf",
         "System.Drawing",
         "Aspose.Imaging.FileFormats.BigTiff",
-        "System.Linq",
-        "System.Diagnostics",
-        "System.Security.Cryptography",
-        "Aspose.Imaging.ImageFilters.FilterOptions"
+        "System.Linq"
       ],
       "key_apis": [
         "AutoMaskingGraphCutOptions",
@@ -1829,6 +1829,7 @@
         "MaskingOptions",
         "PngImage",
         "PngOptions",
+        "RasterCachedImage",
         "RasterImage",
         "SharpenFilterOptions",
         "SolidBrush",
@@ -1838,7 +1839,7 @@
         "VectorRasterizationOptions"
       ],
       "more_files": {
-        "count": 108,
+        "count": 111,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/image-and-photo-filters"
       }
     },
