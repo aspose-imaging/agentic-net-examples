@@ -7,36 +7,32 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "C:\\temp\\input.emf";
-        string outputPath = "C:\\temp\\output.pdf";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Temp\sample.emf";
+        string outputPath = @"C:\Temp\Result\sample.pdf";
 
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EMF from a byte array
+            // Load the EMF image from a byte array
             byte[] emfBytes = File.ReadAllBytes(inputPath);
             using (MemoryStream ms = new MemoryStream(emfBytes))
-            using (Image image = Image.Load(ms))
+            using (Image emfImage = Image.Load(ms))
             {
                 // Prepare PDF save options
-                PdfOptions pdfOptions = new PdfOptions
-                {
-                    // Set PDF page size to match the EMF image size
-                    PageSize = image.Size
-                };
+                PdfOptions pdfOptions = new PdfOptions();
 
-                // Save directly to PDF
-                image.Save(outputPath, pdfOptions);
+                // Save the image directly to PDF
+                emfImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to convert user‑uploaded EMF vector graphics into PDF reports for printing or archiving.
- * 2. When an automated document‑generation service must read EMF files stored in a database as byte arrays and output PDF files for email attachments.
- * 3. When a batch‑processing script has to convert a folder of legacy Windows Metafile images to PDF without opening each file manually.
- * 4. When a web API receives EMF data via a POST request, loads it from a memory stream, and returns a PDF version to the client.
- * 5. When a migration tool extracts EMF assets from old software, resizes them to match page dimensions, and saves them directly as PDF for inclusion in new documentation.
+ * 1. When a Windows desktop application receives an EMF graphic as a byte stream from a database and must generate a printable PDF report for end users.
+ * 2. When a web service processes uploaded vector images, reads the EMF file into memory, and needs to return a PDF version for cross‑platform viewing.
+ * 3. When an automated document conversion pipeline extracts EMF icons embedded in legacy Office files and saves them as PDF thumbnails for a document management system.
+ * 4. When a background job reads EMF files stored on a network share, loads them from a byte array, and creates PDF invoices that can be emailed to customers.
+ * 5. When a mobile backend receives EMF data via an API, converts it directly to PDF using Aspose.Imaging to avoid intermediate file writes and reduce I/O overhead.
  */
