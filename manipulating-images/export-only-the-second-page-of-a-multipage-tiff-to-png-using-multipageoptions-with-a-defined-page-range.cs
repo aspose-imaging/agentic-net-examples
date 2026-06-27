@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\multipage.tif";
-        string outputPath = @"C:\Images\page2.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\multipage.tif";
+            string outputPath = @"C:\Images\page2.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,20 +20,19 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the multipage TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PNG save options with MultiPageOptions to export only the second page (index 1)
-                var pngOptions = new PngOptions
+                // Configure PNG options to export only the second page (index 1)
+                PngOptions pngOptions = new PngOptions
                 {
-                    // Define the pages to export; only page index 1 will be saved
                     MultiPageOptions = new MultiPageOptions(new int[] { 1 })
                 };
 
-                // Save the selected page as PNG
+                // Save the selected page as a PNG file
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -46,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract a single page from a multi‑page TIFF document and save it as a PNG for web preview, they can use Aspose.Imaging with MultiPageOptions to select page index 1.
- * 2. When integrating a document scanning workflow that stores scanned pages as a TIFF stack, the code can be used to convert a specific scanned page (e.g., the second page) to a PNG thumbnail for display in a UI.
- * 3. When generating printable assets from a multi‑page medical imaging file, a developer may need to isolate the second frame and export it to PNG for inclusion in a report.
- * 4. When automating archival processes that require converting individual pages of a multi‑page TIFF into lossless PNG files, this snippet shows how to target only the desired page using C# and Aspose.Imaging.
- * 5. When building a batch conversion tool that processes large TIFF files but only needs to extract a particular page (such as a cover page) to PNG, the MultiPageOptions page‑range feature enables selective saving without loading all pages into memory.
+ * 1. When a medical imaging system stores patient scans as multipage TIFFs and needs to extract the second slice as a PNG for quick preview in a web portal.
+ * 2. When a document management workflow receives scanned contracts as multipage TIFF files and must generate a PNG thumbnail of the second page for indexing in a search engine.
+ * 3. When a GIS application captures satellite imagery in a multipage TIFF and wants to convert only the second band to PNG for analysis in a C# data pipeline.
+ * 4. When an e‑commerce platform receives product catalogs as multipage TIFFs and needs to display the second page as a PNG image on a mobile app.
+ * 5. When an archival system processes historical newspapers stored as multipage TIFFs and extracts the second page as a PNG for OCR processing in a .NET service.
  */
