@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.gif";
-            string outputPath = "C:\\temp\\output_contrast.gif";
+            string inputPath = @"C:\Images\input.gif";
+            string outputPath = @"C:\Images\output_contrast.gif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,21 +24,23 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the GIF image
+            // Load the GIF image (may contain multiple frames)
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to GifImage to access GIF-specific methods
                 GifImage gifImage = (GifImage)image;
 
-                // Increase contrast (range -100 to 100)
+                // Increase contrast (value in range [-100, 100])
                 gifImage.AdjustContrast(50f);
 
-                // Save with palette correction for better colors
-                GifOptions saveOptions = new GifOptions
+                // Save the modified GIF preserving animation
+                gifImage.Save(outputPath, new GifOptions
                 {
-                    DoPaletteCorrection = true
-                };
-
-                gifImage.Save(outputPath, saveOptions);
+                    // Enable palette correction for better color quality
+                    DoPaletteCorrection = true,
+                    // Preserve all frames
+                    FullFrame = true
+                });
             }
         }
         catch (Exception ex)
@@ -47,3 +49,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer wants to use Aspose.Imaging for .NET to boost the contrast of an animated GIF before embedding it in a marketing email.
+ * 2. When a developer needs to preprocess user‑uploaded GIF files with Aspose.Imaging to make overlaid text more readable by increasing contrast while keeping the animation intact.
+ * 3. When a developer is generating product demo slideshows and uses Aspose.Imaging to enhance each frame’s tones by adjusting contrast in the GIF sequence.
+ * 4. When a developer prepares GIF assets for a mobile game and applies Aspose.Imaging’s AdjustContrast method to achieve richer colors without losing frame timing.
+ * 5. When a developer automates batch processing of GIFs for a social‑media scheduler, using Aspose.Imaging to increase contrast and enable palette correction in C#.
+ */
