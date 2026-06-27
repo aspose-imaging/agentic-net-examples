@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -13,29 +14,36 @@ class Program
             string inputPath = "input.eps";
             string outputPath = "output.svg";
 
-            // Verify that the input EPS file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
+            Directory.CreateDirectory(outputDir);
 
-            // Load the EPS image
+            // Load EPS image
             using (Image image = Image.Load(inputPath))
             {
-                // Create default SVG export options
-                var svgOptions = new SvgOptions();
+                // Prepare SVG export options
+                var svgOptions = new SvgOptions
+                {
+                    // Set vector rasterization options to match the source size
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    }
+                };
 
-                // Export the image to SVG format
+                // Save as SVG
                 image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -43,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to display legacy EPS artwork in browsers that only support SVG, a developer can use this code to convert the EPS file to SVG on the server side.
- * 2. When an automated build pipeline must generate scalable icons from EPS design assets for responsive UI, the code enables batch conversion to SVG format.
- * 3. When a document management system imports vector files and must store them as web‑friendly SVG for preview, the developer can load the EPS and save it as SVG using Aspose.Imaging.
- * 4. When a desktop tool allows users to edit or annotate vector graphics and requires converting uploaded EPS files to SVG for further processing, this snippet performs the conversion.
- * 5. When a cloud service provides an API that accepts EPS uploads and returns SVG output for downstream analytics, the code demonstrates the C# implementation of the conversion step.
+ * 1. When a developer needs to convert legacy EPS artwork into web‑friendly SVG files for responsive design using C# and Aspose.Imaging.
+ * 2. When an automated build pipeline must batch‑process print‑ready EPS logos and generate scalable SVG assets for branding guidelines.
+ * 3. When a desktop application imports user‑provided EPS diagrams and saves them as SVG to enable editing in vector editors without losing quality.
+ * 4. When a server‑side service receives EPS files via API and must return SVG responses for browser rendering in a .NET environment.
+ * 5. When a migration script replaces EPS icons in a legacy database with SVG equivalents to improve loading speed on modern devices.
  */
