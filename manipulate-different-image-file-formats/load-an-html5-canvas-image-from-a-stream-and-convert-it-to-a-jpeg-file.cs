@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\canvas.html";
-        string outputPath = @"C:\Temp\output.jpg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\canvas.html";
+            string outputPath = @"C:\Temp\Result\canvas.jpg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,19 +20,18 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Open the input HTML5 Canvas file as a stream
+            // Load the image from a file stream
             using (FileStream inputStream = File.OpenRead(inputPath))
             {
-                // Load the image from the stream
                 using (Image image = Image.Load(inputStream))
                 {
-                    // Prepare JPEG save options (default settings)
+                    // Set JPEG save options (default settings)
                     JpegOptions jpegOptions = new JpegOptions();
 
-                    // Save the image as JPEG to the specified output path
+                    // Save the image as JPEG
                     image.Save(outputPath, jpegOptions);
                 }
             }
@@ -46,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to archive user‑drawn HTML5 Canvas artwork on the server as a JPEG file for later viewing or printing.
- * 2. When an e‑learning platform converts Canvas diagrams created in the browser into JPEG thumbnails for course catalogs.
- * 3. When a digital signage system receives Canvas images via a network stream and must store them as JPEGs for fast loading on display devices.
- * 4. When a mobile backend processes uploaded Canvas screenshots and saves them as JPEGs to reduce storage size while preserving visual fidelity.
- * 5. When a reporting tool extracts Canvas‑based charts from HTML reports and converts them to JPEG images for inclusion in PDF or email summaries.
+ * 1. When a web application generates charts on an HTML5 Canvas and needs to archive them as JPEG files on the server using C# and Aspose.Imaging.
+ * 2. When a desktop utility processes user‑uploaded canvas.html files and converts them to JPEG thumbnails for preview in a file manager.
+ * 3. When an automated reporting tool reads HTML5 Canvas images from a network share via a stream and saves them as JPEGs for inclusion in PDF reports.
+ * 4. When a migration script converts legacy HTML5 Canvas assets stored in a database BLOB into JPEG files for a content management system.
+ * 5. When a background service validates the existence of a canvas.html file, loads it from a stream, and stores a compressed JPEG version to reduce storage costs.
  */
