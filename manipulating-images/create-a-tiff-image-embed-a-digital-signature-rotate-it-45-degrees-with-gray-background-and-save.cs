@@ -5,7 +5,6 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -13,37 +12,25 @@ class Program
     {
         try
         {
-            // Output file path
             string outputPath = "output/output.tif";
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure TIFF creation options
             TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.Photometric = TiffPhotometrics.Rgb;
             tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+            tiffOptions.Photometric = TiffPhotometrics.Rgb;
+            tiffOptions.Compression = TiffCompressions.Lzw;
+            tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
             tiffOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a new TIFF image (200x200 pixels)
             using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, 200, 200))
             {
-                // Fill the image with a simple gradient
-                LinearGradientBrush brush = new LinearGradientBrush(
-                    new Point(0, 0),
-                    new Point(tiffImage.Width, tiffImage.Height),
-                    Color.Red,
-                    Color.Blue);
                 Graphics graphics = new Graphics(tiffImage);
-                graphics.FillRectangle(brush, tiffImage.Bounds);
+                graphics.Clear(Color.White);
 
-                // Embed a digital signature using a valid password
                 tiffImage.EmbedDigitalSignature("secure123");
-
-                // Rotate the image 45 degrees with a gray background, resizing proportionally
                 tiffImage.Rotate(45f, true, Color.Gray);
 
-                // Save the image (output path is already bound)
                 tiffImage.Save();
             }
         }
@@ -53,3 +40,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a TIFF document that includes a tamper‑evident digital signature for secure archival and must rotate the page 45° with a gray fill to meet printing specifications.
+ * 2. When an application must create a 200 × 200 pixel raster image in the TIFF format, embed a password‑protected signature, and apply a 45‑degree rotation while preserving the background color for compliance with medical imaging standards.
+ * 3. When a workflow requires programmatically producing a LZW‑compressed RGB TIFF file, adding a custom security tag, and rotating the canvas to align with landscape layouts used in GIS mapping tools.
+ * 4. When a document management system needs to store scanned forms as TIFF files, embed a unique identifier as a digital signature, and rotate the image to correct skew with a gray background for visual consistency.
+ * 5. When a developer is building a C# service that automatically creates signed TIFF images, applies a 45° rotation with a gray background to match corporate branding, and saves the result to a file system for downstream processing.
+ */
