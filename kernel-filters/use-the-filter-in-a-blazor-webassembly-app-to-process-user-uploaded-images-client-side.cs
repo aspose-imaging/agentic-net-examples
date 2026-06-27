@@ -11,8 +11,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPathGaussian = "output_gaussian.png";
-            string outputPathSharpen = "output_sharpen.png";
+            string outputPath = "output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,24 +20,21 @@ class Program
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathGaussian));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathSharpen));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Apply Gaussian blur filter
+            // Load the image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage to apply filters
                 RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-                raster.Save(outputPathGaussian);
-            }
 
-            // Apply Sharpen filter
-            using (Image image = Image.Load(inputPath))
-            {
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-                raster.Save(outputPathSharpen);
+                // Apply Gaussian blur filter (radius: 5, sigma: 4.0) to the whole image
+                raster.Filter(raster.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+
+                // Save the processed image
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -50,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to apply a Gaussian blur to a user‑uploaded PNG image in a Blazor WebAssembly app to create a softened preview before saving it locally.
- * 2. When a developer wants to sharpen the details of an uploaded JPEG or PNG picture directly in the browser using Aspose.Imaging’s SharpenFilterOptions to improve readability of scanned documents.
- * 3. When a developer builds a client‑side photo gallery that automatically generates both blurred and sharpened versions of each image for visual effects without sending the files to a server.
- * 4. When a developer prepares images for machine‑learning inference by applying consistent blur or sharpen filters in C# to normalize texture characteristics before uploading them to a cloud service.
- * 5. When a developer creates an online image‑editing tool that lets users compare the original PNG with Gaussian‑blurred and sharpened variants side‑by‑side, using Aspose.Imaging’s RasterImage.Filter method in a Blazor WebAssembly project.
+ * 1. When building a Blazor WebAssembly photo‑editing tool that lets users upload PNG files and instantly apply a Gaussian blur filter before saving the result locally.
+ * 2. When creating an online form that requires users to submit a blurred version of their ID image for privacy, using Aspose.Imaging to process the image entirely in the browser.
+ * 3. When developing a client‑side image‑optimization pipeline that reduces visual detail with a Gaussian blur to lower file size of uploaded JPEG or PNG pictures before sending them to a server.
+ * 4. When implementing a preview feature in a Blazor app that shows a real‑time blurred thumbnail of any user‑selected image to help users decide if they want to keep the original.
+ * 5. When adding a custom filter option to a Blazor‑based e‑commerce product‑gallery, allowing sellers to upload product photos and automatically apply a subtle blur effect to background areas using RasterImage filtering.
  */
