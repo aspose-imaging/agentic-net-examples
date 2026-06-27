@@ -1,19 +1,21 @@
 using System;
 using System.IO;
-using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output.tif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.dcm";
+            string outputPath = "output.tif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,23 +24,23 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Configure high‑performance memory strategy
-            var loadOptions = new Aspose.Imaging.LoadOptions
+            LoadOptions loadOptions = new LoadOptions
             {
-                BufferSizeHint = 256 * 1024 // 256 KB buffer size hint
+                BufferSizeHint = 256 * 1024 // 256 KB buffer size
             };
 
-            // Load DICOM image using a stream and the load options
-            using (var stream = File.OpenRead(inputPath))
-            using (var dicomImage = new DicomImage(stream, loadOptions))
+            // Load DICOM image using a file stream and the load options
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
             {
-                // Adjust contrast (value in range [-100, 100])
+                // Adjust contrast (value range: -100 to 100)
                 dicomImage.AdjustContrast(50f);
 
                 // Prepare TIFF save options
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
                 // Save the adjusted image as TIFF
                 dicomImage.Save(outputPath, tiffOptions);
@@ -53,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert DICOM scans to TIFF files for archival while applying a contrast boost and minimizing memory usage with Aspose.Imaging’s high‑performance buffer strategy.
- * 2. When a radiology workflow requires batch processing of DICOM images to enhance visibility for diagnostic review and then store the results as lossless TIFFs using C# and Aspose.Imaging.
- * 3. When a healthcare integration service must read DICOM files from a stream, adjust the image contrast for better display on web portals, and save the output as TIFF without loading the entire file into memory.
- * 4. When a PACS (Picture Archiving and Communication System) developer wants to ensure fast loading of large DICOM datasets by configuring BufferSizeHint and then export the processed images to TIFF for compatibility with third‑party viewers.
- * 5. When a C# developer is building a diagnostic reporting tool that needs to programmatically improve DICOM image contrast and generate TIFF files for inclusion in PDF reports while controlling memory consumption.
+ * 1. When a medical imaging application must convert DICOM scans to TIFF files for long‑term storage while boosting contrast and using a high‑performance memory strategy in C#.
+ * 2. When a radiology workflow needs to batch‑process large DICOM images, apply a contrast boost, and export them as TIFFs for compatibility with legacy analysis tools.
+ * 3. When a healthcare IT system integrates Aspose.Imaging to read DICOM files from a file stream, enhance visibility of details, and save the result as a TIFF for reporting purposes.
+ * 4. When a developer builds a diagnostic viewer that loads high‑resolution DICOM images with optimized buffering, adjusts contrast on the fly, and outputs TIFFs for sharing with clinicians.
+ * 5. When a PACS migration script must efficiently read DICOM files, improve image contrast, and generate TIFF copies for archival archives using .NET and Aspose.Imaging.
  */
