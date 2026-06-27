@@ -9,19 +9,17 @@ class Program
     {
         try
         {
-            // Hard‑coded input TIFF files (adjust paths as needed)
-            string[] inputPaths = new[]
+            // Hard‑coded input and output paths
+            string[] inputPaths = new string[]
             {
-                @"C:\Images\part1.tif",
-                @"C:\Images\part2.tif",
-                @"C:\Images\part3.tif"
+                @"C:\Images\input1.tif",
+                @"C:\Images\input2.tif",
+                @"C:\Images\input3.tif"
             };
-
-            // Hard‑coded output file
-            string outputPath = @"C:\Images\combined.tif";
+            string outputPath = @"C:\Images\output.tif";
 
             // Verify each input file exists
-            foreach (string inputPath in inputPaths)
+            foreach (var inputPath in inputPaths)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -33,21 +31,21 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the first TIFF image – this will become the destination image
-            using (TiffImage combinedImage = (TiffImage)Image.Load(inputPaths[0]))
+            // Load the first TIFF image – it will become the base of the concatenated file
+            using (TiffImage resultImage = (TiffImage)Image.Load(inputPaths[0]))
             {
-                // Append remaining TIFF images frame‑by‑frame
+                // Append frames from the remaining TIFF images
                 for (int i = 1; i < inputPaths.Length; i++)
                 {
-                    using (TiffImage nextImage = (TiffImage)Image.Load(inputPaths[i]))
+                    using (TiffImage srcImage = (TiffImage)Image.Load(inputPaths[i]))
                     {
-                        // Add all frames (including their EXIF metadata) from nextImage
-                        combinedImage.Add(nextImage);
+                        // Add all frames (and their associated EXIF data) from srcImage to resultImage
+                        resultImage.Add(srcImage);
                     }
                 }
 
-                // Save the concatenated multi‑page TIFF
-                combinedImage.Save(outputPath);
+                // Save the combined multi‑page TIFF
+                resultImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -59,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system needs to combine multiple DICOM‑exported TIFF scans into a single multi‑page TIFF for patient records while keeping each scan’s EXIF metadata intact.
- * 2. When a legal firm archives scanned contract pages as a single TIFF file but must retain the original capture dates and camera settings stored in EXIF for evidentiary purposes.
- * 3. When a publishing workflow merges separate high‑resolution TIFF illustrations into one document for print production, ensuring the color profile and resolution metadata are preserved.
- * 4. When a construction company consolidates daily site‑photo TIFFs into a chronological multi‑page archive, keeping GPS coordinates and timestamps from EXIF for project tracking.
- * 5. When a museum digitization project stitches individual TIFF scans of artwork panels into a single file for cataloging, while maintaining each panel’s provenance metadata embedded in EXIF.
+ * 1. When a medical imaging system needs to combine multiple DICOM‑exported TIFF scans into a single multi‑page TIFF archive while keeping each scan’s EXIF tags for patient and acquisition data.
+ * 2. When a legal firm digitizes a multi‑page contract as separate TIFF pages and wants to merge them into one searchable file without losing the original metadata that records scan dates and operator information.
+ * 3. When a publishing workflow assembles scanned book chapters stored as individual TIFF files into a single multi‑page TIFF for print‑ready proofing, preserving EXIF metadata for version control.
+ * 4. When a GIS application consolidates aerial photograph tiles saved as TIFF images into a single file for archival, ensuring each tile’s geolocation EXIF data remains intact.
+ * 5. When an archival system merges scanned historical documents, each saved as a separate TIFF with provenance metadata, into one multi‑page TIFF to maintain the original EXIF information for future reference.
  */
