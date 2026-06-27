@@ -9,42 +9,48 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output\normalized.png";
+            // Hard‑coded input and output paths.
+            string inputPath = "c:\\temp\\sample.png";
+            string outputPath = "c:\\temp\\sample_normalized.png";
 
-            // Verify that the source file exists
+            // Verify that the input file exists.
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure the output directory exists.
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
+            // Load the image.
             using (Image image = Image.Load(inputPath))
             {
-                // Work with a raster image to access filter methods
+                // Cast to RasterImage to access filter methods.
                 RasterImage raster = (RasterImage)image;
 
-                // 1. Apply automatic adaptive brightness/contrast.
-                // This runs a pipeline (CLAHE, adaptive white stretch, auto white balance)
-                // that equalizes local contrast while preserving overall brightness.
-                raster.AutoBrightnessContrast();
+                // ------------------------------------------------------------
+                // Kernel Normalization Best Practice:
+                // 1. Apply the desired convolution filter (e.g., sharpen).
+                // 2. Convolution kernels can shift overall brightness or contrast.
+                // 3. Immediately follow with adaptive brightness/contrast correction.
+                // 4. Optionally normalize the histogram to stretch pixel values
+                //    across the full dynamic range.
+                // ------------------------------------------------------------
 
-                // 2. Normalize the histogram so the full dynamic range is used.
-                // This step guarantees that subsequent filters start from a consistent brightness level.
-                raster.NormalizeHistogram();
-
-                // 3. Apply a sharpen filter.
-                // SharpenFilterOptions provides a pre‑normalized kernel, but if you create a custom kernel,
-                // ensure its sum equals 1 (or 0 for edge‑enhancement kernels) to keep overall brightness unchanged.
+                // Apply a sharpen filter with a 5×5 kernel and sigma = 4.0.
                 var sharpenOptions = new SharpenFilterOptions(5, 4.0);
                 raster.Filter(raster.Bounds, sharpenOptions);
 
-                // Save the processed image
+                // Adaptive brightness and contrast normalization restores consistent
+                // visual appearance after the kernel operation.
+                raster.AutoBrightnessContrast();
+
+                // Histogram normalization ensures the full range of pixel intensities
+                // is utilized, preventing washed‑out or overly dark results.
+                raster.NormalizeHistogram();
+
+                // Save the processed image.
                 raster.Save(outputPath);
             }
         }
@@ -57,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to automatically improve the visual quality of user‑uploaded PNG photos before storing them, this code can apply adaptive brightness/contrast, histogram normalization, and sharpening in one pipeline.
- * 2. When a batch‑processing service must ensure that scanned documents have consistent brightness across varying lighting conditions, the AutoBrightnessContrast and NormalizeHistogram calls guarantee uniform exposure before OCR.
- * 3. When an e‑commerce platform wants to generate product thumbnails with the same perceived brightness regardless of the original image’s lighting, the code normalizes the histogram and applies a pre‑normalized sharpen kernel to keep colors stable.
- * 4. When a medical imaging tool processes radiology images in PNG format and needs to preserve diagnostic brightness while enhancing edges, the kernel normalization step prevents artificial brightening after sharpening.
- * 5. When a content‑management system automatically resizes and enhances uploaded images for web delivery, using Aspose.Imaging’s RasterImage with AutoBrightnessContrast, NormalizeHistogram, and SharpenFilterOptions ensures consistent brightness across all filtered images.
+ * 1. When a developer needs to sharpen PNG photos for an online gallery while preserving the original brightness, they can load the image with Aspose.Imaging, apply a 5×5 SharpenFilterOptions kernel, and immediately call AutoBrightnessContrast to normalize the result.
+ * 2. When processing scanned documents for OCR, a developer can use this code to enhance edge definition with a convolution filter and then automatically adjust brightness and contrast so the text remains legible across varying scan qualities.
+ * 3. When preparing product images for an e‑commerce platform, a developer can apply the sharpen filter to JPEG files and rely on the built‑in histogram normalization to ensure consistent visual appearance across all catalog thumbnails.
+ * 4. When building a medical imaging viewer that highlights subtle details in X‑ray PNGs, a developer can use the kernel‑based sharpening followed by AutoBrightnessContrast to avoid unintended darkening or overexposure of diagnostic regions.
+ * 5. When creating a batch image‑processing pipeline that normalizes lighting conditions after applying custom convolution kernels, a developer can employ this pattern to guarantee each output image maintains a uniform dynamic range regardless of the original exposure.
  */
