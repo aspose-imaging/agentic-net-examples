@@ -7,8 +7,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output/kernel.txt";
+            string inputPath = "input.txt";
+            string outputPath = "output\\kernel.txt";
 
             if (!File.Exists(inputPath))
             {
@@ -18,18 +18,16 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            double[,] kernel2D = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetGaussian(5, 1.0);
+            double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetGaussian(5, 1.0);
 
-            using (StreamWriter writer = new StreamWriter(outputPath))
+            Console.WriteLine("Gaussian kernel (size=5, sigma=1.0):");
+            int rows = kernel.GetLength(0);
+            int cols = kernel.GetLength(1);
+            for (int i = 0; i < rows; i++)
             {
-                int rows = kernel2D.GetLength(0);
-                int cols = kernel2D.GetLength(1);
-                for (int i = 0; i < rows; i++)
+                for (int j = 0; j < cols; j++)
                 {
-                    for (int j = 0; j < cols; j++)
-                    {
-                        writer.WriteLine(kernel2D[i, j]);
-                    }
+                    Console.WriteLine(kernel[i, j]);
                 }
             }
         }
@@ -42,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 5×5 Gaussian blur kernel with sigma 1.0 in C# to apply a softening effect to PNG images using Aspose.Imaging’s convolution filter.
- * 2. When building a preprocessing pipeline that exports the Gaussian kernel to a .txt file for reuse in external scripts or cross‑platform image‑processing tools.
- * 3. When creating a reusable kernel file that will be loaded by a real‑time video filter written in C# to blur each frame consistently.
- * 4. When validating the correctness of Aspose.Imaging’s GetGaussian method by writing the kernel values to a text file and comparing them against a reference dataset.
- * 5. When documenting a step‑by‑step example that shows how to serialize a Gaussian blur kernel to a text file for educational or debugging purposes.
+ * 1. When a developer needs to apply a Gaussian blur to JPEG or PNG images in a .NET application, they can generate a 5×5 kernel with sigma 1.0 using Aspose.Imaging’s ConvolutionFilter.GetGaussian to feed into a convolution operation.
+ * 2. When building a medical imaging analysis tool that requires smoothing of DICOM scans before edge detection, the code can create the Gaussian kernel to standardize the blur strength across all slices.
+ * 3. When creating a custom thumbnail generator that reduces noise in BMP files, the developer can use the generated kernel to perform a lightweight blur before resizing.
+ * 4. When implementing a real‑time video frame pre‑processor in a C# WPF app, the kernel provides a deterministic blur filter that can be applied to each frame’s pixel buffer for consistent visual quality.
+ * 5. When writing automated tests for an image‑processing pipeline, the developer can output the kernel values to a text file to verify that the Gaussian parameters (size 5, sigma 1.0) match expected mathematical results.
  */
