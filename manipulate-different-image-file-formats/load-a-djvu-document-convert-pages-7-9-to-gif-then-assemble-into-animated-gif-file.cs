@@ -1,6 +1,8 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
@@ -12,8 +14,9 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.djvu";
-            string outputPath = @"C:\Images\output.gif";
+            string inputPath = "sample.djvu";
+            string outputPath = "animated.gif";
+            string tempDir = "temp_frames";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,52 +26,47 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure temporary directory exists
+            Directory.CreateDirectory(tempDir);
 
-            // Load the DjVu document
+            // Load DjVu document and export pages 7‑9 as individual GIF files
             using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                GifImage gifImage = null;
-                bool firstFrame = true;
-
-                // Iterate through all pages and process pages 7‑9
-                for (int i = 0; i < djvuImage.PageCount; i++)
+                int[] pagesToExport = { 7, 8, 9 };
+                foreach (int pageNumber in pagesToExport)
                 {
-                    // DjVu pages are 1‑based; adjust index accordingly
-                    int pageNumber = i + 1;
-                    if (pageNumber < 7 || pageNumber > 9)
-                        continue;
+                    if (pageNumber < 1 || pageNumber > djvuImage.PageCount)
+                        continue; // skip invalid page numbers
 
-                    // Retrieve the page as a raster image
-                    RasterImage rasterPage = (RasterImage)djvuImage.Pages[i];
+                    var djvuPage = djvuImage.Pages[pageNumber - 1];
+                    string tempPath = Path.Combine(tempDir, $"page{pageNumber}.gif");
+                    djvuPage.Save(tempPath, new GifOptions());
+                }
+            }
 
-                    // Create a GIF frame from the raster page
-                    GifFrameBlock frameBlock = new GifFrameBlock(rasterPage);
+            // Load the exported GIF frames as RasterImage objects
+            var rasterFrames = Directory.GetFiles(tempDir, "*.gif")
+                .Select(p => (RasterImage)Image.Load(p))
+                .ToArray();
 
-                    if (firstFrame)
-                    {
-                        // Initialize the animated GIF with the first frame
-                        gifImage = new GifImage(frameBlock);
-                        firstFrame = false;
-                    }
-                    else
-                    {
-                        // Add subsequent frames
-                        gifImage.AddPage(frameBlock);
-                    }
+            if (rasterFrames.Length == 0)
+            {
+                Console.Error.WriteLine("No frames were exported.");
+                return;
+            }
+
+            // Create an animated GIF using the first frame and add the remaining frames
+            using (GifImage animatedGif = new GifImage(new GifFrameBlock(rasterFrames[0])))
+            {
+                for (int i = 1; i < rasterFrames.Length; i++)
+                {
+                    animatedGif.AddPage(rasterFrames[i]);
                 }
 
-                if (gifImage != null)
-                {
-                    // Save the animated GIF
-                    gifImage.Save(outputPath);
-                    gifImage.Dispose();
-                }
-                else
-                {
-                    Console.Error.WriteLine("Pages 7‑9 were not found in the DjVu document.");
-                }
+                // Save the animated GIF
+                animatedGif.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -80,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract pages 7‑9 from a multi‑page DjVu document and create an animated GIF for web preview, they can use this C# Aspose.Imaging code.
- * 2. When a digital archive system must convert selected DjVu pages into a lightweight GIF animation for email newsletters, the example shows how to load, rasterize, and assemble the frames.
- * 3. When an e‑learning platform wants to generate a short animated tutorial from specific pages of a DjVu textbook, this code demonstrates converting those pages to GIF frames in .NET.
- * 4. When a document‑management workflow requires turning a subset of scanned DjVu pages into an animated GIF for quick visual inspection, the snippet provides the necessary C# operations.
- * 5. When a mobile app needs to display a looping preview of pages 7‑9 from a DjVu file without loading the entire document, this example shows how to create an animated GIF using Aspose.Imaging for .NET.
+ * 1. When a developer needs to extract specific pages (e.g., pages 7‑9) from a multi‑page DjVu document and create an animated GIF for web preview, they can use this code.
+ * 2. When an archival system must convert selected DjVu pages into GIF frames and combine them into a single animated GIF to embed in an e‑learning module, this snippet provides the required workflow.
+ * 3. When a digital publishing platform wants to generate a lightweight animated preview of scanned book sections stored as DjVu files, the code shows how to export pages to GIF and assemble them.
+ * 4. When a document‑management application requires on‑the‑fly conversion of DjVu pages to an animated GIF for email attachments, the example demonstrates loading, saving, and merging the frames in C#.
+ * 5. When a QA engineer needs to automate testing of DjVu‑to‑GIF conversion and verify that pages 7‑9 render correctly as an animated GIF, this code offers a repeatable solution.
  */
