@@ -7,41 +7,40 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\temp\sample.cdr";
         string outputPath = @"C:\temp\sample.gif";
 
         try
         {
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CorelDRAW (CDR) file
             using (Image image = Image.Load(inputPath))
             {
-                // Configure GIF save options (256‑color palette)
-                var gifOptions = new GifOptions
+                // Configure GIF save options for 256‑color output
+                GifOptions gifOptions = new GifOptions
                 {
-                    // 7 means 8 bits per primary color (2^8 = 256 colors)
+                    // ColorResolution = bits per primary color minus 1 (7 => 8 bits => 256 colors)
                     ColorResolution = 7,
-                    // Analyze source colors to build the best matching palette
+                    // Enable palette correction for best matching palette
                     DoPaletteCorrection = true
                 };
 
-                // Save the image as GIF using the configured options
+                // Save as GIF using the configured options
                 image.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -49,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy CorelDRAW (CDR) artwork into a web‑friendly GIF with a 256‑color palette for embedding in HTML emails.
- * 2. When an e‑commerce platform must generate low‑size product thumbnails from CDR source files to meet bandwidth constraints on mobile browsers.
- * 3. When a marketing automation system automates the creation of animated GIF banners from designer‑provided CDR files while ensuring the GIF complies with the 256‑color limit of older browsers.
- * 4. When a document management workflow requires batch conversion of archived CDR drawings to GIF for quick preview in file explorers that only support raster formats.
- * 5. When a game development pipeline needs to import vector assets created in CorelDRAW and export them as indexed GIF sprites to reduce texture memory usage.
+ * 1. When a developer needs to convert a multi‑layer CorelDRAW (CDR) design into a web‑friendly GIF with a 256‑color palette for faster page loads.
+ * 2. When an e‑commerce platform must generate product thumbnails from CDR files that can be displayed in legacy browsers supporting only 8‑bit GIF images.
+ * 3. When an automated reporting tool has to embed vector artwork from CorelDRAW into email newsletters that require GIF attachments limited to 256 colors.
+ * 4. When a digital asset management system must archive CDR drawings as size‑optimized GIFs for long‑term storage while preserving visual fidelity through palette correction.
+ * 5. When a batch‑processing script needs to convert a library of CorelDRAW files to 256‑color GIFs for use in a mobile app that only supports GIF images with limited color depth.
  */
