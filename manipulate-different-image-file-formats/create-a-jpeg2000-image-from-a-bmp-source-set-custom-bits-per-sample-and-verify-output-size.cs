@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg2000;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -25,23 +25,19 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load BMP image
-            using (Image bmpImage = Image.Load(inputPath))
+            // Load BMP image as a raster image
+            using (Image loadedImage = Image.Load(inputPath))
             {
-                // Cast to RasterImage for conversion
-                RasterImage raster = bmpImage as RasterImage;
-                if (raster == null)
+                // Cast to RasterImage (BMP is a raster format)
+                using (RasterImage raster = (RasterImage)loadedImage)
                 {
-                    Console.Error.WriteLine("Failed to load raster image from BMP.");
-                    return;
-                }
-
-                // Create JPEG2000 image with custom bits per sample (e.g., 12 bits)
-                int bitsPerSample = 12;
-                using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(raster, bitsPerSample))
-                {
-                    // Save JPEG2000 image
-                    jpeg2000Image.Save(outputPath);
+                    // Create JPEG2000 image from the raster image with custom bits per pixel (e.g., 12)
+                    int customBitsPerPixel = 12;
+                    using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(raster, customBitsPerPixel))
+                    {
+                        // Save the JPEG2000 image using default options
+                        jpeg2000Image.Save(outputPath);
+                    }
                 }
             }
 
@@ -58,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive legacy BMP artwork as high‑precision JPEG2000 files with 12‑bit depth for long‑term preservation while confirming the resulting file size.
- * 2. When a medical imaging application must convert diagnostic BMP scans to JPEG2000 with custom bits per sample to meet DICOM standards and verify the output size for storage budgeting.
- * 3. When a printing workflow requires transforming BMP source graphics into lossless JPEG2000 images with increased bit depth to retain color fidelity before sending files to a high‑resolution press.
- * 4. When a GIS system needs to re‑encode BMP elevation maps to JPEG2000 with 12‑bit samples for efficient tiling and must check the file size to ensure it fits within tile cache limits.
- * 5. When a digital asset management tool batch‑processes BMP assets into JPEG2000 with custom bits per sample and logs the output file size to monitor compression performance.
+ * 1. When a developer needs to convert legacy BMP assets to JPEG2000 for web delivery while preserving high color fidelity by setting a custom 12‑bit per sample depth.
+ * 2. When an application must generate JPEG2000 files from raster images on the fly and verify the resulting file size to ensure it meets storage or bandwidth constraints.
+ * 3. When a medical imaging system requires converting 12‑bit grayscale BMP scans to JPEG2000 to take advantage of lossless compression and maintain diagnostic quality.
+ * 4. When a batch processing tool has to read BMP files from a known folder, create JPEG2000 versions with a specific bits‑per‑sample setting, and automatically create the output directory if it does not exist.
+ * 5. When a developer wants to catch and log errors while loading a BMP, converting it to a Jpeg2000Image object, and saving it, ensuring the process is robust for production environments.
  */
