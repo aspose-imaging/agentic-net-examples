@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.cmx";
-            string outputPath = "output/output.png";
+            string inputPath = "Input/sample.cmx";
+            string outputPath = "Output/sample.png";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -23,20 +25,28 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure PNG save options with CMX rasterization settings
-            PngOptions pngOptions = new PngOptions
+            // Load CMX vector image
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
             {
-                VectorRasterizationOptions = new CmxRasterizationOptions
+                // Configure PNG save options
+                var pngOptions = new PngOptions
                 {
-                    // Set desired DPI for web usage
-                    ResolutionSettings = new Aspose.Imaging.ResolutionSetting(96, 96)
-                }
-            };
+                    Source = new FileCreateSource(outputPath, false)
+                };
 
-            // Load the CMX image and save as PNG using the configured options
-            using (Image cmxImage = Image.Load(inputPath))
-            {
-                cmxImage.Save(outputPath, pngOptions);
+                // Set rasterization options for CMX
+                var rasterOptions = new CmxRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
+                    ResolutionSettings = new ResolutionSetting(96, 96) // DPI for web usage
+                };
+
+                pngOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save rasterized PNG
+                cmx.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy Corel Metafile (CMX) vector graphics into web‑friendly PNG images at 96 DPI for faster page loads.
- * 2. When an e‑commerce site must display product diagrams originally stored as CMX files, and the images must be rasterized to PNG with a specific resolution for consistent thumbnail sizing.
- * 3. When a content management system imports archival CMX artwork and requires automated C# code to generate PNG previews at a standard web DPI.
- * 4. When a reporting tool generates charts in CMX format and the final PDF or HTML report needs those charts rasterized to PNG at 96 DPI for cross‑browser compatibility.
- * 5. When a mobile app backend processes user‑uploaded CMX files and must deliver PNG assets optimized for web display at a fixed DPI without manual intervention.
+ * 1. When a developer needs to display legacy CorelDRAW CMX artwork on a modern website, they can rasterize the vector file to a PNG at 96 DPI to ensure fast loading and consistent colors.
+ * 2. When an e‑commerce platform must generate product thumbnails from CMX source files, the code converts the vector to a web‑optimized PNG with a white background and fixed resolution.
+ * 3. When a content management system imports user‑uploaded CMX diagrams and must store them as PNG images for browser compatibility, the rasterization at a specific DPI guarantees uniform sizing across devices.
+ * 4. When a reporting tool creates PDF dashboards that embed CMX charts, it first rasterizes the vectors to PNG at 96 DPI so the images render correctly in HTML preview mode.
+ * 5. When a mobile app needs to cache CMX icons as PNG assets for offline use, the code rasterizes the vectors at a web‑friendly DPI, preserving text rendering hints and eliminating vector support dependencies.
  */
