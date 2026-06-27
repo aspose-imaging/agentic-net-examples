@@ -1,32 +1,38 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
-    // Processes an image supplied as a byte array, applies a simple MagicWand mask,
-    // and returns the resulting image in a MemoryStream.
-    static MemoryStream ProcessImage(byte[] imageData)
+    // Applies Magic Wand tool to an image loaded from a byte array and returns the processed image as a stream.
+    static MemoryStream ApplyMagicWand(byte[] imageData, int pointX, int pointY, int threshold)
     {
-        // Load the image from the provided byte array.
+        // Load image from the provided byte array.
         using (var inputStream = new MemoryStream(imageData))
-        using (var rasterImage = (RasterImage)Image.Load(inputStream))
         {
-            // Create a mask using MagicWandTool.
-            // Here we use a reference point (10,10) with default settings.
-            ImageBitMask mask = MagicWandTool.Select(rasterImage, new MagicWandSettings(10, 10));
-            // Apply the mask to the image.
-            mask.Apply();
+            // Use Aspose.Imaging.Image.Load(Stream) as per the documented rule.
+            using (Image image = Image.Load(inputStream))
+            {
+                // Cast to RasterImage to work with MagicWandTool.
+                RasterImage raster = (RasterImage)image;
 
-            // Save the processed image into a memory stream (PNG format).
-            var outputStream = new MemoryStream();
-            rasterImage.Save(outputStream, new PngOptions());
-            // Reset position so the caller can read from the beginning.
-            outputStream.Position = 0;
-            return outputStream;
+                // Create settings for the Magic Wand algorithm.
+                var settings = new MagicWandSettings(pointX, pointY) { Threshold = threshold };
+
+                // Generate mask and apply it to the image.
+                MagicWandTool.Select(raster, settings).Apply();
+
+                // Save the processed image into a new memory stream (PNG format).
+                var outputStream = new MemoryStream();
+                var pngOptions = new PngOptions(); // default options
+                raster.Save(outputStream, pngOptions);
+                outputStream.Position = 0; // reset for reading
+                return outputStream;
+            }
         }
     }
 
@@ -45,23 +51,20 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists.
+            // Ensure output directory exists.
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Read the entire file into a byte array.
+            // Read the entire input file into a byte array.
             byte[] imageBytes = File.ReadAllBytes(inputPath);
 
-            // Process the image and obtain the result stream.
-            using (MemoryStream resultStream = ProcessImage(imageBytes))
+            // Apply Magic Wand processing (example coordinates and threshold).
+            using (MemoryStream resultStream = ApplyMagicWand(imageBytes, 120, 100, 150))
             {
-                // Write the result stream to the output file.
-                using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                // Write the resulting stream to the output file.
+                using (FileStream fileOut = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
                 {
-                    resultStream.CopyTo(fileStream);
+                    resultStream.CopyTo(fileOut);
                 }
-
-                // At this point resultStream still contains the processed image data
-                // and can be used further if needed.
             }
         }
         catch (Exception ex)
@@ -70,3 +73,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web API receives an uploaded PNG image as a byte array and needs to automatically remove a background region using the Magic Wand tool before sending the edited image back to the client as a stream.
+ * 2. When a desktop application processes scanned documents stored in memory, applies a threshold‑based Magic Wand selection to isolate handwritten notes, and saves the result to a MemoryStream for further PDF conversion.
+ * 3. When a cloud function reads image data from a message queue, uses MagicWandSettings to select a color range at a specific coordinate, and returns the processed PNG via a stream to another microservice.
+ * 4. When a mobile backend service loads user‑provided JPEG bytes, applies a Magic Wand mask to highlight a selected object, and streams the edited image back for display in the app.
+ * 5. When an automated testing framework loads test images from embedded resources, applies the Magic Wand tool to verify region selection logic, and captures the output in a MemoryStream for comparison against expected results.
+ */
