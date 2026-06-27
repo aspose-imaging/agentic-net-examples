@@ -1,57 +1,43 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string blurredOutputPath = "output_blur.png";
+        string deconvolvedOutputPath = "output_deconvolution.png";
+
         try
         {
-            string inputPath = "input.svg";
-            string tempPngPath = "temp.png";
-            string blurredPath = "blurred.png";
-            string deconvolvedPath = "deconvolved.png";
-
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(blurredPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(deconvolvedPath));
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(blurredOutputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(deconvolvedOutputPath));
 
-            // Load SVG and rasterize to PNG
-            using (Image svgImage = Image.Load(inputPath))
+            // Load the SVG image
+            using (Image image = Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions();
-                rasterOptions.PageSize = svgImage.Size;
+                // Rasterize the SVG to a raster image (default size)
+                RasterImage rasterImage = (RasterImage)image;
 
-                var pngOptions = new PngOptions();
-                pngOptions.VectorRasterizationOptions = rasterOptions;
+                // Apply Gaussian blur with size 3 and sigma 0.5
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(3, 0.5));
+                rasterImage.Save(blurredOutputPath);
 
-                svgImage.Save(tempPngPath, pngOptions);
-            }
-
-            // Apply Gaussian blur
-            using (Image img = Image.Load(tempPngPath))
-            {
-                var raster = (RasterImage)img;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(1, 0.5));
-                raster.Save(blurredPath, new PngOptions());
-            }
-
-            // Apply deconvolution with identical kernel parameters
-            using (Image img = Image.Load(blurredPath))
-            {
-                var raster = (RasterImage)img;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(1, 0.5));
-                raster.Save(deconvolvedPath, new PngOptions());
+                // Apply Gaussian deconvolution (Gauss-Wiener) with same kernel parameters
+                rasterImage.Filter(rasterImage.Bounds, new GaussWienerFilterOptions(3, 0.5));
+                rasterImage.Save(deconvolvedOutputPath);
             }
         }
         catch (Exception ex)
@@ -63,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to simulate a slight out‑of‑focus effect on a vector logo (SVG) before sharpening it for a high‑resolution PNG thumbnail, they can use this code to blur with sigma 0.5 and then deconvolve with the same kernel.
- * 2. When preparing SVG illustrations for print, a developer may apply a low‑strength Gaussian blur to reduce aliasing during rasterization to PNG and then restore detail with a Gauss‑Wiener deconvolution to meet print‑ready quality standards.
- * 3. When building an automated pipeline that tests image‑processing algorithms, a developer can use this snippet to generate a known‑blurred PNG from an SVG and immediately reverse the blur, providing a controlled before‑and‑after dataset.
- * 4. When creating web assets that require a subtle soft‑edge effect on SVG icons while preserving crisp edges after compression, a developer can rasterize the SVG to PNG, apply a sigma 0.5 blur, and then deconvolve to retain visual fidelity.
- * 5. When developing a diagnostic tool for visual quality assessment, a developer can employ this code to intentionally blur an SVG‑derived PNG and then apply identical deconvolution parameters to evaluate the effectiveness of the Gauss‑Wiener filter in restoring original details.
+ * 1. When creating a low‑resolution blurred thumbnail of an SVG icon for a mobile app’s loading screen and then using the same Gaussian kernel to deconvolve the image for a high‑quality version displayed after loading.
+ * 2. When preprocessing SVG diagrams for a scientific report by applying a Gaussian blur to reduce visual noise before printing, and subsequently applying a Gauss‑Wiener deconvolution to restore edge detail for the final PDF.
+ * 3. When implementing an automated pipeline that converts SVG assets to PNG, adds a subtle blur for UI background effects, and then runs deconvolution to verify that the blur parameters can be accurately reversed for quality‑control testing.
+ * 4. When building a web‑based image editor that lets users apply a Gaussian blur to vector graphics and immediately see the effect of a deconvolution filter using identical kernel settings to understand the limits of image restoration.
+ * 5. When generating test data for computer‑vision algorithms by blurring SVG illustrations with sigma 0.5 and then deconvolving them to evaluate the performance of edge‑detection models on both degraded and restored raster images.
  */
