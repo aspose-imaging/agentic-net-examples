@@ -1,51 +1,46 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputFolder = @"C:\Images\Input";
+        string outputFolder = @"C:\Images\Output";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\Images\Input";
-            string outputFolder = @"C:\Images\Output";
-
             // Get all TIFF files in the input folder
-            string[] tiffFiles = Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly);
-            foreach (string filePath in tiffFiles)
-            {
-                // Process only .tif and .tiff extensions
-                string extension = Path.GetExtension(filePath).ToLowerInvariant();
-                if (extension != ".tif" && extension != ".tiff")
-                    continue;
+            string[] tiffFiles = Directory.GetFiles(inputFolder, "*.tif");
 
-                // Verify input file exists
-                if (!File.Exists(filePath))
+            foreach (string inputPath in tiffFiles)
+            {
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load the TIFF image
-                using (Image image = Image.Load(filePath))
+                // Build the output PNG path
+                string outputPath = Path.Combine(
+                    outputFolder,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".png");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the TIFF image, apply dithering, and save as PNG
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to TiffImage to access Dither method
                     TiffImage tiffImage = (TiffImage)image;
 
-                    // Apply Floyd‑Steinberg dithering with 1‑bit palette
+                    // Apply Floyd‑Steinberg dithering with a 1‑bit palette
                     tiffImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
-
-                    // Build output PNG path
-                    string outputPath = Path.Combine(
-                        outputFolder,
-                        Path.GetFileNameWithoutExtension(filePath) + ".png");
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save the processed image as PNG
                     tiffImage.Save(outputPath, new PngOptions());
@@ -61,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a collection of high‑resolution scanned TIFF documents into web‑friendly PNG files with 1‑bit Floyd‑Steinberg dithering to reduce file size while preserving visual detail.
- * 2. When an archival system requires automated processing of incoming TIFF images to generate monochrome PNG previews for quick browsing in a .NET application.
- * 3. When a printing workflow must batch‑process TIFF artwork by applying dithering and saving as PNG to ensure consistent rendering on low‑color‑depth printers.
- * 4. When a digital asset management tool needs to ingest a folder of TIFF photographs and create optimized PNG thumbnails using Aspose.Imaging’s Dither method in C#.
- * 5. When a GIS application must transform a set of geospatial TIFF layers into PNG overlays with 1‑bit dithering for faster map rendering on the client side.
+ * 1. When a developer needs to batch‑convert a folder of high‑resolution TIFF scans into web‑ready PNG files while applying Floyd‑Steinberg 1‑bit dithering to reduce size and preserve detail.
+ * 2. When an archival system must automatically process incoming TIFF documents, dither them, and store the results as lossless PNG images for long‑term preservation.
+ * 3. When a printing workflow requires converting multi‑page TIFF assets into single‑page PNGs with a binary palette to ensure compatibility with raster printers.
+ * 4. When a digital asset management application needs to generate thumbnail PNG previews from a directory of TIFF images using Aspose.Imaging’s dithering API in C#.
+ * 5. When a migration script has to bulk‑convert legacy TIFF graphics to PNG format with consistent dithering to maintain uniform appearance across different platforms.
  */
