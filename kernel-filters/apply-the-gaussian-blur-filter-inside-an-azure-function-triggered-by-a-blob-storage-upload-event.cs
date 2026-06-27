@@ -1,29 +1,35 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input/sample.png";
+            string outputPath = "output/sample.GaussianBlur.png";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load image, apply Gaussian blur, and save
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-                raster.Save(outputPath);
+                RasterImage rasterImage = (RasterImage)image;
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -35,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a user uploads a profile picture to Azure Blob storage, an Azure Function can automatically apply a Gaussian blur filter to obscure background details, ensuring consistent visual style and privacy compliance.
- * 2. When a marketing team stores high‑resolution product images in Blob storage, a serverless function can blur the edges to create soft‑focus thumbnails that load faster on e‑commerce sites.
- * 3. When scanned documents are saved as PNG files in Blob storage, an Azure Function can use Gaussian blur to reduce image noise before the files are processed by OCR engines for better text extraction accuracy.
- * 4. When a mobile app uploads user‑generated photos to Blob storage, a backend function can apply a Gaussian blur with a radius of 5 and sigma of 4.0 to generate stylized images for social media sharing without requiring client‑side processing.
- * 5. When a healthcare provider stores medical imaging data in Blob storage, an Azure Function can automatically blur patient identifiers in the images to meet HIPAA privacy requirements while preserving diagnostic details.
+ * 1. When a developer wants to automatically soften user‑uploaded PNG images stored in Azure Blob storage by applying a Gaussian blur filter via an Azure Function written in C# with Aspose.Imaging.
+ * 2. When a SaaS platform needs to generate privacy‑preserving thumbnails for newly uploaded photos, using a serverless Azure Function to blur faces before saving the PNG output.
+ * 3. When an e‑commerce site requires on‑the‑fly background smoothing for product images uploaded to Blob storage, leveraging Aspose.Imaging’s GaussianBlurFilterOptions in a C# Azure Function.
+ * 4. When a content moderation pipeline must obscure sensitive details in images immediately after they are uploaded to Azure Blob, using a serverless function to apply a 5‑pixel radius blur and store the result as a .GaussianBlur.png file.
+ * 5. When a mobile app backend wants to create stylized blurred previews of high‑resolution PNG assets uploaded to Azure, triggering an Azure Function that loads the image, applies a Gaussian blur, and saves the processed file back to Blob storage.
  */
