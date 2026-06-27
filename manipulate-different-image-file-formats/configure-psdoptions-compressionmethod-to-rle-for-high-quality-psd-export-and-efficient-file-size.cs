@@ -8,13 +8,13 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"c:\temp\sample.bmp";
-        string outputPath = @"c:\temp\output.psd";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\sample.bmp";
+            string outputPath = @"c:\temp\output.psd";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,7 +27,7 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD export options with RLE compression
+                // Configure PSD options with RLE compression
                 PsdOptions psdOptions = new PsdOptions
                 {
                     CompressionMethod = CompressionMethod.RLE
@@ -39,7 +39,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -47,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application needs to convert high‑resolution BMP files to Photoshop PSD files while preserving image quality and minimizing file size for archival in a digital asset management system.
- * 2. When an automated build pipeline generates design mockups and must export them as PSDs with RLE compression so that downstream Photoshop scripts can edit them without excessive storage overhead.
- * 3. When a web service receives user‑uploaded bitmap images and must provide downloadable PSD versions that retain layer fidelity yet stay within bandwidth limits for email delivery.
- * 4. When a desktop utility batch‑processes a folder of scanned documents, converting each to PSD using RLE compression to ensure lossless compression for professional printing workflows.
- * 5. When integrating Aspose.Imaging into a C# plugin for a graphics editor that needs to save edited images as PSDs with efficient RLE compression to speed up save operations on low‑memory devices.
+ * 1. When a developer needs to convert high‑resolution BMP assets to Photoshop PSD files while keeping lossless quality and reducing file size for faster upload to a design collaboration platform.
+ * 2. When an automated image‑processing pipeline must generate PSD previews from scanned documents and wants to use RLE compression to keep the files compatible with Photoshop without bloating storage.
+ * 3. When a desktop application exports user‑edited graphics to PSD format for further editing in Adobe Photoshop and wants to ensure the exported layers are losslessly compressed to meet client storage quotas.
+ * 4. When a batch conversion tool processes large numbers of bitmap images into PSDs for archival purposes and requires RLE compression to balance image fidelity with manageable archive size.
+ * 5. When a web service creates PSD files on‑the‑fly from uploaded BMP images and needs to use RLE compression to deliver high‑quality files quickly to downstream Photoshop‑based workflows.
  */
