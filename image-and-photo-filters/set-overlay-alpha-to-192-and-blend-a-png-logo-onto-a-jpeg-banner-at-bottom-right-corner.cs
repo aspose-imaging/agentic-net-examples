@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -11,10 +10,10 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hard‑coded input and output paths
             string bannerPath = "banner.jpg";
             string logoPath = "logo.png";
-            string outputPath = "output.jpg";
+            string outputPath = "output\\result.jpg";
 
             // Validate input files
             if (!File.Exists(bannerPath))
@@ -35,23 +34,17 @@ class Program
             using (RasterImage banner = (RasterImage)Image.Load(bannerPath))
             using (RasterImage logo = (RasterImage)Image.Load(logoPath))
             {
-                // Calculate bottom‑right corner position
-                int x = banner.Width - logo.Width;
-                int y = banner.Height - logo.Height;
-                if (x < 0) x = 0;
-                if (y < 0) y = 0;
-                Point origin = new Point(x, y);
+                // Position logo at bottom‑right corner
+                Point origin = new Point(banner.Width - logo.Width, banner.Height - logo.Height);
 
                 // Blend logo onto banner with alpha = 192
                 banner.Blend(origin, logo, 192);
 
-                // Save the result as JPEG
+                // Prepare JPEG save options
                 Source src = new FileCreateSource(outputPath, false);
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Source = src,
-                    Quality = 90
-                };
+                JpegOptions jpegOptions = new JpegOptions { Source = src };
+
+                // Save the composited image
                 banner.Save(outputPath, jpegOptions);
             }
         }
@@ -61,3 +54,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When creating marketing email banners that need a semi‑transparent PNG logo placed at the bottom‑right of a JPEG background, a developer can use this Aspose.Imaging C# code to blend the logo with an alpha value of 192 and save the result as a JPEG.
+ * 2. When generating product catalog images on‑the‑fly, a web service can overlay a company watermark PNG onto each JPEG photo at the lower‑right corner with 75 % opacity using the Blend method shown.
+ * 3. When automating the production of event flyers, a desktop application can combine a high‑resolution JPEG banner with a PNG sponsor logo at the bottom‑right, controlling the transparency via the alpha parameter (192) before exporting the final JPEG.
+ * 4. When building a batch‑processing tool that adds a brand logo to thousands of existing JPEG advertisements, developers can employ this code to position the PNG logo at the corner, apply a consistent alpha blend, and write the composited images back to disk.
+ * 5. When integrating dynamic graphics into a C# reporting engine, the code enables the insertion of a semi‑transparent PNG badge onto a JPEG chart image at the lower‑right edge, ensuring the overlay respects the desired opacity and JPEG output settings.
+ */
