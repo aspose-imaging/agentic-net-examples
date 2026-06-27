@@ -5,7 +5,7 @@
   "package_version": "26.6.0",
   "total_examples": 2874,
   "total_categories": 17,
-  "last_updated": "2026-06-26",
+  "last_updated": "2026-06-27",
   "categories": [
     {
       "name": "conversion",
@@ -1577,17 +1577,18 @@
       "required_namespaces": [
         "System",
         "System.IO",
-        "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging",
+        "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging.FileFormats.Wmf",
-        "Aspose.Imaging.FileFormats.Emf",
         "Aspose.Imaging.FileFormats.Tiff.Enums",
-        "System.Threading.Tasks",
+        "Aspose.Imaging.FileFormats.Emf",
+        "Aspose.Imaging.FileFormats.Jpeg",
         "Aspose.Imaging.FileFormats.Png",
-        "Aspose.Imaging.Sources",
+        "System.Threading.Tasks",
         "System.Net.Http",
         "System.IO.Compression",
-        "Aspose.Imaging.FileFormats.Jpeg",
+        "Aspose.Imaging.Sources",
+        "Aspose.Imaging.Exif",
         "Aspose.Imaging.FileFormats.Bmp",
         "Aspose.Imaging.FileFormats.Tiff"
       ],
