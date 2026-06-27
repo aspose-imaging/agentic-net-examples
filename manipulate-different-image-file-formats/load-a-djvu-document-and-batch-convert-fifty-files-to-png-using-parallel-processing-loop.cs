@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Djvu;
@@ -10,16 +10,18 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = @"C:\InputDjvu";
-        string outputDirectory = @"C:\OutputPng";
-
         try
         {
-            // Get up to 50 DjVu files from the input directory
-            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.djvu")
-                                           .Take(50)
-                                           .ToArray();
+            // Hardcoded input and output directories
+            string inputDir = @"C:\DjvuInput";
+            string outputDir = @"C:\PngOutput";
+
+            // Prepare list of 50 DjVu files (input0.djvu … input49.djvu)
+            var inputFiles = new List<string>();
+            for (int i = 0; i < 50; i++)
+            {
+                inputFiles.Add(Path.Combine(inputDir, $"input{i}.djvu"));
+            }
 
             // Process each file in parallel
             Parallel.ForEach(inputFiles, inputPath =>
@@ -31,24 +33,22 @@ class Program
                     return;
                 }
 
-                // Open the DjVu file stream
+                // Load the DjVu document from a file stream
                 using (Stream stream = File.OpenRead(inputPath))
                 {
-                    // Load the DjVu document
-                    using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+                    using (DjvuImage djvuImage = new DjvuImage(stream))
                     {
-                        // Iterate through each page and save as PNG
-                        foreach (DjvuPage djvuPage in djvuImage.Pages)
+                        // Save each page as a separate PNG file
+                        foreach (DjvuPage page in djvuImage.Pages)
                         {
-                            // Build output file name: <originalName>.<pageNumber>.png
-                            string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}.{djvuPage.PageNumber}.png";
-                            string outputPath = Path.Combine(outputDirectory, outputFileName);
+                            string baseName = Path.GetFileNameWithoutExtension(inputPath);
+                            string outputPath = Path.Combine(outputDir, $"{baseName}_page{page.PageNumber}.png");
 
                             // Ensure the output directory exists
                             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                             // Save the page as PNG
-                            djvuPage.Save(outputPath, new PngOptions());
+                            page.Save(outputPath, new PngOptions());
                         }
                     }
                 }
@@ -63,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a document management system needs to quickly generate thumbnail PNG previews for up to fifty DjVu files stored on a server, this parallel batch conversion code can extract each page as an image.
- * 2. When a digital archiving workflow must convert scanned DjVu manuscripts into lossless PNG files for downstream OCR processing, the code provides a fast C# solution that handles multiple files concurrently.
- * 3. When a web application offers users the ability to download individual pages of a DjVu ebook as PNG images, developers can use this snippet to load the DjVu document and save each page in parallel.
- * 4. When a batch‑processing pipeline has to migrate legacy DjVu assets to a PNG‑based asset library while minimizing CPU time, the parallel loop in the example efficiently processes up to fifty files at once.
- * 5. When an automated reporting tool needs to extract visual charts from DjVu reports and store them as PNG files for inclusion in PowerPoint slides, this C# code automates the page‑by‑page conversion in a scalable way.
+ * 1. When a developer needs to migrate a large archive of scanned DjVu technical manuals into high‑resolution PNG images for web publishing, they can use this parallel batch conversion code.
+ * 2. When an automated document‑processing pipeline must extract every page of multiple DjVu e‑books and store them as PNG thumbnails for a digital library catalog, this example shows how to do it efficiently in C#.
+ * 3. When a cloud‑based service has to convert fifty DjVu files uploaded by users into PNG format for downstream OCR or image analysis, the parallel loop speeds up the workload.
+ * 4. When a legacy system stores engineering drawings in DjVu and a new application requires PNG assets for integration with a reporting tool, the code demonstrates batch loading and page‑wise saving.
+ * 5. When a DevOps script needs to validate the integrity of DjVu files by rendering each page to PNG and checking the output files, this parallel processing approach provides a fast, automated solution.
  */
