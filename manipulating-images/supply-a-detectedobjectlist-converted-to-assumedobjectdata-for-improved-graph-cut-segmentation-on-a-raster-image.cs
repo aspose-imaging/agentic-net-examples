@@ -5,75 +5,55 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Masking;
+using Aspose.Imaging.Masking.Options;
+using Aspose.Imaging.Masking.Result;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output.png";
-        string tempPath = Path.Combine(Path.GetTempPath(), "mask_temp.png");
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Sample detected objects list (type, bounds)
-            var detectedObjects = new List<(Aspose.Imaging.Masking.Options.DetectedObjectType type, Rectangle bounds)>
-            {
-                (Aspose.Imaging.Masking.Options.DetectedObjectType.Human, new Rectangle(100, 100, 150, 300)),
-                (Aspose.Imaging.Masking.Options.DetectedObjectType.Other, new Rectangle(300, 100, 50, 30))
-            };
+            string inputPath = "input.jpg";
+            string outputPath = "output.png";
 
-            // Convert to AssumedObjectData list
-            var assumedObjects = new List<Aspose.Imaging.Masking.Options.AssumedObjectData>();
-            foreach (var obj in detectedObjects)
+            if (!File.Exists(inputPath))
             {
-                assumedObjects.Add(new Aspose.Imaging.Masking.Options.AssumedObjectData(obj.type, obj.bounds));
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Load image as RasterImage
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Configure AutoMaskingGraphCutOptions with assumed objects
-                var options = new Aspose.Imaging.Masking.Options.AutoMaskingGraphCutOptions
+                List<AssumedObjectData> assumedObjects = new List<AssumedObjectData>();
+                assumedObjects.Add(new AssumedObjectData(DetectedObjectType.Human, new Rectangle(100, 100, 150, 300)));
+                assumedObjects.Add(new AssumedObjectData(DetectedObjectType.Other, new Rectangle(300, 200, 80, 120)));
+
+                AutoMaskingGraphCutOptions options = new AutoMaskingGraphCutOptions
                 {
                     AssumedObjects = assumedObjects,
                     CalculateDefaultStrokes = true,
                     FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
-                    Method = Aspose.Imaging.Masking.Options.SegmentationMethod.GraphCut,
+                    Method = SegmentationMethod.GraphCut,
                     Decompose = false,
                     ExportOptions = new PngOptions
                     {
                         ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new FileCreateSource(tempPath, false)
+                        Source = new StreamSource(new MemoryStream())
                     },
                     BackgroundReplacementColor = Color.Transparent
                 };
 
-                // Perform masking
-                var results = new Aspose.Imaging.Masking.ImageMasking(image).Decompose(options);
-
-                // Save foreground (masked object) as PNG
-                using (RasterImage resultImage = (RasterImage)results[1].GetImage())
+                using (MaskingResult results = new ImageMasking(image).Decompose(options))
                 {
-                    resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    using (RasterImage resultImage = (RasterImage)results[1].GetImage())
+                    {
+                        resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    }
                 }
-            }
-
-            // Clean up temporary file
-            if (File.Exists(tempPath))
-            {
-                File.Delete(tempPath);
             }
         }
         catch (Exception ex)
@@ -82,3 +62,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert a DetectedObjectList into AssumedObjectData and apply AutoMaskingGraphCutOptions to automatically remove the background of JPEG product photos and save them as transparent PNGs for e‑commerce catalogs.
+ * 2. When a developer wants to feed a list of detected humans into AssumedObjectData to perform graph‑cut segmentation that isolates people in security camera footage while leaving other objects untouched.
+ * 3. When a developer builds a medical imaging application that transforms a DetectedObjectList of patient silhouettes into AssumedObjectData to achieve precise graph‑cut separation from scan backgrounds.
+ * 4. When a developer adds a feature to an image‑editing app that converts user‑selected objects into AssumedObjectData, runs graph‑cut masking, and replaces the original background with a custom color or transparency.
+ * 5. When a developer automates a content‑management pipeline by converting detection results into AssumedObjectData for graph‑cut masking, producing PNG thumbnails with transparent backgrounds for social‑media sharing.
+ */
