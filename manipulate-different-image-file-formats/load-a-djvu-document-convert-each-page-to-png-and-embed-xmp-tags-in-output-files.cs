@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Png;
@@ -10,27 +11,29 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.djvu";
-            string outputDir = "Output";
-
+            string inputPath = "Input/sample.djvu";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(outputDir);
-
             using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                int pageIndex = 0;
-                foreach (DjvuPage page in djvuImage.Pages)
+                using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    string outputPath = Path.Combine(outputDir, $"page_{pageIndex}.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    page.Save(outputPath, new PngOptions());
-                    pageIndex++;
+                    int pageIndex = 0;
+                    foreach (DjvuPage page in djvuImage.Pages)
+                    {
+                        string outputPath = $"Output/page_{pageIndex}.png";
+
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        PngOptions pngOptions = new PngOptions();
+                        page.Save(outputPath, pngOptions);
+
+                        pageIndex++;
+                    }
                 }
             }
         }
@@ -43,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each page of a multi‑page DjVu document and save them as high‑quality PNG images for web publishing or digital archives.
- * 2. When an application must batch‑process scanned books in DjVu format and generate PNG files that can be easily displayed in browsers without requiring a DjVu viewer.
- * 3. When a workflow requires converting DjVu pages to PNG so that downstream image‑processing libraries such as OCR or thumbnail generators can operate on a widely supported raster format.
- * 4. When a developer wants to automate the conversion of DjVu technical manuals into PNG assets that can be embedded in mobile apps or e‑learning platforms.
- * 5. When a document management system needs to create PNG previews of each DjVu page to provide quick visual thumbnails for end‑users.
+ * 1. When a digital archive needs to convert scanned DjVu manuscripts into high‑resolution PNG images with searchable XMP metadata for each page.
+ * 2. When an e‑learning platform wants to extract individual pages from a DjVu textbook and generate PNG thumbnails that include XMP tags for licensing information.
+ * 3. When a legal firm must transform multi‑page DjVu case files into PNG evidence images while embedding XMP tags that record the document’s creation date and author.
+ * 4. When a publishing workflow requires batch processing of DjVu comic books into PNG pages with XMP metadata for color profile and copyright details.
+ * 5. When a content management system automates the ingestion of DjVu technical manuals, converting each page to PNG and adding XMP tags to support image search and categorization.
  */
