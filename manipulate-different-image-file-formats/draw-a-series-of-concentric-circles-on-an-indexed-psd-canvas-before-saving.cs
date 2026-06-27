@@ -11,59 +11,59 @@ class Program
     {
         try
         {
-            // Hardcoded output path for the indexed PSD file
+            // Hardcoded output path
             string outputPath = @"C:\Temp\ConcentricCircles.psd";
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define image dimensions
+            // Define canvas size
             int width = 800;
             int height = 800;
 
-            // Create PSD options for an indexed color mode
+            // Create a simple grayscale palette (256 shades)
+            Color[] paletteColors = new Color[256];
+            for (int i = 0; i < 256; i++)
+            {
+                paletteColors[i] = Color.FromArgb(i, i, i);
+            }
+            ColorPalette palette = new ColorPalette(paletteColors);
+
+            // Configure PSD options for an indexed image
             PsdOptions psdOptions = new PsdOptions();
             psdOptions.Source = new FileCreateSource(outputPath, false);
             psdOptions.ColorMode = ColorModes.Indexed;
+            psdOptions.CompressionMethod = CompressionMethod.RLE;
+            psdOptions.ChannelsCount = (short)1;          // One channel for palette index
+            psdOptions.ChannelBitsCount = (short)8;      // 8 bits per channel
+            psdOptions.Version = 6;
+            psdOptions.Palette = palette;
 
-            // Define a simple palette (e.g., 4 colors)
-            psdOptions.Palette = new ColorPalette(new Color[]
-            {
-                Color.Black,
-                Color.Red,
-                Color.Green,
-                Color.Blue
-            });
-
-            // Create the PSD image bound to the output file
+            // Create the PSD image canvas
             using (Image image = Image.Create(psdOptions, width, height))
             {
-                // Initialize Graphics for drawing
+                // Create graphics for drawing
                 Graphics graphics = new Graphics(image);
-
-                // Clear background with white color
                 graphics.Clear(Color.White);
 
-                // Center of the canvas
+                // Center point
                 int centerX = width / 2;
                 int centerY = height / 2;
 
                 // Draw concentric circles
                 int maxRadius = Math.Min(width, height) / 2 - 10;
-                int step = 40;
+                int step = 20;
                 for (int radius = maxRadius; radius > 0; radius -= step)
                 {
-                    // Choose a pen color cycling through the palette
-                    Color penColor = radius % 4 == 0 ? Color.Black :
-                                     radius % 4 == 1 ? Color.Red :
-                                     radius % 4 == 2 ? Color.Green : Color.Blue;
-
-                    Pen pen = new Pen(penColor, 3);
-                    Rectangle rect = new Rectangle(centerX - radius, centerY - radius, radius * 2, radius * 2);
+                    int left = centerX - radius;
+                    int top = centerY - radius;
+                    int diameter = radius * 2;
+                    Rectangle rect = new Rectangle(left, top, diameter, diameter);
+                    Pen pen = new Pen(Color.Black, 2);
                     graphics.DrawEllipse(pen, rect);
                 }
 
-                // Save the PSD image (output file already bound)
+                // Save the image (output path already bound)
                 image.Save();
             }
         }
@@ -76,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically generate a PSD file with a simple indexed‑color palette for a printable pattern, such as a set of concentric circles used as a background in a brochure layout.
- * 2. When creating test assets for an image‑processing pipeline that must handle PSD files in indexed mode, drawing concentric circles helps verify that color indexing and pen drawing work correctly in Aspose.Imaging for .NET.
- * 3. When building a web‑to‑print service that automatically produces PSD templates with layered vector shapes, using C# to draw concentric circles on an indexed canvas provides a lightweight, color‑restricted design element.
- * 4. When producing educational graphics or tutorials that illustrate geometric concepts in a PSD file, developers can use the code to render concentric circles with a predefined palette for clear visual contrast.
- * 5. When generating thumbnail previews of PSD artwork that need to maintain a limited color set for performance, drawing concentric circles on an indexed PSD canvas offers a fast way to create sample images in C#.
+ * 1. When a developer needs to generate a lightweight PSD file with a 256‑color indexed palette for a background pattern in a Photoshop mock‑up, this code can draw concentric circles on the canvas and save it.
+ * 2. When testing PSD import/export pipelines or verifying that RLE compression and indexed color handling work correctly, a reproducible test image of concentric circles can be created with this snippet.
+ * 3. When producing printable spot‑color guides or calibration charts that must stay within a single 8‑bit channel, the code provides a quick way to generate the required PSD artwork.
+ * 4. When building a web service that returns a PSD thumbnail containing simple geometric shapes for preview purposes, developers can use this routine to draw concentric circles on an indexed image before sending it to the client.
+ * 5. When creating assets for a game UI where the final artwork will be edited in Photoshop and must retain a small palette for performance, this example shows how to programmatically generate the initial PSD with concentric circles.
  */
