@@ -1,52 +1,48 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output locations
+        string inputPath = @"C:\Images\multi_page.tif";
+        string outputDirectory = @"C:\Images\Frames";
+
         try
         {
-            // Hard‑coded input and output locations
-            string inputPath = @"C:\Images\multi.tif";
-            string outputDirectory = @"C:\Images\Frames";
-
-            // Verify the input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(outputDirectory);
-
             // Load the multi‑page TIFF
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Iterate through each frame in the TIFF
+                // Iterate over each frame in the TIFF
                 for (int i = 0; i < tiffImage.Frames.Length; i++)
                 {
                     TiffFrame frame = tiffImage.Frames[i];
 
-                    // Build the output BMP file path
+                    // Build the output BMP path (preserving original DPI automatically)
                     string outputPath = Path.Combine(outputDirectory, $"frame_{i + 1}.bmp");
 
-                    // Ensure the directory for the output file exists
+                    // Ensure the output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the current frame as BMP while preserving DPI
-                    BmpOptions bmpOptions = new BmpOptions();
-                    // DPI values are taken from the source frame automatically
-                    frame.Save(outputPath, bmpOptions);
+                    // Save the current frame as a BMP file
+                    frame.Save(outputPath, new BmpOptions());
                 }
             }
         }
         catch (Exception ex)
         {
+            // Report any unexpected errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -54,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system receives multi‑page TIFF scans of pathology slides and needs to generate individual high‑resolution BMP files for each slide while keeping the original DPI for accurate measurements.
- * 2. When a document management workflow must convert multi‑page TIFF invoices into separate BMP images for OCR processing, preserving DPI to maintain text clarity.
- * 3. When a GIS application stores satellite imagery as multi‑page TIFF and requires extracting each band as a BMP file with the same DPI for precise georeferencing.
- * 4. When a printing service receives multi‑page TIFF proofs and wants to split them into individual BMP files for per‑page color calibration, ensuring the DPI settings remain unchanged.
- * 5. When an archival tool needs to backup each page of a scanned multi‑page TIFF book as separate BMP files for long‑term storage, retaining the original DPI to preserve image quality.
+ * 1. When a developer needs to extract individual scanned pages from a multi‑page TIFF document and save them as high‑resolution BMP files for legacy printing systems that require BMP input.
+ * 2. When a medical imaging application must separate each frame of a multi‑page DICOM‑converted TIFF into BMP images while keeping the original DPI for accurate measurements.
+ * 3. When a GIS (Geographic Information System) tool has to convert multi‑page satellite TIFF layers into separate BMP tiles for compatibility with older mapping software.
+ * 4. When an archival workflow requires converting each page of a multi‑page TIFF manuscript into BMP files to preserve the original DPI before performing OCR processing.
+ * 5. When a digital asset management system needs to generate BMP thumbnails for each frame of a multi‑page TIFF to maintain consistent resolution across different display devices.
  */
