@@ -11,14 +11,11 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputEmf";
-            string outputDirectory = @"C:\OutputSvg";
-
-            // Ensure the output directory exists (creates parent if needed)
-            Directory.CreateDirectory(outputDirectory);
+            string inputDir = @"C:\InputEmf";
+            string outputDir = @"C:\OutputSvg";
 
             // Get all EMF files in the input directory
-            string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf");
+            string[] emfFiles = Directory.GetFiles(inputDir, "*.emf");
 
             foreach (string inputPath in emfFiles)
             {
@@ -29,35 +26,29 @@ class Program
                     return;
                 }
 
-                // Build the output SVG file path
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+                // Build the output SVG path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".svg");
 
-                // Ensure the output directory for this file exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EMF image
+                // Load the EMF image and convert to SVG
                 using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
                 {
-                    // Prepare SVG save options
                     SvgOptions saveOptions = new SvgOptions
                     {
-                        TextAsShapes = true
+                        TextAsShapes = true,
+                        VectorRasterizationOptions = new EmfRasterizationOptions
+                        {
+                            BackgroundColor = Color.WhiteSmoke,
+                            PageSize = emfImage.Size,
+                            RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
+                            BorderX = 50,
+                            BorderY = 50
+                        }
                     };
 
-                    // Configure rasterization options for EMF
-                    EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
-                    {
-                        BackgroundColor = Color.WhiteSmoke,
-                        PageSize = emfImage.Size,
-                        RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
-                        BorderX = 50,
-                        BorderY = 50
-                    };
-
-                    saveOptions.VectorRasterizationOptions = rasterOptions;
-
-                    // Save as SVG
                     emfImage.Save(outputPath, saveOptions);
                 }
             }
@@ -71,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy Windows Metafile (EMF) asset library to scalable web‑friendly SVG files while preserving embedded raster images as external references.
- * 2. When an automation script must process dozens of EMF diagrams in a folder and generate corresponding SVGs for use in responsive HTML5 dashboards.
- * 3. When a document conversion service has to batch convert EMF charts to SVG with a white‑smoke background and consistent page size for uniform rendering in browsers.
- * 4. When a CI/CD pipeline requires converting EMF icons to SVG with text converted to shapes to ensure font‑independent display on cross‑platform devices.
- * 5. When a GIS application needs to rasterize EMF map overlays into SVG files, keeping the original vector data and external image links for efficient storage.
+ * 1. When a developer needs to migrate a legacy Windows Metafile (EMF) icon library to scalable web‑friendly SVG assets for responsive UI design.
+ * 2. When an automated build pipeline must generate SVG versions of engineering diagrams stored as EMF files to embed them in HTML documentation.
+ * 3. When a GIS application requires converting batch EMF map overlays into SVG with external image references for high‑resolution printing.
+ * 4. When a content management system needs to transform user‑uploaded EMF logos into SVG thumbnails while preserving vector fidelity and background color.
+ * 5. When a reporting tool must export chart images originally saved as EMF into SVG format for cross‑platform analytics dashboards.
  */
