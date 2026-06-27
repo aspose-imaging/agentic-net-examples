@@ -2,19 +2,20 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\Sample.svg";
-            string outputHtmlPath = @"C:\Images\Canvas.html";
-            string reactComponentPath = @"C:\Images\CanvasComponent.jsx";
+            string inputPath = "input.svg";
+            string outputHtmlPath = "output.html";
+            string reactComponentPath = "CanvasComponent.jsx";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,33 +23,33 @@ class Program
             }
 
             // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(outputHtmlPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(reactComponentPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputHtmlPath) ?? string.Empty);
+            Directory.CreateDirectory(Path.GetDirectoryName(reactComponentPath) ?? string.Empty);
 
-            // Load the vector image and export to HTML5 Canvas (canvas tag only)
-            using (var image = Image.Load(inputPath))
+            // Load the vector image and export to HTML5 Canvas
+            using (Image image = Image.Load(inputPath))
             {
-                var canvasOptions = new Html5CanvasOptions
+                Html5CanvasOptions canvasOptions = new Html5CanvasOptions
                 {
                     VectorRasterizationOptions = new SvgRasterizationOptions(),
                     CanvasTagId = "myCanvas",
-                    FullHtmlPage = false // export only the <canvas> tag
+                    FullHtmlPage = false
                 };
-
                 image.Save(outputHtmlPath, canvasOptions);
             }
 
-            // Generate a simple React component that embeds the canvas
-            string reactComponentContent = @"import React from 'react';
+            // Create a simple React component that embeds the canvas tag
+            string componentContent = 
+@"import React from 'react';
 
 const CanvasComponent = () => (
-    <canvas id=""myCanvas""></canvas>
+  <canvas id=""myCanvas""></canvas>
 );
 
 export default CanvasComponent;
 ";
 
-            File.WriteAllText(reactComponentPath, reactComponentContent);
+            File.WriteAllText(reactComponentPath, componentContent);
         }
         catch (Exception ex)
         {
@@ -59,9 +60,9 @@ export default CanvasComponent;
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer wants to convert an SVG logo into an HTML5 canvas element for faster rendering in a React single‑page application.
- * 2. When a SaaS platform needs to programmatically generate a reusable React component that displays vector graphics without loading external image files.
- * 3. When an e‑learning portal must embed scalable diagrams as canvas tags inside React components to support dynamic resizing and interactivity.
- * 4. When a marketing automation tool automates the transformation of SVG assets into React‑compatible canvas markup for email templates or landing pages.
- * 5. When a desktop .NET utility processes a batch of SVG files and creates corresponding React components that render the graphics on an HTML5 canvas for cross‑browser consistency.
+ * 1. When a developer wants to convert an SVG logo into an HTML5 Canvas element for dynamic rendering in a web page built with React.
+ * 2. When a team needs to automate the generation of reusable React components that embed vector graphics without relying on external image files.
+ * 3. When a .NET backend service must export vector illustrations to lightweight canvas markup to improve page load performance in single‑page applications.
+ * 4. When a designer wants to preview SVG artwork directly inside a React component during development, using Aspose.Imaging to handle the SVG‑to‑Canvas conversion.
+ * 5. When an e‑learning platform requires programmatic conversion of SVG diagrams to HTML5 Canvas so they can be manipulated with JavaScript in a React‑based interactive tutorial.
  */
