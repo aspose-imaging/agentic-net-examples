@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -19,34 +21,32 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the image and cast to RasterImage
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            // Load image as RasterImage
+            using (Image image = Image.Load(inputPath))
             {
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
                 // Store original dimensions
                 int originalWidth = raster.Width;
                 int originalHeight = raster.Height;
 
-                // Apply a convolution filter (Gaussian blur in this example)
-                raster.Filter(
-                    raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                // Apply a convolution filter (Sharpen)
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
 
-                // Verify that dimensions have not changed
+                // Verify dimensions remain unchanged
                 if (raster.Width == originalWidth && raster.Height == originalHeight)
                 {
-                    Console.WriteLine("Dimensions unchanged after filter.");
+                    Console.WriteLine("Dimensions unchanged after applying the filter.");
                 }
                 else
                 {
-                    Console.WriteLine($"Dimensions changed: before {originalWidth}x{originalHeight}, after {raster.Width}x{raster.Height}");
+                    Console.WriteLine($"Dimensions changed: original {originalWidth}x{originalHeight}, after {raster.Width}x{raster.Height}");
                 }
 
-                // Save the processed image
-                raster.Save(outputPath);
+                // Save the filtered image
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -58,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# developer needs to apply a Gaussian blur to a PNG image while guaranteeing that the original width and height remain unchanged for downstream layout calculations.
- * 2. When an image‑processing pipeline must validate that applying any convolution filter (e.g., sharpening, edge detection) does not alter the raster dimensions before saving the result to disk.
- * 3. When a .NET application processes user‑uploaded photos and must ensure the output file preserves the original resolution so that UI components display it correctly.
- * 4. When a batch job converts images to a different format (e.g., PNG to JPEG) and applies filters, it needs to confirm that the filter operation does not resize the image, avoiding layout breaks.
- * 5. When debugging an Aspose.Imaging filter implementation, a developer wants to log a message if the filter unexpectedly changes the image size, helping to catch bugs early.
+ * 1. When a developer needs to sharpen a PNG image without altering its original width and height, they can use this code to apply a convolution Sharpen filter and verify dimensions stay the same.
+ * 2. When building an automated image‑processing pipeline that must preserve layout constraints, the code ensures that applying any Aspose.Imaging convolution filter (e.g., Sharpen) does not resize the raster image.
+ * 3. When validating that a batch job which reads, filters, and saves images keeps the original resolution for downstream GIS or printing workflows, this example demonstrates the dimension check after filtering.
+ * 4. When creating a C# utility that accepts user‑provided PNG files, applies a custom filter, and writes the result to a specific folder while guaranteeing the output file matches the input dimensions, the code provides the necessary logic.
+ * 5. When troubleshooting a bug where applying Aspose.Imaging image filters unexpectedly changes image size, this snippet can be used to reproduce the issue and confirm that dimensions remain unchanged after the filter operation.
  */
