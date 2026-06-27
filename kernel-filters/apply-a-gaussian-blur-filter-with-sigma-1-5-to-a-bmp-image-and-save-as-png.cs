@@ -7,32 +7,33 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.bmp";
-        string outputPath = @"c:\temp\output.png";
+        // Hardcoded input and output file paths
+        string inputPath = "input.bmp";
+        string outputPath = "output.png";
 
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering
-                RasterImage rasterImage = (RasterImage)image;
+                // Cast to RasterImage to access filtering functionality
+                var rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur with size 5 and sigma 1.5 to the whole image
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new GaussianBlurFilterOptions(5, 1.5));
+                // Create Gaussian blur filter with size 5 and sigma 1.5
+                var blurOptions = new GaussianBlurFilterOptions(5, 1.5);
+
+                // Apply the filter to the entire image
+                rasterImage.Filter(rasterImage.Bounds, blurOptions);
 
                 // Save the result as PNG
                 rasterImage.Save(outputPath);
@@ -47,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to soften the edges of a scanned BMP document before converting it to a PNG for web display, they can apply a Gaussian blur with sigma 1.5 using Aspose.Imaging.
- * 2. When an application must generate a blurred thumbnail from a high‑resolution BMP file and save it as a PNG for faster loading, this code provides the required image filtering and format conversion.
- * 3. When a batch‑processing tool has to reduce visual noise in legacy BMP assets while preserving transparency by exporting them as PNG, the Gaussian blur filter with sigma 1.5 can be applied programmatically.
- * 4. When a photo‑editing plugin for a .NET desktop app wants to add a subtle soft‑focus effect to user‑uploaded BMP images before storing them as PNG files, the shown code accomplishes that.
- * 5. When an automated reporting system needs to anonymize sensitive details in BMP screenshots by blurring them slightly and then saving the result as a PNG for inclusion in PDF reports, this approach is appropriate.
+ * 1. When a developer needs to soften the edges of a scanned BMP document before converting it to a PNG for web display, they can apply a Gaussian blur with sigma 1.5 using Aspose.Imaging in C#.
+ * 2. When preparing legacy BMP assets for a mobile app, a developer may blur the image to reduce visual noise and then save it as a PNG to benefit from lossless compression.
+ * 3. When creating a thumbnail gallery where BMP images must be uniformly softened to improve aesthetic consistency, the code can apply a Gaussian blur filter and output PNG files.
+ * 4. When implementing a batch processing tool that sanitizes sensitive details in BMP screenshots by blurring them before archiving as PNG, this C# snippet provides the required functionality.
+ * 5. When integrating image preprocessing in a .NET workflow that requires converting BMP files to PNG while applying a subtle Gaussian blur to meet UI design guidelines, the example demonstrates the exact steps.
  */
