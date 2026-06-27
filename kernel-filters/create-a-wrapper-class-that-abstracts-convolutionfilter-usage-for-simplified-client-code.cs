@@ -3,42 +3,12 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Png;
 
-public class ConvolutionFilterWrapper
+class Program
 {
-    public FilterOptionsBase Options { get; }
-
-    public ConvolutionFilterWrapper(string filterName)
-    {
-        switch (filterName)
-        {
-            case "Emboss":
-                Options = new ConvolutionFilterOptions(
-                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3,
-                    1.0,
-                    0);
-                break;
-            case "Sharpen":
-                Options = new ConvolutionFilterOptions(
-                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Sharpen3x3,
-                    1.0,
-                    0);
-                break;
-            case "BoxBlur":
-                Options = new ConvolutionFilterOptions(
-                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurBox(3),
-                    1.0,
-                    0);
-                break;
-            default:
-                throw new NotSupportedException($"Filter '{filterName}' is not supported.");
-        }
-    }
-}
-
-public class Program
-{
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
@@ -56,9 +26,14 @@ public class Program
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
-                var wrapper = new ConvolutionFilterWrapper("Emboss");
-                raster.Filter(raster.Bounds, wrapper.Options);
-                raster.Save(outputPath);
+
+                double[,] kernel = ConvolutionFilter.Emboss3x3;
+                var options = new ConvolutionFilterOptions(kernel);
+
+                raster.Filter(raster.Bounds, options);
+
+                var saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -70,9 +45,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to apply an emboss effect to user‑uploaded PNG photos in a .NET web application without writing repetitive convolution code.
- * 2. When a batch‑processing tool must sharpen a collection of JPEG images before they are indexed for search, using Aspose.Imaging’s ConvolutionFilterWrapper to simplify the filter call.
- * 3. When an automated document‑generation service creates thumbnail previews of scanned PDFs and wants to add a subtle box‑blur to reduce noise, the wrapper abstracts the 3×3 blur kernel.
- * 4. When a desktop C# utility allows end‑users to select a filter name from a dropdown (e.g., “Emboss”, “Sharpen”, “BoxBlur”) and instantly applies it to BMP files, the wrapper maps the name to the correct ConvolutionFilterOptions.
- * 5. When a CI/CD pipeline runs integration tests that verify image‑processing algorithms, the wrapper provides a concise way to instantiate and apply standard convolution filters across multiple image formats.
+ * 1. When a developer needs to apply an emboss effect to user‑uploaded PNG photos in a .NET web application without dealing directly with kernel matrices.
+ * 2. When a desktop C# utility must batch‑process scanned PNG documents to enhance edge details using a 3×3 convolution filter.
+ * 3. When a mobile backend service has to generate stylized thumbnails from PNG assets by applying a convolution filter before saving them with PngOptions.
+ * 4. When an image‑processing pipeline requires a simple wrapper around Aspose.Imaging’s ConvolutionFilter to hide low‑level raster operations for maintainable code.
+ * 5. When a C# automation script must verify the existence of input PNG files, apply a custom kernel, and save the transformed image while handling exceptions gracefully.
  */
