@@ -45,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When preparing BMP graphics for a high‑resolution brochure, a developer can use this code to set the image DPI to 300 so the printed output matches the design specifications.
- * 2. When converting scanned engineering drawings stored as BMP files into print‑ready assets, the code updates the DPI metadata to 300 DPI to ensure accurate scaling on large‑format printers.
- * 3. When integrating a C# application with a workflow that generates BMP logos for product packaging, the developer applies this snippet to enforce a 300 DPI resolution required by the packaging vendor.
- * 4. When migrating legacy BMP assets from a low‑resolution archive to a modern publishing system, the code is used to adjust the DPI to 300, enabling crisp reproduction on high‑quality print media.
- * 5. When building an automated batch‑processing tool that prepares BMP images for laser‑cutting or CNC machining, the developer employs this example to set both horizontal and vertical DPI to 300, guaranteeing precise dimensional output.
+ * 1. When a developer needs to prepare a BMP logo for a high‑resolution brochure, they can use this code to set the image DPI to 300 before sending it to the printer.
+ * 2. When an automated build pipeline generates BMP screenshots that must meet print‑ready specifications, the snippet updates the DPI metadata to 300 DPI automatically.
+ * 3. When a desktop application allows users to export diagrams as BMP files for large‑format posters, the code ensures the exported files have 300 DPI for crisp printing.
+ * 4. When a document management system ingests BMP scans and must standardize them for archival quality, the developer can apply this routine to enforce a 300 DPI resolution.
+ * 5. When a batch‑processing tool converts scanned BMP images to a print‑ready format, the example provides a simple way to adjust the horizontal and vertical DPI to 300 DPI.
  */
