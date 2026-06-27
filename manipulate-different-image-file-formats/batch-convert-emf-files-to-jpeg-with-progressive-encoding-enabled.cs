@@ -11,14 +11,11 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
+            string inputFolder = @"C:\InputEmf";
+            string outputFolder = @"C:\OutputJpeg";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Get all EMF files in the input directory
-            string[] emfFiles = Directory.GetFiles(inputDir, "*.emf");
+            // Get all EMF files in the input folder
+            string[] emfFiles = Directory.GetFiles(inputFolder, "*.emf");
 
             foreach (string inputPath in emfFiles)
             {
@@ -29,24 +26,23 @@ class Program
                     return;
                 }
 
-                // Build output file path with .jpg extension
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".jpg");
+                // Build output JPEG path
+                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
 
-                // Ensure the directory for the output file exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EMF image
+                // Load EMF image
                 using (Image image = Image.Load(inputPath))
                 {
                     // Configure JPEG options with progressive compression
                     JpegOptions jpegOptions = new JpegOptions
                     {
                         CompressionType = JpegCompressionMode.Progressive,
-                        Quality = 100
+                        Quality = 100 // optional: set quality to maximum
                     };
 
-                    // Save the image as JPEG
+                    // Save as JPEG
                     image.Save(outputPath, jpegOptions);
                 }
             }
@@ -60,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy collection of vector EMF graphics to web‑friendly JPEG images with progressive loading for faster page rendering.
- * 2. When an automated build process must generate high‑quality JPEG thumbnails from EMF diagrams stored in a shared folder for inclusion in reports.
- * 3. When a Windows desktop application has to batch convert user‑uploaded EMF files to JPEG while preserving image quality and enabling progressive compression for email attachments.
- * 4. When a server‑side service processes design assets, converting EMF logos to JPEG format with 100 % quality and progressive encoding to reduce bandwidth usage on mobile devices.
- * 5. When a migration script needs to ensure all EMF files in a directory are saved as JPEGs with progressive compression before archiving them to a cloud storage bucket.
+ * 1. When a Windows desktop application must generate web‑ready preview images from a collection of vector EMF charts, converting them to progressive JPEGs for faster page load.
+ * 2. When an automated reporting pipeline needs to archive high‑resolution EMF diagrams as space‑efficient JPEG files with progressive compression to reduce storage while preserving visual quality.
+ * 3. When a migration script moves legacy EMF assets from a file server to a cloud‑based CMS that only accepts JPEG images, requiring batch conversion with Aspose.Imaging in C#.
+ * 4. When a digital asset management system processes incoming EMF logos and creates progressive JPEG thumbnails for responsive design across browsers.
+ * 5. When a document processing service extracts embedded EMF graphics from PDFs and saves them as progressive JPEGs for downstream image analysis or OCR tasks.
  */
