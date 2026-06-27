@@ -2,18 +2,19 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input/sample.eps";
+        string outputPath = "Output/sample.tif";
+
         try
         {
-            string inputPath = "input.eps";
-            string outputPath = "output.tif";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,26 +23,22 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            using (EpsImage eps = (EpsImage)Image.Load(inputPath))
             {
-                double widthInches = epsImage.SizeF.Width;
-                double heightInches = epsImage.SizeF.Height;
-                int pixelWidth = (int)Math.Round(widthInches * 300);
-                int pixelHeight = (int)Math.Round(heightInches * 300);
-
                 var rasterOptions = new EpsRasterizationOptions
                 {
-                    PageWidth = pixelWidth,
-                    PageHeight = pixelHeight
+                    BackgroundColor = Color.White,
+                    PageWidth = eps.Width,
+                    PageHeight = eps.Height
                 };
 
                 var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
-                    ResolutionSettings = new ResolutionSetting(300, 300),
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = rasterOptions,
+                    ResolutionSettings = new ResolutionSetting(300, 300)
                 };
 
-                epsImage.Save(outputPath, tiffOptions);
+                eps.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop needs to convert customer‑submitted EPS artwork into a high‑resolution 300 DPI TIFF with an embedded ICC profile to ensure accurate color reproduction in pre‑press workflows.
- * 2. When a desktop publishing application must generate a raster preview of vector EPS logos as 300 DPI TIFF images for inclusion in PDFs that require TIFF format compliance.
- * 3. When an e‑commerce platform automatically transforms supplier‑provided EPS product drawings into 300 DPI TIFF thumbnails with embedded color profiles for consistent on‑screen display.
- * 4. When a digital archiving system needs to store legacy EPS files as lossless 300 DPI TIFFs with ICC profiles to preserve visual fidelity over long periods.
- * 5. When a C# build pipeline uses Aspose.Imaging to batch‑process EPS files into 300 DPI TIFF images with embedded ICC profiles for downstream image analysis or OCR processing.
+ * 1. When a publishing system needs to convert client‑supplied EPS logos into high‑resolution 300 DPI TIFF files for offset printing while preserving color accuracy with an embedded ICC profile.
+ * 2. When a digital asset management workflow must rasterize vector EPS artwork into TIFF images for archival storage and ensure consistent color reproduction across different monitors and devices.
+ * 3. When an e‑commerce platform generates product catalog pages by turning EPS product diagrams into printable TIFF files at 300 DPI, embedding the appropriate ICC profile to match the catalog’s color standards.
+ * 4. When a CAD/CAM application exports engineering drawings from EPS to TIFF for inclusion in technical documentation, requiring precise resolution and color management for regulatory compliance.
+ * 5. When a batch‑processing script in a C# backend service automates the conversion of EPS marketing materials to TIFF for high‑quality promotional prints, using Aspose.Imaging to handle rasterization and ICC profile embedding.
  */
