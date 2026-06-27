@@ -6,46 +6,34 @@ using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.gif";
-        string outputPath = @"C:\Images\output.gif";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.gif";
+            string outputPath = "output.gif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the GIF image
-            using (GifImage image = (GifImage)Image.Load(inputPath))
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
                 // Flip horizontally
-                image.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                gif.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                // Rotate 15 degrees with transparent background
+                gif.Rotate(15f, true, Color.Transparent);
 
-                // Rotate 15 degrees clockwise, resize proportionally, transparent background
-                image.Rotate(15f, true, Color.Transparent);
-
-                // Save to file
-                image.Save(outputPath, new GifOptions());
-
-                // Also save to a memory stream to obtain a byte array
-                byte[] resultBytes;
-                using (var ms = new MemoryStream())
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    image.Save(ms, new GifOptions());
-                    resultBytes = ms.ToArray();
+                    gif.Save(ms, new GifOptions());
+                    byte[] result = ms.ToArray();
+                    Console.WriteLine($"Result byte array length: {result.Length}");
                 }
-
-                // Example usage of the byte array (here we just output its length)
-                Console.WriteLine($"Result byte array length: {resultBytes.Length}");
             }
         }
         catch (Exception ex)
@@ -54,3 +42,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When creating a web service that generates animated GIF thumbnails with a mirrored effect and a slight rotation for a social media preview, a developer can use this code to flip, rotate, and return the image as a byte array.
+ * 2. When building an email marketing platform that needs to embed custom‑styled GIF banners with a horizontal flip and a 15‑degree tilt to match a campaign’s visual theme, this snippet processes the GIF and provides the result in memory for attachment.
+ * 3. When developing a mobile app that applies playful transformations to user‑uploaded GIF stickers—flipping them horizontally and rotating them before sending them to a server—the code performs the transformation and supplies the byte array for network transmission.
+ * 4. When implementing a server‑side image‑processing pipeline that converts uploaded GIF avatars into a consistent orientation by flipping and rotating them, the byte array output can be stored directly in a database or cache.
+ * 5. When creating an automated testing tool that validates GIF rendering after applying geometric transformations, the developer can use this example to flip, rotate, and capture the resulting image data as a byte array for comparison.
+ */
