@@ -2,37 +2,33 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.psd";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.psd";
-            string outputPath = "output.png";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the PSD image
             using (Image image = Image.Load(inputPath))
             {
-                // Deskew the image (do not resize canvas, fill background with white)
-                ((RasterImage)image).NormalizeAngle(false, Color.White);
+                if (image is RasterImage raster)
+                {
+                    raster.NormalizeAngle(false, Color.White);
+                }
 
-                // Prepare PNG save options
                 PngOptions pngOptions = new PngOptions();
-
-                // Save the deskewed image as PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -42,3 +38,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to automatically correct the tilt of scanned Photoshop PSD files before publishing them as web‑ready PNG images.
+ * 2. When an e‑commerce platform must straighten product mockups stored in PSD format and convert them to PNG for fast browser display.
+ * 3. When a digital archiving system processes legacy PSD artwork, removes skew using Aspose.Imaging’s NormalizeAngle, and saves the result as lossless PNG for long‑term storage.
+ * 4. When a mobile app backend receives user‑uploaded PSD files, deskews the raster layer and outputs a PNG thumbnail for preview generation.
+ * 5. When a print‑to‑web workflow requires batch‑processing of PSD designs, correcting their orientation and exporting them to PNG using C# and Aspose.Imaging.
+ */
