@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Exif;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -12,54 +12,57 @@ class Program
         string inputPath = @"C:\Images\sample.jpg";
         string outputPath = @"C:\Images\thumbnail_output.jpg";
 
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load JPEG image
             using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
             {
+                // Original image dimensions
                 int originalWidth = jpegImage.Width;
                 int originalHeight = jpegImage.Height;
+                Console.WriteLine($"Original image size: {originalWidth}x{originalHeight}");
 
-                // Access EXIF data and retrieve thumbnail
-                JpegExifData jpegExif = jpegImage.ExifData as JpegExifData;
-                if (jpegExif?.Thumbnail != null)
+                // Extract EXIF thumbnail
+                RasterImage thumbnail = jpegImage.ExifData?.Thumbnail;
+
+                if (thumbnail == null)
                 {
-                    using (RasterImage thumbnail = jpegExif.Thumbnail)
-                    {
-                        int thumbWidth = thumbnail.Width;
-                        int thumbHeight = thumbnail.Height;
+                    Console.WriteLine("No EXIF thumbnail found in the image.");
+                    return;
+                }
 
-                        Console.WriteLine($"Original dimensions: {originalWidth}x{originalHeight}");
-                        Console.WriteLine($"Thumbnail dimensions: {thumbWidth}x{thumbHeight}");
+                // Thumbnail dimensions
+                int thumbWidth = thumbnail.Width;
+                int thumbHeight = thumbnail.Height;
+                Console.WriteLine($"Thumbnail size: {thumbWidth}x{thumbHeight}");
 
-                        // Compare dimensions
-                        if (thumbWidth == originalWidth && thumbHeight == originalHeight)
-                        {
-                            Console.WriteLine("Thumbnail dimensions match the original image.");
-                        }
-                        else
-                        {
-                            Console.WriteLine("Thumbnail dimensions differ from the original image.");
-                        }
-
-                        // Save thumbnail to output path
-                        thumbnail.Save(outputPath);
-                    }
+                // Compare dimensions
+                if (thumbWidth == originalWidth && thumbHeight == originalHeight)
+                {
+                    Console.WriteLine("Thumbnail dimensions match the original image.");
                 }
                 else
                 {
-                    Console.WriteLine("No EXIF thumbnail found in the image.");
+                    Console.WriteLine("Thumbnail dimensions differ from the original image.");
                 }
+
+                // Save thumbnail to output path
+                using (var options = new JpegOptions())
+                {
+                    thumbnail.Save(outputPath, options);
+                }
+
+                Console.WriteLine($"Thumbnail saved to: {outputPath}");
             }
         }
         catch (Exception ex)
@@ -71,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building a photo‑gallery web application that must verify the embedded EXIF thumbnail dimensions match the original JPEG before showing a preview.
- * 2. When creating a digital asset management system that validates image metadata by comparing the EXIF thumbnail size to the full‑size image dimensions.
- * 3. When developing a batch‑processing script that flags JPEG files whose EXIF thumbnails are incorrectly scaled, ensuring proper thumbnail generation for mobile devices.
- * 4. When implementing a C# utility that extracts the embedded thumbnail from a JPEG and checks its width and height against the original image to detect corrupted or missing EXIF data.
- * 5. When writing a migration tool that moves images to new storage and needs to confirm the EXIF thumbnail can serve as a fallback preview without additional resizing.
+ * 1. When building a photo‑gallery web app in C# you can use this code with Aspose.Imaging to load a JPEG, extract its EXIF thumbnail and verify that the thumbnail dimensions match the original image before displaying previews.
+ * 2. When developing a mobile‑first e‑commerce platform you may need to confirm that the embedded EXIF thumbnail of product photos is correctly sized, so this snippet loads the JPEG, reads the thumbnail via Aspose.Imaging and compares its width and height to the full‑size image.
+ * 3. When creating a batch‑processing tool that validates camera‑generated JPEG files, the code can detect mismatched EXIF thumbnail dimensions, helping to flag images with corrupted or missing thumbnail metadata.
+ * 4. When generating PDF catalogs that include low‑resolution previews, you can extract the JPEG’s EXIF thumbnail with Aspose.Imaging, compare its size to the source image, and decide whether to use the thumbnail or generate a new one.
+ * 5. When implementing a digital asset management system that indexes image metadata, this example shows how to load a JPEG, retrieve the EXIF thumbnail, and ensure its dimensions are consistent with the original, enabling reliable thumbnail caching.
  */
