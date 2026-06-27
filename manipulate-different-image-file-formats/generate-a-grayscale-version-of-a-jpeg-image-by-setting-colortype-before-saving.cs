@@ -8,35 +8,32 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output_grayscale.jpg";
-
         try
         {
-            // Verify input file exists
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\input.jpg";
+            string outputPath = @"C:\Images\output_grayscale.jpg";
+
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source JPEG image
+            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG save options to produce a grayscale image
+                // Prepare JPEG save options with grayscale color type
                 JpegOptions saveOptions = new JpegOptions
                 {
-                    // Convert to grayscale during save
-                    ColorType = JpegCompressionColorMode.Grayscale,
-                    // Optional: set quality (1-100)
-                    Quality = 100
+                    ColorType = JpegCompressionColorMode.Grayscale
                 };
 
-                // Save the image with the specified options
+                // Save the image as a grayscale JPEG
                 image.Save(outputPath, saveOptions);
             }
         }
@@ -49,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a grayscale version of a user‑uploaded JPEG for a web gallery that only supports black‑and‑white thumbnails, they can load the image with Aspose.Imaging and set JpegOptions.ColorType to Grayscale before saving.
- * 2. When an e‑commerce platform wants to generate low‑cost product catalog PDFs that use grayscale JPEGs to meet printing guidelines, the code can convert the original color images to grayscale using C# and Aspose.Imaging.
- * 3. When a medical imaging application must store diagnostic photos as grayscale JPEGs to comply with storage constraints, developers can apply the JpegCompressionColorMode.Grayscale setting during save.
- * 4. When a mobile app needs to reduce file size for bandwidth‑limited uploads by stripping color data from JPEGs, the developer can use the provided code to convert the image to grayscale while preserving quality.
- * 5. When an archival system requires all incoming photographs to be saved in a uniform grayscale JPEG format for consistent indexing, the code demonstrates how to enforce the grayscale ColorType with Aspose.Imaging in C#.
+ * 1. When a photo‑sharing website wants to create low‑bandwidth preview thumbnails by converting user‑uploaded color JPEGs to grayscale, a developer can load the image with Aspose.Imaging and save it using JpegOptions.ColorType = Grayscale.
+ * 2. When an archival system requires all scanned documents to be stored as grayscale JPEGs to preserve text clarity while minimizing file size, this C# code can read the original image and re‑save it with the grayscale color mode.
+ * 3. When a medical imaging application needs to standardize input X‑ray images to a single channel before analysis, a developer can use Aspose.Imaging to load the JPEG and output a grayscale version with the specified JpegCompressionColorMode.
+ * 4. When an e‑commerce platform generates product catalog PDFs and wants the background images in grayscale to reduce printing costs, the code demonstrates how to convert each JPEG to grayscale using C# and Aspose.Imaging.
+ * 5. When a desktop utility offers batch conversion of color photographs to grayscale for artistic effect, this snippet shows how to verify file paths, load each JPEG, set JpegOptions.ColorType to Grayscale, and save the result.
  */
