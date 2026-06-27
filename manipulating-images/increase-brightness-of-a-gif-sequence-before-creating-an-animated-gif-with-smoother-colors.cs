@@ -1,70 +1,49 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.gif";
+        string outputPath = "output.gif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input directory containing GIF frames and output file path
-            string inputDirectory = @"C:\temp\frames";
-            string outputPath = @"C:\temp\output\animated_bright.gif";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Get all GIF files in the input directory
-            string[] frameFiles = Directory.GetFiles(inputDirectory, "*.gif");
-
-            GifImage resultGif = null;
-
-            foreach (string frameFile in frameFiles)
+            // Load the GIF image
+            using (Image image = Image.Load(inputPath))
             {
-                // Verify each input file exists
-                if (!File.Exists(frameFile))
+                // Cast to GifImage to access GIF-specific methods
+                GifImage gifImage = (GifImage)image;
+
+                // Increase brightness of all frames (value range: -255 to 255)
+                gifImage.AdjustBrightness(50);
+
+                // Prepare save options with palette correction for smoother colors
+                GifOptions saveOptions = new GifOptions
                 {
-                    Console.Error.WriteLine($"File not found: {frameFile}");
-                    return;
-                }
+                    DoPaletteCorrection = true,
+                    // Preserve all frames (full animation)
+                    FullFrame = true
+                };
 
-                // Load the GIF frame
-                using (GifImage frameGif = (GifImage)Image.Load(frameFile))
-                {
-                    // Increase brightness (value range: -255 to 255)
-                    frameGif.AdjustBrightness(50);
-
-                    if (resultGif == null)
-                    {
-                        // Create the result GIF using the first frame's active frame block
-                        resultGif = new GifImage((GifFrameBlock)frameGif.ActiveFrame);
-                    }
-                    else
-                    {
-                        // Add the current frame as a new page to the result GIF
-                        resultGif.AddPage((RasterImage)frameGif.ActiveFrame);
-                    }
-                }
+                // Save the adjusted animated GIF
+                gifImage.Save(outputPath, saveOptions);
             }
-
-            if (resultGif == null)
-            {
-                Console.Error.WriteLine("No frames were processed.");
-                return;
-            }
-
-            // Set palette correction for smoother colors
-            GifOptions saveOptions = new GifOptions
-            {
-                DoPaletteCorrection = true
-            };
-
-            // Save the animated GIF
-            resultGif.Save(outputPath, saveOptions);
         }
         catch (Exception ex)
         {
@@ -72,3 +51,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to brighten a low‑light animated GIF (e.g., a surveillance camera clip) before publishing it online, they can use this code to adjust the brightness of every frame and save the result with palette correction for smoother colors.
+ * 2. When creating promotional social‑media content that includes an animated GIF with faded colors, a developer can increase the brightness of the entire sequence and generate a smoother‑gradient GIF using Aspose.Imaging for .NET.
+ * 3. When converting a series of scanned handwritten notes into an animated GIF, a developer may need to boost the brightness to improve legibility and ensure the final GIF displays consistent colors across browsers.
+ * 4. When building a web‑based meme generator that lets users upload GIFs, a developer can apply this code to automatically brighten dark frames and apply palette correction so the animated output looks vibrant on all devices.
+ * 5. When processing GIF frames extracted from a video for an e‑learning module, a developer can use this snippet to uniformly raise brightness and produce an animated GIF with smoother color transitions for better visual clarity.
+ */
