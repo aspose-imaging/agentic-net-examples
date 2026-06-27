@@ -5,39 +5,37 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "Input\\sample.emf";
+        string outputPath = "Output\\sample.gif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.emf";
-            string outputPath = @"C:\Images\output.gif";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image
             using (Image emfImage = Image.Load(inputPath))
             {
-                // Configure GIF options for a 256‑color palette
-                GifOptions gifOptions = new GifOptions
+                var gifOptions = new GifOptions
                 {
-                    // 7 bits per primary color (2^(7+1) = 256 colors)
-                    ColorResolution = 7,
-                    // Analyze source colors to build the best matching palette
                     DoPaletteCorrection = true,
-                    // Use lossless compression
-                    MaxDiff = 0
+                    ColorResolution = 7,
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = emfImage.Width,
+                        PageHeight = emfImage.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    }
                 };
 
-                // Save the image as GIF
                 emfImage.Save(outputPath, gifOptions);
             }
         }
@@ -47,3 +45,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application must display legacy vector graphics (EMF) in browsers that only support GIF, a developer can use this code to rasterize the EMF and generate a 256‑color GIF for fast loading.
+ * 2. When an email marketing system needs to embed small animated or static images from EMF sources while keeping the email size under the typical 100 KB limit, the conversion to a palette‑limited GIF ensures compliance.
+ * 3. When a Windows desktop utility creates thumbnail previews of EMF files for a file explorer, converting each thumbnail to a GIF with a fixed palette provides consistent color depth and reduces memory usage.
+ * 4. When a reporting tool exports charts saved as EMF into a printable PDF that only accepts GIF images, this code transforms the vector charts into GIFs with controlled color resolution for reliable rendering.
+ * 5. When a mobile app synchronizes design assets from a legacy CAD system and must store them as lightweight GIFs to minimize bandwidth, the developer can employ this routine to rasterize EMF files with a 256‑color palette.
+ */
