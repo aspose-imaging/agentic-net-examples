@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -8,52 +9,49 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Define a 3x3 kernel with edge values 0.1 and center 0.6, then normalize
-                double[,] kernel = new double[3, 3];
+                double[,] kernel = new double[3, 3]
+                {
+                    { 0.1, 0.1, 0.1 },
+                    { 0.1, 0.6, 0.1 },
+                    { 0.1, 0.1, 0.1 }
+                };
+
+                double sum = 0;
                 for (int y = 0; y < 3; y++)
                 {
                     for (int x = 0; x < 3; x++)
                     {
-                        kernel[y, x] = (x == 1 && y == 1) ? 0.6 : 0.1;
+                        sum += kernel[y, x];
                     }
                 }
-                double sum = 0.0;
-                foreach (double v in kernel) sum += v;
                 for (int y = 0; y < 3; y++)
                 {
                     for (int x = 0; x < 3; x++)
                     {
-                        kernel[y, x] /= sum; // normalize
+                        kernel[y, x] /= sum;
                     }
                 }
 
-                // Apply the custom convolution filter to the entire image
                 var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+
                 raster.Filter(raster.Bounds, filterOptions);
 
-                // Save the filtered image as PNG
-                PngOptions saveOptions = new PngOptions();
-                raster.Save(outputPath, saveOptions);
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -65,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to gently smooth a PNG screenshot before embedding it in a PDF report, they can use this Aspose.Imaging C# code to apply a normalized 3×3 convolution filter that reduces high‑frequency noise while preserving details.
- * 2. When preparing product photos for an e‑commerce website, a developer can run this code to apply a light blur to PNG images, helping to hide minor imperfections and create a more consistent visual appearance across the catalog.
- * 3. When building an OCR preprocessing pipeline, a developer can use the custom kernel to slightly denoise scanned PNG documents, improving text recognition accuracy without overly blurring characters.
- * 4. When generating thumbnail previews of user‑uploaded PNG graphics, a developer can apply the normalized convolution filter to reduce aliasing artifacts and produce smoother, more visually appealing small images.
- * 5. When creating a custom image‑filtering feature in a C# desktop application, a developer can employ this code to demonstrate how to define, normalize, and apply a 3×3 kernel with Aspose.Imaging, enabling users to apply a subtle soft‑focus effect to their PNG files.
+ * 1. When a developer wants to reduce noise in a PNG screenshot while preserving overall brightness by applying a custom 3×3 convolution kernel with normalized weights.
+ * 2. When an image‑processing pipeline needs to smooth medical imaging PNG files using a weighted average filter before further analysis.
+ * 3. When a web application must automatically enhance uploaded PNG avatars by applying a gentle blur that keeps the central pixel dominant.
+ * 4. When a batch job processes PNG product photos to create a consistent softening effect across all images using Aspose.Imaging’s ConvolutionFilterOptions in C#.
+ * 5. When a developer is building a desktop tool that applies a custom low‑pass filter to PNG graphics to prepare them for printing, ensuring the kernel sums to one for correct exposure.
  */
