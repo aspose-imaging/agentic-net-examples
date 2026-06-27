@@ -2,54 +2,70 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions
+                // Cast to SvgImage for vector-specific properties
+                SvgImage svgImage = (SvgImage)image;
+
+                // Set up rasterization options for SVG
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = image.Size
+                    PageSize = svgImage.Size,
+                    BackgroundColor = Color.White
                 };
 
-                var pngOptions = new PngOptions
+                // Prepare PNG options with the rasterization settings
+                PngOptions pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                using (var ms = new MemoryStream())
+                // Rasterize SVG to a memory stream
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    image.Save(ms, pngOptions);
+                    svgImage.Save(ms, pngOptions);
                     ms.Position = 0;
 
-                    using (Image rasterImg = Image.Load(ms))
+                    // Load the rasterized image
+                    using (Image rasterImageContainer = Image.Load(ms))
                     {
-                        var raster = (RasterImage)rasterImg;
+                        RasterImage rasterImage = (RasterImage)rasterImageContainer;
 
-                        var kernel = ConvolutionFilter.GetBlurMotion(10, 120.0);
-                        var filterOptions = new ConvolutionFilterOptions(kernel);
-                        raster.Filter(raster.Bounds, filterOptions);
+                        // Create convolution kernel for motion blur (size 10, angle 120)
+                        double[,] kernel = ConvolutionFilter.GetBlurMotion(10, 120);
+                        ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel);
 
-                        raster.Save(outputPath, new PngOptions());
+                        // Apply the convolution filter to the entire image
+                        rasterImage.Filter(rasterImage.Bounds, filterOptions);
+
+                        // Save the filtered raster image as PNG
+                        rasterImage.Save(outputPath, new PngOptions());
                     }
                 }
             }
@@ -63,9 +79,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add a motion‑blur effect to an SVG logo before converting it to a PNG for use on a website.
- * 2. When an automated build pipeline must generate blurred thumbnails from vector assets to improve page load performance.
- * 3. When a desktop application requires dynamic image processing to simulate camera shake on SVG illustrations and export them as raster PNG files.
- * 4. When a reporting tool has to rasterize SVG charts, apply a directional blur of size 10 at 120° and embed the result in PDF documents.
- * 5. When a batch script processes a folder of SVG icons, applies a consistent motion‑blur filter, and saves the output as high‑quality PNGs for mobile apps.
+ * 1. When a web developer needs to add a realistic motion‑blur effect to an SVG logo before converting it to a PNG for high‑resolution marketing assets, they can use this C# Aspose.Imaging code.
+ * 2. When a desktop application must programmatically generate blurred map overlays from vector SVG files and export them as PNG tiles for GIS viewers, the convolution filter with GetBlurMotion size 10 angle 120 is ideal.
+ * 3. When an e‑learning platform wants to create animated‑style illustrations by applying a directional blur to SVG diagrams and saving them as PNG images for faster loading on mobile devices, this code provides a simple solution.
+ * 4. When a game developer needs to preprocess vector UI elements with a 120‑degree motion blur and rasterize them to PNG sprites for use in a 2D engine, the Aspose.Imaging filter pipeline handles it automatically.
+ * 5. When a reporting tool generates SVG charts that must be visually softened with a specific motion blur before embedding them as PNG images in PDF reports, this C# snippet accomplishes the task efficiently.
  */
