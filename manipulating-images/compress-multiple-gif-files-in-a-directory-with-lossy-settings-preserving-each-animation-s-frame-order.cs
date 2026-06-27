@@ -7,14 +7,18 @@ class Program
 {
     static void Main()
     {
+        // Wrap the whole logic to catch unexpected errors
         try
         {
             // Hard‑coded input and output directories
-            string inputDir = @"C:\InputGifs";
-            string outputDir = @"C:\OutputGifs";
+            string inputDirectory = @"C:\InputGifs";
+            string outputDirectory = @"C:\OutputGifs";
+
+            // Ensure the output directory exists (creates parent if needed)
+            Directory.CreateDirectory(outputDirectory);
 
             // Process every GIF file in the input directory
-            foreach (var inputPath in Directory.GetFiles(inputDir, "*.gif"))
+            foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.gif"))
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -23,29 +27,29 @@ class Program
                     return;
                 }
 
-                // Build the output file path
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + "_compressed.gif");
+                // Build the corresponding output path
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
 
-                // Ensure the output directory exists
+                // Ensure the output folder exists (required before saving)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the GIF image (preserves animation frames and order)
+                // Load the GIF image, apply lossy compression, and save it
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Configure lossy compression options
-                    var options = new GifOptions
+                    // Configure lossy compression (MaxDiff > 0)
+                    var saveOptions = new GifOptions
                     {
-                        MaxDiff = 80 // recommended value for effective lossy compression
+                        MaxDiff = 80 // recommended value for good lossy compression
                     };
 
-                    // Save the compressed GIF
-                    image.Save(outputPath, options);
+                    // Save the compressed GIF while preserving animation frames order
+                    image.Save(outputPath, saveOptions);
                 }
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime error without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -53,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must shrink a large collection of animated GIFs for faster website delivery, applying lossy compression with Aspose.Imaging while preserving each animation’s frame order.
- * 2. When an e‑commerce platform needs to automatically compress product GIFs stored in a folder to meet email attachment size limits without breaking the animation sequence.
- * 3. When a mobile app backend processes user‑uploaded GIF stickers, using C# file I/O and GifOptions.MaxDiff to reduce bandwidth usage while keeping the original motion intact.
- * 4. When a digital marketing tool batch‑optimizes campaign GIF assets on a scheduled job, ensuring the compressed files retain their original timing and frame hierarchy.
- * 5. When a game development pipeline compresses sprite animation GIFs before publishing, leveraging Aspose.Imaging’s lossy settings to lower file size while maintaining the correct frame playback order.
+ * 1. When a web developer needs to reduce the bandwidth of animated GIFs on a website by applying lossy compression while keeping the original frame sequence intact.
+ * 2. When a mobile app team wants to batch‑process user‑uploaded GIF stickers to fit size limits without breaking the animation order.
+ * 3. When an e‑learning platform must archive a large collection of tutorial GIFs in a smaller footprint while preserving the step‑by‑step animation flow.
+ * 4. When a digital marketing agency automates the optimization of promotional GIF banners stored in a folder before uploading them to an ad server.
+ * 5. When a game developer prepares animated sprite sheets in GIF format for faster loading by compressing them lossily and ensuring each frame remains in the correct order.
  */
