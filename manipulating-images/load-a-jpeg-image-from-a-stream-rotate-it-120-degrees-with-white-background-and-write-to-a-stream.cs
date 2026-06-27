@@ -6,7 +6,7 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
@@ -14,7 +14,7 @@ class Program
             string inputPath = "input.jpg";
             string outputPath = "output.jpg";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,20 +24,17 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load JPEG image from a file stream
+            // Load JPEG image from a stream
             using (FileStream inputStream = File.OpenRead(inputPath))
-            using (JpegImage jpegImage = new JpegImage(inputStream))
+            using (JpegImage image = new JpegImage(inputStream))
             {
-                // Rotate 120 degrees with white background, resizing proportionally
-                jpegImage.Rotate(120f, true, Color.White);
+                // Rotate 120 degrees clockwise, resize proportionally, white background
+                image.Rotate(120f, true, Aspose.Imaging.Color.White);
 
-                // Prepare JPEG save options
-                JpegOptions jpegOptions = new JpegOptions();
-
-                // Save rotated image to an output stream
+                // Save the rotated image to a stream
                 using (FileStream outputStream = File.Open(outputPath, FileMode.Create))
                 {
-                    jpegImage.Save(outputStream, jpegOptions);
+                    image.Save(outputStream, new JpegOptions());
                 }
             }
         }
@@ -47,3 +44,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web service needs to accept a JPEG uploaded by a user, rotate it by 120 degrees with a white background, and return the transformed image directly from a stream.
+ * 2. When a desktop application processes scanned photos stored in a stream, applies a 120‑degree clockwise rotation to correct orientation, and saves the result as a new JPEG file.
+ * 3. When an automated batch job reads JPEG images from a network share via streams, rotates them for consistent layout in a catalog, and writes the rotated images to another stream.
+ * 4. When a mobile backend receives JPEG data from an API, rotates the image to match UI design specifications, and streams the modified JPEG back to the client.
+ * 5. When a document generation system needs to embed a rotated JPEG into a PDF, it loads the image from a stream, rotates it 120 degrees with a white fill, and streams the rotated JPEG for further processing.
+ */
