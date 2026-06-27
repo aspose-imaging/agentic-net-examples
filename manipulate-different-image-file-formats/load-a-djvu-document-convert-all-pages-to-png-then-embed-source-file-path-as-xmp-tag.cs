@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -23,18 +22,14 @@ class Program
             Directory.CreateDirectory(outputDirectory);
 
             using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                using (DjvuImage djvuImage = new DjvuImage(stream))
+                foreach (DjvuPage page in djvuImage.Pages)
                 {
-                    int pageIndex = 0;
-                    foreach (DjvuPage page in djvuImage.Pages)
-                    {
-                        string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.png");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        page.Save(outputPath, new PngOptions());
-                        pageIndex++;
-                    }
+                    page.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -47,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each page of a multi‑page DjVu file (such as a scanned magazine) and save them as separate PNG images for inclusion in a digital archive.
- * 2. When an application must generate thumbnail previews of DjVu documents on the fly by converting each page to PNG format for display in a file‑manager UI.
- * 3. When a document‑processing pipeline requires converting DjVu pages to lossless PNG files before applying OCR or further image analysis in C#.
- * 4. When a web service needs to serve DjVu content to browsers that only support PNG, so the server converts all pages to PNG files on demand.
- * 5. When a developer automates batch conversion of a folder of DjVu files into PNG pages to prepare assets for a mobile app that only accepts PNG images.
+ * 1. When a digital archive needs to preserve scanned DjVu documents as lossless PNG images while adding the original file path as an XMP metadata tag for traceability.
+ * 2. When an e‑learning platform converts multi‑page DjVu lecture notes into separate PNG slides for web display and embeds the source path to link back to the original material.
+ * 3. When a legal firm extracts each page of a DjVu case file into PNG thumbnails for quick preview in a document management system and stores the source location in XMP for audit purposes.
+ * 4. When a publishing workflow automates the transformation of DjVu manuscripts into PNG assets for print‑ready pipelines, embedding the source path to maintain version control.
+ * 5. When a mobile app pre‑processes DjVu comics by converting each page to PNG and tagging the images with the original file path in XMP so the app can reference the source during offline viewing.
  */
