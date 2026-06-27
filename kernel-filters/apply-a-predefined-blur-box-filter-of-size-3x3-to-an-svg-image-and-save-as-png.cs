@@ -2,46 +2,44 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "input.svg";
+            string tempPath = "temp.png";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
             {
-                var pngOptions = new PngOptions();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure directories exist for temporary and final output files
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Rasterize SVG to a temporary PNG
+            using (Image svgImage = Image.Load(inputPath))
+            {
                 var rasterOptions = new SvgRasterizationOptions();
-                pngOptions.VectorRasterizationOptions = rasterOptions;
+                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
+                svgImage.Save(tempPath, pngOptions);
+            }
 
-                using (var memoryStream = new MemoryStream())
-                {
-                    image.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
-
-                    using (RasterImage raster = (RasterImage)Image.Load(memoryStream))
-                    {
-                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                            Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurBox(3));
-
-                        raster.Filter(raster.Bounds, filterOptions);
-                        raster.Save(outputPath);
-                    }
-                }
+            // Load the rasterized PNG, apply blur box filter, and save final PNG
+            using (Image img = Image.Load(tempPath))
+            {
+                RasterImage raster = (RasterImage)img;
+                var blurOptions = new ConvolutionFilterOptions(ConvolutionFilter.GetBlurBox(3));
+                raster.Filter(raster.Bounds, blurOptions);
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -53,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate a softened thumbnail of a vector logo stored as SVG for faster page loads, a developer can rasterize the SVG to PNG and apply a 3x3 blur box filter using Aspose.Imaging in C#.
- * 2. When creating print‑ready assets that require a subtle background blur to reduce visual noise in SVG illustrations before converting them to high‑resolution PNGs, this code provides an automated C# solution.
- * 3. When a desktop tool must preprocess user‑uploaded SVG icons by adding a light blur effect and exporting them as PNG sprites for UI themes, the Aspose.Imaging filter pipeline can be employed.
- * 4. When a reporting system needs to embed blurred versions of SVG charts into PDF documents as PNG images to protect sensitive data details, developers can use this C# routine.
- * 5. When an e‑learning platform wants to generate blurred PNG overlays from SVG diagrams for focus‑out effects in tutorials, the code demonstrates the required C# image processing steps.
+ * 1. When a web developer needs to generate a low‑resolution preview PNG of a complex SVG logo with a subtle 3×3 blur to improve loading speed on mobile devices.
+ * 2. When a desktop application must convert user‑uploaded SVG diagrams to PNG thumbnails and apply a uniform blur box filter to hide proprietary details before sharing.
+ * 3. When an e‑learning platform automatically rasterizes SVG illustrations to PNG assets and adds a 3×3 blur to create a consistent background effect across all course materials.
+ * 4. When a reporting tool processes SVG charts, rasterizes them to PNG, and applies a convolution blur to soften sharp edges for better visual integration in PDF reports.
+ * 5. When a batch‑processing script in C# uses Aspose.Imaging to convert a folder of SVG icons to blurred PNG icons for use as placeholders during asynchronous UI loading.
  */
