@@ -8,27 +8,32 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hard‑coded input and output file paths
         string inputPath = @"C:\Images\sample.cdr";
-        string outputPath = @"C:\Images\output.png";
+        string outputPath = @"C:\Images\sample_resized.png";
 
+        // Ensure any runtime exception is reported without crashing
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CorelDRAW file, resize, and save as PNG
+            // Load the CorelDRAW (CDR) file
             using (CdrImage image = (CdrImage)Image.Load(inputPath))
             {
+                // Resize to 1024x768 pixels (default NearestNeighbourResample)
                 image.Resize(1024, 768);
-                image.Save(outputPath, new PngOptions());
+
+                // Save as PNG using default PNG options
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -40,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy CorelDRAW (.cdr) artwork into web‑ready PNG thumbnails of 1024 × 768 pixels for an online portfolio.
- * 2. When an e‑commerce platform must automatically generate product preview images from designer‑provided CDR files and store them as PNGs at a fixed resolution.
- * 3. When a content management system imports client‑supplied CorelDRAW graphics and resizes them to 1024 × 768 before saving them as PNG for fast browser rendering.
- * 4. When a desktop application batch‑processes a folder of CDR files, resizing each to 1024 × 768 and exporting them as PNGs using Aspose.Imaging in C#.
- * 5. When a reporting tool needs to embed a CorelDRAW diagram into a PDF report, first converting the CDR to a 1024 × 768 PNG with C# code.
+ * 1. When a developer needs to convert a CorelDRAW CDR design into a 1024 × 768 PNG thumbnail for quick preview on a web portal.
+ * 2. When an e‑commerce platform must automatically resize uploaded CDR product illustrations to a standard PNG size for consistent catalog display.
+ * 3. When a marketing automation script generates PNG assets from CDR files at a fixed resolution to embed in email campaigns.
+ * 4. When a desktop application batch‑processes CDR artwork, resizing each to 1024 × 768 pixels and saving as PNG for use in print‑ready PDFs.
+ * 5. When a cloud service provides on‑the‑fly conversion of user‑submitted CorelDRAW files to PNG images with a predefined 1024 × 768 resolution for API consumers.
  */
