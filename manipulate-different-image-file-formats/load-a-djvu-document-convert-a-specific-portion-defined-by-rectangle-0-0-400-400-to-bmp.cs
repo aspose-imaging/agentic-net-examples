@@ -1,19 +1,20 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "sample.djvu";
+        string outputPath = "output.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.djvu";
-            string outputPath = "output\\sample.bmp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,21 +25,18 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Open the DjVu file stream
+            // Load DjVu document from file stream
             using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Load DjVu image from stream
-                using (DjvuImage djvuImage = new DjvuImage(stream))
-                {
-                    // Define BMP save options
-                    BmpOptions bmpOptions = new BmpOptions();
+                // Define the rectangle area to extract (0,0,400,400)
+                Rectangle bounds = new Rectangle(0, 0, 400, 400);
 
-                    // Define the rectangle area to extract (0,0,400,400)
-                    Rectangle bounds = new Rectangle(0, 0, 400, 400);
+                // Set BMP save options
+                BmpOptions bmpOptions = new BmpOptions();
 
-                    // Save the specified portion as BMP
-                    djvuImage.Save(outputPath, bmpOptions, bounds);
-                }
+                // Save the specified portion as BMP
+                djvuImage.Save(outputPath, bmpOptions, bounds);
             }
         }
         catch (Exception ex)
@@ -50,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a thumbnail preview of the first page of a multi‑page DjVu file for a document management system, they can extract the top‑left 400×400 pixels and save it as a BMP image.
- * 2. When integrating legacy scanned archives into a .NET application, a developer may convert a specific region of a DjVu scan (e.g., a signature block) to BMP for OCR processing.
- * 3. When creating a printable sample of a large DjVu illustration, a developer can crop the initial 400×400 pixel area and output it as BMP to ensure lossless quality for the sample.
- * 4. When building a web service that returns a BMP snapshot of a DjVu file’s header section, a developer can use the rectangle (0,0,400,400) to extract that portion on demand.
- * 5. When automating batch conversion of DjVu pages to BMP for a digital asset pipeline, a developer can limit each conversion to the top‑left 400×400 region to reduce file size and processing time.
+ * 1. When a developer needs to generate a thumbnail preview of the first page of a DjVu file for a web gallery, they can extract the top‑left 400×400 pixels and save it as a BMP using Aspose.Imaging for .NET.
+ * 2. When integrating a document‑management system that stores scanned books as DjVu, a developer can quickly convert a specific region of a page to BMP for OCR preprocessing.
+ * 3. When building a legacy Windows application that only accepts BMP images, a developer can crop a defined rectangle from a DjVu source and convert it to BMP for compatibility.
+ * 4. When creating a batch‑processing tool that extracts a fixed‑size region from multiple DjVu files for quality‑control screenshots, the code can load each file, slice the (0,0,400,400) area, and output BMP files.
+ * 5. When implementing a digital‑archive migration script that needs to preserve a preview image of each DjVu document, a developer can use this C# snippet to read the DjVu stream, select a 400×400 rectangle, and store it as a BMP thumbnail.
  */
