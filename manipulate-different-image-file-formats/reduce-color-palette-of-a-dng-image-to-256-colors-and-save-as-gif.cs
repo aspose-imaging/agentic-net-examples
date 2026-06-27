@@ -1,47 +1,49 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dng;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hard‑coded input and output paths
         string inputPath = @"C:\temp\input.dng";
         string outputPath = @"C:\temp\output.gif";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the DNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DngImage (inherits from RasterImage)
-                DngImage dngImage = (DngImage)image;
-                RasterImage raster = (RasterImage)dngImage;
+                // DngImage derives from RasterImage, so we can treat it as RasterImage
+                RasterImage raster = (RasterImage)image;
 
-                // Generate a 256‑color palette from the image
+                // Generate a 256‑color palette from the raster image
                 IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256);
 
                 // Prepare GIF save options with the generated palette
                 GifOptions gifOptions = new GifOptions
                 {
-                    Palette = palette
+                    Palette = palette,
+                    // Disable automatic palette correction because we already provide a palette
+                    DoPaletteCorrection = false
                 };
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the image as GIF using the palette
-                dngImage.Save(outputPath, gifOptions);
+                // Save the image as GIF using the specified options
+                image.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer needs to generate a lightweight preview of a high‑resolution DNG RAW file for quick web viewing, they can reduce the image to a 256‑color palette and save it as a GIF using C# and Aspose.Imaging.
- * 2. When an e‑commerce platform wants to display product photos captured in DNG format on low‑bandwidth mobile devices, converting them to 256‑color GIFs provides fast loading while preserving essential visual details.
- * 3. When a digital archivist must store large collections of RAW DNG images in a space‑efficient format for metadata‑rich catalogs, creating GIF thumbnails with a limited palette helps reduce storage costs.
- * 4. When a developer builds an email marketing tool that embeds RAW camera shots, converting DNG files to 256‑color GIFs ensures compatibility with email clients that only support GIF images.
- * 5. When a scientific imaging application needs to generate quick visual summaries of DNG microscopy data for reporting dashboards, using Aspose.Imaging to palette‑reduce and save as GIF enables fast rendering in C#‑based web apps.
+ * 1. When a developer needs to convert high‑resolution raw DNG photos into lightweight 256‑color GIFs for web previews or email attachments, they can use this code to generate an optimal palette and save the result.
+ * 2. When building an automated pipeline that ingests raw camera files and creates animated GIF thumbnails for a digital asset management system, this snippet provides the necessary color reduction and format conversion.
+ * 3. When a mobile app must display raw DNG images on devices that only support GIF with limited colors, the code enables on‑the‑fly palette generation and saving in a compatible format.
+ * 4. When a photographer’s portfolio website requires batch processing of DNG files into GIFs to reduce bandwidth while preserving visual fidelity, the example demonstrates how to create a 256‑color palette and export each image.
+ * 5. When integrating Aspose.Imaging into a C# desktop tool that lets users export raw images as GIFs with a custom 256‑color palette, this code handles loading, palette creation, and saving in a single workflow.
  */
