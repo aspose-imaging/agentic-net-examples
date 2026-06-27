@@ -2,18 +2,19 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.cdr";
+        string outputPath = @"C:\temp\sample.tif";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\sample.cdr";
-            string outputPath = @"C:\Images\output.tif";
-
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,13 +25,13 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CorelDRAW file
+            // Load the CorelDRAW (CDR) file
             using (Image image = Image.Load(inputPath))
             {
                 // Flip the image horizontally
                 image.RotateFlip(RotateFlipType.RotateNoneFlipX);
 
-                // Prepare TIFF save options
+                // Prepare TIFF save options with default format
                 var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
                 // Save the flipped image as TIFF
@@ -39,6 +40,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -46,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a printing workflow requires converting legacy CorelDRAW (.cdr) artwork into a high‑resolution TIFF image with a mirrored layout for double‑sided printing, a developer can use this code.
- * 2. When an e‑commerce platform needs to generate product catalog pages by flipping source CDR designs horizontally before saving them as TIFF files for consistent DPI and color fidelity, this snippet is applicable.
- * 3. When a document management system must archive engineering diagrams stored as CorelDRAW files, but the archive standard mandates TIFF format and a horizontal flip to match legacy viewing conventions, the code provides the needed conversion.
- * 4. When a marketing automation tool prepares promotional banners that must be mirrored for right‑to‑left languages, loading the .cdr file, applying a horizontal RotateFlip, and exporting to TIFF ensures correct orientation and lossless quality.
- * 5. When a desktop application automates batch processing of CDR assets, applying a horizontal flip and saving them as TIFF files for downstream OCR or image analysis pipelines, this C# example handles the transformation.
+ * 1. When a developer needs to convert a CorelDRAW CDR illustration into a high‑resolution TIFF for printing while mirroring the artwork horizontally for a right‑to‑left layout.
+ * 2. When an automated batch job must read CDR files, apply a horizontal flip to correct reversed designs, and save them as TIFF images for archival in a document management system.
+ * 3. When a web service receives user‑uploaded CorelDRAW files and must generate flipped TIFF thumbnails for preview in a gallery view.
+ * 4. When a desktop application processes engineering diagrams stored in CDR format, flips them to match a mirrored CAD view, and exports them to TIFF for inclusion in PDF reports.
+ * 5. When a migration script needs to transform legacy CDR assets into TIFF format with a horizontal mirror effect to comply with a new branding guideline.
  */
