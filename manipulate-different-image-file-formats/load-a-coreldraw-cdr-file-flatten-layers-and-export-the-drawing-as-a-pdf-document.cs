@@ -3,6 +3,10 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
@@ -24,25 +28,33 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR image
-            using (CdrImage image = (CdrImage)Image.Load(inputPath))
+            // Load the CDR file
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Select the first page (index 0)
-                CdrImagePage page = (CdrImagePage)image.Pages[0];
+                // Cache all pages to avoid lazy loading
+                foreach (CdrImagePage page in cdrImage.Pages)
+                {
+                    page.CacheData();
+                }
 
-                // Prepare PDF export options with rasterization settings
+                // Export each page to PDF (flattened)
+                // Here we export the first page; repeat loop for all pages if needed
+                int pageNumber = 0;
+                CdrImagePage imagePage = (CdrImagePage)cdrImage.Pages[pageNumber];
+
+                // Set up PDF export options with rasterization to flatten layers
                 PdfOptions pdfOptions = new PdfOptions();
                 CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                     SmoothingMode = SmoothingMode.None,
-                    PageWidth = page.Width,
-                    PageHeight = page.Height
+                    PageWidth = imagePage.Width,
+                    PageHeight = imagePage.Height
                 };
                 pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Export the page to PDF
-                page.Save(outputPath, pdfOptions);
+                // Save the page as a PDF
+                imagePage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -54,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a CorelDRAW CDR file to a PDF for client delivery, this C# code flattens the layers and exports the drawing as a PDF using Aspose.Imaging.
- * 2. When an automated workflow must generate printable PDFs from multi‑page CDR documents, the code loads each CDR page, applies rasterization options, and saves it as a PDF.
- * 3. When a web service has to validate and archive uploaded CorelDRAW drawings as PDF files, the snippet verifies the file, creates the output folder, and performs the conversion with Aspose.Imaging.
- * 4. When a desktop application requires batch processing of CDR graphics to PDF for compliance reporting, the example demonstrates loading the CDR image, setting page dimensions, and saving the flattened PDF.
- * 5. When an integration script needs to ensure consistent PDF rendering of CorelDRAW artwork across platforms, the code uses CdrRasterizationOptions (e.g., TextRenderingHint and SmoothingMode) to control the export quality.
+ * 1. When a design studio needs to convert multi‑layer CorelDRAW CDR artwork into a single‑layer PDF for client review without preserving editability.
+ * 2. When an automated build pipeline must batch‑process CDR files, flatten their layers, and generate PDF documentation for archiving.
+ * 3. When a web service receives uploaded CDR drawings and must render them as PDF invoices, ensuring all vector and text elements are rasterized for consistent display.
+ * 4. When a desktop application needs to preview a specific page of a multi‑page CDR file as a PDF, flattening layers to simplify rendering performance.
+ * 5. When a legal compliance tool must transform proprietary CDR designs into non‑editable PDF files to meet document‑retention regulations.
  */
