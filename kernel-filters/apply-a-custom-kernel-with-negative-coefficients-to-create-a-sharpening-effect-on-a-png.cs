@@ -3,19 +3,20 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
-            // Verify input file exists
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -38,15 +39,18 @@ class Program
                     { 0, -1, 0 }
                 };
 
-                // Create filter options using the custom kernel
+                // Apply the convolution filter using the custom kernel
                 var filterOptions = new ConvolutionFilterOptions(kernel);
-
-                // Apply the filter to the entire image
                 raster.Filter(raster.Bounds, filterOptions);
 
-                // Save the result as PNG
-                var saveOptions = new PngOptions();
-                raster.Save(outputPath, saveOptions);
+                // Prepare PNG save options with a bound source
+                var pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                // Save the processed image as PNG
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -58,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to enhance the edge definition of a PNG screenshot for a documentation portal by applying a sharpening filter with a custom convolution kernel.
- * 2. When a C# application must improve the visual clarity of scanned PNG receipts before OCR processing by using negative coefficients in a convolution filter.
- * 3. When a photo‑editing tool built with Aspose.Imaging needs to sharpen PNG product images on the fly to make details more visible in an e‑commerce catalog.
- * 4. When a batch‑processing script has to automatically increase the contrast of PNG map tiles for a GIS web service using a custom kernel in .NET.
- * 5. When a developer wants to programmatically restore the crispness of PNG icons that have become blurry after compression by applying a sharpening convolution filter.
+ * 1. When a developer needs to enhance the details of product photos in PNG format before uploading them to an e‑commerce site, they can apply a custom sharpening kernel with negative coefficients using Aspose.Imaging for .NET.
+ * 2. When an automated image‑processing pipeline must improve the readability of scanned PNG documents by emphasizing edges, the convolution filter with a negative‑coefficient kernel provides a fast sharpening step in C#.
+ * 3. When a photo‑editing desktop application requires a one‑click “sharpen” feature for PNG images, the code demonstrates how to load, filter, and save the image with Aspose’s RasterImage and ConvolutionFilterOptions.
+ * 4. When a batch job processes PNG screenshots from a UI test suite and needs to make UI elements crisper for visual verification, the custom kernel sharpens each image without external tools.
+ * 5. When a developer integrates image enhancement into a C# web service that returns sharpened PNG thumbnails, the example shows how to perform the convolution filter and stream the result directly to a file.
  */
