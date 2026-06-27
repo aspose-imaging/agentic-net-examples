@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -27,21 +25,15 @@ class Program
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to BmpImage for clarity (optional)
-                BmpImage bmpImage = (BmpImage)image;
+                // Define the rectangle to crop (left, top, width, height)
+                // Example: crop a 200x150 region starting at (50,50)
+                Rectangle cropArea = new Rectangle(50, 50, 200, 150);
 
-                // Define the cropping rectangle (example: top-left corner (50,30), width 200, height 150)
-                int left = 50;   // X coordinate of the left edge
-                int top = 30;    // Y coordinate of the top edge
-                int width = 200; // Width of the cropped area
-                int height = 150; // Height of the cropped area
-                Aspose.Imaging.Rectangle cropArea = new Aspose.Imaging.Rectangle(left, top, width, height);
+                // Perform the cropping operation
+                image.Crop(cropArea);
 
-                // Perform the crop operation
-                bmpImage.Crop(cropArea);
-
-                // Save the cropped image (default BMP options)
-                bmpImage.Save(outputPath);
+                // Save the cropped image to the output path
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -53,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract a specific region from a large BMP screenshot for a thumbnail in a Windows desktop application using C# and Aspose.Imaging.
- * 2. When an automated batch process must trim unwanted margins from scanned BMP documents before archiving them in a document management system.
- * 3. When a game developer wants to slice sprite sheets stored as BMP files into individual character frames by specifying pixel coordinates in C#.
- * 4. When a medical imaging tool requires cropping a region of interest from a BMP X‑ray image for further analysis while preserving the original file format.
- * 5. When a legacy reporting system generates BMP charts and the developer must programmatically isolate a chart area for inclusion in a PDF report.
+ * 1. When a developer needs to extract a specific portion of a scanned BMP document—such as a logo or signature—by specifying exact pixel coordinates before embedding it into a report.
+ * 2. When building a Windows desktop application that generates thumbnails from large BMP screenshots, cropping a defined rectangle to create a smaller preview image.
+ * 3. When processing legacy BMP assets for a game and isolating sprite frames by cropping fixed‑width and height regions using C# image processing.
+ * 4. When creating an automated batch job that removes unwanted borders from BMP scans by cropping a known offset and size before archiving the files.
+ * 5. When integrating with a printing workflow that requires sending only a selected area of a BMP blueprint to a printer, using pixel‑based cropping to meet the printer’s layout constraints.
  */
