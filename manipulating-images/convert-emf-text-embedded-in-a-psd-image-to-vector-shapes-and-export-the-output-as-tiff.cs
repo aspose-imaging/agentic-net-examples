@@ -2,50 +2,30 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.psd";
+        string outputPath = "output.tif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Images\input.psd";
-            string outputPath = @"C:\Images\output.tif";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (Image psdImage = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the PSD image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Configure vector rasterization to render embedded EMF text as shapes
-                var vectorOptions = new EmfRasterizationOptions
-                {
-                    PageSize = image.Size,
-                    RenderMode = EmfRenderMode.Auto,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
-
-                // Set up TIFF save options with the vector rasterization options
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                {
-                    VectorRasterizationOptions = vectorOptions
-                };
-
-                // Save the result as TIFF
-                image.Save(outputPath, tiffOptions);
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                psdImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -57,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to preserve the editability of text from a Photoshop PSD that contains embedded EMF captions while converting the file to a high‑resolution TIFF for archival or printing, they can use this code to rasterize the EMF text as vector shapes.
- * 2. When an automated workflow must generate print‑ready TIFF files from PSD assets that include vector‑based annotations stored as EMF, this snippet ensures the annotations are rendered accurately as scalable shapes.
- * 3. When a .NET application processes user‑uploaded PSD designs and must output a TIFF that complies with a publishing system’s requirement for vector‑based text rendering, the code provides the necessary conversion.
- * 4. When a batch‑processing tool needs to convert a library of PSD files with embedded EMF logos into TIFFs while maintaining crisp text edges and avoiding anti‑aliasing artifacts, this example shows how to configure the rasterization options.
- * 5. When integrating Aspose.Imaging into a C# service that generates searchable PDFs from PSD sources, converting the PSD to TIFF with vectorized EMF text first ensures the text can later be extracted reliably.
+ * 1. When a graphics pipeline needs to preserve editable vector text from a Photoshop PSD that contains embedded EMF objects while delivering a high‑resolution TIFF for printing, a developer can load the PSD, convert the EMF text to vector shapes, and save the result as a TIFF using Aspose.Imaging for .NET.
+ * 2. When an archival system requires converting legacy Photoshop files with embedded Windows Metafile (EMF) annotations into a lossless TIFF format that retains the original vector information for future editing, the code can be used to perform the conversion in C#.
+ * 3. When a web service must generate printable TIFF previews from user‑uploaded PSD files that include EMF‑based captions, the developer can employ this routine to extract the vector text, rasterize it correctly, and output a TIFF suitable for PDF generation.
+ * 4. When a batch‑processing job needs to automate the transformation of multiple PSD assets containing EMF text layers into TIFF files for a publishing workflow, the Aspose.Imaging API enables loading each PSD, converting the EMF objects to vector shapes, and saving them as TIFFs in a single C# loop.
+ * 5. When a desktop application has to validate that embedded EMF text in a Photoshop document is correctly rendered before sending the image to a commercial printer that only accepts TIFF files, the developer can use this code to load the PSD, convert the EMF text to vector shapes, and export a TIFF for visual inspection.
  */
