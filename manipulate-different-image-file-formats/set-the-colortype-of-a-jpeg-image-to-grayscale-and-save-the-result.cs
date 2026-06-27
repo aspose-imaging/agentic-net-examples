@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
+        string inputPath = @"c:\temp\sample.bmp";
+        string outputPath = @"c:\temp\sample.grayscale.jpg";
 
         try
         {
@@ -24,18 +24,16 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Configure JPEG save options with Grayscale color mode
+            JpegOptions saveOptions = new JpegOptions
+            {
+                ColorType = JpegCompressionColorMode.Grayscale
+            };
+
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG save options with Grayscale color type
-                var saveOptions = new JpegOptions
-                {
-                    ColorType = JpegCompressionColorMode.Grayscale,
-                    // Optional: use an 8‑bit grayscale palette to reduce size
-                    Palette = ColorPaletteHelper.Create8BitGrayscale(false)
-                };
-
-                // Save the image as a grayscale JPEG
+                // Save the image as JPEG using the configured options
                 image.Save(outputPath, saveOptions);
             }
         }
@@ -48,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate lightweight thumbnail previews for product photos by converting color JPEGs to 8‑bit grayscale to reduce bandwidth.
- * 2. When a medical imaging system must store scanned X‑ray images as grayscale JPEGs to comply with DICOM‑like requirements while using C# and Aspose.Imaging.
- * 3. When an archival tool processes legacy color photographs and saves them as grayscale JPEGs to preserve visual detail while minimizing file size.
- * 4. When a batch‑processing script converts color scanned documents into grayscale JPEGs for OCR preprocessing in a .NET workflow.
- * 5. When a mobile app backend generates grayscale JPEG avatars from user‑uploaded color images to maintain a consistent visual style across the platform.
+ * 1. When a developer needs to convert a high‑resolution BMP scan of a document into a smaller grayscale JPEG for faster web loading and reduced storage.
+ * 2. When an application must generate printable black‑and‑white thumbnails from color images to meet PDF/A compliance requirements.
+ * 3. When a photo‑processing service wants to strip color information from user‑uploaded pictures to create uniform grayscale assets for a gallery.
+ * 4. When a batch‑processing script has to prepare medical imaging files in JPEG format with Grayscale color mode for compatibility with legacy diagnostic software.
+ * 5. When a C# desktop tool must ensure that archived screenshots are saved as grayscale JPEGs to minimize file size while preserving visual detail.
  */
