@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
 
@@ -10,58 +9,47 @@ class Program
     {
         try
         {
-            string inputDirectory = "InputImages";
-            string outputKmlPath = "output.kml";
+            string inputPath = "input.jpg";
+            string outputPath = "output.kml";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputKmlPath));
-
-            // Verify input directory exists; create if missing
-            if (!Directory.Exists(inputDirectory))
+            if (!File.Exists(inputPath))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add JPEG files and rerun.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            List<string> kmlLines = new List<string>();
-            kmlLines.Add(@"<?xml version=""1.0"" encoding=""UTF-8""?>");
-            kmlLines.Add(@"<kml xmlns=""http://www.opengis.net/kml/2.2"">");
-            kmlLines.Add(@"<Document>");
-            kmlLines.Add(@"<name>Image Locations</name>");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            foreach (string filePath in Directory.GetFiles(inputDirectory, "*.jpg"))
+            using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                // Validate each file path
-                if (!File.Exists(filePath))
+                var exif = image.ExifData;
+                if (exif == null)
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    Console.Error.WriteLine("No EXIF data found.");
                     return;
                 }
 
-                using (JpegImage image = (JpegImage)Image.Load(filePath))
+                var latitude = exif.GPSLatitude;
+                var longitude = exif.GPSLongitude;
+
+                if (latitude == null || longitude == null)
                 {
-                    var exif = image.ExifData as Aspose.Imaging.Exif.JpegExifData;
-                    if (exif != null && exif.GPSLatitude != null && exif.GPSLongitude != null)
-                    {
-                        string latitude = exif.GPSLatitude.ToString();
-                        string longitude = exif.GPSLongitude.ToString();
-
-                        // Simple KML placemark
-                        kmlLines.Add(@"<Placemark>");
-                        kmlLines.Add($@"  <name>{Path.GetFileName(filePath)}</name>");
-                        kmlLines.Add(@"  <Point>");
-                        kmlLines.Add($@"    <coordinates>{longitude},{latitude},0</coordinates>");
-                        kmlLines.Add(@"  </Point>");
-                        kmlLines.Add(@"</Placemark>");
-                    }
+                    Console.Error.WriteLine("GPS latitude or longitude not found in EXIF data.");
+                    return;
                 }
+
+                string kmlContent = $"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                                    $"<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n" +
+                                    $"  <Document>\n" +
+                                    $"    <Placemark>\n" +
+                                    $"      <name>{Path.GetFileNameWithoutExtension(inputPath)}</name>\n" +
+                                    $"      <Point><coordinates>{longitude},{latitude},0</coordinates></Point>\n" +
+                                    $"    </Placemark>\n" +
+                                    $"  </Document>\n" +
+                                    $"</kml>";
+
+                File.WriteAllText(outputPath, kmlContent);
             }
-
-            kmlLines.Add(@"</Document>");
-            kmlLines.Add(@"</kml>");
-
-            File.WriteAllLines(outputKmlPath, kmlLines);
         }
         catch (Exception ex)
         {
@@ -72,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a real‑estate application needs to plot property photos on a Google Earth map, a developer can use Aspose.Imaging for .NET to read GPSLatitude and GPSLongitude EXIF tags from JPEG images and generate a KML file for visualizing the locations.
- * 2. When a field‑service company wants to create a route map of completed site visits, a C# program can extract the GPS coordinates stored in JPEG EXIF data and output a KML document that can be opened in GIS tools.
- * 3. When a travel blog wants to embed an interactive map showing where each travel photo was taken, the developer can read the JPEG EXIF GPS tags with Aspose.Imaging and produce a KML file for use in Google Maps or Earth.
- * 4. When a drone‑photography workflow requires batch processing of aerial JPEGs to produce a geospatial overlay, the code can read the EXIF GPSLatitude/GPSLongitude values and write them as placemarks in a KML file.
- * 5. When a wildlife‑research project needs to catalog camera‑trap images by location, a C# solution can pull the GPS metadata from each JPEG and generate a KML file that researchers can load into mapping software for analysis.
+ * 1. When a travel‑blogger wants to automatically plot photos taken on a road trip onto Google Earth, they can use this C# code with Aspose.Imaging to read JPEG EXIF GPS tags and create a KML file for mapping.
+ * 2. When a real‑estate company needs to generate a location‑aware property catalog, developers can extract latitude and longitude from property‑photo JPEGs and produce KML placemarks for each image.
+ * 3. When a wildlife researcher collects camera‑trap images and wants to visualize animal sightings on a map, the code reads the GPS EXIF data from each JPEG and writes a KML file that can be opened in GIS tools.
+ * 4. When a municipal GIS team receives field‑survey photos and must convert the embedded GPS coordinates into a standard KML layer, this Aspose.Imaging‑based C# snippet automates the extraction and KML generation.
+ * 5. When an e‑commerce platform wants to display where product photos were taken, developers can use the example to pull GPSLatitude and GPSLongitude from JPEG EXIF metadata and generate a KML file for interactive map integration.
  */
