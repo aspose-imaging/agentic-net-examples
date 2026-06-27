@@ -2,46 +2,34 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.bmp";
+        string outputPath = "output.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.bmp";
-            string outputPath = "output.bmp";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
-                // Create a 7x7 blur box kernel
-                double[,] kernel = ConvolutionFilter.GetBlurBox(7);
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions();
+                blurOptions.Size = 7;
+                blurOptions.Sigma = 2.0;
 
-                // Prepare filter options with the custom kernel
-                var filterOptions = new ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, blurOptions);
 
-                // Apply the blur filter to the entire image
-                raster.Filter(raster.Bounds, filterOptions);
-
-                // Save the processed image as BMP
                 raster.Save(outputPath, new BmpOptions());
             }
         }
@@ -54,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce noise in scanned BMP documents by applying a stronger 7x7 blur box filter instead of the default 3x3 kernel.
- * 2. When creating a preprocessing step in a C# image‑processing pipeline that smooths BMP textures before edge detection or OCR.
- * 3. When building a desktop application that lets users import legacy BMP graphics and automatically soften harsh pixelation with a larger convolution kernel.
- * 4. When generating test images for performance benchmarking of BMP compression algorithms, requiring a consistent 7x7 blur to simulate real‑world smoothing.
- * 5. When integrating Aspose.Imaging into a batch job that processes a folder of BMP files, applying a 7x7 blur box to improve visual quality for web publishing.
+ * 1. When preparing scanned BMP documents for OCR, a developer may increase the Gaussian blur kernel to 7x7 to reduce noise and improve text recognition.
+ * 2. When generating thumbnail previews of BMP screenshots, a developer can apply a larger 7x7 blur kernel to smooth edges and create a consistent visual style.
+ * 3. When preprocessing BMP images for a machine‑learning pipeline that requires low‑frequency features, a developer may use a 7x7 Gaussian blur to suppress fine details.
+ * 4. When creating background textures from BMP photos for a game UI, a developer might enlarge the blur kernel to 7x7 to produce a softer, less distracting backdrop.
+ * 5. When sanitizing user‑uploaded BMP files to obscure sensitive details, a developer can apply a 7x7 Gaussian blur to ensure stronger smoothing before storage.
  */
