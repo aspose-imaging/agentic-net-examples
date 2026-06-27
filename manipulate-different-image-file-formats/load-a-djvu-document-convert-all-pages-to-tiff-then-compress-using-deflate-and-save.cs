@@ -2,49 +2,36 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.djvu";
-        string outputPath = "output.tif";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists (handles null or empty directory)
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (!string.IsNullOrWhiteSpace(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
-
         try
         {
-            // Open the DjVu file stream
-            using (Stream stream = File.OpenRead(inputPath))
+            string inputPath = "Input\\sample.djvu";
+            if (!File.Exists(inputPath))
             {
-                // Load DjVu image
-                using (DjvuImage djvuImage = new DjvuImage(stream))
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            {
+                int pageNumber = 1;
+                foreach (Image page in djvuImage.Pages)
                 {
-                    // Configure TIFF save options with Deflate compression
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    tiffOptions.Compression = TiffCompressions.Deflate;
+                    string outputPath = $"Output\\page_{pageNumber}.tif";
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Export all pages using DjvuMultiPageOptions
-                    tiffOptions.MultiPageOptions = new DjvuMultiPageOptions();
+                    using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffDeflateRgb))
+                    {
+                        page.Save(outputPath, tiffOptions);
+                    }
 
-                    // Save the DjVu document as a multi-page TIFF
-                    djvuImage.Save(outputPath, tiffOptions);
+                    pageNumber++;
                 }
             }
         }
@@ -57,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive scanned DjVu documents as a single multi‑page TIFF with lossless Deflate compression for long‑term storage.
- * 2. When an application must convert a DjVu e‑book into TIFF images to enable printing or OCR processing on Windows using C#.
- * 3. When a workflow requires batch conversion of all DjVu pages into one compressed TIFF file to reduce file count and simplify distribution to users with only TIFF viewers.
- * 4. When a developer wants to integrate DjVu‑to‑TIFF conversion into a .NET service that validates input files, creates missing output directories, and applies Deflate compression to minimize bandwidth.
- * 5. When a document management system needs to ingest DjVu files and store them as compressed multi‑page TIFFs to meet archival standards that mandate the TIFF format.
+ * 1. When a developer needs to archive scanned documents originally stored as DjVu files by converting each page to lossless TIFF with Deflate compression for long‑term storage.
+ * 2. When a digital library system must provide TIFF downloads of DjVu manuscripts to users who require a widely supported format for printing or further processing.
+ * 3. When an image‑processing pipeline has to extract individual pages from a multi‑page DjVu file and save them as compressed TIFF files for use in OCR engines.
+ * 4. When a medical records application must transform DjVu‑based patient charts into TIFF images with Deflate compression to meet regulatory file‑format standards.
+ * 5. When a batch‑conversion utility is required to read DjVu documents, convert each page to TIFF, and compress them to reduce disk space while preserving image quality.
  */
