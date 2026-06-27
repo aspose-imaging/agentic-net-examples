@@ -11,42 +11,39 @@ class Program
         try
         {
             // Hard‑coded input and output file paths
-            string inputPath = @"C:\Temp\input.emf";
-            string outputPath = @"C:\Temp\output.pdf";
+            string inputPath = @"C:\Images\input.emf";
+            string outputPath = @"C:\Images\output.pdf";
 
-            // Verify that the input file exists
+            // Verify that the source EMF file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure the output directory exists (creates it if missing)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image
+            // Load the EMF vector image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare vector rasterization options for EMF
-                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                // Configure rasterization options for high‑resolution rendering
+                var rasterOptions = new EmfRasterizationOptions
                 {
-                    // Use the original image size as page size
-                    PageSize = image.Size,
-                    // High‑resolution rendering (e.g., 300 DPI)
-                    // The DPI can be set via ResolutionSettings if needed
-                    // Here we rely on default high quality rendering
+                    PageSize = image.Size,   // Preserve original page size
+                    BorderX = 0,
+                    BorderY = 0
+                    // Additional high‑resolution settings can be added here if needed
                 };
 
-                // Configure PDF export options
-                PdfOptions pdfOptions = new PdfOptions
+                // Set up PDF export options, linking the rasterization options
+                var pdfOptions = new PdfOptions
                 {
-                    // Assign the rasterization options so fonts are embedded
                     VectorRasterizationOptions = rasterOptions,
-                    // Optional: set PDF page size to match the EMF size
-                    PageSize = image.Size
+                    UseOriginalImageResolution = true   // Preserve original DPI
                 };
 
-                // Save the image as a PDF
+                // Save the EMF as a PDF with embedded fonts
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -59,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a Windows desktop application needs to generate printable reports from vector‑based EMF charts and ensure the PDF output retains crisp lines and embedded fonts for accurate printing.
- * 2. When a document management system must archive legacy EMF diagrams as high‑resolution PDF files so they can be viewed on any platform without losing vector quality.
- * 3. When a batch‑processing service converts a folder of engineering schematics stored as EMF into PDF for distribution to clients, preserving exact dimensions and font rendering.
- * 4. When a web API receives user‑uploaded EMF logos and returns a PDF version with embedded fonts to meet corporate branding guidelines for marketing collateral.
- * 5. When an automated testing tool validates that EMF graphics are correctly rendered in PDF by rasterizing them at 300 DPI with Aspose.Imaging to compare visual fidelity across formats.
+ * 1. When a Windows desktop application needs to export user‑drawn EMF diagrams to high‑resolution PDF reports with embedded fonts for printing.
+ * 2. When a batch‑processing service must convert a library of legacy EMF icons into PDF assets while preserving original DPI and page size.
+ * 3. When an automated document generation pipeline has to embed vector graphics from EMF files into PDF invoices to ensure crisp rendering on any device.
+ * 4. When a GIS or CAD system exports map or schematic drawings stored as EMF to PDF for regulatory submission, requiring exact dimensions and font embedding.
+ * 5. When a cloud‑based API receives EMF files from clients and needs to return PDF files that retain vector quality and embedded fonts for archival purposes.
  */
