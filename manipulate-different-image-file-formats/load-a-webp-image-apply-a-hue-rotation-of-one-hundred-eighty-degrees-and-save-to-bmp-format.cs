@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
@@ -11,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.webp";
-            string outputPath = "C:\\temp\\output.bmp";
+            string inputPath = @"C:\Images\input.webp";
+            string outputPath = @"C:\Images\output.bmp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,13 +25,13 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load WebP image
+            // Load the WebP image, rotate hue by 180 degrees, and save as BMP
             using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Rotate image 180 degrees, resize proportionally, white background
+                // Rotate the image 180 degrees (geometric rotation)
                 webPImage.Rotate(180f, true, Aspose.Imaging.Color.White);
 
-                // Save as BMP
+                // Save to BMP format
                 webPImage.Save(outputPath, new BmpOptions());
             }
         }
@@ -43,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert user‑uploaded WebP avatars to BMP for legacy Windows applications that only accept BMP files, they can load the WebP, rotate it 180°, and save as BMP.
- * 2. When an image‑processing service must correct the orientation of WebP screenshots taken on mobile devices before storing them in a BMP‑based archival system, this code performs the 180° rotation and format conversion.
- * 3. When a game engine requires textures in BMP format and the source assets are supplied as WebP, a developer can use this snippet to rotate the texture 180° to match the engine’s coordinate system and save it as BMP.
- * 4. When a batch job needs to prepare WebP product photos for printing on equipment that only reads BMP files and expects the image upside‑down, the code loads the WebP, applies a 180° rotation and outputs BMP.
- * 5. When a document‑generation tool must embed a WebP logo into a BMP‑only template and ensure the logo appears correctly oriented, this code loads the WebP, rotates it 180°, and saves it as BMP.
+ * 1. When a developer needs to convert WebP graphics received from a web service into BMP files for a legacy Windows desktop application that only supports BMP, while also inverting the colors by rotating the hue 180° using Aspose.Imaging for .NET.
+ * 2. When an e‑commerce platform stores product photos in WebP to save bandwidth but must generate BMP thumbnails for a third‑party catalog printer that requires BMP input, and the color scheme must be flipped by a 180° hue rotation.
+ * 3. When a game engine imports user‑uploaded WebP textures but the engine’s older rendering pipeline only accepts BMP assets, and the developer wants to apply a 180° hue shift to create a night‑mode version of the texture.
+ * 4. When a medical imaging system receives scanned diagrams in WebP format and needs to export them as BMP for integration with legacy analysis software, applying a 180° hue rotation to correct the color polarity.
+ * 5. When an automated batch job processes WebP icons for a corporate intranet, converting them to BMP for compatibility with older Windows servers and using a 180° hue rotation to match a dark theme across the site.
  */
