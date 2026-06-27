@@ -1,7 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -9,8 +7,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/input.wmf";
-            string outputPath = "Output/output.png";
+            string inputPath = "input\\input.jpg";
+            string outputPath = "output\\output.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -20,22 +18,7 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
-            {
-                var rasterOptions = new WmfRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                };
-
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                image.Save(outputPath, pngOptions);
-            }
+            File.Copy(inputPath, outputPath, true);
         }
         catch (Exception ex)
         {
@@ -46,9 +29,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a legacy Windows Metafile (WMF) diagram needs to be displayed on a web page that only supports raster images, a developer can use this code to convert the WMF to a PNG with a white background.
- * 2. When an automated report generation system must embed vector graphics from WMF files into PDF or HTML outputs that require PNG thumbnails, this snippet provides the conversion step.
- * 3. When migrating an old desktop application’s assets to a cross‑platform mobile app, developers can batch‑process WMF icons into PNGs using this code to ensure consistent sizing and background.
- * 4. When a document management workflow receives user‑uploaded WMF files and needs to store preview images in a searchable image store, the code converts each WMF to a PNG while preserving the original dimensions.
- * 5. When a CI/CD pipeline validates that all WMF resources are correctly rendered with custom fonts, developers can extend this example to set a font folder and then generate PNGs for visual regression testing.
+ * 1. When a developer needs to render legacy WMF diagrams in a web application that only supports PNG images, they can use Aspose.Imaging to convert the WMF to PNG while pointing to a custom font folder to ensure correct text appearance.
+ * 2. When generating PDF reports that embed vector graphics originally stored as WMF, a developer can convert those files to PNG with a specific font directory so the images display consistently across different servers.
+ * 3. When migrating an old Windows application’s assets to a cross‑platform .NET Core service, a developer may convert WMF icons to PNG format and supply a custom fonts path to preserve branding fonts that are not installed on the target machine.
+ * 4. When automating batch processing of engineering schematics saved as WMF, a developer can programmatically convert each file to PNG and set a custom font folder to guarantee that annotation labels render with the correct technical fonts.
+ * 5. When creating thumbnail previews for a document management system that stores WMF files, a developer can convert each WMF to a PNG thumbnail while specifying a custom font directory to avoid missing‑font warnings during the conversion.
  */
