@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -9,30 +10,35 @@ class Program
     {
         try
         {
-            // Hardcoded list of TIFF files to process
-            var inputPaths = new[]
+            // Hardcoded list of TIFF files to convert
+            string[] inputPaths = new string[]
             {
-                @"C:\Images\sample1.tif",
-                @"C:\Images\sample2.tif",
-                @"C:\Images\sample3.tif"
+                @"C:\Images\Input\image1.tif",
+                @"C:\Images\Input\image2.tif",
+                @"C:\Images\Input\image3.tif"
             };
 
-            foreach (var inputPath in inputPaths)
+            // Output directory (hardcoded)
+            string outputDirectory = @"C:\Images\Output";
+
+            foreach (string inputPath in inputPaths)
             {
-                // Verify that the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine the output WebP file path (same folder, .webp extension)
-                var outputPath = Path.ChangeExtension(inputPath, ".webp");
+                // Determine output path with .webp extension
+                string outputPath = Path.Combine(
+                    outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".webp");
 
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the TIFF image and save it as WebP with quality 90
+                // Load the TIFF image and save as WebP with quality 90
                 using (Image image = Image.Load(inputPath))
                 {
                     var webpOptions = new WebPOptions
@@ -43,12 +49,11 @@ class Program
                 }
 
                 // Log successful conversion
-                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+                Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
             }
         }
         catch (Exception ex)
         {
-            // Catch any unexpected errors and report them
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -56,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce storage size of scanned documents by converting a batch of high‑resolution TIFF files to WebP with 90 % quality for faster web delivery.
- * 2. When an e‑commerce platform must automatically generate lightweight product images from legacy TIFF assets for mobile browsers using C# and Aspose.Imaging.
- * 3. When a digital archiving system requires a scheduled job that validates TIFF file existence, converts them to WebP, and logs each conversion for audit trails.
- * 4. When a photo‑editing application wants to provide users a one‑click export of selected TIFF photos to WebP format while preserving visual fidelity with a quality setting of 90.
- * 5. When a content management workflow needs to batch‑process incoming TIFF uploads, create WebP versions in the same folder, and output conversion results to the console for monitoring.
+ * 1. When a developer needs to migrate a legacy archive of TIFF photographs to the modern WebP format to reduce storage size while preserving visual quality at 90% using C# and Aspose.Imaging.
+ * 2. When an e‑commerce platform must batch‑convert product catalog TIFF images to WebP for faster web page loading and SEO‑friendly image delivery.
+ * 3. When a medical imaging application requires automated conversion of scanned TIFF radiology images to WebP for efficient transmission to remote diagnostic tools.
+ * 4. When a content management system needs to process a predefined list of TIFF assets nightly, saving them as WebP with consistent quality and logging each conversion result.
+ * 5. When a developer builds a Windows service that validates the existence of TIFF files, creates the output directory, and converts them to WebP with Aspose.Imaging while handling errors gracefully.
  */
