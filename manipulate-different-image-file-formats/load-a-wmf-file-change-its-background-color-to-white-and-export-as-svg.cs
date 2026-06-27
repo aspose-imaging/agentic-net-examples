@@ -8,47 +8,50 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.wmf";
-        string outputPath = @"C:\temp\output.svg";
-
+        // Wrap the whole process in a try/catch to handle unexpected errors gracefully.
         try
         {
-            // Verify that the input file exists
+            // Hard‑coded input and output file paths.
+            string inputPath = @"C:\Images\sample.wmf";
+            string outputPath = @"C:\Images\sample.svg";
+
+            // Verify that the input file exists.
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure the output directory exists (creates it if necessary).
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the WMF image
+            // Load the WMF image.
             using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
             {
-                // Prepare SVG save options
-                SvgOptions saveOptions = new SvgOptions
+                // Prepare SVG save options.
+                SvgOptions svgOptions = new SvgOptions
                 {
-                    TextAsShapes = true // optional: render text as shapes
+                    // Render text as shapes (optional, can be set to false if not needed).
+                    TextAsShapes = true
                 };
 
-                // Configure rasterization options with a white background
-                WmfRasterizationOptions rasterizationOptions = new WmfRasterizationOptions
+                // Configure rasterization options, setting the background to white.
+                WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
                 {
                     BackgroundColor = Aspose.Imaging.Color.White,
                     PageSize = wmfImage.Size,
                     RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
                 };
 
-                saveOptions.VectorRasterizationOptions = rasterizationOptions;
+                svgOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the image as SVG
-                wmfImage.Save(outputPath, saveOptions);
+                // Save the image as SVG.
+                wmfImage.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
         {
+            // Output any error message without crashing the program.
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -56,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy Windows Metafile (WMF) graphics to scalable SVG for web display while ensuring a white background for consistent rendering across browsers.
- * 2. When integrating a document processing pipeline that extracts vector icons from WMF files and saves them as SVG with a uniform white canvas to match corporate branding guidelines.
- * 3. When building a C# desktop application that allows users to import WMF diagrams, automatically replace any transparent or colored background with white, and export them as SVG for inclusion in reports.
- * 4. When migrating an old Windows‑based catalog that stores product illustrations as WMF and requires batch conversion to SVG with a white background to improve print quality and scalability.
- * 5. When creating an automated CI/CD step that validates WMF assets, rasterizes them with a white background, and generates SVG files for responsive UI components in a .NET web project.
+ * 1. When a developer needs to convert legacy Windows Metafile (WMF) diagrams into scalable SVG graphics for responsive web pages while ensuring a white background for consistent rendering.
+ * 2. When an application must batch‑process corporate flowcharts stored as WMF files, replace their transparent or colored backgrounds with white, and generate SVG files for inclusion in PDF reports.
+ * 3. When a document‑management system imports user‑uploaded WMF logos and needs to standardize them by setting a white canvas before exporting to SVG for high‑resolution printing.
+ * 4. When a GIS tool reads WMF map overlays, applies a white background to eliminate visual artifacts, and saves them as SVG to overlay on modern web‑based maps.
+ * 5. When an e‑learning platform converts WMF‑based instructional illustrations to SVG for interactive HTML5 content, ensuring the background matches the page’s white theme.
  */
