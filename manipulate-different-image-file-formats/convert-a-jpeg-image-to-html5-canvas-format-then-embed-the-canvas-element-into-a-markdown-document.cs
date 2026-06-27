@@ -9,8 +9,8 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.jpg";
+            // Hardcoded paths
+            string inputPath = @"C:\temp\sample.jpg";
             string canvasPath = @"C:\temp\output\canvas.html";
             string markdownPath = @"C:\temp\output\image.md";
 
@@ -25,24 +25,24 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(canvasPath));
             Directory.CreateDirectory(Path.GetDirectoryName(markdownPath));
 
-            // Load the JPEG image
+            // Load JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                // Save the image as an HTML5 Canvas snippet (only the <canvas> tag)
+                // Save as HTML5 Canvas (only the canvas tag)
                 var canvasOptions = new Html5CanvasOptions
                 {
-                    FullHtmlPage = false // export only the canvas element
+                    FullHtmlPage = false
                 };
                 image.Save(canvasPath, canvasOptions);
             }
 
-            // Read the generated canvas HTML
-            string canvasHtml = File.ReadAllText(canvasPath);
+            // Read the generated canvas tag
+            string canvasTag = File.ReadAllText(canvasPath);
 
-            // Build markdown content embedding the canvas HTML
-            string markdownContent = "# Image Canvas\n\n```html\n" + canvasHtml + "\n```\n";
+            // Create markdown content embedding the canvas
+            string markdownContent = $"# Image Canvas{Environment.NewLine}{Environment.NewLine}{canvasTag}{Environment.NewLine}";
 
-            // Write the markdown file
+            // Write markdown file
             File.WriteAllText(markdownPath, markdownContent);
         }
         catch (Exception ex)
@@ -54,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to display a JPEG image in a static site generator that renders Markdown, they can convert the image to an HTML5 canvas snippet and embed it directly in the Markdown file.
- * 2. When creating technical documentation that requires interactive image rendering without external image files, this code lets you embed the JPEG as a canvas element inside the Markdown, ensuring the document is self‑contained.
- * 3. When building a blog post that uses Markdown and needs to avoid mixed content warnings, converting the JPEG to a canvas and inserting it into the Markdown guarantees the image is rendered via HTML5 canvas rather than a separate image URL.
- * 4. When generating automated reports in C# where images must be displayed in environments that only support HTML fragments inside Markdown, the code transforms the JPEG into a canvas tag and inserts it into the report’s Markdown section.
- * 5. When preparing e‑learning material that combines Markdown lessons with visual examples, developers can use this code to embed JPEG graphics as HTML5 canvas elements, allowing the content to be viewed consistently across browsers without loading external image files.
+ * 1. When a developer needs to create a self‑contained Markdown document that displays a JPEG image without relying on external image files, they can convert the JPEG to an HTML5 canvas tag and embed it directly.
+ * 2. When building a static site generator that outputs Markdown, this code allows the conversion of source JPEG assets into canvas elements so the images render consistently in browsers supporting HTML5 canvas.
+ * 3. When automating report generation that embeds JPEG charts into Markdown files, converting the JPEG to a canvas tag prevents broken image links in environments that strip external resources.
+ * 4. When a Markdown previewer only supports HTML5 canvas for image rendering, a developer can use this snippet to transform a JPEG into a canvas element and insert it into the Markdown content.
+ * 5. When preparing e‑learning material where Markdown is exported to PDF and the exporter only renders canvas elements, this code enables embedding JPEG illustrations as HTML5 canvas for accurate visual representation.
  */
