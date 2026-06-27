@@ -1,24 +1,22 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input\\sample.jpg";
-            string outputPath = "Output\\mask.bin";
+            string inputPath = @"C:\temp\sourceImage.png";
+            string outputPath = @"C:\temp\mask.bin";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,46 +26,35 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load source image as RasterImage
+            // Load source image
             using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                // Prepare masking export options (required by the API)
-                var exportOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new StreamSource(new MemoryStream())
-                };
-
-                // Configure masking options (GraphCut segmentation)
+                // Prepare masking options (no export needed for mask extraction)
                 var maskingOptions = new MaskingOptions
                 {
-                    Method = SegmentationMethod.GraphCut,
-                    Decompose = false,
-                    Args = new AutoMaskingArgs(),
+                    Method = SegmentationMethod.KMeans, // any method; using KMeans as example
+                    Decompose = true,
+                    Args = new AutoMaskingArgs { NumberOfObjects = 2 },
                     BackgroundReplacementColor = Color.Transparent,
-                    ExportOptions = exportOptions
+                    ExportOptions = new PngOptions() // placeholder; not used for mask extraction
                 };
 
                 // Perform masking
                 var masking = new ImageMasking(sourceImage);
                 using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
                 {
-                    // Retrieve the binary mask (foreground)
+                    // Obtain the mask of the first foreground object (index 1)
                     using (RasterImage maskImage = maskingResult[1].GetMask())
                     {
-                        int width = maskImage.Width;
-                        int height = maskImage.Height;
-                        int[] argbPixels = new int[width * height];
-                        maskImage.SaveArgb32Pixels(new Rectangle(0, 0, width, height), argbPixels);
-
-                        // Write pixel data to binary file
-                        using (var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                        using (var binaryWriter = new BinaryWriter(fileStream))
+                        // Save mask to a memory stream in BMP format (raw binary representation)
+                        using (var ms = new MemoryStream())
                         {
-                            foreach (int pixel in argbPixels)
-                            {
-                                binaryWriter.Write(pixel);
-                            }
+                            var bmpOptions = new BmpOptions();
+                            maskImage.Save(ms, bmpOptions);
+                            byte[] maskBytes = ms.ToArray();
+
+                            // Write binary data to the output file
+                            File.WriteAllBytes(outputPath, maskBytes);
                         }
                     }
                 }
@@ -79,3 +66,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to feed a binary mask into a machine‑learning model that expects raw pixel data for object segmentation, they can use this code to generate a .bin file from a PNG source.
+ * 2. When integrating a .NET imaging pipeline with a third‑party vision SDK that only accepts binary mask files for defect detection on manufactured parts, the code exports the mask in BMP binary format for seamless import.
+ * 3. When building an augmented‑reality app that overlays virtual objects only on foreground regions, the binary mask saved by this code can be transmitted to the AR engine that reads raw mask bytes.
+ * 4. When performing batch processing of satellite imagery where a GIS system requires binary masks to delineate land‑cover classes, developers can automate mask extraction and save each mask as a .bin file.
+ * 5. When creating a custom OCR pre‑processing step that isolates text regions and supplies the mask to a separate C++ OCR library that reads binary mask files, this code provides the necessary .bin output.
+ */
