@@ -10,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.png";
-            string outputPath = @"C:\temp\output.png";
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,12 +26,13 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage to access filtering methods
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Background removal step would go here (if needed)
-                // e.g., rasterImage.RemoveBackground(); // placeholder for actual implementation
+                // TODO: Perform background removal here if required
+                // Example placeholder: rasterImage.RemoveBackground();
 
-                // Apply median filter with kernel size 3 to the entire image
+                // Apply median filter with kernel size 3
                 rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(3));
 
                 // Save the processed image
@@ -44,3 +45,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to clean up scanned PNG documents by removing the background and smoothing speckles before performing OCR.
+ * 2. When an e‑commerce platform automatically processes product PNG images to eliminate noisy edges after background removal for a consistent catalog appearance.
+ * 3. When a medical imaging application must reduce salt‑and‑pepper noise in PNG microscopy images after isolating the specimen from the slide background.
+ * 4. When a game developer prepares PNG sprite sheets, stripping the background and applying a 3×3 median filter to ensure smooth animation frames.
+ * 5. When a photo‑editing tool offers a batch operation that loads PNG files, removes the background, and applies a median filter with kernel size 3 to improve visual quality before saving.
+ */
