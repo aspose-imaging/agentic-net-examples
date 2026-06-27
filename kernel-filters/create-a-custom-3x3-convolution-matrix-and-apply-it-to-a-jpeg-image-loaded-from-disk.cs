@@ -1,8 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -24,10 +23,11 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the JPEG image
-            using (Image image = Image.Load(inputPath))
+            // Load JPEG image
+            using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
+                // Cast to RasterImage for filtering
+                RasterImage raster = (RasterImage)image;
 
                 // Define a custom 3x3 convolution kernel (sharpen example)
                 double[,] kernel = new double[3, 3]
@@ -37,13 +37,14 @@ class Program
                     { 0, -1, 0 }
                 };
 
-                // Apply the custom convolution filter to the entire image
-                var filterOptions = new ConvolutionFilterOptions(kernel);
-                rasterImage.Filter(rasterImage.Bounds, filterOptions);
+                // Create filter options with the custom kernel
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
 
-                // Save the processed image as JPEG
-                var jpegOptions = new JpegOptions();
-                rasterImage.Save(outputPath, jpegOptions);
+                // Apply the filter to the entire image
+                raster.Filter(raster.Bounds, filterOptions);
+
+                // Save the processed image
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -55,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to sharpen a product photo before uploading it to an e‑commerce site, they can load the JPEG, apply a custom 3×3 convolution matrix with Aspose.Imaging for .NET, and save the enhanced image.
- * 2. When an automated image‑processing pipeline must improve the clarity of scanned documents stored as JPEG files, the code can be used to apply a sharpen filter via a custom convolution kernel in C#.
- * 3. When a desktop photo‑editing application wants to give users a “sharpen” button that processes the currently opened JPEG using a 3×3 convolution filter from Aspose.Imaging, this snippet provides the core logic.
- * 4. When a batch job needs to preprocess a folder of JPEG images by applying the same custom convolution matrix to each file for better edge definition, the example shows how to load, filter, and save each image in C#.
- * 5. When a developer is building a diagnostic tool that visualizes the effect of different convolution kernels on JPEG images, they can use this code to apply a 3×3 sharpen kernel and compare the output.
+ * 1. When a developer needs to programmatically sharpen a JPEG photograph in a .NET application using Aspose.Imaging’s custom 3×3 convolution filter.
+ * 2. When an e‑commerce platform wants to automatically enhance uploaded product JPEG images by applying a custom kernel to improve visual clarity.
+ * 3. When a desktop utility must batch‑process scanned JPEG documents to emphasize edges before OCR, using C# and Aspose.Imaging’s raster filter.
+ * 4. When a server‑side service stores user‑generated JPEGs and requires on‑the‑fly image sharpening to reduce blur without relying on external tools.
+ * 5. When a scientific imaging application needs to apply a custom convolution matrix to JPEG microscopy images for feature detection within a .NET workflow.
  */
