@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"c:\temp\sample.png";
-            string outputPath = @"c:\temp\sample_compressed.png";
+            string inputPath = @"C:\temp\input.png";
+            string outputPath = @"C:\temp\output_compressed.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -28,30 +28,25 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Configure PNG options for lossless compression
-                var pngOptions = new PngOptions
+                PngOptions options = new PngOptions
                 {
-                    // Maximum compression level (0-9)
-                    CompressionLevel = 9,
-                    // Adaptive filter gives best compression for lossless PNG
-                    FilterType = PngFilterType.Adaptive,
-                    // Preserve progressive loading (optional)
-                    Progressive = true,
-                    // Keep truecolor with alpha (preserve original color depth)
-                    ColorType = PngColorType.TruecolorWithAlpha,
+                    CompressionLevel = 9,                         // Max compression
+                    FilterType = PngFilterType.Adaptive,          // Best filter selection
+                    Progressive = true,                           // Enable progressive loading
+                    ColorType = PngColorType.TruecolorWithAlpha,  // Preserve alpha channel
                     BitDepth = 8
                 };
 
                 // Save the compressed PNG
-                image.Save(outputPath, pngOptions);
+                image.Save(outputPath, options);
             }
 
             // Compare file sizes
             long originalSize = new FileInfo(inputPath).Length;
             long compressedSize = new FileInfo(outputPath).Length;
 
-            Console.WriteLine($"Original size: {originalSize} bytes");
+            Console.WriteLine($"Original size:   {originalSize} bytes");
             Console.WriteLine($"Compressed size: {compressedSize} bytes");
-            Console.WriteLine($"Size reduction: {originalSize - compressedSize} bytes");
         }
         catch (Exception ex)
         {
@@ -62,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to serve PNG assets faster by reducing bandwidth, a developer can use this code to apply lossless compression and verify the size reduction.
- * 2. When an automated build pipeline processes UI screenshots, the code can compress each PNG and compare original versus compressed sizes to ensure storage efficiency.
- * 3. When a mobile app synchronizes image resources over limited data connections, developers can run this routine to shrink PNG files without losing quality and log the savings.
- * 4. When a digital asset management system archives large collections of PNG graphics, the snippet helps compress each file and record the size improvement for reporting.
- * 5. When a developer creates a batch‑processing tool to optimize PNGs before uploading to a CDN, this example demonstrates how to set the highest compression level, adaptive filter, and verify the resulting file size.
+ * 1. When a developer needs to reduce the storage footprint of high‑resolution PNG assets for a web application while preserving exact visual quality, they can use this code to apply lossless compression and verify the size reduction.
+ * 2. When preparing PNG graphics for mobile apps where bandwidth is limited, the snippet lets a C# developer compress the images with Aspose.Imaging and compare original versus compressed file sizes to ensure optimal download performance.
+ * 3. When archiving scanned documents as PNG files, a developer can employ this example to apply adaptive filtering and maximum lossless compression, then check the saved file size to confirm storage savings.
+ * 4. When generating PNG thumbnails in an automated pipeline, the code enables a .NET developer to compress each thumbnail without losing alpha transparency and to log the size difference for quality‑control reporting.
+ * 5. When troubleshooting image‑processing workflows that unexpectedly inflate PNG sizes, a programmer can run this sample to compress the output, compare file sizes, and pinpoint whether the compression settings are effective.
  */
