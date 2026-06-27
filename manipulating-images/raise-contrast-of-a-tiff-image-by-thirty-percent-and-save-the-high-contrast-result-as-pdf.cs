@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.tif";
-            string outputPath = @"C:\Images\sample_high_contrast.pdf";
+            string inputPath = @"C:\temp\sample.tif";
+            string outputPath = @"C:\temp\sample_contrast.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -34,8 +34,7 @@ class Program
                 tiffImage.AdjustContrast(30f);
 
                 // Save the result as PDF
-                PdfOptions pdfOptions = new PdfOptions();
-                tiffImage.Save(outputPath, pdfOptions);
+                tiffImage.Save(outputPath, new PdfOptions());
             }
         }
         catch (Exception ex)
@@ -44,3 +43,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to improve the readability of scanned documents by increasing the contrast of a TIFF file before converting it to a searchable PDF.
+ * 2. When an application must automatically enhance medical imaging scans stored as TIFFs by raising contrast 30% and deliver the results as PDF reports.
+ * 3. When a batch processing tool for archival records requires adjusting the contrast of legacy TIFF images and saving them as PDF for easier distribution.
+ * 4. When a web service generates high‑contrast PDF previews of uploaded TIFF photographs for e‑commerce product listings.
+ * 5. When a document management system needs to normalize the visual quality of incoming TIFF invoices by applying a 30% contrast boost and storing them as PDFs.
+ */
