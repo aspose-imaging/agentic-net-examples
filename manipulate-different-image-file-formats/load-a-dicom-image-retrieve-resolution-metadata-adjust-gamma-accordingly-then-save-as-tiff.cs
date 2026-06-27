@@ -2,7 +2,9 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
@@ -20,35 +22,26 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
             // Load the DICOM image
-            using (Aspose.Imaging.FileFormats.Dicom.DicomImage dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
+                // Cast to DicomImage for DICOM-specific operations
+                DicomImage dicomImage = (DicomImage)image;
+
                 // Retrieve resolution metadata
-                double horizontalDpi = dicomImage.HorizontalResolution;
-                double verticalDpi = dicomImage.VerticalResolution;
+                double horizontalResolution = dicomImage.HorizontalResolution;
+                double verticalResolution = dicomImage.VerticalResolution;
 
-                // Determine gamma based on resolution (example logic)
-                float gamma = 1.0f;
-                if (horizontalDpi > 300 || verticalDpi > 300)
-                {
-                    gamma = 1.2f;
-                }
-                else if (horizontalDpi < 150 && verticalDpi < 150)
-                {
-                    gamma = 0.8f;
-                }
-
-                // Apply gamma correction
+                // Adjust gamma based on resolution (example logic)
+                float gamma = (horizontalResolution > 300 || verticalResolution > 300) ? 1.2f : 1.0f;
                 dicomImage.AdjustGamma(gamma);
 
-                // Prepare TIFF save options
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
                 // Save the adjusted image as TIFF
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 dicomImage.Save(outputPath, tiffOptions);
             }
         }
@@ -61,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application must convert high‑resolution DICOM scans to TIFF files while automatically adjusting gamma based on the image’s DPI to improve visual contrast.
- * 2. When a radiology workflow needs to batch‑process DICOM X‑ray images, read their horizontal and vertical resolution, apply resolution‑dependent gamma correction, and store the results as lossless TIFF for archival.
- * 3. When a C# developer is building a diagnostic viewer that imports DICOM images, extracts resolution metadata, tweaks brightness via gamma adjustment, and exports the adjusted image to a widely supported TIFF format.
- * 4. When a healthcare data integration service has to ensure that low‑resolution DICOM ultrasound frames are brightened (gamma < 1) and high‑resolution CT slices are slightly darkened (gamma > 1) before saving them as TIFF for downstream analysis.
- * 5. When an imaging pipeline requires reading DICOM files, determining if the DPI exceeds 300 dpi, applying a 1.2 gamma boost, otherwise reducing gamma for low‑dpi images, and then saving the processed output as a TIFF using Aspose.Imaging for .NET.
+ * 1. A radiology software developer needs to convert high‑resolution DICOM scans to TIFF for archival systems while automatically brightening images with a gamma boost when the scan resolution exceeds 300 dpi.
+ * 2. A medical research application must load DICOM ultrasound files, detect their pixel density, apply a resolution‑based gamma correction, and export the results as TIFF for compatibility with image analysis tools.
+ * 3. An electronic health record (EHR) integration service uses this code to ingest DICOM X‑ray images, adjust their visual contrast according to horizontal or vertical resolution, and store the processed images as TIFF for display on web portals.
+ * 4. A telemedicine platform processes incoming DICOM CT images, applies a gamma tweak when the images are captured at high resolution, and saves them as TIFF to ensure consistent rendering across different client devices.
+ * 5. A healthcare data migration script reads DICOM mammography files, evaluates their DPI, performs a conditional gamma adjustment, and writes the output as TIFF to meet the target system’s file‑format requirements.
  */
