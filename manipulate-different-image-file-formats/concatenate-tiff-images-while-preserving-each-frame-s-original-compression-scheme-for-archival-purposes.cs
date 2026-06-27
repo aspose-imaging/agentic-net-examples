@@ -9,9 +9,13 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string[] inputPaths = { "input1.tif", "input2.tif", "input3.tif" };
-            string outputPath = "output.tif";
+            // Hard‑coded input TIFF files (replace with actual paths as needed)
+            string[] inputPaths = new[]
+            {
+                @"C:\Images\input1.tif",
+                @"C:\Images\input2.tif",
+                @"C:\Images\input3.tif"
+            };
 
             // Verify each input file exists
             foreach (var inputPath in inputPaths)
@@ -23,32 +27,27 @@ class Program
                 }
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Hard‑coded output path
+            string outputPath = @"C:\Images\output_combined.tif";
 
-            TiffImage outputImage = null;
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            foreach (var inputPath in inputPaths)
+            // Load the first TIFF image to serve as the base container
+            using (TiffImage combinedImage = (TiffImage)Image.Load(inputPaths[0]))
             {
-                // Load source TIFF image
-                var srcImage = (TiffImage)Image.Load(inputPath);
+                // Append frames from the remaining TIFF images
+                for (int i = 1; i < inputPaths.Length; i++)
+                {
+                    using (TiffImage nextImage = (TiffImage)Image.Load(inputPaths[i]))
+                    {
+                        combinedImage.Add(nextImage); // Preserves each frame's original compression
+                    }
+                }
 
-                if (outputImage == null)
-                {
-                    // First image becomes the base output image
-                    outputImage = srcImage;
-                }
-                else
-                {
-                    // Append all frames from the current source image
-                    outputImage.Add(srcImage);
-                    srcImage.Dispose(); // Dispose source after its frames are added
-                }
+                // Save the combined multi‑page TIFF
+                combinedImage.Save(outputPath);
             }
-
-            // Save the concatenated TIFF preserving original compression per frame
-            outputImage.Save(outputPath);
-            outputImage.Dispose();
         }
         catch (Exception ex)
         {
@@ -59,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to merge multiple scanned legal documents stored as separate TIFF files into a single multi‑page TIFF for long‑term archiving while keeping each page’s original LZW or CCITT compression.
- * 2. When a medical imaging system must combine individual DICOM‑exported TIFF slices into one multi‑frame TIFF for patient records without re‑encoding the lossless compression of each slice.
- * 3. When a GIS application has several satellite image tiles saved as compressed TIFFs and wants to create a single archival TIFF that preserves the original JPEG or LZW compression of each tile.
- * 4. When a publishing workflow requires concatenating high‑resolution magazine page scans, each saved with different TIFF compression, into one searchable PDF‑compatible TIFF while retaining the original compression to reduce storage costs.
- * 5. When an e‑discovery tool needs to bundle thousands of court‑submitted TIFF exhibits into a single archive file, ensuring each exhibit’s original compression (e.g., CCITT Group 4) remains unchanged for evidentiary integrity.
+ * 1. When a developer needs to merge scanned document pages stored as separate multi‑page TIFF files into a single archival TIFF while keeping each page’s original LZW or CCITT compression.
+ * 2. When a medical imaging system must combine individual DICOM‑derived TIFF slices into one multi‑frame TIFF for long‑term storage without re‑encoding the lossless compression.
+ * 3. When a legal firm wants to concatenate multiple case‑file TIFFs into a single searchable bundle while preserving the original G4 fax compression for compliance.
+ * 4. When a GIS application aggregates raster map tiles saved as TIFFs into a single multi‑page TIFF for offline archiving, ensuring each tile’s original Deflate compression remains unchanged.
+ * 5. When a publishing workflow combines separate high‑resolution TIFF artwork layers into a single multi‑page TIFF for archival printing, retaining each layer’s original compression to minimize file size.
  */
