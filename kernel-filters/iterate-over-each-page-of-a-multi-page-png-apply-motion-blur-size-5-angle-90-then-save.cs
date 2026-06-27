@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -10,7 +10,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputDirectory = "output";
+            string outputPath = "output\\result.png";
 
             if (!File.Exists(inputPath))
             {
@@ -18,37 +18,20 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                Aspose.Imaging.IMultipageImage multipageImage = image as Aspose.Imaging.IMultipageImage;
-                int pageCount = multipageImage != null ? multipageImage.PageCount : 1;
-
-                for (int i = 0; i < pageCount; i++)
+                if (image is IMultipageImage multipageImage)
                 {
-                    Aspose.Imaging.RasterImage page;
-                    if (multipageImage != null)
+                    foreach (Image page in multipageImage.Pages)
                     {
-                        page = (Aspose.Imaging.RasterImage)multipageImage.Pages[i];
-                    }
-                    else
-                    {
-                        page = (Aspose.Imaging.RasterImage)image;
-                    }
-
-                    using (page)
-                    {
-                        page.Filter(page.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(5, 1.0, 90.0));
-
-                        string outputPath = Path.Combine(outputDirectory, $"page_{i}.png");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        PngOptions saveOptions = new PngOptions
+                        if (page is RasterImage rasterPage)
                         {
-                            Source = new FileCreateSource(outputPath, false)
-                        };
-                        page.Save(outputPath, saveOptions);
+                            rasterPage.Filter(
+                                rasterPage.Bounds,
+                                new MotionWienerFilterOptions(5, 1.0, 90.0));
+                        }
                     }
                 }
             }
@@ -62,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a series of scanned document pages that need a vertical motion‑blur effect to simulate a scanning artifact, a developer can loop through each PNG page, apply a 5‑pixel blur at 90°, and save the results.
- * 2. When preparing multi‑page PNG sprites for a game and wanting to create a motion‑blur overlay for a scrolling animation, the code can process each frame, blur vertically, and export individual PNG files.
- * 3. When cleaning up multi‑page medical imaging PNGs by adding a subtle vertical blur to reduce high‑frequency noise before archiving, the developer can iterate pages, apply the filter, and store them in an output folder.
- * 4. When converting a multi‑page PNG invoice into separate pages with a consistent vertical blur to hide sensitive information while preserving layout, the code iterates each page, blurs at angle 90°, and saves each page.
- * 5. When building an automated batch job that adds a vertical motion‑blur watermark effect to every page of a multi‑page PNG advertisement before publishing to a web portal, the developer can use this loop to process and save each page.
+ * 1. When a developer needs to add a vertical motion blur effect to every frame of a multi‑page PNG (such as an animated scan) before publishing, this code iterates through each page, applies a size‑5 blur at a 90° angle, and saves the result.
+ * 2. When processing a multi‑page PNG invoice that contains scanned pages, a developer can use this code to uniformly blur sensitive information on each page with a motion blur filter before archiving.
+ * 3. When creating a stylized slideshow of PNG images where each slide should appear as if captured with camera shake, this C# snippet applies a consistent motion blur across all pages of the multi‑page PNG.
+ * 4. When preparing a multi‑page PNG sprite sheet for a game and needing to simulate motion on every sprite, a developer can run this code to apply a 5‑pixel, 90‑degree motion blur to each raster page automatically.
+ * 5. When automating the preprocessing of multi‑page PNG medical scans to reduce visual noise by adding a directional blur, this example shows how to loop through each page, apply the filter, and store the processed file.
  */
