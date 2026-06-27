@@ -9,21 +9,21 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.eps";
-        string outputPath = @"C:\Images\output.tif";
+        string inputPath = "sample.eps";
+        string outputPath = "sample.tif";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
         try
         {
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the EPS image
             using (Image image = Image.Load(inputPath))
             {
@@ -36,6 +36,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -43,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop needs to convert vector EPS artwork into high‑resolution TIFF files for raster‑based prepress workflows.
- * 2. When a document management system must ingest legacy EPS diagrams and store them as TIFF images for archival and thumbnail generation.
- * 3. When a web application generates PDF reports that include EPS logos and must provide a TIFF version for compatibility with older imaging APIs.
- * 4. When an automated batch process validates that EPS files exist, creates missing output folders, and converts them to TIFF for downstream OCR processing.
- * 5. When a C# desktop utility needs to read an EPS file from disk, apply Aspose.Imaging’s TiffOptions, and save it as a TIFF to be used in GIS or CAD software that only accepts raster formats.
+ * 1. When a developer needs to convert vector EPS artwork received from a designer into a raster TIFF file for high‑resolution printing workflows using C# and Aspose.Imaging.
+ * 2. When an automated document processing service must ingest EPS logos and store them as TIFF images for archival in a Windows file system.
+ * 3. When a batch job in a .NET application has to validate that an EPS file exists, then transform it to a TIFF format for compatibility with legacy imaging software.
+ * 4. When a web API written in C# must accept uploaded EPS files, convert them on the server side to TIFF, and return the rasterized result to the client.
+ * 5. When a desktop utility needs to ensure the output directory exists, load an EPS file, and save it as a TIFF using Aspose.Imaging’s TiffOptions for further image analysis.
  */
