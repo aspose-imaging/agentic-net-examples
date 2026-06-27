@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -27,42 +28,22 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to RasterImage for filtering
-                RasterImage raster = (RasterImage)image;
+                RasterImage rasterImage = (RasterImage)image;
 
                 // Retrieve the built‑in 3×3 sharpen kernel
                 double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Sharpen3x3;
 
-                // Compute the sum of kernel elements
-                double sum = 0;
-                for (int i = 0; i < kernel.GetLength(0); i++)
-                {
-                    for (int j = 0; j < kernel.GetLength(1); j++)
-                    {
-                        sum += kernel[i, j];
-                    }
-                }
+                // Create convolution filter options with the kernel
+                var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
 
-                // Normalize the kernel to preserve overall brightness
-                double[,] normalizedKernel = new double[3, 3];
-                for (int i = 0; i < 3; i++)
-                {
-                    for (int j = 0; j < 3; j++)
-                    {
-                        normalizedKernel[i, j] = kernel[i, j] / sum;
-                    }
-                }
+                // Apply the sharpen filter to the entire image
+                rasterImage.Filter(rasterImage.Bounds, convOptions);
 
-                // Create convolution filter options with the normalized kernel
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(normalizedKernel);
+                // Prepare JPEG save options
+                JpegOptions jpegOptions = new JpegOptions();
 
-                // Apply the filter to the entire image
-                raster.Filter(raster.Bounds, filterOptions);
-
-                // Prepare JPEG save options (default settings)
-                var jpegOptions = new JpegOptions();
-
-                // Save the processed image as JPEG
-                raster.Save(outputPath, jpegOptions);
+                // Save the processed image
+                rasterImage.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -74,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# developer needs to sharpen JPEG product photos for an e‑commerce website while keeping the overall brightness consistent, they can use Aspose.Imaging to normalize a 3×3 sharpening kernel before applying the convolution filter.
- * 2. When processing scanned documents in a .NET application, normalizing the sharpen kernel ensures text edges become clearer without over‑exposing the page background.
- * 3. When creating a batch image‑enhancement tool that prepares travel blog pictures for fast web loading, the code preserves color balance by adjusting the kernel sum before sharpening each JPEG.
- * 4. When integrating image‑processing into a medical imaging workflow, normalizing the 3×3 sharpen filter prevents artificial brightness shifts that could affect diagnostic interpretation of JPEG scans.
- * 5. When building a desktop photo‑editing utility that offers a “quick sharpen” feature, developers can rely on this Aspose.Imaging snippet to apply a brightness‑preserving convolution filter to any loaded JPEG image.
+ * 1. When a developer needs to enhance the detail of a JPEG photo in a C# application without changing its overall brightness, they can apply the normalized 3×3 sharpening kernel using Aspose.Imaging’s convolution filter.
+ * 2. When building an automated image‑processing pipeline that receives raw JPEG uploads and must improve sharpness before storage, this code demonstrates how to load, filter, and save the image with Aspose.Imaging in .NET.
+ * 3. When creating a desktop utility that lets users batch‑sharpen JPEG images while preserving exposure levels, the example shows the necessary file‑validation, raster conversion, and JPEG save options.
+ * 4. When integrating image enhancement into a web service that processes user‑submitted JPEGs, developers can use this snippet to apply a 3×3 sharpen filter and return the processed image without altering its brightness.
+ * 5. When troubleshooting visual quality issues in a C# photo‑editing tool, the code provides a clear way to test the effect of a normalized sharpening kernel on JPEG files using Aspose.Imaging’s filter API.
  */
