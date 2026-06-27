@@ -7,39 +7,34 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input path
+        string inputPath = "sample.cmx";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.cmx";
-            string outputPath = "report.txt";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load CMX image
             using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
             {
-                using (StreamWriter writer = new StreamWriter(outputPath))
+                // Enumerate pages
+                Console.WriteLine($"CMX file loaded. Page count: {cmx.Pages.Length}");
+                int pageIndex = 0;
+                foreach (var page in cmx.Pages)
                 {
-                    int pageIndex = 0;
-                    foreach (var page in cmx.Pages)
+                    var cmxPage = page as CmxImagePage;
+                    if (cmxPage != null)
                     {
-                        writer.WriteLine($"Page {pageIndex}:");
-                        writer.WriteLine($"  Width: {page.Width}");
-                        writer.WriteLine($"  Height: {page.Height}");
-                        writer.WriteLine($"  Bounds: {page.Bounds}");
-                        pageIndex++;
+                        Console.WriteLine($"Page {pageIndex}: Size = {cmxPage.Size.Width}x{cmxPage.Size.Height}");
+                        // Additional analysis of drawing objects could be added here if API provides access.
                     }
+                    pageIndex++;
                 }
-
-                Console.WriteLine($"Enumeration completed. Report saved to {outputPath}");
             }
         }
         catch (Exception ex)
@@ -51,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract page dimensions and bounds from a CMX vector file to generate a printable layout report for a CAD workflow.
- * 2. When an application must validate that all pages in a multi‑page CMX drawing meet specific size constraints before converting them to PDF.
- * 3. When a quality‑control tool has to enumerate each page of a CMX file to log its width, height, and bounding box for downstream analytics.
- * 4. When a migration script needs to read CMX files and produce a plain‑text inventory of page metadata to assist in bulk asset management.
- * 5. When a C# service uses Aspose.Imaging to load CMX drawings and create a summary file that can be indexed by search engines for quick document discovery.
+ * 1. When a developer needs to validate that a CMX vector file from a legacy CAD system was successfully imported before converting it to another format.
+ * 2. When an application must generate a report of page dimensions for each page in a multi‑page CMX drawing to ensure they meet printing specifications.
+ * 3. When a quality‑control tool has to verify the existence of a CMX file and enumerate its pages to detect missing or corrupted pages before batch processing.
+ * 4. When a migration script extracts metadata such as page count and size from CMX files to populate a database that tracks vector assets for a design repository.
+ * 5. When a developer builds a preview feature that reads a CMX file, lists its pages, and displays basic information to help users choose which page to render in a .NET imaging application.
  */
