@@ -2,44 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.tif";
-        string outputPath = @"C:\Images\output.pdf";
-
-        // Ensure the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = @"C:\temp\input.tif";
+        string outputPath = @"C:\temp\output.pdf";
 
         try
         {
-            // Load the TIFF image
-            using (Image image = Image.Load(inputPath))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Prepare PDF save options with vector rasterization settings
-                var pdfOptions = new PdfOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the TIFF image
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            {
+                // Prepare PDF save options with anti-aliasing
+                PdfOptions pdfOptions = new PdfOptions
                 {
                     VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        // Set smoothing mode to AntiAlias for smoother edges
-                        SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
-                        // Use the original image size as the page size
-                        PageSize = image.Size
+                        SmoothingMode = SmoothingMode.AntiAlias
                     }
                 };
 
-                // Save the image as PDF using the configured options
-                image.Save(outputPath, pdfOptions);
+                // Save the image as PDF
+                tiffImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -51,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When converting high‑resolution scanned TIFF blueprints to PDF for client delivery, a developer can enable AntiAlias smoothing to ensure the linework appears crisp and free of jagged edges.
- * 2. When generating PDF reports from TIFF medical images, setting SmoothingMode to AntiAlias helps preserve subtle details while producing print‑ready documents.
- * 3. When automating the archival of TIFF photographs into searchable PDF portfolios, applying AntiAlias smoothing improves visual quality for end‑users viewing the files on screen.
- * 4. When building a C# web service that transforms user‑uploaded TIFF invoices into PDF receipts, using AntiAlias smoothing prevents rough text and logo edges in the final PDF.
- * 5. When creating batch scripts to convert TIFF engineering diagrams to PDF for inclusion in technical manuals, enabling AntiAlias smoothing ensures the diagrams retain smooth contours and professional appearance.
+ * 1. When a developer needs to convert a high‑resolution TIFF scan of architectural drawings into a PDF and wants smooth vector edges for professional printing, they set SmoothingMode.AntiAlias before saving.
+ * 2. When a medical imaging application must export DICOM‑derived TIFF images to PDF reports with clear, anti‑aliased contours for accurate diagnosis review, this code ensures the rendering quality.
+ * 3. When a document management system processes scanned TIFF invoices and generates PDF files that must display crisp text and graphics on screen, applying anti‑aliasing prevents jagged edges.
+ * 4. When a GIS tool transforms large geospatial TIFF raster layers into PDF maps and requires smooth boundary lines for better visual analysis, the smoothing mode is enabled during rasterization.
+ * 5. When a publishing workflow converts multi‑page TIFF artwork into PDF brochures and needs the final PDF to retain smooth curves and fine details for digital distribution, the code sets the anti‑aliasing option before saving.
  */
