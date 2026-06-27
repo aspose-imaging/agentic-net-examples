@@ -1,28 +1,30 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"c:\temp\output.webp";
+            // Output file path (hardcoded)
+            string outputPath = "C:\\temp\\output.webp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create default WebP options
+            // Default WebP options
             WebPOptions options = new WebPOptions();
 
-            // Create a new blank WebP image with dimensions 800x600
-            using (WebPImage webPImage = new WebPImage(800, 600, options))
+            // Create a blank WebP image with the specified dimensions
+            int width = 800;
+            int height = 600;
+            using (WebPImage webPImage = new WebPImage(width, height, options))
             {
-                // Save the image using default options
+                // Save the image to the specified path
                 webPImage.Save(outputPath);
             }
         }
@@ -35,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a blank 800 × 600 WebP image as a placeholder for a web page layout using Aspose.Imaging in C#.
- * 2. When an application must create a new WebP canvas with default compression settings before programmatically drawing graphics or adding text.
- * 3. When a batch job requires initializing a WebP file with default options to later merge or overlay other images in an automated workflow.
- * 4. When a service dynamically produces 800 × 600 WebP thumbnails for responsive design without loading existing source files.
- * 5. When a test suite needs a predictable 800 × 600 WebP image to validate image‑processing pipelines and file‑handling code.
+ * 1. When generating placeholder images for a web page layout, a developer can use this code to create an 800 × 600 WebP file with default compression settings.
+ * 2. When a batch job needs to produce blank canvas files for later drawing operations, the snippet creates a WebP image of the required size using Aspose.Imaging in C#.
+ * 3. When automating the creation of default thumbnails for a media library, this example quickly generates an 800 × 600 WebP image that can be filled with content later.
+ * 4. When testing image upload pipelines that require a WebP file, the code provides a simple way to generate a compliant 800 × 600 image without external assets.
+ * 5. When initializing a new project’s asset folder with sample WebP files, a developer can run this C# program to create an 800 × 600 image using the library’s default WebPOptions.
  */
