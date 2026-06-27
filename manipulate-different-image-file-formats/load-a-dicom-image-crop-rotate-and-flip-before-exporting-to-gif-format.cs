@@ -1,9 +1,7 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -23,29 +21,24 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load DICOM image
-            using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
+            using (DicomImage dicomImage = (DicomImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                // Crop the image (example: remove 10 pixels from each side)
-                int cropMargin = 10;
-                int cropX = cropMargin;
-                int cropY = cropMargin;
-                int cropWidth = dicom.Width - 2 * cropMargin;
-                int cropHeight = dicom.Height - 2 * cropMargin;
-                var cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
-                dicom.Crop(cropRect);
+                // Crop the image (example rectangle)
+                Aspose.Imaging.Rectangle cropRect = new Aspose.Imaging.Rectangle(50, 50, 200, 200);
+                dicomImage.Crop(cropRect);
 
-                // Rotate the image 45 degrees clockwise, resizing proportionally, with gray background
-                dicom.Rotate(45f, true, Color.Gray);
+                // Rotate the image 45 degrees clockwise, resize proportionally, gray background
+                dicomImage.Rotate(45f, true, Aspose.Imaging.Color.Gray);
 
                 // Flip the image horizontally
-                dicom.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                dicomImage.RotateFlip(Aspose.Imaging.RotateFlipType.RotateNoneFlipX);
 
                 // Save the processed image as GIF
-                var gifOptions = new GifOptions();
-                dicom.Save(outputPath, gifOptions);
+                GifOptions gifOptions = new GifOptions();
+                dicomImage.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -57,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a healthcare application needs to extract a region of interest from a DICOM radiology scan, rotate it for better orientation, flip it for left‑right correction, and then deliver the result as a lightweight GIF for web preview.
- * 2. When a research tool must batch‑process DICOM images, trim unwanted borders, apply a 45‑degree rotation with a gray background, and save the transformed frames as GIF animations for inclusion in presentations.
- * 3. When a telemedicine portal wants to convert patient DICOM files into GIF thumbnails that are cropped, rotated, and horizontally flipped to match the viewer’s perspective before embedding them in HTML reports.
- * 4. When a diagnostic imaging system requires on‑the‑fly manipulation of a DICOM image—cropping excess padding, rotating to align anatomical landmarks, flipping horizontally, and exporting to GIF for quick sharing with colleagues.
- * 5. When a medical imaging workflow automates the preparation of DICOM scans for machine‑learning pipelines, performing crop, rotate, and flip operations in C# and saving the pre‑processed output as GIF for visualization and debugging.
+ * 1. When a radiology software needs to extract a region of interest from a DICOM X‑ray, rotate it for proper orientation, flip it for left‑right correction, and then embed the result as a lightweight GIF in a web‑based patient report.
+ * 2. When a medical research tool must batch‑process DICOM MRI slices, crop out the brain area, apply a 45° rotation to align with a standard view, and save the images as GIFs for inclusion in presentations.
+ * 3. When a hospital’s PACS integration requires converting DICOM ultrasound frames into animated GIFs after cropping and flipping, enabling quick preview on mobile devices.
+ * 4. When a C# desktop application for dental imaging needs to isolate a tooth region from a DICOM scan, rotate it to match the chart orientation, flip it horizontally, and export to GIF for patient education material.
+ * 5. When a tele‑medicine portal wants to display processed DICOM CT images with custom cropping and orientation adjustments as GIF thumbnails to reduce bandwidth while preserving visual details.
  */
