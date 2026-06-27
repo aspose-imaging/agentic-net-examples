@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -10,15 +10,12 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
+            // Hardcoded input and output folders
             string inputFolder = @"C:\Images\Input";
             string outputFolder = @"C:\Images\Output";
 
-            // Ensure output folder exists
-            Directory.CreateDirectory(outputFolder);
-
             // Get all SVG files in the input folder
-            string[] svgFiles = Directory.GetFiles(inputFolder, "*.svg", SearchOption.TopDirectoryOnly);
+            string[] svgFiles = Directory.GetFiles(inputFolder, "*.svg");
 
             foreach (string inputPath in svgFiles)
             {
@@ -26,44 +23,45 @@ class Program
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Determine output file path (same name with .png extension)
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
+                // Prepare output path (same name with suffix, saved as PNG)
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + "_blurred.png");
 
-                // Ensure the directory for the output file exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the SVG image
                 using (Image svgImage = Image.Load(inputPath))
                 {
-                    // Set up rasterization options for PNG output
+                    // Set up rasterization options to convert SVG to raster format
                     var rasterizationOptions = new SvgRasterizationOptions
                     {
                         PageSize = svgImage.Size
                     };
+
+                    // PNG save options with the rasterization settings
                     var pngOptions = new PngOptions
                     {
                         VectorRasterizationOptions = rasterizationOptions
                     };
 
-                    // Rasterize SVG to a memory stream
+                    // Rasterize SVG into a memory stream
                     using (var rasterStream = new MemoryStream())
                     {
                         svgImage.Save(rasterStream, pngOptions);
-                        rasterStream.Position = 0;
+                        rasterStream.Position = 0; // Reset stream position for reading
 
-                        // Load the rasterized image as a RasterImage
+                        // Load the rasterized image
                         using (Image rasterImage = Image.Load(rasterStream))
                         {
                             // Cast to RasterImage to apply filters
                             var raster = (RasterImage)rasterImage;
 
                             // Apply Gaussian blur with size 5 and sigma 2.0
-                            var blurOptions = new GaussianBlurFilterOptions(5, 2.0);
-                            raster.Filter(raster.Bounds, blurOptions);
+                            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 2.0));
 
                             // Save the processed image
                             raster.Save(outputPath);
@@ -81,9 +79,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web designer needs to batch‑process a folder of SVG icons into blurred PNG thumbnails for faster page loading and consistent visual style.
- * 2. When an e‑commerce platform automatically applies a soft‑focus Gaussian blur (sigma 2.0) to product vector graphics before exporting them as PNGs for mobile app displays.
- * 3. When a marketing team creates blurred PNG versions of SVG logos to use as subtle background watermarks in email newsletters and promotional PDFs.
- * 4. When a GIS application converts detailed SVG map layers into raster PNG tiles with a Gaussian blur to enhance visual hierarchy in multi‑layer map visualizations.
- * 5. When a game developer preprocesses SVG assets by applying a sigma 2.0 Gaussian blur and exporting them as PNG sprites for real‑time rendering pipelines.
+ * 1. When a web designer wants to automatically generate blurred PNG thumbnails from a folder of SVG icons for use as placeholders during page load.
+ * 2. When a marketing team needs to create a set of low‑resolution, blurred background images from vector logos stored as SVG files to protect brand assets while still showing visual cues.
+ * 3. When a mobile app developer must preprocess SVG assets into blurred PNG sprites to improve rendering performance and achieve a consistent soft‑focus UI effect across devices.
+ * 4. When an e‑learning platform batch‑converts SVG diagrams into blurred PNG overlays for watermarking purposes without altering the original vector files.
+ * 5. When a data‑visualization pipeline requires applying a Gaussian blur with sigma 2.0 to every SVG chart exported to PNG to create a stylized report ready for print.
  */
