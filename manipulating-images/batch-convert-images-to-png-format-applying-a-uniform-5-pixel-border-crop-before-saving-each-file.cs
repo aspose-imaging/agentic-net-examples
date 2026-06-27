@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,14 +9,17 @@ class Program
     {
         try
         {
-            // Hardcoded input file paths
-            string[] inputPaths = new string[]
-            {
-                @"c:\input\image1.jpg",
-                @"c:\input\image2.bmp"
-            };
+            // Hardcoded input and output directories
+            string inputDir = @"c:\input\";
+            string outputDir = @"c:\output\";
 
-            foreach (var inputPath in inputPaths)
+            // Ensure output directory exists (in case it is used directly)
+            Directory.CreateDirectory(outputDir);
+
+            // Get all files in the input directory
+            string[] inputFiles = Directory.GetFiles(inputDir);
+
+            foreach (string inputPath in inputFiles)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -26,28 +28,28 @@ class Program
                     return;
                 }
 
-                // Build output path (same name, .png extension, in c:\output)
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-                string outputPath = Path.Combine(@"c:\output", outputFileName);
+                // Determine output file path with .png extension
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png");
 
-                // Ensure output directory exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the source image
+                // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Define a rectangle that crops a 5‑pixel border from each side
+                    // Calculate crop rectangle (5-pixel border on each side)
                     int cropX = 5;
                     int cropY = 5;
-                    int cropWidth = Math.Max(0, image.Width - 10);
-                    int cropHeight = Math.Max(0, image.Height - 10);
-                    var bounds = new Rectangle(cropX, cropY, cropWidth, cropHeight);
+                    int cropWidth = Math.Max(0, image.Width - 2 * cropX);
+                    int cropHeight = Math.Max(0, image.Height - 2 * cropY);
+                    var cropBounds = new Rectangle(cropX, cropY, cropWidth, cropHeight);
 
-                    // PNG save options (default)
+                    // Prepare PNG save options
                     var pngOptions = new PngOptions();
 
-                    // Save the cropped region as PNG
-                    image.Save(outputPath, pngOptions, bounds);
+                    // Save the cropped portion as PNG
+                    image.Save(outputPath, pngOptions, cropBounds);
                 }
             }
         }
@@ -57,3 +59,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch convert a folder of JPEG or BMP files to PNG format while removing a 5‑pixel border from each image for consistent thumbnail generation on a website.
+ * 2. When an application must preprocess scanned documents by cropping the outer margin and saving them as lossless PNGs for archival in a document management system.
+ * 3. When a C# utility is required to prepare a set of product photos for e‑commerce platforms, ensuring all images have a uniform border crop and are stored in PNG to preserve transparency.
+ * 4. When a machine‑learning pipeline demands a clean dataset of PNG images with identical dimensions, achieved by trimming a 5‑pixel edge from each source image during batch conversion.
+ * 5. When a legacy media library needs to be migrated to a modern format, automatically converting assorted image files to PNG while discarding unwanted edge pixels to standardize the visual layout.
+ */
