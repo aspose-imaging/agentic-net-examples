@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\large.tif";
+        string outputDirectory = @"C:\Images\WebP";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\large_input.tif";
-            string outputDirectory = @"C:\Images\WebP_Output";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,33 +21,32 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(outputDirectory);
 
             // Load the multi‑page TIFF image
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Process each page sequentially to keep memory usage low
-                for (int pageIndex = 0; pageIndex < tiffImage.PageCount; pageIndex++)
+                // Enable sequential processing: release resources after each page is handled
+                tiffImage.PageExportingAction = (index, page) =>
                 {
-                    // Retrieve the current page
-                    using (Image page = tiffImage.Pages[pageIndex])
-                    {
-                        // Build the output WebP file path for this page
-                        string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.webp");
-
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the page as WebP using default options
-                        page.Save(outputPath, new WebPOptions());
-
-                        // Explicitly release resources for the page
-                        ((RasterImage)page).Dispose();
-                    }
-
-                    // Force garbage collection to free any lingering memory
+                    // Force garbage collection to keep memory usage low
                     GC.Collect();
+                };
+
+                // Iterate through each page and save it as a separate WebP file
+                for (int i = 0; i < tiffImage.PageCount; i++)
+                {
+                    // Retrieve the current page as an Image
+                    Image page = tiffImage.Pages[i];
+
+                    // Build output file path for this page
+                    string outputPath = Path.Combine(outputDirectory, $"page_{i}.webp");
+
+                    // Ensure the directory for the output file exists (already created above)
+                    // Save the page using WebP format
+                    WebPOptions webpOptions = new WebPOptions(); // default options; customize if needed
+                    page.Save(outputPath, webpOptions);
                 }
             }
         }
@@ -61,8 +60,8 @@ class Program
 /*
  * Real-World Use Cases:
  * 1. When a developer needs to convert each page of a multi‑page TIFF archive into separate WebP files while keeping memory usage low for large images.
- * 2. When an application must batch‑export scanned documents stored as a single TIFF into web‑optimized WebP thumbnails on a server with limited RAM.
- * 3. When a photo‑management tool processes high‑resolution TIFF slides and saves each slide as a WebP image for fast web delivery without loading the entire file into memory.
- * 4. When an automated pipeline extracts individual pages from a multi‑page TIFF invoice and stores them as WebP files for inclusion in a web‑based reporting dashboard.
- * 5. When a cloud service needs to sequentially read a massive TIFF map and generate lightweight WebP tiles for an interactive map viewer while preventing out‑of‑memory errors.
+ * 2. When an application processes high‑resolution scanned documents and must export them to web‑friendly WebP format without loading the entire TIFF into memory.
+ * 3. When a batch image‑conversion service must handle thousands of TIFF pages on a server with limited RAM by using sequential processing and explicit garbage collection.
+ * 4. When a digital archiving workflow requires extracting individual pages from a large TIFF and saving them as compressed WebP thumbnails for fast web preview.
+ * 5. When a C# utility needs to automate the migration of legacy TIFF assets to modern WebP format while ensuring each page is saved independently and resources are released after each export.
  */
