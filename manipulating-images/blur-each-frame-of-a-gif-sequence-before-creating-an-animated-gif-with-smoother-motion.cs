@@ -1,7 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
@@ -9,38 +11,32 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.gif";
-            string outputPath = "output\\blurred.gif";
+            string outputPath = "output.gif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
 
-            // Load the GIF image
             using (Image img = Image.Load(inputPath))
             {
                 GifImage gif = (GifImage)img;
 
-                // Apply Gaussian blur to each frame
                 for (int i = 0; i < gif.PageCount; i++)
                 {
-                    // Set the active frame
-                    gif.ActiveFrame = (Aspose.Imaging.FileFormats.Gif.Blocks.GifFrameBlock)gif.Pages[i];
-
-                    // Apply Gaussian blur filter (radius 5, sigma 4.0)
-                    gif.Filter(gif.Bounds,
-                        new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                    gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
+                    gif.Filter(gif.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
                 }
 
-                // Save the blurred animated GIF
-                gif.Save(outputPath);
+                gif.Save(outputPath, new GifOptions());
             }
         }
         catch (Exception ex)
@@ -52,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating an animated GIF from a series of photos for a website banner, a developer may blur each frame to soften transitions and reduce visual noise.
- * 2. When generating a GIF preview of a video clip in a mobile app, applying a Gaussian blur to each frame can produce smoother motion and hide compression artifacts.
- * 3. When preparing a GIF for social media marketing that contains sensitive background details, a developer can blur each frame to protect privacy while keeping the main subject clear.
- * 4. When converting a high‑resolution screen capture sequence into an animated GIF for documentation, blurring each frame helps lower the file size and creates a more fluid animation.
- * 5. When building an interactive e‑learning module that uses animated GIFs to illustrate concepts, a developer might blur each frame to achieve a subtle motion‑blur effect that guides the learner’s focus.
+ * 1. When creating an animated GIF for a website banner and you want to soften fast‑moving objects to reduce visual strain, you can use this C# code with Aspose.Imaging to apply a Gaussian blur to every frame before saving.
+ * 2. When generating privacy‑preserving GIFs from surveillance footage, developers can blur each frame using Aspose.Imaging’s GaussianBlurFilterOptions to obscure faces while retaining motion.
+ * 3. When preparing a GIF slideshow for a mobile app where smooth transitions are required, applying a blur filter to each frame with Aspose.Imaging helps achieve a more fluid visual effect.
+ * 4. When converting a series of raw images into an animated GIF and need to reduce noise or grain in each frame, the code demonstrates how to load, blur, and save the GIF using C# and Aspose.Imaging.
+ * 5. When building a social‑media sharing tool that automatically adds a subtle motion‑blur effect to user‑uploaded GIFs, this Aspose.Imaging example shows how to process each frame and export the result with GifOptions.
  */
