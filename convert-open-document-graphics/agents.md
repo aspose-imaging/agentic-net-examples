@@ -121,6 +121,107 @@ All tasks passed ✅
 ## Related Categories  
 The Convert Open Document Graphics category complements the **Vector Graphics Conversion** and **Raster Image Processing** sections, where you can find additional examples for handling SVG, EPS, and PDF formats. If you’re working with multi‑page documents, the **Document to Image** category provides guidance on converting PDF or DOCX pages to bitmap images. Together, these categories give a comprehensive toolkit for any .NET developer dealing with diverse image and document workflows.
 
+
+## Developer Q&A
+
+### Q: How to load an ODG file and save it as a PNG image using Image.Save in .NET C#?  
+Use `Image.Load("sample.odg")` to open the ODG and then call `image.Save("output.png", new PngOptions())`. → See: `load-an-odg-file-and-save-it-as-a-png-image-using-image-save.cs`
+
+### Q: How do I convert an ODG file to JPEG with default compression settings in C#?  
+Load the ODG with `Image.Load` and save it using `new JpegOptions()` without modifying any properties. → See: `load-an-odg-file-and-convert-it-to-jpeg-format-with-default-compression-settings.cs`
+
+### Q: How to export an OTG file as a PDF document using default PDF options in .NET?  
+Open the OTG via `Image.Load` and call `image.Save("result.pdf", new PdfOptions())`. → See: `load-an-otg-file-and-save-it-as-a-pdf-document-using-default-pdf-options.cs`
+
+### Q: How do I convert an ODG file to SVG while preserving all vector layers and attributes in C#?  
+Load the ODG with `Image.Load` and save it using `new SvgOptions()` (or `SvgRasterizationOptions`) to retain vector information. → See: `load-odg-and-save-as-svg-while-preserving-all-vector-layers-and-attributes.cs`
+
+### Q: How to apply a median filter to an OTG image before converting and saving it as a BMP in .NET?  
+Create a `MedianFilterOptions` object, assign it to `OtgRasterizationOptions`, and then save the image with `new BmpOptions()`. → See: `apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-bmp.cs`
+
+
+
+### Q: How can I apply a Gaussian blur filter to an ODG image before saving it as a JPEG using Aspose.Imaging in C#?  
+Use `Image.Load` to open the ODG, add a `GaussianBlurFilterOption` to the image’s `FilterOptions`, and then call `image.Save` with `JpegOptions`. → See: `apply-a-gaussian-blur-filter-to-an-odg-image-before-converting-and-saving-as-jpeg.cs`
+
+### Q: How do I set the JPEG output quality to 85 % when converting an ODG file to JPEG with Aspose.Imaging in .NET?  
+Create a `JpegOptions` instance, set its `Quality` property to 85, and pass it to `image.Save`. → See: `convert-an-odg-file-to-jpeg-and-set-the-output-quality-to-85-percent.cs`
+
+### Q: How can I embed XMP metadata into a PDF generated from an ODG file using Aspose.Imaging for .NET?  
+Load the ODG with `Image.Load`, create a `PdfOptions` object, assign the XMP XML string to its `XmpMetadata` property, and save the image as PDF. → See: `convert-an-odg-file-to-pdf-and-embed-xmp-metadata-for-enhanced-document-information.cs`
+
+### Q: How do I define custom DPI and page margins when converting an ODG document to PDF with Aspose.Imaging in C#?  
+Set `PdfOptions.DpiX`/`DpiY` and `PdfOptions.PageMargins` before calling `image.Save` with the `PdfOptions` instance. → See: `convert-an-odg-file-to-pdf-set-custom-dpi-and-define-page-margins-for-layout.cs`
+
+### Q: How can I preserve transparency while converting an OTG file to BMP using Aspose.Imaging in .NET?  
+Load the OTG image, use `BmpOptions` with `ColorType = PngColorType.TruecolorWithAlpha` (or the default preserving alpha), and save the image as BMP. → See: `convert-an-otg-file-to-bmp-while-preserving-transparency-information-in-the-output-image.cs`
+
+### Q: How do I apply a threshold filter to an ODG image before saving it as a BMP using Aspose.Imaging in C#?  
+Use `Image.Load` to open the ODG, call `image.Filter(new ThresholdFilter())`, and then save with `BmpOptions` via `image.Save(outputPath, new BmpOptions())`. → See: `convert-an-odg-file-to-bmp-and-apply-a-threshold-filter-to-create-a-binary-image.cs`
+
+### Q: How can I set the PNG compression level to maximum when converting an ODG file to PNG with Aspose.Imaging for .NET?  
+Create a `PngOptions` object, set `CompressionLevel = PngCompressionLevel.Maximum`, and pass it to `image.Save(outputPath, pngOptions)`. → See: `convert-an-odg-file-to-png-and-set-lossless-compression-level-to-maximum-for-smallest-size.cs`
+
+### Q: How do I preserve original layer names when converting an ODG file to SVG using Aspose.Imaging in C#?  
+Load the ODG with `Image.Load`, configure `SvgOptions` with `KeepLayerNames = true`, and save the image using `image.Save(outputPath, svgOptions)`. → See: `convert-an-odg-file-to-svg-and-preserve-original-layer-names-in-the-output-file.cs`
+
+### Q: How can I add password protection to a PDF generated from an OTG file with Aspose.Imaging for .NET?  
+Load the OTG, create a `PdfOptions` instance, set `Password = "yourPassword"`, and save the document using `image.Save(outputPath, pdfOptions)`. → See: `convert-an-otg-file-to-pdf-and-add-password-protection-to-restrict-access.cs`
+
+### Q: How do I apply a median filter to an OTG image before converting and saving it as JPEG in C# with Aspose.Imaging?  
+After loading the OTG via
+
+### Q: How can I set the radius of a Gaussian blur filter when converting an ODG to JPEG with Aspose.Imaging in C#?  
+Use `GaussianBlurFilterOptions` to specify the `Radius` before calling `image.ApplyFilter` and then save with `Image.Save`. → See: `apply-a-gaussian-blur-filter-to-an-odg-image-before-converting-and-saving-as-jpeg.cs`
+
+### Q: How do I specify the kernel size for a median filter while converting an OTG to JPEG using Aspose.Imaging in C#?  
+Create a `MedianFilterOptions` instance, set its `Size` property, apply it via `image.ApplyFilter`, and then save the image as JPEG. → See: `apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-jpeg.cs`
+
+### Q: How can I set a custom threshold value when converting an ODG to a binary BMP with Aspose.Imaging in C#?  
+Instantiate `ThresholdFilterOptions`, assign the desired `Threshold` value, apply the filter with `image.ApplyFilter`, and save the result as BMP. → See: `convert-an-odg-file-to-bmp-and-apply-a-threshold-filter-to-create-a-binary-image.cs`
+
+### Q: How do I use JpegOptions to define compression quality when saving an ODG as JPEG with Aspose.Imaging in C#?  
+Create a `JpegOptions` object, set its `Quality` property (e.g., 85), and pass it to `image.Save(outputPath, jpegOptions)`. → See: `convert-an-odg-file-to-jpeg-and-set-the-output-quality-to-85-percent.cs`
+
+### Q: How can I add custom XMP metadata fields to a PDF generated from an ODG using Aspose.Imaging in C#?  
+After loading the ODG, create a `PdfOptions` object, populate its `XmpMetadata` dictionary with custom key‑value pairs, and save the PDF with those options. → See: `convert-an-odg-file-to-pdf-and-embed-xmp-metadata-for-enhanced-document-information.cs`
+## Operations Covered
+- Apply Gaussian blur filter to ODG image  
+- Convert ODG image to JPEG format  
+- Apply specific ICC color profile to ODG image  
+- Convert ODG image to PNG format  
+- Preserve transparency when converting ODG to BMP  
+- Convert ODG image to BMP format  
+- Embed XMP metadata while saving ODG as PDF  
+- Convert ODG image to PDF format  
+- Add text watermark overlay to ODG image before PNG export  
+- Convert ODG image to SVG format  
+- Set correct viewbox attribute in exported SVG  
+- Convert OTG image to BMP while preserving transparency  
+
+## Supported Formats
+- **ODG** – source OpenDocument graphics file loaded for processing  
+- **OTG** – alternative OpenDocument graphics file loaded for processing  
+- **JPEG** – target format when saving blurred image  
+- **PNG** – target format for color‑profile and watermark examples  
+- **BMP** – target format for transparency‑preserving conversions  
+- **PDF** – target format for rasterization with XMP metadata embedding  
+- **SVG** – target format for vector export with viewbox handling  
+
+## API Classes Used
+- `Image` — base class that loads any supported image and provides common functionality.  
+- `RasterImage` — derived class that enables raster‑specific operations such as applying filters.  
+- `GaussianBlurFilterOption` — defines parameters for a Gaussian blur filter applied to a raster image.  
+- `PngOptions` — configures settings (e.g., compression, color type) used when saving an image as PNG.  
+- `JpegOptions` — configures settings (e.g., quality) used when saving an image as JPEG.  
+- `BmpOptions` — configures settings for saving an image as BMP, including transparency handling.  
+- `PdfOptions` — configures settings for saving an image as PDF, including metadata embedding.  
+- `VectorRasterizationOptions` — specifies rasterization parameters (background color, page size, etc.) for vector‑to‑raster conversions like PDF.  
+- `Color` — represents a color value; used for background color or other color specifications.  
+- `ColorProfile` — applies an ICC color profile to an image to ensure accurate color reproduction.  
+- `ImageOptions` — abstract base for all format‑specific save‑option classes.  
+- `Aspose.Imaging.FileFormats.OpenDocument` (namespace) — provides support for loading ODG/OTG files.
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-06-26 | Run: `20260626_062855` | Examples: 120
 <!-- AUTOGENERATED:END -->

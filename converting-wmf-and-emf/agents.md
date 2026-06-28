@@ -105,6 +105,92 @@ All tasks passed ✅
 ## Related Categories  
 The conversion utilities in this folder complement the **Image Format Conversion** examples, where you can see how to move between raster and vector formats beyond WMF and EMF. If you need to manipulate the visual content before conversion, the **Image Editing** category offers cropping, resizing, and color adjustments that can be applied to the metafile data. For scenarios that involve rendering WMF or EMF files onto other canvases, the **Graphics Rendering** examples demonstrate drawing metafiles onto PDFs or other image types, providing a natural next step after conversion. Together, these sections give a complete workflow for handling Windows metafiles in .NET applications.
 
+
+## Developer Q&A
+
+### Q: How to load a WMF file from disk and save it as a high‑resolution PNG in .NET C#?  
+Use `Image.Load` to open the WMF file and call `image.Save` with `PngOptions` where you set the desired resolution. Aspose.Imaging for .NET (C#) handles the conversion in a single step. → See: `load-a-wmf-file-from-disk-and-save-it-as-a-high-resolution-png-image.cs`
+
+### Q: How do I convert an EMF image from a memory stream to a TIFF with LZW compression using C#?  
+Load the EMF via `Image.Load(memoryStream)` and then call `image.Save` with `TiffOptions` setting `Compression = TiffCompression.Lzw`. Aspose.Imaging for .NET performs the rasterization and compression automatically. → See: `load-an-emf-image-from-a-memory-stream-and-export-it-to-tiff-with-lzw-compression.cs`
+
+### Q: How to preserve WMF metadata such as author and creation date when converting to PNG in .NET?  
+After loading the WMF with `Image.Load`, assign its `Metadata` to the `PngOptions` before saving with `image.Save`. The metadata is retained in the resulting PNG file. → See: `convert-wmf-to-png-while-preserving-metadata-such-as-author-and-creation-date.cs`
+
+### Q: How do I set DPI to 300 when rasterizing a WMF to JPEG in C#?  
+Create a `WmfRasterizationOptions` object, set `ResolutionX` and `ResolutionY` to 300, assign it to `JpegOptions`, then call `image.Save`. This uses Aspose.Imaging for .NET to produce a high‑resolution JPEG. → See: `set-dpi-to-300-when-rasterizing-wmf-to-jpeg-to-improve-print-quality.cs`
+
+### Q: How to embed an ICC color profile when converting an EMF to PNG using Asp
+
+
+
+### Q: How can I set a custom background color when converting a transparent EMF to JPEG with Aspose.Imaging in C#?  
+Use `JpegOptions` and set its `BackgroundColor` property before calling `image.Save(outputPath, jpegOptions)`. This fills transparent areas with the specified color during conversion. → See: `apply-a-custom-background-color-when-converting-transparent-emf-files-to-jpeg-format.cs`
+
+### Q: How do I apply a grayscale filter while converting an EMF to BMP using Aspose.Imaging for .NET?  
+Load the EMF with `Image.Load`, create a `BmpOptions` object, set `BmpOptions.ColorType = BmpColorType.Grayscale`, and save the image. The grayscale setting forces monochrome output. → See: `apply-a-grayscale-filter-during-conversion-of-emf-to-bmp-to-produce-monochrome-output.cs`
+
+### Q: How can I batch‑convert EMF files to TIFF with LZW compression and a resolution of 150 dpi using Aspose.Imaging?  
+Iterate over the EMF files, create a `TiffOptions` instance, set `Compression = TiffCompression.Lzw` and `Resolution = new Resolution(150)`, then call `image.Save(outputPath, tiffOptions)` for each file. This applies LZW compression and the desired DPI to all outputs. → See: `batch-convert-emf-files-to-tiff-applying-lzw-compression-and-setting-resolution-to-150-dpi.cs`
+
+### Q: How do I convert a multi‑page EMF document into separate PNG files, one per page, with Aspose.Imaging in C#?  
+Load the EMF as an `Image`, cast it to `IMultipageImage`, loop through `multipage.PageCount`, set `PngOptions` for each page, and call `multipage.Save(pagePath, pngOptions, pageIndex)`. Each iteration writes a single page to its own PNG file. → See: `convert-a-multi-page-emf-document-to-a-series-of-png-files-one-per-page.cs`
+
+### Q: How can I rasterize a WMF to PNG at half its original size using Aspose.Imaging?  
+Create `RasterizationOptions`, set `ScaleX = 0.5f` and `ScaleY = 0.5f`, assign them to `PngOptions`, then load the WMF and save with those options. The scaling factors reduce the rasterized image dimensions by 50 %. → See: `convert-a-wmf-file-to-png-and-apply-a-custom-scaling-factor-of-0-5-during-rasterization.cs`
+
+### Q: How can I check for the existence of an EMF file and ensure the output directory is created before converting it to JPEG with Aspose.Imaging in C#?  
+Use `File.Exists` to verify the source EMF and `Directory.CreateDirectory` for the target folder, then load the image with `Image.Load` and save it using `JpegOptions`. → See: apply-a-custom-background-color-when-converting-transparent-emf-files-to-jpeg-format.cs  
+
+### Q: How do I set the JPEG quality to 90 when rasterizing a transparent EMF to JPEG using Aspose.Imaging in C#?  
+Create a `JpegOptions` instance, set its `Quality = 90`, configure `RasterizationOptions` (e.g., background color), and call `image.Save(outputPath, jpegOptions)`. → See: apply-a-custom-background-color-when-converting-transparent-emf-files-to-jpeg-format.cs  
+
+### Q: How can I limit the color palette to 256 colors when converting an EMF file to GIF with Aspose.Imaging in C#?  
+Instantiate `GifOptions`, set `ColorCount = 256`
+
+### Q: How can I batch convert WMF files to PNG, JPEG, and BMP in a single operation using Aspose.Imaging’s format enumeration in C#?  
+Load each WMF with `Image.Load` and call `image.Save` inside a loop, passing the appropriate `ImageOptions` (e.g., `PngOptions`, `JpegOptions`, `BmpOptions`) selected via `ExportImageFormat`. → See: batch-convert-wmf-files-to-png-jpeg-and-bmp-in-a-single-operation-using-format-enumeration.cs  
+
+### Q: How do I preserve the original dimensions when converting a folder of WMF files to BMP using Aspose.Imaging in C#?  
+Simply load each WMF with `Image.Load` and save it using `BmpOptions`; without altering width or height the library retains the source size automatically. → See: batch-process-a-folder-of-wmf-files-converting-each-to-bmp-while-preserving-original-dimensions.cs  
+
+### Q: How can I rasterize a WMF to PNG at half its original size using a custom scaling factor with Aspose.Imaging in C#?  
+After loading the WMF, set `PngOptions.VectorRasterizationOptions.ScaleX` and `ScaleY` to `0.5` before calling `image.Save`. → See: convert-a-wmf-file-to-png-and-apply-a-custom-scaling-factor-of-0-5-during-rasterization.cs  
+
+### Q: How do I embed EXIF camera metadata into a JPEG generated from an EMF file using Aspose.Imaging in C#?  
+Create `JpegOptions`, populate its `ExifData` (e.g., `CameraModel`, `DateTime`) and then save the loaded
+## Operations Covered
+- Apply custom background color to transparent EMF  
+- Convert EMF images to JPEG format  
+- Apply grayscale filter during EMF‑to‑BMP conversion  
+- Batch convert EMF files to TIFF with LZW compression  
+- Set image resolution to 150 DPI while converting  
+- Batch convert WMF files to PNG, JPEG, and BMP using format enumeration  
+- Preserve original dimensions when converting WMF to BMP  
+- Export each page of a multi‑page EMF document to separate PNG files  
+- Rasterize WMF to PNG with a custom scaling factor of 0.5  
+
+## Supported Formats
+- **EMF** – source vector format used in several conversions  
+- **WMF** – source vector format used in batch and single‑file conversions  
+- **JPEG** – target format for EMF conversion with background handling  
+- **BMP** – target format for EMF and WMF conversions, including grayscale output  
+- **TIFF** – target format for EMF batch conversion with LZW compression and DPI settings  
+- **PNG** – target format for WMF conversion and multi‑page EMF export  
+
+## API Classes Used
+- `Image` — base class for loading, manipulating, and saving images.  
+- `EmfImage` — represents an EMF file; provides EMF‑specific properties after casting from `Image`.  
+- `WmfImage` — represents a WMF file; gives access to WMF‑specific features.  
+- `JpegOptions` — defines options for saving JPEG images, such as background color handling.  
+- `BmpOptions` — defines options for saving BMP images, including grayscale processing.  
+- `TiffOptions` — defines options for saving TIFF images, allowing compression type and resolution settings.  
+- `PngOptions` — defines options for saving PNG images, supporting scaling factors during rasterization.  
+- `IMultipageImage` — interface for images that contain multiple pages; provides `PageCount` and page‑wise access.  
+- `TiffCompression` — enumeration that specifies TIFF compression algorithms (e.g., LZW).  
+- `Image.Load(string path)` — static method that loads an image from the given file path.  
+- `Image.Save(string path, ImageOptions options)` — instance method that saves the image using specified format options.
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-06-27 | Run: `20260627_021954` | Examples: 29
 <!-- AUTOGENERATED:END -->

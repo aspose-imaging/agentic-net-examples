@@ -118,6 +118,87 @@ All tasks passed ✅
 
 The Convert APNG examples share many of the same image‑processing fundamentals found in the Convert PNG and Convert GIF sections, such as handling pixel formats and managing streams. If you need to work with lossless compression or transparency, the PNG optimization category offers complementary techniques. For scenarios that involve converting video clips or sprite sheets into animated formats, the Convert WebP and Convert Video groups provide useful reference implementations that can be combined with APNG workflows. Together, these categories give a full picture of how Aspose.Imaging can handle static and animated image transformations across the .NET ecosystem.
 
+
+## Developer Q&A
+
+### Q: How do I load a PNG image and create an animated APNG with custom frame delays in C# .NET?  
+Load the PNG using `RasterImage.Load`, then instantiate an `ApngImage` and add `ApngFrame` objects, setting each frame’s `Delay` property as needed. → See: `load-a-png-image-and-create-an-animated-apng-with-custom-frame-delays.cs`
+
+### Q: How to generate an APNG from a single‑page PNG and set a 100 ms delay for each frame in .NET?  
+Load the source PNG with `RasterImage.Load`, create an `ApngImage` using `ApngOptions` where `DefaultFrameDelay = 100`, and save the result. → See: `generate-an-apng-from-a-single-page-png-specifying-a-100-ms-delay-for-each-frame.cs`
+
+### Q: How do I set the APNG loop count to zero for infinite looping in C#?  
+Assign `ApngOptions.LoopCount = 0` before calling `ApngImage.Save`. → See: `set-apng-loop-count-to-zero-to-indicate-infinite-looping-for-continuous-animation-playback.cs`
+
+### Q: How to convert an animated WEBP file to an APNG while preserving the original animation timing using Aspose.Imaging for .NET?  
+Load the WEBP with `Image.Load`, cast to `IMultipageImage`, copy its frames into a new `ApngImage`, and keep the original frame delays via `ApngOptions`. → See: `convert-an-animated-webp-file-to-an-apng-while-preserving-original-animation-timing.cs`
+
+### Q: How do I batch convert a folder of WEBP files to APNG format with a uniform frame delay in C#?  
+Loop through the folder, load each WEBP with `Image.Load`, create an `ApngImage` setting `ApngOptions.DefaultFrameDelay` to the desired uniform value, and save each as an .apng file. → See: `batch-convert-a-folder-of-webp-files-to-apng-format-applying-uniform-frame-delay.cs`
+
+
+
+### Q: How can I set custom frame delays for an APNG using timing values stored in a JSON file with Aspose.Imaging for .NET?  
+Parse the JSON, then create an `ApngImage` and assign each frame’s `Delay` via `ApngOptions.FrameDelay` based on the parsed values; load the source PNG with `Image.Load`. → See: adjust-apng-frame-delays-based-on-external-timing-data-stored-in-a-json-configuration-file.cs  
+
+### Q: How do I generate an animated APNG from a directory of PNG images ordered alphabetically using Aspose.Imaging in C#?  
+Retrieve PNG file names, sort them alphabetically, load each with `Image.Load`, add them as frames to an `ApngImage`, and save using `ApngOptions`. → See: create-an-apng-from-a-png-sequence-stored-in-a-directory-using-alphabetical-file-naming.cs  
+
+### Q: What is the simplest way to batch convert multiple SVG files into separate APNG files with the default frame delay using Aspose.Imaging for .NET?  
+Iterate over the SVG paths, load each SVG via `Image.Load`, create an `ApngImage` with default `ApngOptions` (which applies the default frame delay), and save each output file. → See: convert-a-batch-of-svg-files-into-individual-apng-animations-each-with-default-frame-delay.cs  
+
+### Q: How can I export every frame of an animated APNG to individual BMP files using Aspose.Imaging in C#?  
+Load the APNG with `Image.Load`, loop through its `Frames` collection, and save each frame using `BmpOptions` to a separate BMP file. → See: convert-an-apng-to-a-series-of-bmp-files-for-compatibility-with-legacy-imaging-systems.cs  
+
+### Q: How do I preserve each frame of an APNG as separate pages in a multi‑page TIFF using Aspose.Imaging for .NET?  
+Load the APNG, create a new `TiffImage`, add each APNG frame as a new page with `TiffOptions`, then save the combined TIFF. → See: convert-an-apng-to-a-series-of-tiff-images-preserving-each-frame-as-a-separate-page.cs
+
+### Q: How can I extract the first frame of an animated APNG and save it as a static PNG using Aspose.Imaging for .NET?  
+Load the APNG with `Image.Load`, cast to `ApngImage`, take `Frames[0]` and save it with `PngOptions`. → See: `convert-an-animated-apng-to-a-static-png-by-extracting-the-first-frame-and-saving-it.cs`
+
+### Q: How do I convert an APNG into a series of BMP files for legacy imaging
+
+### Q: How do I adjust APNG frame delays using timing data from a JSON file in C# with Aspose.Imaging?  
+Parse the JSON, then iterate through `ApngImage.Frames` and set each frame’s `Delay` property before saving with `ApngOptions`. → See: adjust-apng-frame-delays-based-on-external-timing-data-stored-in-a-json-configuration-file.cs  
+
+### Q: How can I batch convert all WEBP images in a folder to APNG with a fixed 50 ms frame delay using Aspose.Imaging for .NET?  
+Loop through `Directory.GetFiles(..., "*.webp")`, load each file with `Image.Load`, create an `ApngOptions` with `DefaultFrameDelay = 5` (5 × 10 ms = 50 ms), and save as `.apng`. → See: batch-convert-a-folder-of-webp-files-to-apng-format-applying-uniform-frame-delay.cs  
+
+### Q: How to preserve original frame order and timing when converting animated WEBP files to APNG in C#?  
+Load the animated WEBP via `Image.Load`, copy each frame’s `DelayTime` to a new `ApngFrame` using `ApngImage.AddFrame`, then save with `ApngOptions`. → See: batch-convert-animated-webp-files-to-apng-preserving-original-frame-order-and-timing-metadata.cs  
+
+### Q: How can I generate a report that logs success or failure of each PNG‑sequence‑to‑APNG conversion in a batch process using Aspose.Imaging?  
+After converting each PNG sequence to an `ApngImage`, append the file name and conversion status to a `StringBuilder` (or file) and write the report once the loop finishes. → See: batch-process-png-sequences-into-apng-files-logging-each-conversion-s-success-status-to-a-report.cs  
+
+### Q: How do I set each APNG frame’s display duration based on the resolution of the corresponding TIFF page when converting a multi‑page TIFF to APNG in C#?  
+Load the multi‑page TIFF, iterate its pages, compute a delay from each page’s resolution, assign it to `ApngFrame.FrameDelay`, and save the result with `ApngOptions`. → See: convert-a-multi-page-tiff-to-apng-using-each-page-s-resolution-to-determine-frame-display-duration.cs
+## Operations Covered
+- Adjust APNG frame delays using JSON timing data  
+- Convert animated WebP files to APNG in batch  
+- Record conversion times to a CSV summary file  
+- Create APNG files from PNG sequences (alphabetical order)  
+- Log each conversion’s success status to a report file  
+- Convert multi‑page TIFF to APNG with lossless compression  
+- Extract the first frame of an animated APNG and save as static PNG  
+- Export each APNG frame to separate JPEG images with indexed filenames  
+
+## Supported Formats
+- **PNG** – source and destination for static images and PNG sequences  
+- **APNG** – animated PNG format used for loading, modifying, and saving animations  
+- **WebP** – animated WebP files converted to APNG  
+- **TIFF** – multi‑page TIFF files converted to APNG  
+- **JPEG** – individual frames exported from APNG as JPEG images  
+
+## API Classes Used
+- `Image` — base class for loading and saving any supported image type (`Image.Load`, `Image.Save`).  
+- `ApngImage` — represents an animated PNG; provides access to frames via `Pages` and frame count via `PageCount`.  
+- `RasterImage` — represents a raster image frame; used when extracting or converting individual frames.  
+- `Image.Load` — static method that reads an image file into an `Image`‑derived object.  
+- `Image.Save` — instance method that writes the image (or modified image) to a file.  
+- `ApngImage.Pages` — collection property exposing each frame of the APNG for iteration or manipulation.  
+- `ApngImage.PageCount` — property returning the total number of frames in the APNG.  
+- `StreamWriter` (from `System.IO`) — used to write CSV logs of conversion times and status reports.
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-06-26 | Run: `20260626_051901` | Examples: 51
 <!-- AUTOGENERATED:END -->

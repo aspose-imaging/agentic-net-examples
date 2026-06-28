@@ -133,6 +133,96 @@ All tasks passed ✅
 ## Related Categories  
 The techniques demonstrated in the Merge Images examples often complement the **Resize & Crop** and **Watermark** categories, where you may need to adjust dimensions or add branding before stitching images together. Likewise, the **Format Conversion** examples can be useful when the combined output must be saved in a different file type, such as converting a stitched PNG into a compressed JPEG for web delivery. Exploring these adjacent sections can give you a complete workflow for advanced image manipulation in Aspose.Imaging for .NET.
 
+
+## Developer Q&A
+
+### Q: How to load multiple JPEG files from a directory and merge them horizontally into a single JPEG image using Aspose.Imaging for .NET?
+Load each file with `JpegImage.Load`, create a wide `RasterImage` canvas, draw the images side‑by‑side with `Graphics.DrawImage`, and save the result with `JpegOptions`.  
+→ See: `load-multiple-jpeg-files-from-a-directory-and-merge-them-horizontally-into-a-single-jpeg-image.cs`
+
+### Q: How do I combine a set of JPEG images horizontally and output the merged picture as a PDF document in C#?
+Open each JPEG with `JpegImage`, compose them on a `RasterImage` canvas, then call `Save` on the canvas using `PdfOptions`.  
+→ See: `combine-a-set-of-jpeg-images-horizontally-and-output-the-merged-picture-as-a-pdf-document.cs`
+
+### Q: How to resize each input JPEG to a uniform width before performing a horizontal merge and saving as JPEG in .NET 6?
+Use `JpegImage.Load` for each file, call `Resize` on the `RasterImage` to the target width, merge the resized images, and save with `JpegOptions`.  
+→ See: `resize-each-input-jpeg-to-a-uniform-width-before-performing-a-horizontal-merge-and-saving-as-jpeg.cs`
+
+### Q: How do I limit memory usage while loading JPEG files for a horizontal merge with Aspose.Imaging in C#?
+Create an `ImageLoadOptions` instance (e.g., set `BufferSize`), pass it to `JpegImage.Load` for each file, then merge as usual.  
+→ See: `use-imageloadoptions-to-limit-memory-usage-while-loading-jpeg-files-for-a-horizontal-merge.cs`
+
+### Q: How to implement parallel loading of JPEG files, then merge them vertically and save the composition as PNG in .NET 7?
+Use `Parallel.ForEach` to load each image with `JpegImage.Load`, draw them onto a tall `RasterImage` using `Graphics.DrawImage`, and finally save with `PngOptions`.  
+→ See: `implement-parallel-loading-of-jpeg-files-then-merge-them-vertically-and-save-the-composition-as-png.cs`
+
+
+
+### Q: How can I add a semi‑transparent watermark text to a horizontally merged JPEG using Aspose.Imaging for .NET?  
+Use a `Graphics` object with a `SolidBrush` whose `Opacity` is set (e.g., 0.5) to draw the watermark text after merging the images, then save the result with `JpegOptions`. → See: add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs  
+
+### Q: How do I center each JPEG on the canvas while performing a horizontal merge with Aspose.Imaging in C#?  
+Calculate the vertical offset for each source `RasterImage` based on the canvas height and draw the image at that Y‑position using `Graphics.DrawImage`, ensuring each picture is centered. → See: center-each-jpeg-image-on-the-canvas-while-merging-them-horizontally-to-create-a-balanced-composition.cs  
+
+### Q: How can I create a PDF from multiple JPEGs using JPEG2000 compression with Aspose.Imaging for .NET?  
+Load each JPEG into a `RasterImage`, add them as pages to a `PdfDocument`, and set `PdfOptions.Jpeg2000CompressionOptions` before calling `PdfDocument.Save`. → See: combine-jpeg-images-into-a-pdf-document-employing-the-jpeg2000-compression-format-while-maintaining-image-fidelity-and-document-integrity.cs  
+
+### Q: How do I embed an ICO file as the document icon when generating a PDF from JPEG images with Aspose.Imaging in C#?  
+Load the ICO file into an `Image` and assign it to `PdfDocumentOptions.Icon` on the `PdfDocument` before saving the PDF. → See: combine-jpg-images-into-a-pdf-document-embedding-an-ico-file-as-the-document-s-icon.cs  
+
+### Q: How can I convert a series of JPEG images to EMF format before merging them into a PDF using Aspose.Imaging for .NET?  
+Save each JPEG as an `EmfImage` using `EmfOptions`, then add the resulting EMF pages to a `PdfDocument` and call `PdfDocument.Save`. → See: combine-jpg-images-into-a-pdf-document-by-converting-them-to-emf-format-while-preserving-vector-fidelity.cs
+
+### Q: How can I combine several JPEG files into a single PNG image using the WMZ container format with Aspose.Imaging for .NET?  
+Load each JPEG, create a `WmfImage` with `WmzContainerFormat` set, draw the JPEGs onto it, and save the result with `PngOptions`. → See: `combine-jpg-images-into-a-single-png-file-efficiently-utilizing-the-wmz-container-format.cs`
+
+### Q: How do I vertically stack multiple JPEG images while preserving their original order and quality using Asp
+
+### Q: How can I specify the JPEG compression quality when saving a horizontally merged image with Aspose.Imaging in C#?  
+Set the `Quality` property on a `JpegOptions` instance and pass it to `Image.Save(outputPath, jpegOptions)`. This controls the output JPEG quality after the merge. → See: add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs  
+
+### Q: How do I embed JPEG2000 images into a PDF document while preserving fidelity using Aspose.Imaging for .NET?  
+Load each source JPEG as a `Jpeg2000Image`, then add the image to a `PdfDocument` using `PdfOptions` with `Compression = Jpeg2000Compression`. The PDF pages will contain the JPEG2000‑compressed images. → See: combine-jpeg-images-into-a-pdf-document-employing-the-jpeg2000-compression-format-while-maintaining-image-fidelity-and-document-integrity.cs  
+
+### Q: What is the process to convert JPEG files to EMF format before creating a PDF with Aspose.Imaging in C#?  
+Load each JPEG, save it to an EMF file using `EmfOptions`, then add the resulting EMF images to a `PdfDocument` via `PdfOptions`. This preserves vector fidelity in the final PDF. → See: combine-jpg-images-into-a-pdf-document-by-converting-them-to-emf-format-while-preserving-vector-fidelity.cs  
+
+### Q: How can I set a custom ICO file as the document icon for a PDF generated from JPEG images using Aspose.Imaging for .NET?  
+Load the ICO with `Image.Load`, assign it to `PdfDocumentInfo.Icon`, and attach the `PdfDocumentInfo` to `PdfOptions` before saving the PDF. The resulting PDF will display the specified icon. → See: combine-jpg-images-into-a-pdf-document-embedding-an-ico-file-as-the-document-s-icon.cs  
+
+### Q: How do I convert a series of JPEG images to a multi‑page TIFF and then generate a PDF from that TIFF using Aspose.Imaging in C#?  
+Create a `TiffImage` by adding each loaded JPEG as a new frame using `TiffOptions`, then open the TIFF and export it to PDF with `PdfOptions`. This two‑step conversion yields a PDF that
+## Operations Covered
+- Merge multiple JPEG images horizontally  
+- Merge multiple JPEG images vertically preserving order  
+- Add semi‑transparent text watermark to a merged image  
+- Apply custom JPEG compression settings during merge  
+- Convert JPEG image to TGA format  
+- Convert TGA image to PDF document  
+- Convert JPEG images to EMF while preserving vector fidelity  
+- Convert JPEG images to PDF via EMF or SVGZ intermediate formats  
+- Validate existence of input image files  
+- Ensure output directory is created before saving  
+
+## Supported Formats
+- **JPEG** – source images for merging and conversion  
+- **PNG** – final merged image output in one example  
+- **TGA** – intermediate format when converting JPEG to PDF  
+- **PDF** – final document produced from JPEG/TGA/EMF/SVGZ conversions  
+- **EMF** – intermediate vector format preserving fidelity  
+- **SVGZ** – intermediate vector format used for PDF conversion  
+
+## API Classes Used
+- `Image` — base class for loading any image file (`Image.Load`).  
+- `RasterImage` — concrete image type for raster operations, used after loading JPEG.  
+- `JpegOptions` — (implied via `using Aspose.Imaging.FileFormats.Jpeg`) configures JPEG‑specific save settings such as compression quality.  
+- `PngOptions` — (implied via `using Aspose.Imaging.ImageOptions`) configures PNG‑specific save settings for the merged output.  
+- `TgaOptions` — (implied via `using Aspose.Imaging.FileFormats.Tga`) configures TGA‑specific save settings for the temporary conversion step.  
+- `PdfOptions` — (implied via `using Aspose.Imaging.ImageOptions`) configures PDF‑specific save settings when creating the final document.  
+- `EmfOptions` — (implied via `using Aspose.Imaging.FileFormats.Emf`) configures EMF‑specific save settings for vector‑preserving conversion.  
+- `Brushes` / `SolidBrush` — used to create a semi‑transparent brush for drawing watermark text.  
+- `Sources` — (implied via `using Aspose.Imaging.Sources`) provides image source abstractions for loading/saving streams.
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-06-28 | Run: `20260628_033206` | Examples: 140
 <!-- AUTOGENERATED:END -->

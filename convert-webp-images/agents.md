@@ -105,6 +105,97 @@ All tasks passed ✅
 
 The Convert Webp Images category complements the broader **Image Format Conversion** examples, where you can see how to switch between PNG, BMP, and TIFF alongside WebP. If you need to resize or crop images after conversion, the **Image Resizing and Cropping** samples provide seamless integration with the same Aspose.Imaging API. For scenarios that involve extracting or preserving metadata during conversion, the **Metadata Handling** examples illustrate how to retain EXIF information when moving from WebP to JPEG. Together, these categories give a complete toolkit for end‑to‑end image processing in .NET.
 
+
+## Developer Q&A
+
+### Q: How do I convert a WebP image to GIF in C# using Aspose.Imaging on .NET?
+Load the WebP file with `Image.Load` and call `image.Save(outputPath, new GifOptions())`.  
+→ See: `load-a-webp-file-and-save-it-as-a-gif-using-image-save.cs`
+
+### Q: How to check if a WebP file exists before converting it to avoid FileNotFound exceptions in .NET 6 C#?
+Use `File.Exists(webpPath)` before calling `Image.Load`; if true, proceed with conversion using `image.Save`.  
+→ See: `verify-that-the-webp-image-exists-before-conversion-to-avoid-filenotfound-exceptions.cs`
+
+### Q: How do I set PDF compression to JPEG with 80 % quality when converting WebP to PDF in C#?
+Create a `PdfOptions` object, set `CompressionMode = PdfCompressionMode.Jpeg` and `Quality = 80`, then save the WebP image with `image.Save(pdfPath, pdfOptions)`.  
+→ See: `set-pdf-compression-mode-to-jpeg-with-80-quality-during-webp-to-pdf-conversion-to-reduce-size.cs`
+
+### Q: How to batch‑convert all WebP files in a folder to GIF using a foreach loop in .NET?
+Iterate through `Directory.GetFiles(folder, "*.webp")`, load each file with `Image.Load`, and save it as GIF via `image.Save(gifPath, new GifOptions())` inside the loop.  
+→ See: `perform-batch-conversion-of-all-webp-files-in-a-directory-to-gif-using-a-foreach-loop.cs`
+
+### Q: How to make an animated GIF loop infinitely when converting an animated WebP file in C#?
+Set `GifOptions.LoopCount = 0` (0 means infinite) before calling `image.Save(gifPath, gifOptions)`.  
+→ See: `set-gif-loop-count-to-infinite-when-converting-animated-webp-to-ensure-continuous-playback.cs`
+
+
+
+### Q: How can I determine if a WebP image is animated before converting it to GIF using Aspose.Imaging in C#?  
+Load the file with `Image.Load` and cast it to `WebPImage`; then check its `IsAnimated` property. If true, proceed with the GIF conversion, otherwise treat it as a static image. → See: check-if-the-loaded-webp-image-is-animated-before-saving-it-as-a-gif.cs  
+
+### Q: How do I set the PDF page size to A4 when converting a WebP image to PDF with Aspose.Imaging in .NET?  
+Create a `PdfOptions` instance and assign `PdfOptions.PageSize = PageSize.A4` before calling `image.Save(outputPath, pdfOptions)`. This forces the generated PDF to use standard A4 dimensions. → See: configure-pdf-page-size-to
+
+### Q: How can I load a WebP image from a byte array and save it as a PDF using Aspose.Imaging in C#?  
+Load the image with `Image.Load(byte[])` and save it with `PdfOptions` (e.g., `image.Save(outputPath, new PdfOptions())`). → See: `convert-a-webp-image-read-as-a-byte-array-directly-to-pdf-using-image-load-overload.cs`
+
+### Q: How do I set a custom delay for each frame when converting an animated WebP to GIF with Aspose.Imaging in C#?  
+After loading the animated WebP, create a `GifOptions` object, add a `GifFrameDelayBlock` for each frame, and assign the desired delay values before saving. → See: `define-frame-delay-for-each-gif-frame-derived-from-animated-webp-to-control-animation-speed.cs`
+
+### Q: How can I perform an asynchronous batch conversion of WebP files to GIF with cancellation support using Aspose.Imaging in .NET?  
+Use `Task.Run` to process each file, pass a `CancellationToken` to the loop, and check `token.ThrowIfCancellationRequested()` inside the conversion logic. → See: `implement-cancellation-token-support-in-asynchronous-batch-conversion-of-webp-files-to-gif-for-responsive-ui.cs`
+
+### Q: How do I convert a WebP image that’s loaded from a MemoryStream directly to GIF without creating temporary files in C# with Aspose.Imaging?  
+Read the file into a `MemoryStream`, call `Image.Load(stream)`, then save using `GifOptions` to the target path. → See: `convert-a-webp-image-loaded-from-a-memory-stream-to-gif-without-creating-intermediate-files.cs`
+
+### Q: How can I adjust the output resolution or quality when saving a WebP image as PDF using Aspose.Imaging in C#?  
+Configure the `PdfOptions.RasterizationOptions` (e.g., `ResolutionX`, `ResolutionY`, `CompressionQuality`) before calling `image.Save(outputPath, pdfOptions)`. → See: `adjust-image-quality-before-saving-webp-as-pdf-to-control-output-resolution.cs`
+
+### Q: How can I verify that the width and height of a WebP image match those of the resulting GIF after conversion using Aspose.Imaging in C#?  
+Use `Image.Width` and `Image.Height` on the loaded `WebP` image and on the saved `GifImage` (or reload the GIF) to compare the dimensions. → See: `compare-original-webp-dimensions-with-resulting-gif-dimensions-to-ensure-size-consistency.cs`
+
+### Q: How do I set the DPI (horizontal and vertical resolution) of a PDF when converting a WebP image with Aspose.Imaging in .NET?  
+Create a `PdfOptions` instance and assign `ResolutionX` and `ResolutionY` (e.g., 300) before calling `image.Save(outputPath, pdfOptions)`. → See: `adjust-image-quality-before-saving-webp-as-pdf-to-control-output-resolution.cs`
+
+### Q: How can I speed up batch conversion of many WebP files to GIF by using Aspose.Imaging’s multithreading support in C#?  
+Wrap the conversion loop with `Parallel.ForEach` and use `Image.Load`/`image.Save` inside; Aspose.Imaging’s `Multithreading` namespace enables thread‑safe processing. → See: `implement-cancellation-token-support-in-asynchronous-batch-conversion-of-webp-files-to-gif-for-responsive-ui.cs`
+
+### Q: What is the recommended way to catch and log unexpected errors during a WebP‑to‑PDF conversion with Aspose.Imaging in C#?  
+Enclose the loading and saving code in a `try‑catch` block, catching `Exception` and writing the message to the console or a log file. → See: `implement-try-catch-blocks-around-conversion-code-to-handle-unexpected-runtime-errors-gracefully.cs`
+
+### Q: How do I ensure the output folder exists before saving a converted PDF from a WebP file using Aspose.Imaging in C#?  
+Call `Directory.CreateDirectory(Path.GetDirectoryName(outputPath))` prior to `image.Save`, which creates the directory if it’s missing. → See: `configure-pdf-page-size-to-a4-when-converting-webp-to-pdf-for-standard-document-layout.cs`
+## Operations Covered
+- Load WebP image from file  
+- Load WebP image from memory stream  
+- Save image as PDF  
+- Save image as GIF  
+- Adjust image quality before saving  
+- Control output resolution for PDF output  
+- Retrieve original image dimensions (width & height)  
+- Compare source and target image dimensions  
+- Set frame delay for each GIF frame  
+- Control GIF animation speed  
+- Measure conversion time for batch processing  
+- Log performance metrics for image conversion  
+- Handle conversion errors with try‑catch blocks  
+
+## Supported Formats
+- **WebP** – source format used in all conversion examples  
+- **PDF** – target format when converting WebP to a document  
+- **GIF** – target format for static and animated conversions  
+- **JPEG** – target format in the generic error‑handling example  
+- **PNG** – source format in the generic error‑handling example  
+
+## API Classes Used
+- `Image` — base class that loads any supported image (`Image.Load`) and saves it (`Image.Save`).  
+- `WebPImage` — specialized class for WebP files; provides properties like `Width` and `Height` and supports animated WebP.  
+- `JpegOptions` — options class for configuring JPEG output (e.g., quality).  
+- `GifOptions` — options class for configuring GIF output, including frame‑delay settings.  
+- `Image.Load` — static method that creates an `Image` (or derived) instance from a file path or stream.  
+- `Image.Save` — instance method that writes the image to a file using the supplied format‑specific options.  
+- `ImageOptions` — abstract base for all format‑specific option classes (used as a reference type in the code).
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-06-26 | Run: `20260626_081143` | Examples: 30
 <!-- AUTOGENERATED:END -->

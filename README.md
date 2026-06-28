@@ -1,5 +1,16 @@
 # Aspose.Imaging for .NET — Agentic C# Examples
 
+> Build-verified, standalone C# code examples for **[Aspose.Imaging for .NET](https://products.aspose.com/imaging/net/)** — a UI-agnostic backend API for image processing that integrates into any .NET application (ASP.NET Core, console, Azure Functions, Docker, and more). No UI dependencies required.
+
+## Resources
+
+| | Link |
+|--|------|
+| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
+| 📦 NuGet | [nuget.org/packages/Aspose.Imaging](https://www.nuget.org/packages/aspose.imaging) |
+| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
+| 🌐 Try Online | [products.aspose.app/imaging](https://products.aspose.app/imaging/family/) |
+
 ## Statistics
 
 | Metric | Value |
@@ -7,7 +18,7 @@
 | Total Examples | 4720 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
-| Last Updated | 2026-06-28 |
+| Last Updated | 2026-06-23 |
 
 ## Repository Structure
 
@@ -110,7 +121,7 @@ The agent exposes a public REST API for programmatic access:
 
 All examples are compiler-validated against the target NuGet version before being committed. The benchmark is a 100% build pass rate across all generated examples.
 
-| Version | Total Examples | Pass Rate | Framework |
+| Version | Total Examples | 2874 | Framework |
 |---------|---------------|-----------|----------|
 | 26.6.0 | 4720 | 100.0% | net9.0 |
 
@@ -194,4 +205,4 @@ Part of the Aspose agentic examples ecosystem — compiler-validated C# examples
 | [aspose-barcode/agentic-net-examples](https://github.com/aspose-barcode/agentic-net-examples) | Aspose.BarCode for .NET |
 
 ---
-*Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-06-28*
+*Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-06-23*

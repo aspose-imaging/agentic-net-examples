@@ -102,6 +102,79 @@ All tasks passed ✅
 ## Related Categories  
 The Convert SVG to Raster Images examples complement the **Convert Raster to Vector** and **Image Format Conversion** sections, where you can see how raster sources are transformed back into scalable formats or switched between common bitmap types. If you need to manipulate colors, apply filters, or resize images after rasterization, the **Image Manipulation** category provides ready‑to‑use snippets that integrate smoothly with the raster output. Together, these groups give a full pipeline—from vector creation to raster rendering and subsequent bitmap processing—tailored for .NET developers working with Aspose.Imaging.
 
+
+## Developer Q&A
+
+### Q: How do I load an SVG file using the SvgImage class and configure rasterization dimensions before conversion in C# (.NET)?
+Use `SvgImage.Load` to read the SVG, then create a `SvgRasterizationOptions` object and set its `Width` and `Height` properties before assigning it to `PngOptions.VectorRasterizationOptions`. Finally call `svgImage.Save(outputPath, pngOptions)`. → See: `load-an-svg-file-using-svgimage-class-and-configure-rasterization-dimensions-before-conversion.cs`
+
+### Q: How to save the loaded SVG as a BMP file with custom width and height settings in .NET C#?
+Create a `BmpOptions` instance, configure its `VectorRasterizationOptions` with the desired `Width` and `Height`, load the SVG via `SvgImage.Load`, and call `svgImage.Save(outputPath, bmpOptions)`. → See: `save-the-loaded-svg-as-a-bmp-file-with-custom-width-and-height-settings.cs`
+
+### Q: How do I render an SVG to PNG with a transparent background by disabling the background color in SvgRasterizationOptions (C#)?
+Set `SvgRasterizationOptions.BackgroundColor` to `Color.Transparent` (or set `BackgroundColor` to `null`) before saving, then use `PngOptions` with these rasterization options to generate the PNG. → See: `render-svg-to-png-with-transparent-background-by-disabling-background-color-in-options.cs`
+
+### Q: How to batch convert multiple SVG files to PNG while reusing the same rasterization options in .NET?
+Instantiate a single `SvgRasterizationOptions` object, loop through the SVG file paths, load each with `SvgImage.Load`, assign the shared rasterization options to `PngOptions`, and call `svgImage.Save` for each file. → See: `batch-convert-multiple-svg-files-to-png-while-reusing-the-same-rasterization-options.cs`
+
+### Q: How do I integrate SVG‑to‑BMP conversion into an ASP.NET Core controller action that returns a FileResult (C# .NET)?
+In the controller action, load the SVG with `SvgImage.Load`, configure `BmpOptions`, save the image to a `MemoryStream`, and return `File(stream, "image/bmp")` as a `FileResult`. → See: `integrate-svg-to-bmp-conversion-into-an-asp-net-core-controller-action-returning-a-fileresult.cs`
+
+
+
+### Q: How can I add a text watermark to a BMP image generated from an SVG using Aspose.Imaging in C#?  
+Load the SVG with `Image.Load`, rasterize it using `SvgRasterizationOptions` and `BmpOptions`, then create a `Graphics` object from the bitmap and call `DrawString` to place the watermark text. → See: `add-a-watermark-text-to-bmp-image-after-svg-rasterization-using-drawing-api.cs`
+
+### Q: How do I convert an SVG to a BMP file that uses a custom indexed color palette with Aspose.Imaging in .NET?  
+Create a `BmpOptions` instance, assign a `ColorPalette` to its `Palette` property, set its `Source` to a new `SvgRasterizationOptions`, and pass the options to `Image.Save`. → See: `convert-svg-to-bmp-using-an-indexed-color-palette-defined-in-bmpoptions.cs`
+
+### Q: How can I save an SVG as a PNG with the highest compression level using Aspose.Imaging in C#?  
+Use `PngOptions`, set its `CompressionLevel` to `CompressionLevel.Maximum`, and pass the options to `Image.Save` after loading the SVG. → See: `convert-svg-to-png-with-high-compression-by-setting-pngoptions-compressionlevel-to-maximum.cs`
+
+### Q: How do I improve SVG‑to‑PNG conversion performance by disabling anti‑aliasing in Aspose.Imaging?  
+Set the `AntiAliasing` property of `SvgRasterizationOptions` to `false` before assigning it to `PngOptions.Source` and saving the image. → See: `disable-anti-aliasing-in-svgrasterizationoptions-before-saving-svg-to-png-to-improve-performance.cs`
+
+### Q: How can I enable high‑quality vector rasterization when converting SVG to PNG with Aspose.Imaging in C#?  
+Set the `VectorRasterizationQuality` property of `SvgRasterizationOptions` to `VectorRasterizationQuality.High`, then use these options in `PngOptions` before saving. → See: `enable-high-quality-vector-rasterization-by-setting-svgrasterizationoptions-vectorrasterizationquality-to-high.cs`
+
+### Q: How can I catch and log detailed errors when loading an SVG with Aspose.Imaging in C#?  
+Wrap `Image.Load(inputPath)` in a try‑catch block and log `ex.Message` and `ex.StackTrace` to diagnose loading failures. → See: `catch-exceptions-during-svg-loading-and-log-error-details-for-troubleshooting.cs`
+
+### Q: How do I load an SVG and save it as PNG asynchronously using Aspose.Imaging in .NET?  
+Use an `async Main` (or method) and run `Image.Load(inputPath)` inside `Task.Run`, then call `image.Save(outputPath, new PngOptions())` after the await. → See: `implement-asynchronous-svg-loading-and-png-saving-using-async-await-pattern-for-non-blocking-i-o.cs`
+
+### Q: How can I embed a converted PNG into an HTML email body after SVG rasterization with Aspose.Imaging in C#?  
+Read the PNG into a byte array, convert it to a Base64 string, and insert it into an `<img src="data:image/png;base64,{data}" />` tag in the HTML file. → See: `embed-the-png-raster-image-into-an-html-email-body-after-conversion.cs`
+
+### Q: How can I batch‑convert several SVG files to BMP using a single `SvgRasterizationOptions` instance in C#?  
+Create one `SvgRasterizationOptions` object, set its width/height, then loop through the SVG files, loading each with `Image.Load` and saving with `BmpOptions` that reference the shared rasterization options. → See: `batch-convert-multiple-svg-files-to-bmp-using-a-single-svgrasterizationoptions-instance.cs`
+
+### Q: How do I build an ASP.NET Core controller action that accepts an uploaded SVG and returns a PNG using Aspose.Imaging?  
+Accept an `IFormFile` parameter, load the stream with `Image.Load`, configure `PngOptions`, and return `File(imageStream, "image/png")` from the action. → See: `create-an-asp-net-api-endpoint-that-accepts-uploaded-svg-and-returns-converted-png-as-file.cs`
+## Operations Covered
+- Add text watermark to BMP image after SVG rasterization  
+- Rasterize SVG to BMP format  
+- Batch‑convert multiple SVG files to BMP using one options instance  
+- Apply an indexed color palette when converting SVG to BMP  
+- Set maximum compression level for PNG output  
+- Disable anti‑aliasing in SVG rasterization to improve performance  
+- Load an SVG image into an Aspose Imaging object  
+- Save a rasterized image as PNG or BMP file  
+
+## Supported Formats
+- **SVG** – source vector graphics loaded for rasterization  
+- **BMP** – raster image produced from SVG (including indexed‑palette BMP)  
+- **PNG** – raster image produced from SVG with optional high compression  
+
+## API Classes Used
+- `Image` — base class for loading and saving images; used with `Image.Load` and `image.Save`.  
+- `SvgRasterizationOptions` — defines how an SVG is rasterized (page size, anti‑aliasing, etc.).  
+- `BmpOptions` — specifies BMP‑specific saving options, such as an indexed color palette.  
+- `PngOptions` — specifies PNG‑specific saving options, including compression level.  
+- `Brushes` — provides brush objects (e.g., for drawing text watermark on a bitmap).  
+- `Aspose.Imaging.FileFormats.Svg` (namespace) — contains SVG‑related types used during loading.  
+- `Aspose.Imaging.FileFormats.Bmp` (namespace) — contains BMP‑related types used during saving.
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-06-26 | Run: `20260626_071457` | Examples: 40
 <!-- AUTOGENERATED:END -->

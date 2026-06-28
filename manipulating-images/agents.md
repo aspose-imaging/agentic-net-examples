@@ -164,6 +164,98 @@ All tasks passed ✅
 ## Related Categories  
 The Manipulating Images examples often complement the **Converting Formats** category, where files are first transformed into a suitable format before being resized or cropped. Developers working on **Applying Filters** can chain filter operations after performing basic transformations like rotate and resize, achieving richer visual effects. Additionally, the **Drawing Shapes** and **Metadata Management** sections provide ways to annotate or tag the manipulated images, creating a comprehensive image processing toolkit within the repository.
 
+
+## Developer Q&A
+
+### Q: How do I load a PNG image, apply auto‑masking graph cut with the default strokes, and save the result as a PNG in C#?
+Use `RasterImage.Load` to open the PNG, create an `AutoMaskingGraphCutOptions` instance with default strokes, call `image.ApplyAutoMaskingGraphCut(options)`, and then save with `image.Save("output.png", new PngOptions())`. → See: `27872-load-a-png-image-apply-auto-masking-graph-cut-with-default-strokes-and-save-as-png.cs`
+
+### Q: How to define a point array for manual masking on a PNG and export the processed image using Aspose.Imaging for .NET?
+Create a `MaskingOptions` object, assign your `Point[]` array to its `Points` property, invoke `image.ApplyMasking(maskingOptions)`, and save the image with `new PngOptions()`. → See: `define-a-point-array-for-manual-masking-use-it-on-a-png-and-save-the-processed-image.cs`
+
+### Q: How do I remove the background from an SVG vector image with default analysis and rasterize it to PNG in C#?
+Load the SVG with `SvgImage.Load`, use `AutoMaskingGraphCutOptions` (default settings) together with `image.ApplyAutoMaskingGraphCut`, then rasterize and save via `image.Save("output.png", new PngOptions())`. → See: `load-an-svg-vector-image-remove-its-background-using-default-analysis-and-save-as-png.cs`
+
+### Q: How to apply a median filter to a PNG after background removal to reduce residual noise before saving?
+After masking, instantiate `MedianFilterOptions`, call `image.ApplyFilter(medianOptions)`, and finally save the cleaned image with `new PngOptions()`. → See: `apply-median-filter-to-a-png-image-after-background-removal-to-reduce-residual-noise-before-saving.cs`
+
+### Q: How to batch‑process a folder of PNG files, applying auto‑masking graph cut with custom user‑defined strokes to each file in .NET?
+Loop through the directory, load each file with `RasterImage.Load`, configure `AutoMaskingGraphCutOptions` with your custom strokes, apply `image.ApplyAutoMaskingGraphCut(options)`, and save the result using `new PngOptions()`. → See: `batch-process-a-folder-of-png-files-applying-auto-masking-graph-cut-with-user-defined-strokes-to-each.cs`
+
+
+
+### Q: How can I rotate a BMP image by 45 degrees, fill the empty background with white, and save the result using Aspose.Imaging for .NET?  
+Load the BMP with `Image.Load`, call `image.Rotate(45)` and set the background color via `image.BackgroundColor = Color.White` before saving with `BmpImage.Save`. → See: `apply-a-45-degree-rotation-to-a-bmp-image-with-white-background-fill-and-store-the-output-in-a-file.cs`
+
+### Q: How do I programmatically adjust brightness, contrast, and gamma of an APNG file and export the edited image as PNG in C#?  
+Use `ApngImage` to load the file, apply `ImageAdjustments.BrightnessContrastGamma(brightness, contrast, gamma)` and then save with `PngOptions`. → See: `apply-configurable-brightness-contrast-and-gamma-adjustments-to-apng-images-programmatically-within-the-net-environment.cs`
+
+### Q: How can I apply a Gaussian blur to a TIFF image, increase its brightness, and save the final picture as a PDF using Aspose.Imaging?  
+Load the TIFF with `Image.Load`, add a `GaussianBlurFilter` via `image.ApplyFilter(new GaussianBlurFilter(radius))`, adjust brightness with `ImageAdjustments.Brightness(image, value)`, and export using `PdfOptions`. → See: `apply-gaussian-blur-to-a-tiff-image-then-adjust-brightness-saving-the-final-picture-as-pdf.cs`
+
+### Q: How do I crop an image by shifting the crop region with offset values in Aspose.Imaging for .NET?  
+Create a `Rectangle` that represents the desired crop area, modify its `X` and `Y` with the offset, and call `image.Crop(rectangle)` before saving. → See: `apply-offset-based-cropping-to-images-shifting-the-crop-region-to-extract-desired-portions-efficiently.cs`
+
+### Q: How can I batch‑process all TIFF files in a folder, apply a Gaussian blur to each, and output each softened image as a PDF with Aspose.Imaging?  
+Iterate through the directory, load each TIFF via `Image.Load`, apply `new GaussianBlurFilter(radius)` with `image.ApplyFilter`, then save each result using `PdfOptions` to the output folder. → See: `batch-apply-gaussian-blur-to-all-tiff-files-in-a-folder-outputting-each-softened-image-as-pdf.cs`
+
+### Q: How can I batch‑verify digital signatures of images stored in a cloud folder and write any mismatches to an audit log using Aspose.Imaging for .NET?  
+Use `Image.Load` to open each file, call `image.VerifySignature(password)` for verification, and log the result with `File.AppendAllText`. → See: batch-verify-digital-signatures-of-images-in-cloud-storage-logging-any-mismatches-to-an-audit-file.cs  
+
+### Q: How do I compress all GIF files in a directory with lossy compression while keeping the original animation frame order in C#?  
+Create a `GifCompressionOptions` with `Lossy = true` and pass it to `GifImage.Save` for each file; the library preserves the frame sequence automatically. → See: compress-multiple-gif-files-in-a-directory-with-lossy-settings-preserving-each-animation-s-frame-order.cs  
+
+### Q: How can I embed a digital signature into a BMP image and then attempt verification with an incorrect password using Aspose.Imaging for .NET?  
+Set `BmpOptions.DigitalSignature` when saving the BMP, then call `image.VerifySignature(wrongPassword)` which will return false for a bad password. → See: create-a-bmp-image-embed-a-digital-signature-then-attempt-to-verify-the-signature-with-an-incorrect-password.cs  
+
+### Q: How do I set
+
+### Q: How can I extract the mask generated by AutoMaskingGraphCut and save it as a separate PNG using Aspose.Imaging for .NET?  
+Use the `AutoMaskingGraphCutResult.MaskImage` property to get the mask bitmap and call its `Save` method with a `PngOptions` instance. → See: 27872-load-a-png-image-apply-auto-masking-graph-cut-with-default-strokes-and-save-as-png.cs  
+
+### Q: How do I set a custom feathering radius for the AutoMaskingGraphCut operation on a PNG in C#?  
+Create an `AutoMaskingGraphCutOptions` object, assign the desired value to its `FeatheringRadius` property, and pass it to `AutoMaskingGraphCut`. → See: create-automaskinggraphcutoptions-with-custom-feathering-radius-apply-to-a-png-then-export-result.cs  
+
+### Q: How can I rotate a BMP image by a non‑standard angle (e.g., 30°) and fill the empty area with white using Aspose.Imaging in .NET?  
+Call `image.Rotate` with a `RotateOptions` specifying `Angle = 30` and `BackgroundColor = Color.White`. → See: apply-a-45-degree-rotation-to-a-bmp-image-with-white-background-fill-and-store-the-output-in-a-file.cs  
+
+### Q: How do I apply brightness, contrast, and gamma adjustments to each frame of an APNG before saving as a PNG in C#?  
+Load the `ApngImage`, iterate its `Frames` collection, call `AdjustBrightnessContrast
+## Operations Covered
+- Load PNG image from file  
+- Apply auto‑masking (graph‑cut) to PNG  
+- Save processed image as PNG  
+- Apply Gaussian‑Wiener filter to image  
+- Save filtered image as APNG  
+- Adjust gamma of raster image  
+- Apply per‑channel gamma correction to PSD  
+- Export PSD image to PDF  
+- Embed digital signature into JPEG (pixel‑count check)  
+- Verify digital signature on BMP  
+- Perform Gauss‑Wiener deblurring on raster image  
+- Apply bilateral smoothing after masking  
+
+## Supported Formats
+- **PNG** – loaded and saved after masking  
+- **APNG** – output format for Gaussian‑Wiener filtered image  
+- **JPEG** – source image for digital‑signature embedding  
+- **PSD** – source image for per‑channel gamma correction  
+- **PDF** – target format when exporting PSD  
+- **BMP** – created, signed, and verified  
+
+## API Classes Used
+- **Image** – base class for loading, processing, and disposing images.  
+- **RasterImage** – provides pixel‑level operations such as `AdjustGamma` and filter application.  
+- **PngOptions** – specifies options when saving PNG files.  
+- **GraphCutMaskingOptions** – configures parameters for automatic graph‑cut masking.  
+- **GraphCutMaskingResult** – holds the result of a graph‑cut masking operation.  
+- **FileCreateSource** – represents a file‑based data source used when creating new images.  
+- **GaussianWienerFilterOption** – defines settings for the Gaussian‑Wiener filter.  
+- **BilateralSmoothingFilterOption** – defines settings for bilateral smoothing filter.  
+- **JpegImage** – represents a JPEG image, used here for embedding a digital signature.  
+- **BmpOptions** – defines options for creating and saving BMP images.  
+- **BmpImage** – represents a BMP image, used for signing and verification.
+
 <!-- AUTOGENERATED:START -->
 Updated: 2026-06-27 | Run: `20260627_051727` | Examples: 425
 <!-- AUTOGENERATED:END -->
