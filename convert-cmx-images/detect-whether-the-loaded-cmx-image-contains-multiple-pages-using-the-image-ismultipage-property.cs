@@ -8,7 +8,7 @@ class Program
     static void Main(string[] args)
     {
         string inputPath = "sample.cmx";
-        string outputPath = "result.txt";
+        string outputPath = "output\\result.txt";
 
         try
         {
@@ -18,15 +18,16 @@ class Program
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             using (CmxImage image = (CmxImage)Image.Load(inputPath))
             {
-                bool isMultiPage = image.IsMultiPage;
+                bool isMultiPage = false;
+                if (image is IMultipageImage multipageImage)
+                {
+                    isMultiPage = multipageImage.PageCount > 1;
+                }
+
                 Console.WriteLine($"Is multi-page: {isMultiPage}");
                 File.WriteAllText(outputPath, isMultiPage.ToString());
             }
@@ -40,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD application imports a CMX file and must decide whether to treat it as a single drawing or iterate through multiple pages for batch rendering.
- * 2. When a document conversion service processes CMX drawings and needs to split each page into separate PNG files only if the image is multi‑page.
- * 3. When an automated quality‑control script validates incoming CMX assets and logs a warning if a file contains more than one page, which could affect downstream printing.
- * 4. When a cloud‑based image viewer loads CMX files and uses the IsMultiPage flag to enable page navigation controls for end users.
- * 5. When a migration tool moves legacy CMX drawings to a new repository and must preserve page hierarchy by checking the multi‑page property before creating separate database entries.
+ * 1. When a C# application processes CMX vector drawings and must decide whether to treat the file as a single page or iterate through multiple pages, it can use Image.IsMultiPage (via IMultipageImage) to detect multi‑page content.
+ * 2. When converting batch CMX files to PDF or another format, a developer needs to know if the source image contains more than one page to generate separate PDF pages accordingly.
+ * 3. When building a document management system that indexes CMX assets, checking the multi‑page flag helps decide whether to store each page as an individual record.
+ * 4. When implementing a preview thumbnail generator for CMX files, detecting multiple pages allows the UI to display a page‑navigation control only when needed.
+ * 5. When validating user‑uploaded CMX files in a web service, the code can quickly reject files with unexpected page counts by inspecting the Image.IsMultiPage property.
  */
