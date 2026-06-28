@@ -3,68 +3,46 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Emf.Graphics;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.emf";
+        string outputPath = @"C:\Images\output.png";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.emf";
-            string outputPath = "output.png";
-
-            if (!File.Exists(inputPath))
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load EMF image
-            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
-            {
-                // Set up vector rasterization options
-                EmfRasterizationOptions vectorOptions = new EmfRasterizationOptions
+                // Configure rasterization options.
+                // The BackgroundColor is set with an alpha of 204 (80% opacity) to affect overall rendering.
+                var rasterOptions = new EmfRasterizationOptions
                 {
-                    PageSize = emfImage.Size
+                    PageSize = image.Size,
+                    BackgroundColor = Aspose.Imaging.Color.FromArgb(204, 255, 255, 255) // 80% opacity white
                 };
 
-                // Configure PNG options with vector rasterization
-                PngOptions pngOptions = new PngOptions
+                // Set PNG save options with the rasterization settings
+                var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = vectorOptions
+                    VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save EMF as PNG (rasterized)
-                emfImage.Save(outputPath, pngOptions);
-            }
-
-            // Load the generated PNG to adjust opacity
-            using (RasterImage raster = (RasterImage)Image.Load(outputPath))
-            {
-                int width = raster.Width;
-                int height = raster.Height;
-                var rect = new Rectangle(0, 0, width, height);
-
-                // Load ARGB pixels
-                int[] pixels = raster.LoadArgb32Pixels(rect);
-
-                // Adjust alpha to 80% (204 out of 255)
-                for (int i = 0; i < pixels.Length; i++)
-                {
-                    int pixel = pixels[i];
-                    int alpha = (pixel >> 24) & 0xFF;
-                    int newAlpha = (int)(alpha * 0.8);
-                    if (newAlpha > 255) newAlpha = 255;
-                    pixels[i] = (newAlpha << 24) | (pixel & 0x00FFFFFF);
-                }
-
-                // Save modified pixels back
-                raster.SaveArgb32Pixels(rect, pixels);
-                raster.Save();
+                // Save the rasterized image as PNG
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -76,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a vector‑based EMF logo into a semi‑transparent PNG for use as an overlay on web pages or marketing materials.
- * 2. When a software solution must rasterize technical drawings from EMF files and reduce line opacity to 80 % so they appear as subtle background guides in a reporting dashboard.
- * 3. When an application generates printable PDFs and requires EMF charts to be saved as PNG images with reduced opacity to act as watermarks without obscuring underlying content.
- * 4. When a UI designer wants to create scalable icons from EMF assets and apply 80 % line transparency before embedding the PNGs into a Windows Forms or WPF application.
- * 5. When a document‑processing pipeline needs to batch‑process EMF diagrams, rasterize them to PNG, and uniformly lower the alpha channel to 80 % for consistent visual styling across all generated assets.
+ * 1. When a developer needs to convert legacy Windows Metafile (EMF) graphics into web‑friendly PNG images while applying a semi‑transparent background for overlay effects.
+ * 2. When an application must generate printable reports that embed vector EMF logos but require the final output as PNG with 80 % line opacity to blend with document backgrounds.
+ * 3. When a desktop tool automates batch processing of EMF icons, adjusting their opacity to 80 % before saving them as PNG files for use in UI themes.
+ * 4. When a GIS system exports map symbols stored as EMF and needs to rasterize them with a partially transparent background for overlay on satellite imagery in PNG format.
+ * 5. When a document management workflow imports EMF diagrams and needs to create PNG previews with reduced line opacity to indicate draft status.
  */
