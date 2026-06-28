@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -9,48 +10,33 @@ class Program
     {
         try
         {
-            // Hardcoded input SVG path
-            string inputPath = @"C:\Data\diagram.svg";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\diagram.svg";
+            string outputPath = @"C:\Temp\diagram.pdf";
+
+            // Ensure the directory for the input file exists and write SVG content
+            Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
+            string svgContent = GenerateSvgDiagram();
+            File.WriteAllText(inputPath, svgContent, Encoding.UTF8);
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Hardcoded output PDF path
-            string outputPath = @"C:\Data\report.pdf";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Read original SVG content
-            string svgContent = File.ReadAllText(inputPath);
-
-            // Define axis lines and labels as SVG elements
-            string axesAndLabels = @"
-  <line x1='50' y1='550' x2='750' y2='550' stroke='black' stroke-width='2'/>
-  <line x1='50' y1='550' x2='50' y2='50' stroke='black' stroke-width='2'/>
-  <text x='400' y='580' font-family='Arial' font-size='16' text-anchor='middle'>X Axis</text>
-  <text x='20' y='300' font-family='Arial' font-size='16' text-anchor='middle' transform='rotate(-90 20,300)'>Y Axis</text>";
-
-            // Insert the new elements before the closing </svg> tag
-            string modifiedSvg = svgContent.Replace("</svg>", axesAndLabels + "\n</svg>");
-
-            // Write the modified SVG to a temporary file
-            string tempSvgPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.svg");
-            File.WriteAllText(tempSvgPath, modifiedSvg);
-
-            // Load the temporary SVG and save it as PDF
-            using (Image image = Image.Load(tempSvgPath))
+            // Load the SVG as an Aspose.Imaging image
+            using (Image image = Image.Load(inputPath))
             {
-                var pdfOptions = new PdfOptions();
+                // Prepare PDF export options
+                PdfOptions pdfOptions = new PdfOptions();
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the image as PDF
                 image.Save(outputPath, pdfOptions);
-            }
-
-            // Optionally delete the temporary SVG file
-            if (File.Exists(tempSvgPath))
-            {
-                File.Delete(tempSvgPath);
             }
         }
         catch (Exception ex)
@@ -58,13 +44,62 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
+
+    // Generates a simple SVG diagram with data points, axes, and labels
+    static string GenerateSvgDiagram()
+    {
+        // Example data points
+        var points = new (double X, double Y)[]
+        {
+            (10, 80), (30, 60), (50, 70), (70, 40), (90, 50)
+        };
+
+        // SVG canvas size
+        int width = 200;
+        int height = 200;
+        int margin = 20;
+
+        var sb = new StringBuilder();
+        sb.AppendLine($"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{width}\" height=\"{height}\">");
+
+        // Draw axes
+        sb.AppendLine($"  <line x1=\"{margin}\" y1=\"{height - margin}\" x2=\"{width - margin}\" y2=\"{height - margin}\" stroke=\"black\"/>"); // X axis
+        sb.AppendLine($"  <line x1=\"{margin}\" y1=\"{margin}\" x2=\"{margin}\" y2=\"{height - margin}\" stroke=\"black\"/>"); // Y axis
+
+        // Axis labels
+        sb.AppendLine($"  <text x=\"{width / 2}\" y=\"{height - 5}\" font-size=\"12\" text-anchor=\"middle\">X Axis</text>");
+        sb.AppendLine($"  <text x=\"5\" y=\"{height / 2}\" font-size=\"12\" transform=\"rotate(-90 5,{height / 2})\" text-anchor=\"middle\">Y Axis</text>");
+
+        // Plot points and connect them with lines
+        sb.AppendLine("  <polyline fill=\"none\" stroke=\"blue\" stroke-width=\"2\" points=\"");
+        foreach (var p in points)
+        {
+            // Transform data coordinates to SVG coordinates
+            double svgX = margin + p.X * (width - 2 * margin) / 100.0;
+            double svgY = height - margin - p.Y * (height - 2 * margin) / 100.0;
+            sb.Append($"{svgX},{svgY} ");
+        }
+        sb.AppendLine("\">");
+        sb.AppendLine("  </polyline>");
+
+        // Draw individual points
+        foreach (var p in points)
+        {
+            double svgX = margin + p.X * (width - 2 * margin) / 100.0;
+            double svgY = height - margin - p.Y * (height - 2 * margin) / 100.0;
+            sb.AppendLine($"  <circle cx=\"{svgX}\" cy=\"{svgY}\" r=\"3\" fill=\"red\"/>");
+        }
+
+        sb.AppendLine("</svg>");
+        return sb.ToString();
+    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a financial analyst needs to convert a generated SVG chart of stock performance into a PDF report with labeled X and Y axes for distribution to stakeholders.
- * 2. When an engineering team wants to embed a vector diagram of a circuit layout into a PDF technical manual, adding axis labels automatically via C# and Aspose.Imaging.
- * 3. When a data‑science application produces SVG scatter plots that must be merged into a printable PDF summary, requiring on‑the‑fly insertion of axis lines and text.
- * 4. When a marketing automation script creates SVG infographics and needs to produce PDF assets with proper axis annotations for client presentations.
- * 5. When a compliance system archives SVG‑based process flow diagrams as searchable PDF files, adding axis labels to meet documentation standards using Aspose.Imaging for .NET.
+ * 1. When a financial analyst needs to generate a vector chart of stock price trends from raw data points, embed axis labels, and export it as a PDF for inclusion in quarterly reports using C# and Aspose.Imaging.
+ * 2. When a manufacturing engineer wants to visualize sensor measurements on a calibrated graph, create an SVG diagram with labeled axes, and automatically convert it to a PDF for quality‑control documentation.
+ * 3. When a healthcare application must produce patient vital‑sign charts from numeric readings, add descriptive axis titles, and save the result as a PDF for electronic medical records using Aspose.Imaging for .NET.
+ * 4. When a marketing team requires a scalable infographic of campaign performance metrics, generate the SVG plot with data points and axis labels in C#, then convert it to a PDF for printable presentations.
+ * 5. When an academic researcher needs to programmatically create a scientific plot of experimental data, label the axes, and distribute the figure as a PDF in a research paper, this code provides a straightforward solution.
  */
