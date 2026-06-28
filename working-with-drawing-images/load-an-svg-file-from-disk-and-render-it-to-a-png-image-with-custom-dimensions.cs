@@ -1,20 +1,21 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.svg";
-            string outputPath = "output/output.png";
+            string inputPath = @"C:\Images\input.svg";
+            string outputPath = @"C:\Images\output.png";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,27 +25,30 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
-            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
-            {
-                // Desired output dimensions
-                int targetWidth = 800;
-                int targetHeight = 600;
+            // Desired raster dimensions
+            int targetWidth = 800;
+            int targetHeight = 600;
 
-                // Configure rasterization options with custom size
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+            // Load the SVG image from file
+            using (SvgImage svgImage = new SvgImage(inputPath))
+            {
+                // Configure rasterization options with custom page size
+                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
                 {
                     PageSize = new Size(targetWidth, targetHeight),
-                    BackgroundColor = Color.White
+                    // Optional: set background color, smoothing, etc.
+                    BackgroundColor = Color.White,
+                    SmoothingMode = SmoothingMode.AntiAlias,
+                    TextRenderingHint = TextRenderingHint.AntiAlias
                 };
 
                 // Set PNG save options and attach rasterization options
                 PngOptions pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = rasterizationOptions
                 };
 
-                // Save the rendered PNG image
+                // Save the rasterized image as PNG
                 svgImage.Save(outputPath, pngOptions);
             }
         }
@@ -58,8 +62,8 @@ class Program
 /*
  * Real-World Use Cases:
  * 1. When a web application needs to generate thumbnail previews of user‑uploaded SVG logos as 800×600 PNG files for display in a product catalog.
- * 2. When an automated build pipeline must convert vector icons stored as SVG into raster PNG assets of specific size for inclusion in a mobile app’s resource bundle.
- * 3. When a reporting service has to embed high‑resolution PNG charts derived from SVG diagrams into PDF invoices, requiring precise width and height control.
- * 4. When a desktop utility processes a batch of SVG floor‑plan files and outputs them as white‑background PNG images sized to fit a predefined print layout.
- * 5. When a content management system needs to render SVG illustrations to PNG on the fly, ensuring the output matches the exact pixel dimensions required by a responsive web page.
+ * 2. When an automated reporting tool must convert vector‑based SVG charts into raster PNG images with a specific page size to embed in PDF reports.
+ * 3. When a desktop utility has to batch‑process SVG icons and output them as PNG assets with a white background for use in a Windows application UI.
+ * 4. When a CI/CD pipeline requires rendering SVG diagrams to PNG at custom dimensions to verify visual consistency before deployment.
+ * 5. When a mobile app backend needs to serve PNG versions of scalable SVG illustrations at a fixed resolution for devices that do not support SVG rendering.
  */
