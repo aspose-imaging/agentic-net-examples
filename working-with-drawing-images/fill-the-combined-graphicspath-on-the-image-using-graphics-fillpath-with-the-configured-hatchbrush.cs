@@ -9,49 +9,45 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = @"C:\temp\input.png";
         string outputPath = @"C:\temp\output.png";
 
         try
         {
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Initialize graphics for the image
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
 
-                // Create a combined GraphicsPath
+                // First figure with rectangle and ellipse
+                Figure figure1 = new Figure();
+                figure1.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
+                figure1.AddShape(new EllipseShape(new RectangleF(100f, 100f, 150f, 150f)));
+
+                // Second figure with a pie shape
+                Figure figure2 = new Figure();
+                figure2.AddShape(new PieShape(new RectangleF(150f, 150f, 200f, 200f), 0f, 90f));
+
+                // Combine figures into a single GraphicsPath
                 GraphicsPath combinedPath = new GraphicsPath();
-
-                // First figure: rectangle
-                Figure rectFigure = new Figure();
-                rectFigure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
-                combinedPath.AddFigure(rectFigure);
-
-                // Second figure: ellipse
-                Figure ellipseFigure = new Figure();
-                ellipseFigure.AddShape(new EllipseShape(new RectangleF(150f, 120f, 200f, 150f)));
-                combinedPath.AddFigure(ellipseFigure);
+                combinedPath.AddFigures(new[] { figure1, figure2 });
 
                 // Configure HatchBrush
                 using (HatchBrush hatchBrush = new HatchBrush())
                 {
-                    hatchBrush.BackgroundColor = Color.LightGray;
+                    hatchBrush.BackgroundColor = Color.White;
                     hatchBrush.ForegroundColor = Color.Blue;
+                    // Optional: set hatch style if needed
+                    // hatchBrush.HatchStyle = Aspose.Imaging.Brushes.HatchStyle.Cross;
 
-                    // Fill the combined path with the hatch brush
+                    // Fill the combined path
                     graphics.FillPath(hatchBrush, combinedPath);
                 }
 
@@ -69,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to generate a PNG badge that combines a rectangular background and an elliptical logo, filled with a blue‑on‑light‑gray hatch pattern using Aspose.Imaging’s GraphicsPath and HatchBrush.
- * 2. When creating printable PDF or image reports where overlapping shapes (e.g., a highlighted area and a call‑out ellipse) need a consistent textured fill to improve visual distinction.
- * 3. When building a custom map overlay in a C# application that shades intersecting zones with a hatch brush to indicate restricted regions on a raster image.
- * 4. When designing a UI asset such as a button or icon where a rectangle and an ellipse are merged into a single path and filled with a patterned brush for a retro or technical aesthetic.
- * 5. When automating the generation of promotional flyers that require layered geometric shapes filled with a specific color hatch to meet branding guidelines, saving the result as a high‑resolution PNG.
+ * 1. When a developer wants to overlay a patterned watermark composed of multiple shapes (rectangle, ellipse, pie) onto a PNG or JPEG image for branding purposes.
+ * 2. When generating custom map annotations where combined geometric regions need to be filled with a hatch pattern to distinguish zones on a raster map.
+ * 3. When creating printable reports that require shaded diagram elements, such as highlighted sections in engineering schematics, using a HatchBrush on a combined GraphicsPath.
+ * 4. When building a UI that dynamically renders complex icons with cross‑hatched fills, allowing the shapes to be defined programmatically and saved as PNG for web use.
+ * 5. When automating the preparation of marketing assets that need a blue‑on‑white hatch fill applied to multiple overlapping shapes to achieve a consistent visual style across images.
  */

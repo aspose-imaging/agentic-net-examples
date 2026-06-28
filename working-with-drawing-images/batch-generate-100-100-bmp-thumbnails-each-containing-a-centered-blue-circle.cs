@@ -11,57 +11,31 @@ class Program
     {
         try
         {
-            string inputFolder = "Input";
-            string outputFolder = "Output";
+            string outputDir = "Thumbnails";
+            Directory.CreateDirectory(outputDir);
 
-            // Ensure input and output directories exist
-            if (!Directory.Exists(inputFolder))
+            for (int i = 0; i < 100; i++)
             {
-                Directory.CreateDirectory(inputFolder);
-                Console.WriteLine($"Input directory created at: {inputFolder}. Add files and rerun.");
-                return;
-            }
-
-            if (!Directory.Exists(outputFolder))
-            {
-                Directory.CreateDirectory(outputFolder);
-            }
-
-            string[] inputFiles = Directory.GetFiles(inputFolder);
-
-            foreach (string inputPath in inputFiles)
-            {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".bmp");
-
-                // Ensure the output directory exists
+                string outputPath = Path.Combine(outputDir, $"thumb_{i}.bmp");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Create BMP options with bound file source
-                BmpOptions bmpOptions = new BmpOptions();
-                bmpOptions.BitsPerPixel = 24;
-                bmpOptions.Source = new FileCreateSource(outputPath, false);
+                Source source = new FileCreateSource(outputPath, false);
+                BmpOptions options = new BmpOptions() { Source = source };
 
-                // Create a 100x100 BMP canvas
-                using (Image canvas = Image.Create(bmpOptions, 100, 100))
+                using (Image canvas = Image.Create(options, 100, 100))
                 {
-                    // Draw on the canvas
                     Graphics graphics = new Graphics(canvas);
-                    graphics.Clear(Aspose.Imaging.Color.White);
 
-                    using (SolidBrush blueBrush = new SolidBrush(Aspose.Imaging.Color.Blue))
+                    int radius = 40;
+                    int centerX = 50;
+                    int centerY = 50;
+                    Rectangle bounds = new Rectangle(centerX - radius, centerY - radius, radius * 2, radius * 2);
+
+                    using (SolidBrush blueBrush = new SolidBrush(Color.Blue))
                     {
-                        // Draw a centered blue circle (filled ellipse)
-                        graphics.FillEllipse(blueBrush, new Rectangle(0, 0, 100, 100));
+                        graphics.FillEllipse(blueBrush, bounds);
                     }
 
-                    // Save the bound image
                     canvas.Save();
                 }
             }
@@ -75,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically generate a set of 100 × 100 BMP icons with a centered blue circle for a Windows desktop application's toolbar, this code can batch‑process source files and output ready‑to‑use thumbnails.
- * 2. When building a legacy embedded system that only supports 24‑bit BMP images, the snippet can create uniform placeholder graphics for device menus by converting any input files into 100 × 100 BMP thumbnails with a blue circle.
- * 3. When preparing a dataset for computer‑vision testing, a programmer can employ the code to produce a large collection of small BMP samples containing a known blue circle pattern for algorithm validation.
- * 4. When a web service must supply thumbnail previews of user‑uploaded images in BMP format for an older client application, the batch routine creates 100 × 100 BMP previews with a consistent blue‑circle watermark.
- * 5. When automating the creation of printable sticker sheets where each sticker is a 100 × 100 BMP image with a centered blue circle, this C# solution quickly generates all required files from a folder of source assets.
+ * 1. When a developer needs to automatically generate a batch of 100 × 100 BMP thumbnail icons with a centered blue circle for a Windows desktop application's toolbar.
+ * 2. When an automated test suite must create placeholder BMP images of a fixed size to verify that image‑processing pipelines correctly handle 100 × 100 pixel graphics.
+ * 3. When a content‑management system requires pre‑rendered BMP thumbnails with a simple blue circle logo to display before the actual user‑uploaded pictures are processed.
+ * 4. When a game developer wants to produce a set of 100 × 100 BMP sprites containing a blue circular marker for use as minimap icons or UI elements.
+ * 5. When a reporting tool needs to embed uniform 100 × 100 BMP thumbnails with a blue circle into PDF or Excel documents to illustrate data points without relying on external image assets.
  */

@@ -1,8 +1,7 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -10,69 +9,39 @@ class Program
     {
         try
         {
-            // Define base directories
             string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputDir = Path.Combine(baseDir, "Input");
+            string outputDir = Path.Combine(baseDir, "Output");
 
-            // Ensure input directory exists (no validation required per task, but create if missing)
-            if (!Directory.Exists(inputDirectory))
+            if (!Directory.Exists(inputDir))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
+            if (!Directory.Exists(outputDir))
             {
-                Directory.CreateDirectory(outputDirectory);
+                Directory.CreateDirectory(outputDir);
             }
 
-            // Get all vector files (common extensions)
-            string[] files = Directory.GetFiles(inputDirectory, "*.*")
-                .Where(f => f.EndsWith(".svg", StringComparison.OrdinalIgnoreCase) ||
-                            f.EndsWith(".cdr", StringComparison.OrdinalIgnoreCase) ||
-                            f.EndsWith(".cmx", StringComparison.OrdinalIgnoreCase) ||
-                            f.EndsWith(".wmf", StringComparison.OrdinalIgnoreCase) ||
-                            f.EndsWith(".emf", StringComparison.OrdinalIgnoreCase))
-                .ToArray();
-
+            string[] files = Directory.GetFiles(inputDir);
             foreach (string inputPath in files)
             {
-                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Prepare output paths
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string pdfOutputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-                string svgOutputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".svg");
-
-                // Ensure output directories exist
+                string pdfOutputPath = Path.Combine(outputDir, fileNameWithoutExt + ".pdf");
                 Directory.CreateDirectory(Path.GetDirectoryName(pdfOutputPath));
-                Directory.CreateDirectory(Path.GetDirectoryName(svgOutputPath));
 
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+                using (Image image = Image.Load(inputPath))
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    // Save as PDF
-                    var pdfOptions = new PdfOptions();
                     image.Save(pdfOutputPath, pdfOptions);
-
-                    // Save as SVG
-                    var svgRasterOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = image.Size,
-                        BackgroundColor = Aspose.Imaging.Color.White
-                    };
-                    var svgOptions = new SvgOptions
-                    {
-                        VectorRasterizationOptions = svgRasterOptions
-                    };
-                    image.Save(svgOutputPath, svgOptions);
                 }
             }
         }
@@ -85,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a company needs to archive legacy vector graphics from design tools by converting them into searchable PDF and web‑ready SVG files using C# and Aspose.Imaging.
- * 2. When a document management system must ingest a mixed collection of .cdr, .wmf, .emf, and .svg files and store standardized PDF and SVG versions for long‑term preservation.
- * 3. When an automated build pipeline has to generate PDF reports and SVG thumbnails from a batch of vector assets to ensure consistent rendering across browsers and printers.
- * 4. When a legal compliance team requires batch conversion of vector drawings into PDF/A and SVG formats to meet regulatory record‑keeping standards with minimal manual effort.
- * 5. When a cloud‑based archival service processes user‑uploaded vector files in bulk, converting each to PDF for offline viewing and to SVG for scalable web display using Aspose.Imaging for .NET.
+ * 1. When a developer needs to archive a collection of vector drawings (e.g., AI, EPS, SVG) as searchable PDF documents for long‑term storage, they can use this batch conversion code with Aspose.Imaging.
+ * 2. When an automated nightly job must transform all newly uploaded design files in a folder into PDF format for compliance reporting, the loop that loads each image and saves it with PdfOptions is ideal.
+ * 3. When a web service receives a zip of vector assets and must return PDF versions for client preview, the code demonstrates how to iterate through the files, load them with Image.Load, and generate PDFs in an output directory.
+ * 4. When a company wants to migrate legacy CAD or illustration files to a universal, platform‑independent format without manual effort, this C# script shows how to programmatically convert each file to PDF in bulk.
+ * 5. When a CI/CD pipeline includes a step to verify that all vector assets can be rendered correctly, the sample illustrates how to load each file, catch loading errors, and produce PDF outputs for visual inspection.
  */

@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
@@ -12,8 +10,8 @@ class Program
     {
         try
         {
-            string inputPath = @"input.png";
-            string outputPath = @"output.png";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -23,26 +21,23 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new FileCreateSource(outputPath, false);
+                Graphics graphics = new Graphics(image);
 
-                using (Image canvas = Image.Create(pngOptions, sourceImage.Width, sourceImage.Height))
-                {
-                    Graphics graphics = new Graphics(canvas);
-                    graphics.Clear(Color.White);
+                float offsetX = 50f;
+                float offsetY = 30f;
 
-                    GraphicsPath path = new GraphicsPath();
-                    Figure figure = new Figure();
-                    figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
-                    path.AddFigure(figure);
+                graphics.TranslateTransform(offsetX, offsetY);
 
-                    graphics.TranslateTransform(100f, 50f);
-                    graphics.DrawPath(new Pen(Color.Blue, 3), path);
+                GraphicsPath path = new GraphicsPath();
+                Figure figure = new Figure();
+                figure.AddShape(new RectangleShape(new RectangleF(10f, 10f, 200f, 150f)));
+                path.AddFigure(figure);
 
-                    canvas.Save();
-                }
+                graphics.DrawPath(new Pen(Color.Blue, 2), path);
+
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -54,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to place a rectangular watermark at a specific offset on a PNG image by translating the GraphicsPath before rendering with Aspose.Imaging for .NET.
- * 2. When a developer wants to reposition a logo or badge on a raster canvas by applying Graphics.TranslateTransform to shift the shape’s coordinates prior to drawing.
- * 3. When a developer generates a PNG report page and must align diagram elements with custom margins by translating the entire GraphicsPath.
- * 4. When a developer creates a thumbnail preview and uses a translation transform to center a rectangle shape relative to the image dimensions before saving.
- * 5. When a developer simulates drag‑and‑drop positioning of UI components by shifting a GraphicsPath with specified X/Y offsets and exporting the result as a PNG file.
+ * 1. When a developer needs to add a watermark or logo to an existing PNG image and wants to position it at a specific offset from the original content, they can use Graphics.TranslateTransform to shift the drawing path before rendering.
+ * 2. When creating a thumbnail generator that adds a decorative border around JPEG or PNG photos, TranslateTransform can move the rectangle shape so the border aligns correctly with the image edges.
+ * 3. When building a batch image annotation tool that places measurement boxes at consistent distances from the top‑left corner of each raster image, the code translates the GraphicsPath to the required X and Y offsets before drawing.
+ * 4. When implementing a custom UI overlay for scanned documents where a blue rectangle highlights a region of interest, developers can offset the rectangle using TranslateTransform to match the document’s margin settings.
+ * 5. When developing a report‑generation system that merges multiple raster images into a single PNG and needs to shift each graphic element to avoid overlap, TranslateTransform provides the precise X/Y shift before drawing the path.
  */

@@ -10,39 +10,44 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            if (!Directory.Exists(inputDirectory))
+            string[] files = Directory.GetFiles(inputDirectory);
+            foreach (string inputPath in files)
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    pdfOptions.PdfCoreOptions = new PdfCoreOptions
+                    {
+                        PdfCompliance = PdfComplianceVersion.PdfA1b
+                    };
+
+                    if (image is VectorImage)
+                    {
+                        pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
+                        };
+                    }
+
+                    image.Save(outputPath, pdfOptions);
+                }
             }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string inputPath = Path.Combine(inputDirectory, "input.jpg");
-            string outputPath = Path.Combine(outputDirectory, "output.pdf");
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
-            {
-                image.Save(outputPath, new PdfOptions());
-            }
-
-            Console.WriteLine($"Conversion completed: {outputPath}");
         }
         catch (Exception ex)
         {
@@ -53,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically convert a folder of SVG or EPS design files into PDF documents that preserve the original typography by embedding all fonts and comply with PDF 1.6 standards for downstream printing workflows.
- * 2. When an enterprise application must generate archival PDFs from a batch of CAD‑exported vector drawings, ensuring the files are self‑contained with embedded fonts and compatible with PDF viewers that require version 1.6.
- * 3. When a web service processes user‑uploaded vector logos and returns PDF versions with embedded fonts so the logos can be used in corporate brochures without font substitution issues.
- * 4. When a reporting tool creates multi‑page PDF reports from vector chart images, embedding the chart fonts and setting the PDF version to 1.6 to meet regulatory document‑format requirements.
- * 5. When a CI/CD pipeline needs to validate that all vector assets in a repository are converted to PDF/1.6 with embedded fonts before they are shipped to a print vendor.
+ * 1. When a developer needs to batch‑convert a directory of SVG, EPS, or AI vector graphics into PDF/A‑1b compliant PDFs with embedded fonts and a PDF version of 1.6 for long‑term archival.
+ * 2. When an automated build or CI pipeline must process multiple vector image files and generate PDFs that preserve the original page size, white background, and exact dimensions for regulatory reporting.
+ * 3. When a web service receives user‑uploaded vector drawings and must render each as a PDF with consistent rasterization options, such as SingleBitPerPixel text rendering and no smoothing, for high‑quality printing.
+ * 4. When a desktop application needs to export a collection of design assets to PDF while ensuring the PDF version is set to 1.6 and the fonts are embedded to avoid missing‑glyph issues on client machines.
+ * 5. When a document management system requires converting various vector image formats to PDFs with uniform PDF core options and vector rasterization settings to guarantee consistent viewing across different PDF viewers.
  */

@@ -3,8 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -12,51 +10,57 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
+            // Hard‑coded input and output directories
             string inputDir = @"C:\Icons\Svg";
-            string outputDir = @"C:\Icons\Png";
+            string outputDir = @"C:\Icons\MonochromePng";
 
-            // Get all SVG files in the input directory
-            string[] svgFiles = Directory.GetFiles(inputDir, "*.svg");
-
-            foreach (string inputPath in svgFiles)
+            // List of SVG files to process
+            string[] svgFiles = new[]
             {
-                // Verify input file exists
+                "icon1.svg",
+                "icon2.svg",
+                "icon3.svg"
+            };
+
+            foreach (string fileName in svgFiles)
+            {
+                // Build full paths
+                string inputPath = Path.Combine(inputDir, fileName);
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output file path (same name with .png extension)
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png");
-
-                // Ensure output directory exists
+                string outputPath = Path.Combine(outputDir, Path.ChangeExtension(fileName, ".png"));
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the SVG image
-                using (Image image = Image.Load(inputPath))
+                using (Image svgImage = Image.Load(inputPath))
                 {
-                    // Prepare rasterization options for SVG -> PNG conversion
-                    SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+                    // Rasterization options for SVG → PNG conversion
+                    var rasterOptions = new SvgRasterizationOptions
                     {
-                        // Render on a black background for dark theme
-                        BackgroundColor = Color.Black,
-                        // Use a size equal to the original SVG dimensions
-                        PageSize = image.Size
+                        PageSize = svgImage.Size,
+                        BackgroundColor = Color.Black // dark background for dark theme
                     };
 
-                    // Prepare PNG save options with grayscale (monochrome) color type
-                    PngOptions pngOptions = new PngOptions
+                    // PNG save options with the rasterization settings
+                    var pngOptions = new PngOptions
                     {
-                        VectorRasterizationOptions = rasterizationOptions,
-                        // Force grayscale output
-                        ColorType = PngColorType.Grayscale
+                        VectorRasterizationOptions = rasterOptions
                     };
 
                     // Save the rasterized PNG
-                    image.Save(outputPath, pngOptions);
+                    svgImage.Save(outputPath, pngOptions);
+                }
+
+                // Re‑open the PNG to convert it to grayscale (monochrome)
+                using (PngImage png = (PngImage)Image.Load(outputPath))
+                {
+                    png.Grayscale();               // Convert to grayscale
+                    png.Save(outputPath);          // Overwrite with the monochrome version
                 }
             }
         }
@@ -69,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate monochrome PNG assets from a library of SVG icons for a dark‑theme UI, they can batch‑convert the files using Aspose.Imaging’s SVG rasterization and PNG options in C#.
- * 2. When an automated build pipeline must produce black‑background, grayscale PNGs from SVG source files to ensure consistent branding across Windows desktop applications, this code can be integrated to run during CI.
- * 3. When a mobile app requires lightweight, single‑color PNG icons derived from scalable SVG vectors to reduce memory usage on low‑end devices, the snippet provides a fast C# solution.
- * 4. When a content management system needs to export user‑uploaded SVG logos as dark‑theme ready PNG thumbnails for preview thumbnails, the example shows how to process a folder of images in one pass.
- * 5. When a game developer wants to pre‑process SVG UI elements into black‑background, monochrome PNG sprites for faster rendering in Unity, the code demonstrates the necessary file‑system and image‑format handling.
+ * 1. When a developer needs to batch‑convert a collection of SVG icons into monochrome PNG files for a dark‑theme UI, this code automates the rasterization and saves the images with a black background.
+ * 2. When building a cross‑platform mobile app that requires lightweight PNG assets derived from vector SVG logos, the snippet quickly generates dark‑mode ready PNGs using Aspose.Imaging in C#.
+ * 3. When a CI/CD pipeline must produce production‑ready icon sets for a web dashboard that only supports PNG, the example shows how to script the conversion of multiple SVG files to black‑and‑white PNGs.
+ * 4. When an accessibility tool needs to replace colorful SVG symbols with high‑contrast monochrome PNGs for visually impaired users, the code demonstrates the necessary file‑system handling and rasterization options.
+ * 5. When a game developer wants to pre‑process SVG UI elements into dark‑theme compatible PNG sprites for faster loading, this sample provides a straightforward way to load, rasterize, and save the assets in bulk.
  */

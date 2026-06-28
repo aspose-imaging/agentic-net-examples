@@ -4,73 +4,76 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = @"C:\temp\house.bmp";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            int canvasWidth = 200;
-            int canvasHeight = 200;
+            // Output BMP file path
+            string outputPath = @"C:\temp\house.bmp";
 
-            // Set BMP options with file source
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // BMP options with 24 bits per pixel
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create the image canvas
-            using (Image image = Image.Create(bmpOptions, canvasWidth, canvasHeight))
+            // Create a 200x200 image
+            using (Image image = Image.Create(bmpOptions, 200, 200))
             {
-                // Initialize graphics
+                // Graphics for drawing
                 Graphics graphics = new Graphics(image);
+
+                // Clear background
                 graphics.Clear(Color.White);
 
-                // Pen for outlines
+                // Pens for outlines
                 Pen blackPen = new Pen(Color.Black, 2);
 
-                // House body
-                int houseX = 50;
-                int houseY = 100;
-                int houseWidth = 100;
-                int houseHeight = 80;
-                using (SolidBrush bodyBrush = new SolidBrush(Color.LightGray))
+                // Brushes for fills
+                using (SolidBrush houseBrush = new SolidBrush())
                 {
-                    graphics.FillRectangle(bodyBrush, new Rectangle(houseX, houseY, houseWidth, houseHeight));
-                }
-                graphics.DrawRectangle(blackPen, houseX, houseY, houseWidth, houseHeight);
+                    houseBrush.Color = Color.LightGray;
+                    houseBrush.Opacity = 100;
 
-                // Roof (triangle)
-                Point[] roofPoints = new Point[]
+                    // Draw house body
+                    graphics.FillRectangle(houseBrush, new Rectangle(50, 80, 100, 80));
+                    graphics.DrawRectangle(blackPen, new Rectangle(50, 80, 100, 80));
+                }
+
+                using (SolidBrush roofBrush = new SolidBrush())
                 {
-                    new Point(houseX, houseY),
-                    new Point(houseX + houseWidth / 2, houseY - 60),
-                    new Point(houseX + houseWidth, houseY)
-                };
-                using (SolidBrush roofBrush = new SolidBrush(Color.Brown))
-                {
+                    roofBrush.Color = Color.DarkRed;
+                    roofBrush.Opacity = 100;
+
+                    // Roof triangle points
+                    Point[] roofPoints = new Point[]
+                    {
+                        new Point(50, 80),
+                        new Point(150, 80),
+                        new Point(100, 30)
+                    };
+
+                    // Fill and draw roof
                     graphics.FillPolygon(roofBrush, roofPoints);
+                    graphics.DrawPolygon(blackPen, roofPoints);
                 }
-                graphics.DrawPolygon(blackPen, roofPoints);
 
-                // Chimney
-                int chimneyX = houseX + houseWidth - 30;
-                int chimneyY = houseY - 60;
-                int chimneyWidth = 20;
-                int chimneyHeight = 30;
-                using (SolidBrush chimneyBrush = new SolidBrush(Color.DarkRed))
+                using (SolidBrush chimneyBrush = new SolidBrush())
                 {
-                    graphics.FillRectangle(chimneyBrush, new Rectangle(chimneyX, chimneyY, chimneyWidth, chimneyHeight));
-                }
-                graphics.DrawRectangle(blackPen, chimneyX, chimneyY, chimneyWidth, chimneyHeight);
+                    chimneyBrush.Color = Color.Gray;
+                    chimneyBrush.Opacity = 100;
 
-                // Save the image (bound to FileCreateSource)
+                    // Chimney rectangle
+                    graphics.FillRectangle(chimneyBrush, new Rectangle(120, 30, 20, 30));
+                    graphics.DrawRectangle(blackPen, new Rectangle(120, 30, 20, 30));
+                }
+
+                // Save the image (file is already bound to the source)
                 image.Save();
             }
         }
@@ -83,9 +86,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically create a lightweight BMP icon of a house for a Windows Forms toolbar, this Aspose.Imaging C# example shows how to draw rectangles, triangles, and a chimney on a 24‑bit bitmap.
- * 2. When an automated report generator must embed a simple house illustration into a BMP image for real‑estate listings, the code demonstrates using Graphics, SolidBrush, and Pen objects to render the house shape.
- * 3. When a game developer wants to produce placeholder house sprites as BMP files during prototyping, the example provides a quick way to draw the building components with C# drawing primitives.
- * 4. When a batch image processing script needs to add a custom house watermark to existing BMP files, the sample illustrates creating a new canvas, clearing it, and drawing the house elements before saving.
- * 5. When a learning platform teaches basic image manipulation concepts such as drawing shapes and saving BMP files, this code serves as a practical demonstration of using Aspose.Imaging’s BmpOptions and graphics API.
+ * 1. When a developer needs to generate a lightweight 24‑bit BMP icon of a house for a Windows desktop application's toolbar using Aspose.Imaging's Graphics API.
+ * 2. When an automated reporting system must embed a simple house illustration into BMP files to visually indicate property status in batch‑processed documents.
+ * 3. When a game developer wants to create placeholder building sprites on the fly in C# without external image assets, leveraging Aspose.Imaging's FillRectangle and FillPolygon methods.
+ * 4. When a real‑estate web service generates thumbnail BMP images of property icons on the server side for quick preview in email notifications.
+ * 5. When a testing framework requires programmatically drawing basic shapes like a house with a chimney to validate image rendering pipelines and BMP file output in CI pipelines.
  */

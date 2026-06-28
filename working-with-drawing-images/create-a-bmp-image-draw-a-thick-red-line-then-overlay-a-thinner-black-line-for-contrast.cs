@@ -9,19 +9,19 @@ class Program
     {
         try
         {
-            string outputPath = "output\\image.bmp";
+            // Define output path
+            string outputPath = @"C:\temp\output.bmp";
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up BMP options with a file source
+            // Set BMP options with file source
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            int width = 300;
-            int height = 300;
-
-            // Create the image bound to the output file
+            // Create a new image canvas
+            int width = 200;
+            int height = 200;
             using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, width, height))
             {
                 // Initialize graphics for drawing
@@ -29,13 +29,13 @@ class Program
 
                 // Draw a thick red line
                 Aspose.Imaging.Pen redPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 10);
-                graphics.DrawLine(redPen, new Aspose.Imaging.Point(50, 50), new Aspose.Imaging.Point(250, 250));
+                graphics.DrawLine(redPen, new Aspose.Imaging.Point(10, 10), new Aspose.Imaging.Point(190, 190));
 
                 // Overlay a thinner black line for contrast
                 Aspose.Imaging.Pen blackPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
-                graphics.DrawLine(blackPen, new Aspose.Imaging.Point(50, 50), new Aspose.Imaging.Point(250, 250));
+                graphics.DrawLine(blackPen, new Aspose.Imaging.Point(10, 10), new Aspose.Imaging.Point(190, 190));
 
-                // Save the image (already bound to the file)
+                // Save the image (source is already bound to the file)
                 image.Save();
             }
         }
@@ -48,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically generate a BMP image with a bold red diagonal line and a thin black outline to highlight a path in a Windows desktop utility.
- * 2. When a reporting system must add a thick red marker with a contrasting black edge to a bitmap chart for clearer visual emphasis.
- * 3. When an automated test creates a BMP placeholder that displays a thick red line overlaid by a thin black line to verify UI layout alignment.
- * 4. When a game‑asset pipeline requires a quick BMP texture containing a colored line with a contrasting border for debugging collision detection.
- * 5. When documentation tooling generates a BMP illustration that uses a thick red stroke and a thin black stroke to improve accessibility and readability.
+ * 1. When a developer needs to create a BMP image with a bold diagonal highlight for a custom UI icon, this code draws a thick red line and adds a thin black line for contrast.
+ * 2. When generating printable test patterns that require a high‑visibility guide line, the code produces a BMP file with a red line overlaid by a black line to improve readability.
+ * 3. When building a simple graphics editor that supports drawing primitives, this snippet shows how to use Aspose.Imaging in C# to render a thick red stroke and a finer black stroke on a BMP canvas.
+ * 4. When automating the creation of watermark overlays for legacy BMP assets, the code demonstrates drawing a prominent red line and a subtle black line to ensure the watermark stands out on any background.
+ * 5. When preparing diagnostic images for debugging image‑processing pipelines, developers can use this example to generate a BMP file with a clearly visible red line bordered by a thin black line for easy visual inspection.
  */

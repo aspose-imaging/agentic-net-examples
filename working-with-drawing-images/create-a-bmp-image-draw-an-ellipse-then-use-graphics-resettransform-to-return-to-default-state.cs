@@ -10,36 +10,34 @@ class Program
     {
         try
         {
-            // Define output BMP file path (hardcoded)
-            string outputPath = @"C:\temp\output.bmp";
+            // Output BMP file path
+            string outputPath = @"c:\temp\output.bmp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up BMP options with a file create source
+            // Configure BMP options
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a new image canvas (500x500)
+            // Create a 500x500 image canvas
             using (Image image = Image.Create(bmpOptions, 500, 500))
             {
-                // Initialize Graphics for drawing
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Clear the canvas with white background
-                graphics.Clear(Color.White);
+                // Clear the canvas with a background color
+                graphics.Clear(Color.Wheat);
 
-                // Create a pen for the ellipse
-                Pen pen = new Pen(Color.Blue, 3);
-
-                // Draw an ellipse within the specified rectangle
-                graphics.DrawEllipse(pen, new Rectangle(50, 50, 300, 200));
+                // Draw an ellipse with a blue pen
+                Pen pen = new Pen(Color.Blue, 2);
+                graphics.DrawEllipse(pen, new Rectangle(100, 100, 300, 200));
 
                 // Reset any transformations applied to the graphics object
                 graphics.ResetTransform();
 
-                // Save the image (output file is already bound via FileCreateSource)
+                // Save the image to the specified path
                 image.Save();
             }
         }
@@ -52,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically generate a 24‑bit BMP file with a blue ellipse for a printable report or dashboard using C# and Aspose.Imaging.
- * 2. When an application must create placeholder thumbnail images in BMP format for a document management system and requires resetting graphics transformations to ensure consistent positioning.
- * 3. When automated test data for image‑processing algorithms is needed, such as a simple BMP canvas with a known ellipse shape to validate shape detection routines.
- * 4. When a Windows desktop utility builds custom icons or UI assets on the fly, drawing vector shapes like ellipses onto a BMP before saving them to disk.
- * 5. When a batch job produces printable certificates or labels that include an elliptical seal, using Aspose.Imaging’s Graphics.ResetTransform to return to the default coordinate system before adding additional elements.
+ * 1. When a developer needs to generate a simple 24‑bit BMP thumbnail with a highlighted elliptical region for a legacy Windows application that only supports BMP files.
+ * 2. When a reporting tool must programmatically add a blue ellipse overlay to a 500×500 bitmap chart and then revert the graphics state before drawing additional elements.
+ * 3. When an automated testing framework creates a BMP image to verify that Graphics.ResetTransform correctly restores the default coordinate system after applying custom transformations.
+ * 4. When a desktop utility produces a BMP placeholder image with a wheat‑colored background and a centered ellipse for use in UI mockups that require exact pixel dimensions.
+ * 5. When a batch image‑processing script needs to draw a geometric shape on a BMP canvas and ensure subsequent drawing commands start from the original origin without residual transforms.
  */

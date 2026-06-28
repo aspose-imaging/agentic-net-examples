@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -11,21 +12,21 @@ class Program
         try
         {
             // Hardcoded paths
-            string inputPath = "input/input.eps";
-            string outputPath = "output/output.jpg";
-            string srgbProfilePath = "profiles/sRGB.icc";
+            string inputPath = "input.eps";
+            string outputPath = "output.jpg";
+            string iccProfilePath = "sRGB.icc";
 
-            // Verify input EPS file exists
+            // Validate input EPS file
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Verify sRGB ICC profile exists
-            if (!File.Exists(srgbProfilePath))
+            // Validate ICC profile file
+            if (!File.Exists(iccProfilePath))
             {
-                Console.Error.WriteLine($"File not found: {srgbProfilePath}");
+                Console.Error.WriteLine($"File not found: {iccProfilePath}");
                 return;
             }
 
@@ -33,17 +34,15 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load EPS image
-            using (var epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Prepare JPEG save options with sRGB profile
-                using (var srgbStream = File.OpenRead(srgbProfilePath))
+                // Load sRGB ICC profile
+                using (FileStream iccStream = File.OpenRead(iccProfilePath))
                 {
-                    var jpegOptions = new JpegOptions
+                    // Configure JPEG save options with the sRGB profile
+                    JpegOptions jpegOptions = new JpegOptions
                     {
-                        // Use default RGB color type
-                        ColorType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionColorMode.Rgb,
-                        // Assign the sRGB ICC profile
-                        RgbColorProfile = new StreamSource(srgbStream)
+                        RgbColorProfile = new StreamSource(iccStream)
                     };
 
                     // Save as JPEG
@@ -60,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application must display vector EPS logos on browsers that only support raster JPEG images with a standard sRGB color space, this code converts the EPS to a JPEG with an embedded sRGB ICC profile.
- * 2. When an e‑commerce platform receives product artwork in EPS format and needs to generate thumbnail JPEGs that match the site's color management workflow, the code loads the EPS, applies the sRGB profile, and saves the result as JPEG.
- * 3. When a digital asset management system imports EPS files from designers and must store them as JPEGs for quick preview while ensuring consistent colors across devices, the code replaces the original profile with sRGB before saving.
- * 4. When a print‑to‑web service has to convert customer‑submitted EPS files to web‑ready JPEGs and guarantee that the output uses the sRGB color space for accurate on‑screen rendering, this snippet performs the conversion.
- * 5. When an automated batch job processes a folder of EPS illustrations, embeds a standard sRGB ICC profile, and outputs JPEG files for use in email newsletters, the code provides the necessary loading, profiling, and saving steps.
+ * 1. When a print shop receives EPS artwork with an unknown or non‑standard ICC profile and must deliver web‑ready JPEGs in the universal sRGB color space.
+ * 2. When a digital asset management system needs to ingest vector EPS files, normalize their color profiles to sRGB, and generate thumbnail JPEG previews for quick browsing.
+ * 3. When an e‑commerce platform converts supplier‑provided EPS logos to sRGB JPEG images to ensure consistent color rendering across browsers and mobile devices.
+ * 4. When a marketing automation tool batch‑processes EPS banners, replaces their embedded color profiles with the sRGB profile, and saves them as JPEGs for email campaigns.
+ * 5. When a scientific visualization pipeline exports EPS charts, applies the sRGB ICC profile for accurate on‑screen colors, and outputs JPEG files for inclusion in reports.
  */

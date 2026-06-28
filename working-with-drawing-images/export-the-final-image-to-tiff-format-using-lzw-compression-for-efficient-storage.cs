@@ -6,50 +6,32 @@ using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\temp\input.jpg";
-            string outputPath = @"C:\temp\output.tif";
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string outputPath = "output.tif";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure TIFF options for LZW compression
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                {
-                    // 8 bits per color component
-                    BitsPerSample = new ushort[] { 8, 8, 8 },
+                // Configure TIFF options with LZW compression
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Compression = TiffCompressions.Lzw;
 
-                    // Use Big Endian byte order (Motorola)
-                    ByteOrder = TiffByteOrder.BigEndian,
-
-                    // LZW compression
-                    Compression = TiffCompressions.Lzw,
-
-                    // Horizontal predictor improves LZW efficiency
-                    Predictor = TiffPredictor.Horizontal,
-
-                    // RGB photometric interpretation
-                    Photometric = TiffPhotometrics.Rgb,
-
-                    // Store all components in a single plane
-                    PlanarConfiguration = TiffPlanarConfigs.Contiguous
-                };
-
-                // Save the image as a TIFF file with the specified options
+                // Save the image as TIFF using the configured options
                 image.Save(outputPath, tiffOptions);
             }
         }
@@ -62,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert high‑resolution JPEG photographs to lossless TIFF files with LZW compression for archival storage while preserving color depth and metadata.
- * 2. When a medical imaging application must export scanned X‑ray images to a TIFF format that uses Big‑Endian byte order and horizontal predictor to reduce file size without sacrificing diagnostic quality.
- * 3. When a GIS system requires batch processing of satellite imagery, converting each JPEG tile to a contiguous‑planar RGB TIFF with LZW compression for efficient transmission to remote servers.
- * 4. When an e‑commerce platform wants to generate print‑ready product images in TIFF with 8‑bit per channel color and LZW compression to meet printer specifications while keeping bandwidth usage low.
- * 5. When a document management workflow needs to store scanned documents as TIFF files with LZW compression and standardized photometric settings to ensure compatibility with legacy archival software.
+ * 1. When a developer needs to convert high‑resolution JPEG photographs to lossless TIFF files with LZW compression for archival storage while preserving image quality.
+ * 2. When an application must generate TIFF documents for a medical imaging system that requires the LZW algorithm to meet DICOM file size constraints.
+ * 3. When a batch‑processing tool has to export scanned receipts from JPEG to TIFF to enable OCR engines that only accept TIFF with LZW compression.
+ * 4. When a GIS workflow requires converting satellite imagery from JPEG to TIFF with LZW to reduce disk usage without losing raster data.
+ * 5. When a document management solution needs to store user‑uploaded images as TIFF files with LZW compression to ensure consistent format and efficient retrieval.
  */

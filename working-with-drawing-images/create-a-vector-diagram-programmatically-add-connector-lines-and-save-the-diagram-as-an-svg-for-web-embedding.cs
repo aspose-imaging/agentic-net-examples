@@ -12,7 +12,7 @@ class Program
     {
         try
         {
-            // Hardcoded output path for the SVG file
+            // Hardcoded output path
             string outputPath = @"C:\temp\diagram.svg";
 
             // Ensure the output directory exists
@@ -27,35 +27,50 @@ class Program
             SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
             // Define pens and brushes
-            Pen rectPen = new Pen(Color.Black, 2);
-            Pen connectorPen = new Pen(Color.DarkBlue, 1);
-            SolidBrush rectBrush = new SolidBrush(Color.LightGray);
+            Pen nodePen = new Pen(Color.Black, 2);
+            Brush nodeBrush = new SolidBrush(Color.LightBlue);
+            Pen connectorPen = new Pen(Color.DarkGray, 1);
 
-            // Draw first rectangle
-            int rect1X = 100, rect1Y = 100, rect1W = 200, rect1H = 150;
-            graphics.FillRectangle(rectPen, rectBrush, rect1X, rect1Y, rect1W, rect1H);
-            graphics.DrawRectangle(rectPen, rect1X, rect1Y, rect1W, rect1H);
+            // Draw two rectangular nodes
+            int nodeWidth = 120;
+            int nodeHeight = 60;
 
-            // Draw second rectangle
-            int rect2X = 500, rect2Y = 300, rect2W = 200, rect2H = 150;
-            graphics.FillRectangle(rectPen, rectBrush, rect2X, rect2Y, rect2W, rect2H);
-            graphics.DrawRectangle(rectPen, rect2X, rect2Y, rect2W, rect2H);
+            // Node 1 at (100,200)
+            int node1X = 100;
+            int node1Y = 200;
+            graphics.DrawRectangle(nodePen, node1X, node1Y, nodeWidth, nodeHeight);
+            graphics.FillRectangle(nodePen, nodeBrush, node1X, node1Y, nodeWidth, nodeHeight);
 
-            // Calculate center points of the rectangles
-            int rect1CenterX = rect1X + rect1W / 2;
-            int rect1CenterY = rect1Y + rect1H / 2;
-            int rect2CenterX = rect2X + rect2W / 2;
-            int rect2CenterY = rect2Y + rect2H / 2;
+            // Node 2 at (500,200)
+            int node2X = 500;
+            int node2Y = 200;
+            graphics.DrawRectangle(nodePen, node2X, node2Y, nodeWidth, nodeHeight);
+            graphics.FillRectangle(nodePen, nodeBrush, node2X, node2Y, nodeWidth, nodeHeight);
 
-            // Draw connector line between the two rectangles
-            graphics.DrawLine(connectorPen, rect1CenterX, rect1CenterY, rect2CenterX, rect2CenterY);
+            // Draw a connector line between the centers of the two nodes
+            int node1CenterX = node1X + nodeWidth / 2;
+            int node1CenterY = node1Y + nodeHeight / 2;
+            int node2CenterX = node2X + nodeWidth / 2;
+            int node2CenterY = node2Y + nodeHeight / 2;
+            graphics.DrawLine(connectorPen, node1CenterX, node1CenterY, node2CenterX, node2CenterY);
 
-            // Optionally, add a label inside each rectangle
-            Font labelFont = new Font("Arial", 24, FontStyle.Regular);
-            graphics.DrawString(labelFont, "Box 1", new Point(rect1X + 20, rect1Y + rect1H / 2), Color.Black);
-            graphics.DrawString(labelFont, "Box 2", new Point(rect2X + 20, rect2Y + rect2H / 2), Color.Black);
+            // Optionally add an arrowhead using a small triangle path
+            GraphicsPath arrowPath = new GraphicsPath();
+            Figure arrowFigure = new Figure { IsClosed = true };
+            arrowPath.AddFigure(arrowFigure);
+            // Simple arrowhead shape (triangle)
+            arrowFigure.AddShapes(new Shape[]
+            {
+                new PolygonShape(new PointF[]
+                {
+                    new PointF(node2CenterX - 5, node2CenterY - 5),
+                    new PointF(node2CenterX + 5, node2CenterY - 5),
+                    new PointF(node2CenterX, node2CenterY + 5)
+                })
+            });
+            graphics.FillPath(new Pen(Color.DarkGray, 1), new SolidBrush(Color.DarkGray), arrowPath);
 
-            // Finalize the SVG image and save it
+            // Finalize SVG image
             using (SvgImage svgImage = graphics.EndRecording())
             {
                 svgImage.Save(outputPath);
@@ -70,9 +85,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a scalable vector diagram of system components on the fly and embed it as an SVG in a web page, they can use this Aspose.Imaging for .NET code to draw rectangles and connector lines programmatically.
- * 2. When building a reporting tool that visualizes workflow steps as boxes linked by arrows, the code creates the SVG graphics with precise DPI and dimensions without manual design.
- * 3. When an application must export architectural diagrams to a portable file format for client‑side rendering, this C# snippet produces an SVG file that scales cleanly across browsers.
- * 4. When automating the creation of network topology maps where each node is represented by a rectangle and connections are drawn as lines, the Aspose.Imaging API handles the drawing and saving process.
- * 5. When integrating dynamic diagram generation into a SaaS dashboard that requires on‑demand SVG images for printable documentation, the example shows how to programmatically draw shapes, apply pens and brushes, and save the result.
+ * 1. When a developer needs to generate a scalable flowchart or network diagram on the fly in a C# web application and embed it as an SVG image in HTML pages.
+ * 2. When an enterprise reporting tool must programmatically create vector‑based organizational charts with connector lines and export them as SVG files for high‑resolution printing or PDF conversion.
+ * 3. When a SaaS platform wants to render interactive topology maps of server clusters using Aspose.Imaging for .NET, drawing nodes and links and saving the result as an SVG for responsive web display.
+ * 4. When a documentation generator requires automatic creation of step‑by‑step process diagrams in C# and needs the output in a lightweight, searchable SVG format that scales on any device.
+ * 5. When a data visualization dashboard needs to draw custom relationship graphs with rectangular nodes and connector lines at runtime and store them as SVG files for later reuse or client‑side manipulation.
  */

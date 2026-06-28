@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Wmf;
+using Aspose.Imaging.FileFormats.Wmf.Graphics;
 
 class Program
 {
@@ -11,8 +12,8 @@ class Program
         try
         {
             // Hard‑coded input and output file paths
-            string inputPath = @"C:\Temp\input.wmf";
-            string outputPath = @"C:\Temp\output.svg";
+            string inputPath = @"C:\Images\sample.wmf";
+            string outputPath = @"C:\Images\sample.svg";
 
             // Verify that the input WMF file exists
             if (!File.Exists(inputPath))
@@ -21,7 +22,7 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the WMF image
@@ -30,22 +31,24 @@ class Program
                 // Prepare SVG save options
                 SvgOptions saveOptions = new SvgOptions
                 {
-                    // Preserve text as text (keeps embedded fonts and layout)
+                    // Preserve text as text (do not convert to shapes)
                     TextAsShapes = false
                 };
 
                 // Configure rasterization options for WMF
                 WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
                 {
-                    BackgroundColor = Color.WhiteSmoke,
+                    // Keep background transparent to retain original appearance
+                    BackgroundColor = Color.Transparent,
+                    // Use the original WMF page size
                     PageSize = wmfImage.Size,
-                    RenderMode = WmfRenderMode.Auto
+                    // Let Aspose decide the best render mode (preserves embedded fonts)
+                    RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
                 };
 
-                // Attach rasterization options to the SVG options
                 saveOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the image as SVG
+                // Save as SVG
                 wmfImage.Save(outputPath, saveOptions);
             }
         }
@@ -58,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must migrate legacy WMF icons or diagrams to responsive SVG files for a web application while preserving the original text layout and embedded fonts using C# and Aspose.Imaging.
- * 2. When an automated build pipeline needs to generate high‑quality SVG assets from WMF source files for printing or documentation purposes, ensuring that text remains selectable and searchable.
- * 3. When a desktop software vendor wants to offer users the ability to export their WMF‑based reports to SVG so the graphics scale without loss and the embedded fonts are retained for accurate rendering.
- * 4. When a migration tool processes a batch of WMF files stored on a file server and converts them to SVG to integrate with modern vector‑based design tools, requiring rasterization options such as background color and page size.
- * 5. When a C# utility is required to validate that WMF drawings can be displayed correctly in browsers by converting them to SVG while keeping text as text rather than converting it to shapes.
+ * 1. When a legacy Windows Metafile (WMF) diagram must be displayed on modern web pages, a developer can convert it to scalable SVG while preserving embedded fonts and exact text positioning.
+ * 2. When an automated document‑generation pipeline needs to transform vector assets from old CAD tools into SVG for responsive UI components, this code ensures the original text remains selectable and searchable.
+ * 3. When a batch‑processing job migrates a corporate archive of WMF icons to SVG for high‑resolution printing, the conversion retains transparent backgrounds and font fidelity without rasterizing the text.
+ * 4. When a desktop application imports user‑provided WMF logos and needs to export them as SVG for further editing in vector‑graphics editors, the code keeps the text as editable text rather than converting it to shapes.
+ * 5. When a cloud‑based service converts uploaded WMF files to SVG for accessibility compliance, preserving the text layout and embedded fonts enables screen readers to read the content correctly.
  */

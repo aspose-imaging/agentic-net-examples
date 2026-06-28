@@ -2,73 +2,57 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            // Hardcoded input and output directories
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-            if (!Directory.Exists(inputDirectory))
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDir))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add BMP files and rerun.");
                 return;
             }
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            foreach (var inputPath in files)
+            // Process each BMP file in the input directory
+            foreach (string inputPath in Directory.GetFiles(inputDir, "*.bmp"))
             {
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     continue;
                 }
 
-                using (Image image = Image.Load(inputPath))
+                // Prepare output path
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + "_thumb.bmp");
+
+                // Ensure output directory for the file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load, resize, draw border, and save
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    RasterImage raster = image as RasterImage;
-                    if (raster == null)
-                    {
-                        Console.Error.WriteLine($"Unsupported image format: {inputPath}");
-                        continue;
-                    }
+                    // Resize to 100x100 thumbnail
+                    image.Resize(100, 100);
 
-                    if (!raster.IsCached)
-                        raster.CacheData();
+                    // Draw a thin black border around the image
+                    Graphics graphics = new Graphics(image);
+                    graphics.DrawRectangle(new Pen(Color.Black, 1), 0, 0, image.Width - 1, image.Height - 1);
 
-                    // Create thumbnail with max dimension 150 pixels
-                    int maxSize = 150;
-                    double scale = Math.Min((double)maxSize / raster.Width, (double)maxSize / raster.Height);
-                    int thumbWidth = (int)(raster.Width * scale);
-                    int thumbHeight = (int)(raster.Height * scale);
-                    raster.Resize(thumbWidth, thumbHeight);
-
-                    // Draw thin black border
-                    Graphics graphics = new Graphics(raster);
-                    Pen pen = new Pen(Color.Black, 1);
-                    graphics.DrawRectangle(pen, 0, 0, raster.Width - 1, raster.Height - 1);
-
-                    // Prepare output path
-                    string fileName = Path.GetFileNameWithoutExtension(inputPath) + "_thumb.bmp";
-                    string outputPath = Path.Combine(outputDirectory, fileName);
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    using (BmpOptions bmpOptions = new BmpOptions())
-                    {
-                        image.Save(outputPath, bmpOptions);
-                    }
+                    // Save as BMP
+                    image.Save(outputPath, new BmpOptions());
                 }
             }
         }
@@ -81,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a gallery of small preview images for a web portal, generating BMP thumbnails with a uniform thin border drawn by a Pen to maintain visual consistency.
- * 2. When an e‑commerce site must display product photos as quick‑load thumbnails on mobile devices, resizing original images to 150 px and using a Pen to add a thin border for separation.
- * 3. When a desktop application processes scanned documents in various formats and requires batch conversion to BMP thumbnails with a Pen‑drawn border for inclusion in a PDF index.
- * 4. When a digital asset management system automatically creates low‑resolution previews of high‑resolution BMP files for faster browsing, adding a subtle Pen‑drawn border to highlight each thumbnail.
- * 5. When a reporting tool needs to embed small BMP images with a consistent frame into generated PDFs or Excel sheets, resizing and drawing a border with a Pen around each image in a batch operation.
+ * 1. When a developer needs to create a gallery of small preview images for legacy Windows applications that only support BMP files, they can batch‑process source BMPs into 100 × 100 thumbnails with a thin black border for consistent UI layout.
+ * 2. When an automated build pipeline must generate low‑resolution BMP assets for embedded devices with limited color depth, this code can resize each source image and add a border to clearly delineate the thumbnail area.
+ * 3. When a content‑management system imports user‑uploaded BMP scans and requires uniform thumbnail previews with a visible frame, the batch script provides a quick way to produce 100 px thumbnails with a 1‑pixel border.
+ * 4. When a developer is preparing documentation screenshots in BMP format and wants all images to have the same size and a subtle border for visual separation, the code can process an entire folder in one run.
+ * 5. When a game engine that only reads BMP textures needs preview icons for its asset browser, this routine can generate 100 × 100 thumbnail BMPs with a thin border to improve recognizability without altering the original files.
  */

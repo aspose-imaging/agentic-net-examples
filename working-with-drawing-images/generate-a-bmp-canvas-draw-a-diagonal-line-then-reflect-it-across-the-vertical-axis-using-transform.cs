@@ -10,28 +10,20 @@ class Program
     {
         try
         {
-            string outputPath = "output.bmp";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            Source source = new FileCreateSource(outputPath, false);
+            string outputPath = "output\\canvas.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            FileCreateSource source = new FileCreateSource(outputPath, false);
             BmpOptions options = new BmpOptions() { Source = source };
-
             int width = 200;
             int height = 200;
-
             using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
             {
                 Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Color.White);
-
                 Pen pen = new Pen(Color.Black, 2);
                 graphics.DrawLine(pen, new Point(0, 0), new Point(width, height));
-
-                graphics.ResetTransform();
-                graphics.ScaleTransform(-1, 1);
-                graphics.TranslateTransform(width, 0);
+                Matrix flipMatrix = new Matrix(-1, 0, 0, 1, width, 0);
+                graphics.MultiplyTransform(flipMatrix);
                 graphics.DrawLine(pen, new Point(0, 0), new Point(width, height));
-
                 canvas.Save();
             }
         }
@@ -44,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP file with a simple geometric pattern, such as a diagonal line and its mirror image, for use in legacy Windows applications or testing image pipelines.
- * 2. When creating placeholder graphics for UI mockups where a quick black‑on‑white diagonal line and its reflected counterpart are required without external design tools.
- * 3. When implementing automated tests that verify the correctness of Aspose.Imaging’s Transform operations by drawing a line, applying a horizontal flip, and saving the result as a BMP.
- * 4. When producing diagnostic images that illustrate how scaling and translation affect raster graphics, useful for documentation or teaching image processing concepts in C#.
- * 5. When building a batch process that programmatically adds mirrored line watermarks to BMP assets before they are uploaded to a content management system.
+ * 1. When a developer needs to generate a BMP thumbnail with a mirrored diagonal watermark for branding purposes.
+ * 2. When an application must create a simple black‑and‑white pattern by drawing a line and its vertical reflection for testing printer alignment.
+ * 3. When a game engine requires a procedural texture that shows a symmetric diagonal line to be used as a UI overlay.
+ * 4. When a reporting tool has to produce a BMP diagram that demonstrates geometric transformations such as reflection across the vertical axis.
+ * 5. When a developer wants to validate that the Aspose.Imaging Graphics.MultiplyTransform method correctly flips raster images in a C# image‑processing pipeline.
  */

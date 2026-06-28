@@ -17,8 +17,9 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up BMP options with a file create source bound to the output path
+            // Set BMP options and bind to the output file
             BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
             // Create a new image canvas (500x500)
@@ -27,23 +28,21 @@ class Program
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Clear background to white
-                graphics.Clear(Color.White);
-
                 // Define rectangle bounds
-                Rectangle rect = new Rectangle(100, 100, 300, 200);
+                Rectangle rect = new Rectangle(50, 50, 200, 150);
 
-                // Draw rectangle outline
-                graphics.DrawRectangle(new Pen(Color.Black, 2), rect);
+                // Draw rectangle outline with a blue pen
+                graphics.DrawRectangle(new Pen(Color.Blue, 3), rect);
 
-                // Fill rectangle with semi‑transparent blue brush
-                using (SolidBrush brush = new SolidBrush(Color.Blue))
+                // Fill rectangle with a semi‑transparent red brush
+                using (SolidBrush brush = new SolidBrush())
                 {
-                    brush.Opacity = 0.5f; // 0 = fully visible, 1 = fully opaque (semi‑transparent)
+                    brush.Color = Color.Red;
+                    brush.Opacity = 0.5f; // 50% opacity
                     graphics.FillRectangle(brush, rect);
                 }
 
-                // Save the image (output path already bound via FileCreateSource)
+                // Save the image (output path already bound)
                 image.Save();
             }
         }
@@ -56,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a BMP thumbnail for a legacy Windows application and highlight a region with a semi‑transparent overlay.
- * 2. When generating printable forms in C# where a rectangle marks a user‑selected area on a BMP background with an alpha‑blended color.
- * 3. When producing diagnostic screenshots for a medical imaging system that require a clear rectangle annotation with adjustable opacity.
- * 4. When building a game asset pipeline that programmatically draws UI panels onto BMP textures and uses semi‑transparent fills for visual effects.
- * 5. When automating the creation of BMP‑based certificates that include a semi‑transparent colored border to emphasize the signature field.
+ * 1. When a developer needs to generate a 24‑bit BMP thumbnail with a highlighted rectangular area for a legacy Windows reporting tool that only accepts BMP files.
+ * 2. When a developer wants to programmatically add a blue‑bordered rectangle filled with a semi‑transparent red overlay to indicate selection or focus in a desktop UI mockup using C# and Aspose.Imaging.
+ * 3. When a developer must create a BMP asset for an embedded system where a rectangular safety warning with 50 % opacity is required to preserve underlying image details.
+ * 4. When a developer is building an automated batch process that stamps rectangular markers with adjustable alpha blending onto scanned documents saved as BMP for archival compatibility.
+ * 5. When a developer needs to produce a BMP diagram that demonstrates layering effects by drawing a rectangle outline and filling it with a semi‑transparent brush to teach image‑processing concepts in a C# tutorial.
  */

@@ -2,56 +2,56 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";   // Not used in this example, but shown for rule compliance
-        string outputPath = "output.png";
+        // Hardcoded output path
+        string outputPath = @"C:\temp\output_winding.png";
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Input file existence check (if needed)
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                // Continue without input file as we are creating a new image
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set up PNG options
+            // Set up PNG options with a bound file source
             PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
 
             // Create a new image canvas
             using (Image image = Image.Create(pngOptions, 500, 500))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
-
-                // Clear background
                 graphics.Clear(Color.White);
 
                 // Create a GraphicsPath with FillMode set to Winding
-                GraphicsPath graphicPath = new GraphicsPath(FillMode.Winding);
+                GraphicsPath path = new GraphicsPath(FillMode.Winding);
 
-                // Create a figure and add shapes
+                // Build a figure containing overlapping shapes
                 Figure figure = new Figure();
                 figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
-                figure.AddShape(new EllipseShape(new RectangleF(100f, 100f, 200f, 200f)));
+                figure.AddShape(new EllipseShape(new RectangleF(150f, 150f, 200f, 200f)));
 
                 // Add the figure to the path
-                graphicPath.AddFigure(figure);
+                path.AddFigure(figure);
 
-                // Draw the path with a black pen
-                graphics.DrawPath(new Pen(Color.Black, 2), graphicPath);
+                // Draw the outline of the path
+                Pen pen = new Pen(Color.Black, 2);
+                graphics.DrawPath(pen, path);
 
-                // Save the image to the specified output path
-                image.Save(outputPath, pngOptions);
+                // Fill the path to observe the effect of the Winding fill mode
+                using (SolidBrush brush = new SolidBrush(Color.LightBlue))
+                {
+                    graphics.FillPath(brush, path);
+                }
+
+                // Save the image (bound to the output file)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -63,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PNG thumbnail that demonstrates how overlapping shapes are filled using the Winding rule for vector graphics in a .NET application.
- * 2. When testing the visual output of complex path filling in Aspose.Imaging to ensure that the Winding FillMode correctly renders intersecting rectangles and ellipses for a custom diagram editor.
- * 3. When creating a printable PDF or image asset where the winding fill algorithm determines the interior of overlapping shapes, such as logos with cut‑out sections, and the developer wants to preview it as a PNG.
- * 4. When debugging a C# graphics pipeline that converts geometric figures into raster images and needs to compare the Winding fill behavior against the default Alternate mode.
- * 5. When building an automated UI test that validates that Aspose.Imaging’s GraphicsPath with FillMode.Winding produces the expected black outline and white background for overlapping shapes in a 500 × 500 pixel canvas.
+ * 1. When a developer wants to generate a PNG image with overlapping rectangles and ellipses and needs to ensure the interior region is filled according to the Winding rule for accurate vector rendering.
+ * 2. When creating printable graphics for reports where the fill behavior of intersecting shapes must follow the non‑zero winding number algorithm to avoid unwanted holes.
+ * 3. When building a custom chart or diagram in a .NET application and the visual design requires consistent filling of complex paths across different file formats such as PNG.
+ * 4. When testing the visual difference between EvenOdd and Winding fill modes in Aspose.Imaging to choose the correct mode for a logo that contains nested shapes.
+ * 5. When automating image generation for a web service that outputs transparent PNG thumbnails and the developer needs to control how overlapping shapes are composited using the Winding fill mode.
  */

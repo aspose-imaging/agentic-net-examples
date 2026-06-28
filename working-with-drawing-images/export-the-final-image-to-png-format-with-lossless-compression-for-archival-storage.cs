@@ -2,43 +2,40 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Define input and output paths (relative)
-            string inputPath = "Input\\sample.jpg";
-            string outputPath = "Output\\sample.png";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\input.bmp";
+            string outputPath = @"C:\Images\output.png";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG options for lossless archival storage
-                using (PngOptions options = new PngOptions())
+                // Configure PNG export options for lossless archival storage
+                var pngOptions = new PngOptions
                 {
-                    // Maximum compression (still lossless)
-                    options.CompressionLevel = 9;
+                    // PNG is inherently lossless; setting compression level to 0 disables compression
+                    // which preserves the original data without additional processing.
+                    PngCompressionLevel = 0
+                };
 
-                    // Preserve full color with alpha channel
-                    options.ColorType = PngColorType.TruecolorWithAlpha;
-
-                    // Save the image as PNG with the specified options
-                    image.Save(outputPath, options);
-                }
+                // Save the image as PNG using the specified options
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -50,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert JPEG photographs to lossless PNG files for long‑term archival in a document management system.
- * 2. When an application must generate PNG assets with maximum compression while preserving alpha transparency for use in web galleries.
- * 3. When a batch‑processing service has to ensure that uploaded images are stored in a consistent, lossless format before indexing them in a searchable repository.
- * 4. When a C# utility is required to create PNG copies of scanned PDFs to maintain image fidelity for legal evidence storage.
- * 5. When a developer wants to programmatically export processed images from an image‑editing workflow to PNG with Aspose.Imaging to meet regulatory compliance for medical imaging archives.
+ * 1. When a developer needs to convert legacy BMP files to PNG with lossless compression for long‑term archival in a .NET application.
+ * 2. When a C# service must generate PNG assets from scanned bitmaps while preserving exact pixel data for regulatory compliance.
+ * 3. When an image‑processing pipeline requires saving intermediate bitmap results as PNG to ensure no quality loss before further analysis.
+ * 4. When a desktop utility has to batch‑export user‑provided BMP images to PNG for storage on a version‑controlled repository.
+ * 5. When a cloud‑based document management system must store uploaded BMP images as PNG with zero compression to maintain original fidelity.
  */

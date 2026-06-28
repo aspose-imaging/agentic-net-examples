@@ -23,19 +23,23 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PDF document (vector image)
+            // Load the PDF document
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization to preserve vector data
+                // Configure SVG rasterization options to preserve size and quality
                 var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = image.Size // keep original size
+                    PageSize = image.Size,
+                    // Preserve text as text for interactivity (axes, labels)
+                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias,
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias
                 };
 
-                // Set SVG save options; keep text as text for interactivity
+                // Set SVG save options
                 var svgOptions = new SvgOptions
                 {
                     VectorRasterizationOptions = rasterOptions,
+                    // Keep text as text (not shapes) to retain data labels
                     TextAsShapes = false
                 };
 
@@ -52,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed a PDF‑generated chart into a responsive web page and wants the axes and data labels to remain selectable and interactive, they can convert the PDF to SVG using this code.
- * 2. When an analytics dashboard must display vector‑based financial graphs from PDF reports without losing resolution, the code enables conversion to scalable SVG while preserving text elements.
- * 3. When a content management system imports client‑provided PDF charts and must serve them as lightweight, searchable SVG files for SEO and accessibility, this snippet performs the transformation.
- * 4. When an e‑learning platform requires high‑quality, zoomable diagrams from PDF lecture notes and wants to keep the chart labels editable in the browser, the code converts the PDF to SVG with text retained.
- * 5. When a mobile app needs to render PDF chart assets offline as vector graphics to reduce memory usage and maintain crisp axes on different screen sizes, this C# example rasterizes the PDF to SVG while preserving vector data.
+ * 1. When a developer needs to embed a PDF‑generated financial chart into a responsive web dashboard and wants the axes and data labels to remain selectable text for tooltips, they can use this Aspose.Imaging C# code to convert the PDF to SVG.
+ * 2. When a reporting service exports analytical graphs as PDF but the front‑end requires scalable vector graphics for zoom‑able visualizations, this snippet converts the PDF charts to SVG while preserving vector text for interactive labeling.
+ * 3. When an e‑learning platform wants to display exam performance charts from PDF resources on HTML5 pages without losing resolution or searchable text, the code transforms the PDF into SVG with preserved axes and labels.
+ * 4. When a GIS application generates map legends as PDF vector charts and needs to render them in a web map viewer with clickable data points, the provided C# routine converts the PDF to SVG while keeping text elements intact.
+ * 5. When a marketing automation tool automates the conversion of PDF sales dashboards into web‑friendly SVG assets for SEO‑optimized pages, this Aspose.Imaging example ensures chart axes and data labels stay as editable text.
  */

@@ -9,12 +9,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\vector.svg";
+        string outputPath = @"C:\Images\output.jpg";
+
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Images\vector.svg";
-            string outputPath = @"C:\Images\output.jpg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,38 +22,38 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the vector image (e.g., SVG, EPS, etc.)
+            // Load the vector image
             using (Image image = Image.Load(inputPath))
             {
                 // Desired maximum dimensions
-                const int maxWidth = 1200;
-                const int maxHeight = 1200;
+                const int maxWidth = 800;
+                const int maxHeight = 600;
 
                 // Compute scaling factor while preserving aspect ratio
                 double widthScale = (double)maxWidth / image.Width;
                 double heightScale = (double)maxHeight / image.Height;
                 double scale = Math.Min(widthScale, heightScale);
-                if (scale > 1) scale = 1; // Do not upscale beyond original size
+                if (scale > 1) scale = 1; // Do not upscale
 
-                int newWidth = (int)Math.Round(image.Width * scale);
-                int newHeight = (int)Math.Round(image.Height * scale);
+                int newWidth = (int)(image.Width * scale);
+                int newHeight = (int)(image.Height * scale);
 
-                // Resize using a high‑quality resampling algorithm
+                // Resize using a high‑quality resample method
                 image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
-                // Prepare JPEG save options with 90 % quality
+                // Prepare JPEG save options with 90% quality
                 JpegOptions jpegOptions = new JpegOptions
                 {
                     Quality = 90,
-                    // Optional: keep resolution at 96 dpi
-                    ResolutionSettings = new ResolutionSetting(96.0, 96.0),
-                    ResolutionUnit = ResolutionUnit.Inch
+                    // Optional: set resolution unit and DPI if needed
+                    ResolutionUnit = ResolutionUnit.Inch,
+                    ResolutionSettings = new ResolutionSetting(96.0, 96.0)
                 };
 
-                // Save the rasterized image as JPEG
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the resized image as JPEG
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -66,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application must generate thumbnail previews of user‑uploaded SVG logos that fit within a 1200 × 1200 pixel box while preserving the original aspect ratio and then serve them as high‑quality JPEGs for browsers that do not support SVG.
- * 2. When an e‑commerce platform needs to convert scalable product illustrations (e.g., EPS or SVG files) into optimized 90 % quality JPEG images for email newsletters, ensuring the images are resized proportionally to avoid distortion.
- * 3. When a desktop publishing tool automates the preparation of print‑ready assets by loading vector artwork, resizing it with Lanczos resampling to maintain visual fidelity, and exporting a JPEG with 90 % quality for inclusion in PDF catalogs.
- * 4. When a content management system processes batch uploads of vector graphics, using Aspose.Imaging in C# to limit each image to a maximum width or height of 1200 px, keep the original aspect ratio, and store the result as a high‑quality JPEG for faster page loads.
- * 5. When a mobile app backend needs to serve responsive images by converting scalable SVG icons into JPEGs that are no larger than 1200 px in either dimension, applying high‑quality resampling and a 90 % JPEG compression setting to balance image clarity with bandwidth usage.
+ * 1. When a web application needs to generate thumbnail previews of user‑uploaded SVG logos for product listings, it can use this C# code to resize the vector while preserving aspect ratio and save a 90 % quality JPEG for fast browser rendering.
+ * 2. When an e‑commerce platform must convert scalable vector graphics of product diagrams into printable JPEG images at a maximum size of 800×600 pixels, the code ensures the images are down‑scaled without distortion and retain high visual fidelity.
+ * 3. When a content management system automatically creates responsive images for blog posts from SVG illustrations, developers can employ this snippet to produce optimized JPEGs that fit within layout constraints while maintaining the original proportions.
+ * 4. When a desktop reporting tool needs to embed company branding SVG files into PDF reports as raster images, the code resizes the vectors to the required dimensions and exports them as high‑quality JPEGs for consistent appearance across devices.
+ * 5. When a mobile app backend processes vector icons uploaded by designers and must deliver them as compressed JPEG assets for low‑bandwidth networks, this C# routine resizes the SVGs, keeps the aspect ratio, and saves them with 90 % quality to balance size and clarity.
  */

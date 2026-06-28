@@ -8,64 +8,57 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded paths
-        string csvPath = @"C:\temp\dimensions.csv";
-        string outputDir = @"C:\temp\output\";
-
         try
         {
-            // Verify input CSV exists
-            if (!File.Exists(csvPath))
+            // Hardcoded input CSV file path
+            string inputCsvPath = @"C:\temp\dimensions.csv";
+
+            // Verify input file exists
+            if (!File.Exists(inputCsvPath))
             {
-                Console.Error.WriteLine($"File not found: {csvPath}");
+                Console.Error.WriteLine($"File not found: {inputCsvPath}");
                 return;
             }
 
-            // Read all lines from CSV
-            string[] lines = File.ReadAllLines(csvPath);
-            int index = 0;
+            // Hardcoded output directory
+            string outputDirectory = @"C:\temp\output";
 
-            foreach (string line in lines)
+            // Read all non‑empty lines from the CSV
+            foreach (string line in File.ReadAllLines(inputCsvPath))
             {
-                // Skip empty lines
                 if (string.IsNullOrWhiteSpace(line))
                     continue;
 
-                // Expected format: width,height
+                // Expected CSV format: width,height,filename
                 string[] parts = line.Split(',');
-                if (parts.Length < 2)
-                {
-                    Console.Error.WriteLine($"Invalid line format at index {index}: {line}");
-                    continue;
-                }
+                if (parts.Length < 3)
+                    continue; // skip malformed lines
 
-                if (!int.TryParse(parts[0].Trim(), out int width) || !int.TryParse(parts[1].Trim(), out int height))
-                {
-                    Console.Error.WriteLine($"Invalid dimensions at index {index}: {line}");
-                    continue;
-                }
+                if (!int.TryParse(parts[0].Trim(), out int width) ||
+                    !int.TryParse(parts[1].Trim(), out int height))
+                    continue; // skip lines with invalid dimensions
 
-                // Build output file path
-                string outputPath = Path.Combine(outputDir, $"image_{index}.bmp");
+                string fileName = parts[2].Trim();
+                if (string.IsNullOrEmpty(fileName))
+                    continue; // skip if filename is missing
 
-                // Ensure output directory exists
+                // Build full output path and ensure directory exists
+                string outputPath = Path.Combine(outputDirectory, fileName);
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Set up BMP options with a file create source
+                // Set up BMP creation options
                 BmpOptions bmpOptions = new BmpOptions
                 {
                     BitsPerPixel = 24,
                     Source = new FileCreateSource(outputPath, false)
                 };
 
-                // Create a new image with the specified dimensions
+                // Create a blank BMP image with the specified dimensions
                 using (Image image = Image.Create(bmpOptions, width, height))
                 {
-                    // Save the image (the source is already set to the output file)
+                    // Save the image to the file (FileCreateSource handles the path)
                     image.Save();
                 }
-
-                index++;
             }
         }
         catch (Exception ex)
@@ -77,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a set of placeholder BMP files for UI mock‑ups based on size specifications stored in a CSV inventory.
- * 2. When an automated testing framework must create images of exact pixel dimensions to validate scaling algorithms in a C# application.
- * 3. When a game asset pipeline requires bulk creation of texture maps in BMP format using dimension data exported from a spreadsheet.
- * 4. When a reporting tool has to produce thumbnail‑size BMP charts for each record listed in a CSV file of width and height values.
- * 5. When a legacy system expects BMP files of predefined sizes, and a developer automates their production by reading the required dimensions from a CSV configuration file.
+ * 1. When a developer needs to generate a set of placeholder BMP files for UI mock‑ups by reading width, height and filenames from a CSV inventory.
+ * 2. When an automated build pipeline must create device‑specific splash screen images in BMP format based on dimensions listed in a configuration CSV.
+ * 3. When a testing framework requires a batch of blank bitmap images of varying sizes to simulate image uploads, using Aspose.Imaging in C# to read the size list from a CSV file.
+ * 4. When a digital signage system must pre‑produce BMP assets for multiple screen resolutions defined in a spreadsheet, and the code creates the files in a designated output folder.
+ * 5. When a data‑driven graphics generator needs to export a series of BMP thumbnails whose dimensions are stored in a CSV, enabling quick bulk creation without manual editing.
  */

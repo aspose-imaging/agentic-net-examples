@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -11,40 +10,36 @@ class Program
     {
         try
         {
-            // Output file path (hardcoded)
-            string outputPath = @"C:\temp\output.bmp";
+            // Output BMP file path
+            string outputPath = @"output.bmp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // BMP image options with a file create source
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
+            // Define image dimensions
             int width = 400;
             int height = 300;
 
-            // Create the BMP image
+            // Set up BMP options with a file create source
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+            // Create the image
             using (Image image = Image.Create(bmpOptions, width, height))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Clear the canvas with white background
-                graphics.Clear(Color.White);
+                // Draw a thick outer border
+                Pen outerPen = new Pen(Color.Black, 10);
+                graphics.DrawRectangle(outerPen, 0, 0, width, height);
 
-                // Draw a thick black border around the image
-                Pen borderPen = new Pen(Color.Black, 10);
-                graphics.DrawRectangle(borderPen, 0, 0, width, height);
+                // Draw an inset inner rectangle
+                int inset = 20;
+                Pen innerPen = new Pen(Color.Blue, 5);
+                graphics.DrawRectangle(innerPen, inset, inset, width - 2 * inset, height - 2 * inset);
 
-                // Fill an inner rectangle inset from the border
-                using (SolidBrush innerBrush = new SolidBrush(Color.LightGray))
-                {
-                    int inset = 20;
-                    graphics.FillRectangle(innerBrush, inset, inset, width - 2 * inset, height - 2 * inset);
-                }
-
-                // Save the image (file is already bound to outputPath)
+                // Save the image (output path is already bound via FileCreateSource)
                 image.Save();
             }
         }
@@ -57,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically create a BMP image with a thick black border and a light‑gray inset rectangle for use as a printable report header or footer.
- * 2. When an application must generate placeholder graphics for UI mockups, such as a bordered canvas that visually separates content sections in a Windows Forms prototype.
- * 3. When a batch process creates standardized image assets for a document management system, ensuring each BMP file has a consistent border thickness and inner background color.
- * 4. When a game or simulation engine requires a simple texture with a defined outer frame and inner area to serve as a UI panel or dialog background.
- * 5. When an automated testing tool needs to produce a known‑size BMP file with a clear border and inner fill to verify image rendering and file‑output functionality in .NET applications.
+ * 1. When a developer needs to programmatically generate a BMP placeholder image with a thick black border and a blue inner rectangle for UI mockups using C# and Aspose.Imaging.
+ * 2. When an automated report generator must create simple diagrammatic graphics, such as a bordered thumbnail with a highlighted inner area, by drawing rectangles on a BMP file with Aspose.Imaging.
+ * 3. When a game asset pipeline requires drawing a bold outer frame and an inset rectangle on a BMP sprite sheet to define collision zones or safe‑area guides via C# graphics operations.
+ * 4. When a document processing system has to embed a BMP image that includes a visible border and a colored inner rectangle to indicate watermark or annotation zones using Aspose.Imaging's Graphics class.
+ * 5. When a testing suite needs to produce a BMP test image with defined outer and inner rectangles to validate image rendering, file creation, and pen thickness handling in .NET.
  */
