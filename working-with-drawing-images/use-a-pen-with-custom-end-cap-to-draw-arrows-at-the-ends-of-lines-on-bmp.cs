@@ -16,26 +16,29 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set BMP options with a file source bound to the output path
+            // Set BMP options
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create the image canvas
+            // Create image canvas
             using (Image image = Image.Create(bmpOptions, 400, 400))
             {
-                // Initialize graphics for drawing
+                // Initialize graphics
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                // Configure pen with an arrow end cap
+                // Pen with arrow end cap
                 Pen pen = new Pen(Color.Black, 5f);
                 pen.EndCap = LineCap.ArrowAnchor;
 
-                // Draw a horizontal line with arrow at the end
+                // Draw horizontal line with arrow
                 graphics.DrawLine(pen, new Point(50, 200), new Point(350, 200));
 
-                // Save the image (output path already bound)
+                // Draw vertical line with arrow
+                graphics.DrawLine(pen, new Point(200, 50), new Point(200, 350));
+
+                // Save the image
                 image.Save();
             }
         }
@@ -48,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP diagram in C# that visualizes directional flow, such as a pipeline or process step, and wants to draw arrows at the ends of lines using a Pen with a custom ArrowAnchor end cap.
- * 2. When creating printable engineering schematics where the output must be a BMP file and the lines require arrowheads to indicate force direction or signal flow, leveraging Aspose.Imaging’s Graphics and Pen objects.
- * 3. When building a Windows desktop reporting tool that exports charts as BMP images and requires arrows on axis lines to highlight trends, using the Pen.EndCap property for arrow styling.
- * 4. When automating the production of instructional graphics for user manuals, and the developer wants to programmatically add arrow‑styled line endings to illustrate step‑by‑step directions in a BMP image.
- * 5. When integrating Aspose.Imaging into a batch image generation pipeline that creates BMP icons with arrow markers to denote navigation directions in a UI mockup, employing the Pen with LineCap.ArrowAnchor.
+ * 1. When a developer needs to generate a BMP diagram that highlights flow direction by drawing arrows at the ends of lines, such as for a simple network topology illustration.
+ * 2. When creating printable engineering schematics in C# where straight lines must indicate vector direction using a Pen with a custom ArrowAnchor end cap in an Aspose.Imaging BMP image.
+ * 3. When building an automated report that embeds 400×400 pixel BMP charts with directional arrows to show process steps, requiring the use of Graphics.DrawLine and LineCap.ArrowAnchor.
+ * 4. When a desktop application must programmatically add annotated arrows to a white background BMP file for user‑guided tutorials, leveraging Aspose.Imaging’s Pen and Graphics classes.
+ * 5. When exporting GIS route segments to a BMP file and needing arrowheads on each segment to convey travel direction, using C# and Aspose.Imaging’s custom end cap functionality.
  */
