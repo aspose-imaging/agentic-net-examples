@@ -1,6 +1,6 @@
 {
   "name": "Aspose.Imaging for .NET Examples Agent",
-  "description": "AI agent that generates, compiles, and validates C# code examples for Aspose.Imaging for .NET 26.6.0. 4,754 build-verified examples across 17 categories.",
+  "description": "AI agent that generates, compiles, and validates C# code examples for Aspose.Imaging for .NET 26.6.0. 4,784 build-verified examples across 17 categories.",
   "version": "26.6.0",
   "url": "https://github.com/aspose-imaging/agentic-net-examples",
   "api_base_url": "http://faisalabad-examples-mcp.dynabic.com:7009",
@@ -47,7 +47,7 @@
     },
     {
       "name": "Convert CDR",
-      "examples": 90
+      "examples": 120
     },
     {
       "name": "Convert CMX Images",
