@@ -1,6 +1,8 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
@@ -11,58 +13,60 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
+            // Hardcoded input and output paths
+            string inputDirectory = "InputImages";
             string outputPath = "Output/merged.jpg";
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Get JPEG files from the input directory
             string[] imageFiles = Directory.GetFiles(inputDirectory, "*.jpg");
 
-            if (imageFiles.Length == 0)
+            // Collect sizes of all images
+            List<Size> sizes = new List<Size>();
+            foreach (string filePath in imageFiles)
             {
-                Console.WriteLine("No JPEG files found in the input directory.");
-                return;
-            }
-
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-
-            foreach (string file in imageFiles)
-            {
-                if (!File.Exists(file))
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {file}");
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
 
-                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(file))
+                using (RasterImage img = (RasterImage)Image.Load(filePath))
                 {
                     sizes.Add(img.Size);
                 }
             }
 
-            int newWidth = 0;
-            int newHeight = 0;
-            foreach (var sz in sizes)
+            if (sizes.Count == 0)
             {
-                newWidth += sz.Width;
-                if (sz.Height > newHeight) newHeight = sz.Height;
+                Console.WriteLine("No JPEG files found to merge.");
+                return;
             }
 
-            FileCreateSource source = new FileCreateSource(outputPath, false);
-            JpegOptions options = new JpegOptions() { Source = source, Quality = 100 };
+            // Calculate canvas dimensions for horizontal merge
+            int canvasWidth = sizes.Sum(s => s.Width);
+            int canvasHeight = sizes.Max(s => s.Height);
 
-            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(options, newWidth, newHeight))
+            // Create JPEG canvas with specified options
+            Source source = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 90 };
+
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetX = 0;
-                foreach (string file in imageFiles)
+                foreach (string filePath in imageFiles)
                 {
-                    using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(file))
+                    using (RasterImage img = (RasterImage)Image.Load(filePath))
                     {
-                        var bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
+                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
+
+                // Save the merged image (bound image)
                 canvas.Save();
             }
         }
@@ -75,9 +79,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. A photographer can automatically stitch a series of portrait shots taken side‑by‑side into a single wide‑format JPEG for portfolio presentation.
- * 2. An e‑commerce platform can merge individual product angle photos stored in a folder into one composite image to display on a product listing page.
- * 3. A marketing team can combine daily social‑media banner images into a single horizontal collage for a weekly campaign recap.
- * 4. An accountant can concatenate scanned receipt JPEGs from a folder into one file for easy attachment to expense reports.
- * 5. A real‑estate agency can join room‑by‑room JPEG photos of a property into a single panoramic image for virtual tours.
+ * 1. When creating a product catalog thumbnail that shows several product photos side‑by‑side in a single JPEG for an e‑commerce website.
+ * 2. When generating a before‑and‑after comparison image for a medical imaging report by stitching two JPEG scans horizontally.
+ * 3. When building a social media collage that combines user‑uploaded JPEG pictures into one wide image for a marketing campaign.
+ * 4. When preparing a printable banner that requires multiple JPEG graphics to be merged horizontally into a single high‑quality JPEG file.
+ * 5. When automating the creation of a timeline infographic where each event’s JPEG icon is placed next to the previous one in a single image.
  */
