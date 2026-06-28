@@ -1,29 +1,28 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string[] inputPaths = new string[]
-        {
-            "image1.jpg",
-            "image2.jpg",
-            "image3.jpg"
-        };
-        string outputPath = "merged.png";
-
         try
         {
-            List<string> validPaths = new List<string>();
-            List<Size> sizes = new List<Size>();
+            // Hardcoded input JPEG files
+            string[] inputPaths = new string[]
+            {
+                "image1.jpg",
+                "image2.jpg",
+                "image3.jpg"
+            };
 
+            // Hardcoded output PNG file
+            string outputPath = "output/merged.png";
+
+            // Validate input files
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -31,43 +30,52 @@ class Program
                     Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
-
-                using (Image img = Image.Load(path))
-                {
-                    sizes.Add(new Size(img.Width, img.Height));
-                }
-
-                validPaths.Add(path);
             }
 
-            int totalWidth = sizes.Sum(s => s.Width);
-            int maxHeight = sizes.Max(s => s.Height);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Lists to hold pixel data and sizes
+            List<int[]> pixelDataList = new List<int[]>();
+            List<Size> sizeList = new List<Size>();
 
-            Source source = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions() { Source = source };
+            // Load each JPEG, flip horizontally, and store pixel data
+            foreach (string path in inputPaths)
+            {
+                using (Image img = Image.Load(path))
+                {
+                    img.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                    RasterImage raster = (RasterImage)img;
+                    int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
+                    pixelDataList.Add(pixels);
+                    sizeList.Add(raster.Size);
+                }
+            }
 
+            // Calculate canvas dimensions for horizontal layout
+            int totalWidth = 0;
+            int maxHeight = 0;
+            foreach (Size sz in sizeList)
+            {
+                totalWidth += sz.Width;
+                if (sz.Height > maxHeight) maxHeight = sz.Height;
+            }
+
+            // Create PNG canvas with bound source
+            Source src = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions() { Source = src };
             using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, totalWidth, maxHeight))
             {
                 int offsetX = 0;
-
-                for (int i = 0; i < validPaths.Count; i++)
+                for (int i = 0; i < pixelDataList.Count; i++)
                 {
-                    string path = validPaths[i];
-
-                    using (Image img = Image.Load(path))
-                    {
-                        img.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                        RasterImage raster = (RasterImage)img;
-
-                        Rectangle destRect = new Rectangle(offsetX, 0, raster.Width, raster.Height);
-                        canvas.SaveArgb32Pixels(destRect, raster.LoadArgb32Pixels(raster.Bounds));
-                    }
-
-                    offsetX += sizes[i].Width;
+                    Size sz = sizeList[i];
+                    Rectangle bounds = new Rectangle(offsetX, 0, sz.Width, sz.Height);
+                    canvas.SaveArgb32Pixels(bounds, pixelDataList[i]);
+                    offsetX += sz.Width;
                 }
 
+                // Save the composed image
                 canvas.Save();
             }
         }
@@ -80,9 +88,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a product catalog web page, a developer can use this C# Aspose.Imaging code to horizontally flip each JPEG photo of a product, stitch them side‑by‑side, and export the combined view as a high‑quality PNG for faster browser rendering.
- * 2. When generating a before‑and‑after comparison for a photo‑editing app, the code flips the original JPEG images, aligns them in a single horizontal strip, and saves the result as a PNG to preserve lossless quality for display in the UI.
- * 3. When preparing a printable marketing banner that requires mirrored images for symmetrical design, a C# developer can apply RotateFlip on each JPEG, merge them into one horizontal layout, and output a PNG that retains exact color fidelity.
- * 4. When building an automated image‑processing pipeline that consolidates multiple user‑uploaded JPEG selfies into a single panoramic PNG thumbnail, this Aspose.Imaging snippet flips each photo, concatenates them horizontally, and creates a web‑optimized PNG file.
- * 5. When developing a digital signage system that needs to show a series of mirrored JPEG advertisements in a single slide, the code flips each image, arranges them side‑by‑side, and exports the composite as a PNG for seamless playback on the display hardware.
+ * 1. When creating a product catalog that shows mirrored side‑view photos of items, a developer can flip each JPEG horizontally, stitch them side‑by‑side, and output a single PNG for web display.
+ * 2. When generating a before‑and‑after comparison for a photo‑editing app, the code can flip the original JPEGs, align them in a horizontal strip, and save the composite as a PNG thumbnail.
+ * 3. When preparing a printable banner that requires mirrored images for a symmetrical design, the developer can use this routine to horizontally flip the source JPEGs, concatenate them, and export a high‑quality PNG.
+ * 4. When building an e‑learning slide that demonstrates image reflection, the code can automatically mirror each JPEG, arrange them in a row, and produce a PNG for inclusion in PowerPoint.
+ * 5. When automating the creation of a social‑media collage where each photo must appear as its mirror image, the solution flips the JPEGs, merges them horizontally, and saves the result as a PNG ready for upload.
  */
