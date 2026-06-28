@@ -11,69 +11,54 @@ class Program
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"c:\temp\batch_shapes.png";
+            // Define output path
+            string outputPath = @"C:\temp\shapes_output.png";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up PNG options with a FileCreateSource bound to the output path
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
+            // Create PNG options with file source
+            Source source = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions() { Source = source };
 
-            // Create the image canvas
-            using (Image image = Image.Create(pngOptions, 800, 600))
+            // Create a new image canvas
+            using (Image image = Image.Create(pngOptions, 500, 500))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
                 // Define a collection of shape descriptors
-                var shapes = new List<(string Type, object[] Params)>
+                var shapes = new List<(string Type, Color Color, int X, int Y, int Width, int Height)>
                 {
-                    ("Line", new object[] { new Point(50, 50), new Point(750, 50) }),
-                    ("Rectangle", new object[] { new Rectangle(100, 100, 200, 150) }),
-                    ("Ellipse", new object[] { new Rectangle(350, 100, 200, 150) }),
-                    ("Pie", new object[] { new Rectangle(100, 300, 200, 150), 0f, 120f }),
-                    ("Polygon", new object[] { new[] { new Point(400,300), new Point(500,350), new Point(450,450), new Point(350,400) } })
+                    ("Rectangle", Color.Red, 50, 50, 150, 100),
+                    ("Ellipse", Color.Blue, 250, 50, 120, 120),
+                    ("Line", Color.Green, 100, 200, 300, 350),
+                    ("Pie", Color.Purple, 150, 250, 200, 200)
                 };
 
-                // Iterate over the descriptors and draw each shape
-                foreach (var shape in shapes)
+                // Iterate and draw each shape
+                foreach (var s in shapes)
                 {
-                    switch (shape.Type)
+                    Pen pen = new Pen(s.Color, 2);
+                    switch (s.Type)
                     {
-                        case "Line":
-                            var p1 = (Point)shape.Params[0];
-                            var p2 = (Point)shape.Params[1];
-                            graphics.DrawLine(new Pen(Color.Black, 2), p1, p2);
-                            break;
-
                         case "Rectangle":
-                            var rect = (Rectangle)shape.Params[0];
-                            graphics.DrawRectangle(new Pen(Color.Blue, 2), rect);
+                            graphics.DrawRectangle(pen, new Rectangle(s.X, s.Y, s.Width, s.Height));
                             break;
-
                         case "Ellipse":
-                            var ellipseRect = (Rectangle)shape.Params[0];
-                            graphics.DrawEllipse(new Pen(Color.Red, 2), ellipseRect);
+                            graphics.DrawEllipse(pen, new Rectangle(s.X, s.Y, s.Width, s.Height));
                             break;
-
+                        case "Line":
+                            graphics.DrawLine(pen, new Point(s.X, s.Y), new Point(s.Width, s.Height));
+                            break;
                         case "Pie":
-                            var pieRect = (Rectangle)shape.Params[0];
-                            var startAngle = (float)shape.Params[1];
-                            var sweepAngle = (float)shape.Params[2];
-                            graphics.DrawPie(new Pen(Color.Green, 2), pieRect, startAngle, sweepAngle);
-                            break;
-
-                        case "Polygon":
-                            var points = (Point[])shape.Params[0];
-                            graphics.DrawPolygon(new Pen(Color.Purple, 2), points);
+                            graphics.DrawPie(pen, new Rectangle(s.X, s.Y, s.Width, s.Height), 0, 90);
                             break;
                     }
                 }
 
-                // Save the image (output file is already bound via FileCreateSource)
+                // Save the image (bound to the file source)
                 image.Save();
             }
         }
@@ -86,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PNG report that visualizes a series of geometric annotations (lines, rectangles, ellipses, pies, polygons) in a single image using Aspose.Imaging for .NET batch drawing.
- * 2. When an application must create thumbnails with overlaid shapes to highlight regions of interest in medical imaging or satellite photos, leveraging C# graphics drawing on an 800x600 canvas.
- * 3. When a web service automatically produces custom certificates or badges by iterating over shape descriptors and saving the result as a PNG file on the server.
- * 4. When a desktop tool needs to export a schematic diagram composed of multiple primitive shapes into a high‑resolution PNG for printing or archival purposes.
- * 5. When a batch processing job has to render a set of diagram elements defined in a collection into a single image file, using Aspose.Imaging’s FileCreateSource and PNG options for consistent output.
+ * 1. When a developer needs to generate a PNG report thumbnail that visualizes layout zones (rectangles, ellipses, lines, pies) based on dynamic data, they can use this Aspose.Imaging C# code to batch‑draw the shapes onto a 500×500 canvas.
+ * 2. When an application must create custom diagram assets (e.g., flow‑chart symbols) on the fly and save them as PNG files, iterating over a shape descriptor list with Aspose.Imaging simplifies the batch rendering process.
+ * 3. When a web service has to produce on‑demand image badges that combine multiple geometric elements (colored rectangles, circles, lines, and pie slices) for user profiles, this code provides a programmatic way to compose and export the PNG.
+ * 4. When an automated testing tool needs to overlay visual markers (rectangular highlights, ellipses around defects, connecting lines, and pie charts) onto screenshots for defect documentation, the batch shape drawing loop in Aspose.Imaging handles the composition.
+ * 5. When a desktop utility must convert a collection of shape definitions stored in a database into a single PNG illustration for printing or archiving, the C# example demonstrates how to iterate through the descriptors and render each shape with Aspose.Imaging.
  */
