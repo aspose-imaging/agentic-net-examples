@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
@@ -10,44 +11,39 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "Input/sample.emf";
             string outputPath = "Output/sample.pdf";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure vector rasterization options for EMF
-                var vectorOptions = new EmfRasterizationOptions
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    PageSize = image.Size,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
-
-                // Set PDF options with metadata and vector rasterization
-                var pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = vectorOptions,
-                    PdfDocumentInfo = new PdfDocumentInfo
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
                     {
-                        Author = "Author Name",
-                        Title = "Document Title"
-                    }
-                };
+                        Author = "John Doe",
+                        Title = "Sample PDF"
+                    };
 
-                // Save as PDF with embedded fonts
-                image.Save(outputPath, pdfOptions);
+                    EmfRasterizationOptions vectorOptions = new EmfRasterizationOptions
+                    {
+                        PageSize = image.Size,
+                        BackgroundColor = Aspose.Imaging.Color.White,
+                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = Aspose.Imaging.SmoothingMode.None
+                    };
+
+                    pdfOptions.VectorRasterizationOptions = vectorOptions;
+
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -59,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate printable PDF reports from vector‑based EMF diagrams while preserving font fidelity and adding author and title metadata.
- * 2. When an engineering application must archive CAD schematics stored as EMF files into searchable PDF documents with embedded fonts for consistent rendering across devices.
- * 3. When a legal document management system converts signed EMF signatures into PDFs that include metadata for document tracking and retain exact font appearance.
- * 4. When a marketing tool exports high‑resolution EMF logos into PDF brochures, embedding the fonts to avoid missing characters and setting PDF metadata for SEO.
- * 5. When a desktop utility batch‑processes EMF assets into PDF portfolios, ensuring each PDF contains author and title information for easy cataloguing.
+ * 1. When a Windows desktop application must generate printable PDF reports from vector‑based EMF charts while preserving font fidelity and adding author and title metadata.
+ * 2. When an automated document conversion service needs to batch‑process EMF logos into PDF files with embedded fonts for consistent branding across different operating systems.
+ * 3. When a legal or compliance system requires converting EMF diagrams to PDF and embedding metadata such as author and title for audit‑trail purposes.
+ * 4. When a cloud‑based API transforms user‑uploaded EMF drawings into searchable PDF documents, ensuring the fonts are rasterized correctly and PDF properties are set programmatically in C#.
+ * 5. When a legacy engineering tool exports schematics as EMF and a .NET utility must create PDF documentation with proper page size, white background, and PDF metadata for inclusion in technical manuals.
  */
