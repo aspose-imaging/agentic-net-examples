@@ -1,37 +1,33 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input SVG path
-            string inputPath = "input.svg";
+            string inputPath = @"C:\Images\multpage.svg";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the input directory exists (creates if missing)
-            string inputDir = Path.GetDirectoryName(inputPath);
-            Directory.CreateDirectory(inputDir);
-
-            // Load the SVG image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            // Load the SVG image (supports multipage)
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to multipage interface
-                Aspose.Imaging.IMultipageImage multipage = image as Aspose.Imaging.IMultipageImage;
+                // Ensure the image implements IMultipageImage
+                IMultipageImage multipage = image as IMultipageImage;
                 if (multipage == null)
                 {
-                    Console.Error.WriteLine("The loaded image is not a multipage vector image.");
+                    Console.Error.WriteLine("The loaded image is not a multipage image.");
                     return;
                 }
 
@@ -39,21 +35,23 @@ class Program
 
                 for (int i = 0; i < pageCount; i++)
                 {
-                    // Prepare EMF export options for the current page
-                    EmfOptions exportOptions = new EmfOptions
-                    {
-                        MultiPageOptions = new MultiPageOptions(new Aspose.Imaging.IntRange(i, i + 1)),
-                        VectorRasterizationOptions = new EmfRasterizationOptions
-                        {
-                            PageSize = image.Size
-                        }
-                    };
-
-                    // Construct output path for the page
-                    string outputPath = Path.Combine(inputDir, $"page_{i + 1}.emf");
+                    // Construct output file name for each page
+                    string outputPath = $@"C:\Images\output_page_{i}.emf";
 
                     // Ensure output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Prepare EMF export options
+                    EmfOptions exportOptions = new EmfOptions();
+
+                    // Export only the current page
+                    exportOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
+
+                    // Set vector rasterization options (page size based on source image)
+                    exportOptions.VectorRasterizationOptions = new EmfRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    };
 
                     // Save the current page as EMF
                     image.Save(outputPath, exportOptions);
@@ -69,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a multi‑page SVG diagram into separate EMF files for use in Windows vector graphics applications such as Microsoft Office.
- * 2. When an automated reporting tool must extract each page of an SVG chart and save them as individual EMF images to embed in PDF or Word documents.
- * 3. When a batch processing pipeline processes SVG assets from a design system and requires per‑page EMF output for high‑resolution printing.
- * 4. When a GIS application stores map layers as a multi‑page SVG and the developer wants to export each layer as a standalone EMF vector file for integration with CAD software.
- * 5. When a legacy system only accepts EMF files, a developer can use this code to split a multi‑page SVG logo into separate EMF pages for backward‑compatible rendering.
+ * 1. When a CAD application needs to convert each layer of a multi‑page SVG diagram into separate EMF files for Windows vector graphics editing.
+ * 2. When an automated reporting system must split a multi‑page SVG chart into individual EMF pages to embed them in PowerPoint slides.
+ * 3. When a printing workflow requires extracting each SVG page as an EMF vector to preserve resolution‑independent quality for high‑DPI printers.
+ * 4. When a document conversion service wants to transform multi‑page SVG invoices into separate EMF files for inclusion in legacy Word templates.
+ * 5. When a GIS tool needs to export each map view stored in a multi‑page SVG as distinct EMF files for further analysis in vector‑based GIS software.
  */
