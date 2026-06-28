@@ -1,12 +1,8 @@
 using System;
 using System.IO;
-using System.Diagnostics;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -14,60 +10,42 @@ class Program
     {
         try
         {
-            // Define input images of different resolutions (must exist in the working directory)
+            // Define input images of different resolutions
             string[] inputPaths = {
                 "image_640x480.png",
                 "image_1280x720.png",
                 "image_1920x1080.png"
             };
 
-            // Output directory
-            string outputDir = "Output";
-
-            // Ensure the output directory exists (once)
-            Directory.CreateDirectory(outputDir);
-
-            foreach (string inputPath in inputPaths)
+            foreach (var inputPath in inputPaths)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Prepare output path
-                string outputFileName = $"mask_{Path.GetFileNameWithoutExtension(inputPath)}.png";
-                string outputPath = Path.Combine(outputDir, outputFileName);
-
-                // Ensure the output directory for this file exists
+                // Prepare output path and ensure directory exists
+                string outputPath = Path.Combine("Output", Path.GetFileNameWithoutExtension(inputPath) + "_masked.png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load image and apply MagicWand mask
+                // Measure mask generation time
+                var startTime = DateTime.Now;
+
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    // Use the center point as the reference for the mask
-                    int centerX = image.Width / 2;
-                    int centerY = image.Height / 2;
-
-                    Stopwatch sw = Stopwatch.StartNew();
-
+                    // Simple mask: select around the image center and apply
                     MagicWandTool
-                        .Select(image, new MagicWandSettings(centerX, centerY))
+                        .Select(image, new MagicWandSettings(image.Width / 2, image.Height / 2))
                         .Apply();
 
-                    sw.Stop();
-
-                    // Save the masked image as PNG with alpha channel
-                    var pngOptions = new PngOptions
-                    {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new StreamSource(new MemoryStream())
-                    };
-                    image.Save(outputPath, pngOptions);
-
-                    Console.WriteLine($"{Path.GetFileName(inputPath)} processed in {sw.ElapsedMilliseconds} ms");
+                    // Save the masked image
+                    image.Save(outputPath);
                 }
+
+                var elapsed = DateTime.Now - startTime;
+                Console.WriteLine($"Processed {inputPath} in {elapsed.TotalMilliseconds} ms, saved to {outputPath}");
             }
         }
         catch (Exception ex)
@@ -76,3 +54,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to compare the performance of Aspose.Imaging’s MagicWandTool on low‑resolution PNG thumbnails versus high‑definition JPEGs for a photo‑editing web service.
+ * 2. When a QA engineer wants to benchmark mask generation time across 640×480, 1280×720, and 1920×1080 images to set acceptable latency thresholds in a C# desktop application.
+ * 3. When an optimization team is evaluating the impact of different image formats (PNG, BMP, TIFF) on the speed of applying a center‑based mask using the MagicWandTool.
+ * 4. When a CI pipeline must automatically verify that recent library updates do not degrade the runtime of mask creation on images of varying resolutions.
+ * 5. When a product manager needs concrete millisecond measurements to justify hardware requirements for a batch‑processing server that applies masks to user‑uploaded images in .NET.
+ */

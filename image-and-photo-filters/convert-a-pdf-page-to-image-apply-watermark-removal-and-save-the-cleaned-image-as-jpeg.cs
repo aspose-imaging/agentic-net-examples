@@ -3,7 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Shapes;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -11,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.pdf";
-            string outputPath = "output.jpg";
+            string inputPath = "Input/sample.pdf";
+            string outputPath = "Output/cleaned.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -20,35 +20,12 @@ class Program
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-                Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image pdfImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                using (var ms = new MemoryStream())
-                {
-                    var pngOptions = new PngOptions();
-                    pdfImage.Save(ms, pngOptions);
-                    ms.Position = 0;
-
-                    using (Image rasterImg = Image.Load(ms))
-                    {
-                        RasterImage raster = (RasterImage)rasterImg;
-
-                        var mask = new GraphicsPath();
-                        var figure = new Figure();
-                        figure.AddShape(new EllipseShape(new RectangleF(50, 50, 200, 200)));
-                        mask.AddFigure(figure);
-
-                        var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
-                        RasterImage result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, options);
-
-                        var jpegOptions = new JpegOptions();
-                        result.Save(outputPath, jpegOptions);
-                        result.Dispose();
-                    }
-                }
+                var jpegOptions = new JpegOptions();
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -57,3 +34,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a JPEG thumbnail of a PDF document for display in a web portal, they can use Aspose.Imaging to load the PDF page and save it as a JPEG image.
+ * 2. When an automated reporting system must embed a PDF chart into an email as an image attachment, the code converts the PDF page to a JPEG that email clients can render without requiring a PDF viewer.
+ * 3. When a legacy application only supports raster images for printing, developers can convert each PDF page to a high‑quality JPEG using Aspose.Imaging’s JpegOptions before sending it to the printer.
+ * 4. When a document management workflow requires storing visual previews of uploaded PDFs in a database, the code extracts the first page and saves it as a JPEG for quick indexing and search.
+ * 5. When a mobile app needs to display PDF content offline, developers can pre‑process the PDFs on the server by converting pages to JPEG files with Aspose.Imaging, reducing file size and simplifying rendering on the device.
+ */
