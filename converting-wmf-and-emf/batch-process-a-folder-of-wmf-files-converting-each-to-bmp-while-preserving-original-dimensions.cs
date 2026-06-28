@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
@@ -26,30 +25,18 @@ class Program
                     return;
                 }
 
-                // Build the output BMP path preserving the original file name
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileName + ".bmp");
+                // Build the output BMP path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".bmp";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the WMF image
+                // Load the WMF image and save it as BMP
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Set rasterization options to keep original dimensions
-                    var rasterOptions = new WmfRasterizationOptions
-                    {
-                        PageSize = image.Size
-                    };
-
-                    // Configure BMP save options with the rasterization settings
-                    var bmpOptions = new BmpOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions
-                    };
-
-                    // Save as BMP
-                    image.Save(outputPath, bmpOptions);
+                    // Save using BMP options (preserves original dimensions)
+                    image.Save(outputPath, new BmpOptions());
                 }
             }
         }
@@ -59,3 +46,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a Windows desktop application must convert a legacy collection of vector WMF icons into raster BMP files for a printing system that only accepts BMP images.
+ * 2. When an automated build pipeline needs to generate thumbnail previews of WMF diagrams by batch‑converting each file to BMP while preserving the original dimensions.
+ * 3. When a migration script has to bulk‑export WMF assets from an old documentation repository to BMP format so they can be displayed in a web portal that does not support WMF.
+ * 4. When a C# service processes user‑uploaded WMF graphics and stores them as BMP files on disk, ensuring the saved images retain their original size for downstream image analysis.
+ * 5. When a nightly batch job synchronizes a folder of WMF drawings with a legacy CAD system that requires BMP inputs, using Aspose.Imaging to load each WMF and save it as a dimension‑preserving BMP.
+ */

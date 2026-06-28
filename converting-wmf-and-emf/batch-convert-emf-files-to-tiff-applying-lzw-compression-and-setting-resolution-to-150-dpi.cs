@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -10,47 +11,47 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            // Hardcoded input and output directories
+            string inputFolder = "Input";
+            string outputFolder = "Output";
 
-            if (!Directory.Exists(inputDirectory))
+            // Validate input directory
+            if (!Directory.Exists(inputFolder))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Directory.CreateDirectory(inputFolder);
+                Console.WriteLine($"Input directory created at: {inputFolder}. Add files and rerun.");
                 return;
             }
 
-            if (!Directory.Exists(outputDirectory))
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputFolder);
+
+            // Get all EMF files in the input directory
+            string[] emfFiles = Directory.GetFiles(inputFolder, "*.emf");
+
+            foreach (string inputPath in emfFiles)
             {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            foreach (string file in files)
-            {
-                if (!string.Equals(Path.GetExtension(file), ".emf", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                string inputPath = file;
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file) + ".tif");
-
+                // Validate each input file
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
+                // Construct output TIFF path
+                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".tif");
+
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+                // Load EMF image and save as TIFF with LZW compression and 150 DPI resolution
                 using (Image image = Image.Load(inputPath))
                 {
-                    using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
-                    {
-                        tiffOptions.Compression = TiffCompressions.Lzw;
-                        image.Save(outputPath, tiffOptions);
-                    }
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    tiffOptions.Compression = TiffCompressions.Lzw;
+                    tiffOptions.ResolutionSettings = new ResolutionSetting(150, 150);
+
+                    image.Save(outputPath, tiffOptions);
                 }
             }
         }
@@ -60,3 +61,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to migrate a legacy collection of vector EMF drawings into compressed TIFF files for archival storage while preserving a 150 DPI resolution.
+ * 2. When an automated build pipeline must generate print‑ready TIFF assets from EMF logos, applying LZW compression to reduce file size.
+ * 3. When a document management system requires batch conversion of user‑uploaded EMF diagrams to TIFF format with consistent DPI for OCR processing.
+ * 4. When a Windows desktop application has to export multiple EMF charts to TIFF for inclusion in PDF reports, ensuring lossless compression and uniform resolution.
+ * 5. When a cloud service processes bulk EMF files from a shared folder and needs to output TIFF images with LZW compression and 150 DPI for downstream image analysis.
+ */

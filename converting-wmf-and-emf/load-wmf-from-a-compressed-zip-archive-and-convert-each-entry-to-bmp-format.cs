@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input zip file and output directory
-            string zipPath = @"C:\Data\wmf_archive.zip";
-            string outputDir = @"C:\Data\ConvertedBmp";
+            string zipPath = @"C:\Input\wmf_archive.zip";
+            string outputDirectory = @"C:\Output\BmpImages";
 
             // Verify the zip file exists
             if (!File.Exists(zipPath))
@@ -21,31 +21,37 @@ class Program
                 return;
             }
 
-            // Ensure the base output directory exists
-            Directory.CreateDirectory(outputDir);
+            // Ensure the output directory exists (CreateDirectory works even if the directory already exists)
+            Directory.CreateDirectory(outputDirectory);
 
             // Open the zip archive for reading
             using (ZipArchive archive = ZipFile.OpenRead(zipPath))
             {
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    // Process only WMF files
-                    if (string.Equals(Path.GetExtension(entry.FullName), ".wmf", StringComparison.OrdinalIgnoreCase))
+                    // Process only files with .wmf or .wmz extensions (case‑insensitive)
+                    string extension = Path.GetExtension(entry.FullName);
+                    if (!string.Equals(extension, ".wmf", StringComparison.OrdinalIgnoreCase) &&
+                        !string.Equals(extension, ".wmz", StringComparison.OrdinalIgnoreCase))
                     {
-                        // Build the output BMP file path
-                        string outputPath = Path.Combine(
-                            outputDir,
-                            Path.GetFileNameWithoutExtension(entry.FullName) + ".bmp");
+                        continue;
+                    }
 
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Build the output BMP file path
+                    string outputFileName = Path.GetFileNameWithoutExtension(entry.Name) + ".bmp";
+                    string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                        // Load the WMF image from the entry stream and save as BMP
-                        using (Stream entryStream = entry.Open())
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Load the WMF image from the zip entry stream
+                    using (Stream entryStream = entry.Open())
+                    {
+                        // Aspose.Imaging.Image.Load can read from a stream
                         using (Image image = Image.Load(entryStream))
                         {
-                            BmpOptions bmpOptions = new BmpOptions();
-                            image.Save(outputPath, bmpOptions);
+                            // Save as BMP using default BMP options
+                            image.Save(outputPath, new BmpOptions());
                         }
                     }
                 }
@@ -57,3 +63,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑convert legacy Windows Metafile (WMF/WMZ) graphics stored in a compressed zip archive into bitmap (BMP) files for use in older reporting systems.
+ * 2. When an application must extract vector icons from a vendor‑supplied zip package and render them as BMP thumbnails for display in a Windows desktop UI.
+ * 3. When a migration tool has to process archived design assets, loading each WMF entry from a zip file and saving them as BMP to ensure compatibility with legacy printing pipelines.
+ * 4. When an automated build script has to unpack a zip of WMF diagrams, convert them to BMP, and place the results in a designated output folder for inclusion in documentation PDFs.
+ * 5. When a cloud service receives user‑uploaded zip files containing WMF drawings and needs to quickly generate BMP previews without extracting the archive to disk.
+ */
