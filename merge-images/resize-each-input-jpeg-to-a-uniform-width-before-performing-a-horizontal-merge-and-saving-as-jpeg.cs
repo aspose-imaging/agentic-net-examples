@@ -13,21 +13,26 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string[] inputPaths = new string[]
+            // Hardcoded input JPEG file paths
+            string[] inputPaths = new[]
             {
                 "input1.jpg",
                 "input2.jpg",
                 "input3.jpg"
             };
-            string outputPath = "output/merged.jpg";
+
+            // Hardcoded output JPEG path
+            string outputPath = "merged.jpg";
+
+            // Uniform width for each image after resizing
+            int uniformWidth = 200;
 
             // Validate input files
-            foreach (string path in inputPaths)
+            foreach (string inputPath in inputPaths)
             {
-                if (!File.Exists(path))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {path}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
             }
@@ -35,46 +40,46 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            const int uniformWidth = 200; // Desired width for each image
-
-            // Load, resize, and collect images
-            List<RasterImage> images = new List<RasterImage>();
-            List<int> heights = new List<int>();
-
-            foreach (string path in inputPaths)
+            // First pass: calculate total canvas size
+            int totalWidth = 0;
+            int maxHeight = 0;
+            foreach (string inputPath in inputPaths)
             {
-                RasterImage img = (RasterImage)Image.Load(path);
-                int newHeight = (int)((double)img.Height * uniformWidth / img.Width);
-                img.Resize(uniformWidth, newHeight);
-                images.Add(img);
-                heights.Add(img.Height);
+                using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                {
+                    int targetHeight = (int)Math.Round((double)img.Height * uniformWidth / img.Width);
+                    totalWidth += uniformWidth;
+                    if (targetHeight > maxHeight)
+                        maxHeight = targetHeight;
+                }
             }
 
-            // Calculate canvas size
-            int totalWidth = uniformWidth * images.Count;
-            int maxHeight = heights.Max();
-
-            // Create JPEG canvas
+            // Prepare JPEG options with bound source
             Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 90 };
+            JpegOptions jpegOptions = new JpegOptions
+            {
+                Source = source,
+                Quality = 90
+            };
 
+            // Create canvas bound to the output file
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
             {
                 int offsetX = 0;
-                foreach (RasterImage img in images)
+                foreach (string inputPath in inputPaths)
                 {
-                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                    offsetX += img.Width;
+                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                    {
+                        int targetHeight = (int)Math.Round((double)img.Height * uniformWidth / img.Width);
+                        img.Resize(uniformWidth, targetHeight);
+                        var bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                        offsetX += img.Width;
+                    }
                 }
-                // Save the bound image
-                canvas.Save();
-            }
 
-            // Dispose loaded images
-            foreach (RasterImage img in images)
-            {
-                img.Dispose();
+                // Save the bound canvas
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -86,9 +91,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a product catalog thumbnail strip, a developer can use this code to resize each product JPEG to the same width and merge them side‑by‑side into a single JPEG for quick web preview.
- * 2. When generating a social media collage of event photos, the code ensures all JPEG images share a uniform width before horizontally stitching them together for a consistent look.
- * 3. When preparing a printable banner that combines multiple advertisement images, the developer can resize each JPEG to a fixed width and merge them into one high‑quality JPEG canvas.
- * 4. When building an e‑learning platform that displays a sequence of diagram screenshots, this code resizes each JPEG to the same width and merges them horizontally for a seamless slide view.
- * 5. When automating the creation of a before‑and‑after comparison image, the code resizes the two JPEGs to a uniform width and merges them side‑by‑side into a single JPEG file.
+ * 1. When building a product catalog website, a developer can use this C# Aspose.Imaging code to resize each product JPEG to the same width and merge them side‑by‑side into a single thumbnail strip for quick visual browsing.
+ * 2. When generating a social‑media collage, the code ensures all uploaded JPEG photos are uniformly scaled and horizontally combined, creating a ready‑to‑post image with consistent dimensions.
+ * 3. When preparing an email newsletter, a developer can batch‑process multiple JPEG banners, resize them to a fixed width, and merge them into one horizontal strip to reduce email size and improve load times.
+ * 4. When creating a printable banner, the code resizes each component JPEG to a uniform width and stitches them horizontally, guaranteeing a seamless layout that matches the required print specifications.
+ * 5. When displaying before‑and‑after comparisons on a medical imaging portal, the developer can use this routine to align the original and processed JPEGs at the same width and merge them horizontally for easy side‑by‑side analysis.
  */
