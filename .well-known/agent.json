@@ -1,6 +1,6 @@
 {
   "name": "Aspose.Imaging for .NET Examples Agent",
-  "description": "AI agent that generates, compiles, and validates C# code examples for Aspose.Imaging for .NET 26.6.0. 2,874 build-verified examples across 17 categories.",
+  "description": "AI agent that generates, compiles, and validates C# code examples for Aspose.Imaging for .NET 26.6.0. 4,754 build-verified examples across 17 categories.",
   "version": "26.6.0",
   "url": "https://github.com/aspose-imaging/agentic-net-examples",
   "api_base_url": "http://faisalabad-examples-mcp.dynabic.com:7009",
@@ -43,67 +43,67 @@
     },
     {
       "name": "Convert APNG",
-      "examples": 51
+      "examples": 102
     },
     {
       "name": "Convert CDR",
-      "examples": 30
+      "examples": 90
     },
     {
       "name": "Convert CMX Images",
-      "examples": 34
+      "examples": 102
     },
     {
       "name": "Convert DICOM Images",
-      "examples": 30
-    },
-    {
-      "name": "Convert EPS Images",
       "examples": 60
     },
     {
-      "name": "Convert Open Document Graphics",
+      "name": "Convert EPS Images",
       "examples": 120
     },
     {
+      "name": "Convert Open Document Graphics",
+      "examples": 240
+    },
+    {
       "name": "Convert Raster Image",
-      "examples": 141
+      "examples": 279
     },
     {
       "name": "Convert SVG to Raster Images",
-      "examples": 40
+      "examples": 80
     },
     {
       "name": "Convert webp Images",
-      "examples": 30
+      "examples": 60
     },
     {
       "name": "Converting WMF and EMF",
-      "examples": 29
+      "examples": 58
     },
     {
       "name": "Image and Photo Filters",
-      "examples": 138
+      "examples": 210
     },
     {
       "name": "Kernel Filters",
-      "examples": 464
+      "examples": 695
     },
     {
       "name": "Manipulate Different Image File Formats",
-      "examples": 600
+      "examples": 1032
     },
     {
       "name": "Manipulating Images",
-      "examples": 413
+      "examples": 650
     },
     {
       "name": "Merge Images",
-      "examples": 135
+      "examples": 175
     },
     {
       "name": "Working With Drawing Images",
-      "examples": 397
+      "examples": 639
     }
   ],
   "links": {
