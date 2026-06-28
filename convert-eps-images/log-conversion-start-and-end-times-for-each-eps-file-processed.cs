@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -10,12 +10,10 @@ class Program
     {
         try
         {
-            // Define base, input, and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure input directory exists
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -23,42 +21,38 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all EPS files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.eps");
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (var file in files)
+            foreach (var inputPath in files)
             {
-                // Verify the file exists
-                if (!File.Exists(file))
-                {
-                    Console.Error.WriteLine($"File not found: {file}");
+                if (!inputPath.EndsWith(".eps", StringComparison.OrdinalIgnoreCase))
                     continue;
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Log start time
-                Console.WriteLine($"Processing started: {file} at {DateTime.Now}");
-
-                // Prepare output path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(file);
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                 string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
 
-                // Ensure output directory for the file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load EPS image and save as PNG
-                using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(file))
+                Console.WriteLine($"Processing {inputPath} started at {DateTime.Now}");
+
+                using (var image = (EpsImage)Image.Load(inputPath))
                 {
-                    image.Save(outputPath, new PngOptions());
+                    var options = new PngOptions();
+                    image.Save(outputPath, options);
                 }
 
-                // Log end time
-                Console.WriteLine($"Processing finished: {file} at {DateTime.Now}");
+                Console.WriteLine($"Processing {inputPath} finished at {DateTime.Now}");
             }
         }
         catch (Exception ex)
@@ -67,3 +61,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a print shop needs to batch‑convert customer EPS artwork to PNG for web previews and must record how long each file takes to process for performance monitoring.
+ * 2. When an automated CI/CD pipeline generates PNG thumbnails from EPS design assets and logs start/end timestamps to detect slow conversions that could delay builds.
+ * 3. When a digital asset management system imports EPS logos and stores conversion timestamps in logs to audit processing times and troubleshoot bottlenecks.
+ * 4. When a SaaS platform offers on‑the‑fly EPS to PNG conversion and records processing times per request to enforce service‑level agreements.
+ * 5. When a developer creates a scheduled Windows service that scans an input folder for EPS files, converts them to PNG, and logs start and finish times to generate daily performance reports.
+ */

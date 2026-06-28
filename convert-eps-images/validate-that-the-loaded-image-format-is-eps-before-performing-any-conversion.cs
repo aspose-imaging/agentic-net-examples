@@ -8,34 +8,28 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.eps";
-        string outputPath = "output.png";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the image
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/sample.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                // Verify the image is an EPS image
-                if (!(image is EpsImage))
+                if (!(image is EpsImage epsImage))
                 {
-                    Console.Error.WriteLine("The loaded file is not an EPS image.");
+                    Console.Error.WriteLine("Loaded image is not an EPS file.");
                     return;
                 }
 
-                // Convert EPS to PNG
-                image.Save(outputPath, new PngOptions());
+                epsImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -44,3 +38,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application needs to convert client‑uploaded EPS logos to PNG thumbnails, it must first verify the file is truly an EPS image to avoid processing invalid formats.
+ * 2. When an automated batch job processes a folder of design assets, checking that each file is an EPS before conversion prevents runtime errors and ensures only vector graphics are rasterized.
+ * 3. When generating printable PDFs that embed PNG versions of EPS illustrations, the code validates the source EPS format to guarantee the correct rendering pipeline is used.
+ * 4. When a content management system allows users to replace EPS diagrams with PNG previews, confirming the original file type protects against accidental uploads of unsupported image types.
+ * 5. When a CI/CD pipeline validates graphic assets before deployment, the EPS format check ensures that only approved vector files are converted to PNG for use in the final product.
+ */
