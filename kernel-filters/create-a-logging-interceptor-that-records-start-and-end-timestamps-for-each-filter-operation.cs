@@ -1,65 +1,66 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    // Simple logger that records timestamps to the console.
-    static class FilterLogger
-    {
-        public static void LogStart(string filterName)
-        {
-            Console.WriteLine($"{DateTime.Now:O} - Starting filter: {filterName}");
-        }
-
-        public static void LogEnd(string filterName)
-        {
-            Console.WriteLine($"{DateTime.Now:O} - Finished filter: {filterName}");
-        }
-    }
-
-    // Executes a filter on the given raster image while logging start/end times.
-    static void ApplyFilterWithLogging(RasterImage rasterImage, Rectangle bounds, FilterOptionsBase options, string filterName)
-    {
-        FilterLogger.LogStart(filterName);
-        rasterImage.Filter(bounds, options);
-        FilterLogger.LogEnd(filterName);
-    }
-
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths.
-            string inputPath = @"C:\temp\sample.png";
-            string outputPath = @"C:\temp\sample.filtered.png";
-
-            // Verify input file exists.
+            // Hardcoded input and output paths
+            string inputPath = "sample.png";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists.
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = "output";
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
 
-            // Load the source image.
+            // Median filter
+            string medianOutput = Path.Combine(outputDir, "median.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(medianOutput));
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities.
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
+                DateTime start = DateTime.Now;
+                Console.WriteLine($"Median filter start: {start}");
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
+                DateTime end = DateTime.Now;
+                Console.WriteLine($"Median filter end: {end}");
+                raster.Save(medianOutput, new PngOptions());
+            }
 
-                // Define filter options (e.g., sharpen filter).
-                var sharpenOptions = new SharpenFilterOptions(5, 4.0);
+            // Gaussian blur filter
+            string gaussianOutput = Path.Combine(outputDir, "gaussian.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(gaussianOutput));
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+                DateTime start = DateTime.Now;
+                Console.WriteLine($"Gaussian blur filter start: {start}");
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                DateTime end = DateTime.Now;
+                Console.WriteLine($"Gaussian blur filter end: {end}");
+                raster.Save(gaussianOutput, new PngOptions());
+            }
 
-                // Apply the filter with logging.
-                ApplyFilterWithLogging(rasterImage, rasterImage.Bounds, sharpenOptions, "SharpenFilter");
-
-                // Save the processed image.
-                rasterImage.Save(outputPath);
+            // Sharpen filter
+            string sharpenOutput = Path.Combine(outputDir, "sharpen.png");
+            Directory.CreateDirectory(Path.GetDirectoryName(sharpenOutput));
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+                DateTime start = DateTime.Now;
+                Console.WriteLine($"Sharpen filter start: {start}");
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+                DateTime end = DateTime.Now;
+                Console.WriteLine($"Sharpen filter end: {end}");
+                raster.Save(sharpenOutput, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -71,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When processing large batches of PNG or JPEG images on a server, a developer can use the logger to measure how long each sharpen or blur filter takes, helping to identify performance bottlenecks.
- * 2. When building a compliance‑audit trail for a medical imaging workflow, the start/end timestamps recorded by the interceptor provide a tamper‑evident record of every filter applied to DICOM‑converted PNG files.
- * 3. When optimizing a real‑time photo‑editing desktop app, developers can log filter execution times to decide whether to offload expensive operations like Gaussian blur to a background thread.
- * 4. When integrating Aspose.Imaging into an automated CI/CD pipeline that validates image quality, the timestamps help verify that new filter parameters do not cause regressions in processing time.
- * 5. When troubleshooting intermittent failures in a cloud‑based image‑processing microservice, the logged timestamps allow engineers to correlate filter duration with resource usage spikes and timeout errors.
+ * 1. When a C# application needs to benchmark the performance of median and Gaussian blur filters on PNG images during batch image processing, this code logs precise start and end timestamps for each operation.
+ * 2. When developers are building an automated testing suite for Aspose.Imaging that validates filter execution times across different image formats such as JPEG and BMP, the timestamp interceptor provides measurable results.
+ * 3. When a photo‑editing tool requires real‑time feedback on how long each filter takes to apply so users can be informed about processing delays, the logged timestamps enable accurate UI progress indicators.
+ * 4. When a server‑side image‑optimization service must track and log filter durations for compliance or SLA reporting, the code’s start/end time records integrate easily with logging frameworks.
+ * 5. When troubleshooting unexpected slowdowns in a C# image‑processing pipeline that uses Aspose.Imaging’s RasterImage filters, the timestamp logs help pinpoint whether the median or Gaussian blur step is the bottleneck.
  */

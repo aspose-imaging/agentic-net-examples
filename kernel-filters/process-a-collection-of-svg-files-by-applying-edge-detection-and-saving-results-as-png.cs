@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
@@ -10,13 +11,13 @@ class Program
     {
         try
         {
-            string inputDirectory = "InputSvgs";
-            string outputDirectory = "OutputPngs";
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add SVG files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
@@ -26,6 +27,7 @@ class Program
             }
 
             string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+
             foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
@@ -38,36 +40,38 @@ class Program
                 string outputPath = Path.Combine(outputDirectory, fileName + ".png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image vectorImage = Image.Load(inputPath))
+                using (Image svgImage = Image.Load(inputPath))
                 {
-                    var rasterOptions = new SvgRasterizationOptions
+                    // Prepare PNG options with vector rasterization
+                    PngOptions pngOptions = new PngOptions();
+                    VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
                     {
-                        PageSize = vectorImage.Size
+                        PageWidth = svgImage.Width,
+                        PageHeight = svgImage.Height,
+                        BackgroundColor = Color.White
                     };
+                    pngOptions.VectorRasterizationOptions = vectorOptions;
 
-                    var pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions
-                    };
-
+                    // Rasterize SVG to PNG in memory
                     using (MemoryStream ms = new MemoryStream())
                     {
-                        vectorImage.Save(ms, pngOptions);
+                        svgImage.Save(ms, pngOptions);
                         ms.Position = 0;
 
                         using (RasterImage raster = (RasterImage)Image.Load(ms))
                         {
+                            // Sobel edge detection kernel
                             double[,] kernel = new double[,]
                             {
-                                { -1, -1, -1 },
-                                {  0,  0,  0 },
-                                {  1,  1,  1 }
+                                { -1, 0, 1 },
+                                { -2, 0, 2 },
+                                { -1, 0, 1 }
                             };
-                            var convOptions = new ConvolutionFilterOptions(kernel);
-                            raster.Filter(raster.Bounds, convOptions);
+                            var filterOptions = new ConvolutionFilterOptions(kernel);
+                            raster.Filter(raster.Bounds, filterOptions);
 
-                            var outPngOptions = new PngOptions();
-                            raster.Save(outputPath, outPngOptions);
+                            // Save the processed image as PNG
+                            raster.Save(outputPath, new PngOptions());
                         }
                     }
                 }
@@ -82,9 +86,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a folder of SVG icons into high‑contrast PNG thumbnails with edge detection for a web UI, they can use this Aspose.Imaging C# routine.
- * 2. When an e‑learning platform must transform vector diagrams into raster PNG slides that highlight outlines for better readability on low‑resolution screens, this code automates the process.
- * 3. When a GIS application requires extracting the edges of SVG map layers and saving them as PNG overlays for further spatial analysis, the sample provides a ready‑to‑use solution.
- * 4. When a machine‑learning pipeline needs a large set of PNG images with detected edges from SVG training data, the program efficiently rasterizes and filters each file in C#.
- * 5. When a print‑to‑web workflow must generate PNG previews of SVG artwork with edge detection to verify line quality before publishing, this code handles the batch processing.
+ * 1. When a developer needs to batch‑convert a library of vector icons (SVG) into raster PNG thumbnails with edge detection for a web UI, they can use this code.
+ * 2. When an e‑commerce platform wants to generate high‑contrast product outline images from SVG designs for marketing materials, the snippet automates the rasterization and edge‑filtering process.
+ * 3. When a GIS application must prepare map symbols by extracting their edges from SVG files and storing them as PNG assets for faster rendering on mobile devices, this code provides a C# solution.
+ * 4. When a documentation generator requires edge‑enhanced PNG screenshots of SVG diagrams to improve readability in PDF reports, the example processes the entire folder automatically.
+ * 5. When a CI/CD pipeline needs to validate visual changes by comparing edge‑detected PNG outputs of SVG assets across builds, the program offers a repeatable batch conversion step.
  */

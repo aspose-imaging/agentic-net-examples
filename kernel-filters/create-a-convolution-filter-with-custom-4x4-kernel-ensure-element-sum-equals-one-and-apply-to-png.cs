@@ -2,28 +2,34 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output/output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output/output.png";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
 
+                // 4x4 averaging kernel (sum equals 1)
                 double[,] kernel = new double[4, 4]
                 {
                     { 0.0625, 0.0625, 0.0625, 0.0625 },
@@ -32,10 +38,14 @@ class Program
                     { 0.0625, 0.0625, 0.0625, 0.0625 }
                 };
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1, 0);
+                // Create convolution filter options (factor 1, bias 0)
+                ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel, 1.0, 0);
+
+                // Apply the custom convolution filter to the entire image
                 raster.Filter(raster.Bounds, filterOptions);
 
-                var saveOptions = new PngOptions();
+                // Save the processed image as PNG
+                PngOptions saveOptions = new PngOptions();
                 raster.Save(outputPath, saveOptions);
             }
         }
@@ -48,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to apply a uniform blur to a PNG image by using a custom 4x4 convolution kernel whose elements sum to one, they can use this code.
- * 2. When an application needs to preprocess scanned PNG documents to reduce noise before OCR by applying a normalized averaging filter, this example shows how to do it in C# with Aspose.Imaging.
- * 3. When a game asset pipeline requires consistent smoothing of PNG textures across different resolutions, the code demonstrates how to implement a custom convolution filter in .NET.
- * 4. When a web service must generate a softened thumbnail from a user‑uploaded PNG file, the sample illustrates loading, filtering, and saving the result with Aspose.Imaging.
- * 5. When a developer is building an image‑editing tool that lets users apply custom kernels for effects such as motion blur or edge detection, this snippet provides the basic steps for applying a 4x4 kernel to a PNG image.
+ * 1. When a developer needs to smooth a PNG image by applying a custom 4x4 averaging convolution filter to reduce noise before further analysis.
+ * 2. When a developer wants to preserve overall brightness while blurring a PNG by using a kernel whose elements sum to one, preventing unintended exposure changes.
+ * 3. When a developer must preprocess scanned PNG documents with a uniform blur to improve OCR accuracy using Aspose.Imaging’s ConvolutionFilterOptions.
+ * 4. When a developer is building an automated C# image pipeline that loads PNG files, applies a custom kernel for edge softening, and saves the processed image to a specific output folder.
+ * 5. When a developer needs to demonstrate file existence validation, output directory creation, and the application of a custom convolution filter to a raster image in a .NET console application.
  */

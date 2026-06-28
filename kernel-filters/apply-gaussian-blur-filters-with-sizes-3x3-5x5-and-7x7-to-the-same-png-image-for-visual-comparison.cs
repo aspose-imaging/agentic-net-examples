@@ -9,7 +9,7 @@ class Program
     {
         try
         {
-            // Hardcoded input path
+            // Hardcoded input and output paths
             string inputPath = @"C:\Images\sample.png";
 
             // Verify input file exists
@@ -20,9 +20,9 @@ class Program
             }
 
             // Define output paths for each kernel size
-            string outputPath3 = @"C:\Images\sample.GaussianBlur3x3.png";
-            string outputPath5 = @"C:\Images\sample.GaussianBlur5x5.png";
-            string outputPath7 = @"C:\Images\sample.GaussianBlur7x7.png";
+            string outputPath3 = @"C:\Images\sample.GaussianBlur_3x3.png";
+            string outputPath5 = @"C:\Images\sample.GaussianBlur_5x5.png";
+            string outputPath7 = @"C:\Images\sample.GaussianBlur_7x7.png";
 
             // Ensure output directories exist
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath3));
@@ -62,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate preview thumbnails with varying softness for a PNG product catalog, they can apply 3x3, 5x5, and 7x7 Gaussian blur filters using Aspose.Imaging for .NET to compare visual impact.
- * 2. When building a photo‑editing web service in C#, the code can be used to create side‑by‑side blurred versions of a PNG upload so users can choose the appropriate blur strength before saving.
- * 3. When testing the performance of different Gaussian kernel sizes on PNG assets in a desktop application, a developer can run this snippet to benchmark rendering speed and image quality across 3x3, 5x5, and 7x7 filters.
- * 4. When preparing PNG graphics for a game UI where background elements need progressive softening, the code helps generate three pre‑blurred assets with distinct sigma values for easy swapping at runtime.
- * 5. When documenting image‑processing pipelines, a developer can use this example to demonstrate how Aspose.Imaging’s GaussianBlurFilterOptions manipulate PNG files in C# and produce comparable output files for training machine‑learning models that require varied blur levels.
+ * 1. When a developer needs to generate preview thumbnails with varying blur strengths to let users compare the visual impact of 3x3, 5x5, and 7x7 Gaussian blur on a PNG asset in a C# web application.
+ * 2. When an image‑processing pipeline must create side‑by‑side before‑and‑after samples for a UI that demonstrates how different kernel sizes affect noise reduction in raster PNG images using Aspose.Imaging for .NET.
+ * 3. When a QA engineer wants to automate regression testing of the GaussianBlurFilterOptions class by saving the same source PNG with 3x3, 5x5, and 7x7 kernels and comparing the output files for consistency.
+ * 4. When a desktop publishing tool needs to offer designers quick visual feedback on how various blur radii (sigma 1.0, 2.0, 3.0) change the appearance of logos stored as PNG files, using C# and Aspose.Imaging.
+ * 5. When a machine‑learning dataset is being prepared and the developer must augment a PNG image with multiple levels of Gaussian blur to increase training diversity, saving each version with a distinct file name.
  */

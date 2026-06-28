@@ -1,8 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,9 +13,9 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output/output.png";
+            string outputPath = "output.png";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -29,21 +30,29 @@ class Program
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Create a 5x5 averaging kernel
+                // Create a 5x5 averaging kernel (each element = 1/25)
                 double[,] kernel = new double[5, 5];
-                for (int i = 0; i < 5; i++)
+                for (int y = 0; y < 5; y++)
                 {
-                    for (int j = 0; j < 5; j++)
+                    for (int x = 0; x < 5; x++)
                     {
-                        kernel[i, j] = 1.0 / 25.0;
+                        kernel[y, x] = 1.0 / 25.0;
                     }
                 }
 
-                // Apply the custom convolution filter to the whole image
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                // Apply the custom convolution filter (smoothing)
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+
+                // Prepare PNG save options
+                PngOptions options = new PngOptions
+                {
+                    ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.TruecolorWithAlpha,
+                    BitDepth = 8,
+                    Source = new FileCreateSource(outputPath, false)
+                };
 
                 // Save the processed image
-                raster.Save(outputPath);
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -55,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce noise in scanned PNG documents before OCR by applying a 5x5 averaging convolution filter using Aspose.Imaging for .NET.
- * 2. When a C# application must generate a softened background effect for PNG UI assets by smoothing pixel values with a custom 5x5 kernel.
- * 3. When an image processing pipeline requires uniform blurring of PNG textures for game development, using the RasterImage.Filter method with a 5x5 average filter.
- * 4. When a batch script processes PNG photographs to create a consistent low‑pass filter for visual analytics, leveraging Aspose.Imaging's ConvolutionFilterOptions.
- * 5. When a developer wants to pre‑process PNG screenshots to remove high‑frequency details before compression, applying a 5x5 averaging kernel in C#.
+ * 1. When a developer needs to reduce noise in a PNG photograph by applying a 5x5 averaging convolution filter in C# using Aspose.Imaging.
+ * 2. When a web application must preprocess user‑uploaded PNG avatars to smooth edges before storing them on the server.
+ * 3. When a batch job processes scanned PNG documents to create a uniform, softened appearance for better OCR accuracy.
+ * 4. When a game developer wants to generate a blurred background texture from a PNG asset by applying a custom kernel with Aspose.Imaging.
+ * 5. When an image‑analysis pipeline requires a simple smoothing step on PNG images to normalize pixel values before further processing.
  */

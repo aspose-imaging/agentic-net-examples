@@ -11,7 +11,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Images\sample.png";
-            string outputPath = @"C:\Images\output\sample_emboss.png";
+            string outputPath = @"C:\Images\output_emboss.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,13 +23,12 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
+            // Load the image and cast to RasterImage
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply a sharpen filter (used here to simulate emboss effect)
+                // Apply a sharpen filter as an approximation of emboss effect
                 rasterImage.Filter(
                     rasterImage.Bounds,
                     new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
@@ -47,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to let users load a PNG or JPEG file in a WPF photo editor and instantly see an emboss effect applied to the raster image before saving.
- * 2. When a desktop application needs to verify that the selected image file exists, create the output folder, and apply a sharpen‑based emboss filter using Aspose.Imaging’s FilterOptions in C#.
- * 3. When a graphics‑intensive WPF tool must convert the filtered raster data back to a PNG with lossless quality for further processing or export.
- * 4. When error handling is required to display friendly messages if the input path is invalid or the filter operation throws an exception during real‑time preview.
- * 5. When a developer integrates Aspose.Imaging’s RasterImage.Filter method into a MVVM command to update the UI binding whenever the user adjusts emboss intensity parameters.
+ * 1. When a developer wants to let users load a PNG file in a WPF photo editor and instantly see an emboss‑like effect applied to the raster image.
+ * 2. When a desktop application needs to validate that the selected image exists, create the output folder, and apply a sharpen filter as a fast approximation of emboss before saving the result.
+ * 3. When building a batch‑processing tool that programmatically loads images, applies the Aspose.Imaging FilterOptions.SharpenFilterOptions to simulate emboss, and writes the transformed PNG to a predefined directory.
+ * 4. When implementing a real‑time preview pane in a WPF UI that calls Image.Load, casts to RasterImage, and uses rasterImage.Filter with bounds to render the emboss effect without blocking the UI thread.
+ * 5. When troubleshooting image‑processing pipelines, a developer uses this code to confirm that the Aspose.Imaging sharpen filter correctly modifies the pixel data and produces a visible emboss effect in the saved PNG file.
  */

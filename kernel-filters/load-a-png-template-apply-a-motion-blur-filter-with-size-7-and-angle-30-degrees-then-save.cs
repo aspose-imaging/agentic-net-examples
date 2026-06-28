@@ -1,29 +1,39 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
+            // Hardcoded input and output file paths
             string inputPath = "template.png";
-            string outputPath = "output/output.png";
+            string outputPath = "output.png";
 
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage to access filtering capabilities
                 RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new MotionWienerFilterOptions(7, 1.0, 30.0));
+
+                // Apply a motion Wiener filter (size 7, smooth factor 1.0, angle 30 degrees)
+                raster.Filter(
+                    raster.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(7, 1.0, 30.0));
+
+                // Save the processed image
                 raster.Save(outputPath);
             }
         }
@@ -36,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add a realistic motion blur effect to a PNG UI template before exporting it for a web application, they can use this Aspose.Imaging C# code to load the image, apply a 7‑pixel motion blur at a 30‑degree angle, and save the result.
- * 2. When generating product mock‑ups where a static PNG background must appear as if captured while moving, the code demonstrates how to programmatically apply a motion blur filter using Aspose.Imaging’s MotionWienerFilterOptions in .NET.
- * 3. When automating the creation of animated GIF frames from a series of PNG assets, a developer can first apply a consistent 30‑degree motion blur with size 7 to each frame using this snippet to achieve smooth motion continuity.
- * 4. When preparing marketing banners that require a subtle motion effect on PNG graphics to draw attention, the example shows how to load the template, apply a directional blur, and save the processed image with Aspose.Imaging in C#.
- * 5. When building a server‑side image processing pipeline that receives PNG templates and needs to simulate camera shake by applying a 30‑degree motion blur of radius 7, this code provides a ready‑to‑use implementation with Aspose.Imaging’s raster filter API.
+ * 1. When generating product catalog thumbnails, a developer can load a PNG template, apply a motion blur filter to simulate motion, and save the result for web display.
+ * 2. When creating dynamic game UI elements, a programmer may need to load a PNG asset, add a motion Wiener blur at a specific angle to convey speed, and save the modified image for use in the game engine.
+ * 3. When preparing marketing banners that require a subtle motion effect, a developer can use C# and Aspose.Imaging to load the PNG background, apply a 7‑pixel motion blur at 30°, and output the final PNG.
+ * 4. When automating the preprocessing of scanned documents that include moving objects, a developer can load each PNG page, apply a motion blur filter to smooth motion artifacts, and save the cleaned image.
+ * 5. When building an image‑processing pipeline for a photo‑editing web service, a C# backend can load a user‑provided PNG, apply a motion Wiener filter to achieve a directional blur, and store the processed PNG for download.
  */

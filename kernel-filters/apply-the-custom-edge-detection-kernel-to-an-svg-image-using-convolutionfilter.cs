@@ -2,47 +2,57 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
         try
         {
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
+            string tempPath = "temp.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+
             using (Image svgImage = Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions { PageSize = svgImage.Size };
-                using (MemoryStream ms = new MemoryStream())
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
+                    PageSize = svgImage.Size
+                };
 
-                    using (Image rasterImg = Image.Load(ms))
-                    {
-                        RasterImage raster = (RasterImage)rasterImg;
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                        double[,] kernel = ConvolutionFilter.Emboss3x3;
-                        var filterOptions = new ConvolutionFilterOptions(kernel);
-                        raster.Filter(raster.Bounds, filterOptions);
+                svgImage.Save(tempPath, pngOptions);
+            }
 
-                        var outPngOptions = new PngOptions();
-                        raster.Save(outputPath, outPngOptions);
-                    }
-                }
+            using (Image img = Image.Load(tempPath))
+            {
+                var rasterImage = (RasterImage)img;
+
+                double[,] kernel = new double[,]
+                {
+                    { -1, -1, -1 },
+                    { -1,  8, -1 },
+                    { -1, -1, -1 }
+                };
+
+                var convOptions = new ConvolutionFilterOptions(kernel, 1.0, 0);
+                rasterImage.Filter(rasterImage.Bounds, convOptions);
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -54,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG logo into a high‑contrast PNG thumbnail for a web gallery, they can apply a custom edge‑detection kernel with Aspose.Imaging to highlight the logo’s outlines.
- * 2. When an e‑learning platform wants to generate printable worksheets that emphasize diagram boundaries, they can rasterize SVG illustrations and run a ConvolutionFilter to produce clear edge‑enhanced PNG images.
- * 3. When a GIS application must overlay vector maps with stylized edge‑highlighted raster tiles, the code can load the SVG map, rasterize it, and apply the emboss/edge detection filter before saving as PNG.
- * 4. When a mobile app requires lightweight PNG assets with emphasized edges for low‑resolution screens, developers can use the ConvolutionFilter on SVG assets to create optimized edge‑detected images.
- * 5. When an automated testing pipeline validates visual quality of SVG icons by comparing edge‑detected PNG outputs, the code provides a reproducible way to rasterize and filter the icons using C# and Aspose.Imaging.
+ * 1. When a developer needs to convert an SVG logo to a high‑resolution PNG and apply a custom edge‑detection convolution filter to make the logo’s outlines sharper.
+ * 2. When an application must generate thumbnail previews of vector diagrams, rasterize the SVG to PNG, and highlight the diagram edges using a convolution kernel.
+ * 3. When a web service processes user‑uploaded SVG icons, rasterizes them to PNG, and applies edge‑enhancement to improve visual contrast for accessibility.
+ * 4. When a reporting tool creates printable PNG charts from SVG templates and uses a custom convolution filter to emphasize borders for better readability.
+ * 5. When a batch job automates the conversion of a folder of SVG assets to PNG files with built‑in edge detection to prepare the images for downstream machine‑learning preprocessing.
  */

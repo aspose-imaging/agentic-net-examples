@@ -1,37 +1,44 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "input.bmp";
-            string outputPath = "output.bmp";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.bmp";
+            string outputPath = @"C:\Images\output.bmp";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
+                // Cast to RasterImage to access raster operations
+                RasterImage raster = (RasterImage)image;
 
-                var filterOptions = new GaussWienerFilterOptions(5, 4.0);
-                filterOptions.Brightness = 1.2; // increase brightness
+                // Increase brightness (value range -255 to 255)
+                raster.AdjustBrightness(50);
 
-                rasterImage.Filter(rasterImage.Bounds, filterOptions);
+                // Apply a 5x5 Gaussian blur; add a bias to keep the image brighter
+                var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
+                blurOptions.Bias = 20; // increase overall brightness via kernel bias
+                raster.Filter(raster.Bounds, blurOptions);
 
-                var saveOptions = new BmpOptions();
-                image.Save(outputPath, saveOptions);
+                // Save the processed image
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -43,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to enhance the visibility of scanned documents by brightening and softly blurring BMP images before OCR processing.
- * 2. When an application must prepare legacy BMP graphics for web display by applying a 5×5 Gaussian blur and increasing brightness to improve visual appeal.
- * 3. When a batch‑processing tool has to normalize lighting conditions across a collection of BMP screenshots by adjusting kernel coefficients for brightness and blur.
- * 4. When a game asset pipeline requires smoothing and brightening BMP textures to reduce harsh edges and improve in‑game lighting.
- * 5. When a medical imaging system must pre‑process BMP X‑ray images with a Gauss‑Wiener filter to reduce noise while making details clearer through brightness enhancement.
+ * 1. When a developer needs to preprocess scanned BMP documents for OCR by brightening the image and reducing noise with a 5×5 Gaussian blur using Aspose.Imaging in a C# desktop application.
+ * 2. When a game developer wants to programmatically enhance the visual quality of legacy BMP textures by increasing brightness and applying a subtle blur before loading them into Unity via C#.
+ * 3. When an automation script must prepare BMP screenshots for a reporting system, adjusting brightness to compensate for dark monitors and smoothing details with a 5×5 blur using Aspose.Imaging for .NET.
+ * 4. When a medical imaging software engineer needs to normalize the illumination of BMP X‑ray images and apply a mild blur to suppress high‑frequency artifacts before further analysis in C#.
+ * 5. When a batch processing tool has to convert a folder of BMP assets, brighten each file and apply a consistent 5×5 Gaussian blur to achieve a uniform look across all images using Aspose.Imaging APIs.
  */

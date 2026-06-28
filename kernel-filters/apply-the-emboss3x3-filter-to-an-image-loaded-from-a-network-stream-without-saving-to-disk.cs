@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Net.Http;
 using Aspose.Imaging;
 
 class Program
@@ -8,29 +9,17 @@ class Program
     {
         try
         {
-            // Input image URL (hardcoded)
-            string inputPath = "https://example.com/sample.png";
+            string imageUrl = "https://example.com/sample.png";
 
-            // Validate input path existence (as per safety rules)
-            if (!File.Exists(inputPath))
+            using (HttpClient client = new HttpClient())
+            using (Stream stream = client.GetStreamAsync(imageUrl).Result)
+            using (Image image = Image.Load(stream))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Load image from the URL
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
-
-                // Apply Emboss3x3 filter using convolution kernel
-                raster.Filter(
-                    raster.Bounds,
+                raster.Filter(raster.Bounds,
                     new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
                         Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
-
-                // No saving to disk as required
+                Console.WriteLine("Emboss filter applied successfully.");
             }
         }
         catch (Exception ex)
@@ -42,9 +31,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web‑based photo editor needs to apply an emboss effect to a PNG image retrieved from a remote CDN and return the result directly to the browser without writing temporary files.
- * 2. When a microservice that processes user‑uploaded JPEGs from a REST endpoint must apply a 3×3 emboss convolution filter before storing the transformed image in a database or cloud blob.
- * 3. When a real‑time image‑processing pipeline in a C# Azure Function streams BMP files from an external API, embosses them in memory, and streams the output to another service.
- * 4. When a desktop application generates embossed thumbnails for product images hosted on an external server, loading each image via its URL and applying the filter without creating intermediate files on disk.
- * 5. When a server‑side PDF generation tool fetches PNG logos from a remote server, embosses them in memory using Aspose.Imaging, and embeds the stylized image directly into the PDF document.
+ * 1. When a developer wants to display a stylized, embossed version of a PNG image fetched from a remote API directly in a web application without writing temporary files to disk.
+ * 2. When an image‑processing service needs to apply a 3×3 emboss convolution filter to JPEG or BMP images streamed from cloud storage for real‑time preview generation.
+ * 3. When a desktop C# utility must download product photos from an e‑commerce endpoint, apply an emboss effect, and send the modified stream to another service without persisting the original file.
+ * 4. When a mobile backend processes user‑uploaded avatars hosted on a CDN, applying the Emboss3x3 filter on‑the‑fly to create artistic thumbnails while keeping memory usage low.
+ * 5. When a batch job reads a series of TIFF images over HTTP, applies the built‑in Aspose.Imaging ConvolutionFilter.Emboss3x3 to each raster image, and streams the results directly to a reporting system.
  */

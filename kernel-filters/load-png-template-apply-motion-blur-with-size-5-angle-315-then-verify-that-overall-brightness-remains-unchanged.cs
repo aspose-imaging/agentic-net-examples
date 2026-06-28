@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -10,7 +9,7 @@ class Program
         try
         {
             string inputPath = "template.png";
-            string outputPath = "output.png";
+            string outputPath = "blurred.png";
 
             if (!File.Exists(inputPath))
             {
@@ -24,38 +23,44 @@ class Program
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Compute original average brightness
-                int[] originalPixels = raster.LoadArgb32Pixels(raster.Bounds);
-                double originalBrightness = 0;
-                foreach (int argb in originalPixels)
+                // Compute average brightness before filtering
+                int[] beforePixels = raster.LoadArgb32Pixels(raster.Bounds);
+                double beforeSum = 0;
+                foreach (int pixel in beforePixels)
                 {
-                    int r = (argb >> 16) & 0xFF;
-                    int g = (argb >> 8) & 0xFF;
-                    int b = argb & 0xFF;
-                    originalBrightness += (r + g + b) / 3.0;
+                    int r = (pixel >> 16) & 0xFF;
+                    int g = (pixel >> 8) & 0xFF;
+                    int b = pixel & 0xFF;
+                    beforeSum += (r + g + b) / 3.0;
                 }
-                originalBrightness /= originalPixels.Length;
+                double beforeBrightness = beforeSum / beforePixels.Length;
 
-                // Apply motion blur filter (size 5, angle 315)
-                raster.Filter(raster.Bounds, new MotionWienerFilterOptions(5, 1.0, 315.0));
+                // Apply motion blur (size 5, angle 315)
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(5, 1.0, 315.0));
 
-                // Compute new average brightness
-                int[] newPixels = raster.LoadArgb32Pixels(raster.Bounds);
-                double newBrightness = 0;
-                foreach (int argb in newPixels)
+                // Compute average brightness after filtering
+                int[] afterPixels = raster.LoadArgb32Pixels(raster.Bounds);
+                double afterSum = 0;
+                foreach (int pixel in afterPixels)
                 {
-                    int r = (argb >> 16) & 0xFF;
-                    int g = (argb >> 8) & 0xFF;
-                    int b = argb & 0xFF;
-                    newBrightness += (r + g + b) / 3.0;
+                    int r = (pixel >> 16) & 0xFF;
+                    int g = (pixel >> 8) & 0xFF;
+                    int b = pixel & 0xFF;
+                    afterSum += (r + g + b) / 3.0;
                 }
-                newBrightness /= newPixels.Length;
+                double afterBrightness = afterSum / afterPixels.Length;
 
-                // Verify brightness unchanged
-                double diff = Math.Abs(newBrightness - originalBrightness);
-                Console.WriteLine($"Original brightness: {originalBrightness:F2}");
-                Console.WriteLine($"New brightness: {newBrightness:F2}");
-                Console.WriteLine($"Difference: {diff:F2}");
+                // Verify brightness unchanged (tolerance 0.5%)
+                double diff = Math.Abs(beforeBrightness - afterBrightness);
+                double tolerance = beforeBrightness * 0.005;
+                if (diff <= tolerance)
+                {
+                    Console.WriteLine("Brightness unchanged after motion blur.");
+                }
+                else
+                {
+                    Console.WriteLine("Brightness changed after motion blur.");
+                }
 
                 raster.Save(outputPath);
             }
@@ -69,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add a subtle directional motion blur (size 5, angle 315) to a PNG UI template while confirming that the overall brightness stays unchanged for consistent visual branding.
- * 2. When an e‑commerce site generates stylized product thumbnails by applying a motion‑blur filter to a PNG placeholder and must verify that brightness does not shift, preserving the site’s color palette.
- * 3. When a game developer creates a motion‑blurred splash screen from a PNG asset in C# and uses Aspose.Imaging to ensure the blur does not unintentionally darken or brighten the background, keeping overlaid text readable.
- * 4. When a medical imaging tool overlays a PNG diagram on a scan, applies a motion‑blur effect to simulate movement, and checks brightness consistency to avoid misinterpretation of intensity values.
- * 5. When an automated report generator processes PNG charts, adds a 315‑degree motion blur for visual effect, and programmatically validates that the average pixel brightness remains unchanged to maintain chart legibility.
+ * 1. When generating dynamic marketing banners that require a subtle motion‑blur effect (size 5, angle 315°) on a PNG template while keeping the overall brightness unchanged for consistent brand colors.
+ * 2. When creating animated UI overlays in a C# application and need to apply a directional motion blur to a PNG asset without altering its perceived luminance, ensuring visual balance across the interface.
+ * 3. When preprocessing PNG sprites for a 2D game engine, adding a motion‑blur filter to simulate speed and verifying that the average brightness stays within a 0.5 % tolerance so the game’s lighting remains uniform.
+ * 4. When automating the production of printable PDFs from PNG templates, applying a motion blur to mimic camera shake and confirming brightness unchanged to avoid unexpected exposure shifts in the final print.
+ * 5. When building an image‑processing pipeline that adds a 315° motion blur to user‑uploaded PNG logos for artistic effect, and the code checks that overall brightness is unchanged to maintain logo visibility across different backgrounds.
  */

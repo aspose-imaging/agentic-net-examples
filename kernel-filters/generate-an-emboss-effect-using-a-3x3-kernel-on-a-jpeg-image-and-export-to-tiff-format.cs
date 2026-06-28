@@ -2,46 +2,44 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input\\sample.jpg";
-        string outputPath = "Output\\sample_emboss.tif";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string outputPath = "output.tif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply filter
+                // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
-                // 3x3 emboss kernel
-                double[,] kernel = new double[,]
-                {
-                    { -2, -1, 0 },
-                    { -1,  1, 1 },
-                    {  0,  1, 2 }
-                };
+                // Apply emboss filter using 3x3 kernel
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-                // Apply convolution filter with emboss kernel
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
-
-                // Save the result as TIFF
+                // Prepare TIFF save options
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                image.Save(outputPath, tiffOptions);
+
+                // Save the processed image as TIFF
+                raster.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add a stylized emboss effect to product photos stored as JPEGs before archiving them in lossless TIFF format for high‑quality print catalogs.
- * 2. When an application must automatically enhance scanned documents by applying a 3×3 emboss kernel to highlight edges and then save the result as a TIFF file for OCR preprocessing.
- * 3. When a web service processes user‑uploaded JPEG images, applies a convolution filter for artistic embossing, and returns the transformed image in TIFF to preserve detail for downstream graphics pipelines.
- * 4. When a batch‑processing tool converts a folder of JPEG screenshots into embossed TIFF images to create visually distinct assets for UI mock‑up documentation.
- * 5. When a developer integrates Aspose.Imaging in a C# workflow to apply custom convolution kernels for image sharpening or embossing and needs to export the final output to a TIFF file for archival compliance.
+ * 1. When a developer needs to convert a high‑resolution JPEG photograph to a lossless TIFF while adding a 3×3 emboss effect for printing or archival purposes.
+ * 2. When an e‑commerce platform wants to generate stylized product thumbnails by applying an emboss filter to uploaded JPEG images before storing them as TIFF files for downstream workflows.
+ * 3. When a medical imaging application requires preprocessing of JPEG scans with edge‑enhancement (emboss) and saving the result in TIFF to maintain compatibility with DICOM converters.
+ * 4. When a desktop publishing tool automates batch processing of user‑provided JPEG artwork, applying a 3×3 convolution emboss kernel and exporting the output as TIFF for high‑quality layout rendering.
+ * 5. When a developer builds a document management system that needs to preserve original image quality by converting JPEGs to TIFF after applying an emboss filter to highlight texture details for visual inspection.
  */

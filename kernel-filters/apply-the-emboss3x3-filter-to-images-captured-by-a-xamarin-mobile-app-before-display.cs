@@ -6,13 +6,13 @@ using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
             string inputPath = "input.jpg";
-            string outputPath = "output.jpg";
+            string outputPath = "output_embossed.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,15 +22,15 @@ class Program
             }
 
             // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image and apply Emboss3x3 filter
+            // Load the image, apply the emboss filter, and save the result
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
-                raster.Save(outputPath);
+                RasterImage rasterImage = (RasterImage)image;
+                // Apply the 3x3 emboss kernel to the whole image
+                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -42,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a Xamarin.Forms app needs to add a stylized embossed effect to user‑taken JPEG photos before showing them in a gallery view, the developer can load the image with Aspose.Imaging, apply the Emboss3x3 convolution filter, and save the processed file for display.
- * 2. When an e‑commerce mobile application wants to highlight product textures by converting uploaded PNG images into embossed previews on the fly, the code demonstrates how to perform the convolution filter in C# and render the result instantly.
- * 3. When a travel‑journal app captures landscape pictures and wants to give them a vintage relief look without using heavy GPU shaders, the Emboss3x3 filter can be applied server‑side or on‑device using the provided raster image processing steps.
- * 4. When a social‑media platform integrates a custom photo‑editing feature that adds a 3‑x‑3 emboss effect to images before sharing, developers can use the Aspose.Imaging ConvolutionFilterOptions to transform the bitmap and store the output as a JPEG.
- * 5. When a medical‑imaging Xamarin app needs to emphasize surface details of scanned tissue images by applying an emboss filter to DICOM‑converted BMP files, this code shows how to load, filter, and save the enhanced image using C#.
+ * 1. When a Xamarin mobile app needs to display user‑captured photos with a stylized 3×3 emboss effect, applying the Aspose.Imaging ConvolutionFilter.Emboss3x3 in C# before rendering the JPEG on screen.
+ * 2. When an e‑commerce application wants to generate embossed preview thumbnails (JPEG or PNG) of product images on the fly using Aspose.Imaging’s raster filter to enhance visual appeal.
+ * 3. When a social‑media sharing feature must apply a real‑time emboss filter to images taken on iOS or Android devices, saving the processed image as a JPEG for immediate upload.
+ * 4. When a document‑scanning solution built with Xamarin requires converting scanned pages to an embossed look for artistic PDF generation, using the Emboss3x3 convolution filter in C#.
+ * 5. When a travel‑guide app creates embossed map snapshots (PNG) from raster images to give a tactile feel, applying the Aspose.Imaging emboss filter before caching the result locally.
  */

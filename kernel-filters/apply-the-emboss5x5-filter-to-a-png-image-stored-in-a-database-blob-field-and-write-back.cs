@@ -20,35 +20,16 @@ class Program
                 return;
             }
 
-            // Read image bytes from a simulated database BLOB field
-            byte[] blobData = File.ReadAllBytes(inputPath); // Replace with actual DB read
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (MemoryStream inputStream = new MemoryStream(blobData))
+            using (Image image = Image.Load(inputPath))
             {
-                using (Image image = Image.Load(inputStream))
-                {
-                    RasterImage raster = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                    // Apply Emboss5x5 filter
-                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
 
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the processed image to a memory stream
-                    using (MemoryStream outputStream = new MemoryStream())
-                    {
-                        PngOptions saveOptions = new PngOptions();
-                        image.Save(outputStream, saveOptions);
-                        byte[] resultBytes = outputStream.ToArray();
-
-                        // Write the result back to a file
-                        File.WriteAllBytes(outputPath, resultBytes);
-
-                        // Simulate writing back to the database BLOB field
-                        // byte[] updatedBlob = resultBytes; // assign to DB field
-                    }
-                }
+                PngOptions options = new PngOptions();
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -60,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application stores user‑uploaded PNG avatars in a SQL Server BLOB column and wants to add an emboss effect before displaying them, developers can use this code to read, filter, and write the image back to the database.
- * 2. When a digital asset management system needs to generate embossed preview thumbnails for PNG files that are kept as binary data in a NoSQL store, this snippet shows how to load the BLOB, apply the Emboss5x5 convolution filter, and save the result.
- * 3. When an e‑commerce platform wants to apply a stylized emboss effect to product PNG images stored in an Azure Blob Storage container and then update the stored image with the processed version, the code demonstrates the required C# image‑processing flow.
- * 4. When a medical imaging workflow stores scanned PNG diagrams in a PostgreSQL bytea field and requires a quick visual enhancement using the Emboss5x5 filter before archiving, developers can employ this example to read, process, and write the image back.
- * 5. When a desktop utility synchronizes PNG graphics between a local cache and a remote database and needs to apply a consistent emboss filter during the sync, this code provides the necessary steps to manipulate the image bytes in memory.
+ * 1. When a web application needs to generate stylized product thumbnails stored as PNG BLOBs in a SQL database, a developer can use this code to emboss the images before serving them to users.
+ * 2. When an enterprise document management system archives scanned PNG images in a database and wants to add a subtle 3‑D effect for visual inspection, the Emboss5x5 filter can be applied programmatically.
+ * 3. When a mobile backend processes user‑uploaded PNG avatars saved as BLOBs and wants to create an embossed version for a special “highlight” theme, developers can invoke this routine.
+ * 4. When a digital signage platform stores PNG graphics in a database and needs to apply a quick edge‑enhancement effect to make text stand out on screens, the Emboss5x5 convolution filter provides a lightweight solution.
+ * 5. When a scientific imaging tool archives microscope PNG snapshots as BLOBs and requires an embossed overlay to emphasize surface details for reports, this C# code with Aspose.Imaging can automate the transformation.
  */

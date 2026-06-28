@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -11,29 +12,27 @@ class Program
         try
         {
             string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputPath = "output.jpg";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                // Ensure we are working with a JPEG image
-                JpegImage jpegImage = (JpegImage)image;
-
                 // Correct orientation based on EXIF data
-                jpegImage.AutoRotate();
+                image.AutoRotate();
 
-                // Apply a sharpen filter as an example kernel filter
-                RasterImage raster = (RasterImage)jpegImage;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+                // Apply a sharpen filter
+                image.Filter(image.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                // Save the processed image
-                jpegImage.Save(outputPath);
+                // Save the processed image as JPEG
+                JpegOptions jpegOptions = new JpegOptions();
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -45,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application receives user‑uploaded JPEG photos that may have been taken in portrait mode, a developer can use this code to auto‑rotate the images based on EXIF orientation before sharpening them for display.
- * 2. When building a batch‑processing tool that prepares product catalog images, the code ensures each JPEG is correctly oriented and then applies a sharpen kernel filter to enhance visual detail.
- * 3. When integrating a photo‑editing feature into a mobile‑to‑desktop sync service, developers can run this routine to fix EXIF rotation and improve image clarity with a sharpen filter before saving the files.
- * 4. When generating thumbnails for a digital asset management system, the code can correct the JPEG orientation and apply a custom kernel filter to produce consistently upright and crisp preview images.
- * 5. When automating the preparation of scanned documents saved as JPEGs, a developer can employ this snippet to auto‑rotate based on EXIF data and sharpen the pages for better OCR accuracy.
+ * 1. When a web application receives user‑uploaded JPEG photos that may have been taken on phones with different orientations, a developer can use this code to auto‑rotate the images based on EXIF data before applying a sharpen filter and saving them for display.
+ * 2. When building a batch image‑processing tool that prepares product photos for an e‑commerce catalog, a developer can run this code to correct the orientation of each JPEG, enhance details with a sharpen filter, and output optimized JPEG files.
+ * 3. When integrating an automated photo‑enhancement pipeline into a digital asset management system, a developer can employ this code to ensure all stored JPEGs have the correct orientation before applying kernel‑based filters such as sharpening.
+ * 4. When creating a desktop utility that fixes rotated screenshots taken on mobile devices and improves their clarity, a developer can use this C# example to auto‑rotate the JPEG, apply a sharpen filter, and save the result.
+ * 5. When developing a server‑side image service that generates thumbnails from user‑submitted JPEGs, a developer can first correct EXIF orientation with AutoRotate, sharpen the image for better visual quality, and then save the processed JPEG for further resizing.
  */

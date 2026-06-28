@@ -1,59 +1,100 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            // Hard‑coded input and output directories
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-            if (!Directory.Exists(inputDirectory))
+            // Get all BMP files in the input directory
+            string[] bmpFiles = Directory.GetFiles(inputDir, "*.bmp");
+
+            foreach (string inputPath in bmpFiles)
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
-
-            foreach (string inputPath in files)
-            {
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
+                // Build the output JPEG path
                 string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".jpg");
+                string outputPath = Path.Combine(outputDir, fileName + ".jpg");
 
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+                // Load the BMP image
+                using (Image image = Image.Load(inputPath))
                 {
-                    Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)image;
+                    RasterImage source = (RasterImage)image;
+                    int width = source.Width;
+                    int height = source.Height;
 
-                    double[,] kernel = new double[,]
+                    // Create a new raster image for the processed result (JPEG format)
+                    using (RasterImage result = (RasterImage)Image.Create(new JpegOptions(), width, height))
                     {
-                        { -1, -1, -1 },
-                        { -1, 8, -1 },
-                        { -1, -1, -1 }
-                    };
-                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 0, 1);
-                    rasterImage.Filter(rasterImage.Bounds, filterOptions);
+                        // Sobel kernels for edge detection
+                        int[,] gx = new int[3, 3] { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
+                        int[,] gy = new int[3, 3] { { -1, -2, -1 }, { 0, 0, 0 }, { 1, 2, 1 } };
+                        const double threshold = 128.0;
 
-                    var jpegOptions = new JpegOptions();
-                    rasterImage.Save(outputPath, jpegOptions);
+                        // Process each pixel (skip the border pixels)
+                        for (int y = 1; y < height - 1; y++)
+                        {
+                            for (int x = 1; x < width - 1; x++)
+                            {
+                                double sumX = 0;
+                                double sumY = 0;
+
+                                // Apply convolution kernels
+                                for (int ky = -1; ky <= 1; ky++)
+                                {
+                                    for (int kx = -1; kx <= 1; kx++)
+                                    {
+                                        Aspose.Imaging.Color srcColor = source.GetPixel(x + kx, y + ky);
+                                        // Convert to grayscale intensity
+                                        double intensity = 0.299 * srcColor.R + 0.587 * srcColor.G + 0.114 * srcColor.B;
+
+                                        sumX += intensity * gx[ky + 1, kx + 1];
+                                        sumY += intensity * gy[ky + 1, kx + 1];
+                                    }
+                                }
+
+                                // Gradient magnitude
+                                double magnitude = Math.Sqrt(sumX * sumX + sumY * sumY);
+
+                                // Edge pixel: white if above threshold, otherwise black
+                                byte edge = magnitude > threshold ? (byte)255 : (byte)0;
+                                Aspose.Imaging.Color edgeColor = Aspose.Imaging.Color.FromArgb(255, edge, edge, edge);
+                                result.SetPixel(x, y, edgeColor);
+                            }
+                        }
+
+                        // Set border pixels to black
+                        for (int x = 0; x < width; x++)
+                        {
+                            result.SetPixel(x, 0, Aspose.Imaging.Color.Black);
+                            result.SetPixel(x, height - 1, Aspose.Imaging.Color.Black);
+                        }
+                        for (int y = 0; y < height; y++)
+                        {
+                            result.SetPixel(0, y, Aspose.Imaging.Color.Black);
+                            result.SetPixel(width - 1, y, Aspose.Imaging.Color.Black);
+                        }
+
+                        // Save the processed image as JPEG
+                        result.Save(outputPath, new JpegOptions());
+                    }
                 }
             }
         }
@@ -66,9 +107,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically enhance scanned engineering drawings stored as BMP files by highlighting edges before archiving them as compressed JPEGs.
- * 2. When a photo‑processing service must convert a large batch of legacy BMP product photos into web‑ready JPEGs while applying an edge‑detection filter to improve visual sharpness.
- * 3. When an automated quality‑control pipeline requires extracting contour information from BMP microscopy images and saving the results as JPEG thumbnails for quick review.
- * 4. When a desktop application needs to prepare BMP screenshots for inclusion in documentation by detecting edges and reducing file size through JPEG conversion.
- * 5. When a GIS tool processes BMP elevation maps, applies a custom convolution kernel to emphasize terrain ridges, and outputs the processed layers as JPEG tiles for faster rendering.
+ * 1. When a developer needs to convert a large set of legacy BMP scans into web‑friendly JPEGs while highlighting object outlines using a Sobel edge‑detection filter.
+ * 2. When an automated image‑processing pipeline must read BMP files from a folder, apply custom convolution kernels for edge enhancement, and store the results as compressed JPEGs for faster download.
+ * 3. When a C# application has to generate thumbnail previews of BMP engineering drawings with visible edges and save them in JPEG format for inclusion in reports.
+ * 4. When a batch job is required to preprocess medical BMP images by detecting edges and outputting JPEGs that can be indexed by a PACS system.
+ * 5. When a developer wants to integrate Aspose.Imaging into a Windows service that monitors an input directory, applies a custom edge detection kernel to each BMP, and writes the processed images as JPEGs to an output folder.
  */

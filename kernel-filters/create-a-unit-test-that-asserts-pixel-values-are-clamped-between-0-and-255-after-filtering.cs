@@ -1,15 +1,16 @@
 using System;
 using System.IO;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -18,19 +19,31 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load image and apply a filter
             using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)image;
 
-                // Save the image (no filter applied due to namespace restrictions)
-                raster.Save(outputPath);
+                rasterImage.Filter(rasterImage.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
 
-                // Verify that all pixel components are within the 0‑255 range
-                for (int y = 0; y < raster.Height; y++)
+                PngOptions pngOptions = new PngOptions();
+                rasterImage.Save(outputPath, pngOptions);
+            }
+
+            // Verify pixel values are clamped between 0 and 255
+            using (Aspose.Imaging.Image resultImage = Aspose.Imaging.Image.Load(outputPath))
+            {
+                Aspose.Imaging.RasterImage resultRaster = (Aspose.Imaging.RasterImage)resultImage;
+                int width = resultRaster.Width;
+                int height = resultRaster.Height;
+                bool allInRange = true;
+
+                for (int y = 0; y < height && allInRange; y++)
                 {
-                    for (int x = 0; x < raster.Width; x++)
+                    for (int x = 0; x < width && allInRange; x++)
                     {
-                        int argb = raster.GetArgb32Pixel(x, y);
+                        int argb = resultRaster.GetArgb32Pixel(x, y);
                         int a = (argb >> 24) & 0xFF;
                         int r = (argb >> 16) & 0xFF;
                         int g = (argb >> 8) & 0xFF;
@@ -41,13 +54,19 @@ class Program
                             g < 0 || g > 255 ||
                             b < 0 || b > 255)
                         {
-                            Console.Error.WriteLine($"Pixel out of range at ({x},{y}): A={a}, R={r}, G={g}, B={b}");
-                            return;
+                            allInRange = false;
                         }
                     }
                 }
 
-                Console.WriteLine("All pixel values are clamped between 0 and 255.");
+                if (allInRange)
+                {
+                    Console.WriteLine("Pixel values are within the 0-255 range.");
+                }
+                else
+                {
+                    Console.Error.WriteLine("Pixel values out of the 0-255 range detected.");
+                }
             }
         }
         catch (Exception ex)
@@ -59,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When writing a C# unit test for a custom Aspose.Imaging filter to verify that all ARGB pixel components are correctly clamped between 0 and 255 after processing.
- * 2. When validating an image conversion pipeline that loads a PNG with Aspose.Imaging, saves it, and must ensure no out‑of‑range color values are introduced.
- * 3. When building a web API that accepts user‑uploaded PNG files, processes them with Aspose.Imaging, and needs to confirm the raster image’s pixel values are safe before further analysis.
- * 4. When performing batch image processing on a directory of PNG files in a .NET application and want to detect any corrupted pixels that fall outside the 0‑255 range.
- * 5. When debugging a desktop C# application that renders PNG images using Aspose.Imaging and you need to confirm that the loaded raster image contains only valid ARGB values.
+ * 1. When a developer needs to ensure that applying a sharpen filter to a PNG image using Aspose.Imaging in C# does not produce pixel values outside the 0‑255 range, they can use this unit test to validate clamping.
+ * 2. When integrating image preprocessing into an automated build pipeline, a developer can run this test to confirm that filtered raster images remain within valid ARGB byte limits before deployment.
+ * 3. When creating a photo‑editing web service that sharpens user‑uploaded PNG files, the code helps verify that the service returns correctly clamped pixel data, preventing corrupted output.
+ * 4. When performing batch image processing with Aspose.Imaging’s FilterOptions, a developer can employ this test to detect any overflow errors caused by high‑strength sharpen parameters.
+ * 5. When writing unit tests for a C# library that manipulates raster images, this example demonstrates how to assert that the resulting image’s alpha, red, green, and blue channels stay between 0 and 255 after filtering.
  */

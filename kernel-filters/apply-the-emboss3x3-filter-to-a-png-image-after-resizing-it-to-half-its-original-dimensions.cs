@@ -2,9 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,7 +10,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output.png";
+            string outputPath = "Output\\output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -25,20 +22,18 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-
-                // Resize to half of the original dimensions
-                raster.Resize(raster.Width / 2, raster.Height / 2);
+                // Resize to half of original dimensions
+                image.Resize(image.Width / 2, image.Height / 2);
 
                 // Apply Emboss3x3 filter
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                RasterImage raster = (RasterImage)image;
+                var kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3;
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, filterOptions);
 
-                // Save the processed image as PNG
-                PngOptions options = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-                raster.Save(outputPath, options);
+                // Save the result as PNG
+                var pngOptions = new PngOptions();
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -50,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a smaller, stylized thumbnail of a PNG photo for a web gallery, they can resize the image to half its size and apply an Emboss3x3 filter using Aspose.Imaging for .NET.
- * 2. When creating printable product mock‑ups, a developer may shrink high‑resolution PNG assets and add an emboss effect to simulate a raised‑surface look before saving the result.
- * 3. When optimizing PNG icons for a mobile app, a developer can reduce the dimensions by 50 % and apply the Emboss3x3 convolution filter to give the icons a subtle 3‑D appearance without external tools.
- * 4. When processing user‑uploaded PNG screenshots for a documentation portal, a developer can automatically resize them to half their original width and height and emboss them to improve visual contrast.
- * 5. When building an automated batch job that prepares PNG images for an e‑commerce catalog, a developer can use C# and Aspose.Imaging to resize each image to half size and apply the Emboss3x3 filter to create a consistent, artistic look.
+ * 1. When a web application needs to generate smaller, stylized thumbnails of user‑uploaded PNG photos, a developer can use this C# code with Aspose.Imaging to resize the image to half size and apply the Emboss3x3 convolution filter before saving.
+ * 2. When an e‑commerce platform wants to display product images with a subtle embossed effect while reducing bandwidth, a developer can employ the Aspose.Imaging Resize and Emboss3x3 filter on PNG files in a .NET service.
+ * 3. When a desktop utility creates printable PNG assets with a vintage embossed look, a C# developer can call this code to shrink the original image and apply the Emboss3x3 filter in one pass.
+ * 4. When an automated batch‑processing script must prepare PNG graphics for mobile devices by halving their dimensions and adding a depth‑enhancing emboss effect, the Aspose.Imaging filter pipeline shown can be integrated into the .NET workflow.
+ * 5. When a content management system needs to store optimized PNG images that are both smaller and visually enhanced with a 3×3 emboss convolution, a developer can implement this code to resize and filter the images on upload.
  */
