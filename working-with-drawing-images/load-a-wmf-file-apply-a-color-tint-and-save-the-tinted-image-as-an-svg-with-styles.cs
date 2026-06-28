@@ -10,11 +10,11 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
+            // Hardcoded input and output paths
             string inputPath = @"C:\Images\input.wmf";
             string outputPath = @"C:\Images\output.svg";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,12 +28,12 @@ class Program
             using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
             {
                 // Prepare SVG save options
-                SvgOptions saveOptions = new SvgOptions
+                SvgOptions svgOptions = new SvgOptions
                 {
                     TextAsShapes = true // render text as shapes
                 };
 
-                // Configure rasterization with a color tint (background color)
+                // Configure rasterization options with a color tint (background color)
                 WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
                 {
                     BackgroundColor = Aspose.Imaging.Color.LightBlue, // tint color
@@ -41,10 +41,10 @@ class Program
                     RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
                 };
 
-                saveOptions.VectorRasterizationOptions = rasterOptions;
+                svgOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save as SVG
-                wmfImage.Save(outputPath, saveOptions);
+                // Save the tinted image as SVG
+                wmfImage.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -56,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy WMF vector graphics into modern SVG files while applying a light‑blue background tint for consistent branding across web pages.
- * 2. When an application must batch‑process Windows Metafile (WMF) icons and add a color overlay before embedding them as scalable SVG assets in a responsive UI.
- * 3. When a reporting tool generates charts as WMF and the developer wants to render them as SVG with text converted to shapes to preserve font fidelity and add a background color for print‑ready PDFs.
- * 4. When a migration script updates old Windows‑based documentation by converting WMF illustrations to SVG with a custom tint to match the new corporate color palette.
- * 5. When a C# service automates the creation of SVG thumbnails from WMF files, using Aspose.Imaging to rasterize the vector with a specified background hue for preview galleries.
+ * 1. When a developer needs to convert legacy WMF vector graphics to modern SVG files while applying a brand‑specific background tint for consistent web display.
+ * 2. When an application must generate scalable SVG icons from WMF drawings and ensure the icons inherit a corporate color scheme by setting a LightBlue background.
+ * 3. When a reporting tool has to embed WMF charts into HTML reports as SVGs with tinted backgrounds to match the report’s theme without losing vector quality.
+ * 4. When a batch‑processing script must automate the transformation of a library of WMF assets into SVG format with a uniform color overlay for use in responsive UI designs.
+ * 5. When a C# service processes user‑uploaded WMF files, applies a visual tint for accessibility contrast, and returns the result as an SVG with text rendered as shapes for cross‑platform compatibility.
  */
