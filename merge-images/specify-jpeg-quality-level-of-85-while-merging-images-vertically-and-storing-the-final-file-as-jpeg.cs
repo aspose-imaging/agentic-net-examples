@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -13,11 +12,15 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
-            string outputPath = "merged.jpg";
+            // Hardcoded input image paths
+            string[] inputPaths = new string[]
+            {
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
 
-            // Validate input files
+            // Validate each input file exists
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -27,10 +30,13 @@ class Program
                 }
             }
 
+            // Hardcoded output path
+            string outputPath = "output.jpg";
+
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of all images
+            // Collect sizes of all input images
             List<Size> sizes = new List<Size>();
             foreach (string path in inputPaths)
             {
@@ -41,17 +47,23 @@ class Program
             }
 
             // Calculate canvas dimensions for vertical merge
-            int canvasWidth = sizes.Max(s => s.Width);
-            int canvasHeight = sizes.Sum(s => s.Height);
-
-            // Create JPEG canvas with quality 85
-            Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions
+            int canvasWidth = 0;
+            int canvasHeight = 0;
+            foreach (Size sz in sizes)
             {
-                Source = source,
+                if (sz.Width > canvasWidth) canvasWidth = sz.Width;
+                canvasHeight += sz.Height;
+            }
+
+            // Create JPEG options with quality 85
+            Source src = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions()
+            {
+                Source = src,
                 Quality = 85
             };
 
+            // Create canvas bound to the output file
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
@@ -78,9 +90,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a single high‑quality JPEG banner by vertically stitching multiple product photos for a web storefront using C# and Aspose.Imaging.
- * 2. When an e‑learning platform wants to merge scanned textbook pages into one JPEG file with a controlled quality level of 85 to reduce file size while preserving readability.
- * 3. When a mobile app generates a vertical collage of user‑uploaded selfies and must save the result as a JPEG with consistent compression settings for efficient sharing.
- * 4. When an automated reporting tool combines chart images generated throughout the day into a single JPEG summary image, ensuring the output retains visual fidelity with a quality of 85.
- * 5. When a digital signage system assembles a series of advertisement slides into one tall JPEG file to be displayed on a scrolling screen, using Aspose.Imaging to manage the merge and JPEG quality.
+ * 1. When generating a printable photo collage from multiple user‑uploaded JPEGs, a developer can merge the images vertically and save the result with a quality level of 85 to balance file size and visual fidelity.
+ * 2. When creating a continuous scrolling banner for a web page from a series of product photos, the code can stack the JPEGs vertically and output a single JPEG with quality 85 for fast loading.
+ * 3. When assembling scanned document pages into a single PDF‑like image, a C# application can use this routine to combine the pages vertically and store the combined image as a high‑quality JPEG.
+ * 4. When preparing a before‑and‑after comparison image for a medical imaging report, the developer can vertically merge the two JPEG scans and set the output quality to 85 to preserve diagnostic details while keeping the file manageable.
+ * 5. When automating the generation of a vertical timeline infographic from multiple chart images, the script can stitch the JPEG charts together and export the final infographic as a JPEG with quality 85 for consistent appearance across devices.
  */

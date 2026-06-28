@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -13,7 +13,7 @@ class Program
     {
         try
         {
-            // Hard‑coded input image paths
+            // Hard‑coded input JPEG files (modify as needed)
             string[] inputPaths = new[]
             {
                 "input1.jpg",
@@ -22,54 +22,61 @@ class Program
             };
 
             // Hard‑coded output path
-            string outputPath = "output.jpg";
+            string outputPath = "output/merged.jpg";
 
-            // Validate each input file exists
-            foreach (string path in inputPaths)
+            // Validate each input file
+            foreach (string inputPath in inputPaths)
             {
-                if (!File.Exists(path))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {path}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
 
             // Collect sizes of all input images
             List<Size> sizes = new List<Size>();
-            foreach (string path in inputPaths)
+            foreach (string inputPath in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                using (RasterImage img = (RasterImage)Image.Load(inputPath))
                 {
                     sizes.Add(img.Size);
                 }
             }
 
-            // Determine canvas dimensions for vertical, right‑aligned merge
+            // Determine canvas dimensions (vertical stack, right‑aligned)
             int canvasWidth = sizes.Max(s => s.Width);
             int canvasHeight = sizes.Sum(s => s.Height);
 
-            // Create JPEG canvas bound to the output file
+            // Prepare JPEG options with bound source
             Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = source };
+            JpegOptions jpegOptions = new JpegOptions
+            {
+                Source = source,
+                Quality = 100
+            };
+
+            // Create the output JPEG canvas
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
-                foreach (string path in inputPaths)
+
+                // Place each image on the canvas, aligning to the right edge
+                foreach (string inputPath in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
                     {
-                        // Right‑align each image
-                        int offsetX = canvasWidth - img.Width;
+                        int offsetX = canvasWidth - img.Width; // right alignment
                         Rectangle bounds = new Rectangle(offsetX, offsetY, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetY += img.Height;
                     }
                 }
 
-                // Save the bound canvas
+                // Save the bound image (no path needed because source is already bound)
                 canvas.Save();
             }
         }
@@ -82,9 +89,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an online retailer needs to combine multiple product photos into a single right‑aligned vertical JPEG collage for a catalog page, they can use this C# Aspose.Imaging code to merge the images on a canvas that matches the widest photo.
- * 2. When a mobile app generates a vertical receipt or invoice by stacking scanned JPEG images of line items and wants the content aligned to the right edge for consistent formatting, this code creates the merged output automatically.
- * 3. When a real‑estate website wants to display a series of property interior shots as a single tall JPEG banner with each photo right‑justified, developers can employ this snippet to stitch the images vertically.
- * 4. When a social‑media scheduler needs to produce an Instagram Story image composed of several JPEG frames aligned to the right side of the canvas, the code provides a quick way to assemble the final image in C#.
- * 5. When a document management system consolidates multiple scanned JPEG pages into one vertically merged file while preserving right‑aligned layout for easier viewing on e‑readers, this Aspose.Imaging example handles the merging process.
+ * 1. When a developer needs to generate a single JPEG report that stacks product photos vertically while keeping each image flush with the right edge of the page.
+ * 2. When an e‑commerce site wants to combine multiple customer‑uploaded JPEG thumbnails into a right‑aligned vertical collage for a product detail view using C# and Aspose.Imaging.
+ * 3. When a marketing automation script must create a printable JPEG banner by vertically merging campaign images and aligning them to the bottom‑right corner of the canvas.
+ * 4. When a desktop application has to assemble scanned JPEG receipts into one continuous right‑aligned vertical image for easy archival.
+ * 5. When a photo‑management tool needs to batch‑process a set of JPEG screenshots, stacking them vertically with right alignment to preserve original widths while creating a single output file.
  */

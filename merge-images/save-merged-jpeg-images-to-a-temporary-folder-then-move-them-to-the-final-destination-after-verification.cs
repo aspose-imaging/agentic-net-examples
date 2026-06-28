@@ -2,83 +2,101 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input JPEG files
-            string[] inputPaths = new[]
+            // Hardcoded input JPEG file paths
+            string[] inputPaths = new string[]
             {
-                @"C:\temp\input1.jpg",
-                @"C:\temp\input2.jpg"
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
             };
 
             // Verify each input file exists
-            foreach (var inputPath in inputPaths)
+            foreach (string path in inputPaths)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
             }
 
-            // Load each JPEG image
-            var loadedImages = new List<Image>();
-            foreach (var inputPath in inputPaths)
-            {
-                // Load the image and keep it in the list
-                Image img = Image.Load(inputPath);
-                loadedImages.Add(img);
-            }
+            // Temporary and final output paths
+            string tempOutputPath = "temp\\merged.jpg";
+            string finalOutputPath = "output\\merged.jpg";
 
-            // Create a multipage image from the loaded JPEGs
-            Image mergedImage = Image.Create(loadedImages.ToArray());
-
-            // Temporary output path
-            string tempOutputPath = @"C:\temp\merged_temp.jpg";
-
-            // Ensure the directory for the temporary file exists
+            // Ensure directories exist for temporary and final outputs
             Directory.CreateDirectory(Path.GetDirectoryName(tempOutputPath));
-
-            // Save the merged image to the temporary location
-            mergedImage.Save(tempOutputPath, new JpegOptions());
-
-            // Verify the temporary file was created
-            if (!File.Exists(tempOutputPath))
-            {
-                Console.Error.WriteLine($"Failed to create temporary file: {tempOutputPath}");
-                return;
-            }
-
-            // Final destination path
-            string finalOutputPath = @"C:\output\merged.jpg";
-
-            // Ensure the final directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(finalOutputPath));
 
-            // If a file already exists at the final location, delete it
-            if (File.Exists(finalOutputPath))
+            // Collect sizes of all input images
+            List<Size> sizes = new List<Size>();
+            foreach (string path in inputPaths)
             {
-                File.Delete(finalOutputPath);
+                using (RasterImage img = (RasterImage)Image.Load(path))
+                {
+                    sizes.Add(img.Size);
+                }
             }
 
-            // Move the verified temporary file to the final destination
-            File.Move(tempOutputPath, finalOutputPath);
-
-            // Clean up loaded images
-            foreach (var img in loadedImages)
+            // Calculate canvas dimensions for horizontal merge
+            int newWidth = 0;
+            int newHeight = 0;
+            foreach (Size sz in sizes)
             {
-                img.Dispose();
+                newWidth += sz.Width;
+                if (sz.Height > newHeight) newHeight = sz.Height;
             }
-            mergedImage.Dispose();
 
-            Console.WriteLine("Images merged successfully.");
+            // Create JPEG options with bound source
+            Source source = new FileCreateSource(tempOutputPath, false);
+            JpegOptions jpegOptions = new JpegOptions()
+            {
+                Source = source,
+                Quality = 90
+            };
+
+            // Create bound JPEG canvas
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
+            {
+                int offsetX = 0;
+                foreach (string path in inputPaths)
+                {
+                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    {
+                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                        offsetX += img.Width;
+                    }
+                }
+
+                // Save the bound image
+                canvas.Save();
+            }
+
+            // Verify temporary file and move to final destination
+            if (File.Exists(tempOutputPath) && new FileInfo(tempOutputPath).Length > 0)
+            {
+                if (File.Exists(finalOutputPath))
+                {
+                    File.Delete(finalOutputPath);
+                }
+                File.Move(tempOutputPath, finalOutputPath);
+                Console.WriteLine($"Merged image saved to: {finalOutputPath}");
+            }
+            else
+            {
+                Console.Error.WriteLine("Failed to create the merged image.");
+            }
         }
         catch (Exception ex)
         {
@@ -89,9 +107,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to combine multiple user‑uploaded JPEG photos into a single multi‑page image before storing it in a permanent directory, it can use this code to merge the files, save them to a temporary folder, verify the output, and then move the verified file to the final location.
- * 2. When an automated batch‑processing service creates a composite JPEG report from scanned documents and must ensure the merged file is correctly generated before overwriting existing reports, the temporary‑save‑and‑verify pattern shown here guarantees data integrity.
- * 3. When a desktop utility consolidates product catalog images into one JPEG for printing and wants to avoid partial or corrupted files in the output folder, it can write the merged image to a temp path, check its existence, and then move it to the destination folder.
- * 4. When a cloud‑based image‑processing pipeline assembles JPEG thumbnails into a single preview image and needs to handle intermittent I/O failures safely, saving to a temporary location first allows the system to confirm the file before committing it to the final storage bucket.
- * 5. When a document management system merges JPEG pages of a scanned contract and must comply with audit requirements that the final file be verified before being placed in the secure archive, this code provides a reliable temporary‑file verification step prior to moving the merged image.
+ * 1. When building a web service that combines multiple product photos into a single promotional banner, a developer can merge the JPEGs in a temporary folder, verify the output, and then move the final image to the public assets directory.
+ * 2. When automating the creation of a printable photo collage for a wedding album, the code can stitch the JPEG files horizontally, store the intermediate result securely, and only publish the verified collage to the client‑facing folder.
+ * 3. When generating a composite satellite image from several high‑resolution JPEG tiles in a GIS application, the temporary save allows the system to confirm dimensions and quality before moving the merged file to the analysis workspace.
+ * 4. When implementing a batch job that assembles scanned document pages into a single JPEG for archival, the temporary location ensures that any corrupted input is detected before the final file is placed in the secure archive folder.
+ * 5. When creating a dynamic thumbnail strip for an e‑commerce site, the merged JPEG can be written to a temp directory, validated for correct width and height, and then transferred to the CDN folder for fast delivery.
  */

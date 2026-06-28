@@ -12,21 +12,21 @@ class Program
     {
         try
         {
-            // Define input and output paths
+            // Hardcoded input and output paths
             string[] inputPaths = new string[]
             {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
+                "Input\\image1.jpg",
+                "Input\\image2.jpg",
+                "Input\\image3.jpg"
             };
-            string outputPath = "merged.jpg";
+            string outputPath = "Output\\merged.jpg";
 
             // Validate input files
-            foreach (string path in inputPaths)
+            foreach (string inputPath in inputPaths)
             {
-                if (!File.Exists(path))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {path}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
             }
@@ -34,40 +34,37 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of all input images
+            // Collect sizes of all images
             List<Size> sizes = new List<Size>();
-            foreach (string path in inputPaths)
+            foreach (string inputPath in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                using (RasterImage img = (RasterImage)Image.Load(inputPath))
                 {
                     sizes.Add(img.Size);
                 }
             }
 
             // Calculate canvas dimensions (horizontal merge, top‑left alignment)
-            int newWidth = 0;
-            int newHeight = 0;
+            int canvasWidth = 0;
+            int canvasHeight = 0;
             foreach (Size sz in sizes)
             {
-                newWidth += sz.Width;
-                if (sz.Height > newHeight) newHeight = sz.Height;
+                canvasWidth += sz.Width;
+                if (sz.Height > canvasHeight) canvasHeight = sz.Height;
             }
 
-            // Create JPEG options with bound source
-            Source src = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions()
+            // Create JPEG canvas with bound output file
+            JpegOptions jpegOptions = new JpegOptions
             {
-                Source = src,
+                Source = new FileCreateSource(outputPath, false),
                 Quality = 100
             };
-
-            // Create canvas bound to the output file
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetX = 0;
-                foreach (string path in inputPaths)
+                foreach (string inputPath in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
                     {
                         Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
@@ -88,9 +85,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building a product catalog website that needs to combine multiple product photos into a single horizontal strip JPEG for faster loading and consistent top‑left alignment.
- * 2. When generating printable contact sheets in a desktop publishing workflow where several JPEG thumbnails must be merged side‑by‑side with the images anchored to the top‑left corner of the canvas.
- * 3. When creating a composite banner for an email marketing campaign that stitches together promotional JPEG images horizontally while keeping all elements aligned to the top‑left to avoid unwanted gaps.
- * 4. When developing a digital signage system that concatenates multiple advertisement JPEGs into one wide image, ensuring each ad starts at the top‑left to maintain a uniform layout across screens.
- * 5. When implementing an automated batch process that merges scanned JPEG pages into a single panoramic view, aligning each page to the top‑left corner to preserve the original page order and margins.
+ * 1. When generating a product catalog thumbnail that stitches multiple product photos side‑by‑side into a single JPEG for faster web loading.
+ * 2. When creating a printable contact sheet where several scanned JPEG images need to be placed horizontally with top‑left alignment to maintain consistent margins.
+ * 3. When building a dashboard that combines real‑time camera snapshots into one JPEG banner, ensuring each snapshot starts at the top‑left corner of the canvas.
+ * 4. When preparing a batch of marketing assets that require merging brand‑logo JPEGs with promotional images into a single file with uniform alignment for automated publishing.
+ * 5. When developing a mobile app that concatenates user‑uploaded JPEG pictures into a single image for sharing, needing top‑left placement to avoid gaps and preserve layout.
  */

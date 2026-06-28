@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging;
 
 class Program
 {
@@ -46,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must convert high‑resolution JPEG photographs to lossless PNG files for print‑ready PDFs while preserving a specific 150 DPI resolution using Aspose.Imaging.
- * 2. When a web service needs to generate PNG thumbnails from uploaded JPEG images and enforce a uniform 150 DPI setting to ensure consistent sizing across different browsers.
- * 3. When an automated batch job processes scanned JPEG documents, merges them, and saves the result as PNG with a 150 DPI resolution to meet archival standards.
- * 4. When a desktop utility must re‑encode JPEG assets to PNG for UI assets while controlling the output DPI to match design specifications in a C# project.
- * 5. When a reporting tool creates PNG charts from JPEG sources and requires the images to have a fixed 150 DPI resolution for accurate scaling in printed reports.
+ * 1. A developer converting high‑resolution JPEG photographs to PNG for a print catalog needs to preserve a 150 DPI resolution using Aspose.Imaging ImageOptions in C#.
+ * 2. When generating PNG assets from scanned JPEG documents for archival purposes, setting the output resolution to 150 DPI ensures consistent print quality across all files.
+ * 3. An e‑commerce platform that merges product JPEG images and saves them as PNG thumbnails may require a fixed 150 DPI resolution to meet the vendor’s packaging guidelines.
+ * 4. A desktop application that batch‑processes JPEG graphics for inclusion in a PDF brochure uses Aspose.Imaging to save each image as PNG with a 150 DPI setting to maintain layout fidelity.
+ * 5. In a medical imaging workflow, converting diagnostic JPEG scans to lossless PNG while enforcing a 150 DPI resolution helps meet regulatory standards for image clarity.
  */
