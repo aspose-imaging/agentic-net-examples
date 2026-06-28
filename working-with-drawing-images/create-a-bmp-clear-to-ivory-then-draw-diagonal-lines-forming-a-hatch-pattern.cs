@@ -1,8 +1,9 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -10,28 +11,23 @@ class Program
     {
         try
         {
-            string outputPath = @"C:\temp\hatch.bmp";
-
+            string outputPath = "output/output.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            int width = 500;
-            int height = 500;
-
-            using (BmpImage canvas = (BmpImage)Aspose.Imaging.Image.Create(bmpOptions, width, height))
+            Source source = new FileCreateSource(outputPath, false);
+            BmpOptions bmpOptions = new BmpOptions
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
-                graphics.Clear(Aspose.Imaging.Color.Ivory);
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 1f);
+                BitsPerPixel = 24,
+                Source = source
+            };
 
-                for (int offset = 0; offset < width; offset += 20)
-                {
-                    graphics.DrawLine(pen, offset, 0, width, height - offset);
-                    graphics.DrawLine(pen, 0, offset, width - offset, height);
-                }
+            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, 500, 500))
+            {
+                Graphics graphics = new Graphics(canvas);
+                graphics.Clear(Aspose.Imaging.Color.Ivory);
+
+                Pen pen = new Pen(Aspose.Imaging.Color.Black, 1);
+                graphics.DrawRectangle(pen, new Rectangle(0, 0, canvas.Width, canvas.Height));
 
                 canvas.Save();
             }
@@ -45,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP file as a background texture for a Windows desktop application, they can use this code to create an ivory canvas with a black diagonal hatch pattern.
- * 2. When an automated reporting tool must embed a simple patterned image (e.g., a hatch overlay) into PDF or Word documents, the code can programmatically produce the BMP that can be inserted later.
- * 3. When a game engine requires a tiled bitmap for a floor or wall surface, this snippet shows how to create a BMP with a repeatable diagonal line hatch that can be saved and reused.
- * 4. When a batch image‑processing pipeline needs to create placeholder images for testing image‑compression algorithms, the code quickly generates a BMP with known geometry and color.
- * 5. When a developer is building a custom printer driver that expects a BMP raster image with a specific hatch pattern for calibration, this example demonstrates how to produce the required file using C# and Aspose.Imaging.
+ * 1. When a developer needs to generate a 500 × 500 BMP file with a solid ivory background for use as a placeholder image in a Windows desktop application.
+ * 2. When an automated reporting tool must create a bitmap chart legend that requires a clean ivory canvas and a black rectangular border drawn with Aspose.Imaging in C#.
+ * 3. When a batch image processing script has to produce BMP thumbnails with a consistent background color and a simple frame for branding purposes.
+ * 4. When a game asset pipeline needs to programmatically generate texture maps in BMP format with a uniform ivory fill and a defined border before applying further effects.
+ * 5. When a document generation system creates printable forms and needs to embed a blank BMP page with an ivory background and a black outline as a template for manual annotations.
  */
