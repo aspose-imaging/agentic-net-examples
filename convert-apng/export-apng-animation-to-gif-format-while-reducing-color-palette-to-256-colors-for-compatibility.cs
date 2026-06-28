@@ -9,11 +9,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = "input.apng";
-            string outputPath = "output.gif";
+            string outputPath = "output/output.gif";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,16 +24,17 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the APNG animation
-            using (Image image = Image.Load(inputPath))
+            using (Image apngImage = Image.Load(inputPath))
             {
-                // Configure GIF options to reduce the palette to 256 colors
-                var gifOptions = new GifOptions
+                // Configure GIF options to reduce palette to 256 colors
+                GifOptions gifOptions = new GifOptions
                 {
-                    DoPaletteCorrection = true // Enables palette analysis for optimal 256‑color palette
+                    DoPaletteCorrection = true,   // Analyze source colors and build optimal palette
+                    ColorResolution = 7           // 2^ (7+1) = 256 colors
                 };
 
-                // Save the animation as a GIF file
-                image.Save(outputPath, gifOptions);
+                // Save as GIF with the specified options
+                apngImage.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -42,3 +43,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web developer needs to convert animated PNG (APNG) assets to GIF for older browsers that only support GIF, while ensuring the animation stays within the 256‑color limit.
+ * 2. When a mobile app team wants to generate lightweight GIF previews from high‑color APNG stickers to reduce bandwidth and storage on devices.
+ * 3. When an e‑learning platform must batch‑process course illustrations stored as APNG and export them as GIFs compatible with legacy LMS viewers that cannot handle true‑color palettes.
+ * 4. When a marketing automation script creates animated email banners from APNG files and must down‑sample the colors to 256 to meet email client GIF restrictions.
+ * 5. When a game developer needs to embed animated UI icons originally authored as APNG into a Unity project that only accepts GIF textures, requiring palette correction to avoid color distortion.
+ */

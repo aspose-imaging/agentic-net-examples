@@ -10,8 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input path
+            // Hardcoded input and output paths
             string inputPath = "input.apng";
+            string outputDirectory = "output_frames";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,14 +21,17 @@ class Program
                 return;
             }
 
-            // Load the APNG image
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Load the animated APNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to ApngImage to access frames
+                // Cast to ApngImage to access frame collection
                 ApngImage apng = image as ApngImage;
                 if (apng == null)
                 {
-                    Console.Error.WriteLine("The loaded file is not an APNG image.");
+                    Console.Error.WriteLine("The loaded image is not an APNG file.");
                     return;
                 }
 
@@ -36,18 +40,13 @@ class Program
                 // Iterate through each frame and save as a separate PNG file
                 for (int i = 0; i < frameCount; i++)
                 {
-                    // Retrieve the frame as a RasterImage
-                    using (RasterImage frame = (RasterImage)apng.Pages[i])
-                    {
-                        // Hardcoded output path for each frame
-                        string outputPath = $"frame_{i:D4}.png";
+                    string outputPath = Path.Combine(outputDirectory, $"frame_{i:D4}.png");
 
-                        // Ensure the output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save the frame as PNG
-                        frame.Save(outputPath, new PngOptions());
-                    }
+                    // Save the current frame as PNG
+                    apng.Pages[i].Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -57,3 +56,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to extract each frame from an animated APNG to create individual PNG assets for a sprite sheet in a game engine.
+ * 2. When a web developer wants to generate static thumbnail images from each frame of an APNG for use in a product gallery or preview carousel.
+ * 3. When a data‑science team must feed individual PNG frames into a machine‑learning model that only accepts single‑image inputs for video‑frame analysis.
+ * 4. When an automation script must convert an APNG animation into separate PNG files to apply per‑frame watermarking or image‑processing filters using Aspose.Imaging in C#.
+ * 5. When a CI/CD pipeline needs to validate the visual quality of each animation frame by exporting them as PNGs and comparing them against baseline images.
+ */
