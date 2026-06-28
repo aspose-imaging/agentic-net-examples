@@ -9,54 +9,50 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input/output paths
-        string outputPath = @"C:\temp\checkerboard.bmp";
-
         try
         {
+            // Output BMP file path
+            string outputPath = @"C:\temp\checkerboard.bmp";
+
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up BMP options with file source
+            // Image dimensions and checkerboard settings
+            int cellSize = 50;          // Size of each square
+            int rows = 8;               // Number of rows
+            int cols = 8;               // Number of columns
+            int width = cols * cellSize;
+            int height = rows * cellSize;
+
+            // Configure BMP options
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Define image dimensions
-            int width = 400;
-            int height = 400;
-
-            // Create the BMP canvas (bound to the output file)
-            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
+            // Create the image canvas
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(canvas);
-
-                // Checkerboard configuration
-                int squaresPerRow = 8;
-                int squareSize = width / squaresPerRow;
-
-                // Draw alternating filled rectangles
-                for (int row = 0; row < squaresPerRow; row++)
+                // Prepare brushes for black and white squares
+                using (SolidBrush blackBrush = new SolidBrush(Color.Black))
+                using (SolidBrush whiteBrush = new SolidBrush(Color.White))
                 {
-                    for (int col = 0; col < squaresPerRow; col++)
-                    {
-                        // Determine color based on position
-                        Color fillColor = ((row + col) % 2 == 0) ? Color.White : Color.Black;
+                    Graphics graphics = new Graphics(image);
 
-                        // Create brush for the current square
-                        using (SolidBrush brush = new SolidBrush(fillColor))
+                    // Draw the checkerboard pattern
+                    for (int row = 0; row < rows; row++)
+                    {
+                        for (int col = 0; col < cols; col++)
                         {
-                            int x = col * squareSize;
-                            int y = row * squareSize;
-                            Rectangle rect = new Rectangle(x, y, squareSize, squareSize);
-                            graphics.FillRectangle(brush, rect);
+                            SolidBrush brush = ((row + col) % 2 == 0) ? blackBrush : whiteBrush;
+                            int x = col * cellSize;
+                            int y = row * cellSize;
+                            graphics.FillRectangle(brush, new Rectangle(x, y, cellSize, cellSize));
                         }
                     }
                 }
 
-                // Save the bound image
-                canvas.Save();
+                // Save the image to the bound file
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -68,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP file that serves as a test pattern for calibrating image scanners or printers, they can use this code to draw an 8×8 checkerboard of alternating black and white squares.
- * 2. When creating placeholder graphics for a game board or UI layout where the assets must be stored as BMP images, this method quickly produces a tiled checkerboard background using Aspose.Imaging’s RasterImage and Graphics classes.
- * 3. When writing automated unit tests for image‑processing pipelines, a developer can employ this snippet to produce a known BMP pattern that can be compared against expected pixel values.
- * 4. When building a desktop application that exports printable board‑game templates in BMP format, the code provides a simple way to render the alternating squares with solid brushes and save them directly to disk.
- * 5. When needing to generate a high‑contrast reference image for computer‑vision algorithms that detect edges or patterns, the checkerboard BMP created by this method offers a reliable input for training or debugging.
+ * 1. When a developer needs to generate a 24‑bit BMP checkerboard background for a game board UI using Aspose.Imaging in C#.
+ * 2. When a developer wants to create a test BMP image with alternating black and white squares to verify image processing algorithms such as edge detection.
+ * 3. When a developer must produce a printable black‑and‑white pattern for scanner or printer calibration by drawing filled rectangles into a BMP file.
+ * 4. When a developer requires a dynamically generated tiled texture stored as a BMP file for a Windows Forms or WPF application.
+ * 5. When a developer needs a simple placeholder image in BMP format for documentation, mockups, or UI design, using rectangle fills to create the pattern.
  */
