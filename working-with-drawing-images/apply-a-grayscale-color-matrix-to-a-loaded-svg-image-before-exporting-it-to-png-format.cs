@@ -3,43 +3,51 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input/sample.svg";
-        string outputPath = "Output/sample.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.svg";
+            string outputPath = @"C:\temp\output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image
             using (Image svgImage = Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions();
-                var rasterOptions = new SvgRasterizationOptions
+                // Prepare rasterization options for SVG -> PNG conversion
+                var rasterizationOptions = new SvgRasterizationOptions();
+                var pngOptions = new PngOptions
                 {
-                    PageSize = svgImage.Size
+                    VectorRasterizationOptions = rasterizationOptions
                 };
-                pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                using (var ms = new MemoryStream())
+                // Rasterize SVG to PNG in memory
+                using (var memoryStream = new MemoryStream())
                 {
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
+                    svgImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
 
-                    using (PngImage raster = (PngImage)Image.Load(ms))
+                    // Load the rasterized PNG from memory
+                    using (PngImage pngImage = (PngImage)Image.Load(memoryStream))
                     {
-                        raster.Grayscale();
-                        raster.Save(outputPath);
+                        // Apply grayscale conversion
+                        pngImage.Grayscale();
+
+                        // Save the final grayscale PNG to disk
+                        pngImage.Save(outputPath);
                     }
                 }
             }
@@ -53,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate black‑and‑white thumbnails from user‑uploaded SVG icons for a product catalog, a developer can load the SVG, rasterize it to PNG and apply the grayscale method to ensure a consistent visual style.
- * 2. When an automated reporting tool must embed grayscale versions of vector diagrams (SVG) into PDF or email attachments, the code converts the SVG to a PNG image and removes color using Aspose.Imaging’s Grayscale function.
- * 3. When a mobile‑app server prepares low‑bandwidth preview images of SVG maps for older devices, the developer can rasterize the SVG to PNG and apply a grayscale color matrix to reduce file size while preserving detail.
- * 4. When a content‑management system enforces accessibility guidelines by providing monochrome alternatives for SVG logos, the developer uses this code to load the SVG, rasterize it, convert it to a grayscale PNG, and store it for compliance.
- * 5. When a batch‑processing pipeline needs to convert a collection of SVG assets into grayscale PNG assets for printing on monochrome printers, the developer employs Aspose.Imaging to load each SVG, rasterize with page size, apply Grayscale, and save the result.
+ * 1. When a web application must generate a black‑and‑white preview thumbnail of a user‑uploaded SVG logo for display on a product catalog page.
+ * 2. When an automated reporting tool needs to convert vector diagrams stored as SVG into grayscale PNG images to embed in PDF reports that require consistent print‑ready contrast.
+ * 3. When a mobile app backend processes SVG icons and creates low‑color‑depth PNG assets for devices that only support grayscale displays.
+ * 4. When a document management system archives SVG illustrations as grayscale PNG files to reduce storage size while preserving visual fidelity for archival purposes.
+ * 5. When a batch‑processing script applies a grayscale color matrix to SVG graphics before exporting them to PNG for use in a machine‑learning pipeline that expects single‑channel images.
  */
