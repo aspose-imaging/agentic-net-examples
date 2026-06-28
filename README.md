@@ -4,7 +4,7 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 4478 |
+| Total Examples | 4720 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
 | Last Updated | 2026-06-28 |
@@ -53,7 +53,7 @@ README.md
 | [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 1032 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
 | [Manipulating Images](./manipulating-images/) | 650 | 100.0% | [agents.md](./manipulating-images/agents.md) |
 | [Merge Images](./merge-images/) | 175 | 100.0% | [agents.md](./merge-images/agents.md) |
-| [Working With Drawing Images](./working-with-drawing-images/) | 397 | 100.0% | [agents.md](./working-with-drawing-images/agents.md) |
+| [Working With Drawing Images](./working-with-drawing-images/) | 639 | 100.0% | [agents.md](./working-with-drawing-images/agents.md) |
 
 ## How to Use
 
@@ -112,7 +112,7 @@ All examples are compiler-validated against the target NuGet version before bein
 
 | Version | Total Examples | Pass Rate | Framework |
 |---------|---------------|-----------|----------|
-| 26.6.0 | 4478 | 100.0% | net9.0 |
+| 26.6.0 | 4720 | 100.0% | net9.0 |
 
 Pass rate is enforced by the agent pipeline — only examples that pass both `dotnet build` and `dotnet run` are committed.
 
