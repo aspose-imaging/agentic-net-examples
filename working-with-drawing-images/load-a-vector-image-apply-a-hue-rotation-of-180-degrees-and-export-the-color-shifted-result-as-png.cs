@@ -2,44 +2,28 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output/output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Image vectorImage = Image.Load(inputPath))
+            string inputPath = "Input\\vector.svg";
+            string outputPath = "Output\\result.png";
+
+            if (!File.Exists(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions { PageSize = vectorImage.Size };
-                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                using (var memoryStream = new MemoryStream())
-                {
-                    vectorImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    using (Image rasterImage = Image.Load(memoryStream))
-                    {
-                        var raster = (RasterImage)rasterImage;
-                        if (!raster.IsCached) raster.CacheData();
-
-                        var finalOptions = new PngOptions();
-                        rasterImage.Save(outputPath, finalOptions);
-                    }
-                }
+            using (Image image = Image.Load(inputPath))
+            {
+                PngOptions pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -51,9 +35,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate a night‑mode version of an SVG logo by rotating its hue 180° and serving it as a PNG thumbnail, a developer can use this C# Aspose.Imaging code to rasterize, hue‑shift, and save the image.
- * 2. When an e‑commerce platform wants to display product illustrations with a complementary color scheme for promotional banners, the code can load the original SVG, apply a 180° hue rotation, and export the result as a PNG for fast web delivery.
- * 3. When a desktop publishing tool must convert user‑uploaded vector icons into PNG assets with a uniform color shift for accessibility contrast, this Aspose.Imaging snippet handles the SVG loading, hue adjustment, and PNG output in C#.
- * 4. When an automated build pipeline generates themed UI assets by programmatically recoloring SVG assets and bundling them as PNG files, the provided code performs the rasterization and hue rotation step reliably.
- * 5. When a mobile app needs to pre‑process SVG illustrations into PNGs with a reversed color palette for dark‑mode support, developers can employ this C# example to apply a 180° hue rotation and save the transformed image.
+ * 1. When a developer needs to convert brand SVG logos to PNG thumbnails with a 180‑degree hue shift for a night‑mode UI theme.
+ * 2. When an e‑commerce platform must generate product image variants that use a complementary color scheme by rotating the hue of vector illustrations before saving them as PNGs.
+ * 3. When a game developer wants to programmatically recolor SVG sprites for different player teams and export the results as PNG assets using C# and Aspose.Imaging.
+ * 4. When a marketing automation script has to create color‑shifted PNG banners from SVG templates to match seasonal campaign palettes.
+ * 5. When a reporting tool must render SVG charts with an inverted hue for accessibility compliance and save them as PNG files for inclusion in PDF reports.
  */
