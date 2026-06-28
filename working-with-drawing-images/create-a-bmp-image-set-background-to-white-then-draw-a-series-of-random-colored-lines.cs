@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -9,43 +10,49 @@ class Program
     {
         try
         {
-            // Define output path and ensure its directory exists
-            string outputPath = "output\\random_lines.bmp";
+            // Hardcoded output path
+            string outputPath = @"C:\temp\output.bmp";
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Image dimensions
-            int width = 500;
-            int height = 500;
+            // Create a file source bound to the output path
+            Source fileSource = new FileCreateSource(outputPath, false);
 
-            // Create BMP image bound to the output file
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            // BMP options with the bound source
+            BmpOptions bmpOptions = new BmpOptions { Source = fileSource };
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, width, height))
+            int width = 800;
+            int height = 600;
+            int lineCount = 100;
+
+            // Create the canvas image
+            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
             {
-                // Obtain graphics object and clear background to white
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.White);
+                // Initialize graphics and clear background to white
+                Graphics graphics = new Graphics(canvas);
+                graphics.Clear(Color.White);
 
-                // Draw random colored lines
-                Random rand = new Random();
-                int lineCount = 10;
+                Random rnd = new Random();
+
                 for (int i = 0; i < lineCount; i++)
                 {
-                    Aspose.Imaging.Color lineColor = Aspose.Imaging.Color.FromArgb(
-                        rand.Next(256), rand.Next(256), rand.Next(256));
-                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(lineColor, 2);
+                    // Random start and end points
+                    int x1 = rnd.Next(width);
+                    int y1 = rnd.Next(height);
+                    int x2 = rnd.Next(width);
+                    int y2 = rnd.Next(height);
 
-                    Aspose.Imaging.Point start = new Aspose.Imaging.Point(
-                        rand.Next(width), rand.Next(height));
-                    Aspose.Imaging.Point end = new Aspose.Imaging.Point(
-                        rand.Next(width), rand.Next(height));
+                    // Random color
+                    Color randomColor = Color.FromArgb(255, rnd.Next(256), rnd.Next(256), rnd.Next(256));
+                    Pen pen = new Pen(randomColor, 1);
 
-                    graphics.DrawLine(pen, start, end);
+                    // Draw the line
+                    graphics.DrawLine(pen, new Point(x1, y1), new Point(x2, y2));
                 }
 
-                // Save the image (output path already bound)
-                image.Save();
+                // Save the bound image
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -57,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a placeholder BMP file with a white background and random colored lines for testing image rendering pipelines in C# applications using Aspose.Imaging.
- * 2. When creating a simple visual CAPTCHA image in BMP format where random colored lines are drawn over a white canvas to deter automated bots.
- * 3. When producing sample graphics for a documentation tutorial that demonstrates how to use Aspose.Imaging's Graphics, Pen, and Color classes to draw lines on a BMP image in .NET.
- * 4. When needing to generate synthetic test data for performance benchmarking of image processing algorithms that read BMP files with varying line colors and positions.
- * 5. When building a quick diagnostic tool that outputs a BMP screenshot with random colored lines to verify that file creation, directory handling, and drawing operations work correctly in a C# project.
+ * 1. When a developer needs to generate a BMP placeholder image with a white background and random colored lines for testing image rendering pipelines in a C# application.
+ * 2. When creating a simple visual captcha or pattern image in a .NET web project using Aspose.Imaging’s RasterImage and Graphics classes to deter automated bots.
+ * 3. When producing a quick diagnostic chart that visualizes random line distributions to benchmark the performance of drawing operations on a BMP canvas.
+ * 4. When generating background textures for games or UI prototypes where a BMP file with random line art is required without relying on external design tools.
+ * 5. When automating the creation of sample BMP files for documentation or unit tests that need consistent dimensions, a white background, and random color variations.
  */
