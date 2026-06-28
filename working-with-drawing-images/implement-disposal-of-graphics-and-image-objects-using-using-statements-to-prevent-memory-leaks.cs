@@ -2,49 +2,36 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = @"input.png";
+        string outputPath = @"output.png";
 
         try
         {
-            using (Image inputImage = Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
-                RasterImage raster = inputImage as RasterImage;
-                if (raster == null)
-                {
-                    Console.Error.WriteLine("Input image is not a raster image.");
-                    return;
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                Graphics graphics = new Graphics(raster);
-                graphics.Clear(Color.White);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                Pen pen = new Pen(Color.Blue, 5);
-                graphics.DrawRectangle(pen, new Rectangle(50, 50, 200, 150));
+            using (Image image = Image.Load(inputPath))
+            {
+                Graphics graphics = new Graphics(image);
 
                 using (SolidBrush brush = new SolidBrush(Color.Red))
                 {
-                    graphics.FillRectangle(brush, new Rectangle(60, 60, 180, 130));
+                    graphics.FillRectangle(brush, new Rectangle(10, 10, 100, 100));
                 }
 
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new FileCreateSource(outputPath, false);
-                raster.Save(outputPath, pngOptions);
+                PngOptions saveOptions = new PngOptions();
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -56,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically add a blue border and a red fill to a PNG image for creating branded marketing assets, they can use this code to draw and fill rectangles while ensuring Graphics and Image objects are disposed.
- * 2. When an application must generate annotated screenshots by overlaying shapes on user‑uploaded PNG files, this example shows how to load, draw, and save the image without memory leaks.
- * 3. When a batch‑processing tool has to watermark product photos with a colored rectangle before publishing them to a website, the code demonstrates safe resource handling with using statements.
- * 4. When a desktop utility needs to convert raw PNG files into a new version that includes a white background and highlighted area for printing, this snippet provides the necessary drawing and saving steps.
- * 5. When a C# service processes incoming image streams and must add visual markers such as rectangles for quality‑control checks, the example illustrates proper disposal of Graphics and Image objects to avoid out‑of‑memory errors.
+ * 1. When a developer needs to overlay a red rectangle on a PNG image while ensuring the Graphics and Image objects are properly disposed to avoid memory leaks in a .NET application.
+ * 2. When an automated batch process must read existing PNG files, draw shapes using Aspose.Imaging brushes, and save the modified images without exhausting system resources.
+ * 3. When integrating image annotation features into a C# web service, the code guarantees that file streams are closed and unmanaged resources are released after drawing on the image.
+ * 4. When creating a desktop utility that generates highlighted sections on screenshots, using statements prevent lingering GDI+ handles that could crash the application.
+ * 5. When performing server‑side image manipulation for a reporting tool, the pattern ensures safe loading, editing, and saving of PNG files while complying with .NET memory‑management best practices.
  */
