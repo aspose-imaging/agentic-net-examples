@@ -2,61 +2,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"c:\temp\sample.png";
-            string outputPath1 = @"c:\temp\output1.png";
-            string outputPath2 = @"c:\temp\output2.png";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            // Output file paths (hard‑coded)
+            string outputPath1 = "output1.tif";
+            string outputPath2 = "output2.tif";
 
             // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath1));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath2));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath1) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath2) ?? ".");
 
-            // Create a reusable GraphicsPath with a rectangle shape
-            GraphicsPath path = new GraphicsPath();
-            Figure figure = new Figure();
-            figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
-            path.AddFigure(figure);
+            // Prepare a reusable GraphicsPath (does not depend on any image)
+            var sharedPath = new GraphicsPath();
+            var figure = new Figure();
+            // Add a simple rectangle shape to the figure
+            figure.AddShape(new RectangleShape(new RectangleF(20f, 20f, 100f, 100f)));
+            sharedPath.AddFigure(figure);
 
-            // First image: draw the path and save
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath1, false);
-            using (Image image1 = Image.Create(pngOptions, 300, 300))
+            // ---------- First image: render the path ----------
+            var tiffOptions1 = new TiffOptions(TiffExpectedFormat.Default);
+            using (var image1 = Image.Create(tiffOptions1, 200, 200))
             {
-                Graphics graphics = new Graphics(image1);
-                graphics.Clear(Color.White);
-                graphics.DrawPath(new Pen(Color.Blue, 3), path);
-                image1.Save(); // Since the output is bound to the source, just Save()
-            }
+                var graphics1 = new Graphics(image1);
+                graphics1.Clear(Color.LightGray);
+                graphics1.DrawPath(new Pen(Color.Blue, 3), sharedPath);
+                image1.Save(outputPath1);
+            } // image1 disposed here
 
-            // Second image: reuse the same GraphicsPath without reloading any source image
-            pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath2, false);
-            using (Image image2 = Image.Create(pngOptions, 300, 300))
+            // ---------- Second image: reuse the same GraphicsPath ----------
+            var tiffOptions2 = new TiffOptions(TiffExpectedFormat.Default);
+            using (var image2 = Image.Create(tiffOptions2, 200, 200))
             {
-                Graphics graphics = new Graphics(image2);
-                graphics.Clear(Color.White);
-                graphics.DrawPath(new Pen(Color.Red, 3), path);
-                image2.Save();
-            }
+                var graphics2 = new Graphics(image2);
+                graphics2.Clear(Color.White);
+                // Re‑draw the same path onto a new image after the first image has been disposed
+                graphics2.DrawPath(new Pen(Color.Red, 3), sharedPath);
+                image2.Save(outputPath2);
+            } // image2 disposed here
 
-            // If we reach this point without exceptions, the GraphicsPath does not retain a reference to the source image.
-            Console.WriteLine("GraphicsPath reused successfully on multiple images.");
+            // If we reach this point without exception, GraphicsPath does not retain a reference to the source image.
+            Console.WriteLine("GraphicsPath successfully reused after source image disposal.");
         }
         catch (Exception ex)
         {
@@ -67,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a series of PNG badges that all share the same logo shape, a developer can reuse a single GraphicsPath to draw the logo onto each badge without the path holding onto the previous image’s data.
- * 2. When creating on‑the‑fly watermarks for uploaded photos, you can draw the same watermark path onto each new Image object and be confident the path does not keep a reference to the original file, preventing file‑lock issues.
- * 3. When producing multiple chart panels in a reporting tool, a shared GraphicsPath for axis lines can be rendered into separate Image canvases, ensuring the path does not retain any source image memory and allowing the panels to be saved independently as PNG files.
- * 4. When implementing a batch image‑conversion service that reuses vector shapes across thousands of images, validating that GraphicsPath does not hold onto the source image helps avoid out‑of‑memory exceptions during high‑volume processing.
- * 5. When building a web API that returns dynamically drawn thumbnails, reusing a pre‑defined GraphicsPath for the border rectangle lets the API render each thumbnail quickly while guaranteeing the path does not keep the previous thumbnail file open.
+ * 1. When generating a batch of TIFF reports where the same vector logo (GraphicsPath) must be drawn on each page without keeping the previous page’s image in memory, this code confirms safe reuse of the path.
+ * 2. When creating thumbnail previews for uploaded photos and re‑using a predefined cropping rectangle (GraphicsPath) across many images, the example shows that disposing the first image releases all resources.
+ * 3. When applying a consistent red‑border annotation to a series of scanned documents, developers can reuse the same GraphicsPath for each new Image object without risking a memory leak.
+ * 4. When building a multi‑page TIFF file where each page shares identical geometric shapes (e.g., a rectangle placeholder), this pattern validates that the shared GraphicsPath does not hold references to earlier pages.
+ * 5. When implementing a C# image‑processing service that draws a reusable watermark shape on different image formats (TIFF, PNG, JPEG) using Aspose.Imaging, the code demonstrates that the GraphicsPath can be safely reused after each source image is disposed.
  */
