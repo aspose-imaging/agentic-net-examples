@@ -6,36 +6,38 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Output BMP file path (hardcoded)
-            string outputPath = @"C:\temp\output.bmp";
+            // Output BMP file path
+            string outputPath = @"c:\temp\output_inset.bmp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up BMP options with a file create source
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a new image bound to the output file
-            using (Image image = Image.Create(bmpOptions, 500, 500))
+            // Configure BMP options
+            BmpOptions bmpOptions = new BmpOptions
             {
-                // Initialize graphics for drawing
+                BitsPerPixel = 24,
+                Source = new FileCreateSource(outputPath, false)
+            };
+
+            // Create a 200x200 BMP image
+            using (Image image = Image.Create(bmpOptions, 200, 200))
+            {
+                // Initialize graphics object
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                // Create a pen with Inset alignment
-                Pen pen = new Pen(Color.Blue, 5);
+                // Create a pen with inset alignment
+                Pen pen = new Pen(Color.Black, 10);
                 pen.Alignment = PenAlignment.Inset;
 
-                // Draw a rectangle using the inset-aligned pen
-                graphics.DrawRectangle(pen, new Rectangle(50, 50, 400, 300));
+                // Draw a rectangle to observe border positioning
+                graphics.DrawRectangle(pen, 20, 20, 160, 160);
 
-                // Save the image (bound to the file source)
+                // Save the image
                 image.Save();
             }
         }
@@ -48,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP file with an inner blue border for a printable form, they can set PenAlignment.Inset and draw a rectangle to keep the stroke inside the specified dimensions.
- * 2. When creating UI icons or thumbnails in C# where the border must not expand the image size, this code uses Aspose.Imaging to draw an inset‑aligned rectangle on a BMP canvas.
- * 3. When producing a raster diagram for documentation and the rectangle’s outline should stay within the shape’s edges, the inset pen alignment ensures the border does not overflow the rectangle bounds.
- * 4. When preparing a BMP image for inclusion in a PDF and the border must remain fully visible after conversion, using PenAlignment.Inset with Graphics.DrawRectangle guarantees the stroke stays inside the rectangle.
- * 5. When testing or demonstrating Aspose.Imaging’s pen alignment features across file formats, this example creates a BMP, applies an inset‑aligned pen, and saves the result for visual verification.
+ * 1. When a developer needs to generate a printable BMP report with a black border that stays completely inside the page margins, they can use PenAlignment.Inset to keep the rectangle’s stroke within the defined area.
+ * 2. When creating UI mock‑ups for a Windows desktop application, a programmer can draw inset‑aligned rectangles on a 24‑bit BMP to simulate button outlines that remain inside the control’s bounds.
+ * 3. When preparing assets for a legacy embedded system that only supports BMP files, using an inset pen guarantees that the border thickness is accounted for within the image dimensions, preventing clipping on low‑resolution displays.
+ * 4. When automating the production of certification seals where the outer ring must be fully contained within a fixed 200 × 200 BMP canvas, PenAlignment.Inset ensures the ring’s 10‑pixel stroke stays inside the seal’s perimeter.
+ * 5. When testing image‑processing pipelines that crop or resize BMP images, drawing an inset‑aligned rectangle provides a reliable visual reference that remains unchanged after subsequent transformations.
  */
