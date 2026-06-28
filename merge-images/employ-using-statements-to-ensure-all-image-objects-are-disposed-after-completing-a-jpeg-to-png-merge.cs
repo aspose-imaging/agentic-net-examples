@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -31,31 +30,36 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
 
-            // Load both images to determine canvas size
+            // Load source images
             using (RasterImage jpegImage = (RasterImage)Image.Load(jpegPath))
             using (RasterImage pngImage = (RasterImage)Image.Load(pngPath))
             {
+                // Calculate canvas size for horizontal merge
                 int canvasWidth = jpegImage.Width + pngImage.Width;
                 int canvasHeight = Math.Max(jpegImage.Height, pngImage.Height);
 
-                // Prepare PNG options with file source
-                Source src = new FileCreateSource(outputPath, false);
-                PngOptions pngOptions = new PngOptions() { Source = src };
+                // Prepare PNG options with bound source
+                Source fileSource = new FileCreateSource(outputPath, false);
+                PngOptions pngOptions = new PngOptions { Source = fileSource };
 
-                // Create canvas image
+                // Create canvas bound to the output file
                 using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
                 {
-                    // Copy JPEG image onto canvas at (0,0)
+                    // Copy JPEG image at (0,0)
                     Rectangle jpegBounds = new Rectangle(0, 0, jpegImage.Width, jpegImage.Height);
                     canvas.SaveArgb32Pixels(jpegBounds, jpegImage.LoadArgb32Pixels(jpegImage.Bounds));
 
-                    // Copy PNG image onto canvas next to JPEG
+                    // Copy PNG image next to JPEG
                     Rectangle pngBounds = new Rectangle(jpegImage.Width, 0, pngImage.Width, pngImage.Height);
                     canvas.SaveArgb32Pixels(pngBounds, pngImage.LoadArgb32Pixels(pngImage.Bounds));
 
-                    // Save the merged image
+                    // Save the merged image (canvas is already bound to outputPath)
                     canvas.Save();
                 }
             }
@@ -69,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to combine a product photo (JPEG) with a transparent logo (PNG) into a single PNG for display on an e‑commerce site.
- * 2. When a desktop utility must merge a scanned document (JPEG) with a watermark image (PNG) before archiving the result as a lossless PNG file.
- * 3. When a batch processing script creates a side‑by‑side comparison image by placing a camera‑captured JPEG next to a rendered PNG diagram for quality analysis.
- * 4. When a reporting tool overlays a PNG badge onto a JPEG screenshot to generate a composite PNG that can be embedded in PDF reports.
- * 5. When a mobile backend service assembles a JPEG background and a PNG icon into a single PNG sprite to reduce network requests for UI assets.
+ * 1. When a developer needs to generate a side‑by‑side preview of a high‑resolution JPEG photo and a transparent PNG overlay for an e‑commerce product page, they can use this code to merge the two images into a single PNG file while automatically disposing the Image objects.
+ * 2. When an application must combine a scanned JPEG receipt with a PNG company logo into one printable PNG receipt, this snippet provides a straightforward way to concatenate the images horizontally and ensure proper resource cleanup with using statements.
+ * 3. When a reporting tool has to create a composite chart by appending a JPEG chart image to a PNG legend image before exporting to PNG, the code demonstrates how to calculate the canvas size, merge the images, and release memory safely.
+ * 4. When a mobile backend service needs to bundle a user‑uploaded JPEG avatar with a PNG frame overlay into a single PNG asset for storage, the example shows how to load, merge, and save the result while handling file I/O and disposal correctly.
+ * 5. When a batch‑processing script must convert pairs of JPEG and PNG files into merged PNG composites for archival purposes, this example illustrates the use of Aspose.Imaging’s Image.Load, Image.Create, and using blocks to avoid memory leaks.
  */
