@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -13,50 +14,45 @@ class Program
             string inputFolder = @"C:\InputSvgs";
             string outputFolder = @"C:\OutputPdfs";
 
-            // Get all SVG files in the input folder
-            string[] svgFiles = Directory.GetFiles(inputFolder, "*.svg");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputFolder);
 
-            foreach (string inputPath in svgFiles)
+            // Process each SVG file in the input folder
+            foreach (string inputPath in Directory.GetFiles(inputFolder, "*.svg"))
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine file name without extension
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                // Determine output PDF path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".pdf");
+
+                // Ensure the output directory exists (unconditional as required)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Read original SVG content
-                string svgContent = File.ReadAllText(inputPath);
+                string svgContent = File.ReadAllText(inputPath, Encoding.UTF8);
 
-                // Simple footer: add a <text> element before the closing </svg> tag
-                // Position is approximate; adjust as needed for real use cases
-                string footerText = $"<text x=\"10\" y=\"20\" font-size=\"12\" fill=\"black\">{fileName}</text>";
-                string modifiedSvgContent = svgContent.Replace("</svg>", footerText + "\n</svg>");
-
-                // Write modified SVG to a temporary file
-                string tempSvgPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.svg");
-                File.WriteAllText(tempSvgPath, modifiedSvgContent);
-
-                // Load the modified SVG image
-                using (Image image = Image.Load(tempSvgPath))
+                // Insert a footer text element with the file name before the closing </svg> tag
+                int insertPos = svgContent.LastIndexOf("</svg>", StringComparison.OrdinalIgnoreCase);
+                if (insertPos >= 0)
                 {
-                    // Prepare output PDF path
-                    string outputPath = Path.Combine(outputFolder, $"{fileName}.pdf");
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save as PDF
-                    image.Save(outputPath, new PdfOptions());
+                    // Simple footer positioned near the bottom; y-coordinate is set to 20 for demonstration.
+                    // In a real scenario, you might calculate the height from viewBox or other attributes.
+                    string footerText = $"<text x=\"10\" y=\"20\" font-size=\"12\" fill=\"black\">{fileNameWithoutExt}</text>";
+                    svgContent = svgContent.Insert(insertPos, footerText);
                 }
 
-                // Clean up temporary SVG file
-                if (File.Exists(tempSvgPath))
+                // Load the modified SVG from a memory stream
+                using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(svgContent)))
+                using (Image image = Image.Load(ms))
                 {
-                    File.Delete(tempSvgPath);
+                    // Save as PDF using default PdfOptions
+                    image.Save(outputPath, new PdfOptions());
                 }
             }
         }
@@ -69,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a company needs to automatically convert a large collection of vector graphics (SVG) into printable PDFs while appending the original file name as a footer for traceability.
- * 2. When an e‑learning platform wants to generate downloadable PDF handouts from SVG lesson diagrams and include the diagram title at the bottom of each page.
- * 3. When a marketing team must archive campaign assets by batch‑processing SVG logos into PDF files that display the asset name as a reference footer.
- * 4. When a GIS application exports map SVG files to PDF reports and adds a footer with the map’s filename for easy identification in the final document.
- * 5. When a legal compliance system converts SVG schematics into PDF records and inserts the file name as a footer to satisfy audit‑trail requirements.
+ * 1. When a developer needs to batch‑process a folder of SVG files, converting each to PDF with Aspose.Imaging for .NET and appending a footer that shows the original file name for traceability.
+ * 2. When a marketing automation script must turn a collection of vector SVG logos into printable PDFs using C# and Aspose.Imaging, adding the logo’s filename as a footer to identify each asset.
+ * 3. When an engineering workflow requires generating PDF schematics from SVG diagrams, using Aspose.Imaging to preserve vector quality while inserting the diagram’s filename as a footer for documentation standards.
+ * 4. When a document management system automates the conversion of SVG illustrations to PDF format with Aspose.Imaging and adds a filename footer to support audit trails and searchable metadata.
+ * 5. When a CI/CD pipeline validates that all SVG icons in a repository are correctly rendered as PDFs, employing Aspose.Imaging in C# to add a footer with the source file name for quality‑assurance reporting.
  */
