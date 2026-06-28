@@ -2,9 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -12,8 +11,9 @@ class Program
     {
         try
         {
-            string inputPath = "Input/animation.webp";
-            string outputPath = "Output/animation.gif";
+            string inputPath = "input.webp";
+            string tempGifPath = "temp.gif";
+            string outputPath = "output.gif";
 
             if (!File.Exists(inputPath))
             {
@@ -23,45 +23,16 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load animated WebP
-            using (WebPImage webp = (WebPImage)Image.Load(inputPath))
+            using (Image webpImage = Image.Load(inputPath))
             {
-                // Ensure there are frames
-                if (webp.PageCount == 0)
-                {
-                    Console.Error.WriteLine("No frames found in the WebP image.");
-                    return;
-                }
+                webpImage.Save(tempGifPath, new GifOptions());
+            }
 
-                // Create an empty GIF image using the first frame as a base
-                using (RasterImage firstFrame = (RasterImage)webp.Pages[0])
-                using (GifFrameBlock firstBlock = new GifFrameBlock(firstFrame))
-                using (GifImage gif = new GifImage(firstBlock))
-                {
-                    // Set delay for the first frame (example: 100 ms)
-                    firstBlock.FrameTime = 100;
-
-                    // Process remaining frames
-                    for (int i = 1; i < webp.PageCount; i++)
-                    {
-                        using (RasterImage frame = (RasterImage)webp.Pages[i])
-                        using (GifFrameBlock block = new GifFrameBlock(frame))
-                        {
-                            // Example: set each frame delay to 80 ms
-                            block.FrameTime = 80;
-                            gif.AddPage(block);
-                        }
-                    }
-
-                    // Optional: set loop count (0 = infinite)
-                    GifOptions gifOptions = new GifOptions
-                    {
-                        LoopsCount = 0
-                    };
-
-                    // Save the GIF
-                    gif.Save(outputPath, gifOptions);
-                }
+            using (GifImage gifImage = (GifImage)Image.Load(tempGifPath))
+            {
+                // Set frame delay to 100 milliseconds for all frames
+                gifImage.SetFrameTime(100);
+                gifImage.Save(outputPath, new GifOptions());
             }
         }
         catch (Exception ex)
@@ -70,3 +41,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When converting an animated WebP advertisement into a GIF for email newsletters and needing to ensure each frame displays for a consistent 100 ms to match the original timing.
+ * 2. When building a C# web application that generates product showcase animations from WebP assets and must adjust the GIF frame delay to synchronize with UI transition speeds.
+ * 3. When creating a desktop utility that batch‑processes user‑uploaded WebP stickers into GIFs for social media platforms, requiring explicit frame timing control to avoid overly fast playback.
+ * 4. When developing an e‑learning platform that extracts animated WebP tutorials and converts them to GIFs with a uniform frame delay so the instructional steps are easy to follow.
+ * 5. When implementing a server‑side image pipeline that transforms animated WebP icons into GIFs for legacy browsers, and the developer needs to set the frame delay to guarantee smooth animation across devices.
+ */

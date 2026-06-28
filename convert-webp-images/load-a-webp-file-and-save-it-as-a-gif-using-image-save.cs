@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
@@ -11,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.webp";
-            string outputPath = @"C:\temp\output.gif";
+            string inputPath = @"c:\temp\input.webp";
+            string outputPath = @"c:\temp\output.gif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -36,3 +35,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert user‑uploaded WebP images to GIF for compatibility with legacy browsers that only support GIF animation.
+ * 2. When an e‑commerce platform must generate GIF thumbnails from product photos stored as WebP to embed in email newsletters.
+ * 3. When a mobile app backend processes WebP screenshots and saves them as GIF to create lightweight animated previews for social media sharing.
+ * 4. When a content management system migrates archived WebP assets to GIF to ensure they can be displayed in older Windows applications that rely on System.Drawing.
+ * 5. When a batch‑processing script converts a folder of WebP graphics to GIF format to comply with a third‑party API that accepts only GIF files.
+ */
