@@ -10,24 +10,19 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
-
-            // List of raster image file names to process
-            string[] files = new[]
+            // Hardcoded input image paths
+            string[] inputPaths = new[]
             {
-                "photo1.png",
-                "photo2.jpg",
-                "photo3.bmp"
+                @"C:\Images\image1.png",
+                @"C:\Images\image2.jpg",
+                @"C:\Images\image3.bmp"
             };
 
-            foreach (string fileName in files)
-            {
-                // Build full input and output paths
-                string inputPath = Path.Combine(inputDir, fileName);
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".svg");
+            // Size of the median filter kernel
+            int medianFilterSize = 5;
 
+            foreach (string inputPath in inputPaths)
+            {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
@@ -35,20 +30,34 @@ class Program
                     return;
                 }
 
+                // Determine output SVG path (same folder, same name, .svg extension)
+                string outputPath = Path.ChangeExtension(inputPath, ".svg");
+
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the raster image, apply median filter, and save as SVG
+                // Load the raster image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to access filtering functionality
+                    // Cast to RasterImage to apply filters
                     RasterImage rasterImage = (RasterImage)image;
 
-                    // Apply a median filter with a kernel size of 5 to the entire image
-                    rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+                    // Apply median filter to the whole image
+                    rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(medianFilterSize));
 
-                    // Save the filtered image as SVG using default SVG options
-                    rasterImage.Save(outputPath, new SvgOptions());
+                    // Prepare SVG save options with rasterization settings
+                    SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = rasterImage.Size
+                    };
+
+                    SvgOptions svgOptions = new SvgOptions
+                    {
+                        VectorRasterizationOptions = rasterizationOptions
+                    };
+
+                    // Save the filtered image as SVG
+                    image.Save(outputPath, svgOptions);
                 }
             }
         }
@@ -58,3 +67,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑process a collection of PNG, JPEG, or BMP photos, remove noise with a uniform median filter, and export each cleaned image as a scalable SVG for responsive web design.
+ * 2. When an application must automatically enhance scanned documents by applying a 5‑pixel median filter to reduce speckles before converting them to SVG vectors for searchable PDFs.
+ * 3. When a medical imaging workflow requires denoising multiple raster X‑ray images in C# using Aspose.Imaging and saving the results as SVG files for loss‑less archival and easy annotation.
+ * 4. When a graphics pipeline has to convert legacy product catalog images into SVG format while preserving dimensions, applying a consistent median filter to ensure uniform visual quality across all assets.
+ * 5. When a developer builds a command‑line tool that reads raster images from a folder, applies the same median filter to each image to smooth edges, and batch‑saves them as SVG files for use in vector‑based reporting dashboards.
+ */

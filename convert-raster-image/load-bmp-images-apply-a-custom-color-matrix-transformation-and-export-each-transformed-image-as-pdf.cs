@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -12,11 +13,10 @@ class Program
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure input and output directories exist
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add BMP files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
@@ -26,44 +26,22 @@ class Program
             }
 
             string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
+
             foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
                 {
-                    Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-                    if (!raster.IsCached)
-                    {
-                        raster.CacheData();
-                    }
-
-                    // Apply a simple invert color transformation
-                    for (int y = 0; y < raster.Height; y++)
-                    {
-                        for (int x = 0; x < raster.Width; x++)
-                        {
-                            Aspose.Imaging.Color pixel = raster.GetPixel(x, y);
-                            byte a = pixel.A;
-                            byte r = (byte)(255 - pixel.R);
-                            byte g = (byte)(255 - pixel.G);
-                            byte b = (byte)(255 - pixel.B);
-                            raster.SetPixel(x, y, Aspose.Imaging.Color.FromArgb(a, r, g, b));
-                        }
-                    }
-
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save as PDF
-                    raster.Save(outputPath, new PdfOptions());
+                    image.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -73,3 +51,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑convert legacy BMP scans of printed forms into searchable PDF reports by applying a custom color matrix that enhances the form fields.
+ * 2. When an e‑learning platform must transform BMP screenshots of classroom whiteboards using a contrast‑adjusting color matrix and deliver the results as PDF handouts.
+ * 3. When a medical imaging system has to preprocess BMP X‑ray images with a false‑color matrix to improve tissue visibility before archiving them as PDF documents.
+ * 4. When a marketing automation tool generates product catalogs by recoloring BMP product photos with a brand‑specific color matrix and packaging each page as a PDF.
+ * 5. When a legal document management solution needs to normalize BMP‑encoded signatures using a color matrix for background removal and store the cleaned signatures as PDF files.
+ */

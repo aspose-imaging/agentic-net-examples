@@ -1,63 +1,26 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output.pdf";
-
-            // Verify input file exists
+            string inputPath = Path.Combine("Input", "sample.png");
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            string outputPath = Path.Combine("Output", "sample_converted.jpg");
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Apply color inversion if the image is a raster image
-                if (image is RasterImage raster)
-                {
-                    int width = raster.Width;
-                    int height = raster.Height;
-
-                    for (int y = 0; y < height; y++)
-                    {
-                        for (int x = 0; x < width; x++)
-                        {
-                            // Get current pixel
-                            Aspose.Imaging.Color pixel = raster.GetPixel(x, y);
-
-                            // Invert RGB channels (preserve alpha)
-                            Aspose.Imaging.Color inverted = Aspose.Imaging.Color.FromArgb(
-                                pixel.A,
-                                (byte)(255 - pixel.R),
-                                (byte)(255 - pixel.G),
-                                (byte)(255 - pixel.B));
-
-                            // Set inverted pixel back
-                            raster.SetPixel(x, y, inverted);
-                        }
-                    }
-                }
-
-                // Prepare PDF options
-                var pdfOptions = new PdfOptions();
-
-                // Save the inverted image as a PDF
-                image.Save(outputPath, pdfOptions);
+                image.Save(outputPath, new JpegOptions());
             }
         }
         catch (Exception ex)
@@ -66,3 +29,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a printable PDF report that includes a high‑contrast version of a scanned diagram, they can load the PNG, invert its colors with Aspose.Imaging, and embed the result into the PDF.
+ * 2. When creating accessibility‑friendly documentation, a developer may invert dark‑on‑light images to light‑on‑dark for better readability on e‑ink devices and then insert the transformed image into a PDF using C#.
+ * 3. When automating the preparation of marketing brochures that require a negative‑film effect, a developer can apply a color inversion filter to product photos and embed the altered images into a PDF catalog.
+ * 4. When building a forensic analysis tool that highlights hidden details by inverting image colors before archiving them, a developer can load the raster file, invert it with Aspose.Imaging, and store the result in a PDF evidence file.
+ * 5. When developing a batch conversion utility that converts user‑uploaded PNG screenshots into PDF manuals with inverted colors for night‑mode viewing, a developer can use the image loading, inversion, and PDF embedding workflow in C#.
+ */

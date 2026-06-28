@@ -6,45 +6,50 @@ using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.svg";
+
+        // Ensure any runtime exception is reported cleanly
         try
         {
-            // Hardcoded input raster image and output SVG paths
-            string inputPath = "input.png";
-            string outputPath = "output.svg";
-
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists (creates current directory if none)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the raster image
-            using (Image image = Image.Load(inputPath))
+            using (Image rasterImage = Image.Load(inputPath))
             {
-                // Cast to RasterImage for drawing operations
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage for drawing
+                RasterImage raster = rasterImage as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("The input file is not a raster image.");
+                    return;
+                }
 
-                // Define custom SVG viewbox dimensions
-                int svgWidth = 800;   // width in pixels
-                int svgHeight = 600;  // height in pixels
-                int dpi = 96;         // resolution
+                int width = raster.Width;
+                int height = raster.Height;
+                int dpi = 96; // Standard screen DPI
 
-                // Create an SVG graphics canvas with the specified size
-                SvgGraphics2D graphics = new SvgGraphics2D(svgWidth, svgHeight, dpi);
+                // Create an SVG graphics context with custom dimensions (viewbox)
+                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-                // Draw the raster image onto the SVG canvas, scaling to fit the viewbox
-                graphics.DrawImage(raster, new Point(0, 0), new Size(svgWidth, svgHeight));
+                // Draw the raster image onto the SVG canvas
+                graphics.DrawImage(raster, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Size(width, height));
 
                 // Finalize the SVG image
                 using (SvgImage svgImage = graphics.EndRecording())
                 {
-                    // Save the SVG file
+                    // Save the SVG output
                     svgImage.Save(outputPath);
                 }
             }
@@ -55,3 +60,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web developer needs to convert a PNG logo into a scalable SVG for responsive design while preserving the original dimensions and DPI.
+ * 2. When an e‑learning platform wants to embed high‑resolution raster diagrams as vector graphics in HTML5 courses to reduce page load and enable zoom without pixelation.
+ * 3. When a desktop application generates printable reports and must embed raster charts as SVG to ensure they scale correctly on different paper sizes.
+ * 4. When a CI/CD pipeline automates asset optimization by turning raster icons into SVG files with a defined viewbox so they can be styled with CSS.
+ * 5. When a GIS tool needs to overlay a raster map tile onto an SVG canvas with custom viewbox coordinates before exporting the result for vector‑based mapping applications.
+ */

@@ -20,20 +20,25 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access AdjustGamma
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Apply custom gamma correction (same value for all channels)
-                rasterImage.AdjustGamma(2.2f);
+                // Apply gamma correction (same value for all channels)
+                if (image is RasterImage rasterImage)
+                {
+                    rasterImage.AdjustGamma(2.2f);
+                }
+                else if (image is RasterCachedImage cachedImage)
+                {
+                    cachedImage.AdjustGamma(2.2f);
+                }
 
                 // Save the corrected image as PDF
-                rasterImage.Save(outputPath, new PdfOptions());
+                var pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -42,3 +47,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert a PNG screenshot to a PDF while applying gamma correction to improve print brightness and contrast.
+ * 2. When an application must batch‑process raster images, adjust their gamma uniformly, and save the results as PDF files for archival.
+ * 3. When a reporting tool has to embed a raster chart into a PDF report and ensure consistent visual appearance across devices by correcting gamma.
+ * 4. When a web service receives a JPEG image, applies gamma correction for accurate color rendering, and returns the image as a PDF for downstream consumption.
+ * 5. When a desktop utility must verify the input image, create the output directory if missing, apply gamma adjustment, and export the corrected image as a PDF for compliance documentation.
+ */

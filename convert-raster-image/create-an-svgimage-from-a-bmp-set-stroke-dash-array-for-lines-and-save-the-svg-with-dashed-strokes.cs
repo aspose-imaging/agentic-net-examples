@@ -3,50 +3,52 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\output.svg";
+
+        // Path safety checks
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputBmpPath = "C:\\temp\\sample.bmp";
-            string outputSvgPath = "C:\\temp\\output.svg";
-
-            // Verify input file exists
-            if (!File.Exists(inputBmpPath))
+            // Load the BMP raster image
+            using (RasterImage bmp = (RasterImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputBmpPath}");
-                return;
-            }
+                // Create an SVG graphics context with the same dimensions as the BMP
+                int width = bmp.Width;
+                int height = bmp.Height;
+                int dpi = 96; // standard screen DPI
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputSvgPath));
+                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-            // Load the BMP image as a raster image
-            using (RasterImage bmpImage = (RasterImage)Image.Load(inputBmpPath))
-            {
-                // Create an SVG graphics canvas with the same dimensions as the BMP
-                var graphics = new SvgGraphics2D(bmpImage.Width, bmpImage.Height, 96);
+                // Draw the raster image onto the SVG canvas
+                graphics.DrawImage(bmp, new Point(0, 0));
 
-                // Create a pen with a dash pattern (5 units dash, 5 units gap)
-                var dashPen = new Pen(Color.Black, 2);
-                dashPen.DashPattern = new float[] { 5, 5 };
+                // Create a pen with a dash style for drawing lines
+                Pen dashedPen = new Pen(Color.Black, 2);
+                dashedPen.DashStyle = DashStyle.Dash; // set dash pattern
 
-                // Draw dashed diagonal lines on the SVG
-                graphics.DrawLine(dashPen, 0, 0, bmpImage.Width, bmpImage.Height);
-                graphics.DrawLine(dashPen, 0, bmpImage.Height, bmpImage.Width, 0);
+                // Draw a diagonal dashed line across the image
+                graphics.DrawLine(dashedPen, 0, 0, width, height);
 
-                // Draw the bitmap onto the SVG canvas
-                graphics.DrawImage(bmpImage, new Point(0, 0), new Size(bmpImage.Width, bmpImage.Height));
-
-                // Finalize the SVG image and save it
+                // Finalize the SVG image
                 using (SvgImage svgImage = graphics.EndRecording())
                 {
-                    svgImage.Save(outputSvgPath);
+                    // Save the SVG file
+                    svgImage.Save(outputPath);
                 }
             }
         }
@@ -56,3 +58,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert a legacy BMP diagram into a scalable SVG file while overlaying a dashed guideline for alignment, they can use this C# Aspose.Imaging code to raster‑to‑vector convert and add a dash‑styled line.
+ * 2. When generating printable technical documentation that requires embedding a bitmap logo inside an SVG illustration with a decorative dashed border, this snippet provides the necessary BMP loading, SVG graphics context, and dash pattern handling.
+ * 3. When creating web‑ready graphics for responsive UI components, a developer can transform a BMP asset into an SVG and programmatically draw a dashed separator line to maintain visual consistency across screen sizes.
+ * 4. When automating batch processing of scanned BMP schematics and needing to highlight specific paths using dashed strokes in the resulting SVG, the code demonstrates how to load each image, draw dash‑styled lines, and save the output.
+ * 5. When building a C# application that annotates medical BMP scans with dashed markers before exporting them as SVG for integration with vector‑based reporting tools, this example shows the required image loading, pen configuration, and SVG saving steps.
+ */
