@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -10,43 +11,50 @@ class Program
     {
         try
         {
-            // Define output path (hardcoded)
-            string outputPath = @"output.bmp";
+            // Hardcoded output path
+            string outputPath = @"C:\Temp\output.bmp";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create BMP options with bound file source
-            Source source = new FileCreateSource(outputPath, false);
-            BmpOptions bmpOptions = new BmpOptions { Source = source };
+            // Create a file source bound to the output path
+            Source fileSource = new FileCreateSource(outputPath, false);
 
-            // Define canvas size
-            int width = 500;
-            int height = 300;
+            // Set BMP options with the source
+            BmpOptions bmpOptions = new BmpOptions() { Source = fileSource };
 
-            // Create a BMP canvas (bound to the output file)
-            using (Image canvas = Image.Create(bmpOptions, width, height))
+            // Canvas size
+            int width = 800;
+            int height = 600;
+
+            // Create BMP canvas
+            using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, width, height))
             {
-                // Initialize graphics for drawing
+                // Initialize graphics
                 Graphics graphics = new Graphics(canvas);
+                graphics.Clear(Color.White);
 
-                // Create a pen with rounded line caps for smooth curves
-                Pen pen = new Pen(Color.Blue, 5);
+                // Create a pen with rounded line caps
+                Pen pen = new Pen(Color.Blue, 4);
                 pen.StartCap = LineCap.Round;
                 pen.EndCap = LineCap.Round;
 
-                // Define points for the curve
-                Point[] points = new Point[]
-                {
-                    new Point(50, 250),
-                    new Point(150, 50),
-                    new Point(250, 250),
-                    new Point(350, 50),
-                    new Point(450, 250)
-                };
+                // Draw smooth Bezier curve
+                graphics.DrawBezier(pen,
+                    new Point(100, 500),
+                    new Point(200, 100),
+                    new Point(600, 100),
+                    new Point(700, 500));
 
-                // Draw the smooth curve
-                graphics.DrawCurve(pen, points);
+                // Draw smooth cardinal curve
+                Point[] curvePoints = new Point[]
+                {
+                    new Point(100, 300),
+                    new Point(250, 150),
+                    new Point(550, 150),
+                    new Point(700, 300)
+                };
+                graphics.DrawCurve(pen, curvePoints);
 
                 // Save the bound image
                 canvas.Save();
@@ -61,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a BMP signature stamp with Aspose.Imaging in C#, a Pen with rounded line caps is used to draw smooth, handwritten‑style curves.
- * 2. When creating a BMP waveform image for an audio analysis dashboard, developers use a Pen with rounded caps to render the curve’s peaks and troughs with a polished look.
- * 3. When producing a BMP map overlay that shows curved road routes, a rounded‑cap Pen ensures the lines appear smooth and visually consistent.
- * 4. When exporting a BMP flowchart diagram, using a Pen with rounded line caps for connector curves improves readability and professional appearance.
- * 5. When building a BMP thumbnail of a CAD sketch, a Pen with rounded caps draws the curved edges so the preview looks clean and high‑quality.
+ * 1. When a developer needs to generate a BMP file with smooth, anti‑aliased curves for a printable diagram, they can use Aspose.Imaging for .NET to draw Bezier and cardinal curves with a Pen that has rounded line caps.
+ * 2. When creating custom UI assets such as toolbar icons or button backgrounds in a Windows desktop application, the code shows how to programmatically render high‑quality curved lines on a BMP canvas using C# graphics primitives.
+ * 3. When automating the production of engineering schematics that require precise curve rendering, the example demonstrates how to save the result directly to a file system path with BmpOptions and a FileCreateSource.
+ * 4. When building a server‑side service that converts vector path data into raster BMP images for legacy systems, the Pen with rounded caps ensures the generated curves appear smooth and professional.
+ * 5. When testing image‑processing pipelines that need a known BMP image containing both Bezier and cardinal curves for validation, this snippet provides a reproducible way to create the test image using Aspose.Imaging for .NET.
  */
