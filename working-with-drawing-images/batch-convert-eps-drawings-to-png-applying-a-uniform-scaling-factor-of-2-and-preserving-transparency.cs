@@ -2,20 +2,23 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputFolder = "InputEps";
-        string outputFolder = "OutputPng";
-
         try
         {
-            // Get all EPS files in the input folder
-            string[] epsFiles = Directory.GetFiles(inputFolder, "*.eps");
+            // Hardcoded input and output directories
+            string inputDir = "input_eps";
+            string outputDir = "output_png";
 
+            // Ensure the output base directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Get all EPS files in the input directory
+            string[] epsFiles = Directory.GetFiles(inputDir, "*.eps");
             foreach (string inputPath in epsFiles)
             {
                 // Verify the input file exists
@@ -25,24 +28,21 @@ class Program
                     return;
                 }
 
-                // Build the output PNG path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".png");
+                // Determine the corresponding PNG output path
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
-                // Ensure the output directory exists
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EPS image
-                using (Image image = Image.Load(inputPath))
+                // Load the EPS image, resize by a factor of 2, and save as PNG preserving transparency
+                using (var image = (EpsImage)Image.Load(inputPath))
                 {
-                    // Calculate new dimensions (scale factor of 2)
                     int newWidth = image.Width * 2;
                     int newHeight = image.Height * 2;
 
-                    // Resize the image
+                    // Resize using nearest neighbour resampling (any suitable ResizeType can be used)
                     image.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
 
-                    // Save as PNG preserving transparency
                     var pngOptions = new PngOptions();
                     image.Save(outputPath, pngOptions);
                 }
@@ -57,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to convert a folder of vector EPS logos into high‑resolution PNG files for web use while doubling their size and keeping transparent backgrounds, this C# batch conversion code with Aspose.Imaging can automate the task.
- * 2. When a publishing workflow requires mass conversion of EPS illustrations to PNG thumbnails at twice the original dimensions for preview generation, developers can use this script to resize and preserve transparency in one pass.
- * 3. When an e‑learning platform must import a library of EPS diagrams and store them as scalable PNG assets for responsive HTML5 content, the code provides a fast C# solution to batch process and upscale the images.
- * 4. When a GIS application needs to transform EPS map overlays into PNG layers with a uniform scaling factor for overlay alignment, this Aspose.Imaging routine handles the conversion and maintains alpha channels.
- * 5. When a CI/CD pipeline has to automatically convert newly added EPS assets into double‑sized PNGs for mobile app assets while ensuring transparent backgrounds, the provided C# example performs the batch conversion reliably.
+ * 1. When a graphic designer needs to generate high‑resolution PNG previews of a large collection of EPS vector logos for a web catalog, scaling each image by 2 while keeping the transparent background.
+ * 2. When an e‑learning platform must automatically convert uploaded EPS diagrams into PNG assets for responsive HTML5 lessons, ensuring the images are twice as large for retina displays and retain their alpha channel.
+ * 3. When a print‑to‑digital workflow requires batch processing of EPS artwork files into PNG thumbnails for a content management system, applying a uniform scaling factor of 2 to improve clarity without losing transparency.
+ * 4. When a GIS application needs to transform EPS map overlays into PNG layers for overlaying on raster tiles, using C# and Aspose.Imaging to resize each layer by 200 % while preserving its transparent regions.
+ * 5. When a marketing automation script must prepare EPS banner assets for email campaigns by converting them to PNG, doubling their dimensions for modern email clients and keeping the background transparent.
  */
