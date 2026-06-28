@@ -10,8 +10,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.pdf";
-            string outputPath = "output.svg";
+            string inputPath = @"C:\temp\input.pdf";
+            string outputPath = @"C:\temp\output.svg";
 
             if (!File.Exists(inputPath))
             {
@@ -19,24 +19,26 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Image pdfImage = Image.Load(inputPath))
             {
-                SvgOptions svgOptions = new SvgOptions();
+                SvgOptions exportOptions = new SvgOptions();
 
-                if (image is IMultipageImage multipage && multipage.PageCount > 2)
-                {
-                    svgOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, 2));
-                }
+                exportOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, 2));
 
-                VectorRasterizationOptions rasterOptions = new VectorRasterizationOptions
+                var rasterOptions = new VectorRasterizationOptions
                 {
-                    BackgroundColor = Color.White
+                    PageWidth = pdfImage.Width,
+                    PageHeight = pdfImage.Height,
+                    BackgroundColor = Color.White,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None
                 };
-                svgOptions.VectorRasterizationOptions = rasterOptions;
 
-                image.Save(outputPath, svgOptions);
+                exportOptions.VectorRasterizationOptions = rasterOptions;
+
+                pdfImage.Save(outputPath, exportOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert the first three pages of a multi‑page PDF into a single scalable SVG for responsive web display, they can use this Aspose.Imaging C# code.
- * 2. When an application must extract vector layers from a PDF and preserve them as editable SVG paths for a graphic‑design workflow, the snippet demonstrates how to rasterize with a white background and save the result.
- * 3. When generating print‑ready assets from a PDF brochure, a developer can select specific pages and output them as high‑quality SVG files using the MultiPageOptions and VectorRasterizationOptions shown.
- * 4. When building a document‑to‑vector conversion service that needs to programmatically combine selected PDF pages into one SVG for downstream processing, this code provides the necessary file‑format handling in .NET.
- * 5. When creating an automated pipeline that extracts vector graphics from legal or engineering PDFs and stores them as SVG for archival or further analysis, the example illustrates the required steps with Aspose.Imaging for .NET.
+ * 1. When a developer needs to convert specific pages of a multi‑page PDF into a single scalable SVG for web display, they can use this code to extract the vector layers and combine them.
+ * 2. When generating printable vector graphics from a PDF invoice that spans multiple pages, the snippet lets you rasterize selected pages into one SVG file while preserving text rendering hints.
+ * 3. When building a document‑to‑diagram conversion tool that requires merging vector content from several PDF pages into an interactive SVG diagram, this example shows how to load, select, and export the layers.
+ * 4. When creating an automated workflow that extracts vector artwork from architectural PDF drawings and consolidates chosen pages into a single SVG for CAD integration, the code provides the necessary Aspose.Imaging steps.
+ * 5. When developing a batch process that converts a range of PDF pages into a lightweight SVG for mobile apps, this sample demonstrates how to set MultiPageOptions and VectorRasterizationOptions in C#.
  */
