@@ -1,51 +1,56 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\grid.bmp";
-
         try
         {
+            // Define input and output file paths
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
+
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            int width = 200;
-            int height = 200;
-            int spacing = 20; // distance between grid lines
-
-            // Create a new BMP image
-            using (BmpImage bmp = new BmpImage(width, height))
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
             {
-                // Initialize graphics object
-                Graphics graphics = new Graphics(bmp);
+                // Create a graphics object for drawing
+                Graphics graphics = new Graphics(image);
 
                 // Clear the image to light gray
                 graphics.Clear(Color.LightGray);
 
-                // Prepare a red pen for drawing grid lines
+                // Set up grid parameters
+                int spacing = 50; // distance between lines
                 Pen redPen = new Pen(Color.Red, 1);
+                int width = image.Width;
+                int height = image.Height;
 
-                // Draw vertical lines
+                // Draw vertical grid lines
                 for (int x = 0; x <= width; x += spacing)
                 {
                     graphics.DrawLine(redPen, new Point(x, 0), new Point(x, height));
                 }
 
-                // Draw horizontal lines
+                // Draw horizontal grid lines
                 for (int y = 0; y <= height; y += spacing)
                 {
                     graphics.DrawLine(redPen, new Point(0, y), new Point(width, y));
                 }
 
-                // Save the resulting image
-                bmp.Save(outputPath);
+                // Save the modified image to the output path
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -57,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a light‑gray BMP thumbnail with a red grid overlay for a CAD preview in a .NET desktop application.
- * 2. When creating a printable 200 × 200 pixel graph paper template in BMP format for a Windows Forms utility that lets users annotate images.
- * 3. When building a diagnostic tool that visualizes sensor data as a red‑lined grid on a light‑gray BMP canvas for quick alignment checks.
- * 4. When producing a simple BMP sprite sheet background with evenly spaced red lines to assist game developers in positioning assets during level design.
- * 5. When automating the generation of a BMP placeholder image with a red grid to indicate layout sections in a web‑based image editor built with C#.
+ * 1. When a developer needs to generate a light‑gray BMP canvas and overlay a red grid for a printable engineering diagram, this code provides a quick solution.
+ * 2. When creating test images for computer‑vision models that require a uniform background with known grid patterns, the snippet clears a BMP to light gray and draws precise red lines.
+ * 3. When preparing printable graph paper or worksheet templates in BMP format, a developer can use this example to set the page color and add evenly spaced red grid lines.
+ * 4. When building a UI component that visualizes coordinate systems by rendering a BMP with a light‑gray fill and a red grid, the code demonstrates how to use Aspose.Imaging’s Graphics, Pen, and drawing methods in C#.
+ * 5. When automating the creation of template images for game level design where a light‑gray background and a red grid help designers align assets, this example shows how to clear and draw on a BMP file programmatically.
  */
