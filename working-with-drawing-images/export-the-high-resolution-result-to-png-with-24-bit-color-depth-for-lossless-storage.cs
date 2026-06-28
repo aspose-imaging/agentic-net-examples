@@ -8,33 +8,30 @@ class Program
 {
     static void Main()
     {
-        // Wrap the whole process to catch unexpected errors
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output.png";
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output.png";
-
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG export options for 24‑bit truecolor (8 bits per channel)
-                PngOptions pngOptions = new PngOptions
+                // Configure PNG options for 24‑bit truecolor (8 bits per channel)
+                var pngOptions = new PngOptions
                 {
-                    BitDepth = 8, // 8 bits per channel
-                    ColorType = PngColorType.Truecolor, // 24‑bit RGB, no alpha
-                    CompressionLevel = 9, // maximum compression (still lossless)
-                    Progressive = true // optional: enable progressive loading
+                    ColorType = PngColorType.Truecolor, // 24‑bit RGB
+                    BitDepth = 8                         // 8 bits per channel
                 };
 
                 // Save the image as PNG with the specified options
@@ -43,7 +40,7 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime exception without crashing
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -51,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive high‑resolution JPEG photographs as lossless 24‑bit PNG files using Aspose.Imaging for .NET to preserve exact color data.
- * 2. When an e‑commerce site generates product‑image thumbnails in PNG format with maximum compression to maintain true‑color fidelity while reducing bandwidth.
- * 3. When a medical imaging system exports scanned radiology images as true‑color PNGs via Aspose.Imaging to ensure pixel‑perfect, lossless storage for diagnostic analysis.
- * 4. When a web‑based graphics editor saves a user's edited canvas as a 24‑bit PNG with Aspose.Imaging so the image can be uploaded to a CDN without quality loss.
- * 5. When an automated reporting service converts high‑resolution charts into PNG files with 8‑bits per channel using Aspose.Imaging to embed lossless images in PDF reports.
+ * 1. When a C# application must convert high‑resolution JPEG photographs to lossless 24‑bit PNG files for archival or printing, developers can use Aspose.Imaging to load the JPEG and save it with PngOptions set to Truecolor and an 8‑bit per channel depth.
+ * 2. When a .NET service processes user‑uploaded images and needs to standardize them to a PNG format with truecolor (24‑bit) to ensure consistent color fidelity across browsers, the code demonstrates how to verify file existence, create output directories, and perform the conversion with Aspose.Imaging.
+ * 3. When building a batch‑processing tool that prepares graphics for e‑commerce catalogs, developers can employ this snippet to read each source image, configure PngOptions for 24‑bit color depth, and export a lossless PNG that meets catalog quality standards.
+ * 4. When integrating image manipulation into a C# desktop application that requires saving edited pictures without compression artifacts, the example shows how to use Aspose.Imaging’s Image.Load and Image.Save methods to produce a 24‑bit PNG for lossless storage.
+ * 5. When automating a workflow that extracts frames from high‑resolution video and stores them as PNG files with truecolor for later analysis, developers can apply this code to ensure each frame is saved with 8‑bit per channel depth using Aspose.Imaging.
  */
