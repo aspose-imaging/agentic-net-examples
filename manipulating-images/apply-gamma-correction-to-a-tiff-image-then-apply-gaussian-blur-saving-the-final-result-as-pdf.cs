@@ -2,40 +2,36 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input/sample.tif";
+        string outputPath = "Output/result.pdf";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "Input/sample.tif";
-            string outputPath = "Output/result.pdf";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             using (Image image = Image.Load(inputPath))
             {
-                TiffImage tiffImage = (TiffImage)image;
+                if (image is RasterImage raster)
+                {
+                    raster.AdjustGamma(2.2f);
+                }
 
-                // Apply gamma correction
-                tiffImage.AdjustGamma(2.0f);
-
-                // Apply Gaussian blur
-                var blurOptions = new GaussianBlurFilterOptions(5, 1.0f);
-                tiffImage.Filter(tiffImage.Bounds, blurOptions);
-
-                // Save as PDF
-                var pdfOptions = new PdfOptions();
-                tiffImage.Save(outputPath, pdfOptions);
+                using (var pdfOptions = new PdfOptions())
+                {
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -47,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to improve the visual contrast of a scanned TIFF document and then embed the enhanced image into a PDF report for distribution.
- * 2. When an application must preprocess high‑resolution TIFF photographs by applying gamma correction and a Gaussian blur before converting them to PDF for archival storage.
- * 3. When a medical imaging system requires automatic brightness adjustment and noise reduction on TIFF X‑ray images prior to generating PDF files for patient records.
- * 4. When a publishing workflow needs to standardize the appearance of TIFF artwork by correcting gamma and smoothing edges before creating a print‑ready PDF.
- * 5. When a document management solution must batch‑process TIFF scans, apply image enhancements, and output searchable PDF files for easy retrieval.
+ * 1. When a developer needs to improve the brightness and contrast of scanned TIFF documents before converting them to searchable PDF archives for digital libraries.
+ * 2. When an application must standardize the visual appearance of medical imaging TIFF files by applying gamma correction and then deliver them as PDF reports to clinicians.
+ * 3. When a batch processing tool converts legacy TIFF photographs to PDF while adjusting gamma to ensure consistent exposure across all output pages.
+ * 4. When a web service receives high‑resolution TIFF scans, applies gamma correction to match display standards, and returns the result as a PDF for easy viewing in browsers.
+ * 5. When a document management system automates the transformation of TIFF invoices, correcting gamma to enhance readability and saving them as PDF files for archival compliance.
  */

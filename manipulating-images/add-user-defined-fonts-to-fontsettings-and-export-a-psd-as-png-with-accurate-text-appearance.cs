@@ -1,62 +1,38 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded paths
-            string inputPath = "input.psd";
-            string outputPath = "output/output.png";
-            string fontsFolder = "Fonts";
+            // Hard‑coded input PSD, output PNG and custom fonts folder
+            string inputPath = @"C:\Images\sample.psd";
+            string outputPath = @"C:\Images\output\sample.png";
+            string fontsFolder = @"C:\CustomFonts";
 
-            // Input file validation
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load PSD image with custom fonts
-            var loadOptions = new LoadOptions();
-            loadOptions.AddCustomFontSource(args =>
-            {
-                string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
-                var result = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-                if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
-                {
-                    foreach (var fontFile in Directory.GetFiles(fontsPath))
-                    {
-                        byte[] fontBytes = File.ReadAllBytes(fontFile);
-                        string fontName = Path.GetFileNameWithoutExtension(fontFile);
-                        result.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
-                    }
-                }
-                return result.ToArray();
-            }, fontsFolder);
+            // Register custom fonts folder and refresh the font cache for PSD processing
+            FontSettings.SetFontsFolder(fontsFolder);
+            FontSettings.UpdateFonts();
 
-            using (Image image = Image.Load(inputPath, loadOptions))
+            // Load the PSD image
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare PNG options with vector rasterization to preserve text appearance
+                // Save the image as PNG preserving text appearance
                 var pngOptions = new PngOptions();
-                var vectorOpts = new VectorRasterizationOptions
-                {
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
-                pngOptions.VectorRasterizationOptions = vectorOpts;
-
-                // Save as PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -69,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web‑based design preview tool needs to convert client‑uploaded Photoshop PSD files to PNG thumbnails while preserving the exact look of custom‑font text layers, developers can use this code.
- * 2. When an automated marketing pipeline must generate high‑resolution product images from PSD templates that use brand‑specific fonts stored in a separate folder, the code ensures the fonts are loaded and the PNG output matches the original design.
- * 3. When a desktop application that batch‑processes PSD assets for e‑learning content has to replace missing system fonts with user‑provided font files and export the pages as PNG for LMS compatibility, this approach handles the font substitution and rasterization.
- * 4. When a CI/CD build step creates visual regression screenshots by rendering PSD mockups with embedded corporate fonts into PNG files for comparison in test reports, the code guarantees consistent text rendering across build agents.
- * 5. When a cloud service that offers on‑the‑fly image conversion needs to support PSD files containing non‑standard fonts and deliver PNG responses to API callers, developers can employ this snippet to load custom fonts and preserve text appearance.
+ * 1. When a web‑based design review tool needs to convert client‑provided Photoshop PSD files that use proprietary fonts into PNG thumbnails while preserving the exact text layout.
+ * 2. When an automated build pipeline generates product screenshots from PSD mockups that rely on corporate brand fonts stored in a custom directory.
+ * 3. When a digital asset management system imports PSD artwork and must render it as PNG for preview, ensuring that any embedded text appears correctly even if the system fonts are missing.
+ * 4. When a Windows desktop application batch‑processes a folder of PSD files containing custom typography and outputs PNG files for use in marketing collateral.
+ * 5. When a cloud service receives PSD uploads with licensed fonts and needs to rasterize them to PNG on the server without installing the fonts system‑wide.
  */

@@ -1,66 +1,58 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input CDR files
-            string[] inputPaths = new string[]
+            string inputPath1 = @"input1.cdr";
+            string inputPath2 = @"input2.cdr";
+            string inputPath3 = @"input3.cdr";
+
+            if (!File.Exists(inputPath1))
             {
-                @"C:\temp\file1.cdr",
-                @"C:\temp\file2.cdr",
-                @"C:\temp\file3.cdr"
-            };
-
-            // Hardcoded output PDF file
-            string outputPath = @"C:\temp\output.pdf";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Loop through each CDR file and add its first page to the PDF
-            foreach (string inputPath in inputPaths)
+                Console.Error.WriteLine($"File not found: {inputPath1}");
+                return;
+            }
+            if (!File.Exists(inputPath2))
             {
-                // Verify input file exists
-                if (!File.Exists(inputPath))
+                Console.Error.WriteLine($"File not found: {inputPath2}");
+                return;
+            }
+            if (!File.Exists(inputPath3))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath3}");
+                return;
+            }
+
+            using (Image img1 = Image.Load(inputPath1))
+            using (Image img2 = Image.Load(inputPath2))
+            using (Image img3 = Image.Load(inputPath3))
+            {
+                Image[] images = new Image[] { img1, img2, img3 };
+
+                using (Image multiPage = Image.Create(images, true))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Load the CDR image
-                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
-                {
-                    // Ensure at least one page exists
-                    if (cdrImage.Pages == null || cdrImage.Pages.Length == 0)
-                    {
-                        Console.Error.WriteLine($"No pages found in: {inputPath}");
-                        continue;
-                    }
-
-                    // Use the first page of the CDR file
-                    CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
-
-                    // Configure PDF export options
                     PdfOptions pdfOptions = new PdfOptions
                     {
-                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        VectorRasterizationOptions = new VectorRasterizationOptions
                         {
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None,
-                            PageWidth = page.Width,
-                            PageHeight = page.Height
+                            BackgroundColor = Color.White,
+                            PageWidth = multiPage.Width,
+                            PageHeight = multiPage.Height
                         }
                     };
 
-                    // Save (or append) the page to the output PDF
-                    page.Save(outputPath, pdfOptions);
+                    string outputPath = @"output\merged.pdf";
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    multiPage.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -73,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to combine several CorelDRAW (CDR) drawings into a single PDF brochure for client review.
- * 2. When an automated batch process must generate a multipage PDF report from a collection of CDR files for archival purposes.
- * 3. When a web service converts uploaded CDR files into one consolidated PDF document so users can preview the designs in a browser.
- * 4. When a desktop application creates a printable PDF portfolio by adding the first page of each CDR file to a single output file.
- * 5. When a document management system merges separate CDR assets into a searchable PDF for indexing and easy retrieval.
+ * 1. When a developer uses C# and Aspose.Imaging to merge multiple CorelDRAW (CDR) files into a single PDF portfolio for client review.
+ * 2. When an automated C# reporting tool needs to convert a sequence of CDR diagrams into a multi‑page PDF for archival storage.
+ * 3. When a .NET web service allows users to upload several CDR files and returns a merged PDF ready for printing.
+ * 4. When a batch‑processing script in C# consolidates CDR pages from different design projects into one PDF to simplify version control.
+ * 5. When a document‑management workflow requires rasterizing vector CDR artwork into a PDF with a white background and uniform page dimensions using Aspose.Imaging.
  */

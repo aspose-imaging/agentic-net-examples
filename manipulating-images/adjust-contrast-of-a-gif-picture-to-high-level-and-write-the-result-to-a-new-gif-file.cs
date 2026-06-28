@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"c:\temp\input.gif";
-            string outputPath = @"c:\temp\output_contrast.gif";
+            string inputPath = "c:\\temp\\input.gif";
+            string outputPath = "c:\\temp\\output_contrast.gif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,19 +21,18 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to GifImage to access AdjustContrast
                 GifImage gifImage = (GifImage)image;
 
-                // Apply high contrast (maximum allowed value)
+                // Adjust contrast to a high level (maximum is 100)
                 gifImage.AdjustContrast(100f);
 
-                // Save the modified image as GIF
+                // Save the modified image as a GIF
                 gifImage.Save(outputPath, new GifOptions());
             }
         }
@@ -43,3 +42,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to enhance the visual impact of animated GIF banners for a marketing email by increasing contrast before sending.
+ * 2. When a C# application must preprocess user‑uploaded GIF avatars to make them stand out on a social platform by applying a high‑contrast filter.
+ * 3. When an automated build pipeline generates product demo GIFs and requires a step to boost contrast for better visibility on high‑DPI screens.
+ * 4. When a legacy system converts scanned GIF documents into a more readable format and the code is used to improve legibility by adjusting contrast.
+ * 5. When a game developer prepares animated GIF sprites and wants to ensure they appear crisp against varied backgrounds by programmatically increasing contrast with Aspose.Imaging.
+ */

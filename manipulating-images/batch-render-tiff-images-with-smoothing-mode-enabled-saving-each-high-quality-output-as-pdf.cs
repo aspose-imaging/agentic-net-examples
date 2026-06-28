@@ -1,61 +1,55 @@
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            // Hard‑coded list of TIFF files to process
+            string[] inputFiles = {
+                @"C:\Images\sample1.tif",
+                @"C:\Images\sample2.tif",
+                @"C:\Images\sample3.tif"
+            };
 
-            if (!Directory.Exists(inputDirectory))
+            foreach (string inputPath in inputFiles)
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            foreach (var file in files)
-            {
-                string extension = Path.GetExtension(file).ToLowerInvariant();
-                if (extension != ".tif" && extension != ".tiff")
-                {
-                    continue;
-                }
-
-                string inputPath = file;
+                // Verify that the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(file) + ".pdf");
+                // Determine the output PDF path (same folder, same name, .pdf extension)
+                string outputPath = Path.ChangeExtension(inputPath, ".pdf");
+
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+                // Load the TIFF image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Enable high-quality smoothing
-                    Graphics graphics = new Graphics(image);
-                    graphics.SmoothingMode = SmoothingMode.HighQuality;
+                    // Configure PDF export options with high‑quality smoothing
+                    var pdfOptions = new PdfOptions();
 
-                    using (PdfOptions pdfOptions = new PdfOptions())
+                    // Vector rasterization options enable anti‑aliasing (smoothing)
+                    var vectorOptions = new VectorRasterizationOptions
                     {
-                        image.Save(outputPath, pdfOptions);
-                    }
+                        SmoothingMode = SmoothingMode.AntiAlias,
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+
+                    pdfOptions.VectorRasterizationOptions = vectorOptions;
+
+                    // Save the image as a high‑quality PDF
+                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -68,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system needs to convert batches of high‑resolution DICOM‑derived TIFF scans into searchable PDF reports while preserving smooth visual quality.
- * 2. When an archival workflow must transform scanned TIFF documents of historical manuscripts into PDF files with anti‑aliasing to ensure legible, high‑quality reproductions.
- * 3. When a publishing pipeline processes large sets of TIFF artwork files and generates print‑ready PDFs with high‑quality smoothing to avoid jagged edges.
- * 4. When a construction firm automates the conversion of site‑plan TIFF images into PDF blueprints, applying high‑quality smoothing for clearer line work.
- * 5. When a legal office batch‑converts TIFF‑based evidence photos into PDFs, using high‑quality smoothing to maintain image fidelity for courtroom presentation.
+ * 1. When a developer needs to convert a batch of multi‑page TIFF scans into high‑resolution PDF documents with anti‑aliasing to preserve text clarity for archiving.
+ * 2. When an application must generate printable PDFs from medical imaging TIFF files while ensuring smooth edges and a consistent white background for regulatory compliance.
+ * 3. When a document management system requires automated conversion of scanned invoices stored as TIFFs into searchable PDFs with high‑quality smoothing for better OCR results.
+ * 4. When a desktop utility processes large sets of architectural blueprint TIFF images into PDF portfolios, using Aspose.Imaging’s VectorRasterizationOptions to maintain line sharpness.
+ * 5. When a web service needs to transform user‑uploaded TIFF photos into PDF portfolios with anti‑aliasing to improve visual quality before delivering them to clients.
  */

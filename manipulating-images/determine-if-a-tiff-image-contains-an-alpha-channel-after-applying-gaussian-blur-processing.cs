@@ -2,44 +2,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.tif";
+        string outputPath = "output.tif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.tif";
-            string outputPath = "output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                TiffImage tiffImage = (TiffImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Apply Gaussian blur filter to the whole image
-                tiffImage.Filter(tiffImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 5.0));
 
-                // Save the processed image as PNG
-                var pngOptions = new PngOptions();
-                tiffImage.Save(outputPath, pngOptions);
-
-                // Determine if the image has an alpha channel after processing
-                bool hasAlpha = tiffImage.HasAlpha;
+                bool hasAlpha = ((TiffImage)image).HasAlpha;
                 Console.WriteLine($"HasAlpha after blur: {hasAlpha}");
+
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -51,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When converting scanned TIFF documents with transparent layers to PNG after applying a Gaussian blur for noise reduction, a developer needs to verify if the resulting image still contains an alpha channel.
- * 2. When building a C# web service that processes medical imaging TIFF files, applies a Gaussian blur to smooth artifacts, and then checks for alpha transparency before sending PNG output to clients.
- * 3. When creating an automated batch job that reads high‑resolution TIFF photographs, applies a Gaussian blur filter, saves them as PNG, and logs whether the processed images retain an alpha channel for downstream compositing.
- * 4. When developing a desktop application that lets users edit archival TIFF maps, applies a Gaussian blur to soften edges, and must determine if the map still includes transparency before exporting to PNG.
- * 5. When implementing a document‑management workflow that ingests TIFF files, applies a Gaussian blur to obscure sensitive details, and needs to confirm the presence of an alpha channel to decide if additional masking steps are required.
+ * 1. When a developer needs to verify whether a TIFF file retains its alpha channel after applying a Gaussian blur filter for downstream compositing.
+ * 2. When an imaging pipeline must process high‑resolution scanned documents, blur them for noise reduction, and confirm the presence of transparency before saving as a new TIFF.
+ * 3. When building a C# application that conditionally applies further image operations only if the blurred TIFF still contains an alpha channel.
+ * 4. When integrating Aspose.Imaging into a batch conversion tool that blurs TIFF images and logs whether each output file preserves its alpha channel for quality control.
+ * 5. When troubleshooting a GIS or medical imaging workflow to ensure that applying a Gaussian blur does not unintentionally strip the alpha channel from multi‑page TIFF datasets.
  */

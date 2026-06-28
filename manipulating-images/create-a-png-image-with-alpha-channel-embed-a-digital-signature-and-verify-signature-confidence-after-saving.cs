@@ -1,9 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,42 +9,38 @@ class Program
     {
         try
         {
-            // Define output path
-            string outputPath = "output.png";
+            // Define output path (ensure it contains a directory)
+            string outputPath = "Output/output.png";
 
-            // Ensure output directory exists (unconditional per requirements)
+            // Create output directory unconditionally
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create PNG image with alpha channel
-            PngOptions options = new PngOptions
+            // Create a new PNG image with alpha channel (200x200)
+            using (var png = new PngImage(200, 200, PngColorType.TruecolorWithAlpha))
             {
-                ColorType = PngColorType.TruecolorWithAlpha,
-                Source = new FileCreateSource(outputPath, false)
-            };
+                // Embed a digital signature using a valid password
+                ((RasterImage)png).EmbedDigitalSignature("secure123");
 
-            // Image dimensions must be at least 200x200 for digital signature
-            using (Image image = Image.Create(options, 200, 200))
-            {
-                // Embed digital signature with a valid password
-                RasterImage raster = (RasterImage)image;
-                raster.EmbedDigitalSignature("secure123");
-
-                // Save the image (bound to FileCreateSource)
-                image.Save();
+                // Save the image to the specified path
+                png.Save(outputPath);
             }
 
             // Verify the digital signature after saving
-            if (!File.Exists(outputPath))
+            string inputPath = outputPath;
+
+            // Check that the file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {outputPath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            using (Image loadedImage = Image.Load(outputPath))
+            // Load the saved image and check signature
+            using (var loadedImage = Image.Load(inputPath))
             {
-                RasterImage loadedRaster = (RasterImage)loadedImage;
-                bool isSigned = loadedRaster.IsDigitalSigned("secure123");
-                Console.WriteLine($"Signature verification: {(isSigned ? "Valid" : "Invalid")}");
+                var raster = (RasterImage)loadedImage;
+                bool isSigned = raster.IsDigitalSigned("secure123");
+                Console.WriteLine($"Is digitally signed: {isSigned}");
             }
         }
         catch (Exception ex)
@@ -55,3 +49,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a PNG with transparency for a web UI and protect it from tampering by embedding a digital signature.
+ * 2. When a C# application must create a true‑color PNG with an alpha channel for overlay graphics and later verify its integrity after saving.
+ * 3. When a software solution stores confidential diagrams as PNG files and wants to ensure only authorized users can confirm the image’s authenticity using a password.
+ * 4. When an automated reporting tool produces PNG charts, embeds a signature for compliance auditing, and checks the signature confidence before distribution.
+ * 5. When a digital asset management system programmatically creates PNG thumbnails, signs them to prevent unauthorized modifications, and validates the signature during import.
+ */

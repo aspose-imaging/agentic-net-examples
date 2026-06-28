@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -27,8 +27,8 @@ class Program
                 }
 
                 // Determine output PNG path
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -51,7 +51,7 @@ class Program
                         VectorRasterizationOptions = rasterOptions
                     };
 
-                    // Save rasterized PNG
+                    // Save the rasterized PNG
                     svgImage.Save(outputPath, pngOptions);
                 }
             }
@@ -62,3 +62,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑process a directory of SVG icons, remove their backgrounds, and generate transparent PNG files for use in a responsive web application.
+ * 2. When an e‑commerce system must convert product vector illustrations from SVG to PNG with no background for inclusion in email campaigns and social media posts.
+ * 3. When a design workflow requires automatically rasterizing SVG logos into PNG assets at their original size for printing or branding guidelines.
+ * 4. When a content management platform has to prepare SVG diagrams for mobile devices by stripping backgrounds and saving them as PNG images to reduce rendering complexity.
+ * 5. When a reporting tool needs to transform a collection of SVG charts into PNG images with transparent backgrounds for embedding in PDF reports.
+ */

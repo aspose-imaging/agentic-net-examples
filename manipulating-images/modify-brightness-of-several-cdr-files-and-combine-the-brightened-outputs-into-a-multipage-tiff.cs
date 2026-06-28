@@ -1,83 +1,86 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input CDR file paths
-            string cdrPath1 = @"C:\Images\file1.cdr";
-            string cdrPath2 = @"C:\Images\file2.cdr";
-            string cdrPath3 = @"C:\Images\file3.cdr";
+            // Hard‑coded input CDR files
+            string[] inputPaths = new string[]
+            {
+                @"C:\temp\input1.cdr",
+                @"C:\temp\input2.cdr"
+            };
 
-            // Hardcoded output multipage TIFF path
-            string outputPath = @"C:\Images\combined.tif";
+            // Hard‑coded output multipage TIFF
+            string outputPath = @"C:\temp\combined.tif";
+
+            // Verify each input file exists
+            foreach (var inputPath in inputPaths)
+            {
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+            }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Validate input files
-            if (!File.Exists(cdrPath1)) { Console.Error.WriteLine($"File not found: {cdrPath1}"); return; }
-            if (!File.Exists(cdrPath2)) { Console.Error.WriteLine($"File not found: {cdrPath2}"); return; }
-            if (!File.Exists(cdrPath3)) { Console.Error.WriteLine($"File not found: {cdrPath3}"); return; }
-
-            // Array of input paths for iteration
-            string[] inputPaths = new[] { cdrPath1, cdrPath2, cdrPath3 };
-
             TiffImage finalTiff = null;
-            TiffOptions finalOptions = null;
 
-            foreach (var cdrPath in inputPaths)
+            foreach (var inputPath in inputPaths)
             {
-                // Load CDR vector image
-                using (CdrImage cdr = (CdrImage)Image.Load(cdrPath))
+                // Load the CDR image
+                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
                 {
-                    // Rasterize CDR to a TIFF image in memory
-                    using (MemoryStream ms = new MemoryStream())
+                    // Export the first page of the CDR to a temporary TIFF
+                    string tempTiffPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".tif");
+                    Directory.CreateDirectory(Path.GetDirectoryName(tempTiffPath));
+
+                    var exportOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    cdrImage.Save(tempTiffPath, exportOptions);
+
+                    // Load the temporary TIFF, adjust its brightness, and keep the frame
+                    using (TiffImage tiff = (TiffImage)Image.Load(tempTiffPath))
                     {
-                        TiffOptions rasterOptions = new TiffOptions(TiffExpectedFormat.Default);
-                        rasterOptions.VectorRasterizationOptions = new CdrRasterizationOptions
+                        // Adjust brightness (example value: 50)
+                        tiff.AdjustBrightness(50);
+
+                        // Add the adjusted frame to the final multipage TIFF
+                        if (finalTiff == null)
                         {
-                            PageWidth = cdr.Width,
-                            PageHeight = cdr.Height
-                        };
-                        cdr.Save(ms, rasterOptions);
-                        ms.Position = 0;
-
-                        // Load rasterized TIFF
-                        using (TiffImage rasterTiff = (TiffImage)Image.Load(ms))
+                            // First frame creates the TiffImage instance
+                            finalTiff = new TiffImage(tiff.ActiveFrame);
+                        }
+                        else
                         {
-                            // Adjust brightness (example value: +40)
-                            rasterTiff.AdjustBrightness(40);
-
-                            // Create final multipage TIFF on first iteration
-                            if (finalTiff == null)
-                            {
-                                finalOptions = new TiffOptions(TiffExpectedFormat.Default);
-                                finalOptions.Source = new FileCreateSource(outputPath, false);
-                                finalOptions.Photometric = TiffPhotometrics.Rgb;
-                                finalOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                                finalTiff = (TiffImage)Image.Create(finalOptions, rasterTiff.Width, rasterTiff.Height);
-                            }
-
-                            // Add the processed page to the multipage TIFF
-                            finalTiff.AddPage(rasterTiff);
+                            // Subsequent frames are appended
+                            finalTiff.AddFrame(tiff.ActiveFrame);
                         }
                     }
+
+                    // Clean up the temporary file
+                    try { File.Delete(tempTiffPath); } catch { /* ignore cleanup errors */ }
                 }
             }
 
-            // Save the multipage TIFF (output is already bound to the source)
-            finalTiff?.Save();
-            finalTiff?.Dispose();
+            // Save the combined multipage TIFF
+            if (finalTiff != null)
+            {
+                var saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                finalTiff.Save(outputPath, saveOptions);
+                finalTiff.Dispose();
+            }
         }
         catch (Exception ex)
         {
@@ -85,3 +88,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑process CorelDRAW (CDR) artwork, increase its brightness, and archive the results as a single multipage TIFF for easy distribution or review.
+ * 2. When an automated workflow must convert multiple CDR design files into a printable multipage TIFF while applying a uniform brightness boost to ensure consistent visual appearance across all pages.
+ * 3. When a document management system requires ingesting several CDR diagrams, normalizing their exposure, and storing them as a combined TIFF document for long‑term archival and quick preview.
+ * 4. When a web service generates a PDF‑like preview by brightening each CDR page and stitching them into a multipage TIFF that can be rendered in browsers without needing CorelDRAW installed.
+ * 5. When a quality‑control tool needs to load a set of CDR files, adjust their brightness to meet printing standards, and output a single TIFF file that can be sent to a RIP or print server.
+ */

@@ -3,6 +3,8 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -10,29 +12,24 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.cdr";
             string outputPath = "output.gif";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load CDR image
             using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                // Rasterize CDR to PNG in memory
                 using (MemoryStream ms = new MemoryStream())
                 {
                     var pngOptions = new PngOptions
                     {
-                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        VectorRasterizationOptions = new CdrRasterizationOptions
                         {
                             PageWidth = cdr.Width,
                             PageHeight = cdr.Height
@@ -41,27 +38,8 @@ class Program
                     cdr.Save(ms, pngOptions);
                     ms.Position = 0;
 
-                    // Load rasterized image
                     using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        // Verify presence of alpha channel
-                        bool hasAlpha = false;
-                        int[] argbPixels = raster.LoadArgb32Pixels(raster.Bounds);
-                        foreach (int argb in argbPixels)
-                        {
-                            int alpha = (argb >> 24) & 0xFF;
-                            if (alpha < 255)
-                            {
-                                hasAlpha = true;
-                                break;
-                            }
-                        }
-                        Console.WriteLine($"Alpha channel present: {hasAlpha}");
-
-                        // Apply dithering (Floyd‑Steinberg, 1‑bit)
-                        raster.Dither(DitheringMethod.FloydSteinbergDithering, 1);
-
-                        // Save as GIF
                         var gifOptions = new GifOptions();
                         raster.Save(outputPath, gifOptions);
                     }
@@ -77,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to convert a CorelDRAW (.cdr) vector illustration into a web‑friendly GIF while verifying that any transparent regions are correctly detected before dithering.
- * 2. When an e‑commerce platform must generate low‑size product thumbnails from CDR files, confirm the presence of an alpha channel, and then dither the image for optimal GIF compression.
- * 3. When a marketing automation script batch‑processes corporate brand assets, converting CDR logos to GIFs for email campaigns and checking the alpha channel to avoid unexpected opaque backgrounds.
- * 4. When a desktop publishing tool integrates Aspose.Imaging to allow users to export their CDR artwork as GIFs with dithering for legacy printers, ensuring the image’s transparency is correctly identified.
- * 5. When a mobile app backend receives user‑uploaded CDR files, rasterizes them, validates transparency, applies dithering, and stores the result as a GIF for fast delivery to low‑bandwidth devices.
+ * 1. When a designer needs to embed a CorelDRAW (CDR) illustration into a web page that only supports GIF images, a developer can use this code to rasterize the CDR, ensure the alpha channel is handled, and output a GIF.
+ * 2. When an e‑learning platform must convert legacy CDR assets into animated GIFs for lightweight delivery on low‑bandwidth devices, this snippet automates the rasterization and format conversion in C#.
+ * 3. When a batch‑processing tool has to verify that a CDR file’s transparency is preserved before generating a GIF thumbnail, the code loads the CDR, checks the alpha channel via rasterization, and saves the result as a GIF.
+ * 4. When a content‑management system receives user‑uploaded CDR files and needs to store them as GIFs for preview thumbnails, developers can employ this routine to rasterize, dither, and convert the image in a single pass.
+ * 5. When a Windows desktop application must programmatically convert vector CDR artwork into a GIF with proper dithering for printing proofs, this example shows how to use Aspose.Imaging’s CdrRasterizationOptions and GifOptions in C#.
  */

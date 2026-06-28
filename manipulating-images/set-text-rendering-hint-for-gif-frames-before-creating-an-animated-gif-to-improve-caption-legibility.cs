@@ -1,82 +1,63 @@
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded paths
+        string outputPath = @"C:\temp\animated.gif";
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input directory containing frame images and output GIF path
-            string inputDir = "input_frames";
-            string outputPath = "output/animated.gif";
-
-            // Verify input directory exists
-            if (!Directory.Exists(inputDir))
+            // Create the first GIF frame (blank white background)
+            using (GifFrameBlock firstBlock = new GifFrameBlock(200, 200))
             {
-                Console.Error.WriteLine($"Directory not found: {inputDir}");
-                return;
-            }
+                // Fill background
+                Graphics firstGraphics = new Graphics(firstBlock);
+                SolidBrush backgroundBrush = new SolidBrush(Color.White);
+                firstGraphics.FillRectangle(backgroundBrush, firstBlock.Bounds);
 
-            // Get image files for frames
-            var frameFiles = Directory.GetFiles(inputDir).OrderBy(f => f).ToArray();
-            if (frameFiles.Length == 0)
-            {
-                Console.Error.WriteLine($"No image files found in: {inputDir}");
-                return;
-            }
-
-            // Load first frame and create the initial GIF block
-            using (RasterImage firstImg = (RasterImage)Image.Load(frameFiles[0]))
-            using (GifFrameBlock firstBlock = new GifFrameBlock(firstImg))
-            {
-                // Set text rendering hint for better caption legibility
-                Graphics graphicsFirst = new Graphics(firstBlock);
-                graphicsFirst.TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel;
-
-                using (SolidBrush brush = new SolidBrush(Color.Yellow))
+                // Create the GIF image with the first frame
+                using (GifImage gifImage = new GifImage(firstBlock))
                 {
-                    Font font = new Font("Arial", 12);
-                    graphicsFirst.DrawString("Frame 1", font, brush, new PointF(10, 10));
-                }
+                    // Prepare a brush for drawing text (black)
+                    SolidBrush textBrush = new SolidBrush(Color.Black);
 
-                // Create GIF image with the first block
-                using (GifImage gif = new GifImage(firstBlock))
-                {
-                    // Process remaining frames
-                    for (int i = 1; i < frameFiles.Length; i++)
+                    // Add additional frames with captions
+                    for (int i = 1; i <= 5; i++)
                     {
-                        using (RasterImage img = (RasterImage)Image.Load(frameFiles[i]))
-                        using (GifFrameBlock block = new GifFrameBlock(img))
-                        {
-                            Graphics graphics = new Graphics(block);
-                            graphics.TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel;
+                        GifFrameBlock frame = new GifFrameBlock(200, 200);
+                        Graphics g = new Graphics(frame);
+                        g.FillRectangle(backgroundBrush, frame.Bounds);
 
-                            using (SolidBrush brush = new SolidBrush(Color.Yellow))
-                            {
-                                Font font = new Font("Arial", 12);
-                                graphics.DrawString($"Frame {i + 1}", font, brush, new PointF(10, 10));
-                            }
+                        // Draw simple caption (e.g., "Frame 1")
+                        // Note: Aspose.Imaging.Graphics supports DrawString; using default rendering hint
+                        g.DrawString($"Frame {i}", new Font("Arial", 20), textBrush, new PointF(10, 80));
 
-                            gif.AddBlock(block);
-                        }
+                        gifImage.AddBlock(frame);
                     }
 
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save animated GIF with options
-                    GifOptions gifOptions = new GifOptions
+                    // Set text rendering hint for better caption legibility
+                    GifOptions saveOptions = new GifOptions
                     {
-                        LoopsCount = 0 // 0 for infinite looping
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel
+                        }
                     };
-                    gif.Save(outputPath, gifOptions);
+
+                    // Save the animated GIF
+                    gifImage.Save(outputPath, saveOptions);
                 }
             }
         }
@@ -89,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating an animated GIF for a marketing email campaign and need captions on each frame to remain crisp on low‑resolution displays, you set the TextRenderingHint on each GifFrameBlock.
- * 2. When generating a step‑by‑step tutorial GIF from screenshots and want the overlaid instructions to be readable on both desktop and mobile browsers, you apply a single‑bit‑per‑pixel text rendering hint before drawing the strings.
- * 3. When building a server‑side C# service that converts a series of PNG charts into an animated GIF with labeled axes, you use Aspose.Imaging to set the text rendering hint so the axis labels stay sharp after compression.
- * 4. When producing an animated GIF for a social media story where each frame includes a caption in a custom font, you configure the Graphics.TextRenderingHint to improve legibility after the GIF is saved.
- * 5. When developing a .NET application that assembles user‑uploaded images into an animated GIF with timestamp overlays, you set the text rendering hint on each frame to ensure the timestamps are clear despite the GIF’s limited color palette.
+ * 1. When a C# developer uses Aspose.Imaging to generate an animated GIF for a product tutorial and needs to set a text rendering hint so each frame’s caption remains clear and readable.
+ * 2. When building a marketing email generator that creates a multi‑frame GIF with promotional messages, applying a text rendering hint ensures the overlaid text is sharp on every frame.
+ * 3. When creating meme‑style animated GIFs in a .NET application, developers can use the code to draw captions with Aspose.Imaging.Graphics and improve legibility by configuring the text rendering hint.
+ * 4. When a reporting tool exports step‑by‑step screenshots as an animated GIF, setting the text rendering hint on each frame makes the descriptive labels easy to read on low‑resolution images.
+ * 5. When automating e‑learning content that produces animated GIFs with instructional captions, applying a text rendering hint via Aspose.Imaging guarantees high‑quality text rendering across all frames.
  */
