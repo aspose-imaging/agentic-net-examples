@@ -1,62 +1,54 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.ImageLoadOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Wrap the whole logic to catch unexpected errors
+        string inputPath = "input.cmx";
+        string outputPath = "output.tif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Temp\sample.cmx";
-            string outputPath = @"C:\Temp\sample.tif";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            using (FileStream fileStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CMX image from a memory stream (no temporary files)
-            byte[] cmxData = File.ReadAllBytes(inputPath);
-            using (var memoryStream = new MemoryStream(cmxData))
-            {
-                // StreamContainer wraps the memory stream for Aspose.Imaging
-                var streamContainer = new StreamContainer(memoryStream);
-                var loadOptions = new CmxLoadOptions();
-
-                // Initialize CmxImage with the stream container and load options
-                using (var cmxImage = new CmxImage(streamContainer, loadOptions))
+                using (MemoryStream memoryStream = new MemoryStream())
                 {
-                    // Prepare TIFF save options
-                    var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                    {
-                        BitsPerSample = new ushort[] { 8, 8, 8 },
-                        Compression = TiffCompressions.Lzw,
-                        Photometric = TiffPhotometrics.Rgb,
-                        PlanarConfiguration = TiffPlanarConfigs.Contiguous
-                    };
+                    fileStream.CopyTo(memoryStream);
+                    memoryStream.Position = 0;
 
-                    // Save directly to the output file path using the TIFF options
-                    cmxImage.Save(outputPath, tiffOptions);
+                    using (Image cmxImage = Image.Load(memoryStream))
+                    {
+                        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                        cmxImage.Save(outputPath, tiffOptions);
+                    }
                 }
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime error without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web service receives a CorelDRAW CMX file as a byte stream and must generate a high‑resolution TIFF for printing without creating temporary files on disk.
+ * 2. When an automated document workflow reads CMX data from a database BLOB, converts it to TIFF in memory, and stores the TIFF back to the repository for archival compliance.
+ * 3. When a desktop application loads a CMX image from a network stream, transforms it to a multi‑page TIFF for inclusion in a PDF report, and saves the result directly to the user‑specified folder.
+ * 4. When a cloud‑based image processing pipeline needs to convert uploaded CMX files to TIFF for downstream OCR or barcode detection while keeping the conversion entirely in RAM to improve performance.
+ * 5. When a batch job processes a large collection of CMX files stored in a zip archive, extracts each file to a memory stream, converts it to TIFF, and writes the TIFFs to an output directory without intermediate temporary files.
+ */

@@ -3,7 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -11,11 +11,11 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = @"C:\Images\sample.cmx";
             string outputPath = @"C:\Images\output.tif";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,17 +26,20 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CMX image
-            using (Image cmxImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure TIFF save options
-                TiffOptions tiffOptions = new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default);
+                // Create TIFF options with default format
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
-                // Example of embedding a custom tag: set a known TIFF field (ImageDescription)
-                // In a real scenario you could use AddTag/AddTags to add proprietary tags.
-                tiffOptions.ImageDescription = "Converted from CMX with custom metadata";
+                // Example of embedding a custom tag: set the Artist tag
+                tiffOptions.Artist = "Custom Artist";
 
-                // Save the image as TIFF using the configured options
-                cmxImage.Save(outputPath, tiffOptions);
+                // If you need to add a truly custom tag, you can use AddTag method.
+                // Example (placeholder, replace with actual tag implementation):
+                // tiffOptions.AddTag(new CustomTiffTag(...));
+
+                // Save the image as TIFF with the custom options
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -45,3 +48,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert legacy CorelDRAW CMX files to a widely supported TIFF format for archival while embedding the Artist metadata using Aspose.Imaging in C#.
+ * 2. When a printing workflow requires batch conversion of CMX artwork to high‑resolution TIFF images with custom tags for downstream color management.
+ * 3. When a document management system must ingest CMX files and store them as TIFFs with additional metadata such as the creator’s name for searchable indexing.
+ * 4. When a GIS application needs to transform CMX map layers into TIFF tiles and embed custom tags to retain layer attribution information.
+ * 5. When a medical imaging pipeline converts CMX diagrams to TIFF format and adds custom tags to comply with regulatory metadata standards.
+ */
