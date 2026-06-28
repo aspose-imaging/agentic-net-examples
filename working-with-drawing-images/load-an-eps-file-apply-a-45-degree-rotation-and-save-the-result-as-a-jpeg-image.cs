@@ -3,18 +3,17 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.eps";
-        string outputPath = @"C:\Images\Result\rotated.jpg";
-
         try
         {
+            // Hardcoded input and output file paths
+            string inputPath = "input.eps";
+            string outputPath = "output.jpg";
+
             // Verify that the input EPS file exists
             if (!File.Exists(inputPath))
             {
@@ -26,18 +25,19 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EPS image
-            using (EpsImage image = (EpsImage)Image.Load(inputPath))
+            using (var epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Rotate the image by 45 degrees around its center
-                image.Rotate(45f);
+                // Rotate the image by 45 degrees
+                epsImage.Rotate(45f);
 
                 // Save the rotated image as JPEG
                 var jpegOptions = new JpegOptions();
-                image.Save(outputPath, jpegOptions);
+                epsImage.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -45,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop needs to convert client‑provided EPS logos into rotated JPEG thumbnails for web previews, they can use this C# Aspose.Imaging code.
- * 2. When an e‑commerce platform must display product diagrams originally supplied as EPS files at a 45‑degree angle in JPEG format on mobile devices, the snippet provides a quick solution.
- * 3. When a marketing automation script has to batch‑process EPS artwork, rotate it for a stylized banner, and store the result as JPEG for email campaigns, this code handles the conversion.
- * 4. When a GIS application receives EPS map overlays that must be oriented diagonally and saved as JPEG tiles for fast rendering, developers can apply the shown rotation routine.
- * 5. When a desktop publishing tool needs to preview EPS illustrations with a 45° tilt in a JPEG preview pane, the provided C# example performs the necessary image processing.
+ * 1. When a graphic designer needs to convert a vector EPS logo into a rotated JPEG thumbnail for a web page preview.
+ * 2. When an e‑commerce platform must display product brochures originally saved as EPS files at a 45‑degree angle in a JPEG carousel.
+ * 3. When a publishing workflow requires batch processing of EPS illustrations, rotating them for layout alignment and saving them as JPEGs for quick preview.
+ * 4. When a mobile app backend receives EPS assets from users, rotates them to match orientation guidelines, and stores them as JPEG images for faster delivery.
+ * 5. When a document management system automates the conversion of EPS diagrams into rotated JPEG snapshots for indexing and search.
  */
