@@ -2,46 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Reuse a single Pen instance across all images
-            Pen sharedPen = new Pen(Color.Blue, 5);
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.bmp";
+            string outputPath1 = @"C:\temp\output\output1.bmp";
+            string outputPath2 = @"C:\temp\output\output2.bmp";
+            string outputPath3 = @"C:\temp\output\output3.bmp";
 
-            string[] outputPaths = { "output1.bmp", "output2.bmp", "output3.bmp" };
-            int width = 300;
-            int height = 200;
-
-            foreach (var outputPath in outputPaths)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Set up BMP options with a stream source
-                BmpOptions bmpOptions = new BmpOptions();
-                bmpOptions.BitsPerPixel = 24;
+            // Load the input image to obtain its dimensions
+            using (Image sourceImage = Image.Load(inputPath))
+            {
+                int width = sourceImage.Width;
+                int height = sourceImage.Height;
 
-                using (FileStream stream = new FileStream(outputPath, FileMode.Create))
-                {
-                    bmpOptions.Source = new StreamSource(stream);
+                // Create a single Pen instance to be reused across all BMP creations
+                Pen sharedPen = new Pen(Color.Blue, 3);
 
-                    using (Image image = Image.Create(bmpOptions, width, height))
-                    {
-                        Graphics graphics = new Graphics(image);
-                        graphics.Clear(Color.White);
-
-                        // Draw a rectangle using the shared Pen
-                        graphics.DrawRectangle(sharedPen, new Rectangle(20, 20, width - 40, height - 40));
-
-                        // Save the image
-                        image.Save();
-                    }
-                }
+                // Process three BMP files using the same Pen
+                ProcessAndSave(width, height, sharedPen, outputPath1);
+                ProcessAndSave(width, height, sharedPen, outputPath2);
+                ProcessAndSave(width, height, sharedPen, outputPath3);
             }
         }
         catch (Exception ex)
@@ -49,13 +45,41 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
+
+    // Helper method that creates a BMP, draws with the shared Pen, and saves it
+    static void ProcessAndSave(int width, int height, Pen pen, string outputPath)
+    {
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Configure BMP options
+        BmpOptions bmpOptions = new BmpOptions
+        {
+            BitsPerPixel = 24,
+            Source = new FileCreateSource(outputPath, false)
+        };
+
+        // Create a new BMP image
+        using (Image image = Image.Create(bmpOptions, width, height))
+        {
+            // Initialize graphics for drawing
+            Graphics graphics = new Graphics(image);
+            graphics.Clear(Color.White);
+
+            // Draw a rectangle using the shared Pen instance
+            graphics.DrawRectangle(pen, new Rectangle(10, 10, width - 20, height - 20));
+
+            // Save the image (directory already created)
+            image.Save();
+        }
+    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate multiple BMP files with identical styled borders quickly, they can reuse a single Pen instance to draw rectangles across all images.
- * 2. When automating the creation of thumbnail placeholders for a web gallery, the code can batch‑process BMP images using a shared Pen to ensure consistent border thickness and color.
- * 3. When producing printable reports that require a series of page‑size BMP diagrams with the same frame, reusing the Pen reduces object allocation and speeds up the C# image processing loop.
- * 4. When integrating Aspose.Imaging into a server‑side service that streams BMP images directly to disk, the shared Pen allows efficient drawing of shapes without recreating pen resources for each request.
- * 5. When building a desktop utility that converts a list of dimensions into bordered BMP samples for UI designers, the code demonstrates how to reuse a Pen while handling file streams and graphics clearing in .NET.
+ * 1. When generating a series of thumbnail BMP files with identical border styling for a product catalog, a developer can reuse a single Pen instance to draw the borders efficiently.
+ * 2. When creating multiple map overlay images in BMP format that share the same road‑highlight color and thickness, the shared Pen reduces memory allocations during batch processing.
+ * 3. When producing a set of diagnostic BMP screenshots for automated testing, reusing one Pen ensures consistent annotation lines across all images while minimizing object creation overhead.
+ * 4. When rendering repeated watermark lines on several BMP assets for a branding workflow, a single Pen instance simplifies the code and speeds up the batch drawing operation.
+ * 5. When converting a master BMP template into several variant images with identical frame graphics for a game UI, the shared Pen allows fast reuse of the same drawing style across all output files.
  */
