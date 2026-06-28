@@ -7,12 +7,11 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and dummy output paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\output.png";
-
         try
         {
+            // Hardcoded input ODG file path
+            string inputPath = @"C:\temp\sample.odg";
+
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,22 +19,20 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists (required by the safety rules)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the ODG image
-            using (Image odgImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare PNG save options
+                // Set up PNG save options
                 var pngOptions = new PngOptions();
 
-                // Save the image into a memory stream as PNG
-                using (var memoryStream = new MemoryStream())
+                // Save the image to a memory stream in PNG format
+                using (MemoryStream memoryStream = new MemoryStream())
                 {
-                    odgImage.Save(memoryStream, pngOptions);
+                    image.Save(memoryStream, pngOptions);
 
                     // Example usage of the resulting PNG data
-                    Console.WriteLine($"PNG data length: {memoryStream.Length} bytes");
+                    byte[] pngData = memoryStream.ToArray();
+                    Console.WriteLine($"PNG data size: {pngData.Length} bytes");
                 }
             }
         }
@@ -45,3 +42,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web API receives user‑uploaded ODG drawings and must generate PNG thumbnails on the fly without creating intermediate files, this code loads the ODG, converts it to PNG, and returns the image as a MemoryStream.
+ * 2. When assembling PDF reports that need to embed vector diagrams from ODG files, developers can use this code to convert the ODG to a PNG byte array suitable for PDF image insertion.
+ * 3. When an email automation system has to attach ODG graphics as inline PNG images, the code converts the ODG to PNG in memory, allowing the PNG data to be embedded directly into the email body.
+ * 4. When a cloud function processes design assets stored in ODG format and stores the resulting PNG bytes in a database or blob storage, this snippet performs the in‑memory conversion efficiently.
+ * 5. When a desktop application provides a quick preview of ODG vector files in a picture box control, the code converts the ODG to a PNG MemoryStream that can be rendered instantly without writing to disk.
+ */

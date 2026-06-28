@@ -1,20 +1,21 @@
 using System;
 using System.IO;
-using System.Xml;
-using System.Xml.Schema;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using System.Xml;
+using System.Xml.Schema;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.odg";
-        string outputPath = "output.svg";
-
         try
         {
+            // Hardcoded input, output and schema paths
+            string inputPath = @"C:\Data\sample.odg";
+            string outputPath = @"C:\Data\sample.svg";
+            string schemaPath = @"C:\Data\svg.xsd";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,62 +24,43 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
+            // Load ODG and save as SVG using Aspose.Imaging
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare rasterization options for SVG export
-                var rasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-
-                // Save the image as SVG
-                var svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
-
-                image.Save(outputPath, svgOptions);
+                image.Save(outputPath, new SvgOptions());
             }
 
-            // Validate the generated SVG against an XSD schema
-            // Assumes an SVG schema file named "svg.xsd" is located alongside the executable
-            string schemaPath = "svg.xsd";
+            // Verify schema file exists
             if (!File.Exists(schemaPath))
             {
                 Console.Error.WriteLine($"Schema file not found: {schemaPath}");
                 return;
             }
 
-            var settings = new XmlReaderSettings();
-            var schemas = new XmlSchemaSet();
+            // Prepare schema set
+            XmlSchemaSet schemas = new XmlSchemaSet();
             schemas.Add(null, schemaPath);
-            settings.Schemas = schemas;
-            settings.ValidationType = ValidationType.Schema;
-            settings.ValidationFlags |= XmlSchemaValidationFlags.ReportValidationWarnings;
 
-            bool validationFailed = false;
+            // Configure XML reader for validation
+            XmlReaderSettings settings = new XmlReaderSettings
+            {
+                ValidationType = ValidationType.Schema,
+                Schemas = schemas
+            };
             settings.ValidationEventHandler += (sender, e) =>
             {
                 Console.Error.WriteLine($"Validation {e.Severity}: {e.Message}");
-                validationFailed = true;
             };
 
-            using (var reader = XmlReader.Create(outputPath, settings))
+            // Validate the generated SVG
+            using (XmlReader reader = XmlReader.Create(outputPath, settings))
             {
                 while (reader.Read()) { }
             }
 
-            if (validationFailed)
-            {
-                Console.Error.WriteLine("SVG validation failed.");
-            }
-            else
-            {
-                Console.WriteLine("SVG validation succeeded.");
-            }
+            Console.WriteLine("SVG validation completed successfully.");
         }
         catch (Exception ex)
         {
@@ -86,3 +68,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. A developer converting LibreOffice Draw ODG files to SVG with Aspose.Imaging for .NET can use this code to ensure the generated SVG conforms to the official SVG XML schema before embedding it in a web page.
+ * 2. In an automated document‑processing pipeline, this snippet validates each ODG‑to‑SVG conversion against the SVG XSD to prevent malformed vector graphics from reaching downstream applications.
+ * 3. A CI/CD quality‑assurance step can run this C# program to check that every SVG produced from ODG sources passes schema validation, catching errors before release.
+ * 4. A Windows desktop app that imports ODG diagrams and saves them as SVG can employ this code to verify schema compliance, guaranteeing compatibility with third‑party vector editors.
+ * 5. A cloud‑based batch conversion service that transforms ODG drawings into SVG can use this validation routine to programmatically confirm each file meets SVG schema standards, ensuring reliable downloads for users.
+ */

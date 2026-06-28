@@ -1,20 +1,64 @@
 using System;
 using System.IO;
-using System.Text.RegularExpressions;
+using System.Linq;
+using System.Xml.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+
+class SimpleSvgCallback : SvgResourceKeeperCallback
+{
+    public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
+    {
+        // Load SVG XML from the byte array
+        XDocument doc;
+        using (var ms = new MemoryStream(htmlData))
+        {
+            doc = XDocument.Load(ms);
+        }
+
+        // Flatten all <g> elements by moving their children up and removing the group
+        var groups = doc.Descendants()
+                        .Where(e => e.Name.LocalName == "g")
+                        .ToList(); // materialize to avoid modification during iteration
+
+        foreach (var g in groups)
+        {
+            var parent = g.Parent;
+            if (parent != null)
+            {
+                // Insert child nodes before the group element
+                foreach (var node in g.Nodes().ToList())
+                {
+                    parent.Add(node);
+                }
+            }
+            g.Remove();
+        }
+
+        // Ensure the output directory exists
+        var outDir = Path.GetDirectoryName(suggestedFileName);
+        if (!string.IsNullOrEmpty(outDir))
+        {
+            Directory.CreateDirectory(outDir);
+        }
+
+        // Save the cleaned SVG
+        doc.Save(suggestedFileName);
+        return suggestedFileName;
+    }
+}
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\sample.odg";
+        string outputPath = @"C:\Temp\sample.svg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Temp\input.odg";
-            string outputPath = @"C:\Temp\output.svg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,38 +72,14 @@ class Program
             // Load ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG export options
+                // Configure SVG export with custom callback to simplify groups
                 var svgOptions = new SvgOptions
                 {
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = image.Size,
-                        BackgroundColor = Color.White
-                    }
+                    Callback = new SimpleSvgCallback()
                 };
 
-                // Save to a temporary SVG file
-                string tempSvgPath = outputPath + ".tmp";
-                image.Save(tempSvgPath, svgOptions);
-
-                // Load SVG content for cleanup
-                string svgContent = File.ReadAllText(tempSvgPath);
-
-                // Remove empty group elements
-                while (svgContent.Contains("<g></g>"))
-                {
-                    svgContent = svgContent.Replace("<g></g>", string.Empty);
-                }
-
-                // Collapse groups that only wrap a single child without attributes
-                Regex groupRegex = new Regex(@"<g>(.*?)</g>", RegexOptions.Singleline);
-                svgContent = groupRegex.Replace(svgContent, "$1");
-
-                // Write cleaned SVG to final output
-                File.WriteAllText(outputPath, svgContent);
-
-                // Delete temporary file
-                File.Delete(tempSvgPath);
+                // Save as SVG; the callback will handle post‑processing
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -68,3 +88,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to embed LibreOffice Draw diagrams (ODG) into a web page that only supports SVG, this code converts the file and flattens group elements for faster browser rendering.
+ * 2. When preparing technical documentation that includes vector graphics, a developer can convert ODG charts to clean SVG files without nested <g> tags to reduce file size and improve PDF generation compatibility.
+ * 3. When optimizing SVG assets for responsive UI components, a developer can use this code to strip unnecessary group elements from ODG‑derived SVGs, ensuring smoother scaling and animation in C# WPF applications.
+ * 4. When automating a batch process that extracts vector icons from an ODG library for a mobile app, the code enables conversion to SVG and simplifies the markup for easier CSS styling.
+ * 5. When migrating legacy design assets stored as ODG into a modern content management system that stores SVGs, a developer can run this conversion to produce clean, group‑free SVG files that are easier to index and search.
+ */

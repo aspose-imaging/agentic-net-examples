@@ -10,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.otg";
-            string outputPath = "output.png";
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\sample.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,26 +20,26 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG options with progressive (interlaced) rendering
+                // Configure PNG options with progressive (interlaced) encoding
                 var pngOptions = new PngOptions
                 {
                     Progressive = true
                 };
 
-                // Set OTG rasterization options to match the source image size
+                // Set rasterization options for OTG conversion
                 var otgRasterizationOptions = new OtgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
                 pngOptions.VectorRasterizationOptions = otgRasterizationOptions;
 
-                // Save the image as PNG with the specified options
+                // Save as PNG with the specified options
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -49,3 +49,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application needs to display vector‑based OTG graphics as progressive PNG images for faster page load on slow connections.
+ * 2. When an e‑learning platform converts OTG diagrams into interlaced PNGs to allow students to see a low‑resolution preview while the full image loads.
+ * 3. When a desktop publishing tool automates batch conversion of OTG assets to PNG with progressive rendering for inclusion in print‑ready PDFs.
+ * 4. When a mobile app processes user‑uploaded OTG files and saves them as interlaced PNGs to reduce memory usage during incremental rendering.
+ * 5. When a cloud‑based image service provides on‑the‑fly conversion of OTG icons to PNG with interlacing to support responsive UI elements.
+ */

@@ -6,40 +6,33 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\output.jpg";
+            string inputPath = "Input/sample.otg";
+            string outputPath = "Output/sample.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the OTG image
             using (Image image = Image.Load(inputPath))
+            using (JpegOptions jpegOptions = new JpegOptions())
             {
-                // Prepare rasterization options for OTG
+                // Set progressive JPEG compression
+                jpegOptions.CompressionType = JpegCompressionMode.Progressive;
+
+                // Configure vector rasterization for OTG
                 OtgRasterizationOptions otgRasterizationOptions = new OtgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
-
-                // Configure JPEG options with progressive compression
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    CompressionType = JpegCompressionMode.Progressive,
-                    Quality = 90,
-                    VectorRasterizationOptions = otgRasterizationOptions
-                };
+                jpegOptions.VectorRasterizationOptions = otgRasterizationOptions;
 
                 // Save as JPEG
                 image.Save(outputPath, jpegOptions);
@@ -51,3 +44,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web developer needs to display vector‑based OTG diagrams on a website and wants faster page loads by serving progressive JPEG images.
+ * 2. When an e‑commerce platform must convert product schematics stored as OTG files into web‑friendly JPEG thumbnails that load incrementally for better user experience.
+ * 3. When a mobile app generates OTG charts on the server and requires them to be rasterized and saved as progressive JPEGs to reduce bandwidth consumption on slow networks.
+ * 4. When a content management system automates the ingestion of OTG assets and needs to store them as progressive JPEG files for SEO‑optimized image indexing.
+ * 5. When a reporting tool exports OTG‑based technical drawings to JPEG with progressive compression so that large images can be previewed instantly in browsers.
+ */

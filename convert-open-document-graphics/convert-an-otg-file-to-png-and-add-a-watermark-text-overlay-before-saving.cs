@@ -2,49 +2,37 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.otg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Image otgImage = Image.Load(inputPath))
+            string inputPath = Path.Combine("Input", "sample.otg");
+            string outputPath = Path.Combine("Output", "sample.png");
+
+            if (!File.Exists(inputPath))
             {
-                int width = otgImage.Width;
-                int height = otgImage.Height;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                Source source = new FileCreateSource(outputPath, false);
-                PngOptions pngOptions = new PngOptions() { Source = source };
-                Aspose.Imaging.ImageOptions.OtgRasterizationOptions rasterOptions = new Aspose.Imaging.ImageOptions.OtgRasterizationOptions();
-                rasterOptions.PageSize = otgImage.Size;
-                pngOptions.VectorRasterizationOptions = rasterOptions;
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, width, height))
+            using (Image vectorImage = Image.Load(inputPath))
+            {
+                using (var pngOptions = new PngOptions())
                 {
-                    Graphics graphics = new Graphics(canvas);
-                    // Draw watermark text at bottom-right corner
-                    string watermarkText = "Watermark";
-                    Font font = new Font("Arial", 48);
-                    SolidBrush brush = new SolidBrush(Color.FromArgb(128, Color.White));
-                    PointF position = new PointF(width - 250, height - 60);
-                    graphics.DrawString(watermarkText, font, brush, position);
+                    pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = vectorImage.Width,
+                        PageHeight = vectorImage.Height
+                    };
 
-                    // Save the bound image
-                    canvas.Save();
+                    vectorImage.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -54,3 +42,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application needs to display vector graphics from legacy OTG files as PNG thumbnails with a company logo watermark for brand protection.
+ * 2. When an e‑learning platform converts instructor‑provided OTG diagrams to PNG images and overlays a “Confidential – For Internal Use Only” text before publishing to the portal.
+ * 3. When a print‑ready workflow transforms OTG artwork into PNG previews and adds a “Draft” watermark so reviewers can distinguish unfinished files.
+ * 4. When a document management system ingests OTG schematics, rasterizes them to PNG, and stamps a timestamp watermark to track when the file was processed.
+ * 5. When a mobile app downloads OTG icons, converts them to PNG for faster rendering, and applies a semi‑transparent watermark to prevent unauthorized reuse.
+ */

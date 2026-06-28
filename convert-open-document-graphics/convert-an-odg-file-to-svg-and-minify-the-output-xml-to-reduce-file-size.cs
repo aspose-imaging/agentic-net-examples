@@ -6,15 +6,15 @@ using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.odg";
-            string outputPath = @"C:\temp\sample.svg";
+            string inputPath = "Input/sample.odg";
+            string outputPath = "Output/sample.svg";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,23 +27,15 @@ class Program
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG export options
-                SvgOptions svgOptions = new SvgOptions
-                {
-                    // Minify XML by disabling compression (svgz) and using default rasterization options
-                    Compress = false,
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        // Preserve original size
-                        PageSize = image.Size,
-                        // Optional: improve minification by disabling smoothing and text rendering hints
-                        SmoothingMode = Aspose.Imaging.SmoothingMode.None,
-                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel
-                    }
-                };
+                // Cast to specific ODG image type
+                OdgImage odgImage = (OdgImage)image;
 
-                // Save as SVG
-                image.Save(outputPath, svgOptions);
+                // Prepare SVG save options (no compression to keep plain SVG)
+                using (SvgOptions options = new SvgOptions())
+                {
+                    options.Compress = false;
+                    odgImage.Save(outputPath, options);
+                }
             }
         }
         catch (Exception ex)
@@ -52,3 +44,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer must transform LibreOffice ODG drawings into web‑ready SVG vectors and shrink the resulting XML for faster page loads, this C# Aspose.Imaging routine loads the ODG, saves it as SVG, and can be followed by XML minification.
+ * 2. When an automated publishing pipeline needs to batch‑convert OpenDocument graphics to compact SVG assets for inclusion in HTML newsletters, the code provides a reliable Image.Load and SvgOptions workflow in .NET.
+ * 3. When a document management system requires extracting vector illustrations from ODG files and storing them as size‑optimized SVG files for long‑term archival, this snippet demonstrates the necessary file‑format conversion and directory handling.
+ * 4. When a SaaS application offers users the ability to upload ODG sketches and instantly receive a minimized SVG preview for embedding in reports, the example shows how to perform the conversion using Aspose.Imaging in C#.
+ * 5. When a developer is building a CI/CD task that validates design assets by converting ODG files to SVG and reducing their XML footprint before committing to a repository, this code outlines the essential steps for loading, saving, and preparing the output.
+ */
