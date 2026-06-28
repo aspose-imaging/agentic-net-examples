@@ -3,9 +3,9 @@
   "platform": "net",
   "framework": "net9.0",
   "package_version": "26.6.0",
-  "total_examples": 2911,
+  "total_examples": 2916,
   "total_categories": 17,
-  "last_updated": "2026-06-27",
+  "last_updated": "2026-06-28",
   "categories": [
     {
       "name": "conversion",
@@ -3754,8 +3754,13 @@
     },
     {
       "name": "merge-images",
-      "file_count": 135,
+      "file_count": 140,
       "all_files": [
+        "28686-set-the-output-dpi-to-300-when-merging-jpeg-files-horizontally-and-saving-the-result-as-pdf.cs",
+        "28688-use-imageloadoptions-to-limit-memory-usage-while-loading-jpeg-files-for-a-horizontal-merge.cs",
+        "28691-process-a-batch-of-jpeg-folders-merging-each-folder-s-images-horizontally-into-separate-pdf-files.cs",
+        "28693-use-a-cancellation-token-to-abort-a-long-running-horizontal-jpeg-merge-operation-when-requested.cs",
+        "28694-log-progress-percentage-after-each-jpeg-image-is-added-to-the-canvas-during-a-vertical-merge.cs",
         "add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs",
         "add-custom-author-metadata-to-the-merged-pdf-generated-from-a-horizontal-jpeg-merge-operation.cs",
         "align-all-merged-jpeg-images-to-the-top-left-corner-of-the-canvas-for-a-consistent-layout.cs",
@@ -3893,6 +3898,11 @@
         "wrap-image-loading-and-merging-code-in-try-catch-blocks-to-handle-file-access-exceptions-gracefully.cs"
       ],
       "files": [
+        "28686-set-the-output-dpi-to-300-when-merging-jpeg-files-horizontally-and-saving-the-result-as-pdf.cs",
+        "28688-use-imageloadoptions-to-limit-memory-usage-while-loading-jpeg-files-for-a-horizontal-merge.cs",
+        "28691-process-a-batch-of-jpeg-folders-merging-each-folder-s-images-horizontally-into-separate-pdf-files.cs",
+        "28693-use-a-cancellation-token-to-abort-a-long-running-horizontal-jpeg-merge-operation-when-requested.cs",
+        "28694-log-progress-percentage-after-each-jpeg-image-is-added-to-the-canvas-during-a-vertical-merge.cs",
         "add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs",
         "add-custom-author-metadata-to-the-merged-pdf-generated-from-a-horizontal-jpeg-merge-operation.cs",
         "align-all-merged-jpeg-images-to-the-top-left-corner-of-the-canvas-for-a-consistent-layout.cs",
@@ -3917,25 +3927,22 @@
         "combine-jpg-images-into-a-pdf-document-by-first-converting-them-to-apng-format-and-embedding-them-accordingly.cs",
         "combine-jpg-images-into-a-pdf-document-by-first-converting-them-to-psd-format.cs",
         "combine-jpg-images-into-a-pdf-document-converting-each-image-to-png-format-before-merging.cs",
-        "combine-jpg-images-into-a-pdf-document-embedding-an-ico-file-as-the-document-s-icon.cs",
-        "combine-jpg-images-into-a-pdf-document-encoding-the-images-as-avif-format-to-optimize-size.cs",
-        "combine-jpg-images-into-a-pdf-document-using-dicom-formatting-while-maintaining-image-fidelity.cs",
-        "combine-jpg-images-into-a-png-output-while-applying-jpeg-compression-settings-during-the-merge.cs",
-        "combine-jpg-images-into-a-single-pdf-document-employing-the-wmz-format-for-compression-and-packaging.cs",
-        "combine-jpg-images-into-a-single-pdf-document-using-the-cmx-format-to-maintain-color-fidelity.cs"
+        "combine-jpg-images-into-a-pdf-document-embedding-an-ico-file-as-the-document-s-icon.cs"
       ],
       "required_namespaces": [
         "System",
         "System.IO",
-        "Aspose.Imaging.ImageOptions",
-        "System.Collections.Generic",
         "Aspose.Imaging",
+        "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging.Sources",
+        "System.Collections.Generic",
         "Aspose.Imaging.FileFormats.Jpeg",
         "System.Linq",
-        "Aspose.Imaging.FileFormats.Pdf",
         "Aspose.Imaging.FileFormats.Png",
-        "Aspose.Imaging.Brushes"
+        "Aspose.Imaging.FileFormats.Pdf",
+        "Aspose.Imaging.Brushes",
+        "Aspose.Imaging.ImageLoadOptions",
+        "System.Threading"
       ],
       "key_apis": [
         "ApngImage",
@@ -3957,6 +3964,7 @@
         "Jpeg2000Image",
         "Jpeg2000Options",
         "JpegImage",
+        "JpegLoadOptions",
         "JpegOptions",
         "LoadOptions",
         "OdgRasterizationOptions",
@@ -3981,7 +3989,7 @@
         "WmfRasterizationOptions"
       ],
       "more_files": {
-        "count": 105,
+        "count": 110,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/merge-images"
       }
     },
