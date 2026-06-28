@@ -10,54 +10,52 @@ class Program
     {
         try
         {
-            // Output BMP file path
-            string outputPath = @"c:\temp\star.bmp";
+            // Output BMP file path (hardcoded)
+            string outputPath = @"C:\temp\star.bmp";
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create BMP options and bind to output file
+            // BMP options with 24 bits per pixel
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Define image dimensions
-            int width = 500;
-            int height = 500;
-
-            // Create the image canvas
-            using (Image image = Image.Create(bmpOptions, width, height))
+            // Create a 500x500 BMP image
+            using (Image image = Image.Create(bmpOptions, 500, 500))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                // Parameters for star shape
-                float centerX = width / 2f;
-                float centerY = height / 2f;
-                float outerRadius = 200f;
-                float innerRadius = 80f;
-                int pointsCount = 5;
+                // Pen for drawing the star
+                Pen pen = new Pen(Color.Blue, 2);
 
-                // Calculate star vertices
-                Point[] starPoints = new Point[pointsCount * 2 + 1];
-                for (int i = 0; i < pointsCount * 2; i++)
+                // Define star points (5-pointed star)
+                // Outer points
+                Point[] outer = new Point[]
                 {
-                    double angleDeg = i * 36; // 360 / (5*2) = 36 degrees
-                    double angleRad = Math.PI * angleDeg / 180.0;
-                    float radius = (i % 2 == 0) ? outerRadius : innerRadius;
-                    int x = (int)(centerX + radius * Math.Cos(angleRad));
-                    int y = (int)(centerY + radius * Math.Sin(angleRad));
-                    starPoints[i] = new Point(x, y);
+                    new Point(250, 50),   // top
+                    new Point(320, 200),
+                    new Point(470, 200),
+                    new Point(350, 300),
+                    new Point(400, 450),
+                    new Point(250, 350),
+                    new Point(100, 450),
+                    new Point(150, 300),
+                    new Point(30, 200),
+                    new Point(180, 200)
+                };
+
+                // Draw lines between consecutive points and close the shape
+                for (int i = 0; i < outer.Length; i++)
+                {
+                    Point start = outer[i];
+                    Point end = outer[(i + 1) % outer.Length];
+                    graphics.DrawLine(pen, start, end);
                 }
-                // Close the star shape by returning to the first point
-                starPoints[starPoints.Length - 1] = starPoints[0];
 
-                // Draw the star using line segments
-                Pen pen = new Pen(Color.Black, 2);
-                graphics.DrawLines(pen, starPoints);
-
-                // Save the image (output file already bound)
+                // Save the image (output path already bound to the source)
                 image.Save();
             }
         }
@@ -70,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a printable badge or certificate with a decorative star emblem saved as a BMP file for legacy printing systems.
- * 2. When an application must create a game asset such as a star‑shaped token or icon on the fly, using C# and Aspose.Imaging to output a 24‑bit BMP for fast loading in older engines.
- * 3. When a reporting tool requires a custom watermark consisting of a multi‑point star drawn with line segments, and the result must be stored as a BMP to embed in PDF or Word documents.
- * 4. When an e‑learning platform wants to programmatically produce star‑shaped progress markers that are saved as BMP images for use in SCORM‑compatible content.
- * 5. When a developer is building a batch process that adds a star‑shaped logo to a series of product images, using Aspose.Imaging’s Graphics API to draw the shape directly onto a BMP canvas before further processing.
+ * 1. When a developer needs to generate a 24‑bit BMP badge with a custom star logo using Aspose.Imaging’s Graphics.DrawLine method for a Windows desktop application.
+ * 2. When an automated reporting tool must programmatically create a printable star‑shaped watermark on a 500×500 BMP image with C# and Aspose.Imaging.
+ * 3. When a game asset pipeline requires drawing a blue star shape on a BMP background for sprite sheets using the Pen and Graphics classes.
+ * 4. When a marketing system has to produce thumbnail images that include a star outline by drawing line segments and saving the result as a BMP file without external editors.
+ * 5. When a data‑visualization service wants to render a star polygon as part of a chart legend and export it as a BMP for legacy compatibility.
  */
