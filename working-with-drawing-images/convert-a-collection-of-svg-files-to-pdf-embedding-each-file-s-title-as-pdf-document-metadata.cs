@@ -10,11 +10,11 @@ class Program
     {
         try
         {
-            // Batch input/output directory setup (mandatory block)
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            // Hardcoded relative input and output directories
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
+            // Ensure input directory exists
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -22,54 +22,43 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+            // Get all SVG files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
 
             foreach (string inputPath in files)
             {
-                // Process only SVG files
-                if (!string.Equals(Path.GetExtension(inputPath), ".svg", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                // Verify input file exists
+                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
+                // Derive output PDF path
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                 string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
 
-                // Ensure output directory exists
+                // Ensure output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+                // Load SVG image
                 using (Image image = Image.Load(inputPath))
                 {
                     // Prepare PDF options with metadata
-                    PdfOptions pdfOptions = new PdfOptions
+                    using (PdfOptions pdfOptions = new PdfOptions())
                     {
-                        PdfDocumentInfo = new PdfDocumentInfo()
-                    };
-                    pdfOptions.PdfDocumentInfo.Title = fileNameWithoutExt;
+                        pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                        pdfOptions.PdfDocumentInfo.Title = fileNameWithoutExt; // Use file name as title
 
-                    // Set vector rasterization options for SVG/vector images
-                    if (image is VectorImage)
-                    {
-                        pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height
-                        };
+                        // Save as PDF
+                        image.Save(outputPath, pdfOptions);
                     }
-
-                    // Save as PDF
-                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -82,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design team needs to archive vector artwork from SVG files as searchable PDF documents with each file’s title stored in the PDF metadata for easy retrieval.
- * 2. When an e‑learning platform automatically converts SVG illustrations into PDF handouts, embedding the illustration title so learners can see the source name in the PDF properties.
- * 3. When a marketing department batch‑processes brand assets, turning SVG logos into PDF files that include the logo name in the document metadata for compliance reporting.
- * 4. When a government agency publishes public data visualizations, converting SVG charts to PDF while preserving the chart title in the PDF metadata for indexing by document management systems.
- * 5. When a software product generates printable reports from SVG diagrams, using C# to create PDFs that embed the diagram title as metadata so end users can quickly locate the original diagram file.
+ * 1. When a developer needs to batch‑convert a library of SVG icons into searchable PDF catalogs, embedding each icon’s title as PDF metadata for easy indexing.
+ * 2. When an e‑learning platform must generate printable course handouts from SVG diagrams, automatically adding the diagram title to the PDF document properties.
+ * 3. When a marketing team wants to create a PDF portfolio of vector artwork stored as SVG files, with each artwork’s title stored in the PDF metadata for client reference.
+ * 4. When a compliance system requires archival of SVG‑based schematics as PDFs, preserving the original file name as the PDF title metadata for audit trails.
+ * 5. When a reporting tool needs to export SVG charts to PDF reports, embedding the chart title in the PDF document info so downstream tools can display it in document summaries.
  */
