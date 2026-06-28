@@ -1,9 +1,6 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -12,7 +9,7 @@ class Program
         try
         {
             string inputPath = "input.dcm";
-            string outputPath = "output\\sample.tif";
+            string outputPath = "output.tif";
 
             if (!File.Exists(inputPath))
             {
@@ -22,13 +19,12 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Apply Floyd‑Steinberg dithering with 1‑bit palette
-                dicomImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
+                var dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)image;
+                dicomImage.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 1, null);
 
-                // Save the result as TIFF
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                var tiffOptions = new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default);
                 dicomImage.Save(outputPath, tiffOptions);
             }
         }
@@ -41,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a hospital IT system needs to convert high‑resolution DICOM scans into 1‑bit black‑and‑white TIFF files for fast archival and lossless storage, developers can use this code.
- * 2. When a radiology web portal must display DICOM images on browsers that only support TIFF, applying Floyd‑Steinberg dithering ensures the visual quality of the monochrome conversion.
- * 3. When a medical device manufacturer wants to generate printable hard‑copy reports from DICOM data, the code creates TIFF files with dithering that are suitable for laser printers.
- * 4. When a research lab requires batch processing of DICOM images into TIFF format with a reduced file size for machine‑learning pipelines, this snippet provides the necessary C# workflow.
- * 5. When a healthcare compliance audit demands that diagnostic images be stored in a non‑proprietary format with a fixed 1‑bit palette, developers can employ this code to transform DICOM to TIFF using Aspose.Imaging.
+ * 1. When a radiology software needs to convert high‑resolution DICOM scans into printable black‑and‑white TIFF files with Floyd‑Steinberg dithering to preserve detail on legacy printers.
+ * 2. When a healthcare data pipeline must batch‑process DICOM images, apply error‑diffusion dithering for better visual contrast, and store the results as TIFF for integration with document management systems.
+ * 3. When a research application in C# requires extracting DICOM images, reducing them to a 1‑bit palette using Floyd‑Steinberg dithering, and saving as TIFF to meet journal submission guidelines.
+ * 4. When a medical imaging archive needs to generate TIFF thumbnails from DICOM files with dithering to ensure consistent appearance across web browsers and image viewers.
+ * 5. When a .NET developer wants to automate the conversion of DICOM ultrasound frames into TIFF format with Floyd‑Steinberg dithering for use in electronic health record (EHR) attachments.
  */

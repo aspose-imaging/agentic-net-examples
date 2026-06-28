@@ -12,54 +12,51 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.tif";
             string outputPath = "output.tif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
 
-            // Load existing TIFF image
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
                 // Configure options for the new frame
                 TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
                 frameOptions.Compression = TiffCompressions.Lzw;
-                frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
                 frameOptions.Photometric = TiffPhotometrics.Rgb;
+                frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
                 frameOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+                frameOptions.ResolutionUnit = TiffResolutionUnits.Inch;
+                frameOptions.Xresolution = new TiffRational(300, 1); // 300 DPI
+                frameOptions.Yresolution = new TiffRational(300, 1); // 300 DPI
 
-                // Custom dimensions for the new frame
-                int newWidth = 200;
-                int newHeight = 150;
+                // Create a new frame with custom dimensions
+                int frameWidth = 200;
+                int frameHeight = 150;
+                TiffFrame newFrame = new TiffFrame(frameOptions, frameWidth, frameHeight);
 
-                // Create the new TIFF frame
-                TiffFrame newFrame = new TiffFrame(frameOptions, newWidth, newHeight);
-
-                // Fill the frame with a gradient (optional visual content)
-                LinearGradientBrush brush = new LinearGradientBrush(
+                // Optional: fill the frame with a simple gradient
+                LinearGradientBrush gradient = new LinearGradientBrush(
                     new Point(0, 0),
                     new Point(newFrame.Width, newFrame.Height),
-                    Color.Blue,
-                    Color.Yellow);
+                    Color.LightBlue,
+                    Color.LightGreen);
                 Graphics graphics = new Graphics(newFrame);
-                graphics.FillRectangle(brush, newFrame.Bounds);
+                graphics.FillRectangle(gradient, newFrame.Bounds);
 
-                // Add the new frame to the TIFF image
+                // Add the new frame to the existing TIFF image
                 tiffImage.AddFrame(newFrame);
 
-                // Set specific resolution (DPI) for the TIFF image
-                tiffImage.HorizontalResolution = 300;
-                tiffImage.VerticalResolution = 300;
-
-                // Save the updated TIFF image
+                // Save the modified TIFF image
                 tiffImage.Save(outputPath);
             }
         }
@@ -72,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a multi‑page TIFF document for archival purposes and wants each page to be compressed with LZW to reduce file size while preserving image quality.
- * 2. When creating a high‑resolution satellite image mosaic where each tile is added as a separate TIFF frame with custom width and height to match the geographic grid.
- * 3. When building a medical imaging application that appends additional DICOM‑derived scans to an existing TIFF file, using LZW compression and specific DPI settings for accurate measurements.
- * 4. When producing a printable product catalog where each product photo is inserted as a new TIFF frame with exact dimensions and resolution to meet pre‑press specifications.
- * 5. When developing a document management system that scans multi‑page contracts into a single TIFF file, adding each scanned page as a new frame with LZW compression to optimize storage and maintain consistent resolution across pages.
+ * 1. When a medical imaging application needs to append a high‑resolution, LZW‑compressed scan as a new page to an existing multi‑page TIFF file for efficient storage and quick retrieval.
+ * 2. When a GIS system generates a raster map layer with custom dimensions and 300 DPI resolution, then adds it as an additional frame to a TIFF dataset for seamless overlay with other geospatial data.
+ * 3. When a document management workflow creates a thumbnail preview of a scanned contract, using a 200 × 150 pixel frame with LZW compression to keep the TIFF file size low while preserving image quality.
+ * 4. When a printing service prepares a multi‑page TIFF brochure, inserting a color gradient banner frame with specific inch‑based resolution settings to ensure accurate color reproduction on high‑end printers.
+ * 5. When a scientific research tool records experimental results as separate image frames, adding each new measurement as a custom‑sized, LZW‑compressed TIFF frame with consistent DPI for standardized analysis across datasets.
  */

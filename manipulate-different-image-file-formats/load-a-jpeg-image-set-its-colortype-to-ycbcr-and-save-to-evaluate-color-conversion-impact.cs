@@ -10,11 +10,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\input.jpg";
-            string outputPath = @"C:\temp\output_ycbcr.jpg";
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -30,10 +30,11 @@ class Program
                 // Configure JPEG save options with YCbCr color type
                 JpegOptions saveOptions = new JpegOptions
                 {
-                    ColorType = JpegCompressionColorMode.YCbCr
+                    ColorType = JpegCompressionColorMode.YCbCr,
+                    Quality = 100 // optional: set high quality
                 };
 
-                // Save the image with the specified options
+                // Save the image using the specified options
                 image.Save(outputPath, saveOptions);
             }
         }
@@ -46,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an RGB JPEG to YCbCr to match the color space used by most digital cameras and evaluate compression quality differences.
- * 2. When a web application must generate JPEGs in YCbCr color mode to ensure consistent rendering across browsers that expect YCbCr‑encoded images.
- * 3. When performing batch image preprocessing for a machine‑learning pipeline, a developer may load JPEGs, set ColorType to YCbCr, and save them to standardize the input color format.
- * 4. When testing the impact of color space conversion on file size, a developer can load a JPEG, apply the YCbCr color type with Aspose.Imaging, and compare the resulting output file.
- * 5. When integrating with a legacy printing system that only accepts YCbCr‑encoded JPEGs, a developer can use this code to convert and save images in the required color mode.
+ * 1. When a developer needs to convert an RGB JPEG to the YCbCr color space to reduce file size while preserving visual quality for web delivery, they can use this code to load the image, set ColorType to YCbCr, and save it with high quality.
+ * 2. When testing how different JPEG compression color modes affect downstream video encoding pipelines, a programmer can load a sample JPEG, apply the YCbCr color type, and save the result to compare color fidelity.
+ * 3. When preparing images for printing workflows that require YCbCr color data for accurate color management, developers can employ this snippet to convert and save JPEGs in the required color mode.
+ * 4. When benchmarking the performance impact of color space conversion in a C# image processing service, engineers can use the code to load JPEGs, switch to YCbCr, and measure save times.
+ * 5. When validating that a third‑party viewer correctly interprets YCbCr JPEGs, a QA engineer can run this program to generate a YCbCr‑encoded JPEG from an existing file for compatibility testing.
  */

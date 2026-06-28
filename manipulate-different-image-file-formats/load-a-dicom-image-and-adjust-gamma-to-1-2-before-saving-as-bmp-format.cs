@@ -1,41 +1,40 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"c:\temp\sample.dicom";
-        string outputPath = @"c:\temp\sample_adjusted.bmp";
+        string inputPath = @"C:\Images\sample.dicom";
+        string outputPath = @"C:\Images\sample_adjusted.bmp";
 
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage to access AdjustGamma
+                // Cast to DicomImage to access DICOM-specific methods
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Apply gamma correction (1.2 for all channels)
+                // Adjust gamma for all channels (value 1.2)
                 dicomImage.AdjustGamma(1.2f);
 
-                // Save as BMP format
-                BmpOptions bmpOptions = new BmpOptions();
-                dicomImage.Save(outputPath, bmpOptions);
+                // Save the result as BMP
+                dicomImage.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)
@@ -47,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert a DICOM radiology scan to a BMP file with increased brightness by applying a gamma of 1.2 for better visual inspection.
- * 2. When a healthcare IT system must export DICOM images to a legacy Windows viewer that only supports BMP, and the developer wants to adjust gamma to improve contrast before saving.
- * 3. When a research tool processes DICOM ultrasound images and requires a quick C# routine to apply gamma correction and store the result as BMP for inclusion in reports.
- * 4. When a PACS integration script needs to batch‑convert DICOM files to BMP while normalizing gamma to 1.2 to ensure consistent appearance across different monitors.
- * 5. When a diagnostic software developer wants to demonstrate Aspose.Imaging’s DicomImage.AdjustGamma method by loading a DICOM file, adjusting its gamma, and saving the output as a BMP image in a .NET environment.
+ * 1. When a radiology software needs to export DICOM X‑ray images to BMP format for integration with legacy Windows viewers and wants to boost image brightness by applying a gamma of 1.2.
+ * 2. When a healthcare data pipeline must preprocess DICOM CT scans by adjusting gamma before saving them as BMP files for use in machine‑learning models that expect standard bitmap inputs.
+ * 3. When a hospital’s PACS system requires converting DICOM ultrasound images to BMP thumbnails with consistent gamma correction to ensure uniform visual quality across different monitors.
+ * 4. When a C# desktop application needs to load a DICOM MRI slice, enhance its contrast with a 1.2 gamma adjustment, and store the result as a BMP for inclusion in patient reports.
+ * 5. When a developer is building a cross‑platform imaging tool that reads DICOM files, applies gamma correction to improve visibility, and saves the output as BMP to be displayed in non‑medical image viewers.
  */

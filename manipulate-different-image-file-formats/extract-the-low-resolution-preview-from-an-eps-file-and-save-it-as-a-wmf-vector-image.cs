@@ -8,37 +8,35 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.eps";
-        string outputPath = @"C:\Images\sample_preview.wmf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the EPS image
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.eps";
+            string outputPath = @"C:\Images\sample_preview.wmf";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load EPS image
             using (var epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Retrieve the WMF preview image
+                // Retrieve WMF preview (low‑resolution vector preview)
                 Image preview = epsImage.GetPreviewImage(EpsPreviewFormat.WMF);
-
-                if (preview != null)
-                {
-                    // Save the preview as a WMF file
-                    preview.Save(outputPath, new WmfOptions());
-                }
-                else
+                if (preview == null)
                 {
                     Console.Error.WriteLine("No WMF preview found in the EPS file.");
+                    return;
                 }
+
+                // Save the preview as WMF
+                preview.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -50,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a quick low‑resolution preview of an EPS illustration for display in a Windows Forms UI, they can extract the WMF preview and save it as a vector image.
- * 2. When integrating a document management system that lists EPS files, a developer can use this code to create a lightweight WMF thumbnail for faster rendering in web browsers.
- * 3. When converting legacy EPS assets to a format compatible with Microsoft Office applications, a developer can extract the embedded WMF preview to embed directly into Word or PowerPoint.
- * 4. When building an automated batch process that validates EPS files, a developer can extract the WMF preview to verify that the file contains a renderable preview before further processing.
- * 5. When providing a preview feature in a CAD or GIS application that only supports WMF vectors, a developer can use this code to pull the EPS preview and display it without loading the full high‑resolution EPS data.
+ * 1. When a developer needs to generate a quick thumbnail of an EPS artwork for display in a Windows Forms UI, they can extract the WMF preview and save it as a lightweight vector image.
+ * 2. When integrating EPS files into a legacy reporting system that only supports WMF graphics, extracting the low‑resolution preview enables seamless inclusion of the artwork without full EPS rendering.
+ * 3. When creating a batch process that indexes graphic assets and stores preview images for fast search results, the code can pull the WMF preview from each EPS and save it for quick retrieval.
+ * 4. When a document conversion pipeline must embed EPS illustrations into a Microsoft Word document that accepts WMF, extracting the preview provides a compatible vector representation.
+ * 5. When a web application needs to show a low‑resolution preview of an EPS file in a browser that cannot render EPS directly, converting the preview to WMF allows the image to be displayed via a server‑side conversion step.
  */

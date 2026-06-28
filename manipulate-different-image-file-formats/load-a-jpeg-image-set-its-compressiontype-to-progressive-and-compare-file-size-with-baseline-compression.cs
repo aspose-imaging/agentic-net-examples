@@ -8,13 +8,13 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.jpg";
-        string baselineOutputPath = @"C:\temp\output_baseline.jpg";
-        string progressiveOutputPath = @"C:\temp\output_progressive.jpg";
-
         try
         {
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\temp\input.jpg";
+            string progressivePath = @"C:\temp\output_progressive.jpg";
+            string baselinePath = @"C:\temp\output_baseline.jpg";
+
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,32 +23,42 @@ class Program
             }
 
             // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(baselineOutputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(progressiveOutputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(progressivePath));
+            Directory.CreateDirectory(Path.GetDirectoryName(baselinePath));
 
-            // Load the JPEG image
+            // Load the source JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                // Save with baseline compression
-                JpegOptions baselineOptions = new JpegOptions();
-                baselineOptions.CompressionType = JpegCompressionMode.Baseline;
-                baselineOptions.Quality = 100; // optional quality setting
-                image.Save(baselineOutputPath, baselineOptions);
+                // ---------- Save with Progressive compression ----------
+                JpegOptions progressiveOptions = new JpegOptions
+                {
+                    CompressionType = JpegCompressionMode.Progressive,
+                    Quality = 100 // optional, keep maximum quality
+                };
+                image.Save(progressivePath, progressiveOptions);
 
-                // Save with progressive compression
-                JpegOptions progressiveOptions = new JpegOptions();
-                progressiveOptions.CompressionType = JpegCompressionMode.Progressive;
-                progressiveOptions.Quality = 100; // optional quality setting
-                image.Save(progressiveOutputPath, progressiveOptions);
+                // ---------- Save with Baseline (default) compression ----------
+                JpegOptions baselineOptions = new JpegOptions
+                {
+                    CompressionType = JpegCompressionMode.Baseline,
+                    Quality = 100 // optional, keep maximum quality
+                };
+                image.Save(baselinePath, baselineOptions);
             }
 
             // Compare file sizes
-            long baselineSize = new FileInfo(baselineOutputPath).Length;
-            long progressiveSize = new FileInfo(progressiveOutputPath).Length;
+            long progressiveSize = new FileInfo(progressivePath).Length;
+            long baselineSize = new FileInfo(baselinePath).Length;
 
-            Console.WriteLine($"Baseline size: {baselineSize} bytes");
-            Console.WriteLine($"Progressive size: {progressiveSize} bytes");
-            Console.WriteLine($"Size difference (baseline - progressive): {baselineSize - progressiveSize} bytes");
+            Console.WriteLine($"Progressive JPEG size: {progressiveSize} bytes");
+            Console.WriteLine($"Baseline JPEG size:   {baselineSize} bytes");
+
+            if (progressiveSize < baselineSize)
+                Console.WriteLine("Progressive compression produced a smaller file.");
+            else if (progressiveSize > baselineSize)
+                Console.WriteLine("Baseline compression produced a smaller file.");
+            else
+                Console.WriteLine("Both files have the same size.");
         }
         catch (Exception ex)
         {
@@ -59,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer wants to generate progressive JPEGs for faster perceived loading on browsers while comparing file size against baseline JPEGs.
- * 2. When a desktop application needs to convert user‑uploaded photos to high‑quality JPEGs with optional progressive encoding to reduce bandwidth usage.
- * 3. When a digital asset management system must evaluate storage savings by switching from baseline to progressive JPEG compression using Aspose.Imaging in C#.
- * 4. When a photo‑editing tool wants to offer an option to save images as progressive JPEGs and display the size difference to the user.
- * 5. When a batch‑processing script needs to verify that changing the JpegCompressionMode from Baseline to Progressive does not degrade image quality while measuring file size impact.
+ * 1. When a web developer wants to generate progressive JPEGs for faster incremental loading on browsers and compare their file size against baseline JPEGs to decide which format reduces bandwidth.
+ * 2. When an e‑commerce platform needs to create high‑quality product images with Aspose.Imaging in C# and evaluate whether progressive compression yields smaller files than baseline compression for SEO‑friendly page speed.
+ * 3. When a desktop application processes user‑uploaded photos and must save both progressive and baseline JPEG versions to support older devices while measuring the storage impact of each compression mode.
+ * 4. When a digital asset management system automates image optimization by converting source JPEGs to progressive format using JpegOptions and then logs the size difference to monitor storage savings.
+ * 5. When a developer is troubleshooting image rendering issues and uses Aspose.Imaging to toggle between progressive and baseline JPEG compression in C# to compare file sizes and identify the optimal setting for a given quality level.
  */

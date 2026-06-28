@@ -8,41 +8,34 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input path
-        string inputPath = @"C:\Images\sample.jpg";
-
-        // Path safety checks
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "sample.jpg";
+            string outputPath = "output\\result.txt";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the JPEG image
             using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                // Access EXIF data
-                ExifData exifData = image.ExifData;
-
-                if (exifData != null)
+                // Access JPEG-specific EXIF data
+                JpegExifData jpegExif = image.ExifData as JpegExifData;
+                if (jpegExif != null && !string.IsNullOrEmpty(jpegExif.Model))
                 {
-                    // Cast to JPEG-specific EXIF data to get the Model property
-                    JpegExifData jpegExif = exifData as JpegExifData;
-                    if (jpegExif != null)
-                    {
-                        // Print the camera model tag
-                        Console.WriteLine($"Camera model: {jpegExif.Model}");
-                    }
-                    else
-                    {
-                        Console.WriteLine("No JPEG EXIF data available.");
-                    }
+                    Console.WriteLine($"Camera model: {jpegExif.Model}");
                 }
                 else
                 {
-                    Console.WriteLine("No EXIF data found in the image.");
+                    Console.WriteLine("Camera model tag not found.");
                 }
             }
         }
@@ -55,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building a photo gallery web app in C# that groups images by the camera model, a developer can use this code to extract the Model tag from JPEG EXIF data.
- * 2. When generating a digital asset report that lists the equipment used for each photo, the code helps read the camera model from JPEG files using Aspose.Imaging.
- * 3. When validating that uploaded images were captured with an approved device, a C# service can read the EXIF Model tag to enforce compliance.
- * 4. When creating a desktop utility that renames JPEG files based on the camera model, this snippet provides the necessary EXIF extraction in .NET.
- * 5. When performing forensic analysis of image metadata to trace the source of a JPEG, the code enables quick retrieval of the camera model tag via Aspose.Imaging.
+ * 1. When a developer builds a photo‑gallery web app in C# and needs to display the camera model next to each JPEG thumbnail, they can use Aspose.Imaging to read the EXIF Model tag as shown.
+ * 2. When a digital‑asset‑management system must generate a report of all camera models used in a collection of JPEG files, this code extracts the Model tag for each image.
+ * 3. When a mobile‑photo‑upload service wants to validate that images were taken with a specific device, it can read the JPEG EXIF data in C# to compare the camera model.
+ * 4. When an e‑commerce platform processes product photos and wants to log the source camera for quality‑control auditing, the Aspose.Imaging EXIF reader provides the model information.
+ * 5. When a forensic‑analysis tool needs to quickly identify the make of a camera from a suspect’s JPEG evidence, the C# snippet demonstrates how to retrieve the Model tag from the image’s EXIF metadata.
  */

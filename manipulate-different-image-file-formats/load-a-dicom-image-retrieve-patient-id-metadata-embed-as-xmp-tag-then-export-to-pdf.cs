@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,48 +10,20 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "sample.dcm");
-            string outputPath = Path.Combine("Output", "output.pdf");
-
+            string inputPath = "Input/sample.dcm";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            string outputPath = "Output/output.pdf";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
             {
-                // Retrieve Patient ID from DICOM metadata (if available)
-                string patientId = null;
-                try
-                {
-                    // Attempt to read Patient ID from FileInfo if present
-                    var fileInfo = dicomImage.FileInfo;
-                    var patientIdProp = fileInfo?.GetType().GetProperty("PatientId");
-                    if (patientIdProp != null)
-                    {
-                        patientId = patientIdProp.GetValue(fileInfo) as string;
-                    }
-                }
-                catch
-                {
-                    // Ignore any errors while retrieving metadata
-                }
-
-                // Prepare PDF options and embed Patient ID as document title (metadata)
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
-                    if (!string.IsNullOrEmpty(patientId))
-                    {
-                        pdfOptions.PdfDocumentInfo.Title = patientId;
-                    }
-
-                    // Save DICOM image as PDF with the metadata
-                    dicomImage.Save(outputPath, pdfOptions);
-                }
+                PdfOptions pdfOptions = new PdfOptions();
+                dicom.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -64,9 +35,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology software needs to convert DICOM scans into PDF reports while preserving the patient’s identifier as document metadata for easy indexing in electronic health records.
- * 2. When a healthcare integration service must extract the Patient ID from DICOM files and embed it as the PDF title to enable searchable archives in a PACS‑to‑EMR workflow.
- * 3. When a medical research application wants to batch‑process DICOM images, embed study metadata into PDFs, and store them in a document management system that relies on PDF metadata for retrieval.
- * 4. When a telemedicine platform requires on‑the‑fly conversion of diagnostic DICOM images to PDF with patient information attached, so clinicians can view and share the reports without specialized DICOM viewers.
- * 5. When a compliance audit tool needs to generate PDF evidence of imaging studies, ensuring the patient ID is captured in the PDF’s XMP metadata to meet regulatory traceability requirements.
+ * 1. When a hospital IT system must convert DICOM radiology scans into searchable PDF reports that embed the patient’s ID as an XMP metadata tag for electronic health record compliance.
+ * 2. When a medical research platform needs to batch‑process DICOM files, extract each patient identifier, embed it in the PDF’s XMP block, and archive the PDFs for efficient indexing and retrieval.
+ * 3. When a telemedicine application requires on‑the‑fly conversion of a DICOM image to a PDF document while preserving patient information in XMP so the PDF can be securely shared with clinicians.
+ * 4. When a radiology workflow automation tool generates printable PDF summaries from DICOM images, ensuring the patient ID is embedded as XMP metadata for audit trails and legal documentation.
+ * 5. When a health‑care compliance audit demands that every exported imaging report be a PDF with embedded patient metadata, prompting developers to use Aspose.Imaging to read DICOM, capture the patient ID, and write it as an XMP tag before saving.
  */

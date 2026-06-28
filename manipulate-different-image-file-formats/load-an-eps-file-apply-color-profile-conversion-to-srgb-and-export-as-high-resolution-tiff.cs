@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -12,7 +12,7 @@ class Program
         try
         {
             string inputPath = "Input/sample.eps";
-            string outputPath = "Output/result.tif";
+            string outputPath = "Output/sample.tif";
 
             if (!File.Exists(inputPath))
             {
@@ -22,21 +22,20 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (var epsImage = (EpsImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                var rasterOptions = new EpsRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = 3000,
-                    PageHeight = 3000
-                };
-
                 var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    ResolutionSettings = new ResolutionSetting(300, 300),
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    }
                 };
 
-                epsImage.Save(outputPath, tiffOptions);
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop needs to convert client‑provided EPS artwork into a color‑managed sRGB TIFF at high resolution for proofing or pre‑press workflows.
- * 2. When a digital asset management system must ingest vector EPS logos and store them as high‑resolution sRGB TIFF thumbnails for consistent web display.
- * 3. When an e‑commerce platform automates the generation of product catalog images by rasterizing EPS design files into sRGB TIFF files that meet the publisher’s resolution standards.
- * 4. When a publishing house archives legacy EPS illustrations by converting them to color‑corrected sRGB TIFFs to ensure long‑term preservation and compatibility with modern editing tools.
- * 5. When a scientific imaging application needs to render EPS diagrams into high‑resolution sRGB TIFFs for inclusion in research papers and presentations.
+ * 1. When a print shop needs to convert customer‑submitted EPS artwork into a 300 dpi sRGB TIFF for high‑quality offset printing.
+ * 2. When a digital asset management system must ingest vector EPS logos and store them as raster TIFF thumbnails with consistent color across browsers.
+ * 3. When a scientific imaging pipeline requires converting EPS diagrams into lossless TIFF files at a specific resolution for inclusion in research publications.
+ * 4. When an e‑commerce platform automates the generation of product catalog pages by rasterizing EPS product drawings into sRGB TIFF images for web and print.
+ * 5. When a legal document processing tool needs to preserve the exact appearance of EPS signatures by rendering them as high‑resolution TIFF files with a white background.
  */

@@ -5,14 +5,14 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
-public class Program
+class Program
 {
-    public static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = "Input/sample.dcm";
-            string outputPath = "Output/result.tif";
+            string inputPath = "input.dcm";
+            string outputPath = "output.tif";
 
             if (!File.Exists(inputPath))
             {
@@ -26,13 +26,9 @@ public class Program
             {
                 dicomImage.BinarizeOtsu();
 
-                // Add XMP metadata describing processing steps
-                dicomImage.XmpData = new Aspose.Imaging.Xmp.XmpPacketWrapper();
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
-                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
-                {
-                    dicomImage.Save(outputPath, tiffOptions);
-                }
+                dicomImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -44,9 +40,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert DICOM scans to TIFF for archiving while applying Otsu thresholding to enhance binary segmentation and embedding processing details in XMP metadata.
- * 2. When a radiology workflow requires automated preprocessing of DICOM images to produce high‑contrast black‑and‑white TIFF files for downstream analysis, and wants to record the binarization step in the image’s XMP tags.
- * 3. When a healthcare data integration system must ingest DICOM files, perform Otsu binarization to isolate structures, and store the results as TIFF with searchable XMP metadata for audit trails.
- * 4. When a research project needs to batch‑process DICOM images, apply Otsu threshold to prepare them for machine‑learning models, and preserve the processing history in XMP before saving as TIFF.
- * 5. When a PACS‑to‑document conversion tool has to generate printable TIFF copies of DICOM studies, apply Otsu threshold for clearer visual contrast, and embed XMP metadata describing the conversion steps for compliance reporting.
+ * 1. When a radiology application needs to convert raw DICOM scans into high‑contrast binary TIFF files for downstream image analysis pipelines.
+ * 2. When a hospital’s PACS integration requires automated preprocessing of CT images using Otsu binarization before storing them in a TIFF‑based archival system.
+ * 3. When a research project wants to batch‑process DICOM ultrasound frames in C# with Aspose.Imaging to produce thresholded TIFFs that can be easily opened in standard image viewers.
+ * 4. When a medical device manufacturer must generate printable TIFF reports from DICOM data, applying Otsu’s method to highlight regions of interest for quality‑control documentation.
+ * 5. When a health‑tech startup needs to expose a web API that receives DICOM files, applies Otsu thresholding via Aspose.Imaging, and returns the result as a TIFF for integration with third‑party analytics tools.
  */

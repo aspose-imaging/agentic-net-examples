@@ -9,46 +9,52 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output directories
-            string inputDir = @"C:\InputTiffs";
-            string outputDir = @"C:\OutputJpegs";
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\InputTiffs";
+            string outputDirectory = @"C:\OutputJpegs";
 
             // Get all TIFF files in the input directory
-            string[] tiffFiles = Directory.GetFiles(inputDir, "*.tif");
+            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
+            // Also include *.tiff files
+            string[] tiffFilesAlt = Directory.GetFiles(inputDirectory, "*.tiff");
+            string[] allTiffFiles = new string[tiffFiles.Length + tiffFilesAlt.Length];
+            tiffFiles.CopyTo(allTiffFiles, 0);
+            tiffFilesAlt.CopyTo(allTiffFiles, tiffFiles.Length);
 
-            foreach (string inputPath in tiffFiles)
+            foreach (string inputPath in allTiffFiles)
             {
-                // Verify the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output JPEG path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".jpg");
+                // Determine output path (same name, .jpg extension)
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
 
-                // Ensure the output directory exists (unconditional per rule)
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the TIFF image, convert and save as JPEG with 90% quality
+                // Load the TIFF image
                 using (Image image = Image.Load(inputPath))
                 {
-                    var jpegOptions = new JpegOptions
+                    // Set JPEG options with 90% quality
+                    JpegOptions jpegOptions = new JpegOptions
                     {
                         Quality = 90
                     };
+
+                    // Save as JPEG
                     image.Save(outputPath, jpegOptions);
                 }
 
                 // Log successful conversion
-                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+                Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
             }
         }
         catch (Exception ex)
         {
-            // Catch any unexpected errors and report them
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -56,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy archive of TIFF scans to smaller JPEG files for web publishing, they can batch‑process the directory with 90 % quality using Aspose.Imaging for .NET.
- * 2. When an automated nightly job must convert newly uploaded TIFF images to JPEG to reduce storage costs, this code can scan the input folder, convert each file, and log the results.
- * 3. When a document management system requires all incoming TIFF documents to be saved as JPEG thumbnails for quick preview, the sample demonstrates how to load, set JpegOptions, and save each image in C#.
- * 4. When a Windows service has to validate that every TIFF file in a folder exists before conversion and ensure the output directory is created, the code provides the necessary file‑system checks and error handling.
- * 5. When a batch image‑processing pipeline needs to report successful conversions and capture any exceptions while converting multiple TIFFs to high‑quality JPEGs, this example shows how to log each operation using Console output.
+ * 1. When a medical imaging system needs to archive high‑resolution DICOM TIFF scans as smaller JPEG files for quick web preview, a developer can use this code to batch‑convert the images with 90 % quality and log each conversion.
+ * 2. When a publishing house receives scanned book pages in TIFF format and wants to generate web‑ready JPEG thumbnails for their online catalog, this C# routine automates the directory‑wide conversion and records the results.
+ * 3. When an e‑commerce platform stores product photographs as lossless TIFF files but must deliver compressed JPEGs to browsers, a developer can employ this script to process the entire folder, applying a 90 % quality setting and outputting a conversion log.
+ * 4. When a GIS (geographic information system) project contains aerial imagery saved as TIFF and the team needs portable JPEG copies for field devices, the code provides a simple batch conversion with consistent quality and console logging.
+ * 5. When a legal firm digitizes documents as TIFF files and wants to create smaller JPEG versions for email distribution while tracking which files were successfully converted, this example offers a straightforward C# solution.
  */

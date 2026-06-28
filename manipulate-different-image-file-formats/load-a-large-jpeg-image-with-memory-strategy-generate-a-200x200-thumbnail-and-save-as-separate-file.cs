@@ -3,15 +3,15 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+public class Program
 {
     static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input\\large.jpg";
-            string outputPath = "Output\\thumbnail.jpg";
+            string inputPath = "large.jpg";
+            string outputPath = "thumbnail.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,14 +23,17 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the JPEG image with a memory limit (e.g., 100 MB)
-            using (Image image = Image.Load(inputPath, new LoadOptions { BufferSizeHint = 100 }))
+            // Load JPEG with memory limit (e.g., 50 MB)
+            using (Image image = Image.Load(inputPath, new LoadOptions { BufferSizeHint = 50 }))
             {
-                // Resize to 200x200 thumbnail
+                // Resize to 200x200 thumbnail using nearest-neighbour resampling
                 image.Resize(200, 200, ResizeType.NearestNeighbourResample);
 
-                // Save the thumbnail as JPEG using default options
-                JpegOptions jpegOptions = new JpegOptions();
+                // Save thumbnail as JPEG with desired quality
+                var jpegOptions = new JpegOptions
+                {
+                    Quality = 90
+                };
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -43,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application must display preview images of user‑uploaded high‑resolution JPEG photos without exhausting server memory, developers can use this code to load the image with a 100 MB buffer, create a 200×200 thumbnail, and save it as a separate JPEG file.
- * 2. When an e‑commerce platform needs to generate product thumbnail images on the fly from large catalog photos while keeping the process lightweight, this snippet shows how to resize the JPEG using Aspose.Imaging’s memory‑strategy and store the thumbnail for fast page loads.
- * 3. When a desktop photo‑organizer tool wants to create small preview icons for massive JPEG files without loading the entire image into RAM, the example demonstrates loading with BufferSizeHint, resizing to 200 px, and saving the thumbnail for the UI gallery.
- * 4. When a cloud‑based image‑processing pipeline must process batch JPEG uploads under strict memory quotas, developers can apply this code to enforce a memory limit, generate uniform 200×200 thumbnails, and write them to an output folder for downstream services.
- * 5. When a mobile backend service needs to prepare low‑resolution JPEG thumbnails for device sync while ensuring the server stays within a 100 MB memory ceiling, this example illustrates the C# workflow of loading, resizing, and saving the thumbnail using Aspose.Imaging.
+ * 1. When a web application needs to generate small preview images from large JPEG photos without exhausting server memory, developers can use this code to load the image with a memory‑strategy, resize it to a 200×200 thumbnail, and save it as a separate JPEG file.
+ * 2. When an e‑commerce platform wants to create product thumbnail images on the fly from high‑resolution uploads, the code demonstrates how to limit the buffer size, resize the picture, and output a compressed JPEG with a specific quality setting.
+ * 3. When a desktop photo‑management tool must batch‑process user‑selected large JPEG files into thumbnail icons for quick browsing, this snippet shows the C# approach using Aspose.Imaging to safely load, resize, and save each image.
+ * 4. When a mobile backend service receives user‑uploaded photos and needs to store lightweight preview versions for gallery views, the example illustrates how to apply a memory‑hint, perform nearest‑neighbour resampling, and write the thumbnail as a separate JPEG file.
+ * 5. When a content‑delivery network (CDN) automation script needs to generate 200×200 thumbnails for large JPEG assets while controlling memory usage, the code provides a reusable pattern for loading, resizing, and saving the thumbnails with Aspose.Imaging in .NET.
  */

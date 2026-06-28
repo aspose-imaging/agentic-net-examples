@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.bmp";
-            string outputPath = @"C:\Images\output.webp";
+            string inputPath = @"C:\Images\sample.bmp";
+            string outputPath = @"C:\Images\sample_converted.webp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,12 +23,12 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load BMP image
             using (BmpImage bmpImage = new BmpImage(inputPath))
             {
-                // Set WebP conversion options with quality 85
+                // Set WebP conversion options (lossy with quality 85)
                 var webpOptions = new WebPOptions
                 {
                     Lossless = false,
@@ -43,13 +43,13 @@ class Program
             long inputSize = new FileInfo(inputPath).Length;
             long outputSize = new FileInfo(outputPath).Length;
 
-            if (outputSize > inputSize * 0.6)
+            if (outputSize <= inputSize * 0.6)
             {
-                Console.WriteLine("Warning: Output file size reduction is less than 40%.");
+                Console.WriteLine("Size reduction verification passed.");
             }
             else
             {
-                Console.WriteLine("Success: Output file size reduced by at least 40%.");
+                Console.WriteLine("Warning: Output file size reduction is less than 40%.");
             }
         }
         catch (Exception ex)
@@ -61,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce the storage footprint of legacy BMP assets by converting them to WebP with a quality setting of 85 and confirming at least a 40% size reduction.
- * 2. When an e‑commerce platform wants to optimize product photos stored as BMP files for faster page loads by programmatically converting them to WebP in a C# backend and verifying the compression savings.
- * 3. When a mobile app’s build pipeline must automatically transform high‑resolution BMP icons into WebP thumbnails while ensuring the output files are significantly smaller than the originals.
- * 4. When a content management system needs to batch‑process user‑uploaded BMP images, convert them to WebP with controlled quality, and alert developers if the compression does not meet the expected 40% reduction threshold.
- * 5. When a game developer wants to replace uncompressed BMP textures with WebP equivalents in a .NET tool, using Aspose.Imaging to handle the conversion and validate that the new assets occupy considerably less disk space.
+ * 1. When a developer needs to reduce the bandwidth of legacy BMP assets for a web application by converting them to lossy WebP at quality 85 and confirming at least a 40 % size drop.
+ * 2. When an e‑commerce platform wants to batch‑process product photos stored as BMP files, generate smaller WebP thumbnails for faster page loads, and programmatically verify the compression savings.
+ * 3. When a mobile game studio must shrink texture files originally saved as BMP to meet strict app‑store size limits, using Aspose.Imaging in C# to export lossy WebP with a quality setting of 85 and ensure the file size is reduced by 40 % or more.
+ * 4. When a content management system migrates its image library from BMP to modern web‑friendly formats, developers can use this code to automate the conversion to WebP, apply a specific quality level, and log whether each conversion achieves the desired size reduction.
+ * 5. When a DevOps pipeline includes a step that validates image optimization, the script can load BMP images, convert them to WebP with quality 85 using Aspose.Imaging for .NET, and fail the build if the resulting file is not at least 40 % smaller.
  */

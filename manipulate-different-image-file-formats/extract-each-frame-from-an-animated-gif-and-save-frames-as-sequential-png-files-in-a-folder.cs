@@ -1,49 +1,43 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input GIF and output folder paths
-        string inputPath = "input.gif";
-        string outputFolder = "output_frames";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.gif";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            string outputFolder = "Frames";
             Directory.CreateDirectory(outputFolder);
 
-            // Load the animated GIF
-            using (GifImage gifImage = (GifImage)Image.Load(inputPath))
+            using (Image img = Image.Load(inputPath))
             {
-                int frameIndex = 0;
-                foreach (GifFrameBlock block in gifImage.Blocks)
+                GifImage gif = img as GifImage;
+                if (gif == null)
                 {
-                    // Extract full raster image for the current frame
-                    using (RasterImage frame = block.GetFullFrame())
-                    {
-                        // Build output file path (e.g., frame_0000.png)
-                        string outputPath = Path.Combine(outputFolder, $"frame_{frameIndex:D4}.png");
+                    Console.Error.WriteLine("The input file is not a GIF image.");
+                    return;
+                }
 
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the frame as PNG
-                        frame.Save(outputPath);
-                    }
-
-                    frameIndex++;
+                int frameCount = gif.PageCount;
+                for (int i = 0; i < frameCount; i++)
+                {
+                    gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
+                    string outputPath = Path.Combine(outputFolder, $"frame_{i + 1}.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    gif.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -56,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an animated GIF into a sequence of high‑quality PNG images for frame‑by‑frame editing in a graphics editor, they can use this C# Aspose.Imaging code to extract each frame and save it as a lossless PNG file.
- * 2. When building a web application that generates preview thumbnails for each step of an animated advertisement, the code can extract individual GIF frames and store them as PNGs for faster loading and caching.
- * 3. When creating a dataset of image samples for machine‑learning models that require consistent file formats, developers can run this routine to split an animated GIF into separate PNG frames for labeling and training.
- * 4. When developing a game that uses sprite animations, the code allows developers to decompose a GIF sprite sheet into individual PNG frames that can be imported into the game engine’s animation system.
- * 5. When performing forensic analysis of user‑uploaded GIFs to detect hidden content or tampering, the code provides a reliable way to extract each frame as PNGs for detailed pixel‑level inspection.
+ * 1. When a developer needs to extract each frame from an animated GIF to create individual PNG images for use in a web carousel or slideshow.
+ * 2. When a developer wants to convert GIF animation frames into high‑quality PNG files for further editing in graphic design tools.
+ * 3. When a developer must generate separate PNG assets from a GIF to apply per‑frame watermarking or branding.
+ * 4. When a developer is building a thumbnail preview system that requires saving each GIF frame as a PNG to display step‑by‑step animation.
+ * 5. When a developer needs to archive or analyze the individual frames of a GIF by exporting them as PNG files for machine‑learning image classification.
  */

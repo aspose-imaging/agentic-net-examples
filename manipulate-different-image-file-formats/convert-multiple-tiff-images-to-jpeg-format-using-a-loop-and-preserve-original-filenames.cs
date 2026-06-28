@@ -10,30 +10,39 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Tiff";
-            string outputDir = @"C:\Images\Jpeg";
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
             // Get all TIFF files in the input directory
-            string[] tiffFiles = Directory.GetFiles(inputDir, "*.tif");
-
-            foreach (string inputPath in tiffFiles)
+            string[] tiffFiles = Directory.GetFiles(inputDir, "*.*", SearchOption.TopDirectoryOnly);
+            foreach (string filePath in tiffFiles)
             {
-                // Verify that the input file exists
-                if (!File.Exists(inputPath))
+                // Process only .tif or .tiff extensions (case‑insensitive)
+                string extension = Path.GetExtension(filePath);
+                if (!extension.Equals(".tif", StringComparison.OrdinalIgnoreCase) &&
+                    !extension.Equals(".tiff", StringComparison.OrdinalIgnoreCase))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
+
+                // Verify the input file exists
+                if (!File.Exists(filePath))
+                {
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
 
-                // Build the output JPEG path preserving the original filename
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
+                // Build output path with same filename but .jpg extension
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(filePath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".jpg");
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the TIFF image and save it as JPEG
-                using (Image image = Image.Load(inputPath))
+                // Load the TIFF image
+                using (Image image = Image.Load(filePath))
                 {
+                    // Save as JPEG using default options
                     image.Save(outputPath, new JpegOptions());
                 }
             }
@@ -47,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a folder of TIFF scans into JPEGs for faster web delivery while keeping the original file names.
- * 2. When an application must migrate legacy medical imaging files stored as .tif to a more widely supported .jpg format without altering the naming convention.
- * 3. When a photo‑management tool has to generate JPEG thumbnails from a collection of high‑resolution TIFF pictures for display in a gallery view.
- * 4. When an automated ETL pipeline processes incoming TIFF documents and saves them as JPEGs in a separate output directory for downstream analytics.
- * 5. When a C# service needs to ensure that all TIFF assets are converted to JPEG on a scheduled basis, preserving the base filenames for easy reference.
+ * 1. When a medical imaging system stores patient scans as high‑resolution TIFF files and needs to generate smaller JPEG copies for quick web viewing while keeping the original scan names.
+ * 2. When a publishing workflow receives bulk TIFF artwork from designers and must create JPEG previews for editorial review without altering the original filenames.
+ * 3. When an e‑commerce platform imports product photos in TIFF format and wants to batch‑convert them to JPEG for faster page loads while preserving the SKU‑based file names.
+ * 4. When a digital archiving tool processes scanned documents saved as TIFF and needs to produce JPEG versions for email distribution, maintaining the same document identifiers.
+ * 5. When a GIS application exports map tiles as TIFF and requires a script to generate JPEG tiles for mobile apps, keeping each tile’s original name for seamless integration.
  */

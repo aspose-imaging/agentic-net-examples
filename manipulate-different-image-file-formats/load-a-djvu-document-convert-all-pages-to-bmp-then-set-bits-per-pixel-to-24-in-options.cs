@@ -10,8 +10,8 @@ class Program
     {
         try
         {
-            // Hardcoded input DjVu file path
-            string inputPath = "input.djvu";
+            // Hardcoded input path
+            string inputPath = @"C:\temp\sample.djvu";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,17 +20,23 @@ class Program
                 return;
             }
 
-            // Open the DjVu document from a file stream
+            // Hardcoded output directory
+            string outputDir = @"C:\temp\output";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Load DjVu document from stream
             using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Iterate through all pages in the DjVu document
+                // Iterate through each page
                 foreach (DjvuPage page in djvuImage.Pages)
                 {
-                    // Build output BMP file path for the current page
-                    string outputPath = Path.Combine("output", $"page_{page.PageNumber}.bmp");
+                    // Build output file path for the current page
+                    string outputPath = Path.Combine(outputDir, $"page_{page.PageNumber}.bmp");
 
-                    // Ensure the output directory exists
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Set BMP save options with 24 bits per pixel
@@ -39,7 +45,7 @@ class Program
                         BitsPerPixel = 24
                     };
 
-                    // Save the page as a BMP image using the specified options
+                    // Save the page as BMP using the specified options
                     page.Save(outputPath, bmpOptions);
                 }
             }
@@ -53,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each page of a multi‑page DjVu document and store them as high‑color 24‑bit BMP files for legacy Windows applications.
- * 2. When a document management system must convert scanned DjVu archives into BMP images to generate thumbnails that preserve full color depth.
- * 3. When an archival workflow requires batch processing of DjVu files into BMP format with a fixed BitsPerPixel setting to ensure consistent image quality across all pages.
- * 4. When a C# service reads DjVu files from a file stream, iterates through pages, and saves them as BMP files for downstream OCR engines that only accept BMP input.
- * 5. When a developer integrates Aspose.Imaging into a .NET application to programmatically convert DjVu pages to BMP while controlling the pixel depth to 24 bits for accurate color reproduction.
+ * 1. When a developer needs to extract each page of a multi‑page DjVu document and generate high‑quality 24‑bit BMP images for archival or printing purposes.
+ * 2. When an application must convert scanned DjVu files into BMP format to feed legacy Windows imaging tools that only accept 24‑bit BMP files.
+ * 3. When a batch‑processing service has to read DjVu files from a file stream, iterate over all pages, and save them as BMP images with a specific BitsPerPixel setting for consistent color depth.
+ * 4. When a document‑management system requires converting DjVu pages to BMP thumbnails with 24‑bit color to ensure accurate visual representation in a .NET environment.
+ * 5. When a developer wants to automate the conversion of DjVu pages to BMP using Aspose.Imaging for .NET while handling missing files and creating output directories programmatically.
  */

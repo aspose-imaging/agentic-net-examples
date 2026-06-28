@@ -9,7 +9,8 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "output/Canvas.html";
+        string canvasOutputPath = "canvas.html";
+        string finalHtmlPath = "output.html";
 
         try
         {
@@ -20,26 +21,43 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(canvasOutputPath) ?? string.Empty);
+            Directory.CreateDirectory(Path.GetDirectoryName(finalHtmlPath) ?? string.Empty);
 
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure HTML5 Canvas export options
-                var options = new Html5CanvasOptions
+                // Save only the canvas tag (no full HTML page)
+                var canvasOptions = new Html5CanvasOptions
                 {
-                    // Generate a full HTML page containing the canvas element
-                    FullHtmlPage = true
+                    FullHtmlPage = false,
+                    // Optional: set a canvas tag identifier
+                    CanvasTagId = "myCanvas"
                 };
-
-                // Save as HTML5 Canvas
-                image.Save(outputPath, options);
+                image.Save(canvasOutputPath, canvasOptions);
             }
+
+            // Read the generated canvas snippet
+            string canvasSnippet = File.ReadAllText(canvasOutputPath);
+
+            // Build a full HTML page that embeds the canvas
+            string fullHtml = $"<!DOCTYPE html>{Environment.NewLine}" +
+                              $"<html>{Environment.NewLine}" +
+                              $"<head>{Environment.NewLine}" +
+                              $"    <meta charset=\"UTF-8\" />{Environment.NewLine}" +
+                              $"    <title>Canvas Export</title>{Environment.NewLine}" +
+                              $"</head>{Environment.NewLine}" +
+                              $"<body>{Environment.NewLine}" +
+                              $"    {canvasSnippet}{Environment.NewLine}" +
+                              $"</body>{Environment.NewLine}" +
+                              $"</html>";
+
+            // Write the final HTML page
+            File.WriteAllText(finalHtmlPath, fullHtml);
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -47,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer wants to display a PNG diagram on a dynamic web page without relying on external image files, they can use this C# code to convert the raster image into an HTML5 Canvas element embedded in a full HTML page.
- * 2. When an e‑learning platform needs to embed interactive graphics that can be programmatically manipulated with JavaScript, the code allows exporting the source image to a canvas‑based HTML page using Aspose.Imaging’s Html5CanvasOptions.
- * 3. When a reporting tool must generate self‑contained HTML reports that include raster charts, the snippet converts the chart PNG into a canvas element so the report can be viewed offline without separate image assets.
- * 4. When a mobile‑first website requires responsive rendering of legacy raster assets, developers can run this code to transform the PNG into a scalable HTML5 Canvas that adapts to different screen sizes.
- * 5. When an automated build pipeline has to produce preview pages for design assets, the example shows how to load a PNG in C#, export it to a full HTML page with a canvas tag, and store it in a designated output folder.
+ * 1. When a web developer wants to display a PNG logo on a dynamic HTML5 page without using external image files, they can convert the raster image to a canvas element with Aspose.Imaging and embed it directly in the page.
+ * 2. When building an email template that must inline images for better compatibility, a developer can export the image to a canvas snippet and insert it into the HTML body to avoid attachment handling.
+ * 3. When creating an interactive reporting dashboard that draws charts on a canvas, a programmer can pre‑render static background graphics as a canvas tag using the Html5CanvasOptions and merge it into the final HTML layout.
+ * 4. When generating printable web‑ready documentation where images need to be part of the HTML source for offline viewing, the code can transform each source PNG into an embedded canvas element.
+ * 5. When developing a single‑page application that loads assets on the fly, a developer can use this approach to convert server‑side raster assets to canvas markup, reducing HTTP requests and simplifying client‑side rendering.
  */

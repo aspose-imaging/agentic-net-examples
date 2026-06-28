@@ -9,36 +9,37 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.djvu";
+        string outputPath = @"C:\temp\output.tif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input\\sample.djvu";
-            string outputPath = "output\\combined.tif";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load DjVu document
+            // Load DjVu document from file stream
             using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
                 // Configure TIFF save options
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 tiffOptions.Compression = TiffCompressions.Deflate;
-                // Optional: convert to 1‑bit B/W if needed
+                // Optional: force B/W output
                 tiffOptions.BitsPerSample = new ushort[] { 1 };
 
                 // Select pages 5‑7 (zero‑based indexes 4,5,6)
-                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(new int[] { 4, 5, 6 });
+                DjvuMultiPageOptions multiPageOptions = new DjvuMultiPageOptions(new int[] { 4, 5, 6 });
+                tiffOptions.MultiPageOptions = multiPageOptions;
 
-                // Save combined multipage TIFF
+                // Save selected pages as a multipage TIFF
                 djvuImage.Save(outputPath, tiffOptions);
             }
         }
@@ -51,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a legal firm needs to archive selected pages (5‑7) of a scanned DjVu case file as a compressed multi‑page TIFF for long‑term storage and easy retrieval.
- * 2. When a publishing company wants to extract specific illustration pages from a DjVu manuscript and combine them into a single TIFF for print‑ready proofing.
- * 3. When a medical records system must convert particular pages of a DjVu radiology report into a 1‑bit black‑and‑white multipage TIFF to meet DICOM archival standards.
- * 4. When a government agency automates the conversion of confidential DjVu documents, selecting only the relevant pages and saving them as a deflate‑compressed TIFF for secure distribution.
- * 5. When a digital archiving workflow extracts pages 5‑7 from a DjVu archive and creates a single TIFF file to be indexed by OCR software that only supports TIFF input.
+ * 1. When a developer needs to extract specific pages (e.g., pages 5‑7) from a DjVu document and archive them as a compressed, black‑and‑white multipage TIFF for long‑term storage or printing.
+ * 2. When an application must convert selected DjVu pages into a single TIFF file to feed a downstream OCR engine that only accepts TIFF input.
+ * 3. When a digital library system wants to provide users with downloadable excerpts of scanned books by converting chosen DjVu pages into a deflate‑compressed TIFF bundle.
+ * 4. When a workflow automates the creation of multi‑page TIFF reports from multi‑page DjVu source files, preserving page order and applying B/W bit depth for reduced file size.
+ * 5. When a C# service processes incoming DjVu submissions and needs to generate a single multipage TIFF containing only the relevant pages for compliance auditing or legal review.
  */

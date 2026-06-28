@@ -2,17 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Define input and output paths
-            string inputPath = "Input/sample.djvu";
-            string outputPath = "Output/sample.pdf";
+            string inputPath = "Input\\sample.djvu";
+            string outputPath = "Output\\result.pdf";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -24,17 +25,19 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DjVu document
+            // Load DjVu document
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF options with author metadata
-                var pdfOptions = new PdfOptions
+                // Configure PDF options with custom author
+                PdfOptions pdfOptions = new PdfOptions
                 {
-                    PdfDocumentInfo = new PdfDocumentInfo()
+                    PdfDocumentInfo = new PdfDocumentInfo
+                    {
+                        Author = "Example"
+                    }
                 };
-                pdfOptions.PdfDocumentInfo.Author = "Example";
 
-                // Export to PDF
+                // Save as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -47,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy DjVu scans of technical manuals into searchable PDF files while embedding author metadata for document management systems.
- * 2. When an application must batch‑process archived DjVu images from a file server and produce PDF reports that include the creator’s name for compliance auditing.
- * 3. When a web service receives user‑uploaded DjVu artwork and must deliver a PDF version with proper author attribution for digital publishing workflows.
- * 4. When a desktop utility has to validate the existence of a DjVu file, create the output folder, and export the image to PDF using Aspose.Imaging’s PdfOptions to set the Author field.
- * 5. When integrating C# code into a document‑conversion pipeline that requires preserving image quality while adding PDF metadata such as author for downstream indexing.
+ * 1. When a developer needs to convert archived DjVu scans of historical documents into searchable PDF files while embedding the author's name for proper metadata tracking.
+ * 2. When an application must batch‑process DjVu e‑books and generate PDF versions with a custom author field to comply with publishing standards.
+ * 3. When a document management system requires converting user‑uploaded DjVu images to PDF and setting the author property to identify the source of the content.
+ * 4. When a C# service automates the migration of legacy DjVu technical manuals to PDF format and needs to preserve author information using Aspose.Imaging PdfOptions.
+ * 5. When a workflow integrates Aspose.Imaging to transform DjVu graphics into PDF reports and assign a specific author name for audit and compliance purposes.
  */

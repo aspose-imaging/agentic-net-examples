@@ -9,32 +9,33 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"C:\input\sample.cdr";
-        string outputPath = @"C:\output\sample.tif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/output.tif";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            // Load the CorelDRAW (CDR) file
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                {
-                    Compression = TiffCompressions.Lzw,
-                    VectorRasterizationOptions = new CdrRasterizationOptions
-                    {
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    }
-                };
+                // Configure TIFF options with LZW compression
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.TiffLzwRgb);
+                tiffOptions.Compression = TiffCompressions.Lzw;
+                tiffOptions.Photometric = TiffPhotometrics.Rgb;
+                tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
 
-                image.Save(outputPath, tiffOptions);
+                // Save as TIFF
+                cdr.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a CorelDRAW CDR design into a lossless TIFF image for archival or printing, using Aspose.Imaging to apply LZW compression.
- * 2. When an automated workflow must batch‑process CDR files from a design repository and generate compressed TIFF files for inclusion in a document management system.
- * 3. When a web application receives user‑uploaded CorelDRAW files and must render them as TIFF images with LZW compression to reduce file size before storing them in cloud storage.
- * 4. When a desktop utility has to export vector graphics from a CDR file to a raster TIFF format while preserving page dimensions and using LZW compression for efficient transmission.
- * 5. When a migration script needs to transform legacy CorelDRAW assets into TIFF files that can be displayed in standard image viewers, ensuring the output uses LZW compression for optimal balance of quality and size.
+ * 1. When a developer needs to convert legacy CorelDRAW (CDR) artwork into a lossless, web‑compatible TIFF image with LZW compression for archival or publishing workflows.
+ * 2. When an automated batch process must read CDR files from a folder and generate compressed TIFF files for integration into a document management system.
+ * 3. When a graphics application requires extracting vector designs from CorelDRAW and saving them as RGB TIFFs with 8‑bit per channel depth for high‑quality print previews.
+ * 4. When a .NET service has to validate that a CorelDRAW file exists, create the output directory, and export the image to a TIFF file using Aspose.Imaging’s TiffOptions to ensure consistent compression.
+ * 5. When a developer is building a migration tool that transforms legacy CDR assets into LZW‑compressed TIFFs to reduce storage size while preserving color fidelity.
  */

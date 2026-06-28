@@ -8,40 +8,40 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\temp\large.jpg";
-        string outputPath = @"C:\temp\large_optimized.jpg";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the JPEG with a memory‑usage hint (e.g., 100 MB)
+            // Hard‑coded input and output paths
+            string inputPath = @"C:\Images\large_input.jpg";
+            string outputPath = @"C:\Images\large_output.jpg";
+
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the JPEG with a memory‑usage hint (e.g., 100 MB max for internal buffers)
             var loadOptions = new LoadOptions { BufferSizeHint = 100 };
+
             using (Image image = Image.Load(inputPath, loadOptions))
             {
                 // Configure JPEG save options to reduce file size
                 var saveOptions = new JpegOptions
                 {
-                    Quality = 60, // lower quality reduces size
-                    CompressionType = JpegCompressionMode.Progressive
+                    Quality = 70, // lower quality → smaller file
+                    CompressionType = JpegCompressionMode.Progressive // progressive JPEG often yields better compression
                 };
 
-                // Save the optimized image
+                // Save the processed image
                 image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -49,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application must display a high‑resolution JPEG uploaded by users but needs to limit server memory usage, a developer can load the image with Aspose.Imaging’s BufferSizeHint and save it with lower quality and progressive compression.
- * 2. When a desktop photo‑management tool processes large camera‑generated JPEG files and wants to create smaller preview versions without loading the entire image into RAM, this code shows how to use a memory‑strategy hint and re‑save the image efficiently.
- * 3. When an automated batch‑processing service archives thousands of product photos and must keep the archive size low, a developer can read each large JPEG with a 100 MB buffer and re‑save it at reduced quality to shrink file size.
- * 4. When a mobile‑backend API receives high‑resolution JPEGs from smartphones and needs to reduce bandwidth before delivering them to clients, the snippet demonstrates loading the image with memory‑optimized options and exporting it as a progressive JPEG with a smaller footprint.
- * 5. When a digital‑asset‑management system must ensure incoming JPEGs fit within a memory budget while creating space‑efficient copies for long‑term storage, this example provides the exact steps to load the image with a buffer hint and save it with lower quality and progressive compression.
+ * 1. When a web application must upload a high‑resolution JPEG from a user's device but needs to limit server memory consumption, the code can load the image with a 100 MB buffer hint and save a smaller progressive JPEG.
+ * 2. When a desktop batch‑processing tool processes thousands of large product photos for an e‑commerce catalog, this snippet ensures each image is loaded efficiently and saved with reduced quality to meet bandwidth constraints.
+ * 3. When a mobile backend service receives camera‑generated JPEGs that exceed available RAM, developers can use the BufferSizeHint and JpegOptions to down‑sample and compress the files before storing them.
+ * 4. When an automated reporting system generates large JPEG charts that must be archived, the code helps keep the archive size low by converting the images to progressive JPEGs with a configurable quality level.
+ * 5. When a cloud‑based image‑optimization pipeline needs to handle big JPEG uploads without exhausting VM memory, the example demonstrates how to load the image with a memory‑usage hint and output a smaller file for faster CDN delivery.
  */

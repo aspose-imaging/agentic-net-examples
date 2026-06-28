@@ -8,19 +8,24 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input DICOM files and output directory
-        string[] inputFiles = new string[]
-        {
-            @"C:\Images\image1.dcm",
-            @"C:\Images\image2.dcm",
-            @"C:\Images\image3.dcm"
-        };
-        string outputDirectory = @"C:\Output\";
-
         try
         {
-            foreach (string inputPath in inputFiles)
+            // Hardcoded input directory and file names
+            string inputDir = @"C:\Images\Dicom\";
+            string[] inputFiles = new string[]
             {
+                "image1.dcm",
+                "image2.dcm",
+                "image3.dcm"
+            };
+
+            // Hardcoded output directory
+            string outputDir = @"C:\Images\Gif\";
+
+            foreach (string fileName in inputFiles)
+            {
+                string inputPath = Path.Combine(inputDir, fileName);
+
                 // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
@@ -28,23 +33,23 @@ class Program
                     return;
                 }
 
-                // Build output GIF path
-                string outputPath = Path.Combine(
-                    outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".gif");
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load DICOM image, adjust contrast, and save as GIF
+                // Load DICOM image
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Cast to DicomImage to access AdjustContrast
                     DicomImage dicomImage = (DicomImage)image;
 
-                    // Adjust contrast by 30 (approximately 1.3 factor)
+                    // Adjust contrast; 30f corresponds to a 30% increase (range -100 to 100)
                     dicomImage.AdjustContrast(30f);
 
-                    // Save the processed image as GIF
+                    // Prepare output path with .gif extension
+                    string outputFileName = Path.GetFileNameWithoutExtension(fileName) + ".gif";
+                    string outputPath = Path.Combine(outputDir, outputFileName);
+
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save as GIF
                     dicomImage.Save(outputPath, new GifOptions());
                 }
             }
@@ -58,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application must convert a set of DICOM scans to lightweight GIF files with enhanced contrast for quick web preview.
- * 2. When a radiology research pipeline needs to batch‑process multiple DICOM images, apply a 1.3 contrast factor, and store the results in a shared folder for downstream analysis.
- * 3. When a hospital’s PACS integration script has to generate GIF thumbnails from DICOM files while improving visibility of subtle details.
- * 4. When a C# desktop tool is built to automate the export of DICOM series to GIF format for inclusion in patient reports, ensuring consistent contrast across all images.
- * 5. When a health‑tech startup wants to preprocess DICOM datasets by adjusting contrast and converting them to GIFs in one pass to reduce storage and simplify image handling in a .NET environment.
+ * 1. When a medical imaging application must convert a set of DICOM scans to lightweight GIF files with increased contrast for quick preview in a web portal.
+ * 2. When a radiology research tool needs to batch‑process multiple DICOM images, apply a 30 % contrast boost, and store the results as GIFs for inclusion in presentation slides.
+ * 3. When a hospital’s PACS integration script has to automate the export of DICOM files to GIF format while enhancing visibility of details using C# and Aspose.Imaging.
+ * 4. When a diagnostic software developer wants to generate GIF images from a series of DICOM slices after adjusting contrast to improve visual analysis.
+ * 5. When an e‑learning platform requires a C# routine that loads several DICOM images, raises their contrast by a factor of 1.3, and saves each as a GIF for use in interactive tutorials.
  */

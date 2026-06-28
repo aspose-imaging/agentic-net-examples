@@ -6,11 +6,11 @@ using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input and output file paths
             string inputPath = "input.bmp";
             string outputPath = "output.bmp";
 
@@ -21,27 +21,26 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
-            using (Image image = Image.Load(inputPath))
+            // Load the BMP image as a raster image
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage to access the Rotate overload with background color
-                RasterImage raster = (RasterImage)image;
-
-                // Rotate by an arbitrary angle (e.g., 45 degrees) with proportional resizing
-                // and a transparent background for empty areas
-                float angle = 45f;               // change as needed
+                // Rotate the image by an arbitrary angle (e.g., 45 degrees)
+                // Resize proportionally to fit the rotated content
+                // Fill empty areas with a transparent background
+                float angle = 45f;
                 bool resizeProportionally = true;
-                raster.Rotate(angle, resizeProportionally, Color.Transparent);
+                Color transparent = Color.FromArgb(0, 0, 0, 0);
+                image.Rotate(angle, resizeProportionally, transparent);
 
-                // Save the rotated image as BMP with transparency support (Bitfields compression)
-                var bmpOptions = new BmpOptions
+                // Save the rotated image preserving alpha channel
+                BmpOptions options = new BmpOptions
                 {
                     Compression = BitmapCompression.Bitfields
                 };
-                raster.Save(outputPath, bmpOptions);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -53,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a custom map editor that uses Aspose.Imaging for .NET to rotate BMP terrain tiles and needs the empty corners filled with a transparent background for seamless layering.
- * 2. When generating printable product labels where an Aspose.Imaging‑based C# routine rotates a BMP logo to a diagonal orientation while preserving transparency to avoid white margins.
- * 3. When developing a game asset pipeline that employs Aspose.Imaging to rotate sprite sheets stored as BMP files and requires transparent padding so the sprites align correctly after rotation.
- * 4. When building an automated document‑scanning workflow that uses Aspose.Imaging for .NET to correct the orientation of scanned BMP images and fills the newly created corners with transparency for downstream PDF composition.
- * 5. When implementing a batch image‑processing tool in C# that reorients BMP screenshots from legacy software using Aspose.Imaging, applying a transparent background to maintain visual consistency when overlaying them on modern UI mockups.
+ * 1. When a developer needs to generate rotated thumbnails of legacy BMP assets for a Windows desktop application while preserving transparency for overlay UI elements.
+ * 2. When an image processing pipeline must align scanned BMP diagrams at arbitrary angles before performing OCR, using Aspose.Imaging’s Rotate method with a transparent background to avoid unwanted white corners.
+ * 3. When a game developer wants to rotate sprite sheets stored as BMP files at runtime in C# and keep the empty space transparent so the sprites blend correctly with the game scene.
+ * 4. When a reporting tool has to re‑orient BMP charts that were exported in landscape mode to portrait orientation, requiring proportional resizing and a transparent fill to maintain layout consistency.
+ * 5. When a batch conversion utility must correct the orientation of user‑uploaded BMP logos by rotating them by a custom angle and saving the result with an alpha channel so the logos can be placed on any background without visible borders.
  */

@@ -11,27 +11,40 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.djvu";
+            // Input DjVu file path (relative)
+            string inputPath = Path.Combine("Input", "sample.djvu");
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            PngOptions pngOptions = new PngOptions
+            // Open the DjVu file stream
+            using (Stream stream = File.OpenRead(inputPath))
             {
-                FilterType = PngFilterType.Sub
-            };
-
-            using (FileStream stream = File.OpenRead(inputPath))
-            {
+                // Load DjVu image
                 using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    foreach (DjvuPage page in djvuImage.Pages)
+                    // Configure PNG options with a custom filter type
+                    PngOptions pngOptions = new PngOptions
                     {
-                        string outputPath = Path.Combine("Output", $"page_{page.PageNumber}.png");
+                        FilterType = PngFilterType.Sub // Example filter type
+                    };
+
+                    // Iterate through each page and save as PNG
+                    foreach (Image page in djvuImage.Pages)
+                    {
+                        // Cast to DjvuPage to access the page number
+                        DjvuPage djvuPage = (DjvuPage)page;
+                        string outputPath = Path.Combine("Output", $"page_{djvuPage.PageNumber}.png");
+
+                        // Ensure the output directory exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                        page.Save(outputPath, pngOptions);
+
+                        // Save the page as PNG using the custom options
+                        djvuPage.Save(outputPath, pngOptions);
                     }
                 }
             }
@@ -45,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each page of a multi‑page DjVu document and save them as high‑quality PNG images with a specific Sub filter for better compression, they can use this code.
- * 2. When building a document‑preview feature that converts DjVu files into web‑friendly PNG thumbnails on the fly in a C# application, this snippet provides the necessary page‑by‑page conversion.
- * 3. When migrating legacy scanned archives stored as DjVu into a PNG‑based digital asset management system, the code enables automated batch processing of all pages with custom PngOptions.
- * 4. When creating an automated workflow that validates DjVu content by rendering each page to PNG for visual inspection or OCR preprocessing, the example shows how to load, iterate, and save pages using Aspose.Imaging for .NET.
- * 5. When developing a cross‑platform .NET service that receives DjVu uploads and returns individual PNG files with a chosen filter type for downstream image analysis, this code demonstrates the required file handling and conversion steps.
+ * 1. When a developer needs to extract each page of a multi‑page DjVu document and generate high‑quality PNG images with a specific PNG filter (e.g., Sub) for downstream web publishing.
+ * 2. When an archival system must convert scanned DjVu files into lossless PNG files while preserving page numbers for indexing and search.
+ * 3. When a digital library wants to provide thumbnail previews of DjVu books by converting every page to PNG using Aspose.Imaging in a C# batch process.
+ * 4. When a document‑processing pipeline requires converting DjVu pages to PNG with custom compression settings to meet size constraints before uploading to cloud storage.
+ * 5. When a developer is building a Windows service that monitors an Input folder, reads DjVu files, and automatically saves each page as PNG with chosen filter types for further image analysis.
  */

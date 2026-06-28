@@ -2,44 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.cmx";
+        string outputPath = "output.pdf";
+
+        // Validate input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Input\sample.cmx";
-            string outputPath = @"C:\Output\sample.pdf";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the CMX image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF export options with CMX rasterization settings
-                var pdfOptions = new PdfOptions
+                // Configure PDF export options with vector rasterization settings
+                PdfOptions pdfOptions = new PdfOptions();
+                CmxRasterizationOptions rasterOptions = new CmxRasterizationOptions
                 {
-                    VectorRasterizationOptions = new CmxRasterizationOptions
-                    {
-                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
-                        Positioning = Aspose.Imaging.ImageOptions.PositioningTypes.DefinedByDocument
-                        // Additional options (e.g., BackgroundColor) can be set here if needed
-                    }
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
+                    Positioning = PositioningTypes.DefinedByDocument
                 };
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the image as PDF with vector fidelity and embedded fonts
+                // Save as PDF preserving vector fidelity and embedded fonts
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -52,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD engineer needs to convert legacy CorelDRAW CMX drawings into searchable PDF documents while preserving vector quality and embedding the original fonts for accurate printing.
- * 2. When an automated document processing pipeline must batch‑convert CMX files stored on a server into PDF reports that retain exact line art and text rendering using Aspose.Imaging in a C# application.
- * 3. When a web service offers on‑the‑fly preview of CMX artwork in PDF format, requiring vector fidelity and embedded fonts so that end users see the same layout as the original file.
- * 4. When a desktop utility needs to archive engineering schematics by saving CMX drawings as PDF files with anti‑aliased vector rasterization and font embedding to meet compliance standards.
- * 5. When a migration tool moves legacy CMX assets to a PDF‑based digital asset management system, using C# and Aspose.Imaging to ensure the converted PDFs keep the original vector paths and font information intact.
+ * 1. When a developer needs to convert legacy CorelDRAW CMX files to PDF for archiving while preserving vector quality and embedding fonts.
+ * 2. When an application must generate printable PDFs from CMX drawings without rasterizing the artwork, ensuring crisp lines for engineering diagrams.
+ * 3. When a document management system requires automated batch conversion of CMX assets to PDF with embedded fonts for cross‑platform viewing.
+ * 4. When a web service needs to expose an API that transforms user‑uploaded CMX files into PDF documents that retain vector fidelity for downstream editing.
+ * 5. When a developer wants to integrate Aspose.Imaging into a C# workflow to validate CMX file existence, create output directories, and export to PDF with precise rasterization settings.
  */

@@ -10,38 +10,54 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\temp\input";
-            string outputDir = @"C:\temp\output";
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-            // Process each file found in the input directory
-            foreach (string inputPath in Directory.GetFiles(inputDir))
+            // List of input image files (any supported format)
+            string[] inputFiles = new string[]
             {
-                // Verify the input file exists
+                Path.Combine(inputDir, "image1.png"),
+                Path.Combine(inputDir, "image2.bmp"),
+                Path.Combine(inputDir, "image3.tif")
+            };
+
+            // Uniform JPEG quality
+            int jpegQuality = 85;
+
+            foreach (var inputPath in inputFiles)
+            {
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the corresponding output JPEG path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".jpg");
+                // Build output path with .jpg extension
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
 
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image from the input file stream
-                using (FileStream inputStream = File.OpenRead(inputPath))
-                using (Image image = Image.Load(inputStream))
+                // Load the file into a memory stream
+                using (FileStream fs = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    // Set JPEG save options with uniform quality
-                    var jpegOptions = new JpegOptions
-                    {
-                        Quality = 80 // desired uniform quality (1-100)
-                    };
+                    fs.CopyTo(ms);
+                    ms.Position = 0;
 
-                    // Save the image as JPEG to the output path
-                    image.Save(outputPath, jpegOptions);
+                    // Load image from the memory stream
+                    using (Image image = Image.Load(ms))
+                    {
+                        // Configure JPEG options with the desired quality
+                        JpegOptions jpegOptions = new JpegOptions
+                        {
+                            Quality = jpegQuality
+                        };
+
+                        // Save the image as JPEG
+                        image.Save(outputPath, jpegOptions);
+                    }
                 }
             }
         }
@@ -54,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to export a batch of HTML5 Canvas drawings saved as temporary files into compressed JPEGs with a consistent quality setting for faster download.
- * 2. When an e‑learning platform must generate thumbnail previews from user‑uploaded canvas images and store them as uniform‑quality JPEG files on the server.
- * 3. When a digital asset management system requires automated conversion of stored canvas snapshots into JPEG format to ensure compatibility with legacy image viewers.
- * 4. When a reporting tool has to batch‑process canvas‑based charts saved in memory streams and produce JPEG images with a fixed 80 % quality for inclusion in PDF reports.
- * 5. When a mobile backend service needs to normalize the size and compression of canvas‑generated screenshots by converting them to JPEG files with a standard quality level before archiving.
+ * 1. When a web application captures drawings from an HTML5 Canvas, stores them in memory streams, and needs to batch‑convert them to JPEG files with a consistent quality setting for storage or download.
+ * 2. When a digital asset management system receives various image formats (PNG, BMP, TIFF) from client browsers, loads them into memory streams, and must standardize them to JPEG at a uniform compression level for efficient indexing.
+ * 3. When an e‑learning platform generates course screenshots on the client side, streams them to the server, and requires a C# routine to convert the batch into JPEGs with the same quality for inclusion in PDF handouts.
+ * 4. When a marketing automation tool collects user‑generated graphics from HTML5 Canvas, processes them in memory, and needs to output JPEGs at a fixed quality to ensure consistent email attachment sizes.
+ * 5. When a cloud‑based image‑processing pipeline receives mixed‑format canvas images via API calls, uses Aspose.Imaging to load each from a memory stream and saves them as JPEGs with a predefined quality to meet CDN bandwidth constraints.
  */

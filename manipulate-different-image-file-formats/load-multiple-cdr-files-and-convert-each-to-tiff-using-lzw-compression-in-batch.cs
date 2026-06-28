@@ -1,11 +1,11 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageLoadOptions;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -14,16 +14,19 @@ class Program
         try
         {
             // Hardcoded input CDR files
-            string[] inputPaths = new string[]
+            string[] inputFiles = new string[]
             {
-                @"C:\input\file1.cdr",
-                @"C:\input\file2.cdr"
+                @"C:\Input\sample1.cdr",
+                @"C:\Input\sample2.cdr"
             };
 
             // Hardcoded output directory
-            string outputDirectory = @"C:\output";
+            string outputDir = @"C:\Output\";
 
-            foreach (string inputPath in inputPaths)
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            foreach (string inputPath in inputFiles)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -32,33 +35,32 @@ class Program
                     return;
                 }
 
-                // Determine output TIFF path
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".tif");
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load CDR image with default load options
-                using (FileStream stream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+                // Load the CDR image with default load options
+                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath, new CdrLoadOptions()))
                 {
-                    var loadOptions = new CdrLoadOptions();
-
-                    using (CdrImage cdrImage = new CdrImage(stream, loadOptions))
+                    int pageIndex = 0;
+                    foreach (CdrImagePage page in cdrImage.Pages)
                     {
                         // Configure TIFF save options with LZW compression
-                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                         {
-                            BitsPerSample = new ushort[] { 8, 8, 8 },
-                            ByteOrder = TiffByteOrder.BigEndian,
                             Compression = TiffCompressions.Lzw,
+                            BitsPerSample = new ushort[] { 8, 8, 8 },
                             Photometric = TiffPhotometrics.Rgb,
-                            PlanarConfiguration = TiffPlanarConfigs.Contiguous,
-                            Predictor = TiffPredictor.Horizontal
+                            PlanarConfiguration = TiffPlanarConfigs.Contiguous
                         };
 
-                        // Save as TIFF
-                        cdrImage.Save(outputPath, tiffOptions);
+                        // Build output file path for each page
+                        string outputPath = Path.Combine(
+                            outputDir,
+                            $"{Path.GetFileNameWithoutExtension(inputPath)}_page{pageIndex}.tif");
+
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the page as a TIFF file
+                        page.Save(outputPath, tiffOptions);
+                        pageIndex++;
                     }
                 }
             }
@@ -72,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop needs to archive multiple CorelDRAW (.cdr) designs as lossless TIFF files with LZW compression for long‑term storage.
- * 2. When a document management system must batch‑convert incoming CDR artwork into TIFF images to embed them in PDFs without losing color fidelity.
- * 3. When an e‑commerce platform automatically transforms supplier‑provided CDR product illustrations into web‑ready TIFF files with LZW compression for high‑quality thumbnails.
- * 4. When a GIS application imports vector CDR maps and saves them as tiled TIFF files using LZW to reduce file size while preserving raster detail.
- * 5. When a legal firm digitizes case‑related CDR diagrams and stores them as compressed TIFFs to meet court‑mandated electronic evidence standards.
+ * 1. When a graphic design studio needs to archive a collection of CorelDRAW (.cdr) artwork as lossless TIFF files with LZW compression for long‑term storage, they can use this batch conversion code.
+ * 2. When an automated document‑processing pipeline must ingest multiple CDR files and produce TIFF images that are compatible with legacy printing systems, the example shows how to load each file and save each page as a compressed TIFF.
+ * 3. When a cloud‑based conversion service wants to offer users the ability to upload several CDR files at once and receive high‑quality TIFF outputs without manual intervention, the code demonstrates the required C# loop and TIFF options.
+ * 4. When a quality‑control tool needs to generate TIFF previews of every page in a batch of CorelDRAW files for visual inspection while keeping file size low, the sample illustrates using LZW compression and page‑by‑page processing.
+ * 5. When a migration project moves design assets from CorelDRAW to a TIFF‑based digital asset management system, this script provides a straightforward way to convert multiple CDR files to TIFF with proper color and compression settings.
  */

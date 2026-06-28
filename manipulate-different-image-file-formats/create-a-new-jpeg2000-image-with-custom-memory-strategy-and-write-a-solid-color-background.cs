@@ -11,23 +11,30 @@ class Program
     {
         try
         {
-            string outputPath = @"C:\temp\output.jp2";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Output file path (hard‑coded)
+            string outputPath = "output.jp2";
 
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Create JPEG2000 options with a custom memory buffer hint
             Jpeg2000Options options = new Jpeg2000Options();
-            options.BufferSizeHint = 64;
-            options.Irreversible = true;
-            options.Codec = Jpeg2000Codec.J2K;
+            options.BufferSizeHint = 10; // example value (in MB)
 
+            // Create a new JPEG2000 image of 200x200 pixels using the options
             using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(200, 200, options))
             {
+                // Obtain a graphics object for drawing
                 Graphics graphics = new Graphics(jpeg2000Image);
+
+                // Fill the entire image with a solid blue color
                 using (SolidBrush brush = new SolidBrush(Color.Blue))
                 {
                     graphics.FillRectangle(brush, jpeg2000Image.Bounds);
                 }
 
-                jpeg2000Image.Save(outputPath);
+                // Save the image to the specified path using the same options
+                jpeg2000Image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -39,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a JPEG2000 placeholder image with a solid background for a web application that requires lossless compression and custom buffer settings.
- * 2. When building a batch image conversion tool that creates JPEG2000 files from scratch with a specific color fill and optimized memory usage for large‑scale processing.
- * 3. When implementing a digital archiving system that stores scanned documents as JPEG2000 images and needs to initialize blank pages with a uniform color before adding content.
- * 4. When creating test assets for a medical imaging workflow that uses the J2K codec and requires a known background color to validate rendering pipelines.
- * 5. When developing a graphics library that programmatically produces solid‑color JPEG2000 tiles for map tiling services, controlling buffer size to improve performance.
+ * 1. When a developer needs to generate a JPEG2000 file with a solid‑color background for a medical imaging workflow that requires low memory consumption, they can use this code to create a 200×200 blue image with a custom BufferSizeHint.
+ * 2. When an application must produce placeholder images in JPEG2000 format for a web service that streams large image tiles, this snippet shows how to pre‑allocate memory and fill the tile with a uniform color.
+ * 3. When a reporting tool has to embed a simple colored JPEG2000 logo into PDF documents without loading external assets, the code demonstrates creating the logo on the fly using Aspose.Imaging’s Graphics and SolidBrush classes.
+ * 4. When a batch‑processing script needs to initialize a blank JPEG2000 canvas before adding vector graphics or annotations, the example provides a quick way to set up the canvas with a known background color and controlled memory usage.
+ * 5. When a developer is testing the performance impact of different BufferSizeHint values while rendering JPEG2000 images, this example offers a reproducible scenario that creates and saves a solid‑color image for benchmarking.
  */

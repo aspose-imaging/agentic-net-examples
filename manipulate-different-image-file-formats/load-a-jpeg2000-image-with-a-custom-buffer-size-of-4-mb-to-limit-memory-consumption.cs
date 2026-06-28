@@ -2,35 +2,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageLoadOptions;
 
 class Program
 {
     static void Main()
     {
-        // Wrap the whole logic to catch any unexpected exceptions
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\sample.jp2";
+        string outputPath = @"c:\temp\sample.output.png";
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\sample.jp2";
-            string outputPath = @"C:\Images\sample.output.png";
-
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set a memory limit of 4 MB for internal buffers while loading
-            var loadOptions = new LoadOptions { BufferSizeHint = 4 };
+            // Set up JPEG2000 load options with a 4 MB buffer size hint
+            var loadOptions = new Jpeg2000LoadOptions
+            {
+                BufferSizeHint = 4 // Buffer size in megabytes
+            };
 
-            // Load the JPEG2000 image with the specified load options
+            // Load the JPEG2000 image using the custom load options
             using (Image image = Image.Load(inputPath, loadOptions))
             {
-                // Save the loaded image as PNG
+                // Save the image as PNG
                 image.Save(outputPath, new PngOptions());
             }
         }
@@ -44,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When processing large JPEG2000 satellite imagery on a server with limited RAM, a developer can use this code to load the image with a 4 MB buffer to prevent out‑of‑memory errors while converting it to PNG.
- * 2. When building a desktop application that batch‑converts high‑resolution medical scans from JPEG2000 to PNG on low‑end workstations, the custom buffer size helps keep the app responsive.
- * 3. When integrating an image‑upload service that must validate and re‑encode user‑submitted JPEG2000 files in a cloud function with strict memory quotas, this approach limits the memory footprint during loading.
- * 4. When creating an automated archival workflow that extracts thumbnails from JPEG2000 photographs on a legacy system with 2 GB RAM, setting BufferSizeHint to 4 MB ensures the process stays within available memory.
- * 5. When developing a C# microservice that streams JPEG2000 images from a network share and saves them as PNG without loading the entire file into memory, the custom buffer size reduces peak memory usage.
+ * 1. When a C# application must convert large JPEG2000 files to PNG while keeping memory usage low by limiting the buffer to 4 MB.
+ * 2. When a server‑side image processing service needs to validate the existence of an input JP2 file and ensure the output directory is created before saving the converted image.
+ * 3. When a desktop utility processes high‑resolution medical or satellite JPEG2000 images and wants to avoid out‑of‑memory exceptions by using a custom BufferSizeHint.
+ * 4. When an automated batch job reads JPEG2000 images from a file system, applies Aspose.Imaging load options, and saves them as PNG for downstream web display.
+ * 5. When error handling is required to gracefully report missing files or runtime exceptions during JPEG2000 to PNG conversion in a .NET environment.
  */

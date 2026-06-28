@@ -8,11 +8,11 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input path
+        string inputPath = @"C:\temp\sample.jp2";
+
         try
         {
-            // Hardcoded input path
-            string inputPath = @"C:\temp\sample.jp2";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,17 +20,22 @@ class Program
                 return;
             }
 
-            // Set a memory buffer limit (e.g., 10 MB)
+            // Set limited memory buffer (e.g., 1 MB)
             var loadOptions = new Jpeg2000LoadOptions
             {
-                BufferSizeHint = 10
+                BufferSizeHint = 1024 * 1024
             };
 
-            // Load the JPEG2000 image with limited memory buffer
+            // Load the JPEG2000 image with the specified options
             using (Image image = Image.Load(inputPath, loadOptions))
             {
                 // Cast to Jpeg2000Image to access resolution properties
-                var jpeg2000Image = (Jpeg2000Image)image;
+                var jpeg2000Image = image as Jpeg2000Image;
+                if (jpeg2000Image == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a JPEG2000 image.");
+                    return;
+                }
 
                 // Display horizontal and vertical resolution (DPI)
                 Console.WriteLine($"Horizontal resolution: {jpeg2000Image.HorizontalResolution} DPI");
@@ -46,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must read large JPEG2000 medical images on a low‑memory server and needs to know the image DPI for accurate scaling.
- * 2. When a .NET service processes satellite JPEG2000 tiles and wants to limit memory usage while extracting horizontal and vertical resolution for georeferencing.
- * 3. When a desktop utility converts JPEG2000 scans to PDF and must verify the original resolution before embedding the image.
- * 4. When a batch job validates archival JPEG2000 files by loading them with a buffer size hint and checking their DPI to ensure compliance with printing standards.
- * 5. When a web API receives JPEG2000 uploads, loads them with a constrained memory buffer, and returns the image resolution to the client for preview layout calculations.
+ * 1. When a C# application must read large JPEG2000 medical images on a low‑memory server and verify their DPI before processing them further.
+ * 2. When a desktop utility needs to quickly show the horizontal and vertical resolution of a JP2 file without loading the entire image into memory.
+ * 3. When a batch‑processing script validates that scanned engineering drawings stored as JPEG2000 meet the required resolution standards while operating under a 1 MB buffer limit.
+ * 4. When a cloud‑based image‑conversion service reads JPEG2000 assets with a memory‑size hint to avoid out‑of‑memory errors and logs their DPI for quality‑control reports.
+ * 5. When a GIS tool imports JP2 satellite tiles, reads their resolution metadata, and ensures they match the map’s scale while using limited RAM.
  */

@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output.pdf";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.dcm";
+            string outputPath = "output.pdf";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,7 +22,7 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
@@ -31,9 +31,9 @@ class Program
                 DicomImage dicomImage = (DicomImage)image;
 
                 // Adjust brightness, contrast, and gamma sequentially
-                dicomImage.AdjustBrightness(30);          // example brightness value
-                dicomImage.AdjustContrast(20f);           // example contrast value
-                dicomImage.AdjustGamma(1.2f);             // example gamma value
+                dicomImage.AdjustBrightness(30);          // increase brightness
+                dicomImage.AdjustContrast(20f);           // increase contrast
+                dicomImage.AdjustGamma(1.2f);             // apply gamma correction
 
                 // Save the processed image as PDF
                 dicomImage.Save(outputPath, new PdfOptions());
@@ -48,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert a DICOM radiology scan to a PDF report while enhancing visibility by adjusting brightness, contrast, and gamma using C# and Aspose.Imaging.
- * 2. When a healthcare provider wants to generate printable PDFs from DICOM files for patient records, applying image processing adjustments to improve diagnostic clarity.
- * 3. When a radiology workflow automates the preparation of DICOM images for telemedicine, using Aspose.Imaging to tweak visual parameters before saving as a PDF for easy sharing.
- * 4. When a research team processes batches of DICOM images, applying consistent brightness, contrast, and gamma corrections in .NET and exporting the results as PDFs for publication.
- * 5. When a hospital IT system integrates DICOM image handling into a .NET service, needing to adjust image quality and output the final image as a PDF for archival or review purposes.
+ * 1. When a radiology software needs to convert a DICOM X‑ray image to a printable PDF while enhancing visibility by increasing brightness, contrast, and applying gamma correction.
+ * 2. When a medical research application must batch‑process DICOM scans, improve their visual quality, and archive the results as PDF reports for easy sharing.
+ * 3. When a hospital’s PACS integration requires on‑the‑fly adjustment of DICOM image parameters before exporting the study to a PDF for patient records.
+ * 4. When a telemedicine platform wants to display clearer diagnostic images by programmatically tweaking DICOM brightness, contrast, and gamma, then delivering them as PDFs to clinicians.
+ * 5. When a health‑tech developer needs to generate PDF documentation from DICOM files with standardized image enhancements for compliance audits.
  */

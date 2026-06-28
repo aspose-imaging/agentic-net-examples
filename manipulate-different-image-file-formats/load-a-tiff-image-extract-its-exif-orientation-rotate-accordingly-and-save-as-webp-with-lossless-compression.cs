@@ -2,18 +2,20 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.tif";
+        string outputPath = @"C:\Images\output.webp";
+
+        // Ensure any runtime exception is reported cleanly
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.tif";
-            string outputPath = @"C:\Images\output.webp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,20 +27,23 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TIFF image
-            using (Image image = Image.Load(inputPath))
+            using (Image img = Image.Load(inputPath))
             {
-                // Auto‑rotate according to EXIF orientation if possible
-                if (image is RasterImage raster)
+                // Cast to RasterImage to access AutoRotate (works for TIFF as well)
+                if (img is RasterImage rasterImg)
                 {
-                    raster.AutoRotate();
+                    // Rotate according to EXIF orientation
+                    rasterImg.AutoRotate();
                 }
 
-                // Save as lossless WebP
+                // Prepare WebP options for lossless compression
                 var webpOptions = new WebPOptions
                 {
                     Lossless = true
                 };
-                image.Save(outputPath, webpOptions);
+
+                // Save the image as WebP using the lossless options
+                img.Save(outputPath, webpOptions);
             }
         }
         catch (Exception ex)
@@ -50,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert high‑resolution TIFF photographs that contain EXIF orientation metadata into web‑friendly lossless WebP files for faster page loads.
- * 2. When an e‑commerce platform must automatically rotate product images stored as TIFFs based on their EXIF orientation and save them as lossless WebP to preserve quality while reducing storage costs.
- * 3. When a digital archiving system requires batch processing of scanned TIFF documents, correcting their orientation and storing them in a compact, lossless WebP format for long‑term preservation.
- * 4. When a mobile app backend processes user‑uploaded TIFF images, normalizes their orientation, and serves them as lossless WebP to ensure consistent display across devices.
- * 5. When a content management system integrates Aspose.Imaging in C# to transform legacy TIFF assets with embedded orientation tags into lossless WebP images for SEO‑optimized web publishing.
+ * 1. When a photographer needs to batch‑convert scanned TIFF files to web‑optimized lossless WebP images while automatically correcting orientation from EXIF metadata.
+ * 2. When a medical imaging system must deliver high‑quality TIFF scans as smaller, lossless WebP files for faster web viewing without losing diagnostic detail.
+ * 3. When an e‑commerce platform wants to display product photos originally stored as TIFFs in browsers, ensuring they appear upright and use lossless WebP to reduce bandwidth.
+ * 4. When a digital archiving solution requires preserving the exact visual appearance of legacy TIFF documents while storing them in a modern, lossless WebP format for long‑term storage.
+ * 5. When a mobile app processes user‑uploaded TIFF images, rotates them according to EXIF orientation, and saves them as lossless WebP to maintain quality and improve load times.
  */

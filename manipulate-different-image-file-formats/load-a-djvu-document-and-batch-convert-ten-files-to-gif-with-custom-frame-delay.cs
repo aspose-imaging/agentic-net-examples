@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -10,32 +11,30 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.djvu";
+            string inputDirectory = "Input";
             string outputDirectory = "Output";
 
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            string[] files = Directory.GetFiles(inputDirectory, "*.djvu");
+            int filesToProcess = Math.Min(10, files.Length);
 
             Directory.CreateDirectory(outputDirectory);
 
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvu = new DjvuImage(stream))
+            for (int i = 0; i < filesToProcess; i++)
             {
-                int pagesToConvert = Math.Min(10, djvu.PageCount);
-
-                for (int i = 0; i < pagesToConvert; i++)
+                string inputPath = files[i];
+                if (!File.Exists(inputPath))
                 {
-                    using (DjvuPage page = (DjvuPage)djvu.Pages[i])
-                    {
-                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.gif");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
 
-                        var gifOptions = new GifOptions();
-                        page.Save(outputPath, gifOptions);
-                    }
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".gif");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+                {
+                    var gifOptions = new GifOptions();
+                    djvuImage.Save(outputPath, gifOptions);
                 }
             }
         }
@@ -48,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract the first ten pages of a DjVu document and generate GIF images for a web gallery preview.
- * 2. When an application must batch convert DjVu pages to GIF files with a custom frame delay for inclusion in an e‑learning module.
- * 3. When a document management system requires converting DjVu scans into lightweight GIF thumbnails to improve browsing performance.
- * 4. When a legacy workflow reads a DjVu file stream in C# and saves up to ten pages as GIFs for archival in a .NET environment.
- * 5. When a developer wants to automate the conversion of DjVu pages to GIF format to embed them in email newsletters without using external tools.
+ * 1. When a developer needs to convert a collection of scanned DjVu documents into animated GIFs for web preview, they can use this batch conversion code to process up to ten files at a time.
+ * 2. When an archival system stores multi‑page DjVu files and the UI requires lightweight GIF thumbnails with custom frame delays, the code provides a quick C# solution to generate those GIFs in bulk.
+ * 3. When a digital publishing workflow must transform DjVu e‑books into GIF animations for mobile devices, the example shows how to load each DjVu image and save it as a GIF using Aspose.Imaging.
+ * 4. When a content‑management script has to automate the migration of legacy DjVu graphics to GIF format for compatibility with older browsers, this snippet handles the file‑system operations and image conversion in a loop.
+ * 5. When a developer is building a batch‑processing tool that reads DjVu files from an input folder, creates GIF output with specific options, and limits the run to the first ten files, the provided code demonstrates the required C# logic.
  */

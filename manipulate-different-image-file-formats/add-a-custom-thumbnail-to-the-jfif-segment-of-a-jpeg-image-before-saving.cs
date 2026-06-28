@@ -1,7 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -9,30 +11,40 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.jpg";
-            string thumbnailPath = "thumb.jpg";
-            string outputPath = "output.jpg";
+            string outputPath = "output/output.jpg";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            if (!File.Exists(thumbnailPath))
-            {
-                Console.Error.WriteLine($"File not found: {thumbnailPath}");
-                return;
-            }
-
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage thumbImage = (RasterImage)Image.Load(thumbnailPath))
+            // Load the JPEG image
+            using (JpegImage jpegImage = new JpegImage(inputPath))
             {
-                using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
+                // Create a thumbnail raster image (100x100 pixels)
+                PngOptions thumbOptions = new PngOptions();
+                using (RasterImage thumb = (RasterImage)Image.Create(thumbOptions, 100, 100))
                 {
-                    jpegImage.Jfif = new JFIFData();
-                    jpegImage.Jfif.Thumbnail = thumbImage;
+                    // Fill the thumbnail with a solid red color
+                    Graphics graphics = new Graphics(thumb);
+                    using (SolidBrush brush = new SolidBrush(Color.Red))
+                    {
+                        graphics.FillRectangle(brush, thumb.Bounds);
+                    }
+
+                    // Prepare JFIF data and assign the thumbnail
+                    JFIFData jfif = new JFIFData();
+                    jfif.Thumbnail = thumb;
+                    jpegImage.Jfif = jfif;
+
+                    // Save the modified JPEG image
                     jpegImage.Save(outputPath);
                 }
             }
@@ -46,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photo‑sharing website wants to embed a low‑resolution preview in the JPEG’s JFIF segment so mobile browsers can display a thumbnail without downloading the full image.
- * 2. When a digital asset management system needs to attach a custom thumbnail to each JPEG file for faster indexing and visual search in C# applications.
- * 3. When an e‑commerce platform generates product images and wants to store a brand‑specific thumbnail inside the JPEG for use in email newsletters and catalog PDFs.
- * 4. When a desktop publishing tool creates JPEGs from scanned documents and embeds a user‑selected thumbnail to improve preview rendering in Windows Explorer.
- * 5. When a mobile app developer prepares JPEGs for offline galleries and adds a custom thumbnail to the JFIF segment to reduce memory usage during thumbnail loading.
+ * 1. When a developer needs to embed a branded preview image (e.g., a red logo thumbnail) directly into the JFIF segment of a JPEG file for faster preview in file explorers or digital asset management systems.
+ * 2. When an e‑commerce platform wants to generate lightweight thumbnail previews for product photos without creating separate thumbnail files, by inserting a 100 × 100 pixel JPEG thumbnail using Aspose.Imaging in C#.
+ * 3. When a photo‑sharing application must preserve a custom thumbnail in the JPEG metadata so that mobile devices display a consistent preview before the full image is downloaded.
+ * 4. When a document‑generation workflow requires adding a color‑coded thumbnail to scanned JPEG pages to indicate processing status (e.g., red for pending) directly in the image file.
+ * 5. When a developer is building a batch image‑processing tool that adds a solid‑color thumbnail to legacy JPEGs to improve compatibility with older image viewers that rely on the JFIF thumbnail field.
  */

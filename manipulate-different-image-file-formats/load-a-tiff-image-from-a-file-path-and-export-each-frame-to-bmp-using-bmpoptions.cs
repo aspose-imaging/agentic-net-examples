@@ -8,11 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.tif";
+        string outputDirectory = @"C:\Images\Frames";
+
         try
         {
-            // Hardcoded input TIFF file path
-            string inputPath = @"C:\Images\input.tif";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,26 +21,34 @@ class Program
                 return;
             }
 
-            // Hardcoded output directory for BMP frames
-            string outputDir = @"C:\Images\Frames";
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
             // Load the TIFF image
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Iterate through each frame in the TIFF image
+                // Cast to TiffImage to access frames
+                TiffImage tiffImage = image as TiffImage;
+                if (tiffImage == null)
+                {
+                    Console.Error.WriteLine("The loaded file is not a TIFF image.");
+                    return;
+                }
+
+                // Options for BMP export
+                BmpOptions bmpOptions = new BmpOptions();
+
+                // Export each frame to a separate BMP file
                 for (int i = 0; i < tiffImage.Frames.Length; i++)
                 {
-                    // Build output BMP file path for the current frame
-                    string outputPath = Path.Combine(outputDir, $"frame_{i}.bmp");
+                    TiffFrame frame = tiffImage.Frames[i];
+                    string outputPath = Path.Combine(outputDirectory, $"frame_{i + 1}.bmp");
 
-                    // Ensure the output directory exists
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Set BMP export options (default options are sufficient)
-                    BmpOptions bmpOptions = new BmpOptions();
-
-                    // Save the current frame as BMP
-                    tiffImage.Frames[i].Save(outputPath, bmpOptions);
+                    // Save the frame as BMP
+                    frame.Save(outputPath, bmpOptions);
                 }
             }
         }
@@ -52,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each page of a multi‑page TIFF file and save them as BMP images for compatibility with legacy Windows applications.
- * 2. When a developer must convert scanned document frames stored in a TIFF archive into BMP format to feed them into a third‑party OCR engine that only accepts BMP files.
- * 3. When a developer wants to generate individual BMP thumbnails from a multi‑frame TIFF to display in a .NET WinForms image gallery that only supports BMP resources.
- * 4. When a developer is preparing image assets for a printing workflow that requires BMP files, and the source artwork is delivered as a multi‑page TIFF.
- * 5. When a developer needs to batch‑process a TIFF file on a server, separating its frames into separate BMP files for downstream processing in a C# image‑analysis pipeline.
+ * 1. When a medical imaging system receives multi‑page TIFF scans and needs to convert each page to BMP for display in a legacy viewer.
+ * 2. When a document management workflow extracts individual pages from a multi‑frame TIFF invoice and saves them as BMP files for OCR processing.
+ * 3. When a printing service separates each frame of a high‑resolution TIFF artwork into BMP images to apply per‑page color corrections before rasterization.
+ * 4. When a GIS application converts each layer stored as a frame in a geospatial TIFF file into BMP tiles for use in a web‑based map viewer.
+ * 5. When an archival tool migrates old multi‑page TIFF archives to BMP format to ensure compatibility with Windows thumbnail generators.
  */

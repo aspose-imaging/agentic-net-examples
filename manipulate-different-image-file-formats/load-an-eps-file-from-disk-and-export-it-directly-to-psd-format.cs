@@ -2,33 +2,34 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.eps";
-        string outputPath = "output.psd";
+        // Hardcoded input and output file paths
+        string inputPath = "sample.eps";
+        string outputPath = "output/sample.psd";
 
         try
         {
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+            // Load the EPS image
+            using (Image image = Image.Load(inputPath))
             {
-                var psdOptions = new PsdOptions
-                {
-                    CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
-                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb
-                };
+                // Create PSD save options (default settings)
+                var psdOptions = new PsdOptions();
 
+                // Save the image as PSD
                 image.Save(outputPath, psdOptions);
             }
         }
@@ -41,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert legacy EPS artwork to Photoshop‑compatible PSD files using C# and Aspose.Imaging for .NET, this code provides a fast, automated solution.
- * 2. When a web publishing pipeline requires migration of vector‑based EPS logos into layered PSD files with RLE compression and RGB color mode, the example handles the conversion seamlessly.
- * 3. When a Windows service must generate PSD mockups from incoming EPS design assets for downstream raster editing, the code demonstrates the necessary file‑loading and saving steps.
- * 4. When a desktop application allows users to import EPS illustrations and export them as PSD files for further editing, this snippet shows the core C# operations with Aspose.Imaging.
- * 5. When building a server‑side API that receives EPS uploads and returns PSD files optimized with RLE compression, the example illustrates the essential conversion logic.
+ * 1. When a graphic designer needs to convert vector EPS artwork into a layered Photoshop PSD file for further editing, a developer can use this C# code with Aspose.Imaging to load the EPS and save it as PSD.
+ * 2. When an automated build pipeline must batch‑process EPS assets and generate PSD versions for a digital asset management system, the code provides a simple way to read each EPS file and export it directly to PSD in .NET.
+ * 3. When a web application allows users to upload EPS logos and then download them as PSD files for brand‑consistent editing, the developer can employ this snippet to perform the conversion on the server side.
+ * 4. When migrating legacy print‑ready EPS files to a modern Photoshop workflow, a developer can use the example to programmatically load the EPS and create PSD files with default options in C#.
+ * 5. When a content‑creation tool needs to preview EPS illustrations as PSD layers without manual conversion, this code enables the tool to load the EPS and instantly save it as a PSD for quick viewing.
  */

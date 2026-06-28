@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.cdr";
-            string outputPath = @"C:\temp\sample.pdf";
+            string inputPath = @"C:\Data\sample.cdr";
+            string outputPath = @"C:\Data\sample.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,38 +27,26 @@ class Program
             // Load the CDR image
             using (CdrImage image = (CdrImage)Image.Load(inputPath))
             {
-                // Cache data for better performance
-                image.CacheData();
+                // Retrieve and log the number of pages (layers) in the document
+                int layerCount = image.PageCount;
+                Console.WriteLine($"Layer (page) count: {layerCount}");
 
-                // Retrieve and log the number of pages (layers)
-                int pageCount = image.PageCount;
-                Console.WriteLine($"Cdr file contains {pageCount} page(s).");
-
-                // Export the first page to PDF (adjust index as needed)
+                // Export the first page to PDF
                 int pageNumber = 0;
-                if (pageCount > 0)
-                {
-                    CdrImagePage page = (CdrImagePage)image.Pages[pageNumber];
+                CdrImagePage page = (CdrImagePage)image.Pages[pageNumber];
 
-                    // Set up PDF export options with rasterization settings
-                    PdfOptions pdfOptions = new PdfOptions();
-                    CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
-                    {
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None,
-                        PageWidth = page.Width,
-                        PageHeight = page.Height
-                    };
-                    pdfOptions.VectorRasterizationOptions = rasterOptions;
-
-                    // Save the page as PDF
-                    page.Save(outputPath, pdfOptions);
-                    Console.WriteLine($"Page {pageNumber} exported to PDF: {outputPath}");
-                }
-                else
+                PdfOptions pdfOptions = new PdfOptions();
+                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
-                    Console.Error.WriteLine("No pages found in the CDR document.");
-                }
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
+                    PageWidth = page.Width,
+                    PageHeight = page.Height
+                };
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
+
+                page.Save(outputPath, pdfOptions);
+                Console.WriteLine($"Exported page {pageNumber} to PDF: {outputPath}");
             }
         }
         catch (Exception ex)
@@ -70,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically open a CorelDRAW (CDR) file, determine how many pages or layers it contains, and log that information for validation or reporting purposes.
- * 2. When an application must verify the existence of a CDR source file and automatically create the target directory before processing the image to avoid runtime errors.
- * 3. When a .NET service has to cache CDR image data to improve performance while iterating through its pages for further manipulation.
- * 4. When a workflow requires extracting the first page of a multi‑page CDR document and converting it to a PDF with specific rasterization settings such as text rendering hint and smoothing mode.
- * 5. When a developer wants to automate the conversion of CorelDRAW drawings to PDF format in a batch process, ensuring each output PDF matches the original page dimensions.
+ * 1. When a graphic designer needs to batch‑convert CorelDRAW (.cdr) files to PDF for client review, they can use this code to load each CDR, log the number of layers, and export the first page as a PDF.
+ * 2. When an automated document processing pipeline must verify that a CorelDRAW file contains the expected number of pages before publishing, the snippet reads the CDR, retrieves the page count, and records it in logs.
+ * 3. When a .NET application has to generate PDF previews of multi‑page CDR drawings for a web portal, this example shows how to rasterize the first page with specific rendering options and save it as a PDF.
+ * 4. When a legacy CAD system exports designs as CDR files and a downstream system only accepts PDF, developers can employ this code to safely convert the source file while ensuring the output dimensions match the original page size.
+ * 5. When building a file‑validation tool that checks for missing CDR assets and creates PDF backups, the program demonstrates file existence checks, directory creation, layer counting, and PDF export in a single workflow.
  */

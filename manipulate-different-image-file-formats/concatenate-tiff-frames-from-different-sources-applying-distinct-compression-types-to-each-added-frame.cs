@@ -9,69 +9,70 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string[] inputPaths = {
-            @"C:\Images\source1.tif",
-            @"C:\Images\source2.tif",
-            @"C:\Images\source3.tif"
-        };
-        string outputPath = @"C:\Images\combined.tif";
-
         try
         {
-            // Verify each input file exists
-            foreach (var inputPath in inputPaths)
+            // Hardcoded input and output paths
+            string inputPath1 = @"C:\temp\input1.tif";
+            string inputPath2 = @"C:\temp\input2.tif";
+            string outputPath = @"C:\temp\output.tif";
+
+            // Verify input files exist
+            if (!File.Exists(inputPath1))
             {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                Console.Error.WriteLine($"File not found: {inputPath1}");
+                return;
+            }
+            if (!File.Exists(inputPath2))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath2}");
+                return;
             }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Prepare an array to hold the frames that will be added to the final TIFF
-            TiffFrame[] frames = new TiffFrame[inputPaths.Length];
-
-            // Define distinct compression types for each frame
-            TiffCompressions[] compressions = new TiffCompressions[]
+            // Load first source image
+            using (RasterImage srcImage1 = (RasterImage)Image.Load(inputPath1))
             {
-                TiffCompressions.Lzw,          // First frame uses LZW compression
-                TiffCompressions.CcittFax3,    // Second frame uses CCITT Group 3 Fax compression
-                TiffCompressions.Deflate       // Third frame uses Deflate compression
-            };
-
-            for (int i = 0; i < inputPaths.Length; i++)
-            {
-                // Load the source image (could be any raster format supported by Aspose.Imaging)
-                using (RasterImage srcImage = (RasterImage)Image.Load(inputPaths[i]))
+                // Create TiffOptions for the first frame (LZW compression)
+                TiffOptions options1 = new TiffOptions(TiffExpectedFormat.Default)
                 {
-                    // Configure TiffOptions for this specific frame
-                    TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default)
+                    BitsPerSample = new ushort[] { 8, 8, 8 },
+                    ByteOrder = TiffByteOrder.BigEndian,
+                    Compression = TiffCompressions.Lzw,
+                    Photometric = TiffPhotometrics.Rgb,
+                    PlanarConfiguration = TiffPlanarConfigs.Contiguous
+                };
+
+                // Create a TiffFrame from the first source image with its options
+                TiffFrame frame1 = new TiffFrame(srcImage1, options1);
+
+                // Load second source image
+                using (RasterImage srcImage2 = (RasterImage)Image.Load(inputPath2))
+                {
+                    // Create TiffOptions for the second frame (CCITT Group 3 Fax compression)
+                    TiffOptions options2 = new TiffOptions(TiffExpectedFormat.Default)
                     {
-                        BitsPerSample = new ushort[] { 8, 8, 8 }, // 8 bits per channel
+                        BitsPerSample = new ushort[] { 1 },
                         ByteOrder = TiffByteOrder.LittleEndian,
-                        Compression = compressions[i],
-                        Photometric = TiffPhotometrics.Rgb,
+                        Compression = TiffCompressions.CcittFax3,
+                        Photometric = TiffPhotometrics.MinIsBlack,
                         PlanarConfiguration = TiffPlanarConfigs.Contiguous
                     };
 
-                    // Create a TiffFrame from the loaded image using the above options
-                    TiffFrame frame = new TiffFrame(srcImage, frameOptions);
+                    // Create a TiffFrame from the second source image with its options
+                    TiffFrame frame2 = new TiffFrame(srcImage2, options2);
 
-                    // Store the frame for later assembly
-                    frames[i] = frame;
+                    // Create a new multi‑frame TIFF image using the first frame
+                    using (TiffImage tiffImage = new TiffImage(frame1))
+                    {
+                        // Add the second frame with its distinct compression
+                        tiffImage.AddFrame(frame2);
+
+                        // Save the combined TIFF
+                        tiffImage.Save(outputPath);
+                    }
                 }
-                // Note: individual frames are disposed automatically when the TiffImage is disposed
-            }
-
-            // Assemble the frames into a multi‑page TIFF image
-            using (TiffImage tiffImage = new TiffImage(frames))
-            {
-                // Save the combined TIFF to the output path
-                tiffImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -83,9 +84,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to merge scanned documents from different sources into a single multi‑page TIFF while applying LZW, CCITT Group 3, and Deflate compression to reduce file size and preserve appropriate quality.
- * 2. When an application must create a combined TIFF for archival purposes, pulling pages from separate TIFF or JPEG files and assigning a specific compression algorithm to each frame to meet storage policy requirements.
- * 3. When a medical imaging system has to concatenate DICOM‑derived TIFF slices from various modalities into one file, using different compressions per slice to balance readability on legacy viewers and network bandwidth.
- * 4. When a publishing workflow requires assembling high‑resolution artwork pages into a single TIFF portfolio, applying lossless LZW to the first page and faster fax or deflate compression to subsequent pages for faster preview generation.
- * 5. When a cloud‑based service processes user‑uploaded images of different formats and needs to output a single multi‑frame TIFF with per‑frame compression settings to comply with client‑specified file‑size limits.
+ * 1. When a developer needs to combine scanned documents from two different scanners into a single multi‑page TIFF where the first pages use LZW compression for color images and the later pages use CCITT Group 3 compression for black‑and‑white fax pages.
+ * 2. When building a medical imaging archive that merges patient X‑ray TIFF files with accompanying color photographs, applying LZW to the photos and CCITT Group 3 to the X‑rays to minimize storage while preserving quality.
+ * 3. When creating a legal e‑discovery bundle that merges high‑resolution TIFF evidence with low‑resolution faxed copies, using different compression settings per frame to meet court‑mandated file size limits.
+ * 4. When developing a document management system that assembles multi‑page TIFF reports from separate source files, assigning LZW compression to the first color chart pages and CCITT Group 3 to the subsequent text‑only pages for optimal file size.
+ * 5. When automating the generation of archival TIFF files that combine satellite imagery (color) and scanned map overlays (black‑and‑white), applying distinct compression types per frame to balance image fidelity and archival storage constraints.
  */

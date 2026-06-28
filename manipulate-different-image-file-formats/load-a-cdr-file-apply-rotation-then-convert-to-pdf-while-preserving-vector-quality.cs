@@ -1,39 +1,48 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "input.cdr";
-            string outputPath = "output.pdf";
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Images\sample.cdr";
+            string outputPath = @"C:\Images\sample_rotated.pdf";
 
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists (creates it if necessary)
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir ?? ".");
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            // Load the CDR file
+            using (Image image = Image.Load(inputPath))
             {
+                // Apply a rotation (e.g., 90 degrees clockwise)
                 image.Rotate(90f);
 
-                PdfOptions pdfOptions = new PdfOptions();
-                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+                // Prepare PDF save options with vector rasterization settings
+                var pdfOptions = new PdfOptions
                 {
-                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.None,
-                    Positioning = PositioningTypes.DefinedByDocument
+                    VectorRasterizationOptions = new CdrRasterizationOptions
+                    {
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None,
+                        Positioning = PositioningTypes.DefinedByDocument
+                    }
                 };
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
 
+                // Save the rotated image as PDF while preserving vector quality
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -46,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to rotate a CorelDRAW (CDR) illustration by 90 degrees and export it as a high‑quality PDF without losing vector fidelity, this code can automate the process in a C# application.
- * 2. When an automated document workflow must convert archived CDR files to searchable PDFs while preserving exact positioning of text and shapes, the snippet provides the necessary rotation and vector rasterization steps.
- * 3. When a batch‑processing service has to generate printable PDFs from rotated CDR assets for a printing press, developers can use this code to maintain crisp vector edges and correct orientation.
- * 4. When a web API receives user‑uploaded CDR logos that need to be displayed in portrait orientation as PDFs on a portal, the example shows how to rotate and convert the files while keeping them scalable.
- * 5. When a migration tool moves legacy CorelDRAW designs into a PDF‑based archive and must ensure the drawings are rotated correctly and retain their original vector quality, this C# routine performs the conversion efficiently.
+ * 1. When a graphic designer needs to automatically rotate a CorelDRAW (.cdr) illustration and generate a print‑ready PDF without losing vector sharpness.
+ * 2. When a document management system must batch‑process archived CDR files, apply a 90° orientation correction, and store them as searchable PDFs for compliance.
+ * 3. When a web service converts user‑uploaded CDR logos into correctly oriented PDFs for use in marketing collateral while keeping the vector data intact.
+ * 4. When an automated publishing workflow reorients technical diagrams from CorelDRAW and outputs high‑resolution PDFs for inclusion in e‑books.
+ * 5. When a CAD‑to‑PDF conversion tool needs to preserve exact line art and text rendering while rotating the original CDR drawing for proper page layout.
  */

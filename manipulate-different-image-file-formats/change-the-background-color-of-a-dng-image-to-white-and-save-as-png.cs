@@ -27,14 +27,14 @@ class Program
             // Load the DNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DngImage to access DNG‑specific properties
+                // Cast to DngImage to access DNG-specific properties
                 DngImage dngImage = (DngImage)image;
 
                 // Set background color to white
-                dngImage.BackgroundColor = Color.White;
                 dngImage.HasBackgroundColor = true;
+                dngImage.BackgroundColor = Color.White;
 
-                // Save as PNG with default options
+                // Save as PNG
                 dngImage.Save(outputPath, new PngOptions());
             }
         }
@@ -47,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer needs to convert raw DNG files to web‑ready PNG images with a solid white background for product listings.
- * 2. When an e‑commerce platform must display user‑uploaded raw images on a consistent white canvas to match the site’s design.
- * 3. When a digital archiving system processes batches of DNG scans and replaces transparent backgrounds with white before saving them as PNG files.
- * 4. When a mobile app backend generates thumbnails from raw camera captures and requires a white background to improve visibility across devices.
- * 5. When a printing service prepares raw DNG artwork for print proofs and must export it as PNG with a solid white background to prevent color shifts.
+ * 1. When a photographer needs to embed raw DNG files into a web gallery that only supports PNG, they can use Aspose.Imaging for .NET to set a white background and convert the images to PNG format.
+ * 2. When an e‑commerce platform receives product photos in DNG format and must display them on a white background across browsers, developers can apply this C# code to replace transparent areas with white and save as PNG.
+ * 3. When a digital archiving system must standardize legacy raw DNG scans to a lossless PNG with a consistent white canvas for printing, the code provides a straightforward way to adjust the background color and export the file.
+ * 4. When a mobile app backend processes user‑uploaded raw DNG images and needs to generate PNG thumbnails with a solid white background for consistent UI rendering, this Aspose.Imaging snippet handles the conversion.
+ * 5. When a scientific imaging pipeline requires converting raw DNG microscope captures to PNG while ensuring any empty pixel regions appear white for analysis, developers can use this C# example to set the background color and save the result.
  */

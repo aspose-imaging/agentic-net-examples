@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Brushes;
@@ -19,35 +20,36 @@ class Program
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-                Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (var image = Image.Load(inputPath))
             {
-                BmpImage bmpImage = (BmpImage)image;
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(bmpImage);
+                var bmpImage = (BmpImage)image;
+                var graphics = new Graphics(bmpImage);
 
                 string watermarkText = "Sample Watermark";
-                Aspose.Imaging.Font font = new Aspose.Imaging.Font("Arial", 24);
                 float opacity = 0.5f;
+                int margin = 10;
 
-                Aspose.Imaging.SizeF layoutArea = new Aspose.Imaging.SizeF(bmpImage.Width, bmpImage.Height);
-                Aspose.Imaging.StringFormat format = new Aspose.Imaging.StringFormat();
-                Aspose.Imaging.SizeF textSize = graphics.MeasureString(watermarkText, font, layoutArea, format);
-
-                float margin = 10f;
-                float x = bmpImage.Width - textSize.Width - margin;
-                float y = bmpImage.Height - textSize.Height - margin;
-
-                using (SolidBrush brush = new SolidBrush())
+                using (var brush = new SolidBrush())
                 {
-                    brush.Color = Aspose.Imaging.Color.White;
+                    brush.Color = Color.White;
                     brush.Opacity = opacity;
-                    graphics.DrawString(watermarkText, font, brush, new Aspose.Imaging.PointF(x, y));
+
+                    var font = new Font("Arial", 24);
+
+                    var layoutArea = new SizeF(bmpImage.Width, bmpImage.Height);
+                    var format = new StringFormat();
+                    var textSize = graphics.MeasureString(watermarkText, font, layoutArea, format);
+
+                    float x = bmpImage.Width - textSize.Width - margin;
+                    float y = bmpImage.Height - textSize.Height - margin;
+
+                    graphics.DrawString(watermarkText, font, brush, new PointF(x, y));
                 }
 
-                bmpImage.Save(outputPath, new BmpOptions());
+                var bmpOptions = new BmpOptions();
+                bmpImage.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -59,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed a semi‑transparent textual watermark in a BMP file for copyright protection before distributing the image.
- * 2. When an application must automatically add a brand name to scanned BMP documents at the bottom‑right corner with configurable opacity using C# and Aspose.Imaging.
- * 3. When a batch‑processing tool has to annotate product screenshots saved as BMP images with a light‑gray watermark that does not obscure the underlying content.
- * 4. When a Windows service generates BMP thumbnails and wants to include a “Confidential” label in the corner with adjustable transparency to comply with security policies.
- * 5. When a developer is building a reporting system that stamps the current date and time onto BMP charts, positioning the text at the lower‑right edge with a 50 % opacity brush.
+ * 1. When a developer needs to embed a semi‑transparent copyright watermark onto BMP screenshots using C# before sending them to clients.
+ * 2. When an application must automatically add a “Confidential” textual watermark with configurable opacity to scanned BMP documents to deter unauthorized distribution.
+ * 3. When a game studio wants to tag BMP texture assets with version numbers in the lower‑right corner during the build pipeline, using Aspose.Imaging for .NET.
+ * 4. When a batch‑processing tool has to place a customizable brand name watermark on BMP product images for e‑commerce listings, controlling the opacity and margin via code.
+ * 5. When a security system requires adding a timestamp watermark to BMP surveillance frames at the bottom‑right, with adjustable opacity to keep the overlay readable yet unobtrusive.
  */

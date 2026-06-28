@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 using Aspose.Imaging.FileFormats.Webp;
 
 class Program
@@ -11,11 +12,11 @@ class Program
     {
         try
         {
-            // Hardcoded relative input and output paths
-            string inputPath = "Input\\animation.gif";
-            string outputPath = "Output\\frame3.webp";
+            // Hardcoded input and output paths
+            string inputPath = "input.gif";
+            string outputPath = "output.webp";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,28 +24,40 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the GIF image
-            using (Image image = Image.Load(inputPath))
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                // Cast to GifImage to access frame information
-                GifImage gif = image as GifImage;
-                if (gif == null || gif.PageCount < 3)
+                Directory.CreateDirectory(outputDir);
+            }
+
+            // Load GIF image
+            using (Image gif = Image.Load(inputPath))
+            {
+                GifImage gifImage = gif as GifImage;
+                if (gifImage == null)
                 {
-                    Console.Error.WriteLine("GIF does not contain at least three frames.");
+                    Console.Error.WriteLine("Failed to load GIF image.");
                     return;
                 }
 
-                // Configure WebP options for lossless compression and select only the third frame (index 2)
-                WebPOptions options = new WebPOptions
+                // Verify the GIF has at least three frames
+                if (gifImage.PageCount < 3)
                 {
-                    Lossless = true,
-                    MultiPageOptions = new MultiPageOptions(new IntRange(2, 2))
+                    Console.Error.WriteLine("GIF does not contain a third frame.");
+                    return;
+                }
+
+                // Set the active frame to the third frame (index 2)
+                gifImage.ActiveFrame = (GifFrameBlock)gifImage.Pages[2];
+
+                // Prepare lossless WebP options
+                WebPOptions webpOptions = new WebPOptions
+                {
+                    Lossless = true
                 };
 
-                // Save the selected frame as a lossless WebP file
-                image.Save(outputPath, options);
+                // Save the active frame as a lossless WebP file
+                gifImage.Save(outputPath, webpOptions);
             }
         }
         catch (Exception ex)
@@ -56,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a thumbnail for a specific animation step, a developer can extract the third frame from a GIF and save it as a lossless WebP to preserve quality while reducing file size.
- * 2. When generating preview images for an e‑learning platform, you might need to isolate the third frame of an instructional GIF and store it as a WebP to ensure fast loading on web browsers.
- * 3. When building a social‑media scheduler that converts animated content to static assets, extracting the third frame of a GIF and converting it to a lossless WebP allows consistent visual representation across devices.
- * 4. When performing automated QA on animated advertisements, a test script can pull the third frame from a GIF and save it as a lossless WebP to compare pixel‑perfect screenshots.
- * 5. When optimizing a mobile game’s UI assets, developers may need to take the third frame of a GIF sprite sheet and export it as a lossless WebP to keep sharpness while minimizing bandwidth.
+ * 1. When creating a thumbnail gallery for an animated advertisement, a developer can extract the third frame of a GIF and save it as a lossless WebP to ensure high‑quality preview images without animation overhead.
+ * 2. When generating static assets for a mobile app that only supports WebP, extracting a specific frame from a multi‑frame GIF and converting it to lossless WebP reduces file size while preserving visual fidelity.
+ * 3. When processing user‑uploaded GIF stickers for a messaging platform, a developer may need to isolate the third frame and store it as a lossless WebP to maintain crisp detail for display on high‑resolution screens.
+ * 4. When building an e‑learning platform that extracts key steps from animated tutorials, extracting the third frame of a GIF and converting it to lossless WebP provides a clear, high‑quality snapshot for instructional material.
+ * 5. When archiving promotional graphics, a developer can isolate the third frame of a GIF and save it as a lossless WebP to create a permanent, compression‑efficient representation for future reuse.
  */

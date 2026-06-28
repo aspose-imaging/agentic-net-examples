@@ -2,34 +2,41 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tga;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "Input/sample.tga";
-            string outputPath = "Output/output.tif";
+            // Hard‑coded input and output file paths
+            string inputPath = "input.tga";
+            string outputPath = "output.tif";
 
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (Aspose.Imaging.FileFormats.Tga.TgaImage image = (Aspose.Imaging.FileFormats.Tga.TgaImage)Image.Load(inputPath))
+            // Load the TGA image
+            using (TgaImage tgaImage = (TgaImage)Image.Load(inputPath))
             {
-                // Set DPI to 300
-                image.HorizontalResolution = 300;
-                image.VerticalResolution = 300;
+                // Change DPI from 72 to 300
+                tgaImage.HorizontalResolution = 300;
+                tgaImage.VerticalResolution = 300;
 
-                // Save as TIFF with default options
+                // Prepare TIFF save options
                 var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                image.Save(outputPath, tiffOptions);
+
+                // Save as TIFF
+                tgaImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -41,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a game developer needs to convert legacy TGA textures with low 72 DPI into high‑resolution 300 DPI TIFF files for print‑ready asset pipelines.
- * 2. When an e‑learning platform must upscale scanned TGA diagrams to 300 DPI TIFFs so that they meet publishing standards for textbooks.
- * 3. When a GIS analyst receives TGA satellite overlays at screen resolution and must re‑tag them to 300 DPI TIFFs before importing into mapping software that requires physical measurement accuracy.
- * 4. When a medical imaging system exports TGA scans from legacy equipment and a developer must adjust the DPI to 300 and store them as TIFF for compliance with DICOM archival guidelines.
- * 5. When a digital archiving service processes user‑uploaded TGA artwork and needs to standardize the resolution to 300 DPI TIFFs for consistent printing and long‑term storage.
+ * 1. When a game developer needs to export high‑resolution texture assets originally stored as 72 DPI TGA files into 300 DPI TIFFs for print‑ready marketing materials.
+ * 2. When a GIS analyst converts legacy TGA satellite imagery to 300 DPI TIFF to meet the resolution requirements of a spatial analysis software that only accepts TIFF input.
+ * 3. When a medical imaging software vendor processes TGA scans from legacy equipment and must increase the DPI to 300 before saving as TIFF for compliance with DICOM archiving standards.
+ * 4. When an e‑commerce platform prepares product photos saved as TGA files for high‑quality catalog PDFs, requiring a DPI boost to 300 and conversion to TIFF for lossless printing.
+ * 5. When a digital archivist migrates low‑resolution TGA artwork to a preservation‑grade 300 DPI TIFF format to ensure future scalability and compatibility with archival image management systems.
  */

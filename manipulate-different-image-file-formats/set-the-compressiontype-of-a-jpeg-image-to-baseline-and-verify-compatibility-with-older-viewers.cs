@@ -10,9 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.bmp";
-            string outputPath = @"C:\temp\output_baseline.jpg";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\sample.bmp";
+            string outputPath = @"C:\Images\sample_baseline.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,36 +21,24 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG options with Baseline compression
-                JpegOptions jpegOptions = new JpegOptions
+                // Configure JPEG save options with Baseline compression
+                JpegOptions saveOptions = new JpegOptions
                 {
+                    // Set baseline compression for compatibility with older viewers
                     CompressionType = JpegCompressionMode.Baseline,
-                    Quality = 90 // optional quality setting
+                    // Optional: set quality (1-100). Here we use high quality.
+                    Quality = 100,
+                    // Preserve other defaults (bits per channel, resolution, etc.)
                 };
 
-                // Save the image as JPEG using Baseline compression
-                image.Save(outputPath, jpegOptions);
-            }
-
-            // Verify that the saved JPEG uses Baseline compression
-            using (Image savedImage = Image.Load(outputPath))
-            {
-                var jpegImage = savedImage as Aspose.Imaging.FileFormats.Jpeg.JpegImage;
-                if (jpegImage != null)
-                {
-                    // Baseline JPEGs are widely supported by older viewers
-                    Console.WriteLine("Saved JPEG uses Baseline compression and is compatible with older viewers.");
-                }
-                else
-                {
-                    Console.WriteLine("Saved image is not a JPEG.");
-                }
+                // Save the image as JPEG using the configured options
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -62,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy BMP assets to JPEG files that can be opened by older web browsers or email clients, they can set JpegCompressionMode.Baseline to ensure maximum compatibility.
- * 2. When preparing product catalog images for print‑ready PDFs that must be viewed on outdated viewer software, using Baseline JPEG compression guarantees the images render correctly across all platforms.
- * 3. When building an automated image‑processing pipeline that archives scanned documents as JPEGs, the code verifies the saved file uses Baseline compression so the archive can be accessed by any standard viewer.
- * 4. When integrating a C# application with a third‑party content management system that only accepts Baseline JPEGs, the developer can enforce the compression mode and confirm it before upload.
- * 5. When optimizing image assets for mobile apps that need to support older Android versions, setting the JPEG CompressionType to Baseline and checking the result ensures the images display without errors on legacy devices.
+ * 1. When a developer needs to convert legacy BMP assets to JPEG files that can be opened by older web browsers or email clients that only support baseline JPEG.
+ * 2. When a developer is preparing product catalog images for an e‑commerce platform that requires maximum compatibility with mobile devices running older operating systems.
+ * 3. When a developer must generate thumbnail previews for a digital asset management system and ensure the thumbnails are viewable in any standard image viewer.
+ * 4. When a developer is exporting scanned documents from a Windows desktop application to JPEG while preserving high quality and guaranteeing that the files can be printed from legacy office software.
+ * 5. When a developer is automating batch processing of high‑resolution photographs for archival storage and needs to enforce baseline JPEG compression to avoid compatibility issues with third‑party archival tools.
  */

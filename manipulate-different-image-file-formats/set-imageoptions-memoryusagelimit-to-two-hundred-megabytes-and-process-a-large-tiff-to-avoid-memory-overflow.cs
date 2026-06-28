@@ -2,46 +2,33 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\large_input.tif";
-            string outputPath = @"C:\Images\processed_output.tif";
+            string inputPath = "input.tif";
+            string outputPath = "output.tif";
 
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set a memory limit of 200 MB for loading the image
-            var loadOptions = new LoadOptions
+            using (TiffImage image = (TiffImage)Image.Load(inputPath))
             {
-                BufferSizeHint = 200 // megabytes
-            };
+                image.Rotate(90);
 
-            // Load the large TIFF image with the specified memory limit
-            using (Image image = Image.Load(inputPath, loadOptions))
-            {
-                // (Optional) Perform any image processing here
-
-                // Set a memory limit of 200 MB for saving the image
-                var saveOptions = new TiffOptions(TiffExpectedFormat.Default)
-                {
-                    BufferSizeHint = 200 // megabytes
-                };
-
-                // Save the image to the output path
+                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                saveOptions.Source = new FileCreateSource(outputPath, false);
                 image.Save(outputPath, saveOptions);
             }
         }
@@ -54,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When processing multi‑gigapixel scanned documents in a document‑management system, a developer can limit memory to 200 MB to prevent out‑of‑memory crashes while loading and saving large TIFF files with Aspose.Imaging for .NET.
- * 2. When converting high‑resolution medical imaging (e.g., DICOM‑derived TIFF) on a server with limited RAM, the code ensures the image is processed within a 200 MB buffer using LoadOptions.BufferSizeHint and TiffOptions.BufferSizeHint.
- * 3. When building a batch‑processing service that extracts pages from large multi‑page TIFF archives, setting the memory usage limit avoids exceeding the allocated memory quota in a cloud‑based C# microservice.
- * 4. When integrating a legacy scanning workflow that outputs 200 MB+ TIFF files into a .NET application, developers use this pattern to safely load, optionally edit, and re‑save the image without exhausting system resources.
- * 5. When implementing an on‑premises archival tool that must handle oversized TIFF images on machines with 4 GB RAM, the code’s 200 MB memory cap helps keep the process stable while performing image transformations.
+ * 1. When a C# application must rotate a multi‑gigabyte TIFF file without exhausting system RAM, developers can set ImageOptions.MemoryUsageLimit to 200 MB to keep the operation within safe memory bounds.
+ * 2. When processing high‑resolution scanned documents in a batch job, using Aspose.Imaging’s TiffOptions with a 200 MB memory limit prevents out‑of‑memory exceptions while saving the rotated output.
+ * 3. When integrating a document management system that receives large TIFF uploads, developers can apply a 200 MB MemoryUsageLimit to ensure the server can rotate and store the image without crashing.
+ * 4. When building a .NET microservice that converts legacy TIFF archives to a new orientation, setting ImageOptions.MemoryUsageLimit to 200 MB allows the service to handle each file efficiently under constrained container memory.
+ * 5. When creating a desktop utility for photographers to quickly re‑orient massive TIFF panoramas, configuring the memory usage limit to 200 MB lets the tool rotate images on modest hardware without performance degradation.
  */

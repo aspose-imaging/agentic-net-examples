@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -10,7 +10,7 @@ class Program
     {
         // Hardcoded input and output file paths
         string inputPath = @"C:\Images\source.eps";
-        string outputPath = @"C:\Images\Result\resized.jpg";
+        string outputPath = @"C:\Images\Resized\output.jpg";
 
         try
         {
@@ -27,18 +27,15 @@ class Program
             // Load the EPS image
             using (Image image = Image.Load(inputPath))
             {
-                // Calculate new height to keep aspect ratio for a width of 2000 pixels
+                // Calculate new height to maintain aspect ratio for width = 2000
                 int newWidth = 2000;
                 int newHeight = (int)Math.Round((double)image.Height * newWidth / image.Width);
 
-                // Resize using a high‑quality interpolation method
+                // Resize using Mitchell cubic interpolation
                 image.Resize(newWidth, newHeight, ResizeType.Mitchell);
 
-                // Prepare JPEG save options (default options are sufficient for this example)
-                var jpegOptions = new JpegOptions();
-
-                // Save the resized image as JPEG
-                image.Save(outputPath, jpegOptions);
+                // Save as JPEG with default options
+                image.Save(outputPath, new JpegOptions());
             }
         }
         catch (Exception ex)
@@ -50,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert high‑resolution EPS artwork into a web‑friendly JPEG thumbnail of exactly 2000 px width while preserving the original aspect ratio, this code provides a quick C# solution using Aspose.Imaging.
- * 2. When an e‑commerce platform must generate product preview images from vector EPS files for faster page loads, the snippet resizes the vector to 2000 px wide and saves it as a JPEG.
- * 3. When a publishing workflow requires converting print‑ready EPS logos into JPEG assets for inclusion in digital PDFs, the example demonstrates how to maintain visual fidelity with Mitchell interpolation in C#.
- * 4. When an automated batch job processes a folder of EPS diagrams and needs each file resized to a consistent width before archiving as JPEG, the code shows the necessary file‑system checks and resizing logic.
- * 5. When a mobile app backend must serve scaled‑down JPEG versions of EPS‑based icons to devices with limited bandwidth, this sample illustrates the aspect‑ratio‑preserving resize and export using Aspose.Imaging for .NET.
+ * 1. When a print designer needs to convert high‑resolution EPS artwork to a web‑friendly JPEG of exactly 2000 px width while preserving the original aspect ratio, they can use this C# Aspose.Imaging code.
+ * 2. When an e‑commerce platform must generate product thumbnails from vector EPS logos and ensure consistent width across all images, the snippet resizes and saves them as JPEGs automatically.
+ * 3. When a publishing workflow requires batch processing of EPS files into JPEGs for digital distribution, this code demonstrates how to load, resize with Mitchell interpolation, and export the images in .NET.
+ * 4. When a mobile app backend needs to serve scaled‑down JPEG previews of large EPS diagrams without distortion, the example shows the calculation of proportional height and saving with default JPEG options.
+ * 5. When a content management system must validate that an EPS file exists, create the output folder, and then produce a 2000‑pixel‑wide JPEG for SEO‑optimized web pages, the provided C# routine handles the entire process.
  */

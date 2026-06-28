@@ -1,18 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output\\resolution.txt";
+
         try
         {
-            string inputPath = "Input\\sample.jpg";
-            string outputPath = "Output\\resolution.txt";
-
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,30 +23,22 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image img = Image.Load(inputPath))
+            // Load JPEG image and read resolution
+            using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
             {
-                var jpegImage = img as JpegImage;
-                if (jpegImage == null)
+                double horizontalDpi = jpegImage.HorizontalResolution;
+                double verticalDpi = jpegImage.VerticalResolution;
+
+                // Create a simple record to hold the resolution values
+                var record = new ResolutionRecord
                 {
-                    Console.Error.WriteLine("The loaded image is not a JPEG image.");
-                    return;
-                }
+                    HorizontalDpi = horizontalDpi,
+                    VerticalDpi = verticalDpi
+                };
 
-                var jpegExif = jpegImage.ExifData as Aspose.Imaging.Exif.JpegExifData;
-                if (jpegExif == null)
-                {
-                    Console.Error.WriteLine("No EXIF data found in the JPEG image.");
-                    return;
-                }
-
-                // Read resolution tags
-                var xResolution = jpegExif.XResolution;
-                var yResolution = jpegExif.YResolution;
-
-                // Simulate storing in a database by writing to a text file
-                string record = $"XResolution: {xResolution}, YResolution: {yResolution}";
-                File.WriteAllText(outputPath, record);
-                Console.WriteLine("Resolution data stored successfully.");
+                // Store the record in a text file (simulating a database insert)
+                string content = $"HorizontalDpi={record.HorizontalDpi}, VerticalDpi={record.VerticalDpi}";
+                File.WriteAllText(outputPath, content);
             }
         }
         catch (Exception ex)
@@ -55,11 +48,18 @@ class Program
     }
 }
 
+// Simple data holder representing a database record for image resolution
+class ResolutionRecord
+{
+    public double HorizontalDpi { get; set; }
+    public double VerticalDpi { get; set; }
+}
+
 /*
  * Real-World Use Cases:
- * 1. When building a digital asset management system that catalogs photos, a developer can use this code to extract the XResolution and YResolution EXIF tags from JPEG files and store them in a database for searchable metadata.
- * 2. When creating a print‑ready workflow that validates image DPI before sending files to a printer, the code can read the JPEG EXIF resolution and record the values in a database to trigger quality checks.
- * 3. When developing a web application that displays image details to users, the code helps retrieve the JPEG resolution tags via Aspose.Imaging and persist them so the UI can show accurate DPI information.
- * 4. When migrating a legacy photo archive to a new content‑management platform, the code can programmatically read each JPEG’s EXIF resolution and save the data in the target system’s database for future reporting.
- * 5. When implementing an automated image‑processing pipeline that selects high‑resolution pictures for machine‑learning training, this code extracts the JPEG resolution tags and logs them in a database to filter suitable images.
+ * 1. When a developer needs to extract the EXIF DPI values from a JPEG file using Aspose.Imaging for .NET and store the horizontal and vertical resolution in a database record for later reporting.
+ * 2. When building a digital asset management system that must read image resolution metadata from uploaded JPEG photos and persist the DPI information alongside other asset metadata.
+ * 3. When creating a batch processing tool that validates that all JPEG images meet a required print resolution by reading their EXIF tags with C# and logging the results to a database.
+ * 4. When integrating a photo‑upload feature into a web application that records the original image's DPI settings in a SQL table to support resolution‑based workflow decisions.
+ * 5. When developing a quality‑control script that scans a folder of JPEG images, extracts their horizontal and vertical DPI using Aspose.Imaging, and writes the values to a data store for analytics.
  */

@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.cdr";
-        string outputPath = @"C:\Images\sample.png";
+        string inputPath = @"C:\temp\sample.cdr";
+        string outputPath = @"C:\temp\sample.png";
 
         try
         {
@@ -35,6 +35,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -42,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to display a CorelDRAW illustration on a browser, a developer can use this code to convert the .cdr file to a PNG image that browsers natively support.
- * 2. When an automated batch job must generate thumbnail previews for a library of CorelDRAW designs, the code can load each .cdr file and save a PNG snapshot with default compression.
- * 3. When integrating a document management system that stores vector graphics as .cdr files, a developer can use this snippet to render those files as PNGs for quick visual search results.
- * 4. When creating a reporting tool that embeds graphics from legacy CorelDRAW files into PDF or Word reports, the code provides a simple way to rasterize the .cdr into a PNG before insertion.
- * 5. When building a cross‑platform mobile app that consumes image assets, a developer can pre‑process CorelDRAW assets on the server by converting them to PNG using Aspose.Imaging’s default settings.
+ * 1. When a developer needs to convert a CorelDRAW (CDR) design into a web‑friendly PNG thumbnail for an e‑commerce product catalog using Aspose.Imaging in C#.
+ * 2. When an automated build script must generate PNG previews of CDR files to embed in documentation or release notes without manual editing.
+ * 3. When a desktop application imports user‑provided CorelDRAW artwork and saves it as a PNG image for printing or sharing via email.
+ * 4. When a server‑side API receives a CDR file upload and must return a PNG version for display in a browser, leveraging Aspose.Imaging’s default PNG options.
+ * 5. When a migration tool processes legacy CorelDRAW assets and converts them to PNG format for storage in a cloud‑based image repository.
  */

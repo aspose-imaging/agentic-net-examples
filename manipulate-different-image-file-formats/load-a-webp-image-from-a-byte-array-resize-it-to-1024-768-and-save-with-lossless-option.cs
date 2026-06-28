@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.webp";
-        string outputPath = @"C:\temp\output.webp";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.webp";
+            string outputPath = @"C:\Images\output.webp";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,21 +21,22 @@ class Program
                 return;
             }
 
-            // Load image data into a byte array
-            byte[] imageData = File.ReadAllBytes(inputPath);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a memory stream from the byte array and load the WebP image
-            using (var memoryStream = new MemoryStream(imageData))
-            using (var webPImage = new WebPImage(memoryStream))
+            // Load WebP image from a byte array
+            byte[] imageBytes = File.ReadAllBytes(inputPath);
+            using (var memoryStream = new MemoryStream(imageBytes))
+            using (WebPImage webPImage = new WebPImage(memoryStream))
             {
                 // Resize to 1024x768 using bilinear resampling
                 webPImage.Resize(1024, 768, ResizeType.BilinearResample);
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                 // Save with lossless compression
-                var saveOptions = new WebPOptions { Lossless = true };
+                var saveOptions = new WebPOptions
+                {
+                    Lossless = true
+                };
                 webPImage.Save(outputPath, saveOptions);
             }
         }
@@ -48,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to accept uploaded WebP images, resize them to a standard 1024 × 768 thumbnail, and store them losslessly using Aspose.Imaging in C#.
- * 2. When a desktop utility processes WebP files loaded from byte arrays, converts them to a uniform resolution, and saves the output with lossless compression to preserve image quality.
- * 3. When an e‑commerce platform generates product preview images from raw WebP data, resizing them for responsive design while ensuring no visual degradation by using lossless WebP options.
- * 4. When a mobile backend service receives WebP image data via an API, resizes the picture to fit device screens and saves it with lossless encoding for later retrieval.
- * 5. When a content management system must transform user‑uploaded WebP assets into a consistent 1024 × 768 size without sacrificing fidelity, leveraging Aspose.Imaging’s WebPImage class and memory streams.
+ * 1. When a developer needs to load a WebP image from a byte array, resize it to 1024 × 768, and save it with lossless compression to generate high‑quality thumbnails for a responsive web gallery.
+ * 2. When an e‑commerce application must downscale product photos stored as WebP files in memory to a standard 1024 × 768 resolution while preserving lossless quality before uploading to a CDN.
+ * 3. When a mobile backend processes user‑uploaded WebP screenshots, resizes them to 1024 × 768, and saves them losslessly for archival and later editing.
+ * 4. When a server‑side batch job reads WebP images from a database BLOB, resizes each to 1024 × 768 using bilinear resampling, and writes the output back as lossless WebP files.
+ * 5. When a content management system receives raw WebP assets via an API, converts them to a uniform 1024 × 768 size in C# and saves them with lossless compression for consistent downstream processing.
  */
