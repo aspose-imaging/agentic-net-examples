@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.svg";
-            string outputPath = "output/output.svg";
+            string inputPath = @"C:\temp\input.svg";
+            string outputPath = @"C:\temp\output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,22 +28,41 @@ class Program
             // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
+                // Configure rasterization options for SVG
+                var rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
+
+                // Set PNG save options with the rasterization settings
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Attempt to save and catch any exceptions specific to saving
                 try
                 {
-                    // Save the image as SVG (could change options as needed)
-                    image.Save(outputPath, new SvgOptions());
+                    image.Save(outputPath, pngOptions);
                 }
                 catch (Exception ex)
                 {
-                    // Record file path and exception message during saving
-                    Console.Error.WriteLine($"Error saving file '{outputPath}': {ex.Message}");
+                    Console.Error.WriteLine($"Error saving {outputPath}: {ex.Message}");
                 }
             }
         }
         catch (Exception ex)
         {
-            // General error handling
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web service converts user‑uploaded SVG logos to PNG thumbnails and needs to log any file‑system or rasterization errors with the target path.
+ * 2. When an automated build pipeline generates PNG assets from design SVG files and must capture save failures to prevent silent build breaks.
+ * 3. When a desktop application batch‑processes a folder of SVG diagrams into PNG reports and wants to record which output files failed to save.
+ * 4. When a cloud function transforms SVG charts into PNG images for email attachments and requires detailed error messages for troubleshooting.
+ * 5. When a CI/CD script validates SVG to PNG conversion in a .NET project and needs to output the exact file path and exception details on failure.
+ */

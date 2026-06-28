@@ -1,6 +1,6 @@
 using System;
-using System.Diagnostics;
 using System.IO;
+using System.Diagnostics;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -27,32 +27,31 @@ class Program
             // Measure conversion time
             Stopwatch sw = Stopwatch.StartNew();
 
-            // Load SVG image
+            // Load SVG image and rasterize to PNG
             using (Image image = Image.Load(inputPath))
             {
                 // Configure rasterization options
-                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = image.Size
+                    PageSize = image.Size,
+                    BackgroundColor = Aspose.Imaging.Color.White
                 };
 
                 // Configure PNG save options
-                PngOptions saveOptions = new PngOptions
+                var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterizationOptions
+                    VectorRasterizationOptions = rasterOptions
                 };
 
                 // Save rasterized PNG
-                image.Save(outputPath, saveOptions);
+                image.Save(outputPath, pngOptions);
             }
 
             sw.Stop();
 
-            // Log duration in milliseconds
-            Console.WriteLine($"Conversion duration: {sw.ElapsedMilliseconds} ms");
-
-            // Log output file size
+            // Log duration and output file size
             long fileSize = new FileInfo(outputPath).Length;
+            Console.WriteLine($"Conversion duration: {sw.ElapsedMilliseconds} ms");
             Console.WriteLine($"Output file size: {fileSize} bytes");
         }
         catch (Exception ex)
@@ -61,3 +60,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web service converts user‑uploaded SVG icons to PNG thumbnails and needs to log conversion duration in milliseconds and output file size to monitor performance and bandwidth usage.
+ * 2. When a batch job processes thousands of SVG diagrams for a reporting system and records each rasterization’s elapsed time and resulting PNG size to detect bottlenecks.
+ * 3. When an e‑commerce platform generates product image previews from SVG assets and must ensure the rasterized PNG files stay within size limits for fast page loads, logging both duration and file size.
+ * 4. When a desktop application offers a “Save as PNG” feature for vector drawings and wants to display the conversion time and final file size to the end user after each SVG rasterization.
+ * 5. When a CI/CD pipeline validates that automated SVG‑to‑PNG rasterization meets SLA requirements by capturing the elapsed milliseconds and output file size after each build step.
+ */
