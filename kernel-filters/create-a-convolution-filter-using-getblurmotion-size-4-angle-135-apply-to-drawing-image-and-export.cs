@@ -3,7 +3,8 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -11,34 +12,22 @@ class Program
     {
         try
         {
-            // Define output path
             string outputPath = Path.Combine(Directory.GetCurrentDirectory(), "Output", "filtered.png");
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a PNG image with a FileCreateSource (output is bound to the file)
-            using (PngOptions pngOptions = new PngOptions())
+            using (Image image = Image.Create(new PngOptions { Source = new FileCreateSource(outputPath, false) }, 500, 500))
             {
-                pngOptions.Source = new FileCreateSource(outputPath, false);
-                using (Image image = Image.Create(pngOptions, 500, 500))
-                {
-                    // Draw on the image
-                    Graphics graphics = new Graphics(image);
-                    graphics.Clear(Color.White);
-                    Pen pen = new Pen(Color.Black, 5);
-                    graphics.DrawRectangle(pen, new Rectangle(50, 50, 400, 400));
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
+                Pen pen = new Pen(Color.Blue, 5);
+                graphics.DrawRectangle(pen, new Rectangle(50, 50, 400, 400));
 
-                    // Apply convolution filter (motion blur) to the entire image
-                    RasterImage raster = (RasterImage)image;
-                    int size = 4;
-                    double angle = 135.0;
-                    double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurMotion(size, angle);
-                    var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                    raster.Filter(raster.Bounds, convOptions);
+                RasterImage raster = (RasterImage)image;
+                double[,] kernel = ConvolutionFilter.GetBlurMotion(4, 135);
+                var convOptions = new ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, convOptions);
 
-                    // Save the image (output file is already bound)
-                    image.Save();
-                }
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -50,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PNG thumbnail with a stylized motion‑blur rectangle for a web dashboard, they can use this code to draw the shape, apply a 4‑pixel, 135° blur, and save the result.
- * 2. When building automated test data for image‑processing algorithms, a developer can create a synthetic PNG, draw a known geometric object, apply a motion‑blur convolution filter, and export it to verify detection robustness.
- * 3. When creating custom UI icons that require a subtle diagonal blur effect, the code lets a C# developer render the icon on a white canvas, apply Aspose.Imaging’s GetBlurMotion filter, and output a PNG ready for inclusion in the application.
- * 4. When preparing assets for a game’s loading screen where a rectangle should appear as if moving quickly, the developer can use this snippet to draw the rectangle, apply a 4‑pixel, 135° motion blur via ConvolutionFilterOptions, and save the PNG for the engine.
- * 5. When a developer wants to demonstrate the impact of convolution filters in a tutorial or documentation, this example shows how to bind a FileCreateSource, draw graphics, apply a motion‑blur kernel, and export the processed image as a PNG file.
+ * 1. When a developer needs to generate a PNG image with a 135° motion‑blur applied via Aspose.Imaging’s ConvolutionFilter.GetBlurMotion to create a stylized preview of a drawn shape.
+ * 2. When an application must programmatically draw a rectangle, apply a directional blur using RasterImage.Filter, and export it as a PNG for use in a game UI.
+ * 3. When a reporting system wants to embed a blurred diagram in a PDF, using Aspose.Imaging’s convolution filter to add depth to the blue‑bordered graphic.
+ * 4. When an automated build process creates placeholder PNG assets with a motion‑blur effect to test layout responsiveness in web applications.
+ * 5. When a desktop tool produces custom icons with a subtle 135° motion blur by applying ConvolutionFilterOptions before saving the image.
  */

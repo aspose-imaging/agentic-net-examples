@@ -1,19 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\biginput.tif";
+        string outputPath = @"C:\Images\blurred.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\big.tif";
-            string outputPath = @"C:\Images\blurred.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,23 +22,18 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the BigTIFF image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to RasterImage to apply filters
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
-                {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
-                    return;
-                }
+                RasterImage raster = (RasterImage)image;
 
-                // Apply Gaussian blur (radius 5, sigma 4.0) to the whole image
+                // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
                 raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Save the result as PNG with default settings
+                // Save the result as PNG with default options
                 raster.Save(outputPath, new PngOptions());
             }
         }
@@ -51,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a large scientific BigTIFF microscopy image into a smaller PNG for web preview while applying a Gaussian blur to reduce noise.
- * 2. When an application must process high‑resolution satellite imagery stored as BigTIFF, smooth it with a Gaussian blur, and output a PNG for inclusion in a GIS report.
- * 3. When a medical imaging system requires loading a BigTIFF pathology slide, applying a blur filter to anonymize patient details, and saving the result as a PNG for secure sharing.
- * 4. When a batch‑processing tool has to read massive scanned documents in BigTIFF format, soften the background with a Gaussian blur, and generate PNG thumbnails for a document management portal.
- * 5. When a C# service needs to read a BigTIFF raster, apply a radius‑5 Gaussian blur to improve visual quality, and store the processed image as a PNG using default Aspose.Imaging settings.
+ * 1. When a developer needs to convert a high‑resolution BigTIFF satellite image into a smaller PNG for web preview while softening details with a Gaussian blur.
+ * 2. When an imaging pipeline must preprocess large medical scans in BigTIFF format by applying a blur filter to reduce noise before archiving them as PNG files.
+ * 3. When a GIS application requires loading massive GeoTIFF maps, applying a blur effect for visual smoothing, and exporting the result as a PNG for inclusion in reports.
+ * 4. When a digital asset management system needs to generate blurred thumbnail PNGs from BigTIFF source files to protect sensitive content while still showing a preview.
+ * 5. When a batch‑processing tool automates the conversion of BigTIFF photographs to PNG format with a default Gaussian blur to create consistent, web‑friendly images.
  */

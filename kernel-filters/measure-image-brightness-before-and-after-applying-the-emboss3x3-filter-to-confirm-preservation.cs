@@ -9,8 +9,8 @@ class Program
     {
         try
         {
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output_emboss.png";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -23,19 +23,23 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
+                if (!raster.IsCached)
+                {
+                    raster.CacheData();
+                }
 
                 // Measure brightness before filter
                 int[] pixelsBefore = raster.GetDefaultArgb32Pixels(raster.Bounds);
-                double brightnessBefore = 0;
-                foreach (int pixel in pixelsBefore)
+                double sumBefore = 0;
+                foreach (int argb in pixelsBefore)
                 {
-                    int r = (pixel >> 16) & 0xFF;
-                    int g = (pixel >> 8) & 0xFF;
-                    int b = pixel & 0xFF;
-                    brightnessBefore += (r + g + b) / 3.0;
+                    int r = (argb >> 16) & 0xFF;
+                    int g = (argb >> 8) & 0xFF;
+                    int b = argb & 0xFF;
+                    sumBefore += (r + g + b) / 3.0;
                 }
-                brightnessBefore /= pixelsBefore.Length;
-                Console.WriteLine($"Average brightness before filter: {brightnessBefore:F2}");
+                double avgBrightnessBefore = sumBefore / pixelsBefore.Length;
+                Console.WriteLine($"Average brightness before: {avgBrightnessBefore}");
 
                 // Apply Emboss3x3 filter
                 raster.Filter(raster.Bounds,
@@ -44,16 +48,16 @@ class Program
 
                 // Measure brightness after filter
                 int[] pixelsAfter = raster.GetDefaultArgb32Pixels(raster.Bounds);
-                double brightnessAfter = 0;
-                foreach (int pixel in pixelsAfter)
+                double sumAfter = 0;
+                foreach (int argb in pixelsAfter)
                 {
-                    int r = (pixel >> 16) & 0xFF;
-                    int g = (pixel >> 8) & 0xFF;
-                    int b = pixel & 0xFF;
-                    brightnessAfter += (r + g + b) / 3.0;
+                    int r = (argb >> 16) & 0xFF;
+                    int g = (argb >> 8) & 0xFF;
+                    int b = argb & 0xFF;
+                    sumAfter += (r + g + b) / 3.0;
                 }
-                brightnessAfter /= pixelsAfter.Length;
-                Console.WriteLine($"Average brightness after filter: {brightnessAfter:F2}");
+                double avgBrightnessAfter = sumAfter / pixelsAfter.Length;
+                Console.WriteLine($"Average brightness after: {avgBrightnessAfter}");
 
                 // Save the filtered image
                 raster.Save(outputPath, new PngOptions());
@@ -68,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to verify that applying the Aspose.Imaging Emboss3x3 convolution filter to a PNG image does not unintentionally darken or brighten the picture, they can measure average brightness before and after the filter.
- * 2. When building an automated C# image‑processing pipeline that adds artistic emboss effects while maintaining consistent exposure across batches, this code can compare the brightness of the original and embossed output.
- * 3. When creating a quality‑control test for an application that generates embossed thumbnails using Aspose.Imaging, the brightness comparison ensures the filter preserves visual balance.
- * 4. When integrating the Emboss3x3 filter into a photo‑editing tool and needing to display a numeric brightness metric to users, the sample demonstrates how to calculate and log the average RGB intensity.
- * 5. When troubleshooting why a series of JPEG or PNG files appear too dark after a convolution operation, a developer can use this code to isolate whether the Emboss3x3 filter is the cause by measuring pre‑ and post‑filter brightness.
+ * 1. When a developer needs to verify that applying an Emboss3x3 convolution filter to a PNG image does not unintentionally darken or brighten the picture, they can use this code to compute average brightness before and after the filter.
+ * 2. When building an automated image‑processing pipeline in C# that applies artistic effects while preserving overall exposure, the sample shows how to load a raster image, cache data, and compare brightness metrics.
+ * 3. When creating a quality‑control test for a photo‑editing application that supports multiple file formats such as PNG, JPEG, or BMP, this snippet demonstrates measuring pixel luminance to ensure the emboss effect maintains visual consistency.
+ * 4. When debugging a custom filter implementation in Aspose.Imaging for .NET and needing a quick way to log the average RGB brightness of the source and filtered images, the code provides a straightforward console output.
+ * 5. When generating documentation or tutorials that illustrate the impact of convolution filters on image luminance, developers can reuse this example to show how to retrieve ARGB32 pixels, calculate mean brightness, and confirm the filter’s effect on a raster image.
  */

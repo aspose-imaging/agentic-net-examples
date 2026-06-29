@@ -2,65 +2,66 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string[] inputPaths = { "input1.jpg", "input2.jpg" };
-        string outputPath = "output.jpg";
+        string inputPath1 = "input1.png";
+        string inputPath2 = "input2.png";
+        string outputPath = "output.png";
 
         try
         {
-            // Validate each input file
-            foreach (var path in inputPaths)
+            if (!File.Exists(inputPath1))
             {
-                if (!File.Exists(path))
-                {
-                    Console.Error.WriteLine($"File not found: {path}");
-                    return;
-                }
+                Console.Error.WriteLine($"File not found: {inputPath1}");
+                return;
+            }
+            if (!File.Exists(inputPath2))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath2}");
+                return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Collect sizes of all input images
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-            foreach (var path in inputPaths)
+            // Collect sizes of input images
+            List<Size> sizes = new List<Size>();
+            using (RasterImage img1 = (RasterImage)Image.Load(inputPath1))
             {
-                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
-                {
-                    sizes.Add(img.Size);
-                }
+                sizes.Add(img1.Size);
+            }
+            using (RasterImage img2 = (RasterImage)Image.Load(inputPath2))
+            {
+                sizes.Add(img2.Size);
             }
 
-            // Calculate canvas dimensions for horizontal stitching
+            // Calculate canvas dimensions for horizontal merge
             int newWidth = sizes.Sum(s => s.Width);
             int newHeight = sizes.Max(s => s.Height);
 
-            // Create output source and JPEG options
-            FileCreateSource source = new FileCreateSource(outputPath, false);
-            JpegOptions options = new JpegOptions() { Source = source, Quality = 90 };
+            // Create output source and options
+            Source src = new FileCreateSource(outputPath, false);
+            PngOptions options = new PngOptions() { Source = src };
 
-            // Create a JPEG canvas bound to the output file
-            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(options, newWidth, newHeight))
+            // Create canvas image
+            using (RasterImage canvas = (RasterImage)Image.Create(options, newWidth, newHeight))
             {
                 int offsetX = 0;
-                foreach (var path in inputPaths)
+                foreach (string path in new[] { inputPath1, inputPath2 })
                 {
-                    using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
+                    using (RasterImage img = (RasterImage)Image.Load(path))
                     {
-                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
+                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
-
                 // Save the bound canvas
                 canvas.Save();
             }
@@ -74,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an e‑commerce platform needs to automatically stitch multiple product photos into a single high‑quality JPEG banner, this C# Aspose.Imaging code can merge the images while gracefully handling missing files or access errors.
- * 2. When a travel blog wants to generate panoramic views by concatenating a series of JPEG snapshots taken on a trip, the code creates a horizontal canvas and writes the result with configurable quality, protecting against read/write exceptions.
- * 3. When a document management system scans multi‑page forms as separate JPEG files and must combine them into one image for archival, the routine validates each page, merges them, and catches file‑access issues to avoid processing interruptions.
- * 4. When a marketing team automates the creation of social‑media collages from user‑submitted images, the program loads each JPEG, assembles them side‑by‑side, and uses try‑catch blocks to handle permission problems on the server.
- * 5. When a desktop application generates printable photo strips from a set of camera‑generated JPEGs, the code calculates the canvas size, stitches the images, and ensures any missing or locked files are reported without crashing the app.
+ * 1. When a developer needs to create a side‑by‑side PNG banner by merging two promotional images for a web page, this C# Aspose.Imaging code loads the raster images, combines them on a canvas, and saves the result while gracefully handling missing files or file‑access exceptions.
+ * 2. When an automated batch process must generate composite product thumbnails from separate front‑view and back‑view PNG files, the code can read each image, calculate the combined dimensions, and output a single merged PNG with robust error handling for unavailable or locked files.
+ * 3. When a reporting tool has to embed two chart PNGs into one horizontal image for inclusion in a PDF report, developers can use this snippet to load the charts, merge them on a raster canvas, and ensure any I/O errors are caught and logged.
+ * 4. When a desktop application offers users the ability to stitch together scanned document pages saved as PNGs into a single wide image, this code provides the necessary file existence checks, canvas creation, and exception handling to prevent crashes on inaccessible files.
+ * 5. When a CI/CD pipeline needs to validate that two generated PNG assets can be merged without errors before publishing them to a CDN, the code performs the merge and catches file‑access exceptions, allowing the build to fail gracefully if any image is missing or locked.
  */

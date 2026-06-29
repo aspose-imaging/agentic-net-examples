@@ -2,52 +2,48 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded paths
-        string outputPath = @"C:\temp\vertical_lines.bmp";
+        // Hardcoded input and output paths
+        string outputPath = @"C:\temp\output.bmp";
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Set up BMP options with a file source
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Image dimensions
             int width = 500;
-            int height = 300;
-            int lineCount = 10;
-            int spacing = width / (lineCount + 1);
+            int height = 500;
 
-            // Create BMP options and specify the file to create
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
-            };
-
-            // Create the image
+            // Create the image canvas
             using (Image image = Image.Create(bmpOptions, width, height))
             {
-                // Initialize graphics object
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
                 // Thin black pen
                 Pen pen = new Pen(Color.Black, 1);
 
-                // Draw equally spaced vertical lines
+                // Draw ten equally spaced vertical lines
+                int lineCount = 10;
+                int spacing = width / (lineCount + 1);
                 for (int i = 1; i <= lineCount; i++)
                 {
                     int x = i * spacing;
                     graphics.DrawLine(pen, x, 0, x, height);
                 }
 
-                // Save the image (already linked to outputPath via FileCreateSource)
+                // Save the image (file is already bound to the source)
                 image.Save();
             }
         }
@@ -60,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a simple grid overlay on a BMP chart in a C# reporting application, the code draws ten equally spaced vertical lines using Aspose.Imaging’s Graphics and Pen objects.
- * 2. When creating a placeholder BMP image with vertical separators for a web UI mock‑up, developers can use this loop to add thin black lines via Aspose.Imaging.
- * 3. When producing a test‑pattern BMP to verify printer or monitor calibration, the code provides ten evenly spaced vertical lines drawn with a 1‑pixel Pen.
- * 4. When automating the creation of a ruler‑style background BMP for a CAD or measurement tool, the loop supplies consistent vertical guides using Aspose.Imaging’s drawing API.
- * 5. When building a lightweight BMP template that requires fixed vertical guides for dynamic text or barcode placement, this example shows how to draw the lines with a thin Pen in .NET.
+ * 1. When a developer needs to generate a simple BMP template with evenly spaced vertical guide lines for a UI layout mock‑up using Aspose.Imaging for .NET.
+ * 2. When creating a printable barcode or ruler image where ten vertical markers must be drawn at regular intervals on a 24‑bit BMP file.
+ * 3. When producing a test pattern image to verify image processing pipelines, such as edge detection, by drawing thin black lines on a white background in C#.
+ * 4. When automating the generation of column separators for a spreadsheet export that is saved as a BMP image using Aspose.Imaging’s Graphics API.
+ * 5. When building a lightweight diagram or chart that requires equally spaced vertical lines as a background grid in a BMP image created programmatically.
  */

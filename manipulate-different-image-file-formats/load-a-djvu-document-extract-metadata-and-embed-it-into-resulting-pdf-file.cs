@@ -1,47 +1,33 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.djvu";
-        string outputPath = "output.pdf";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input/sample.djvu";
+            string outputPath = "Output/result.pdf";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(string.IsNullOrEmpty(outputDir) ? "." : outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DjVu document from file stream
-            using (FileStream inputStream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = DjvuImage.LoadDocument(inputStream))
+            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
             {
-                // Extract metadata (XMP data) from the DjVu document
-                var metadata = djvuImage.Metadata;
-
-                // Prepare PDF save options
-                var pdfOptions = new PdfOptions();
-
-                // Transfer extracted metadata to the PDF options if supported
-                // (If PdfOptions does not expose a Metadata property, the metadata
-                // will be retained automatically when saving the image.)
-                // pdfOptions.Metadata = metadata; // Uncomment if property exists
-
-                // Save the DjVu document as a PDF file with the metadata embedded
-                djvuImage.Save(outputPath, pdfOptions);
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    djvuImage.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -53,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert archived DjVu scans of historical documents into searchable PDFs while preserving the original XMP metadata for cataloging.
- * 2. When an application must batch‑process DjVu files received from a document management system and generate PDF reports that retain the source metadata for compliance auditing.
- * 3. When a digital library platform wants to display DjVu‑based e‑books as PDFs on browsers, ensuring that author and rights information embedded in the DjVu metadata is carried over.
- * 4. When a C# service integrates with a workflow that extracts metadata from scanned engineering drawings stored as DjVu and embeds it into PDFs for downstream CAD review tools.
- * 5. When a developer builds a file‑conversion microservice that reads DjVu images, extracts their XMP metadata, and saves them as PDFs so downstream indexing services can read the embedded metadata.
+ * 1. When a developer needs to convert scanned archival DjVu documents into searchable PDF files while preserving the original metadata for compliance reporting.
+ * 2. When an application must batch‑process legal case files stored as DjVu and generate PDF versions that retain author, creation date, and title information for e‑discovery.
+ * 3. When a digital library platform wants to serve users PDFs instead of DjVu but still keep the embedded metadata for cataloging and indexing purposes.
+ * 4. When a document management system requires on‑the‑fly conversion of DjVu blueprints to PDF with metadata intact to integrate with existing PDF workflow tools.
+ * 5. When a C# service automates the migration of legacy DjVu manuals to PDF format, ensuring that the original metadata is embedded for future search and retrieval.
  */

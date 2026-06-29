@@ -2,55 +2,64 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "input.pdf";
-            string outputDirectory = "output";
+            // Hardcoded input PDF path
+            string inputPath = @"C:\Images\input.pdf";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(outputDirectory);
-
+            // Load the PDF document
             using (Image pdfImage = Image.Load(inputPath))
             {
-                int pageCount = 1;
-                if (pdfImage is IMultipageImage multipage)
-                {
-                    pageCount = multipage.PageCount;
-                }
+                // Determine page count (PDF is a multipage vector image)
+                var multipage = pdfImage as IMultipageImage;
+                int pageCount = multipage?.PageCount ?? 1;
 
-                for (int i = 0; i < pageCount; i++)
+                // Loop through each page and export as PNG with alpha channel
+                for (int pageIndex = 0; pageIndex < pageCount; pageIndex++)
                 {
-                    using (PngOptions pngOptions = new PngOptions())
+                    // Prepare PNG save options
+                    var pngOptions = new PngOptions
                     {
-                        pngOptions.ColorType = PngColorType.TruecolorWithAlpha;
+                        // Ensure each page is saved individually
+                        MultiPageOptions = new MultiPageOptions(new Aspose.Imaging.IntRange(pageIndex, pageIndex + 1))
+                    };
 
-                        if (pdfImage is VectorImage)
-                        {
-                            var vectorOptions = new VectorRasterizationOptions();
-                            vectorOptions.TextRenderingHint = TextRenderingHint.SingleBitPerPixel;
-                            vectorOptions.SmoothingMode = SmoothingMode.None;
-                            pngOptions.VectorRasterizationOptions = vectorOptions;
-                        }
+                    // Configure vector rasterization to preserve transparency
+                    var vectorOptions = new VectorRasterizationOptions
+                    {
+                        // Use transparent background so alpha channel is retained
+                        BackgroundColor = Aspose.Imaging.Color.Transparent,
+                        // Preserve original size
+                        PageSize = new SizeF(pdfImage.Width, pdfImage.Height),
+                        // Optional: improve quality
+                        SmoothingMode = Aspose.Imaging.SmoothingMode.None,
+                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel
+                    };
 
-                        pngOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
+                    pngOptions.VectorRasterizationOptions = vectorOptions;
 
-                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.png");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Define output file path for the current page
+                    string outputPath = Path.Combine(@"C:\Images\Output", $"page_{pageIndex + 1}.png");
 
-                        pdfImage.Save(outputPath, pngOptions);
-                    }
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the current page as PNG
+                    pdfImage.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -63,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to display each page of a PDF brochure as a transparent PNG thumbnail while preserving vector sharpness, it can use this code to rasterize and export the pages.
- * 2. When an e‑learning platform wants to convert PDF slide decks containing vector diagrams into PNG images with an alpha channel for overlay on interactive backgrounds, this snippet handles the conversion.
- * 3. When a desktop publishing tool must flatten PDF transparency and generate high‑quality PNG assets for print‑ready PDFs that include vector graphics, the code provides the necessary rasterization.
- * 4. When a mobile app requires on‑device preview of multi‑page PDF invoices as PNGs with transparent backgrounds for custom UI composition, developers can employ this routine.
- * 5. When an automated CI/CD pipeline processes design PDFs to produce per‑page PNG sprites with preserved vector detail and alpha transparency for game development pipelines, this example performs the task.
+ * 1. When a developer needs to convert multi‑page PDF brochures that contain vector illustrations into separate PNG files with preserved transparency for use on responsive web pages.
+ * 2. When an e‑commerce platform must generate product‑label thumbnails from PDF templates, flattening any translucent elements so the PNG output retains an alpha channel for overlay on dynamic backgrounds.
+ * 3. When a mobile app requires high‑resolution PNG assets extracted from a PDF design mockup, ensuring each page’s vector graphics are rasterized with a transparent background for seamless UI integration.
+ * 4. When a reporting tool automates the creation of printable PNG charts from PDF dashboards, preserving vector quality and transparency to embed the images into PowerPoint slides.
+ * 5. When a document‑management system needs to archive each page of a PDF contract as a PNG with an alpha channel, enabling quick preview thumbnails while maintaining the original vector‑based visual fidelity.
  */

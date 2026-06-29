@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -10,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.eps";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = @"C:\Images\source.eps";
+            string outputPath = @"C:\Images\output\cropped.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,19 +21,23 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EPS image
-            using (Image image = Image.Load(inputPath))
+            // Load EPS image
+            using (EpsImage image = (EpsImage)Image.Load(inputPath))
             {
-                // Define the crop rectangle (x, y, width, height)
-                var cropRect = new Aspose.Imaging.Rectangle(50, 50, 300, 300);
+                // Define crop rectangle (example: central half of the image)
+                int cropX = image.Width / 4;
+                int cropY = image.Height / 4;
+                int cropWidth = image.Width / 2;
+                int cropHeight = image.Height / 2;
+                var cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
 
-                // Crop the image to the specified rectangle
+                // Crop the image
                 image.Crop(cropRect);
 
-                // Save the cropped image as PNG
+                // Save as PNG
                 var pngOptions = new PngOptions();
                 image.Save(outputPath, pngOptions);
             }
@@ -47,8 +52,8 @@ class Program
 /*
  * Real-World Use Cases:
  * 1. When a developer needs to extract a specific region from a vector EPS logo and deliver it as a raster PNG for web display.
- * 2. When an automated workflow must convert printed‑ready EPS artwork into a cropped PNG thumbnail for a product catalog.
- * 3. When a C# application has to isolate a portion of an EPS diagram (e.g., a chart area) and save it as a PNG for inclusion in a report.
- * 4. When a batch process must validate that an EPS file contains the required content by cropping a known rectangle and checking the resulting PNG.
- * 5. When a developer wants to integrate Aspose.Imaging into a .NET service that receives EPS files, crops them to a predefined canvas size, and returns PNG images to client applications.
+ * 2. When an automated pipeline must convert large EPS artwork into smaller PNG thumbnails by cropping the central area.
+ * 3. When a print‑to‑screen preview tool requires loading an EPS file, trimming unwanted margins, and saving the result as a PNG for UI rendering.
+ * 4. When a batch job processes incoming EPS design files, removes excess whitespace by cropping, and stores the cleaned images as PNGs for downstream processing.
+ * 5. When a C# application integrates Aspose.Imaging to read EPS files, apply a rectangular crop to focus on a product label, and export the cropped image as PNG for inclusion in a catalog.
  */

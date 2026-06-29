@@ -3,9 +3,9 @@
   "platform": "net",
   "framework": "net9.0",
   "package_version": "26.6.0",
-  "total_examples": 2874,
+  "total_examples": 2920,
   "total_categories": 17,
-  "last_updated": "2026-06-23",
+  "last_updated": "2026-06-29",
   "categories": [
     {
       "name": "conversion",
@@ -272,7 +272,7 @@
       ],
       "more_files": {
         "count": 132,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/conversion"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/conversion"
       }
     },
     {
@@ -371,15 +371,16 @@
         "Aspose.Imaging.FileFormats.Apng",
         "Aspose.Imaging.Sources",
         "Aspose.Imaging.FileFormats.Png",
-        "System.Collections.Generic",
-        "Aspose.Imaging.FileFormats.Gif",
         "Aspose.Imaging.FileFormats.Webp",
-        "System.Linq",
+        "System.Collections.Generic",
         "Aspose.Imaging.FileFormats.Svg",
         "Aspose.Imaging.FileFormats.Tiff",
+        "Aspose.Imaging.FileFormats.Gif",
         "System.Diagnostics",
-        "Aspose.Imaging.Brushes",
-        "Aspose.Imaging.FileFormats.Bmp"
+        "System.Text",
+        "Aspose.Imaging.FileFormats.Bmp",
+        "Aspose.Imaging.FileFormats.Jpeg",
+        "Aspose.Imaging.FileFormats.Tiff.Enums"
       ],
       "key_apis": [
         "ApngFrame",
@@ -406,7 +407,7 @@
       ],
       "more_files": {
         "count": 21,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-apng"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/convert-apng"
       }
     },
     {
@@ -479,17 +480,19 @@
       "required_namespaces": [
         "System",
         "System.IO",
-        "Aspose.Imaging",
         "Aspose.Imaging.ImageOptions",
+        "Aspose.Imaging",
         "Aspose.Imaging.FileFormats.Cdr",
-        "Aspose.Imaging.FileFormats.Psd",
-        "Aspose.Imaging.FileFormats.Jpeg",
         "Aspose.Imaging.FileFormats.Pdf",
+        "Aspose.Imaging.FileFormats.Png",
+        "Aspose.Imaging.FileFormats.Jpeg",
+        "System.Linq",
+        "Aspose.Imaging.CoreExceptions",
         "Aspose.Imaging.Sources",
         "Aspose.Imaging.ImageLoadOptions",
         "System.Threading.Tasks",
         "Aspose.Imaging.ProgressManagement",
-        "Aspose.Imaging.FileFormats.Png"
+        "System.Collections.Generic"
       ],
       "key_apis": [
         "CdrImage",
@@ -586,13 +589,17 @@
         "Aspose.Imaging.FileFormats.Cmx",
         "Aspose.Imaging.FileFormats.Tiff.Enums",
         "Aspose.Imaging.FileFormats.Tiff",
+        "Aspose.Imaging.FileFormats.Pdf",
         "Aspose.Imaging.Sources",
-        "Aspose.Imaging.ImageLoadOptions",
         "Aspose.Imaging.FileFormats.Png",
         "Aspose.Imaging.FileFormats.Jpeg",
-        "Aspose.Imaging.FileFormats.Pdf",
+        "Aspose.Imaging.ImageLoadOptions",
+        "System.Threading.Tasks",
         "System.Net.Http",
-        "System.Threading.Tasks"
+        "Aspose.Imaging.FileFormats.Bmp",
+        "Aspose.Imaging.FileFormats.Gif",
+        "Aspose.Imaging.FileFormats.Webp",
+        "System.Linq"
       ],
       "key_apis": [
         "BmpOptions",
@@ -617,7 +624,7 @@
       ],
       "more_files": {
         "count": 4,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-cmx-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/convert-cmx-images"
       }
     },
     {
@@ -696,14 +703,13 @@
         "Aspose.Imaging.FileFormats.Png",
         "Aspose.Imaging.CoreExceptions.ImageFormats",
         "Aspose.Imaging.ImageFilters.FilterOptions",
-        "Aspose.Imaging.ProgressManagement",
-        "System.Linq",
         "System.Threading.Tasks",
         "Aspose.Imaging.FileFormats.Tiff.Enums"
       ],
       "key_apis": [
         "ApngOptions",
         "DicomImage",
+        "DicomOptions",
         "LoadOptions",
         "MedianFilterOptions",
         "PngImage",
@@ -818,13 +824,18 @@
         "Aspose.Imaging.FileFormats.Pdf",
         "Aspose.Imaging.FileFormats.Psd",
         "Aspose.Imaging.FileFormats.Png",
-        "Aspose.Imaging.FileFormats.Tiff.Enums",
-        "System.Collections.Generic",
-        "System.Threading.Tasks",
-        "System.Diagnostics",
         "Aspose.Imaging.FileFormats.Tiff",
-        "Aspose.Imaging.Sources",
-        "Aspose.Imaging.FileFormats.Webp"
+        "Aspose.Imaging.CoreExceptions",
+        "Aspose.Imaging.CoreExceptions.ImageFormats",
+        "System.Collections.Generic",
+        "Aspose.Imaging.FileFormats.Svg",
+        "System.Threading.Tasks",
+        "System.Text",
+        "Aspose.Imaging.FileFormats.Jpeg",
+        "Aspose.Imaging.FileFormats.Bmp",
+        "Aspose.Imaging.FileFormats.Gif",
+        "Aspose.Imaging.FileFormats.Webp",
+        "Aspose.Imaging.FileFormats.Tiff.Enums"
       ],
       "key_apis": [
         "ApngOptions",
@@ -842,12 +853,13 @@
         "PngOptions",
         "PsdOptions",
         "PsdVectorizationOptions",
+        "TiffImage",
         "TiffOptions",
         "VectorRasterizationOptions"
       ],
       "more_files": {
         "count": 30,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-eps-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/convert-eps-images"
       }
     },
     {
@@ -1010,27 +1022,25 @@
       "required_namespaces": [
         "System",
         "System.IO",
-        "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging",
+        "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging.FileFormats.OpenDocument",
         "Aspose.Imaging.FileFormats.Pdf",
-        "Aspose.Imaging.ImageFilters.FilterOptions",
-        "Aspose.Imaging.FileFormats.Bmp",
         "Aspose.Imaging.FileFormats.Jpeg",
+        "Aspose.Imaging.ImageFilters.FilterOptions",
         "Aspose.Imaging.FileFormats.Png",
-        "Aspose.Imaging.FileFormats.Svg",
+        "Aspose.Imaging.FileFormats.Bmp",
         "Aspose.Imaging.Sources",
+        "Aspose.Imaging.FileFormats.Svg",
         "System.Threading.Tasks",
-        "System.Collections.Generic",
         "System.Xml",
         "System.Xml.Schema",
         "System.Net.Sockets",
-        "System.Diagnostics",
         "System.Reflection",
-        "Aspose.Imaging.Brushes",
         "System.Text",
-        "System.Text.RegularExpressions",
-        "System.Linq"
+        "System.Diagnostics",
+        "System.Linq",
+        "System.Xml.Linq"
       ],
       "key_apis": [
         "BmpImage",
@@ -1043,6 +1053,7 @@
         "MedianFilterOptions",
         "OdgImage",
         "OdgRasterizationOptions",
+        "OpenThermalGraphics",
         "OtgImage",
         "OtgRasterizationOptions",
         "PdfCoreOptions",
@@ -1057,7 +1068,7 @@
       ],
       "more_files": {
         "count": 90,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-open-document-graphics"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/convert-open-document-graphics"
       }
     },
     {
@@ -1239,31 +1250,32 @@
         "convert-a-bmp-image-to-pdf-and-write-the-pdf-directly-to-an-http-response-stream.cs"
       ],
       "required_namespaces": [
-        "Aspose.Imaging",
         "System",
         "System.IO",
+        "Aspose.Imaging",
         "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging.ImageFilters.FilterOptions",
         "Aspose.Imaging.FileFormats.Svg",
         "Aspose.Imaging.FileFormats.Svg.Graphics",
-        "Aspose.Imaging.FileFormats.Png",
         "Aspose.Imaging.FileFormats.Pdf",
+        "Aspose.Imaging.FileFormats.Png",
+        "Aspose.Imaging.FileFormats.Bmp",
         "Aspose.Imaging.Brushes",
         "Aspose.Imaging.Sources",
-        "Aspose.Imaging.FileFormats.Bmp",
         "Aspose.Imaging.Shapes",
         "System.Threading.Tasks",
-        "Aspose.Imaging.FileFormats.Jpeg",
-        "Aspose.Imaging.FileFormats",
-        "System.Net",
-        "System.IO.Compression",
-        "System.Text",
         "System.Xml.Linq",
-        "System.Collections.Generic"
+        "System.IO.Compression",
+        "System.Collections.Generic",
+        "Aspose.Imaging.Masking",
+        "Aspose.Imaging.Masking.Options",
+        "Aspose.Imaging.Masking.Result",
+        "Aspose.Imaging.ImageFilters.Convolution"
       ],
       "key_apis": [
         "BmpImage",
         "BmpOptions",
+        "ConvolutionFilterOptions",
         "GaussianBlurFilterOptions",
         "Graphics",
         "JpegImage",
@@ -1286,7 +1298,7 @@
       ],
       "more_files": {
         "count": 111,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-raster-image"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/convert-raster-image"
       }
     },
     {
@@ -1369,20 +1381,21 @@
       "required_namespaces": [
         "System",
         "System.IO",
-        "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging",
+        "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging.FileFormats.Svg",
         "Aspose.Imaging.FileFormats.Bmp",
         "Aspose.Imaging.FileFormats.Png",
+        "Aspose.Imaging.Sources",
         "System.Diagnostics",
         "Aspose.Imaging.Brushes",
-        "Aspose.Imaging.Sources",
         "System.Threading.Tasks"
       ],
       "key_apis": [
         "BmpImage",
         "BmpOptions",
         "Graphics",
+        "Html5CanvasOptions",
         "PdfOptions",
         "PngImage",
         "PngOptions",
@@ -1395,7 +1408,7 @@
       ],
       "more_files": {
         "count": 10,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/convert-svg-to-raster-images"
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/convert-svg-to-raster-images"
       }
     },
     {
@@ -1474,9 +1487,10 @@
         "Aspose.Imaging.FileFormats.Gif",
         "System.Threading.Tasks",
         "System.Diagnostics",
-        "Aspose.Imaging.FileFormats.Gif.Blocks",
+        "Aspose.Imaging.FileFormats",
+        "Aspose.Imaging.FileFormats.Png",
+        "Aspose.Imaging.FileFormats.Jpeg",
         "Aspose.Imaging.FileFormats.Pdf",
-        "Aspose.Imaging.Metadata",
         "System.Linq",
         "System.Threading",
         "Aspose.Imaging.Multithreading",
@@ -1563,17 +1577,18 @@
       "required_namespaces": [
         "System",
         "System.IO",
-        "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging",
+        "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging.FileFormats.Wmf",
-        "Aspose.Imaging.FileFormats.Emf",
         "Aspose.Imaging.FileFormats.Tiff.Enums",
-        "System.Threading.Tasks",
+        "Aspose.Imaging.FileFormats.Emf",
+        "Aspose.Imaging.FileFormats.Jpeg",
         "Aspose.Imaging.FileFormats.Png",
-        "Aspose.Imaging.Sources",
+        "System.Threading.Tasks",
         "System.Net.Http",
         "System.IO.Compression",
-        "Aspose.Imaging.FileFormats.Jpeg",
+        "Aspose.Imaging.Sources",
+        "Aspose.Imaging.Exif",
         "Aspose.Imaging.FileFormats.Bmp",
         "Aspose.Imaging.FileFormats.Tiff"
       ],
@@ -1596,7 +1611,7 @@
     },
     {
       "name": "image-and-photo-filters",
-      "file_count": 138,
+      "file_count": 141,
       "all_files": [
         "28729-remove-watermark-from-a-png-using-telea-algorithm-and-set-removal-attempts-to-five.cs",
         "28746-create-a-custom-selection-by-combining-magic-wand-union-and-subtraction-then-fill-with-solid-color.cs",
@@ -1656,6 +1671,7 @@
         "combine-two-masks-generated-from-different-points-using-union-then-apply-the-combined-mask-to-the-tiff-image.cs",
         "compare-memory-usage-of-magicwandtool-when-processing-a-4k-png-versus-a-1080p-jpeg-image.cs",
         "compare-the-output-quality-of-telea-algorithm-versus-default-contentawarefill-by-processing-the-same-watermark-image-twice.cs",
+        "compare-the-output-quality-of-telea-algorithm-versus-default-contentawarefill-by-processing-the-same-watermark.cs",
         "configure-the-magic-wand-filter-by-specifying-tolerance-fill-color-and-border-color-parameters.cs",
         "configure-the-remove-watermark-filter-by-defining-watermark-color-and-appropriate-threshold-parameters-clearly.cs",
         "convert-a-pdf-page-to-image-apply-watermark-removal-and-save-the-cleaned-image-as-jpeg.cs",
@@ -1673,6 +1689,7 @@
         "define-watermark-region-coordinates-50-50-200-100-and-apply-removal-filter-on-a-bmp-image.cs",
         "demonstrate-how-to-chain-subtract-and-getfeathered-methods-to-refine-a-mask-around-a-complex-edge.cs",
         "design-a-configuration-ui-that-lets-users-select-between-contentawarefill-and-telea-algorithms-before-watermark-removal.cs",
+        "design-a-configuration-ui-that-lets-users-select-between-contentawarefill-and-telea-algorithms-before-watermark.cs",
         "detect-and-eliminate-watermarks-from-images-using-the-remove-watermark-filter-for-any-supported-format.cs",
         "determine-the-available-image-filters-and-devise-a-strategy-for-applying-them-within-the-processing-pipeline.cs",
         "develop-a-unit-test-that-verifies-union-correctly-merges-two-overlapping-masks-into-a-single-combined-mask.cs",
@@ -1735,7 +1752,8 @@
         "utilize-image-processing-filters-to-detect-and-eliminate-watermarks-from-photos-within-a-given-image.cs",
         "validate-that-setting-a-very-low-threshold-does-not-produce-an-empty-mask-on-a-uniform-color-image.cs",
         "validate-the-image-output-after-watermark-removal-to-ensure-visual-integrity-and-expected-dimensions.cs",
-        "write-integration-tests-that-process-an-image-through-both-filters-and-compare-the-output-hashes-to-expected-values.cs"
+        "write-integration-tests-that-process-an-image-through-both-filters-and-compare-the-output-hashes-to-expected-values.cs",
+        "write-integration-tests-that-process-an-image-through-both-filters-and-compare-the-output-hashes-to-expected.cs"
       ],
       "files": [
         "28729-remove-watermark-from-a-png-using-telea-algorithm-and-set-removal-attempts-to-five.cs",
@@ -1777,26 +1795,23 @@
         "Aspose.Imaging.MagicWand",
         "Aspose.Imaging.FileFormats.Png",
         "Aspose.Imaging.MagicWand.ImageMasks",
-        "Aspose.Imaging.Sources",
         "Aspose.Imaging.Shapes",
+        "Aspose.Imaging.Sources",
         "Aspose.Imaging.Watermark",
         "Aspose.Imaging.Watermark.Options",
-        "Aspose.Imaging.FileFormats.Tiff",
+        "Aspose.Imaging.FileFormats.Tiff.Enums",
+        "Aspose.Imaging.FileFormats.Jpeg",
         "Aspose.Imaging.Masking",
         "Aspose.Imaging.Masking.Options",
         "Aspose.Imaging.Masking.Result",
-        "Aspose.Imaging.FileFormats.Tiff.Enums",
-        "Aspose.Imaging.FileFormats.Gif",
+        "Aspose.Imaging.FileFormats.Tiff",
         "Aspose.Imaging.FileFormats.Bmp",
-        "Aspose.Imaging.FileFormats.Jpeg",
+        "Aspose.Imaging.FileFormats.Gif",
         "Aspose.Imaging.Brushes",
         "Aspose.Imaging.FileFormats.Pdf",
         "System.Drawing",
         "Aspose.Imaging.FileFormats.BigTiff",
-        "System.Linq",
-        "System.Diagnostics",
-        "System.Security.Cryptography",
-        "Aspose.Imaging.ImageFilters.FilterOptions"
+        "System.Linq"
       ],
       "key_apis": [
         "AutoMaskingGraphCutOptions",
@@ -1814,6 +1829,7 @@
         "MaskingOptions",
         "PngImage",
         "PngOptions",
+        "RasterCachedImage",
         "RasterImage",
         "SharpenFilterOptions",
         "SolidBrush",
@@ -1823,14 +1839,26 @@
         "VectorRasterizationOptions"
       ],
       "more_files": {
-        "count": 108,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/image-and-photo-filters"
+        "count": 111,
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/image-and-photo-filters"
       }
     },
     {
       "name": "kernel-filters",
-      "file_count": 464,
+      "file_count": 477,
       "all_files": [
+        "28794-apply-a-zero-sum-edge-detection-kernel-to-a-png-image-and-verify-black-background-with-highlighted-edges.cs",
+        "28810-validate-that-a-custom-kernel-s-dimensions-are-odd-before-applying-a-deconvolution-filter-to-png.cs",
+        "28819-process-each-page-of-a-multipage-tiff-document-with-an-edge-detection-kernel-and-save-results.cs",
+        "28831-generate-a-horizontal-sobel-3-3-kernel-for-edge-detection-operation.cs",
+        "28866-iterate-over-each-page-of-a-multipage-svg-file-and-apply-a-custom-convolution-kernel-to-every-page.cs",
+        "28875-programmatically-generate-a-3x3-edge-detection-kernel-at-runtime-and-apply-it-to-a-png-image.cs",
+        "28881-catch-and-log-convolutionfilter-exceptions-when-applying-an-invalid-custom-kernel-to-an-svg-image.cs",
+        "28882-ensure-the-custom-kernel-matrix-dimensions-match-the-required-size-before-applying-the-filter.cs",
+        "28893-expose-a-restful-service-that-accepts-an-image-url-and-returns-the-image-after-applying-gaussian-blur.cs",
+        "28908-retrieve-and-serve-filtered-images-via-an-http-endpoint-from-azure-blob-storage.cs",
+        "28928-ensure-thread-safety-of-convolutionfilter-instances-when-used-concurrently-in-parallel-loops.cs",
+        "28937-broadcast-filtered-images-to-connected-clients-using-signalr-after-applying-a-kernel-filter.cs",
         "add-a-readme-example-that-walks-through-loading-an-svg-applying-gaussian-blur-and-saving.cs",
         "adjust-kernel-coefficients-dynamically-based-on-user-input-in-a-desktop-ui-before-filtering.cs",
         "adjust-kernel-coefficients-to-increase-brightness-while-applying-a-5x5-blur-to-a-bmp-image.cs",
@@ -2201,6 +2229,7 @@
         "integrate-the-convolutionfilter-into-an-asp-net-core-web-api-endpoint-that-returns-filtered-pngs.cs",
         "integrate-the-filter-into-a-wpf-application-allowing-users-to-preview-emboss-effects-in-real-time.cs",
         "iterate-over-a-collection-of-drawing-images-applying-sharpen3x3-filter-then-export-each-as-png-preserving-vector-data.cs",
+        "iterate-over-a-collection-of-drawing-images-applying-sharpen3x3-filter-then-export-each-as-png-preserving-vector.cs",
         "iterate-over-each-page-of-a-multi-page-png-apply-motion-blur-size-5-angle-90-then-save.cs",
         "iterate-over-each-page-of-a-multi-page-png-applying-sharpen5x5-filter-only-to-even-pages-then-save.cs",
         "iterate-over-each-page-of-a-multi-page-svg-applying-a-normalized-custom-kernel-then-save-combined-document.cs",
@@ -2297,6 +2326,18 @@
         "write-a-unit-test-that-confirms-pixel-clamping-works-when-kernel-coefficients-exceed-normal-range.cs"
       ],
       "files": [
+        "28794-apply-a-zero-sum-edge-detection-kernel-to-a-png-image-and-verify-black-background-with-highlighted-edges.cs",
+        "28810-validate-that-a-custom-kernel-s-dimensions-are-odd-before-applying-a-deconvolution-filter-to-png.cs",
+        "28819-process-each-page-of-a-multipage-tiff-document-with-an-edge-detection-kernel-and-save-results.cs",
+        "28831-generate-a-horizontal-sobel-3-3-kernel-for-edge-detection-operation.cs",
+        "28866-iterate-over-each-page-of-a-multipage-svg-file-and-apply-a-custom-convolution-kernel-to-every-page.cs",
+        "28875-programmatically-generate-a-3x3-edge-detection-kernel-at-runtime-and-apply-it-to-a-png-image.cs",
+        "28881-catch-and-log-convolutionfilter-exceptions-when-applying-an-invalid-custom-kernel-to-an-svg-image.cs",
+        "28882-ensure-the-custom-kernel-matrix-dimensions-match-the-required-size-before-applying-the-filter.cs",
+        "28893-expose-a-restful-service-that-accepts-an-image-url-and-returns-the-image-after-applying-gaussian-blur.cs",
+        "28908-retrieve-and-serve-filtered-images-via-an-http-endpoint-from-azure-blob-storage.cs",
+        "28928-ensure-thread-safety-of-convolutionfilter-instances-when-used-concurrently-in-parallel-loops.cs",
+        "28937-broadcast-filtered-images-to-connected-clients-using-signalr-after-applying-a-kernel-filter.cs",
         "add-a-readme-example-that-walks-through-loading-an-svg-applying-gaussian-blur-and-saving.cs",
         "adjust-kernel-coefficients-dynamically-based-on-user-input-in-a-desktop-ui-before-filtering.cs",
         "adjust-kernel-coefficients-to-increase-brightness-while-applying-a-5x5-blur-to-a-bmp-image.cs",
@@ -2314,51 +2355,38 @@
         "apply-a-blur-filter-to-a-djvu-image-and-persist-the-processed-output-to-a-file.cs",
         "apply-a-blur-filter-to-a-dng-image-and-write-the-processed-output-to-a-new-file.cs",
         "apply-a-blur-filter-to-a-gif-image-and-write-the-processed-image-back-to-storage.cs",
-        "apply-a-blur-filter-to-a-jpeg-image-and-save-the-processed-output-file.cs",
-        "apply-a-blur-filter-to-a-jpeg2000-image-and-write-the-processed-output-to-a-new-file.cs",
-        "apply-a-blur-filter-to-a-png-image-and-write-the-processed-output-to-a-new-file.cs",
-        "apply-a-blur-filter-to-a-psd-image-and-write-the-processed-image-back-to-storage.cs",
-        "apply-a-blur-filter-to-a-tga-image-and-export-the-processed-file-preserving-its-original-format.cs",
-        "apply-a-blur-filter-to-a-tiff-image-and-write-the-processed-image-to-storage.cs",
-        "apply-a-blur-filter-to-a-webp-image-and-write-the-processed-image-to-a-new-file.cs",
-        "apply-a-blur-filter-to-a-wmf-image-and-save-the-processed-output-image.cs",
-        "apply-a-blur-filter-to-a-wmz-image-and-save-the-processed-file-to-the-desired-location.cs",
-        "apply-a-blur-filter-to-an-apng-image-then-write-the-processed-output-to-disk.cs",
-        "apply-a-blur-filter-to-an-avif-image-and-write-the-processed-image-back-to-storage.cs",
-        "apply-a-blur-filter-to-an-emf-image-and-persist-the-processed-output-to-a-file.cs",
-        "apply-a-blur-filter-to-an-emz-image-and-store-the-processed-output-file.cs"
+        "apply-a-blur-filter-to-a-jpeg-image-and-save-the-processed-output-file.cs"
       ],
       "required_namespaces": [
         "System",
         "System.IO",
         "Aspose.Imaging",
-        "Aspose.Imaging.ImageFilters.FilterOptions",
         "Aspose.Imaging.ImageOptions",
+        "Aspose.Imaging.ImageFilters.FilterOptions",
         "Aspose.Imaging.FileFormats.Png",
         "Aspose.Imaging.ImageFilters.Convolution",
         "Aspose.Imaging.FileFormats.Svg",
         "Aspose.Imaging.Sources",
-        "Aspose.Imaging.FileFormats.Tiff",
-        "System.Linq",
-        "Aspose.Imaging.FileFormats.Tiff.Enums",
-        "System.Diagnostics",
-        "System.Collections.Generic",
         "Aspose.Imaging.FileFormats.Jpeg",
-        "System.Threading.Tasks",
-        "System.Drawing",
-        "Aspose.Imaging.CoreExceptions",
-        "System.Threading",
+        "Aspose.Imaging.FileFormats.Tiff",
         "Aspose.Imaging.FileFormats.Apng",
         "Aspose.Imaging.FileFormats.Bmp",
+        "System.Diagnostics",
+        "Aspose.Imaging.FileFormats.Tiff.Enums",
         "Aspose.Imaging.ImageFilters",
-        "Aspose.Imaging.FileFormats.Svg.Graphics",
-        "Aspose.Imaging.Multithreading",
-        "System.Text.Json",
-        "System.Text.RegularExpressions",
+        "System.Drawing",
+        "System.Threading.Tasks",
+        "Aspose.Imaging.CoreExceptions.ImageFormats",
         "System.Net.Http",
+        "System.Linq",
+        "Aspose.Imaging.CoreExceptions",
+        "System.Threading",
+        "Aspose.Imaging.Multithreading",
+        "Aspose.Imaging.FileFormats.Webp",
+        "Aspose.Imaging.ProgressManagement",
         "System.Xml",
-        "System.Xml.Schema",
-        "Aspose.Imaging.Brushes"
+        "Aspose.Imaging.FileFormats.Pdf",
+        "System.Collections.Generic"
       ],
       "key_apis": [
         "ApngFrame",
@@ -2373,12 +2401,14 @@
         "GaussWienerFilterOptions",
         "GaussianBlurFilterOptions",
         "Graphics",
+        "Image",
         "JpegImage",
         "JpegOptions",
         "JsonSerializerOptions",
         "LazyImage",
         "LoadOptions",
         "MedianFilterOptions",
+        "MotionWienerFilter",
         "MotionWienerFilterOptions",
         "MultiPageOptions",
         "ParallelOptions",
@@ -2399,14 +2429,15 @@
         "WebPOptions"
       ],
       "more_files": {
-        "count": 434,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/kernel-filters"
+        "count": 447,
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/kernel-filters"
       }
     },
     {
       "name": "manipulate-different-image-file-formats",
-      "file_count": 600,
+      "file_count": 603,
       "all_files": [
+        "29289-merge-multiple-cmx-files-into-a-single-composite-drawing-preserving-layer-order.cs",
         "access-clipping-paths-of-a-tiff-frame-via-pathresources-and-export-them-as-svg-files.cs",
         "add-a-custom-thumbnail-to-the-exif-segment-of-a-jpeg-image-and-verify-metadata.cs",
         "add-a-custom-thumbnail-to-the-jfif-segment-of-a-jpeg-image-before-saving.cs",
@@ -2446,6 +2477,7 @@
         "apply-lossless-or-lossy-compression-to-png-images-to-reduce-file-size-while-maintaining-visual-fidelity.cs",
         "apply-lossless-png-compression-to-reduce-the-file-size-of-a-png-image-while-maintaining-format-integrity.cs",
         "apply-memory-strategy-optimization-by-setting-imageoptions-memoryusagelimit-before-batch-processing-a-large-webp-collection.cs",
+        "apply-memory-strategy-optimization-by-setting-imageoptions-memoryusagelimit-before-batch-processing-a-large-webp.cs",
         "apply-memory-strategy-optimization-while-processing-a-large-collection-of-jpeg2000-files-in-parallel.cs",
         "apply-multiple-frames-to-an-image-using-varying-configuration-options-to-precisely-customize-its-appearance.cs",
         "apply-multithreaded-processing-to-djvu-images-to-improve-performance-and-handle-concurrent-operations-efficiently.cs",
@@ -2965,6 +2997,7 @@
         "separate-each-frame-of-a-multi-page-tiff-into-individual-tiff-files-while-preserving-image-data.cs",
         "set-a-custom-font-folder-via-fontsettings-before-converting-a-wmf-to-raster-format.cs",
         "set-imageoptions-memoryusagelimit-to-five-hundred-megabytes-before-processing-large-tiff-files-to-avoid-outofmemoryexception.cs",
+        "set-imageoptions-memoryusagelimit-to-five-hundred-megabytes-before-processing-large-tiff-files-to-avoid.cs",
         "set-imageoptions-memoryusagelimit-to-two-hundred-megabytes-and-process-a-large-tiff-to-avoid-memory-overflow.cs",
         "set-jpeg-compression-quality-to-75-percent-and-verify-resulting-file-size-reduction-percentage.cs",
         "set-psdoptions-colormode-to-grayscale-before-saving-a-psd-file-for-optimal-monochrome-output.cs",
@@ -3009,6 +3042,7 @@
         "write-custom-exif-gps-latitude-and-longitude-tags-into-a-jpeg-image-for-geotagging.cs"
       ],
       "files": [
+        "29289-merge-multiple-cmx-files-into-a-single-composite-drawing-preserving-layer-order.cs",
         "access-clipping-paths-of-a-tiff-frame-via-pathresources-and-export-them-as-svg-files.cs",
         "add-a-custom-thumbnail-to-the-exif-segment-of-a-jpeg-image-and-verify-metadata.cs",
         "add-a-custom-thumbnail-to-the-jfif-segment-of-a-jpeg-image-before-saving.cs",
@@ -3037,54 +3071,49 @@
         "apply-a-sharpening-filter-with-strength-three-to-a-tga-texture-and-export-as-bmp.cs",
         "apply-a-solid-background-color-to-a-png-image-with-transparency-replacing-its-alpha-channel-uniformly.cs",
         "apply-a-vignette-effect-around-the-edges-of-a-tga-picture-and-save-as-jpeg.cs",
-        "apply-additional-resizing-operations-to-a-dicom-image-while-maintaining-full-dicom-format-compliance.cs",
-        "apply-coordinate-offsets-to-crop-a-dicom-image-outputting-the-result-as-a-dicom-file.cs"
+        "apply-additional-resizing-operations-to-a-dicom-image-while-maintaining-full-dicom-format-compliance.cs"
       ],
       "required_namespaces": [
         "System",
         "System.IO",
         "Aspose.Imaging",
         "Aspose.Imaging.ImageOptions",
-        "Aspose.Imaging.FileFormats.Tiff.Enums",
         "Aspose.Imaging.FileFormats.Djvu",
+        "Aspose.Imaging.FileFormats.Tiff.Enums",
         "Aspose.Imaging.FileFormats.Tiff",
         "Aspose.Imaging.FileFormats.Jpeg",
         "Aspose.Imaging.FileFormats.Dicom",
-        "Aspose.Imaging.FileFormats.Webp",
         "Aspose.Imaging.Sources",
+        "Aspose.Imaging.FileFormats.Webp",
         "Aspose.Imaging.FileFormats.Emf",
         "Aspose.Imaging.FileFormats.Bmp",
         "Aspose.Imaging.FileFormats.Png",
-        "Aspose.Imaging.FileFormats.Pdf",
         "Aspose.Imaging.FileFormats.Eps",
-        "Aspose.Imaging.FileFormats.Psd",
-        "System.Collections.Generic",
+        "Aspose.Imaging.FileFormats.Pdf",
         "Aspose.Imaging.FileFormats.Cdr",
-        "Aspose.Imaging.FileFormats.Gif",
+        "Aspose.Imaging.FileFormats.Psd",
         "Aspose.Imaging.Brushes",
-        "Aspose.Imaging.FileFormats.Dng",
-        "Aspose.Imaging.FileFormats.Cmx",
-        "System.Linq",
-        "Aspose.Imaging.Exif",
+        "Aspose.Imaging.FileFormats.Gif",
+        "System.Collections.Generic",
         "Aspose.Imaging.FileFormats.Svg",
         "Aspose.Imaging.FileFormats.Jpeg2000",
+        "Aspose.Imaging.FileFormats.Cmx",
+        "System.Linq",
+        "Aspose.Imaging.FileFormats.Dng",
         "System.Threading.Tasks",
+        "Aspose.Imaging.Exif",
         "Aspose.Imaging.ImageFilters.FilterOptions",
-        "Aspose.Imaging.FileFormats.Gif.Blocks",
         "Aspose.Imaging.ImageLoadOptions",
         "Aspose.Imaging.FileFormats.Tga",
-        "System.Text.Json",
-        "Aspose.Imaging.FileFormats",
-        "Aspose.Imaging.FileFormats.Wmf",
-        "System.Reflection",
-        "System.IO.Compression",
+        "Aspose.Imaging.FileFormats.Gif.Blocks",
         "Aspose.Imaging.FileFormats.Tiff.PathResources",
-        "Aspose.Imaging.FileFormats.Cmx.ObjectModel",
+        "System.Text.Json",
+        "System.IO.Compression",
+        "Aspose.Imaging.FileFormats.Wmf",
+        "Aspose.Imaging.FileFormats",
         "Aspose.Imaging.MagicWand.ImageMasks",
+        "System.Globalization",
         "System.Text",
-        "Aspose.Imaging.FileFormats.OpenDocument",
-        "Aspose.Imaging.FileFormats.Emf.Graphics",
-        "Aspose.Imaging.Shapes",
         "System.Net.Http",
         "Aspose.Imaging.FileFormats.Svg.Graphics"
       ],
@@ -3111,6 +3140,7 @@
         "EmfRasterizationOptions",
         "EpsImage",
         "EpsRasterizationOptions",
+        "GaussianBlurFilter",
         "GaussianBlurFilterOptions",
         "GifImage",
         "GifOptions",
@@ -3155,13 +3185,13 @@
         "WmfRasterizationOptions"
       ],
       "more_files": {
-        "count": 570,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/manipulate-different-image-file-formats"
+        "count": 573,
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/manipulate-different-image-file-formats"
       }
     },
     {
       "name": "manipulating-images",
-      "file_count": 413,
+      "file_count": 431,
       "all_files": [
         "27872-load-a-png-image-apply-auto-masking-graph-cut-with-default-strokes-and-save-as-png.cs",
         "27873-create-automaskinggraphcutoptions-with-custom-feathering-radius-apply-to-a-png-then-export-result.cs",
@@ -3221,6 +3251,7 @@
         "apply-gamma-correction-to-multiple-psd-images-and-save-each-adjusted-picture-as-png.cs",
         "apply-gauss-wiener-filter-after-background-removal-to-correct-slight-blur-introduced-by-auto-masking-algorithm.cs",
         "apply-gauss-wiener-filter-with-custom-strength-parameter-to-a-rasterized-svg-that-exhibits-slight-blur-after-conversion.cs",
+        "apply-gauss-wiener-filter-with-custom-strength-parameter-to-a-rasterized-svg-that-exhibits-slight-blur-after.cs",
         "apply-gaussian-blur-to-a-cdr-document-and-store-the-blurred-result-as-a-tiff-file.cs",
         "apply-gaussian-blur-to-a-cdr-image-verify-transparency-and-save-the-blurred-result-as-gif.cs",
         "apply-gaussian-blur-to-a-tiff-image-then-adjust-brightness-saving-the-final-picture-as-pdf.cs",
@@ -3298,6 +3329,7 @@
         "check-alpha-channel-of-a-png-generated-from-a-tiff-source-and-log-the-transparency-status.cs",
         "combine-auto-masking-with-manual-point-array-to-correct-small-regions-that-graph-cut-missed-in-a-raster-image.cs",
         "combine-bilateral-smoothing-and-sharpening-filters-sequentially-on-a-raster-image-to-achieve-noise-reduction-and-edge-clarity.cs",
+        "combine-bilateral-smoothing-and-sharpening-filters-sequentially-on-a-raster-image-to-achieve-noise-reduction-and.cs",
         "combine-gauss-wiener-deblurring-with-bilateral-smoothing-on-a-raster-image-to-enhance-clarity-after-masking.cs",
         "combine-smoothing-mode-and-text-rendering-hint-for-high-quality-psd-rendering-then-export-result-as-pdf.cs",
         "compress-a-gif-after-applying-floyd-steinberg-dithering-to-retain-visual-detail-with-reduced-size.cs",
@@ -3306,6 +3338,7 @@
         "compress-multiple-gif-files-in-a-directory-with-lossy-settings-preserving-each-animation-s-frame-order.cs",
         "configure-apng-image-properties-programmatically-to-adjust-animation-parameters-frame-timing-and-associated-metadata.cs",
         "configure-automaskinggraphcutoptions-to-reuse-strokes-across-iterations-improving-mask-accuracy-for-a-series-of-pngs.cs",
+        "configure-automaskinggraphcutoptions-to-reuse-strokes-across-iterations-improving-mask-accuracy-for-a-series-of.cs",
         "configure-fontsettings-with-multiple-font-directories-for-tiff-to-pdf-conversion-to-support-diverse-scripts.cs",
         "configure-image-attributes-programmatically-to-adjust-properties-such-as-resolution-color-depth-and-format.cs",
         "configure-image-processing-to-substitute-absent-fonts-with-a-specified-apng-file-during-rendering.cs",
@@ -3335,10 +3368,13 @@
         "create-a-multipage-image-combining-cdr-and-tiff-pages-using-imultipageimage-and-export-to-pdf.cs",
         "create-a-multipage-tiff-by-adding-three-psd-images-using-the-addpage-method-and-save-the-file.cs",
         "create-a-png-image-apply-a-45-degree-rotation-with-transparent-background-and-verify-that-image-dimensions-remain-unchanged.cs",
+        "create-a-png-image-apply-a-45-degree-rotation-with-transparent-background-and-verify-that-image-dimensions-remain.cs",
         "create-a-png-image-with-alpha-channel-embed-a-digital-signature-and-verify-signature-confidence-after-saving.cs",
         "create-a-reusable-filter-pipeline-that-applies-bilateral-smoothing-then-sharpening-then-median-filter-to-improve-image-quality.cs",
+        "create-a-reusable-filter-pipeline-that-applies-bilateral-smoothing-then-sharpening-then-median-filter-to-improve.cs",
         "create-a-reusable-method-that-loads-a-raster-image-applies-auto-masking-median-filter-and-returns-processed-bitmap.cs",
         "create-a-script-that-iterates-over-a-directory-of-pngs-applies-sharpening-and-overwrites-originals-with-enhanced-versions.cs",
+        "create-a-script-that-iterates-over-a-directory-of-pngs-applies-sharpening-and-overwrites-originals-with-enhanced.cs",
         "create-a-tiff-image-embed-a-digital-signature-rotate-it-45-degrees-with-gray-background-and-save.cs",
         "create-an-image-from-raw-pixel-byte-array-using-image-create-and-specify-bmp-options-for-file-output.cs",
         "create-an-image-using-a-custom-streamsource-that-reads-from-a-network-socket-and-save-it-as-bmp-file.cs",
@@ -3378,7 +3414,9 @@
         "deskew-several-cdr-files-and-combine-the-corrected-results-into-a-single-multipage-tiff.cs",
         "determine-if-a-tiff-image-contains-an-alpha-channel-after-applying-gaussian-blur-processing.cs",
         "develop-a-command-line-tool-that-accepts-input-path-selects-background-removal-method-and-outputs-png-to-target-folder.cs",
+        "develop-a-command-line-tool-that-accepts-input-path-selects-background-removal-method-and-outputs-png-to-target.cs",
         "develop-a-unit-test-that-verifies-background-removal-on-a-png-yields-transparent-pixels-where-original-background-existed.cs",
+        "develop-a-unit-test-that-verifies-background-removal-on-a-png-yields-transparent-pixels-where-original-background.cs",
         "dither-a-cdr-image-verify-alpha-channel-and-save-the-processed-picture-as-gif.cs",
         "dither-a-gif-picture-and-write-the-processed-animation-to-a-new-gif-file.cs",
         "dither-a-gif-then-compress-the-dithered-animation-using-the-lossy-gif-compressor.cs",
@@ -3390,6 +3428,7 @@
         "embed-a-digital-signature-into-a-1024x1024-png-image-using-a-four-character-password-and-verify-its-presence.cs",
         "embed-a-digital-signature-into-an-image-only-if-the-image-meets-the-minimum-pixel-count-requirement.cs",
         "embed-a-digital-signature-into-an-image-using-a-password-longer-than-four-characters-and-confirm-signature-validity.cs",
+        "embed-a-digital-signature-into-an-image-using-a-password-longer-than-four-characters-and-confirm-signature.cs",
         "enable-high-quality-smoothing-mode-when-saving-a-psd-file-as-png-to-improve-visual-fidelity.cs",
         "encode-images-to-apng-format-and-write-the-resulting-data-directly-into-an-in-memory-stream.cs",
         "enhance-brightness-of-a-gif-then-compress-the-brighter-animation-using-the-lossy-gif-algorithm.cs",
@@ -3419,6 +3458,7 @@
         "generate-multi-page-image-files-by-invoking-the-addpage-method-to-combine-image-layers-sequentially.cs",
         "generate-new-image-files-through-programmatic-manipulation-of-source-images-ensuring-correct-format-and-metadata-handling.cs",
         "implement-a-console-application-that-accepts-image-path-arguments-applies-auto-masking-and-writes-png-output-to-given-folder.cs",
+        "implement-a-console-application-that-accepts-image-path-arguments-applies-auto-masking-and-writes-png-output-to.cs",
         "implement-a-function-that-checks-whether-an-image-is-digitally-signed-before-attempting-to-embed-a-new-signature.cs",
         "implement-a-lossless-gif-compression-mechanism-utilizing-the-apng-format-to-optimize-image-manipulation-workflows.cs",
         "implement-a-lossy-gif-compression-routine-to-reduce-image-size-while-maintaining-acceptable-visual-quality.cs",
@@ -3458,6 +3498,7 @@
         "log-transparency-status-of-pngs-generated-from-animated-gif-frames-for-quality-assurance.cs",
         "lower-contrast-of-a-psd-file-by-twenty-percent-then-export-the-softened-image-to-png.cs",
         "measure-performance-difference-between-graph-cut-auto-masking-with-default-strokes-and-with-custom-user-strokes-on-identical-images.cs",
+        "measure-performance-difference-between-graph-cut-auto-masking-with-default-strokes-and-with-custom-user-strokes.cs",
         "modify-brightness-of-several-cdr-files-and-combine-the-brightened-outputs-into-a-multipage-tiff.cs",
         "modify-contrast-of-several-cdr-files-and-merge-the-adjusted-outputs-into-a-multipage-tiff.cs",
         "modify-gamma-of-several-cdr-files-and-combine-the-corrected-outputs-into-a-multipage-tiff.cs",
@@ -3465,6 +3506,7 @@
         "open-a-jpeg-file-from-disk-rotate-it-90-degrees-with-rotateflip-and-save-as-a-new-file.cs",
         "open-a-jpeg-image-analyze-its-digital-signature-confidence-percentage-and-output-the-value-to-the-console.cs",
         "open-a-png-image-analyze-its-digital-signature-confidence-and-compare-against-a-threshold-to-determine-authenticity.cs",
+        "open-a-png-image-analyze-its-digital-signature-confidence-and-compare-against-a-threshold-to-determine.cs",
         "open-a-png-image-crop-using-a-rectangle-object-resize-to-400x400-and-embed-a-digital-signature.cs",
         "open-a-png-image-from-a-file-crop-using-left-top-right-bottom-offsets-and-save-as-bmp.cs",
         "open-a-png-image-from-a-memorystream-flip-it-vertically-and-write-it-back-to-the-same-stream.cs",
@@ -3510,6 +3552,7 @@
         "resize-a-bmp-image-using-bicubic-algorithm-then-embed-a-digital-signature-with-a-password-of-ten-characters.cs",
         "resize-a-collection-of-jpeg-images-to-a-maximum-dimension-of-1200-pixels-using-lanczos-algorithm.cs",
         "resize-a-collection-of-png-images-to-256x256-using-nearestneighbor-then-embed-a-digital-signature-with-a-secure-password.cs",
+        "resize-a-collection-of-png-images-to-256x256-using-nearestneighbor-then-embed-a-digital-signature-with-a-secure.cs",
         "resize-a-jpeg-image-to-a-width-of-1200-pixels-while-preserving-aspect-ratio-then-save-as-png.cs",
         "resize-a-jpeg-image-using-lanczos-algorithm-then-embed-a-digital-signature-with-a-password-and-save-as-png.cs",
         "resize-a-jpeg-image-while-maintaining-aspect-ratio-then-embed-a-digital-signature-using-a-secure-password.cs",
@@ -3549,7 +3592,9 @@
         "rotate-an-image-to-a-specified-angle-updating-its-orientation-while-preserving-dimensions-and-associated-metadata.cs",
         "rotate-an-image-to-a-specified-angle-while-maintaining-image-quality-and-preserving-metadata-integrity.cs",
         "run-gauss-wiener-filter-with-default-parameters-on-a-rasterized-vector-image-to-reduce-blur-introduced-during-conversion.cs",
+        "run-gauss-wiener-filter-with-default-parameters-on-a-rasterized-vector-image-to-reduce-blur-introduced-during.cs",
         "run-performance-benchmark-comparing-median-filter-execution-time-on-4k-png-versus-1080p-png-after-background-removal.cs",
+        "run-performance-benchmark-comparing-median-filter-execution-time-on-4k-png-versus-1080p-png-after-background.cs",
         "save-a-raster-image-to-a-memorystream-in-gif-format-after-applying-a-30-degree-rotation-with-black-background.cs",
         "save-images-after-applying-transformations-ensuring-appropriate-format-and-compression-settings-for-optimal-output.cs",
         "save-images-using-the-apng-format-automatically-handling-file-extensions-based-on-the-target-image-type.cs",
@@ -3559,6 +3604,7 @@
         "save-processed-images-to-a-memory-stream-after-applying-required-transformations-such-as-resizing-format-conversion-and-filtering.cs",
         "save-processed-images-to-the-apng-format-ensuring-proper-encoding-while-preserving-animation-frames-and-transparency.cs",
         "save-processed-raster-images-using-pngoptions-with-colortype-set-to-truecolor-with-alpha-for-transparent-backgrounds.cs",
+        "save-processed-raster-images-using-pngoptions-with-colortype-set-to-truecolor-with-alpha-for-transparent.cs",
         "set-gamma-of-a-cdr-document-to-0-8-and-store-the-corrected-image-as-tiff.cs",
         "set-gamma-on-a-psd-image-enable-smoothing-mode-and-export-the-enhanced-file-to-png.cs",
         "set-smoothing-mode-for-gif-rendering-to-enhance-animation-smoothness-and-reduce-pixelation.cs",
@@ -3568,12 +3614,14 @@
         "supply-a-detectedobjectlist-converted-to-assumedobjectdata-for-improved-graph-cut-segmentation-on-a-raster-image.cs",
         "test-background-removal-on-a-cdr-file-where-foreground-objects-share-the-same-color-as-the-original-background.cs",
         "use-automaskinggraphcutoptions-to-specify-both-foreground-and-background-strokes-for-more-accurate-segmentation-on-complex-images.cs",
+        "use-automaskinggraphcutoptions-to-specify-both-foreground-and-background-strokes-for-more-accurate-segmentation.cs",
         "use-detectedobjectlist-from-a-prior-analysis-to-seed-graph-cut-algorithm-for-more-precise-background-segmentation.cs",
         "use-fontsettings-to-ensure-embedded-fonts-appear-correctly-in-exported-tiff-images-from-psd-sources.cs",
         "use-motion-wiener-filter-on-a-png-that-suffered-motion-blur-then-apply-sharpening-for-edge-definition.cs",
         "use-vectorimage-removebackground-with-backgroundcolor-parameter-set-to-white-to-preserve-white-foreground-elements.cs",
         "validate-and-handle-image-transparency-in-apng-files-as-part-of-image-processing-workflows-and-transformations.cs",
         "validate-that-alignresolutions-makes-horizontal-and-vertical-dpi-identical-by-comparing-image-metadata-before-and-after-alignment.cs",
+        "validate-that-alignresolutions-makes-horizontal-and-vertical-dpi-identical-by-comparing-image-metadata-before-and.cs",
         "verify-image-transparency-when-processing-images-to-ensure-correct-handling-of-alpha-channels-during-manipulation.cs",
         "verify-transparency-of-a-png-created-from-a-psd-file-before-saving-the-final-image.cs"
       ],
@@ -3615,38 +3663,38 @@
         "System.IO",
         "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging.FileFormats.Tiff",
-        "Aspose.Imaging.Sources",
         "Aspose.Imaging.FileFormats.Png",
         "Aspose.Imaging.FileFormats.Gif",
+        "Aspose.Imaging.Sources",
         "Aspose.Imaging.ImageFilters.FilterOptions",
         "Aspose.Imaging.FileFormats.Tiff.Enums",
         "Aspose.Imaging.FileFormats.Cdr",
+        "Aspose.Imaging.FileFormats.Pdf",
         "System.Collections.Generic",
         "Aspose.Imaging.Masking",
         "Aspose.Imaging.Masking.Options",
         "Aspose.Imaging.Masking.Result",
-        "Aspose.Imaging.FileFormats.Pdf",
         "Aspose.Imaging.FileFormats.Gif.Blocks",
+        "Aspose.Imaging.FileFormats.Jpeg",
         "Aspose.Imaging.FileFormats.Bmp",
         "Aspose.Imaging.FileFormats.Emf",
-        "Aspose.Imaging.FileFormats.Jpeg",
-        "System.Linq",
-        "Aspose.Imaging.Brushes",
         "Aspose.Imaging.FileFormats.Psd",
         "Aspose.Imaging.FileFormats.Svg",
+        "Aspose.Imaging.Brushes",
         "System.Drawing",
         "System.Diagnostics",
-        "Aspose.Imaging.FileFormats",
+        "Aspose.Imaging.CoreExceptions",
+        "System.Linq",
         "Aspose.Imaging.Shapes",
         "Aspose.Imaging.FileFormats.Emf.Emf.Records",
         "Aspose.Imaging.FileFormats.Emf.Emf.Objects",
+        "Aspose.Imaging.FileFormats",
+        "Aspose.Imaging.Watermark",
         "System.Net.Sockets",
-        "Aspose.Imaging.FileFormats.Core",
-        "Aspose.Imaging.FileFormats.Core.Photo.Hdr",
         "Aspose.Imaging.FileFormats.Dicom",
-        "Aspose.Imaging.FileFormats.Ico",
-        "Aspose.Imaging.FileFormats.Djvu",
-        "Aspose.Imaging.ImageLoadOptions"
+        "Aspose.Imaging.FileFormats.Webp",
+        "Aspose.Imaging.ImageLoadOptions",
+        "Aspose.Imaging.CustomFontHandler"
       ],
       "key_apis": [
         "ApngFrame",
@@ -3700,14 +3748,19 @@
         "WmfRasterizationOptions"
       ],
       "more_files": {
-        "count": 383,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/manipulating-images"
+        "count": 401,
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/manipulating-images"
       }
     },
     {
       "name": "merge-images",
-      "file_count": 135,
+      "file_count": 140,
       "all_files": [
+        "28686-set-the-output-dpi-to-300-when-merging-jpeg-files-horizontally-and-saving-the-result-as-pdf.cs",
+        "28688-use-imageloadoptions-to-limit-memory-usage-while-loading-jpeg-files-for-a-horizontal-merge.cs",
+        "28691-process-a-batch-of-jpeg-folders-merging-each-folder-s-images-horizontally-into-separate-pdf-files.cs",
+        "28693-use-a-cancellation-token-to-abort-a-long-running-horizontal-jpeg-merge-operation-when-requested.cs",
+        "28694-log-progress-percentage-after-each-jpeg-image-is-added-to-the-canvas-during-a-vertical-merge.cs",
         "add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs",
         "add-custom-author-metadata-to-the-merged-pdf-generated-from-a-horizontal-jpeg-merge-operation.cs",
         "align-all-merged-jpeg-images-to-the-top-left-corner-of-the-canvas-for-a-consistent-layout.cs",
@@ -3845,6 +3898,11 @@
         "wrap-image-loading-and-merging-code-in-try-catch-blocks-to-handle-file-access-exceptions-gracefully.cs"
       ],
       "files": [
+        "28686-set-the-output-dpi-to-300-when-merging-jpeg-files-horizontally-and-saving-the-result-as-pdf.cs",
+        "28688-use-imageloadoptions-to-limit-memory-usage-while-loading-jpeg-files-for-a-horizontal-merge.cs",
+        "28691-process-a-batch-of-jpeg-folders-merging-each-folder-s-images-horizontally-into-separate-pdf-files.cs",
+        "28693-use-a-cancellation-token-to-abort-a-long-running-horizontal-jpeg-merge-operation-when-requested.cs",
+        "28694-log-progress-percentage-after-each-jpeg-image-is-added-to-the-canvas-during-a-vertical-merge.cs",
         "add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs",
         "add-custom-author-metadata-to-the-merged-pdf-generated-from-a-horizontal-jpeg-merge-operation.cs",
         "align-all-merged-jpeg-images-to-the-top-left-corner-of-the-canvas-for-a-consistent-layout.cs",
@@ -3869,25 +3927,22 @@
         "combine-jpg-images-into-a-pdf-document-by-first-converting-them-to-apng-format-and-embedding-them-accordingly.cs",
         "combine-jpg-images-into-a-pdf-document-by-first-converting-them-to-psd-format.cs",
         "combine-jpg-images-into-a-pdf-document-converting-each-image-to-png-format-before-merging.cs",
-        "combine-jpg-images-into-a-pdf-document-embedding-an-ico-file-as-the-document-s-icon.cs",
-        "combine-jpg-images-into-a-pdf-document-encoding-the-images-as-avif-format-to-optimize-size.cs",
-        "combine-jpg-images-into-a-pdf-document-using-dicom-formatting-while-maintaining-image-fidelity.cs",
-        "combine-jpg-images-into-a-png-output-while-applying-jpeg-compression-settings-during-the-merge.cs",
-        "combine-jpg-images-into-a-single-pdf-document-employing-the-wmz-format-for-compression-and-packaging.cs",
-        "combine-jpg-images-into-a-single-pdf-document-using-the-cmx-format-to-maintain-color-fidelity.cs"
+        "combine-jpg-images-into-a-pdf-document-embedding-an-ico-file-as-the-document-s-icon.cs"
       ],
       "required_namespaces": [
         "System",
         "System.IO",
-        "Aspose.Imaging.ImageOptions",
-        "System.Collections.Generic",
         "Aspose.Imaging",
+        "Aspose.Imaging.ImageOptions",
         "Aspose.Imaging.Sources",
+        "System.Collections.Generic",
         "Aspose.Imaging.FileFormats.Jpeg",
         "System.Linq",
-        "Aspose.Imaging.FileFormats.Pdf",
         "Aspose.Imaging.FileFormats.Png",
-        "Aspose.Imaging.Brushes"
+        "Aspose.Imaging.FileFormats.Pdf",
+        "Aspose.Imaging.Brushes",
+        "Aspose.Imaging.ImageLoadOptions",
+        "System.Threading"
       ],
       "key_apis": [
         "ApngImage",
@@ -3909,6 +3964,7 @@
         "Jpeg2000Image",
         "Jpeg2000Options",
         "JpegImage",
+        "JpegLoadOptions",
         "JpegOptions",
         "LoadOptions",
         "OdgRasterizationOptions",
@@ -3933,13 +3989,13 @@
         "WmfRasterizationOptions"
       ],
       "more_files": {
-        "count": 105,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/merge-images"
+        "count": 110,
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/merge-images"
       }
     },
     {
       "name": "working-with-drawing-images",
-      "file_count": 397,
+      "file_count": 401,
       "all_files": [
         "add-a-cubic-bezier-curve-to-the-same-figure-using-specified-control-points.cs",
         "add-a-custom-figure-overlay-onto-a-gif-image-ensuring-proper-frame-alignment-and-animation-compatibility.cs",
@@ -3962,6 +4018,7 @@
         "apply-graphics-rotatetransform-to-rotate-the-path-45-degrees-around-its-center-point.cs",
         "apply-the-full-graphicspath-source-to-render-vector-shapes-onto-an-image-programmatically-accurately.cs",
         "batch-convert-a-collection-of-vector-drawings-to-high-resolution-tiffs-applying-a-uniform-compression-algorithm-for-storage-efficiency.cs",
+        "batch-convert-a-collection-of-vector-drawings-to-high-resolution-tiffs-applying-a-uniform-compression-algorithm.cs",
         "batch-convert-a-set-of-emf-files-to-pdf-embedding-each-file-s-original-filename-as-a-pdf-bookmark.cs",
         "batch-convert-a-set-of-svg-icons-to-monochrome-pngs-for-use-in-dark-theme-applications.cs",
         "batch-convert-all-emf-files-in-a-directory-to-png-applying-a-uniform-background-color-to-each-image.cs",
@@ -3991,6 +4048,7 @@
         "batch-process-image-creation-by-reading-dimensions-from-a-csv-file-and-generating-corresponding-bmps.cs",
         "batch-process-svg-icons-adding-a-uniform-drop-shadow-and-exporting-each-as-a-png-with-32-bit-color-depth.cs",
         "batch-process-vector-drawings-converting-each-to-both-high-resolution-jpeg-and-lossless-png-for-dual-format-distribution.cs",
+        "batch-process-vector-drawings-converting-each-to-both-high-resolution-jpeg-and-lossless-png-for-dual-format.cs",
         "batch-process-vector-graphics-converting-each-to-pdf-with-embedded-fonts-and-setting-pdf-version-to-1-6.cs",
         "batch-process-wmf-files-converting-each-to-png-with-a-transparent-background-and-32-bit-color-depth.cs",
         "batch-process-wmf-files-converting-each-to-svg-and-applying-a-uniform-fill-color-to-all-shapes.cs",
@@ -4072,6 +4130,7 @@
         "create-a-vector-chart-add-data-labels-and-export-the-chart-as-a-pdf-for-inclusion-in-reports.cs",
         "create-a-vector-diagram-programmatically-add-connector-lines-and-save-the-diagram-as-an-svg-for-web-embedding.cs",
         "create-a-vector-illustration-apply-a-radial-gradient-background-and-save-the-illustration-as-a-high-resolution-tiff.cs",
+        "create-a-vector-illustration-apply-a-radial-gradient-background-and-save-the-illustration-as-a-high-resolution.cs",
         "create-a-vector-image-programmatically-add-gradient-fills-to-shapes-and-save-as-an-svg-file.cs",
         "create-and-attach-a-figures-array-to-an-image-instance-for-handling-multiple-figure-objects.cs",
         "create-and-configure-graphics-instances-using-a-graphicspath-to-render-onto-an-ico-image.cs",
@@ -4161,6 +4220,7 @@
         "load-a-vector-drawing-apply-a-custom-dash-pattern-to-strokes-and-export-the-styled-image-as-pdf.cs",
         "load-a-vector-drawing-apply-a-custom-emboss-filter-and-export-the-embossed-image-as-a-high-resolution-tiff.cs",
         "load-a-vector-drawing-apply-a-perspective-distortion-to-simulate-a-billboard-view-and-export-as-high-resolution-png.cs",
+        "load-a-vector-drawing-apply-a-perspective-distortion-to-simulate-a-billboard-view-and-export-as-high-resolution.cs",
         "load-a-vector-drawing-apply-an-opacity-mask-and-export-the-image-as-a-png-with-alpha-channel.cs",
         "load-a-vector-drawing-apply-anti-aliasing-settings-and-export-it-to-a-high-quality-png-with-16-bit-depth.cs",
         "load-a-vector-drawing-flatten-all-layers-into-a-single-layer-and-save-the-image-as-an-emf-file.cs",
@@ -4361,6 +4421,7 @@
         "apply-graphics-rotatetransform-to-rotate-the-path-45-degrees-around-its-center-point.cs",
         "apply-the-full-graphicspath-source-to-render-vector-shapes-onto-an-image-programmatically-accurately.cs",
         "batch-convert-a-collection-of-vector-drawings-to-high-resolution-tiffs-applying-a-uniform-compression-algorithm-for-storage-efficiency.cs",
+        "batch-convert-a-collection-of-vector-drawings-to-high-resolution-tiffs-applying-a-uniform-compression-algorithm.cs",
         "batch-convert-a-set-of-emf-files-to-pdf-embedding-each-file-s-original-filename-as-a-pdf-bookmark.cs",
         "batch-convert-a-set-of-svg-icons-to-monochrome-pngs-for-use-in-dark-theme-applications.cs",
         "batch-convert-all-emf-files-in-a-directory-to-png-applying-a-uniform-background-color-to-each-image.cs",
@@ -4368,8 +4429,7 @@
         "batch-convert-svg-icons-to-pdf-embedding-each-icon-as-a-vector-object-for-scalable-printing.cs",
         "batch-convert-svg-illustrations-to-pdf-embedding-each-file-s-description-as-pdf-metadata-for-cataloging.cs",
         "batch-convert-svg-logos-to-ico-files-generating-windows-icon-sizes-of-16-32-48-and-256-pixels.cs",
-        "batch-convert-wmf-graphics-to-png-applying-a-uniform-background-color-to-replace-transparent-areas.cs",
-        "batch-create-bmp-files-each-containing-a-rotated-version-of-the-same-base-shape.cs"
+        "batch-convert-wmf-graphics-to-png-applying-a-uniform-background-color-to-replace-transparent-areas.cs"
       ],
       "required_namespaces": [
         "System",
@@ -4379,33 +4439,35 @@
         "Aspose.Imaging.Sources",
         "Aspose.Imaging.Brushes",
         "Aspose.Imaging.Shapes",
-        "Aspose.Imaging.FileFormats.Bmp",
         "Aspose.Imaging.FileFormats.Png",
         "Aspose.Imaging.FileFormats.Svg",
         "Aspose.Imaging.FileFormats.Pdf",
-        "Aspose.Imaging.FileFormats.Wmf",
-        "Aspose.Imaging.FileFormats.Eps",
+        "Aspose.Imaging.FileFormats.Bmp",
         "Aspose.Imaging.FileFormats.Tiff.Enums",
+        "Aspose.Imaging.FileFormats.Eps",
+        "Aspose.Imaging.FileFormats.Wmf",
         "Aspose.Imaging.FileFormats.Emf",
-        "Aspose.Imaging.FileFormats.Tiff",
-        "Aspose.Imaging.FileFormats.Svg.Graphics",
         "System.Collections.Generic",
         "Aspose.Imaging.FileFormats.Jpeg",
-        "Aspose.Imaging.FileFormats.Emf.Graphics",
-        "Aspose.Imaging.FileFormats.Ico",
-        "Aspose.Imaging.CoreExceptions",
-        "Aspose.Imaging.CoreExceptions.ImageFormats",
+        "Aspose.Imaging.FileFormats.Tiff",
+        "Aspose.Imaging.FileFormats.Wmf.Graphics",
+        "Aspose.Imaging.FileFormats.Svg.Graphics",
         "Aspose.Imaging.FileFormats",
         "System.Linq",
-        "Aspose.Imaging.Xmp.Schemas.Pdf",
-        "System.Drawing.Drawing2D",
+        "Aspose.Imaging.FileFormats.Ico",
+        "System.Text",
+        "Aspose.Imaging.ImageFilters.FilterOptions",
+        "Aspose.Imaging.CoreExceptions.ImageFormats",
+        "Aspose.Imaging.CoreExceptions",
+        "Aspose.Imaging.FileFormats.Emf.EmfPlus.Consts",
+        "Aspose.Imaging.FileFormats.Wmf.Consts",
+        "Aspose.Imaging.FileFormats.Emf.EmfPlus.Objects",
+        "System.Xml.Linq",
         "Aspose.Imaging.FileFormats.Emf.Emf.Records",
-        "Aspose.Imaging.FileFormats.Emf.Emf.Objects",
         "Aspose.Imaging.Masking",
         "Aspose.Imaging.Masking.Options",
         "Aspose.Imaging.Masking.Result",
-        "Aspose.Imaging.ImageFilters.FilterOptions",
-        "Aspose.Imaging.ImageFilters.Convolution"
+        "Aspose.Imaging.FileFormats.Emf.Graphics"
       ],
       "key_apis": [
         "ApngOptions",
@@ -4458,8 +4520,8 @@
         "WmfRasterizationOptions"
       ],
       "more_files": {
-        "count": 367,
-        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/working-with-drawing-images"
+        "count": 371,
+        "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/working-with-drawing-images"
       }
     }
   ]

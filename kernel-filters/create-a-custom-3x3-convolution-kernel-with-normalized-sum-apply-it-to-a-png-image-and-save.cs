@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -9,7 +11,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output.png";
+            string outputPath = "output/output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -25,16 +27,18 @@ class Program
 
                 double[,] kernel = new double[,]
                 {
-                    { 0, -1, 0 },
-                    { -1, 5, -1 },
-                    { 0, -1, 0 }
+                    { 1, 2, 1 },
+                    { 2, 4, 2 },
+                    { 1, 2, 1 }
                 };
+                double factor = 1.0 / 16.0;
+                int bias = 0;
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 0);
-
+                var filterOptions = new ConvolutionFilterOptions(kernel, factor, bias);
                 raster.Filter(raster.Bounds, filterOptions);
 
-                raster.Save(outputPath);
+                var saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to enhance the sharpness of a PNG photograph by applying a custom 3x3 convolution kernel with normalized sum before saving the result.
- * 2. When a C# application needs to perform edge‑enhancement on scanned documents in PNG format using Aspose.Imaging’s ConvolutionFilterOptions.
- * 3. When an image‑processing pipeline requires a lightweight, on‑the‑fly filter to improve visual clarity of PNG icons without using external libraries.
- * 4. When a software tool must automatically adjust the contrast of PNG screenshots by applying a normalized convolution matrix during batch processing.
- * 5. When a developer is building a .NET service that validates image quality by sharpening PNG assets with a custom kernel and then stores the processed files.
+ * 1. When a developer needs to reduce visual noise in a PNG photograph by applying a Gaussian‑blur style 3×3 convolution kernel with a normalized sum using Aspose.Imaging in C#.
+ * 2. When a developer wants to smooth the edges of scanned PNG documents before performing OCR by filtering the raster image with a custom kernel and saving the processed file.
+ * 3. When a developer builds a .NET web service that automatically enhances uploaded PNG avatars with a blur effect through Aspose.Imaging’s ConvolutionFilterOptions and C# file I/O.
+ * 4. When a developer must preprocess PNG screenshots for visual‑regression testing by applying a consistent blur to eliminate minor rendering differences across builds.
+ * 5. When a developer creates a lightweight image‑preprocessing step that applies a normalized convolution filter to PNG assets to improve visual quality before further image analysis.
  */

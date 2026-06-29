@@ -1,43 +1,30 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Path where the resulting image will be saved.
         string outputPath = @"C:\temp\green_square.png";
 
         try
         {
-            // Ensure the output directory exists.
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a file stream for the output image.
-            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
+
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 200, 200))
             {
-                // Set up PNG options with the stream as the source.
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new StreamSource(stream);
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Create a new 300x300 image.
-                using (Image image = Image.Create(pngOptions, 300, 300))
-                {
-                    // Initialize graphics for drawing.
-                    Graphics graphics = new Graphics(image);
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Green, 2);
+                graphics.DrawRectangle(pen, 50, 50, 100, 100);
 
-                    // Define a green pen with a thickness of 3 pixels.
-                    Pen greenPen = new Pen(Color.Green, 3);
-
-                    // Draw a square at (50,50) with width and height of 200 pixels.
-                    graphics.DrawRectangle(greenPen, 50, 50, 200, 200);
-
-                    // Save the changes to the image.
-                    image.Save();
-                }
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -49,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a PNG badge for a mobile app where a green square outlines the app’s logo to draw user attention.
- * 2. When generating a printable PDF report that includes a 300 × 300 image with a green square highlight to mark a region of interest.
- * 3. When building an automated testing tool that captures screenshots and draws a green rectangle around UI elements to verify layout accuracy.
- * 4. When developing a web service that returns a PNG image with a green square overlay to indicate a selected area on a map tile.
- * 5. When producing custom QR code graphics that require a green square border to separate the code from the background for branding purposes.
+ * 1. When generating a PNG thumbnail for a product catalog, a developer can use this code to draw a green square overlay that highlights a specific area of interest.
+ * 2. When creating a custom QR code scanner UI, the code can outline a green square on a white background to indicate the scanning region in a .NET application.
+ * 3. When building an automated test that validates image processing pipelines, a developer can generate a 200×200 PNG with a green rectangle to compare against expected output.
+ * 4. When designing a simple game board in a C# Windows or WPF app, the code can be used to draw green squares as tiles or selection markers on a PNG sprite sheet.
+ * 5. When preparing instructional graphics for documentation, a developer can quickly produce a green‑bordered square in a PNG file to illustrate layout boundaries or cropping guides.
  */

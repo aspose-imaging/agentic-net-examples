@@ -1,66 +1,58 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = "input.svg";
-            string outputOriginalPath = "output_original.png";
-            string outputBlurPath = "output_blur.png";
+            // Hardcoded input and output paths
+            string inputSvgPath = @"C:\temp\input.svg";
+            string originalPngPath = @"C:\temp\original.png";
+            string blurredPngPath = @"C:\temp\blurred.png";
 
-            if (!File.Exists(inputPath))
+            // Verify input SVG exists
+            if (!File.Exists(inputSvgPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputSvgPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputOriginalPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputBlurPath));
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(originalPngPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(blurredPngPath));
 
-            // Load the SVG image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            // Load SVG and rasterize to original PNG
+            using (Image svgImage = Image.Load(inputSvgPath))
             {
-                Aspose.Imaging.FileFormats.Svg.SvgImage svgImage = (Aspose.Imaging.FileFormats.Svg.SvgImage)image;
-
-                // Configure rasterization options
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                var vectorOptions = new SvgRasterizationOptions
                 {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Aspose.Imaging.Color.White
+                    PageSize = ((SvgImage)svgImage).Size
                 };
 
-                // Rasterize SVG to a PNG in memory
-                using (MemoryStream ms = new MemoryStream())
+                var pngOptions = new PngOptions
                 {
-                    PngOptions pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions
-                    };
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
+                    VectorRasterizationOptions = vectorOptions
+                };
 
-                    // Load the rasterized image
-                    using (Aspose.Imaging.Image rasterImg = Aspose.Imaging.Image.Load(ms))
-                    {
-                        Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)rasterImg;
+                svgImage.Save(originalPngPath, pngOptions);
+            }
 
-                        // Save the original raster image
-                        rasterImage.Save(outputOriginalPath, new PngOptions());
+            // Load the rasterized PNG, apply Gaussian blur, and save blurred PNG
+            using (Image img = Image.Load(originalPngPath))
+            {
+                RasterImage raster = (RasterImage)img;
 
-                        // Apply Gaussian blur filter
-                        rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                // Apply Gaussian blur with radius 5 and sigma 4.0
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                        // Save the blurred image
-                        rasterImage.Save(outputBlurPath, new PngOptions());
-                    }
-                }
+                raster.Save(blurredPngPath);
             }
         }
         catch (Exception ex)
@@ -72,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to confirm that applying a Gaussian blur to a rasterized SVG does not create visual artifacts before publishing the PNG on a responsive website.
- * 2. When a developer wants to automate regression testing of vector‑based logos by comparing the original rasterized PNG with a blurred version to ensure edge fidelity.
- * 3. When a developer integrates Aspose.Imaging in a C# build pipeline to validate that SVG icons retain crispness after Gaussian blur processing for mobile app assets.
- * 4. When a developer creates a quality‑control script that loads an SVG, rasterizes it to PNG, applies a blur filter, and checks for unwanted pixel distortion in printed marketing materials.
- * 5. When a developer builds a preview tool that shows both the original and blurred PNG outputs of an SVG to verify that the blur effect does not introduce aliasing or color banding in UI components.
+ * 1. When a web designer wants to preview how a logo SVG will look after a Gaussian blur effect without distorting its vector edges, they can rasterize the SVG to PNG, apply the blur, and compare the results.
+ * 2. When an e‑commerce platform generates product thumbnails from SVG icons and needs to ensure that applying a Gaussian blur for a soft‑focus background does not create visual artifacts, this code can automate the verification.
+ * 3. When a mobile app developer creates SVG‑based UI assets and must test that the Gaussian blur filter applied at runtime preserves the original shape quality, they can use this script to rasterize, blur, and inspect the PNG output.
+ * 4. When a printing service converts vector illustrations to raster images for blur‑based watermarking, they can run this code to confirm that the Gaussian blur radius and sigma values do not introduce unwanted pixelation in the final PNG.
+ * 5. When a data‑visualization tool exports charts as SVG and later applies a Gaussian blur for emphasis, developers can employ this example to validate that the blur does not alter the chart’s line crispness before deployment.
  */

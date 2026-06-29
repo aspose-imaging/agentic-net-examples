@@ -1,97 +1,92 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Ico;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = "InputSvgs";
-            string outputDirectory = "OutputIcos";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // List of SVG files to process
-            string[] svgFiles = new[]
+            // Hardcoded input SVG files
+            string[] inputFiles = new[]
             {
-                Path.Combine(inputDirectory, "icon1.svg"),
-                Path.Combine(inputDirectory, "icon2.svg")
-                // Add more SVG file names as needed
+                @"C:\Icons\icon1.svg",
+                @"C:\Icons\icon2.svg",
+                @"C:\Icons\icon3.svg"
             };
 
-            // Desired icon sizes (width and height are equal)
-            int[] iconSizes = new[] { 16, 32, 48, 64, 128, 256 };
+            // Desired icon resolutions
+            int[] sizes = new[] { 16, 32, 48, 64, 128, 256 };
 
-            foreach (string inputPath in svgFiles)
+            // Output folder for ICO files
+            string outputFolder = @"C:\Icons\Output";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputFolder);
+
+            foreach (string inputPath in inputFiles)
             {
-                // Validate input file existence
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare output ICO path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".ico");
-
-                // Ensure output directory exists (already created above, but keep rule)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                 // Load the SVG image
                 using (Image svgImage = Image.Load(inputPath))
                 {
-                    IcoImage icoImage = null;
-
-                    foreach (int size in iconSizes)
+                    // Create an ICO image with the maximum size (256x256) and default options
+                    IcoOptions icoOptions = new IcoOptions();
+                    using (IcoImage ico = new IcoImage(256, 256, icoOptions))
                     {
-                        // Set up rasterization options for the current size
-                        var rasterOptions = new SvgRasterizationOptions
+                        // Add a page for each required size
+                        foreach (int size in sizes)
                         {
-                            PageSize = new Size(size, size)
-                        };
-
-                        // Set up PNG save options with the rasterization options
-                        var pngOptions = new PngOptions
-                        {
-                            VectorRasterizationOptions = rasterOptions
-                        };
-
-                        // Rasterize SVG to PNG in memory
-                        using (var ms = new MemoryStream())
-                        {
-                            svgImage.Save(ms, pngOptions);
-                            ms.Position = 0;
-
-                            // Load the rasterized PNG as a RasterImage
-                            using (RasterImage raster = (RasterImage)Image.Load(ms))
+                            // Rasterize SVG to PNG at the required size using a memory stream
+                            using (MemoryStream pngStream = new MemoryStream())
                             {
-                                if (icoImage == null)
+                                // Configure rasterization options for the target size
+                                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                                 {
-                                    // Create the ICO image with the first frame
-                                    icoImage = new IcoImage(raster.Width, raster.Height, new IcoOptions());
-                                    // Add the first frame
-                                    icoImage.AddPage(raster, new IcoOptions());
-                                }
-                                else
+                                    PageSize = new Size(size, size)
+                                };
+
+                                // Set up PNG save options with the rasterization settings
+                                PngOptions pngOptions = new PngOptions
                                 {
-                                    // Add additional frames
-                                    icoImage.AddPage(raster, new IcoOptions());
+                                    VectorRasterizationOptions = rasterOptions
+                                };
+
+                                // Save rasterized PNG to the memory stream
+                                svgImage.Save(pngStream, pngOptions);
+                                pngStream.Position = 0; // Reset stream position for reading
+
+                                // Load the rasterized PNG as an Image
+                                using (Image rasterImage = Image.Load(pngStream))
+                                {
+                                    // Add the raster image as a page in the ICO
+                                    ico.AddPage(rasterImage);
                                 }
                             }
                         }
-                    }
 
-                    // Save the multi-resolution ICO file
-                    icoImage.Save(outputPath);
-                    icoImage.Dispose();
+                        // Determine output ICO path (same name as SVG but .ico extension)
+                        string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                        string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".ico");
+
+                        // Ensure the directory for the output file exists (already created above)
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the ICO file
+                        ico.Save(outputPath);
+                        Console.WriteLine($"Created ICO: {outputPath}");
+                    }
                 }
             }
         }
@@ -104,9 +99,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a set of SVG icons into a single ICO file that contains multiple resolutions for Windows desktop shortcuts.
- * 2. When building a cross‑platform .NET application that must supply high‑DPI favicons by rasterizing vector SVG assets into 16‑256 px icon sizes inside an ICO container.
- * 3. When automating a CI/CD pipeline to generate Windows application icons from source SVG files, ensuring each .ico includes the required 16, 32, 48, 64, 128, and 256 pixel versions.
- * 4. When creating a branding toolkit where designers provide SVG logos and the development team must programmatically produce multi‑size .ico files for use in installers and start‑menu tiles.
- * 5. When migrating legacy bitmap icons to scalable vector graphics and need a C# script that reads SVG files, rasterizes them at several dimensions, and saves them as a single multi‑resolution ICO resource.
+ * 1. When a developer needs to convert a set of vector SVG icons into Windows ICO files that contain multiple resolutions (16‑256 px) for use as application or shortcut icons.
+ * 2. When building an automated build pipeline that generates high‑quality multi‑size ICO assets from design‑team SVG files to ensure crisp icons on high‑DPI displays.
+ * 3. When creating a desktop installer that must bundle icons in the ICO format, requiring on‑the‑fly rasterization of SVG resources into the required 16, 32, 48, 64, 128, and 256 pixel images.
+ * 4. When a SaaS platform offers custom branding and needs to transform user‑uploaded SVG logos into ICO files that Windows Explorer can display at any supported size.
+ * 5. When a C# utility must batch‑process a folder of SVG symbols and produce corresponding ICO files with all standard Windows icon sizes, using Aspose.Imaging’s SvgRasterizationOptions and IcoImage classes.
  */

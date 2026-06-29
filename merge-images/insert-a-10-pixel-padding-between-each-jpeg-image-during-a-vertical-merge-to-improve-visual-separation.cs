@@ -6,6 +6,7 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -14,13 +15,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string[] inputPaths = new string[]
-            {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
-            };
-            string outputPath = "output/output.jpg";
+            string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
+            string outputPath = "merged_output.jpg";
 
             // Validate input files
             foreach (string path in inputPaths)
@@ -35,8 +31,8 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect image sizes
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            // First pass: collect sizes
+            List<Size> sizes = new List<Size>();
             foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
@@ -45,23 +41,33 @@ class Program
                 }
             }
 
-            // Calculate canvas dimensions with 10‑pixel padding between images
+            // Calculate canvas dimensions (vertical merge with 10‑pixel padding)
             int padding = 10;
             int canvasWidth = sizes.Max(s => s.Width);
-            int canvasHeight = sizes.Sum(s => s.Height) + padding * (sizes.Count - 1);
+            int canvasHeight = sizes.Sum(s => s.Height) + padding * (inputPaths.Length - 1);
 
-            // Create output JPEG canvas
-            Source src = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = src, Quality = 100 };
+            // Create JPEG canvas bound to the output file
+            JpegOptions jpegOptions = new JpegOptions
+            {
+                Source = new FileCreateSource(outputPath, false),
+                Quality = 100
+            };
+
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
+                // Fill background with white
+                Graphics graphics = new Graphics(canvas);
+                SolidBrush whiteBrush = new SolidBrush(Color.White);
+                graphics.FillRectangle(whiteBrush, canvas.Bounds);
+
                 int offsetY = 0;
                 foreach (string path in inputPaths)
                 {
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
-                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(0, offsetY, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                        int[] pixels = img.LoadArgb32Pixels(img.Bounds);
+                        Rectangle destRect = new Rectangle(0, offsetY, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(destRect, pixels);
                         offsetY += img.Height + padding;
                     }
                 }
@@ -79,9 +85,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a printable photo collage in a C# web application, a developer can use this code to vertically merge multiple JPEGs with a 10‑pixel padding to keep each picture visually separated.
- * 2. When generating a product catalog PDF from individual product photos, a developer can stack JPEG images with a 10‑pixel gap to improve readability before converting the canvas to PDF.
- * 3. When building an automated email newsletter that includes a vertical timeline of event screenshots, a developer can merge the JPEG screenshots with a 10‑pixel separator to avoid image crowding.
- * 4. When preparing a series of scanned receipts for archival storage, a developer can combine the JPEG scans into one file with a 10‑pixel padding to make each receipt distinct for later review.
- * 5. When developing a desktop utility that creates a single JPEG sprite sheet from multiple icons, a developer can apply a 10‑pixel vertical padding to ensure each icon is easily selectable in UI design tools.
+ * 1. When generating a printable photo album in a C# web application, a developer can use this code to vertically merge JPEG pages with a 10‑pixel white padding so each picture is visually separated on the final album page.
+ * 2. When creating a multi‑page invoice PDF that includes scanned JPEG receipts, the code can combine the receipt images vertically with a 10‑pixel gap to improve readability before embedding the result into the PDF.
+ * 3. When building an automated email newsletter that showcases product screenshots, a developer can merge the JPEG screenshots into a single image with a 10‑pixel padding to prevent the screenshots from touching each other.
+ * 4. When preparing a dataset of vertically stacked JPEG samples for machine‑learning training, the padding ensures consistent spacing between images, making the merged image easier to annotate using Aspose.Imaging in C#.
+ * 5. When developing a desktop utility that consolidates security camera snapshots taken at different times, the vertical merge with a 10‑pixel separator helps users quickly distinguish each snapshot in the combined JPEG output.
  */

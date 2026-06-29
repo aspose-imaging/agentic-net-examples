@@ -2,21 +2,19 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded paths
+        string inputTiffPath = "input.tif";
+        string[] additionalImagePaths = new[] { "frame1.png", "frame2.jpg" };
+        string outputPath = "output.tif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputTiffPath = "input.tif";
-            string[] additionalImagePaths = new[] { "frame1.png", "frame2.png" };
-            string outputPath = "output.tif";
-
             // Verify input TIFF exists
             if (!File.Exists(inputTiffPath))
             {
@@ -24,34 +22,31 @@ class Program
                 return;
             }
 
-            // Verify each additional image exists
-            foreach (var path in additionalImagePaths)
-            {
-                if (!File.Exists(path))
-                {
-                    Console.Error.WriteLine($"File not found: {path}");
-                    return;
-                }
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
             // Load the base TIFF image from a memory stream
             byte[] tiffBytes = File.ReadAllBytes(inputTiffPath);
-            using (var memoryStream = new MemoryStream(tiffBytes))
-            using (TiffImage tiffImage = (TiffImage)Image.Load(memoryStream))
+            using (var tiffStream = new MemoryStream(tiffBytes))
+            using (TiffImage tiffImage = (TiffImage)Image.Load(tiffStream))
             {
-                // Add each additional frame to the TIFF image
-                foreach (var imgPath in additionalImagePaths)
+                // Add additional frames from other image files
+                foreach (string imgPath in additionalImagePaths)
                 {
-                    using (RasterImage raster = (RasterImage)Image.Load(imgPath))
+                    if (!File.Exists(imgPath))
                     {
-                        // Create a TiffFrame from the raster image and add it
-                        TiffFrame frame = new TiffFrame(raster);
+                        Console.Error.WriteLine($"File not found: {imgPath}");
+                        return;
+                    }
+
+                    using (Image img = Image.Load(imgPath))
+                    {
+                        // Create a TiffFrame from the loaded raster image
+                        TiffFrame frame = new TiffFrame((RasterImage)img);
                         tiffImage.AddFrame(frame);
+                        // No need to dispose 'frame' explicitly; it will be disposed with the TiffImage
                     }
                 }
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Save the resulting multi-frame TIFF
                 tiffImage.Save(outputPath);
@@ -66,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to combine a base DICOM‑converted TIFF scan loaded from a memory stream with additional PNG annotation overlays into a single multi‑frame TIFF for archival.
- * 2. When a document management system must merge a scanned PDF page saved as a TIFF with extra signature images, adding each as a new frame to create a compliant multi‑page TIFF file.
- * 3. When a printing workflow wants to assemble a multi‑page TIFF brochure by loading the first page from a memory stream and appending product photos stored as PNG files as separate frames.
- * 4. When a GIS tool creates a composite satellite image by reading a base TIFF tile from a byte array and adding supplemental raster layers from PNG files as additional frames.
- * 5. When an e‑commerce platform generates a multi‑frame TIFF catalog by loading the main catalog cover from a stream and appending individual product thumbnail images saved as PNG files.
+ * 1. When creating a multi‑page document such as a scanned contract, a developer can load the base TIFF from a database blob via a memory stream and append additional pages stored as PNG or JPEG files as new frames.
+ * 2. When generating a multi‑resolution TIFF for GIS or medical imaging, the original high‑resolution TIFF can be read from a memory stream and lower‑resolution preview images (e.g., PNG, JPG) added as extra frames.
+ * 3. When building a digital archive that stores scanned photos in a single TIFF file, a developer may load the existing TIFF from a network stream and append newly uploaded PNG or JPG images as additional frames.
+ * 4. When implementing a server‑side report generator that combines a base TIFF template with dynamically created chart images (PNG, JPEG), each chart can be added as a new frame before saving the final multi‑page TIFF.
+ * 5. When developing a batch conversion tool that reads a TIFF stored in a byte array, merges it with other image files, and outputs a multi‑frame TIFF suitable for printing or fax transmission.
  */

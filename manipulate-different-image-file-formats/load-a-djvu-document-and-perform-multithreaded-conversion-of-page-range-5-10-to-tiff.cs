@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Djvu;
@@ -14,8 +13,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.djvu";
-            string outputDirectory = @"C:\temp\output";
+            string inputPath = @"C:\Temp\sample.djvu";
+            string outputDir = @"C:\Temp\output";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -25,36 +24,27 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(outputDir);
 
             // Load the DjVu document
             using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Define page numbers (1‑based) to convert: 5 to 10 inclusive
-                int[] pageNumbers = Enumerable.Range(5, 6).ToArray(); // 5,6,7,8,9,10
+                // Common TIFF save options
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Compression = TiffCompressions.Deflate;
+                tiffOptions.BitsPerSample = new ushort[] { 1 };
 
-                // Convert each page in parallel and save as individual TIFF files
-                Parallel.ForEach(pageNumbers, pageNumber =>
+                // Convert pages 5 through 10 (inclusive) in parallel
+                Parallel.For(5, 11, pageIndex =>
                 {
-                    // Zero‑based index for the Pages collection
-                    int pageIndex = pageNumber - 1;
-
-                    // Guard against out‑of‑range indexes
-                    if (pageIndex < 0 || pageIndex >= djvuImage.Pages.Length)
+                    // Skip if page index is out of range
+                    if (pageIndex < 0 || pageIndex >= djvuImage.PageCount)
                         return;
 
-                    // Prepare TIFF save options
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                    {
-                        Compression = TiffCompressions.Deflate,
-                        BitsPerSample = new ushort[] { 1 } // optional B/W conversion
-                    };
+                    string outputPath = Path.Combine(outputDir, $"page_{pageIndex}.tiff");
 
-                    // Build output file path
-                    string outputPath = Path.Combine(outputDirectory, $"page_{pageNumber}.tif");
-
-                    // Ensure the directory for this file exists (unconditional as required)
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save the specific page as TIFF
@@ -71,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a legal firm needs to extract pages 5‑10 from a scanned DjVu case file and convert them to high‑quality TIFF images for archival in a document management system, this multithreaded C# code speeds up the process.
- * 2. When a publishing company wants to generate printable TIFF proofs of specific chapters stored in a DjVu e‑book, the parallel conversion of pages 5‑10 reduces rendering time on Windows servers.
- * 3. When a medical imaging department receives patient records as DjVu documents and must create lossless TIFF copies of pages 5‑10 for integration with PACS, the code ensures fast, thread‑safe conversion.
- * 4. When a government agency automates the digitization pipeline to transform selected DjVu pages (5‑10) into TIFF files for OCR and searchable archives, the parallel processing improves throughput.
- * 5. When a software vendor builds a batch‑processing tool that extracts a range of DjVu pages (5‑10) and saves them as compressed TIFF files for downstream analysis, this example demonstrates the required C# workflow.
+ * 1. When a developer must extract pages 5‑10 from a DjVu document and convert them to compressed TIFF files for archival or printing, this multithreaded Aspose.Imaging C# code provides a fast solution.
+ * 2. When an application needs to generate searchable TIFF images from a specific page range of a large DjVu file while preserving low‑bit depth, the code uses Aspose.Imaging’s TiffOptions with Deflate compression.
+ * 3. When a batch‑processing service has to convert multiple DjVu pages to TIFF in parallel to reduce CPU time on a server, the Parallel.For loop in the example handles concurrent page conversion.
+ * 4. When a document‑management system requires on‑demand conversion of selected DjVu pages to TIFF for downstream OCR or indexing, this snippet demonstrates how to load the DjVu stream, validate page indices, and save each page as a TIFF image.
+ * 5. When a developer needs to ensure the output directory structure exists and safely process a DjVu file’s page range without exceeding its page count, the code’s file‑system checks and page‑range validation make the conversion reliable.
  */

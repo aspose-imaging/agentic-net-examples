@@ -2,11 +2,10 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -14,55 +13,57 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.cmx";
             string outputPath = "output.tif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir);
 
-            // Load the multi‑page CMX image
-            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
+            // Load CMX multipage vector image
+            using (Aspose.Imaging.FileFormats.Cmx.CmxImage cmxImage = (Aspose.Imaging.FileFormats.Cmx.CmxImage)Image.Load(inputPath))
             {
-                // Determine canvas size from the CMX image
-                int canvasWidth = cmx.Width;
-                int canvasHeight = cmx.Height;
+                int canvasWidth = cmxImage.Width;
+                int canvasHeight = cmxImage.Height;
 
-                // Prepare TIFF save options with a bound file source
-                Source tiffSource = new FileCreateSource(outputPath, false);
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default) { Source = tiffSource };
+                // Prepare TIFF options for the output file
+                Source fileSource = new FileCreateSource(outputPath, false);
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    Source = fileSource,
+                    Photometric = TiffPhotometrics.Rgb,
+                    BitsPerSample = new ushort[] { 8, 8, 8 }
+                };
 
-                // Create a raster canvas for the final single‑page TIFF
+                // Create a raster canvas bound to the output TIFF file
                 using (RasterImage canvas = (RasterImage)Image.Create(tiffOptions, canvasWidth, canvasHeight))
                 {
-                    // Iterate over each CMX page, rasterize it, and merge onto the canvas
-                    foreach (var page in cmx.Pages)
+                    // Iterate each page of the CMX image, rasterize and merge onto the canvas
+                    foreach (var page in cmxImage.Pages)
                     {
-                        // Rasterize the vector page to a PNG stored in memory
-                        using (var memoryStream = new MemoryStream())
+                        using (var ms = new MemoryStream())
                         {
-                            PngOptions pngOptions = new PngOptions { Source = new StreamSource(memoryStream) };
-                            page.Save(memoryStream, pngOptions);
-                            memoryStream.Position = 0;
+                            // Rasterize the page to PNG in memory
+                            PngOptions pngOpts = new PngOptions { Source = new StreamSource(ms) };
+                            page.Save(ms, pngOpts);
+                            ms.Position = 0;
 
                             // Load the rasterized page
-                            using (RasterImage pageRaster = (RasterImage)Image.Load(memoryStream))
+                            using (RasterImage pageRaster = (RasterImage)Image.Load(ms))
                             {
-                                // Merge the page onto the canvas at (0,0)
-                                Rectangle bounds = new Rectangle(0, 0, pageRaster.Width, pageRaster.Height);
+                                // Overlay the page onto the canvas at (0,0)
+                                var bounds = new Rectangle(0, 0, pageRaster.Width, pageRaster.Height);
                                 canvas.SaveArgb32Pixels(bounds, pageRaster.LoadArgb32Pixels(pageRaster.Bounds));
                             }
                         }
                     }
 
-                    // Save the merged single‑page TIFF
+                    // Save the merged single-page TIFF
                     canvas.Save();
                 }
             }
@@ -73,3 +74,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When an engineering firm needs to archive multi‑page CorelDRAW CMX drawings as a single, searchable TIFF file for long‑term document management.
+ * 2. When a printing service must combine several CMX vector pages into one high‑resolution TIFF to send to a RIP (Raster Image Processor) that only accepts single‑page TIFFs.
+ * 3. When a legal department wants to merge multiple CMX schematics into a single TIFF for inclusion in electronic case files that require non‑editable image formats.
+ * 4. When a GIS application requires converting multi‑page CMX map layers into one raster TIFF to overlay on satellite imagery.
+ * 5. When a medical device manufacturer needs to consolidate CMX design sheets into a single TIFF for compliance reporting that mandates flat‑image formats.
+ */

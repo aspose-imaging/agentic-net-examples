@@ -1,38 +1,48 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.png";
-        string outputPath = "output/output.png";
-
         try
         {
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\temp\input.png";
+            string outputPath = @"C:\temp\output.png";
+
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
+                // Create a Graphics object for drawing
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
 
-                Pen pen = new Pen(Color.Red, 2);
-                RectangleF rect = new RectangleF(50.5f, 30.5f, 200.75f, 150.25f);
-                graphics.DrawRectangle(pen, rect);
+                // Define a floating‑point rectangle (x, y, width, height)
+                RectangleF rect = new RectangleF(50f, 50f, 200f, 150f);
 
+                // Draw the rectangle with a red pen of width 3
+                graphics.DrawRectangle(new Pen(Color.Red, 3), rect);
+
+                // Save the modified image to the output path
                 image.Save(outputPath);
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -40,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to overlay a precise, sub‑pixel red rectangle on a PNG image for a UI mock‑up, they can use Graphics.DrawRectangle with a RectangleF to draw the floating‑point shape.
- * 2. When generating automated test screenshots that require exact placement of annotations measured in fractions of a pixel, the code demonstrates how to draw a rectangle with decimal coordinates on an image loaded with Aspose.Imaging.
- * 3. When creating a PDF thumbnail preview where the border must be drawn with a specific thickness and color on a PNG source, the RectangleF overload lets the developer specify floating‑point dimensions for high‑resolution rendering.
- * 4. When building a web service that adds a red bounding box around detected objects in uploaded images, the example shows how to load the image, clear the background, and draw a rectangle using Aspose.Imaging’s Graphics class.
- * 5. When implementing a batch image‑processing script that needs to mark regions of interest with sub‑pixel accuracy in various image formats (e.g., PNG, JPEG), the code illustrates the use of Pen, Color, and RectangleF with Graphics.DrawRectangle.
+ * 1. When a developer needs to highlight a detected object with a sub‑pixel accurate red border on a PNG image using Aspose.Imaging’s Graphics.DrawRectangle overload with a RectangleF structure.
+ * 2. When a developer wants to add a scalable annotation box to a high‑resolution JPEG photo in a C# image‑editing tool, ensuring the rectangle’s position and size are defined with floating‑point precision.
+ * 3. When a developer is creating a thumbnail preview of a BMP file and must draw a precise red rectangle to indicate a region of interest for a UI overlay.
+ * 4. When a developer builds an automated report that marks specific coordinates on a TIFF map image, using a floating‑point rectangle to align with geographic data.
+ * 5. When a developer implements a batch process that adds a red rectangular watermark to a series of PNG assets, relying on RectangleF for exact placement across varying image dimensions.
  */

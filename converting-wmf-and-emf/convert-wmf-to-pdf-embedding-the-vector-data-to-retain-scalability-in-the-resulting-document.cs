@@ -11,10 +11,10 @@ class Program
         try
         {
             // Hardcoded input and output file paths
-            string inputPath = @"C:\Temp\sample.wmf";
-            string outputPath = @"C:\Temp\sample.pdf";
+            string inputPath = @"C:\Temp\input.wmf";
+            string outputPath = @"C:\Temp\output.pdf";
 
-            // Verify that the input file exists
+            // Verify that the input WMF file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,19 +27,19 @@ class Program
             // Load the WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare vector rasterization options to keep the vector data
+                // Configure vector rasterization to preserve scalability
                 var vectorOptions = new WmfRasterizationOptions
                 {
                     PageSize = image.Size
                 };
 
-                // Configure PDF save options
+                // Set PDF options with the vector rasterization options
                 var pdfOptions = new PdfOptions
                 {
                     VectorRasterizationOptions = vectorOptions
                 };
 
-                // Save as PDF, preserving scalability
+                // Save as PDF, embedding the vector data
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -49,3 +49,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate printable reports from legacy Windows Metafile (WMF) diagrams while preserving crisp vector quality in PDF documents.
+ * 2. When an application must batch‑convert WMF icons or schematics into searchable PDF files for archival in a document management system.
+ * 3. When a CAD or engineering tool exports drawings as WMF and the downstream workflow requires scalable PDF output for client review.
+ * 4. When a web service receives user‑uploaded WMF graphics and must return a PDF that retains the original vector resolution for high‑DPI displays.
+ * 5. When a Windows desktop utility automates the creation of PDF manuals that embed WMF flowcharts without rasterizing them, ensuring they remain editable in vector‑aware PDF editors.
+ */

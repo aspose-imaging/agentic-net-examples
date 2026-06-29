@@ -6,6 +6,7 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -13,9 +14,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input SVG and output APNG paths
             string inputSvgPath = "input.svg";
-            string outputApngPath = "output.png";
+            string outputApngPath = "output.apng";
 
             // Validate input file existence
             if (!File.Exists(inputSvgPath))
@@ -25,63 +26,59 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputApngPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputApngPath));
 
-            // Define rasterization sizes for each frame
-            var frameSizes = new List<(int width, int height)>
+            // Define resolutions for each frame (width x height)
+            var resolutions = new List<(int width, int height)>
             {
                 (200, 200),
                 (400, 400),
                 (600, 600)
             };
 
-            // Load the SVG vector image
-            using (Image vectorImage = Image.Load(inputSvgPath))
+            // Use the first resolution to define canvas size
+            int canvasWidth = resolutions[0].width;
+            int canvasHeight = resolutions[0].height;
+
+            // Prepare APNG creation options
+            ApngOptions apngCreateOptions = new ApngOptions
             {
-                // Prepare APNG creation options
-                var apngCreateOptions = new ApngOptions
-                {
-                    Source = new FileCreateSource(outputApngPath, false),
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    DefaultFrameTime = 100 // default frame duration in ms
-                };
+                Source = new FileCreateSource(outputApngPath, false),
+                DefaultFrameTime = 100, // default frame duration in ms
+                ColorType = PngColorType.TruecolorWithAlpha
+            };
 
-                // Create APNG canvas using the size of the first frame
-                using (ApngImage apngImage = (ApngImage)Image.Create(
-                    apngCreateOptions,
-                    frameSizes[0].width,
-                    frameSizes[0].height))
+            // Load the SVG image once
+            using (Image svgImage = Image.Load(inputSvgPath))
+            {
+                // Create APNG image bound to the output file
+                using (ApngImage apngImage = (ApngImage)Image.Create(apngCreateOptions, canvasWidth, canvasHeight))
                 {
-                    // Remove the default initial frame
-                    apngImage.RemoveAllFrames();
-
-                    // Generate each frame at its specified resolution
-                    foreach (var size in frameSizes)
+                    // Add a frame for each resolution
+                    foreach (var res in resolutions)
                     {
-                        // Configure PNG save options with SVG rasterization settings
-                        var pngOptions = new PngOptions();
-                        var rasterOptions = new SvgRasterizationOptions
+                        // Rasterize SVG to PNG in memory with desired size
+                        PngOptions pngOptions = new PngOptions
                         {
-                            PageWidth = size.width,
-                            PageHeight = size.height
-                        };
-                        pngOptions.VectorRasterizationOptions = rasterOptions;
-
-                        // Rasterize SVG to PNG in memory
-                        using (var ms = new MemoryStream())
-                        {
-                            vectorImage.Save(ms, pngOptions);
-                            ms.Position = 0;
-
-                            // Load rasterized PNG as a RasterImage frame
-                            using (RasterImage rasterFrame = (RasterImage)Image.Load(ms))
+                            VectorRasterizationOptions = new SvgRasterizationOptions
                             {
-                                apngImage.AddFrame(rasterFrame);
+                                PageWidth = res.width,
+                                PageHeight = res.height
+                            }
+                        };
+
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            svgImage.Save(ms, pngOptions);
+                            ms.Position = 0;
+                            using (RasterImage raster = (RasterImage)Image.Load(ms))
+                            {
+                                apngImage.AddFrame(raster);
                             }
                         }
                     }
 
-                    // Save the compiled APNG
+                    // Save the APNG file
                     apngImage.Save();
                 }
             }
@@ -92,3 +89,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web developer wants to convert a scalable vector logo (SVG) into an animated PNG that shows the logo at multiple sizes for responsive design, they can use this code to rasterize the SVG at different resolutions and bundle the frames into an APNG.
+ * 2. When a mobile app needs to display a high‑resolution icon animation that adapts to device pixel density, this C# snippet can generate an APNG with frames rendered from the same SVG at 1×, 2×, and 3× sizes.
+ * 3. When an e‑learning platform wants to create a step‑by‑step illustration where each frame zooms into a diagram, the code can rasterize the original SVG at increasing canvas dimensions and compile the sequence into a single APNG file.
+ * 4. When a game developer requires animated UI elements that retain crisp edges on any screen, they can use this example to rasterize a vector asset at several target resolutions and combine the results into an animated PNG for fast loading.
+ * 5. When a marketing automation script must generate a compact animated banner from a single SVG source, this Aspose.Imaging for .NET code can produce an APNG with multiple resolution frames, ensuring the banner looks sharp across browsers.
+ */

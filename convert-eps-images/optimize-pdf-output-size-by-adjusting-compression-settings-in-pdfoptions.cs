@@ -6,43 +6,39 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.png";
+        string outputPath = @"C:\Output\sample.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.jpg";
-            string outputPath = "Output/output.pdf";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF options with compression
-                using (var pdfOptions = new PdfOptions())
+                // Set up PDF options with compression to reduce file size
+                var pdfOptions = new PdfOptions
                 {
-                    var coreOptions = new PdfCoreOptions
+                    PdfCoreOptions = new PdfCoreOptions
                     {
-                        // Use Flate compression for smaller PDF size
                         Compression = PdfImageCompressionOptions.Flate,
-                        // Optionally, do not keep original metadata to reduce size
-                        // KeepMetadata = false
-                    };
+                        JpegQuality = 75 // optional lower JPEG quality for further reduction
+                    }
+                };
 
-                    pdfOptions.PdfCoreOptions = coreOptions;
-
-                    // Save the image as PDF with the specified options
-                    image.Save(outputPath, pdfOptions);
-                }
+                // Save the image as a PDF using the configured options
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -51,3 +47,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application needs to generate downloadable PDFs from PNG screenshots while keeping the file size low for faster user downloads, developers can use this code to apply Flate compression and lower JPEG quality.
+ * 2. When an automated reporting system creates PDF invoices from high‑resolution product images and must stay within email attachment size limits, the compression settings in PdfOptions help shrink the PDFs.
+ * 3. When a document management workflow converts scanned PNG files to searchable PDFs and wants to reduce storage costs on a cloud server, developers can adjust the PdfCoreOptions to compress the output.
+ * 4. When a mobile app generates PDF catalogs from user‑uploaded PNG graphics and must minimize bandwidth usage during sync, the code’s compression configuration ensures compact PDFs.
+ * 5. When a batch processing script archives large collections of PNG assets as PDFs for long‑term retention and needs to meet archival size constraints, the Flate compression and JPEG quality settings optimize the resulting PDF size.
+ */

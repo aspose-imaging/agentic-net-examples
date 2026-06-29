@@ -7,46 +7,49 @@ using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded output path
+        string outputPath = @"C:\temp\GraphicsPathCloneOutput.bmp";
+
         try
         {
-            // Define output path and ensure its directory exists
-            string outputPath = "output\\result.png";
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set PNG options with a file create source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a blank image canvas
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            // Create a new BMP image
+            BmpOptions bmpOptions = new BmpOptions
             {
-                // Initialize graphics for drawing
+                BitsPerPixel = 24,
+                Source = new FileCreateSource(outputPath, false)
+            };
+
+            using (Image image = Image.Create(bmpOptions, 500, 500))
+            {
+                // Initialize graphics surface
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                graphics.Clear(Color.Wheat);
 
                 // Build the original GraphicsPath
                 GraphicsPath originalPath = new GraphicsPath();
-                Figure originalFigure = new Figure();
-                originalFigure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
-                originalFigure.AddShape(new EllipseShape(new RectangleF(100f, 100f, 200f, 200f)));
-                originalPath.AddFigure(originalFigure);
 
-                // Clone the original path
-                GraphicsPath clonedPath = originalPath.DeepClone();
+                // Figure 1: a rectangle
+                Figure rectFigure = new Figure();
+                rectFigure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
+                originalPath.AddFigure(rectFigure);
 
-                // Modify the cloned path by adding a new figure
-                Figure newFigure = new Figure();
-                newFigure.AddShape(new PolygonShape(
-                    new[] { new PointF(300f, 300f), new PointF(350f, 350f), new PointF(300f, 400f) },
-                    true));
-                clonedPath.AddFigure(newFigure);
-
-                // Draw the original path with a black pen
+                // Draw the original path in black
                 graphics.DrawPath(new Pen(Color.Black, 2), originalPath);
 
-                // Draw the cloned (modified) path with a red pen
+                // Deep clone the original path
+                GraphicsPath clonedPath = originalPath.DeepClone();
+
+                // Modify the clone by adding an ellipse figure
+                Figure ellipseFigure = new Figure();
+                ellipseFigure.AddShape(new EllipseShape(new RectangleF(150f, 150f, 200f, 200f)));
+                clonedPath.AddFigure(ellipseFigure);
+
+                // Draw the cloned (modified) path in red
                 graphics.DrawPath(new Pen(Color.Red, 2), clonedPath);
 
                 // Save the image
@@ -62,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add a temporary watermark or annotation to a PNG image while keeping the original vector shapes intact for later reuse, they can deep‑clone the GraphicsPath, add the new figure, and render the clone in a different color.
- * 2. When creating a multi‑layer diagram where the base rectangle and ellipse must remain unchanged for export to other formats, cloning the GraphicsPath lets the developer append additional polygons and draw the modified path separately.
- * 3. When implementing a side‑by‑side preview that shows an edited version of a shape collection next to the original in a Windows Forms application, the code can clone the original path, modify the clone, and render both on a 500×500 canvas.
- * 4. When generating test images for unit testing image‑processing algorithms, a tester can clone the original GraphicsPath, add extra figures to the clone, and compare the rendering of the original black path versus the modified red path.
- * 5. When building a CAD‑like tool that requires an immutable master geometry while allowing temporary user annotations, deep‑cloning the GraphicsPath enables the addition of new figures to the clone without altering the master shape data.
+ * 1. When generating a printable BMP report that needs a fixed rectangle base shape while dynamically adding extra figures such as ellipses without altering the original GraphicsPath.
+ * 2. When creating UI thumbnails where the original vector outline is cloned and modified for different theme colors, preserving the source path for reuse across multiple images.
+ * 3. When building a CAD‑style application that must keep the original blueprint path intact while allowing users to experiment with additional geometry on a cloned GraphicsPath.
+ * 4. When producing layered game assets where the background shape remains static and a deep‑cloned path is drawn in a different color to visualize hit‑boxes or effects.
+ * 5. When automating batch image processing that appends watermarks or signatures to existing vector paths on a BMP canvas, ensuring the original path data stays unchanged.
  */

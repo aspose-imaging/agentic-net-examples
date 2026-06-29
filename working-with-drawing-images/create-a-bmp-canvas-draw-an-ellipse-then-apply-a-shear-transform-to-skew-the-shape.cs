@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
@@ -11,31 +12,34 @@ class Program
         try
         {
             string outputPath = "output/output.bmp";
-
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up BMP options with a file source
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            Source src = new FileCreateSource(outputPath, false);
-            bmpOptions.Source = src;
+            // Create BMP options with file source
+            Source source = new FileCreateSource(outputPath, false);
+            BmpOptions bmpOptions = new BmpOptions() { Source = source, BitsPerPixel = 24 };
 
-            // Create a BMP canvas
-            using (Image image = Image.Create(bmpOptions, 500, 500))
+            // Create BMP canvas
+            using (Image canvas = Image.Create(bmpOptions, 500, 500))
             {
-                Graphics graphics = new Graphics(image);
+                // Initialize graphics
+                Graphics graphics = new Graphics(canvas);
                 graphics.Clear(Color.Wheat);
 
-                // Apply a shear transform (skew)
-                Matrix shear = new Matrix(1, 0.5f, 0, 1, 0, 0);
+                // Apply shear transform (shear X by 0.5)
+                Matrix shear = new Matrix(1, 0, 0.5f, 1, 0, 0);
                 graphics.MultiplyTransform(shear);
 
-                // Draw an ellipse
-                graphics.DrawEllipse(new Pen(Color.Black, 2), new RectangleF(50, 50, 300, 300));
+                // Create path with an ellipse shape
+                GraphicsPath path = new GraphicsPath();
+                Figure figure = new Figure();
+                figure.AddShape(new EllipseShape(new RectangleF(100, 100, 300, 200)));
+                path.AddFigure(figure);
 
-                // Save the image (bound to the source)
-                image.Save();
+                // Draw the transformed ellipse
+                graphics.DrawPath(new Pen(Color.Black, 2), path);
+
+                // Save the image (bound to source)
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -47,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP file with a skewed ellipse for a custom report or printable diagram using C# and Aspose.Imaging.
- * 2. When an application must create a BMP canvas and apply a shear transformation to simulate perspective distortion of geometric shapes.
- * 3. When a game or UI tool requires programmatic drawing of an ellipse that is slanted to represent motion blur or artistic effect, saved as a BMP image.
- * 4. When a batch image‑processing script has to produce placeholder graphics with transformed ellipses for testing rendering pipelines.
- * 5. When a developer wants to demonstrate basic graphics operations—canvas creation, matrix transforms, and shape drawing—in a tutorial on Aspose.Imaging for .NET.
+ * 1. When a developer needs to generate a 24‑bit BMP image with a custom‑skewed ellipse for a printable report or legacy system that only accepts BMP files.
+ * 2. When creating a placeholder graphic for a UI mock‑up where the ellipse must be sheared to illustrate perspective distortion.
+ * 3. When preprocessing graphics for a game asset pipeline that requires BMP textures with transformed shapes for retro‑style sprites.
+ * 4. When automating the production of diagram elements, such as a slanted oval badge, that will be embedded in a Word document via BMP.
+ * 5. When testing the accuracy of Aspose.Imaging’s shear matrix and drawing APIs by programmatically applying a 0.5 X‑axis shear to an ellipse and saving the result.
  */

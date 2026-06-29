@@ -5,75 +5,49 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputBmp";
-            string outputDirectory = @"C:\OutputSvg";
-
-            // Verify input directory exists
-            if (!Directory.Exists(inputDirectory))
-            {
-                Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
-                return;
-            }
+            // Define input and output directories (relative to the current directory)
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDir = Path.Combine(baseDir, "Input");
+            string outputDir = Path.Combine(baseDir, "Output");
 
             // Get all BMP files in the input directory
-            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp", SearchOption.TopDirectoryOnly);
-            if (bmpFiles.Length == 0)
-            {
-                Console.Error.WriteLine("No BMP files found to process.");
-                return;
-            }
+            string[] files = Directory.GetFiles(inputDir, "*.bmp");
 
-            int index = 0;
-            foreach (string bmpPath in bmpFiles)
+            foreach (string inputPath in files)
             {
-                // Check that the BMP file exists
-                if (!File.Exists(bmpPath))
+                // Verify that the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {bmpPath}");
-                    continue;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
 
-                // Create a timestamp prefix for uniqueness
+                // Build a unique output file name with a timestamp prefix
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                 string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                // In case processing is very fast, add an index to guarantee uniqueness
-                string prefix = $"{timestamp}_{index:D4}";
-                index++;
-
-                // Build the output SVG file path
-                string outputFileName = $"{prefix}_{Path.GetFileNameWithoutExtension(bmpPath)}.svg";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                string outputFileName = $"{timestamp}_{fileNameWithoutExt}.svg";
+                string outputPath = Path.Combine(outputDir, outputFileName);
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the BMP image
-                using (Image image = Image.Load(bmpPath))
+                // Load the BMP image and save it as SVG
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Prepare rasterization options matching the source image size
-                    var rasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = image.Size
-                    };
-
-                    // Configure SVG export options
                     var svgOptions = new SvgOptions
                     {
-                        VectorRasterizationOptions = rasterizationOptions,
-                        // Optional: keep metadata, compress, etc.
-                        KeepMetadata = true,
-                        Compress = false
+                        VectorRasterizationOptions = new SvgRasterizationOptions
+                        {
+                            PageSize = image.Size
+                        }
                     };
 
-                    // Save as SVG
                     image.Save(outputPath, svgOptions);
                 }
-
-                Console.WriteLine($"Converted: {bmpPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -82,3 +56,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to migrate a legacy collection of BMP icons to scalable SVG graphics for a web UI while ensuring each output file has a unique timestamped name to avoid overwriting.
+ * 2. When an automated build pipeline must convert newly generated BMP screenshots into SVG format for documentation generation, and the timestamp prefix helps track when each conversion occurred.
+ * 3. When a desktop application processes user‑uploaded BMP drawings in bulk and saves them as SVG files with timestamped filenames to maintain version history and prevent name collisions.
+ * 4. When a server‑side service periodically scans an input folder for BMP assets, converts them to SVG for responsive design, and uses the timestamp prefix to create audit‑ready filenames.
+ * 5. When a migration script needs to archive BMP assets into an SVG archive, naming each file with a precise timestamp to simplify sorting and retrieval in a content‑management system.
+ */

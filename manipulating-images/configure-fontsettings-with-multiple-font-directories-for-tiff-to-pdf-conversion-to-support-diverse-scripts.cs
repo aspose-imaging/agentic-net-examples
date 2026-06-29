@@ -8,36 +8,38 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.tiff";
-        string outputPath = @"C:\Converted\sample.pdf";
-
-        // Hardcoded font directories
-        string[] fontDirectories = new string[]
-        {
-            @"C:\Fonts\Dir1",
-            @"C:\Fonts\Dir2"
-        };
+        string inputPath = @"C:\Images\sample.tif";
+        string outputPath = @"C:\Output\sample.pdf";
 
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure Aspose.Imaging to use multiple font folders (recursive search)
-            FontSettings.SetFontsFolders(fontDirectories, true);
+            // Configure multiple font directories (example: Latin and CJK scripts)
+            string[] fontFolders = new string[]
+            {
+                @"C:\Fonts\Latin",
+                @"C:\Fonts\CJK"
+            };
+            // Set the font folders and enable recursive search
+            FontSettings.SetFontsFolders(fontFolders, true);
 
             // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // Save as PDF using default PdfOptions
-                image.Save(outputPath, new PdfOptions());
+                // Set up PDF saving options
+                var pdfOptions = new PdfOptions();
+
+                // Save the image as PDF
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert scanned multilingual TIFF documents (e.g., Arabic and Chinese) to searchable PDF files and must ensure the correct fonts are available from several custom font folders.
- * 2. When an enterprise application processes batch TIFF invoices stored on a network share and must embed company‑specific TrueType fonts located in different directories before saving them as PDF.
- * 3. When a document management system receives TIFF images from various regional offices, each using local font repositories, and the conversion to PDF must respect those font locations to preserve script rendering.
- * 4. When a C# service generates PDF reports from TIFF charts that include Unicode labels, and the required fonts are installed in separate folders on the server, requiring recursive font discovery.
- * 5. When a legal software platform converts TIFF evidence files containing mixed‑language annotations into PDF while loading fonts from multiple directories to comply with jurisdictional font standards.
+ * 1. When a developer needs to convert multi‑language TIFF scans (e.g., documents containing both Latin and CJK characters) to searchable PDF files and must point Aspose.Imaging to separate font folders so the correct glyphs are rendered.
+ * 2. When an automated document‑processing service processes archived TIFF images from different regions and must ensure the PDF output uses the appropriate regional fonts stored in distinct directories.
+ * 3. When building a desktop C# application that generates PDFs from user‑uploaded TIFF files and the application must support custom corporate fonts located in multiple folder paths.
+ * 4. When integrating Aspose.Imaging into a batch conversion pipeline that reads TIFF files with embedded text and requires recursive loading of fonts from both a standard system folder and a network share to preserve text appearance in the resulting PDF.
+ * 5. When creating a multilingual e‑learning platform that converts scanned lecture notes (TIFF) to PDF and needs to configure FontSettings to include both Latin and Asian font directories to avoid missing characters.
  */

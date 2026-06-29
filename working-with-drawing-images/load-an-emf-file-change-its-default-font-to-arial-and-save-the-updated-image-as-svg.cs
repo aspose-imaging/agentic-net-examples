@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
@@ -11,8 +12,8 @@ class Program
     {
         try
         {
-            string inputPath = @"C:\Images\input.emf";
-            string outputPath = @"C:\Images\output.svg";
+            string inputPath = @"C:\Temp\input.emf";
+            string outputPath = @"C:\Temp\output.svg";
 
             if (!File.Exists(inputPath))
             {
@@ -22,23 +23,38 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+            var loadOptions = new LoadOptions();
+            string arialFontFolder = @"C:\Windows\Fonts";
+            loadOptions.AddCustomFontSource(
+                (object[] fontArgs) =>
+                {
+                    string fontsPath = fontArgs.Length > 0 ? fontArgs[0]?.ToString() : string.Empty;
+                    var result = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                    if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
+                    {
+                        foreach (var fontFile in Directory.GetFiles(fontsPath, "*.ttf"))
+                        {
+                            byte[] fontBytes = File.ReadAllBytes(fontFile);
+                            string fontName = Path.GetFileNameWithoutExtension(fontFile);
+                            result.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
+                        }
+                    }
+                    return result.ToArray();
+                },
+                arialFontFolder);
+
+            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath, loadOptions))
             {
-                // Set up SVG save options
                 SvgOptions saveOptions = new SvgOptions
                 {
-                    // Render text using the specified font (Arial) by not converting to shapes
-                    TextAsShapes = false
+                    TextAsShapes = true
                 };
 
-                // Configure rasterization options for EMF to SVG conversion
                 EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
                 {
                     BackgroundColor = Color.White,
                     PageSize = emfImage.Size,
-                    RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
-                    // Optional: map missing fonts to Arial (if needed)
-                    // ReplaceTextMapping = new System.Collections.Generic.Dictionary<string, string> { { "*", "Arial" } }
+                    RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto
                 };
 
                 saveOptions.VectorRasterizationOptions = rasterOptions;
@@ -55,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy Windows Metafile (EMF) diagrams into scalable SVG files while ensuring all text appears in a consistent Arial font for web display.
- * 2. When an application must replace missing or unsupported fonts in an EMF report with Arial before exporting to SVG for cross‑platform compatibility.
- * 3. When a batch processing tool has to read EMF icons, set a uniform default font, and generate lightweight SVG assets for responsive UI design.
- * 4. When a document‑generation service requires converting EMF charts to SVG while preserving vector quality and enforcing Arial as the text rendering font.
- * 5. When a migration script updates legacy engineering drawings stored as EMF, applying Arial as the default typeface and saving them as SVG for integration with modern CAD viewers.
+ * 1. When a developer needs to convert legacy Windows Metafile (EMF) diagrams into scalable web‑friendly SVG files while ensuring all text appears in a consistent Arial font for brand compliance.
+ * 2. When an automated reporting system must replace missing or unsupported fonts in EMF charts with Arial before exporting them as SVG to embed in HTML dashboards.
+ * 3. When a document‑generation pipeline processes user‑uploaded EMF logos and standardizes the typography to Arial before saving them as SVG for responsive UI rendering.
+ * 4. When a batch conversion tool has to load multiple EMF assets, inject a custom Arial font from the system fonts folder, and output SVG files that preserve text as shapes for cross‑platform compatibility.
+ * 5. When a GIS application imports EMF map overlays, forces the default font to Arial to match corporate style guidelines, and exports the result as SVG for high‑resolution printing.
  */

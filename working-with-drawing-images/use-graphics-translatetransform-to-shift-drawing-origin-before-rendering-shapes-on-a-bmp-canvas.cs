@@ -3,34 +3,50 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = "output/output.bmp";
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            Source source = new FileCreateSource(outputPath, false);
-            BmpOptions bmpOptions = new BmpOptions() { Source = source };
-            int width = 400;
-            int height = 300;
+            // Hardcoded output path
+            string outputPath = @"c:\temp\translated_output.bmp";
 
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Create a file source bound to the output path
+            Source source = new FileCreateSource(outputPath, false);
+
+            // Set BMP options with the source
+            BmpOptions bmpOptions = new BmpOptions() { Source = source };
+
+            int width = 400;
+            int height = 400;
+
+            // Create a BMP canvas bound to the file source
             using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
             {
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Color.LightGray);
-                graphics.TranslateTransform(50, 30);
-                Pen rectPen = new Pen(Color.Blue, 2);
-                graphics.DrawRectangle(rectPen, new Rectangle(0, 0, 200, 150));
-                using (SolidBrush brush = new SolidBrush(Color.FromArgb(128, Color.Red)))
-                {
-                    graphics.FillEllipse(brush, new Rectangle(0, 0, 200, 150));
-                }
+
+                // Clear the canvas with white background
+                graphics.Clear(Color.White);
+
+                // Shift the drawing origin by (50,50)
+                graphics.TranslateTransform(50, 50);
+
+                // Create a blue pen
+                Pen pen = new Pen(Color.Blue, 3);
+
+                // Draw a rectangle at the translated origin
+                graphics.DrawRectangle(pen, new Rectangle(0, 0, 100, 100));
+
+                // Draw a diagonal line within the rectangle
+                graphics.DrawLine(pen, new Point(0, 0), new Point(100, 100));
+
+                // Save the bound image (no need to specify path/options)
                 canvas.Save();
             }
         }
@@ -43,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a BMP image with a consistent left‑top margin, they can use Graphics.TranslateTransform to shift the drawing origin before drawing rectangles and ellipses.
- * 2. When adding a semi‑transparent overlay (e.g., a red ellipse) to a BMP background and want to position it with an offset, TranslateTransform lets the code render the shape at the desired coordinates.
- * 3. When generating a simple diagram or badge on a BMP canvas and all elements must be placed 50 px right and 30 px down, using TranslateTransform simplifies the coordinate calculations.
- * 4. When producing a thumbnail preview of a larger design in BMP format and need to apply padding around the content, shifting the origin with TranslateTransform ensures the shapes are centered within the padded area.
- * 5. When building a BMP sprite sheet where each sprite is drawn with the same offset to align within a grid, TranslateTransform moves the origin so each sprite’s rectangle and ellipse are positioned correctly.
+ * 1. When you need to generate a BMP thumbnail with a consistent 50‑pixel margin so that all drawn shapes start away from the image edges.
+ * 2. When you are creating a printable form in C# and must offset the drawing origin to align fields with predefined page margins on a raster canvas.
+ * 3. When you want to compose a composite diagram by translating the coordinate system before drawing each component, ensuring that rectangles and lines line up correctly on a BMP file.
+ * 4. When you are building a simple UI icon set and need to shift the origin to center the graphic within a fixed‑size bitmap without manually adjusting each shape’s coordinates.
+ * 5. When you are adding a decorative border to an existing image and use TranslateTransform to move the drawing origin, allowing you to draw the border elements relative to the new origin on a BMP canvas.
  */

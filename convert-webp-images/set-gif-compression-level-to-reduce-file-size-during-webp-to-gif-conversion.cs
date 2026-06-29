@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.webp";
+        string outputPath = @"C:\temp\output.gif";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\input.webp";
-            string outputPath = @"C:\temp\output.gif";
-
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,24 +24,31 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the WebP image
-            using (Image webpImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure GIF compression options
-                GifOptions gifOptions = new GifOptions
+                // Configure GIF compression using MaxDiff (higher value = more lossy compression)
+                var gifOptions = new GifOptions
                 {
-                    // Use lossy compression with a moderate MaxDiff value to reduce size
-                    MaxDiff = 80
+                    MaxDiff = 80 // recommended value for optimal lossy compression
                 };
 
-                // Save the image as GIF with the specified options
-                webpImage.Save(outputPath, gifOptions);
+                // Save the image as a GIF with the specified compression options
+                image.Save(outputPath, gifOptions);
             }
-
-            Console.WriteLine("Conversion completed successfully.");
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert high‑resolution WebP graphics to static or animated GIFs for legacy browsers while minimizing the resulting file size by adjusting the MaxDiff compression level.
+ * 2. When an e‑commerce platform must generate lightweight product GIF previews from WebP assets to improve page load speed on mobile devices.
+ * 3. When a marketing automation tool creates email‑friendly GIF banners from WebP images and must keep the attachment size under a specific limit.
+ * 4. When a content management system processes user‑uploaded WebP photos and stores them as compressed GIFs for compatibility with older image viewers.
+ * 5. When a game developer exports sprite sheets originally saved as WebP into GIF format for use in legacy game engines that only support GIF, requiring lossy compression to fit within memory constraints.
+ */

@@ -1,11 +1,7 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.FileFormats.Tiff.PathResources;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
@@ -23,36 +19,49 @@ class Program
                 return;
             }
 
-            string outputDirectory = "output_paths";
-            Directory.CreateDirectory(outputDirectory);
+            string outputBaseDir = "output_paths";
 
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            using (var tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                var frames = tiffImage.Frames.ToArray();
-                for (int frameIndex = 0; frameIndex < frames.Length; frameIndex++)
+                int frameIndex = 0;
+                foreach (var frame in tiffImage.Frames)
                 {
-                    tiffImage.ActiveFrame = frames[frameIndex];
-                    List<PathResource> pathResources = tiffImage.ActiveFrame.PathResources;
+                    tiffImage.ActiveFrame = frame;
+                    var pathResources = tiffImage.ActiveFrame.PathResources;
                     if (pathResources == null || pathResources.Count == 0)
-                        continue;
-
-                    for (int pathIndex = 0; pathIndex < pathResources.Count; pathIndex++)
                     {
-                        var pathResource = pathResources[pathIndex];
-                        var graphicsPath = PathResourceConverter.ToGraphicsPath(
-                            new[] { pathResource }, tiffImage.ActiveFrame.Size);
+                        frameIndex++;
+                        continue;
+                    }
 
-                        var svgGraphics = new SvgGraphics2D(tiffImage.ActiveFrame.Width, tiffImage.ActiveFrame.Height, 96);
+                    int pathIndex = 0;
+                    foreach (var resource in pathResources)
+                    {
+                        var graphicsPath = PathResourceConverter.ToGraphicsPath(
+                            new[] { resource },
+                            tiffImage.ActiveFrame.Size);
+
+                        var svgGraphics = new SvgGraphics2D(
+                            tiffImage.ActiveFrame.Width,
+                            tiffImage.ActiveFrame.Height,
+                            96);
+
                         svgGraphics.DrawPath(new Pen(Color.Black, 1), graphicsPath);
 
-                        using (SvgImage svgImage = svgGraphics.EndRecording())
+                        using (var svgImage = svgGraphics.EndRecording())
                         {
-                            string outputPath = Path.Combine(outputDirectory,
+                            string outputPath = Path.Combine(
+                                outputBaseDir,
                                 $"frame{frameIndex}_path{pathIndex}.svg");
+
                             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
                             svgImage.Save(outputPath);
                         }
+
+                        pathIndex++;
                     }
+
+                    frameIndex++;
                 }
             }
         }
@@ -65,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a publishing workflow requires converting multi‑page TIFF artwork with embedded clipping paths into scalable SVG outlines for each page, this code can extract and save them as separate SVG files.
- * 2. When a GIS application needs to reuse vector boundaries stored as TIFF clipping paths for different map layers, the code enables exporting those paths to SVG for further manipulation.
- * 3. When a print‑to‑web service must provide vector cut‑lines from high‑resolution TIFF proofs to web designers, the snippet extracts each frame’s clipping path and writes it as an SVG file.
- * 4. When an e‑learning platform wants to animate individual frames of a scanned diagram by using its original clipping paths as SVG masks, this code supplies the necessary SVG assets.
- * 5. When a quality‑control tool audits scanned documents by comparing the original TIFF clipping paths against regenerated SVG vectors, the example automates the extraction of those paths per frame.
+ * 1. When a developer needs to extract vector clipping paths from a multi‑page TIFF document and save them as separate SVG files for scalable web or print layouts.
+ * 2. When an image‑processing workflow must convert each frame’s clipping path in a scanned TIFF into individual SVG assets for further editing in design tools.
+ * 3. When a GIS application requires preserving geographic vector outlines stored as TIFF path resources and exporting them to SVG for integration with mapping libraries.
+ * 4. When an e‑commerce platform wants to generate SVG cut‑out masks from product photos saved as multi‑frame TIFFs to apply dynamic overlays in a browser.
+ * 5. When a digital‑archiving system must isolate and archive each frame’s clipping paths from high‑resolution TIFF scans as independent SVG files for future metadata analysis.
  */

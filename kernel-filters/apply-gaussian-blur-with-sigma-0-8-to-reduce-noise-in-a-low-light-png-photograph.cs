@@ -5,15 +5,15 @@ using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\lowlight.png";
-        string outputPath = @"C:\Images\lowlight_blur.png";
-
         try
         {
-            // Verify input file exists
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,17 +26,14 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering
-                var rasterImage = (RasterImage)image;
+                // Cast to RasterImage for filtering
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur with size 3 (odd) and sigma 0.8
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new GaussianBlurFilterOptions(3, 0.8)
-                );
+                // Apply Gaussian blur with size 5 and sigma 0.8
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 0.8));
 
                 // Save the processed image
-                rasterImage.Save(outputPath);
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -48,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to clean up noise in a low‑light PNG photograph before displaying it in a web gallery, they can apply a Gaussian blur with sigma 0.8 using Aspose.Imaging for .NET.
- * 2. When an image‑processing pipeline must automatically enhance night‑time screenshots saved as PNG files, the code can be used to reduce grain by filtering the raster image with a Gaussian blur.
- * 3. When a mobile app syncs user‑taken low‑light images to a server and wants to lower file size while preserving visual quality, applying a 0.8 sigma Gaussian blur in C# helps smooth the noise before upload.
- * 4. When a desktop utility converts raw camera PNG outputs taken in dim lighting into cleaner versions for printing, the developer can employ the provided raster filter to blur the image slightly and improve appearance.
- * 5. When an automated test suite validates that image‑enhancement features work on dark‑exposure PNG assets, the code demonstrates how to programmatically apply a Gaussian blur with specific sigma to simulate noise reduction.
+ * 1. When a developer needs to clean up noise in a low‑light PNG photograph before displaying it in a web gallery, they can use this code to apply a Gaussian blur with sigma 0.8.
+ * 2. When an automated image‑processing pipeline must improve the visual quality of user‑uploaded PNG files by reducing grain without losing detail, the code provides a C# solution using Aspose.Imaging’s GaussianBlurFilterOptions.
+ * 3. When a desktop application that imports PNG screenshots from night‑time camera feeds requires quick denoising, the example shows how to load, filter, and save the image with a 0.8 sigma blur.
+ * 4. When a batch‑processing script needs to ensure all PNG assets in a folder have consistent noise reduction for printing, this snippet demonstrates the necessary file‑existence checks and directory creation in C#.
+ * 5. When a developer is building a photo‑editing tool that offers a “low‑light enhancement” feature, the code illustrates how to apply a Gaussian blur filter to the raster image and overwrite the original PNG.
  */

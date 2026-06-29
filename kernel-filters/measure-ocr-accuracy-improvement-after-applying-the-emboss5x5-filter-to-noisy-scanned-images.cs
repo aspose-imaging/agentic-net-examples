@@ -1,65 +1,33 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    // Stub method to simulate OCR accuracy measurement.
-    // In a real scenario, replace this with actual OCR processing and comparison against ground truth.
-    static double GetOcrAccuracy(string imagePath)
+    static void Main(string[] args)
     {
-        // Placeholder: return a dummy accuracy value.
-        // For demonstration, we return a random value between 80 and 95.
-        Random rnd = new Random(imagePath.GetHashCode());
-        return 80.0 + rnd.NextDouble() * 15.0;
-    }
+        string inputPath = "input.tif";
+        string outputPath = "output_emboss5x5.tif";
 
-    static void Main()
-    {
-        // Hardcoded input and output paths.
-        string inputPath = @"C:\Images\noisy_scanned.png";
-        string filteredPath = @"C:\Images\filtered_emboss.png";
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify input file exists.
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists.
-            Directory.CreateDirectory(Path.GetDirectoryName(filteredPath));
-
-            // Load the noisy scanned image.
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities.
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Apply the 5x5 Emboss filter using the predefined kernel.
-                // ConvolutionFilter.Emboss5x5 provides the kernel array.
-                // The second argument (5) specifies the kernel size (5x5).
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5, 5));
-
-                // Save the filtered image.
-                rasterImage.Save(filteredPath);
+                TiffImage tiffImage = (TiffImage)image;
+                tiffImage.Filter(tiffImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
+                tiffImage.Save(outputPath);
             }
-
-            // Measure OCR accuracy before and after applying the filter.
-            double accuracyBefore = GetOcrAccuracy(inputPath);
-            double accuracyAfter = GetOcrAccuracy(filteredPath);
-            double improvement = accuracyAfter - accuracyBefore;
-
-            // Output the results.
-            Console.WriteLine($"OCR accuracy before filter: {accuracyBefore:F2}%");
-            Console.WriteLine($"OCR accuracy after filter:  {accuracyAfter:F2}%");
-            Console.WriteLine($"Improvement: {improvement:F2}%");
         }
         catch (Exception ex)
         {
@@ -70,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to preprocess noisy PNG scans of historical documents before running OCR to compare accuracy improvements using Aspose.Imaging’s Emboss5x5 convolution filter in a C# application.
- * 2. When building a batch processing pipeline that cleans up scanned receipts in JPEG format, applies the 5x5 emboss filter, and measures OCR accuracy gains to validate preprocessing effectiveness.
- * 3. When creating a proof‑of‑concept for a document management system that demonstrates how applying a convolution filter with Aspose.Imaging can boost text extraction rates from low‑contrast PDF‑converted images.
- * 4. When evaluating different image enhancement techniques for mobile‑captured forms, a developer can use the provided C# code to apply the Emboss5x5 filter, save the result, and compare OCR scores against a ground‑truth dataset.
- * 5. When integrating Aspose.Imaging into a .NET service that automatically cleans up noisy scanned PDFs, the code can be used to filter each page, store the filtered PNG, and log OCR accuracy improvements for quality monitoring.
+ * 1. When a developer needs to preprocess noisy TIFF scans of historical documents before running OCR to see if the Emboss5x5 filter improves text recognition accuracy.
+ * 2. When a C# application must batch‑process scanned forms stored as multi‑page TIF files, apply a 5×5 emboss convolution, and compare OCR results to the original unfiltered images.
+ * 3. When a data‑entry automation pipeline requires measuring the impact of Aspose.Imaging’s Emboss5x5 filter on OCR performance for low‑contrast, speckled scanned receipts.
+ * 4. When a machine‑learning team wants to evaluate whether applying the Emboss5x5 convolution to noisy medical image PDFs converted to TIFF reduces OCR error rates in patient records.
+ * 5. When an enterprise document‑management system must generate a filtered version of a scanned TIFF and quantify OCR accuracy gains to justify adding the filter step to the workflow.
  */

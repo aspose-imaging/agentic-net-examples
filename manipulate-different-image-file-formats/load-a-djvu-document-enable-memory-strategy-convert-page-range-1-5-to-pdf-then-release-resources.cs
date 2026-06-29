@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
@@ -12,7 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Temp\sample.djvu";
-            string outputPath = @"C:\Temp\output\sample.pdf";
+            string outputPath = @"C:\Temp\output.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,26 +24,27 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set memory strategy via LoadOptions (e.g., limit buffer size)
+            // Load DjVu document with memory strategy (buffer size hint)
             LoadOptions loadOptions = new LoadOptions
             {
-                // Example: limit internal buffers to 10 MB
-                BufferSizeHint = 10 * 1024 * 1024
+                // Example: limit internal buffers to 2 MB
+                BufferSizeHint = 2 * 1024 * 1024
             };
 
-            // Load DjVu document with the specified load options
-            using (DjvuImage djvuImage = DjvuImage.LoadDocument(File.OpenRead(inputPath), loadOptions))
+            using (FileStream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
             {
-                // Prepare PDF export options and specify pages 1‑5 (zero‑based indexes 0‑4)
+                // Define page range 1‑5 (Aspose uses 1‑based indexing for DjvuMultiPageOptions)
+                int[] pages = new int[] { 1, 2, 3, 4, 5 };
+                DjvuMultiPageOptions multiPageOptions = new DjvuMultiPageOptions(pages);
+
+                // Set up PDF save options with the page range
                 PdfOptions pdfOptions = new PdfOptions
                 {
-                    MultiPageOptions = new MultiPageOptions
-                    {
-                        Pages = new int[] { 0, 1, 2, 3, 4 }
-                    }
+                    MultiPageOptions = multiPageOptions
                 };
 
-                // Save the selected pages as a single PDF file
+                // Save selected pages as PDF
                 djvuImage.Save(outputPath, pdfOptions);
             }
         }
@@ -56,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract the first five pages of a multi‑page DjVu document and deliver them as a single PDF for easy viewing or printing.
- * 2. When an application processes large DjVu files on a server and must limit memory usage by setting a buffer size hint before converting selected pages to PDF.
- * 3. When a document management system must validate the existence of a DjVu source file, create the output folder, and then convert a specific page range to PDF for archival.
- * 4. When a C# batch‑processing tool automates the conversion of DjVu scans into PDF reports, handling pages 1‑5 while ensuring resources are released with a using block.
- * 5. When a developer integrates Aspose.Imaging into a workflow that reads DjVu streams, applies multi‑page PDF export options, and saves the result to a predefined directory.
+ * 1. When a developer needs to extract the first five pages of a large DjVu document and convert them to a PDF while controlling memory usage with a buffer size hint.
+ * 2. When an application must verify the existence of a DjVu file, create the output directory, and safely load the document using Aspose.Imaging's LoadOptions to prevent out‑of‑memory errors.
+ * 3. When a batch conversion tool processes multiple DjVu files and only a specific page range (pages 1‑5) should be included in the resulting PDF for compliance or preview purposes.
+ * 4. When integrating DjVu‑to‑PDF conversion into a C# workflow that requires explicit disposal of streams and image objects to release unmanaged resources promptly.
+ * 5. When a developer wants to use Aspose.Imaging's DjvuMultiPageOptions and PdfOptions to customize multi‑page PDF output from a DjVu source in a .NET environment.
  */

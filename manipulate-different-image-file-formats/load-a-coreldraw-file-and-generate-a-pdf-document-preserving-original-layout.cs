@@ -8,39 +8,39 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Input\sample.cdr";
+        string outputPath = @"C:\Output\sample.cdr.pdf";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Input\sample.cdr";
-            string outputPath = @"C:\Output\sample.cdr.pdf";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CorelDRAW file
+            // Load the CorelDRAW (CDR) file
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF export options
+                // Prepare PDF export options
                 var pdfOptions = new PdfOptions();
 
-                // Set vector rasterization options specific to CDR
+                // Configure rasterization options specific for CDR
                 var rasterOptions = new CdrRasterizationOptions
                 {
-                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.None,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
                     Positioning = PositioningTypes.DefinedByDocument
                 };
 
                 pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save as PDF preserving original layout
+                // Save the image as PDF preserving the original layout
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -53,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design studio needs to batch‑convert client‑supplied CorelDRAW (.cdr) artwork into print‑ready PDF files while keeping the original vector layout intact.
- * 2. When an automated document workflow must extract a CDR file from a file share, render it with precise text rendering hints, and store the result as a PDF for archival compliance.
- * 3. When a web application offers a “download as PDF” feature for uploaded CorelDRAW drawings, using C# and Aspose.Imaging to preserve positioning and smoothing settings.
- * 4. When a reporting tool generates marketing collateral by loading CDR templates and exporting them to PDF to ensure consistent appearance across different operating systems.
- * 5. When a quality‑control script validates that a CorelDRAW design exists, creates the necessary output folder, and saves the file as a PDF with vector rasterization options for downstream review.
+ * 1. When a design studio needs to automatically convert client‑supplied CorelDRAW (CDR) artwork into print‑ready PDF files while preserving the original layout, this C# code with Aspose.Imaging provides a seamless solution.
+ * 2. When a web application must generate downloadable PDF previews of CDR logos or brochures on the fly without installing CorelDRAW, developers can use this snippet to perform server‑side conversion.
+ * 3. When an enterprise document‑management system has to archive legacy CDR drawings as searchable PDFs, the code enables rasterization of vector content while maintaining exact positioning.
+ * 4. When a batch‑processing tool needs to convert a folder of CorelDRAW files to PDFs for mass mailing or e‑catalog generation, this example supplies the core conversion logic in .NET.
+ * 5. When a quality‑control workflow requires comparing the visual fidelity of original CDR designs against their PDF exports, developers can programmatically render the CDR file and save it as a PDF with layout preservation.
  */

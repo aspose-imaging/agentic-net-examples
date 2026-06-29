@@ -8,12 +8,11 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample.dicom";
-        string outputDirectory = @"c:\temp\";
-
         try
         {
+            // Hardcoded input DICOM file path
+            string inputPath = @"c:\temp\multiframe.dicom";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,25 +20,28 @@ class Program
                 return;
             }
 
+            // Hardcoded output directory for PNG files
+            string outputDir = @"c:\temp\output";
+
             // Ensure the output directory exists (creates if missing)
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(outputDir);
 
             // Open the DICOM file as a stream
             using (Stream stream = File.OpenRead(inputPath))
             {
-                // Load the multi‑page DICOM image
+                // Load the DICOM image from the stream
                 using (DicomImage dicomImage = new DicomImage(stream))
                 {
-                    // Iterate through each page (frame) in the DICOM image
+                    // Iterate through each page (frame) of the multi‑page DICOM
                     foreach (DicomPage dicomPage in dicomImage.DicomPages)
                     {
-                        // Build the output file name based on the page index
-                        string outputPath = Path.Combine(outputDirectory, $"sample.{dicomPage.Index}.png");
+                        // Build the output file path for the current page
+                        string outputPath = Path.Combine(outputDir, $"frame.{dicomPage.Index}.png");
 
-                        // Ensure the directory for the output file exists (already created above)
+                        // Ensure the directory for the output file exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save the current page as a PNG file
+                        // Save the current page as a PNG image
                         dicomPage.Save(outputPath, new PngOptions());
                     }
                 }
@@ -47,8 +49,16 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a radiology application must extract each slice from a multi‑frame DICOM study and save them as separate PNG files for web preview or reporting.
+ * 2. When a medical‑research pipeline needs to convert every frame of a multi‑page DICOM MRI series into PNG images for machine‑learning model training in C#.
+ * 3. When a hospital PACS integration requires batch processing of DICOM files to generate thumbnail PNGs for each frame to display in a patient portal.
+ * 4. When a diagnostic device manufacturer wants to automate the conversion of multi‑frame DICOM ultrasound recordings into individual PNG frames for quality‑control documentation using Aspose.Imaging for .NET.
+ * 5. When a clinical data‑archiving tool needs to programmatically read a DICOM file stream, iterate over its DicomPages, and export each page as a PNG to a specified folder for downstream analysis.
+ */

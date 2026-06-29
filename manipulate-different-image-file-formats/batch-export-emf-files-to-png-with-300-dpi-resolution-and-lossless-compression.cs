@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -17,7 +18,7 @@ class Program
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add EMF files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
@@ -33,30 +34,27 @@ class Program
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
-
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    var vectorOptions = new EmfRasterizationOptions
+                    var vectorOptions = new VectorRasterizationOptions
                     {
-                        PageSize = image.Size,
-                        BackgroundColor = Color.White
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
                     };
 
-                    using (var pngOptions = new PngOptions
+                    using (var pngOptions = new PngOptions())
                     {
-                        VectorRasterizationOptions = vectorOptions,
-                        ResolutionSettings = new ResolutionSetting(300, 300),
-                        PngCompressionLevel = PngCompressionLevel.ZipLevel9,
-                        ColorType = PngColorType.TruecolorWithAlpha
-                    })
-                    {
+                        pngOptions.VectorRasterizationOptions = vectorOptions;
+                        pngOptions.PngCompressionLevel = PngCompressionLevel.ZipLevel9;
+                        pngOptions.ResolutionSettings = new ResolutionSetting(300, 300);
+
                         image.Save(outputPath, pngOptions);
                     }
                 }
@@ -71,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a library of Windows Metafile (EMF) vector graphics into high‑resolution PNG images at 300 DPI with lossless compression for printing or publishing.
- * 2. When an automated build pipeline must generate web‑ready PNG thumbnails from EMF diagrams while preserving exact dimensions and a white background using Aspose.Imaging in C#.
- * 3. When a document management system has to process uploaded EMF files in bulk and store them as PNG files with consistent 300 DPI resolution for archival compliance.
- * 4. When a GIS or CAD application requires exporting vector map layers saved as EMF into raster PNG format for integration with raster‑based reporting tools.
- * 5. When a legacy Windows application outputs reports in EMF and a modern .NET service must transform those reports into PNG files with 300 DPI resolution for high‑quality PDF generation.
+ * 1. When a developer needs to convert a large collection of Windows Metafile (EMF) diagrams into high‑resolution PNG images for inclusion in PDF reports or web documentation, they can use this batch export code.
+ * 2. When a legacy engineering application stores schematics as EMF files and the team must archive them as lossless PNGs at 300 DPI for long‑term preservation, the code automates the process.
+ * 3. When an e‑learning platform requires vector‑based illustrations to be rendered as pixel‑perfect PNG assets for responsive HTML5 courses, the developer can run this routine to rasterize the EMFs with a white background and maximum compression.
+ * 4. When a CI/CD pipeline needs to generate preview thumbnails of EMF icons for a UI design system, the batch converter creates consistent PNG previews without manual intervention.
+ * 5. When a print shop receives client artwork in EMF format and must supply print‑ready PNG files at 300 DPI with lossless compression for high‑quality proofs, this C# script handles the conversion in bulk.
  */

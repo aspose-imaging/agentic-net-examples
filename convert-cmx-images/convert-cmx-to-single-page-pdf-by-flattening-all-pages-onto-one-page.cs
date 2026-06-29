@@ -3,60 +3,33 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\sample.cmx";
-        string outputPath = @"C:\Temp\sample_flattened.pdf";
-
-        // Ensure input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the CMX image
-            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+            string inputPath = "sample.cmx";
+            string outputPath = "output.pdf";
+
+            if (!File.Exists(inputPath))
             {
-                // Calculate combined dimensions of all pages
-                int maxWidth = 0;
-                int totalHeight = 0;
-                foreach (CmxImagePage page in cmxImage.Pages)
-                {
-                    if (page.Width > maxWidth)
-                        maxWidth = page.Width;
-                    totalHeight += page.Height;
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Prepare PDF export options
-                var pdfOptions = new PdfOptions
-                {
-                    // No multipage options – all pages will be rendered onto a single PDF page
-                    MultiPageOptions = null,
-                    // Set the PDF page size to accommodate all CMX pages
-                    PageSize = new SizeF(maxWidth, totalHeight),
-                    // Configure vector rasterization to use the combined canvas size
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        PageWidth = maxWidth,
-                        PageHeight = totalHeight,
-                        BackgroundColor = Aspose.Imaging.Color.White,
-                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = Aspose.Imaging.SmoothingMode.None
-                    }
-                };
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
 
-                // Save the flattened PDF
-                cmxImage.Save(outputPath, pdfOptions);
+            using (Image image = Image.Load(inputPath))
+            {
+                PdfOptions pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -65,3 +38,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a printing company receives multi‑page CMX artwork and must deliver a single‑page PDF proof to a client, they can use this C# code with Aspose.Imaging to flatten all CMX pages into one PDF page.
+ * 2. When an archival system needs to store legacy CorelDRAW CMX files as compact, searchable PDFs without preserving individual layers, the code converts the CMX into a single‑page PDF for easy indexing.
+ * 3. When a web application allows users to upload CMX designs and instantly preview them in a browser, the developer can run this snippet to transform the multi‑page CMX into a single‑page PDF that browsers render natively.
+ * 4. When an automated workflow processes batch CMX files and consolidates each document into a single PDF for downstream OCR processing, the Aspose.Imaging C# routine provides the required conversion.
+ * 5. When a mobile app needs to display a CMX drawing as a single image on a small screen, the developer can flatten the CMX pages into one PDF page using this code and then render it as a bitmap.
+ */

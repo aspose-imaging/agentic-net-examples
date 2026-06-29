@@ -10,47 +10,60 @@ class Program
     {
         try
         {
-            // Hard‑coded paths
-            string inputPath = "input.jpg";
-            string thumbnailPath = "thumb.jpg";
-            string outputPath = "output.jpg";
+            // Hardcoded paths
+            string inputPath = @"C:\Images\input.jpg";
+            string thumbnailPath = @"C:\Images\thumb.jpg";
+            string outputPath = @"C:\Images\output.jpg";
 
-            // Verify input files exist
+            // Verify input image exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
+
+            // Verify thumbnail image exists
             if (!File.Exists(thumbnailPath))
             {
                 Console.Error.WriteLine($"File not found: {thumbnailPath}");
                 return;
             }
 
-            // Load the original JPEG image
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the main JPEG image
             using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
             {
-                // Load the thumbnail image (any supported format)
-                using (RasterImage thumbImg = (RasterImage)Image.Load(thumbnailPath))
+                // Load the thumbnail image (any raster image format)
+                using (RasterImage thumbImage = (RasterImage)Image.Load(thumbnailPath))
                 {
                     // Assign the thumbnail to the EXIF data
-                    jpegImage.ExifData.Thumbnail = thumbImg;
+                    if (jpegImage.ExifData == null)
+                    {
+                        // If ExifData is null, create a new instance
+                        jpegImage.ExifData = new JpegExifData();
+                    }
+
+                    // Cast to JpegExifData to access Thumbnail property
+                    JpegExifData jpegExif = jpegImage.ExifData as JpegExifData;
+                    if (jpegExif != null)
+                    {
+                        jpegExif.Thumbnail = thumbImage;
+                    }
                 }
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the JPEG with the new EXIF thumbnail
+                // Save the modified image
                 jpegImage.Save(outputPath);
             }
 
-            // Verify that the thumbnail was written
+            // Verify that the thumbnail was added
             using (JpegImage resultImage = (JpegImage)Image.Load(outputPath))
             {
-                RasterImage thumb = resultImage.ExifData.Thumbnail;
-                if (thumb != null)
+                JpegExifData resultExif = resultImage.ExifData as JpegExifData;
+                if (resultExif?.Thumbnail != null)
                 {
-                    Console.WriteLine($"Thumbnail size: {thumb.Width}x{thumb.Height}");
+                    Console.WriteLine($"Thumbnail added. Size: {resultExif.Thumbnail.Width}x{resultExif.Thumbnail.Height}");
                 }
                 else
                 {
@@ -67,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed a custom thumbnail into a JPEG's EXIF segment so that gallery applications can display a quick preview without loading the full image.
- * 2. When a developer wants to replace an existing EXIF thumbnail with a higher‑resolution or branded thumbnail generated from another image format using Aspose.Imaging in a C# workflow.
- * 3. When a developer must ensure that a JPEG file shipped with a product contains a specific thumbnail for compliance with digital asset management standards and wants to verify the thumbnail size after saving.
- * 4. When a developer is building an automated pipeline that reads a source JPEG, adds a generated thumbnail from a separate file, and saves the result to a designated output folder while handling missing files gracefully.
- * 5. When a developer needs to programmatically read back the EXIF thumbnail from a saved JPEG to confirm that the thumbnail was correctly written, using Aspose.Imaging's RasterImage and JpegImage classes in .NET.
+ * 1. When a developer needs to embed a preview image into the EXIF thumbnail of a JPEG for faster loading in photo gallery apps using C# and Aspose.Imaging.
+ * 2. When a digital asset management system must store a custom low‑resolution thumbnail inside each JPEG’s EXIF segment to enable quick browsing on mobile devices.
+ * 3. When an e‑commerce platform wants to attach a brand‑specific thumbnail to product photos so that search engines can display a consistent preview in image search results.
+ * 4. When a photo‑editing tool requires programmatic verification that the updated EXIF metadata, including the new thumbnail, is correctly saved after processing images in .NET.
+ * 5. When a batch‑processing script needs to replace missing or corrupted EXIF thumbnails in a large collection of JPEG files with a standard placeholder image using Aspose.Imaging for .NET.
  */

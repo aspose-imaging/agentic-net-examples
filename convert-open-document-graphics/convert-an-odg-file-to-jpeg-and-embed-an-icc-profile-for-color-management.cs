@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -10,13 +10,13 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\input.odg";
-            string outputPath = @"C:\temp\output.jpg";
+            // Hardcoded input and output paths
+            string inputPath = "sample.odg";
+            string outputPath = "sample.jpg";
 
-            // Hardcoded ICC profile file paths
-            string rgbProfilePath = @"C:\temp\eciRGB_v2.icc";
-            string cmykProfilePath = @"C:\temp\ISOcoated_v2_FullGamut4.icc";
+            // Hardcoded ICC profile paths
+            string rgbProfilePath = "eciRGB_v2.icc";
+            string cmykProfilePath = "ISOcoated_v2_FullGamut4.icc";
 
             // Validate input files
             if (!File.Exists(inputPath))
@@ -35,25 +35,25 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
+            // Load ODG image
             using (Image image = Image.Load(inputPath))
             {
                 // Open ICC profile streams
-                using (FileStream rgbStream = File.OpenRead(rgbProfilePath))
-                using (FileStream cmykStream = File.OpenRead(cmykProfilePath))
+                using (var rgbStream = File.OpenRead(rgbProfilePath))
+                using (var cmykStream = File.OpenRead(cmykProfilePath))
                 {
-                    // Configure JPEG options with embedded ICC profiles
-                    JpegOptions jpegOptions = new JpegOptions
+                    // Configure JPEG save options with embedded ICC profiles
+                    var jpegOptions = new JpegOptions
                     {
-                        ColorType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionColorMode.Cmyk,
-                        RgbColorProfile = new StreamSource(rgbStream),
-                        CmykColorProfile = new StreamSource(cmykStream)
+                        ColorType = JpegCompressionColorMode.Cmyk,
+                        RgbColorProfile = new Aspose.Imaging.Sources.StreamSource(rgbStream),
+                        CmykColorProfile = new Aspose.Imaging.Sources.StreamSource(cmykStream)
                     };
 
-                    // Save the image as JPEG with the specified options
+                    // Save as JPEG with embedded profiles
                     image.Save(outputPath, jpegOptions);
                 }
             }
@@ -64,3 +64,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert OpenDocument graphics (ODG) drawings into JPEG files for web preview while preserving accurate colors across monitors and printers by embedding both RGB and CMYK ICC profiles.
+ * 2. When an application must generate print‑ready JPEG assets from ODG source files and ensure the output complies with industry‑standard color spaces such as ISO Coated v2.
+ * 3. When a document management system automates the creation of thumbnail JPEGs from ODG diagrams and requires embedded ICC profiles to maintain consistent visual fidelity in downstream workflows.
+ * 4. When a digital asset pipeline extracts vector artwork from ODG files, converts them to JPEG, and embeds color profiles to guarantee that the resulting images match the original design intent on different devices.
+ * 5. When a batch‑processing tool processes multiple ODG files, converts each to JPEG, and embeds the appropriate RGB and CMYK ICC profiles to support color‑critical publishing and archival.
+ */

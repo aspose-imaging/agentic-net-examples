@@ -2,9 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -12,66 +11,47 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.svg";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load SVG image
-            using (Image svgImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options for SVG
-                var rasterOptions = new SvgRasterizationOptions
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    PageSize = svgImage.Size
-                };
+                    PngOptions pngOptions = new PngOptions();
+                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+                    rasterOptions.PageSize = image.Size;
+                    pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Set up PNG save options with rasterization
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                // Rasterize SVG to a memory stream
-                using (var ms = new MemoryStream())
-                {
-                    svgImage.Save(ms, pngOptions);
+                    image.Save(ms, pngOptions);
                     ms.Position = 0;
 
-                    // Load rasterized image
-                    using (Image rasterImg = Image.Load(ms))
+                    using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
                     {
-                        var raster = (RasterImage)rasterImg;
-
-                        // Retrieve original Emboss5x5 kernel
-                        double[,] originalKernel = ConvolutionFilter.Emboss5x5;
-
-                        // Reduce intensity by scaling coefficients (e.g., 50%)
-                        int rows = originalKernel.GetLength(0);
-                        int cols = originalKernel.GetLength(1);
-                        double[,] modifiedKernel = new double[rows, cols];
+                        double[,] emboss = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5;
+                        double scaleFactor = 0.5;
+                        int rows = emboss.GetLength(0);
+                        int cols = emboss.GetLength(1);
+                        double[,] kernel = new double[rows, cols];
                         for (int i = 0; i < rows; i++)
                         {
                             for (int j = 0; j < cols; j++)
                             {
-                                modifiedKernel[i, j] = originalKernel[i, j] * 0.5;
+                                kernel[i, j] = emboss[i, j] * scaleFactor;
                             }
                         }
 
-                        // Apply convolution filter with modified kernel
-                        raster.Filter(raster.Bounds, new ConvolutionFilterOptions(modifiedKernel));
+                        rasterImage.Filter(rasterImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
 
-                        // Save the filtered image as PNG
-                        raster.Save(outputPath, new PngOptions());
+                        rasterImage.Save(outputPath, new PngOptions());
                     }
                 }
             }
@@ -85,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a lighter embossed effect for SVG icons that are rasterized to PNG for a web UI, they can use this code to scale the Emboss5x5 kernel coefficients and reduce intensity.
- * 2. When creating printable PDFs from SVG diagrams where a subtle emboss is required to enhance depth without overwhelming the design, the code lets the developer adjust the kernel before rasterizing.
- * 3. When building an automated image‑processing pipeline that converts user‑uploaded SVG logos to PNG thumbnails with a gentle emboss for branding consistency, this example shows how to modify the convolution filter in C#.
- * 4. When optimizing SVG assets for mobile apps and want to apply a low‑intensity emboss to improve visual appeal while keeping file size low, the code demonstrates scaling the Emboss5x5 coefficients during rasterization.
- * 5. When integrating Aspose.Imaging into a desktop application that previews SVG artwork with a soft emboss effect, developers can use this snippet to fine‑tune the kernel values to match the desired visual style.
+ * 1. When a developer wants to generate a PNG thumbnail from an SVG logo and apply a subtle emboss effect to give the image a slight 3‑D look without overwhelming the design.
+ * 2. When a web application needs to render user‑uploaded SVG illustrations as PNGs with reduced emboss intensity for consistent visual styling across browsers.
+ * 3. When an e‑learning platform converts SVG diagrams to PNG assets and requires a gentle emboss filter to enhance edge definition while preserving readability.
+ * 4. When a reporting tool creates PNG charts from SVG vectors and wants to apply a low‑strength emboss kernel to add depth without distorting the chart data.
+ * 5. When a mobile app preprocesses SVG icons into PNG sprites and uses a scaled‑down emboss convolution to improve visual appeal on high‑resolution screens.
  */

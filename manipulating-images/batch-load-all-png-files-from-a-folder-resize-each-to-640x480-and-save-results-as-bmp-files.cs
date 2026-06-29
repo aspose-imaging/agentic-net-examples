@@ -3,55 +3,46 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Program
+public class Program
 {
     static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = "Input";
-            string outputFolder = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Validate input directory
-            if (!Directory.Exists(inputFolder))
+            if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputFolder);
-                Console.WriteLine($"Input directory created at: {inputFolder}. Add files and rerun.");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputFolder))
+            if (!Directory.Exists(outputDirectory))
             {
-                Directory.CreateDirectory(outputFolder);
+                Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all PNG files in the input folder
-            string[] files = Directory.GetFiles(inputFolder, "*.png");
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-            foreach (string inputPath in files)
+            foreach (var inputPath in files)
             {
-                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Prepare output file path with .bmp extension
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".bmp");
-
-                // Ensure the output directory exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".bmp");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load, resize, and save the image
-                using (Image image = Image.Load(inputPath))
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
+                    if (!image.IsCached) image.CacheData();
                     image.Resize(640, 480);
-                    BmpOptions bmpOptions = new BmpOptions();
-                    image.Save(outputPath, bmpOptions);
+                    image.Save(outputPath, new BmpOptions());
                 }
             }
         }
@@ -61,3 +52,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert a large collection of PNG screenshots into BMP format for legacy Windows applications that only accept BMP files.
+ * 2. When an automated build pipeline must generate uniformly sized 640x480 thumbnails from user‑uploaded PNG assets before packaging them into a desktop installer.
+ * 3. When a photo‑management tool has to batch‑process PNG images from a folder, resize them to a standard resolution, and store the results as BMP files for faster rendering on low‑power devices.
+ * 4. When a migration script must read PNG files, ensure they are cached in memory, resize them, and save them as BMP to meet a third‑party vendor’s image specifications.
+ * 5. When a C# console utility is required to scan an input directory, resize each PNG to 640x480, and output BMP files to an output directory for bulk image preprocessing in a scientific imaging workflow.
+ */

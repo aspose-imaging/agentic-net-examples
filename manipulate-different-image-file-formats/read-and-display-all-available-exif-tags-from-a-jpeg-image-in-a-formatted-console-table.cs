@@ -1,68 +1,58 @@
 using System;
 using System.IO;
-using System.Reflection;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Exif;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "sample.jpg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            // Hardcoded input path
-            string inputPath = @"C:\Images\sample.jpg";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Load the JPEG image
-            using (JpegImage image = (JpegImage)Image.Load(inputPath))
-            {
-                // Get the EXIF data container
-                JpegExifData jpegExif = image.ExifData as JpegExifData;
-                if (jpegExif == null)
+                var jpegImage = image as Aspose.Imaging.FileFormats.Jpeg.JpegImage;
+                if (jpegImage == null)
                 {
-                    Console.WriteLine("No EXIF data found in the image.");
+                    Console.WriteLine("The file is not a JPEG image.");
                     return;
                 }
 
-                // Prepare table header
-                const int tagWidth = 40;
-                const int valueWidth = 60;
-                Console.WriteLine($"{ "Tag".PadRight(tagWidth) } | { "Value".PadRight(valueWidth) }");
-                Console.WriteLine(new string('-', tagWidth + valueWidth + 3));
-
-                // Use reflection to enumerate all public instance properties of JpegExifData
-                PropertyInfo[] properties = typeof(JpegExifData).GetProperties(BindingFlags.Public | BindingFlags.Instance);
-                foreach (PropertyInfo prop in properties)
+                var exifData = jpegImage.ExifData;
+                if (exifData == null)
                 {
-                    // Skip indexer properties
-                    if (prop.GetIndexParameters().Length > 0) continue;
+                    Console.WriteLine("No EXIF data found.");
+                    return;
+                }
 
-                    object val = prop.GetValue(jpegExif);
-                    string displayValue;
+                var exifType = exifData.GetType();
+                var properties = exifType.GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
 
-                    if (val == null)
-                    {
-                        displayValue = "(null)";
-                    }
-                    else if (val is Array arr && !(val is byte[]))
-                    {
-                        // For array types (except byte[]), join elements
-                        displayValue = string.Join(", ", arr);
-                    }
-                    else
-                    {
-                        displayValue = val.ToString();
-                    }
+                Console.WriteLine("{0,-30} {1}", "Tag", "Value");
+                Console.WriteLine(new string('-', 60));
 
-                    Console.WriteLine($"{ prop.Name.PadRight(tagWidth) } | { displayValue.PadRight(valueWidth) }");
+                foreach (var prop in properties)
+                {
+                    try
+                    {
+                        var value = prop.GetValue(exifData);
+                        if (value != null)
+                        {
+                            Console.WriteLine("{0,-30} {1}", prop.Name, value);
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore any property that throws
+                    }
                 }
             }
         }
@@ -75,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to audit or debug metadata of JPEG photos uploaded to a web service, they can use this code to read and display all EXIF tags in a console table.
- * 2. When building a migration tool that moves images between storage systems and must verify that orientation, GPS, and camera settings are preserved, this snippet extracts the full EXIF set for comparison.
- * 3. When creating a command‑line utility for photographers to quickly inspect camera make, model, exposure, and other EXIF information without opening an image editor, the code provides a formatted view of every tag.
- * 4. When implementing a compliance check that ensures images contain required legal metadata such as copyright or author fields before publishing, the program lists all EXIF entries for easy validation.
- * 5. When developing a batch‑processing pipeline that logs image metadata for analytics or indexing, this example shows how to enumerate JpegExifData properties in C# and output them in a readable table.
+ * 1. When a developer needs to extract camera settings such as ISO, aperture, and shutter speed from JPEG photos for a photo‑gallery web application, this code reads and displays all EXIF tags in a formatted console table.
+ * 2. When building a digital asset management system that validates image metadata before indexing, the snippet helps verify that required EXIF fields are present in JPEG files.
+ * 3. When creating a batch‑processing tool that flags images missing GPS coordinates, a developer can use this code to list every EXIF tag and detect the absence of location data.
+ * 4. When troubleshooting an image‑processing pipeline that may be stripping metadata, the example provides a quick C# way to compare original and processed JPEG EXIF data.
+ * 5. When generating compliance reports that require specific EXIF information such as date‑time stamps in regulated image archives, this code reads and prints the tags for audit purposes.
  */

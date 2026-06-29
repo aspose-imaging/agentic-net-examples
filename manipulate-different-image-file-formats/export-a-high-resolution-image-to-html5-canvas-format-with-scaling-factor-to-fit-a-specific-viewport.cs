@@ -8,52 +8,54 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\high_res_image.svg";
-        string outputPath = @"C:\Images\canvas_output.html";
-
-        // Path safety checks
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the source image (SVG or any supported format)
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\highres.svg";
+            string outputPath = @"C:\Images\canvas.html";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source image (SVG in this example)
             using (Image image = Image.Load(inputPath))
             {
-                // Desired viewport size (in pixels)
-                const int viewportWidth = 800;
-                const int viewportHeight = 600;
+                // Desired viewport size
+                int targetWidth = 800;   // pixels
+                int targetHeight = 600;  // pixels
 
-                // Calculate scaling factor to fit the viewport while preserving aspect ratio
-                float scaleX = (float)viewportWidth / image.Width;
-                float scaleY = (float)viewportHeight / image.Height;
-                float scale = Math.Min(scaleX, scaleY);
+                // Compute scaling factors based on original SVG size
+                float scaleX = 1f;
+                float scaleY = 1f;
+                if (image is SvgImage svgImage && svgImage.Size.Width > 0 && svgImage.Size.Height > 0)
+                {
+                    scaleX = (float)targetWidth / svgImage.Size.Width;
+                    scaleY = (float)targetHeight / svgImage.Size.Height;
+                }
 
-                // Configure rasterization options with the calculated scale
+                // Configure rasterization options with scaling
                 var rasterOptions = new SvgRasterizationOptions
                 {
-                    ScaleX = scale,
-                    ScaleY = scale,
-                    // Optional: preserve original size as page size before scaling
-                    PageSize = image.Size
+                    ScaleX = scaleX,
+                    ScaleY = scaleY
                 };
 
                 // Set up HTML5 Canvas export options
-                var canvasOptions = new Html5CanvasOptions
+                var htmlOptions = new Html5CanvasOptions
                 {
                     VectorRasterizationOptions = rasterOptions,
                     FullHtmlPage = true   // generate a complete HTML page
                 };
 
-                // Save the image as an HTML5 Canvas file
-                image.Save(outputPath, canvasOptions);
+                // Save as HTML5 Canvas
+                image.Save(outputPath, htmlOptions);
             }
         }
         catch (Exception ex)
@@ -65,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to embed a high‑resolution SVG diagram into a responsive HTML5 page and wants it to automatically scale to fit an 800 × 600 pixel viewport.
- * 2. When an e‑learning platform must convert vector illustrations into canvas‑based HTML so that they render consistently across browsers without requiring external SVG support.
- * 3. When a digital signage system generates HTML5 Canvas files from large vector assets to ensure the graphics are rasterized at the correct size for a fixed‑dimension display panel.
- * 4. When a SaaS reporting tool exports charts as scalable canvas elements to embed them in client‑side dashboards while preserving aspect ratio and image quality.
- * 5. When a mobile‑first web app needs to preload high‑resolution artwork as a single HTML file that scales to the device’s viewport using C# and Aspose.Imaging.
+ * 1. When a developer needs to embed a high‑resolution SVG into a responsive web page, they can use this code to export the image to an HTML5 Canvas with scaling that fits a specific viewport.
+ * 2. When a C# application must generate a printable preview of a vector graphic at a fixed size, this snippet rasterizes the SVG and saves it as a full HTML page sized to the target dimensions.
+ * 3. When an e‑learning platform requires dynamic resizing of SVG illustrations for different screen resolutions, the code provides a way to compute ScaleX/ScaleY and output a Canvas‑based HTML file.
+ * 4. When a desktop tool automates conversion of design assets into web‑ready formats, this example shows how to load an SVG, apply custom scaling, and save it as an HTML5 Canvas document.
+ * 5. When a developer wants to ensure that vector images render consistently across browsers by converting them to rasterized Canvas elements sized to 800 × 600 pixels, this code performs the necessary image processing and export.
  */

@@ -2,16 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Pdf;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main()
     {
         try
         {
-            string inputPath = "Input\\sample.png";
-            string outputPath = "Output\\result.pdf";
+            string inputPath = "Input/sample.png";
+            string outputPath = "Output/result.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -21,19 +22,13 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (PngImage png = (PngImage)Image.Load(inputPath))
             {
-                if (!image.IsCached)
-                    image.CacheData();
-
-                var cropRect = new Rectangle(0, 0, 300, 300);
-                image.Crop(cropRect);
-
-                image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(3));
-
-                using (PdfOptions pdfOptions = new PdfOptions())
+                using (RasterImage raster = (RasterImage)png)
                 {
-                    image.Save(outputPath, pdfOptions);
+                    raster.Crop(new Rectangle(0, 0, 300, 300));
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
+                    raster.Save(outputPath, new PdfOptions());
                 }
             }
         }
@@ -43,3 +38,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a clean, printable PDF thumbnail from a large PNG logo by extracting a 300 × 300 pixel area and removing noise with a median filter.
+ * 2. When an e‑commerce platform must convert product PNG images into PDF brochures, cropping a specific region and smoothing it before embedding in the document.
+ * 3. When a medical imaging app requires extracting a 300 × 300 pixel region from a scanned PNG X‑ray, applying a median filter to reduce speckle, and saving the result as a PDF report.
+ * 4. When a document management system automates the creation of PDF previews from uploaded PNG scans, using C# and Aspose.Imaging to crop, denoise, and export the selected area.
+ * 5. When a GIS tool needs to isolate a 300 × 300 pixel tile from a PNG map, clean it with a median filter, and deliver the tile as a PDF for offline viewing.
+ */

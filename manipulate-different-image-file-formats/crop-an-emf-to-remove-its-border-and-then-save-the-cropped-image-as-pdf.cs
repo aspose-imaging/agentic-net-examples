@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.emf";
-        string outputPath = @"C:\Images\output.pdf";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.emf";
+            string outputPath = @"C:\Images\output.pdf";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,26 +27,29 @@ class Program
             // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to EmfImage
+                // Cast to EmfImage to access cropping
                 EmfImage emfImage = image as EmfImage;
                 if (emfImage == null)
                 {
-                    Console.Error.WriteLine("The loaded file is not an EMF image.");
+                    Console.Error.WriteLine("The loaded file is not a valid EMF image.");
                     return;
                 }
 
-                // Define a rectangle that removes a 10‑pixel border from each side
-                var cropRect = new Aspose.Imaging.Rectangle(
-                    x: 10,
-                    y: 10,
-                    width: emfImage.Width - 20,
-                    height: emfImage.Height - 20);
+                // Determine the cropping rectangle (remove a 10‑pixel border on each side)
+                var bounds = emfImage.Bounds;
+                int margin = 10;
+                var cropRect = new Rectangle(
+                    bounds.X + margin,
+                    bounds.Y + margin,
+                    Math.Max(0, bounds.Width - 2 * margin),
+                    Math.Max(0, bounds.Height - 2 * margin));
 
-                // Crop the image
+                // Perform cropping
                 emfImage.Crop(cropRect);
 
                 // Save the cropped image as PDF
-                emfImage.Save(outputPath, new PdfOptions());
+                var pdfOptions = new PdfOptions();
+                emfImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -58,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to remove unwanted white space from vector‑based EMF diagrams before embedding them in a PDF report.
- * 2. When an application must batch‑process legacy EMF icons, trim their borders, and generate printable PDF catalogs.
- * 3. When a Windows desktop tool converts user‑drawn EMF charts into PDF slides while ensuring the content fits tightly without extra margins.
- * 4. When a document‑generation service sanitizes incoming EMF files by cropping peripheral artifacts and saves the clean image as a PDF for archiving.
- * 5. When a C# backend service prepares EMF logos for marketing materials, cropping the edges and exporting them as high‑quality PDF assets.
+ * 1. When a developer needs to remove unwanted white space around a vector graphic stored in an EMF file before embedding it in a PDF report.
+ * 2. When an application must automatically trim a fixed‑pixel border from scanned EMF diagrams and generate a PDF for distribution.
+ * 3. When a batch‑processing tool has to convert legacy EMF logos into PDF while ensuring the logo edges are tightly cropped.
+ * 4. When a C# service creates printable PDFs from EMF drawings and must eliminate extra margins to meet page layout requirements.
+ * 5. When a document‑generation workflow requires converting cropped EMF illustrations to PDF to preserve vector quality for downstream editing.
  */

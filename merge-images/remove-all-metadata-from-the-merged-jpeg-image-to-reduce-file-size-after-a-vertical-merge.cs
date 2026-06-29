@@ -13,18 +13,16 @@ class Program
     {
         try
         {
-            // Hardcoded input image paths
-            string[] inputPaths = new[]
+            // Hardcoded input and output paths
+            string[] inputPaths = new string[]
             {
                 "input1.jpg",
                 "input2.jpg",
                 "input3.jpg"
             };
-
-            // Hardcoded output path
             string outputPath = "merged.jpg";
 
-            // Validate each input file exists
+            // Validate input files
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -47,20 +45,19 @@ class Program
                 }
             }
 
-            // Calculate canvas dimensions for vertical merge
+            // Calculate canvas size for vertical merge
             int canvasWidth = sizes.Max(s => s.Width);
             int canvasHeight = sizes.Sum(s => s.Height);
 
-            // Prepare JPEG options without metadata
-            Source src = new FileCreateSource(outputPath, false);
+            // Create JPEG canvas with metadata removal
+            Source source = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions()
             {
-                Source = src,
+                Source = source,
                 Quality = 90,
                 KeepMetadata = false
             };
 
-            // Create bound JPEG canvas
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
@@ -74,7 +71,7 @@ class Program
                     }
                 }
 
-                // Save the merged image (metadata already omitted)
+                // Save the bound image (output path already bound via source)
                 canvas.Save();
             }
         }
@@ -87,9 +84,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a printable photo collage by stacking multiple JPEGs vertically, a developer can use this code to merge the images and strip all EXIF metadata, resulting in a smaller file that loads faster on web galleries.
- * 2. When generating product catalog pages that combine several product photos into a single vertical banner, the code helps reduce bandwidth by removing unnecessary metadata from the merged JPEG.
- * 3. When automating the preparation of vertical social‑media story images from a series of source photos, developers can merge them and discard metadata to meet platform size limits.
- * 4. When building a document scanning workflow that stitches scanned pages into one long JPEG, the code ensures the final document is lightweight by omitting metadata during the merge.
- * 5. When developing a mobile app that creates vertical timelines of user‑uploaded pictures, this snippet merges the images and eliminates metadata to improve download speed and preserve user privacy.
+ * 1. When a web application needs to combine multiple product photos into a single vertical collage and wants to minimize download size by stripping EXIF and XMP metadata from the resulting JPEG.
+ * 2. When an e‑commerce platform generates printable receipt images by stacking scanned pages vertically and must remove personal metadata to comply with privacy regulations.
+ * 3. When a mobile app creates a vertical timeline of user‑uploaded images for social sharing and wants to reduce bandwidth usage by discarding all JPEG metadata after merging.
+ * 4. When a document management system archives scanned documents as a single merged JPEG and needs to eliminate metadata to prevent leakage of scanner information.
+ * 5. When a digital signage solution builds a tall banner from several advertisement images and requires a lightweight JPEG without metadata for faster loading on display hardware.
  */

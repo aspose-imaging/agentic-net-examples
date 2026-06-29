@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -11,11 +12,15 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputFolder = @"C:\Images\Input";
-            string outputFolder = @"C:\Images\Output";
+            string inputFolder = "C:\\Images\\Input";
+            string outputFolder = "C:\\Images\\Output";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputFolder);
+            // Verify input folder exists
+            if (!Directory.Exists(inputFolder))
+            {
+                Console.Error.WriteLine($"Input folder not found: {inputFolder}");
+                return;
+            }
 
             // Get all PNG files in the input folder
             string[] pngFiles = Directory.GetFiles(inputFolder, "*.png");
@@ -29,23 +34,23 @@ class Program
                     return;
                 }
 
-                // Determine output JPEG path (same file name with .jpg extension)
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".jpg");
-
-                // Ensure the output directory exists (unconditional as per rules)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the PNG image
+                // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to apply filters
+                    // Cast to RasterImage to apply filter
                     RasterImage rasterImage = (RasterImage)image;
 
-                    // Apply Gaussian blur filter with radius 5 and sigma 4.0
+                    // Apply a Gaussian blur filter (predefined blur box filter)
                     rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                    // Save the processed image as JPEG
+                    // Build output path with .jpg extension
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".jpg");
+
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save as JPEG with default options
                     rasterImage.Save(outputPath, new JpegOptions());
                 }
             }
@@ -59,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically anonymize faces in a large collection of PNG screenshots by applying a Gaussian blur before converting them to JPEGs for web publishing.
- * 2. When a developer wants to preprocess product catalog PNG images with a blur filter to reduce visual noise and then batch‑save them as JPEGs for faster loading on e‑commerce sites.
- * 3. When a developer must generate low‑resolution preview JPEGs from high‑quality PNG assets by applying a blur to hide details while preserving the original aspect ratio.
- * 4. When a developer is required to batch‑process scanned PNG documents, smoothing out scanning artifacts with a blur filter before saving them as JPEGs for archival storage.
- * 5. When a developer needs to create stylized blurred thumbnails from PNG graphics for a mobile app, converting them to JPEG to meet size and performance constraints.
+ * 1. When a developer needs to batch‑process a directory of PNG product photos and generate blurred JPEG thumbnails for faster loading on an e‑commerce website.
+ * 2. When a C# application must convert scanned PNG documents into JPEG format while applying a Gaussian blur to protect sensitive information before archiving.
+ * 3. When an automated build script has to create low‑resolution, blurred preview images from PNG assets for a mobile app’s asset pipeline using Aspose.Imaging.
+ * 4. When a photo‑management tool requires converting user‑uploaded PNG images to JPEG with a predefined blur box filter to meet a specific visual style guideline.
+ * 5. When a server‑side service processes PNG logos in bulk, applies a Gaussian blur for branding consistency, and saves the results as JPEGs for downstream marketing workflows.
  */

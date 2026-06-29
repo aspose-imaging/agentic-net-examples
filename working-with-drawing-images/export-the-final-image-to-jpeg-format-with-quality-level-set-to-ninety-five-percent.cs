@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.jpg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.bmp";
+            string outputPath = @"C:\Images\sample_converted.jpg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,22 +23,21 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure JPEG save options with quality set to 95%
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                Quality = 95
-            };
-
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Save the image as JPEG using the configured options
-                image.Save(outputPath, jpegOptions);
+                // Configure JPEG save options with quality 95%
+                JpegOptions saveOptions = new JpegOptions
+                {
+                    Quality = 95
+                };
+
+                // Save the image as JPEG
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -46,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to convert user‑uploaded PNG graphics to high‑quality JPEG files for faster page loading.
- * 2. When a batch processing tool must generate JPEG thumbnails from PNG assets while preserving visual fidelity with a 95 % quality setting.
- * 3. When an e‑commerce platform wants to store product images as JPEGs to reduce storage costs but still retain near‑original quality.
- * 4. When a desktop utility automates the migration of legacy PNG files to JPEG format for compatibility with older photo‑editing software.
- * 5. When a reporting service exports charts created in PNG format to JPEG for inclusion in PDF documents that require a specific compression level.
+ * 1. When a developer needs to convert legacy BMP files to web‑friendly JPEGs with high visual quality for faster page loads.
+ * 2. When an application must generate thumbnails from high‑resolution scans and store them as 95% quality JPEGs to balance size and clarity.
+ * 3. When a batch‑processing tool has to archive scanned documents by saving them in JPEG format with a specific quality setting to meet storage policies.
+ * 4. When a photo‑editing workflow requires exporting edited images from Aspose.Imaging to JPEG with a 95% quality level for client delivery.
+ * 5. When a server‑side service processes user‑uploaded BMP images and needs to save them as JPEGs with controlled compression for consistent display across browsers.
  */

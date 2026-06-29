@@ -2,45 +2,77 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
+            // Hardcoded input GIF path
             string inputPath = "input.gif";
-            string outputDir = "output";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Directory to store extracted PNG frames
+            string outputDir = "output_frames";
+
             // Ensure the output directory exists
             Directory.CreateDirectory(outputDir);
 
-            using (GifImage gif = (GifImage)Image.Load(inputPath))
+            // Load the animated GIF
+            using (Image gifImage = Image.Load(inputPath))
             {
-                int frameCount = gif.PageCount;
+                // Cast to multipage image to access frames
+                var multipage = gifImage as IMultipageImage;
+                if (multipage == null)
+                {
+                    Console.Error.WriteLine("The loaded image is not a multipage (animated) image.");
+                    return;
+                }
+
+                int frameCount = multipage.PageCount;
+
                 for (int i = 0; i < frameCount; i++)
                 {
-                    // Set the active frame
-                    gif.ActiveFrame = (GifFrameBlock)gif.Pages[i];
-                    bool hasTransparency = gif.HasTransparentColor;
-
+                    // Build output PNG path for the current frame
                     string outputPath = Path.Combine(outputDir, $"frame_{i}.png");
 
-                    // Ensure the directory for the output file exists
+                    // Ensure the directory for the output file exists (already created above)
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the current frame as PNG
-                    gif.Save(outputPath, new PngOptions());
+                    // Set up PNG save options with a single-page range
+                    PngOptions pngOptions = new PngOptions();
+                    pngOptions.MultiPageOptions = new MultiPageOptions(new Aspose.Imaging.IntRange(i, i + 1));
 
-                    Console.WriteLine($"Frame {i}: Transparent = {hasTransparency}, saved to {outputPath}");
+                    // Save the current frame as PNG
+                    gifImage.Save(outputPath, pngOptions);
+
+                    // Load the saved PNG to check transparency
+                    using (Image pngImage = Image.Load(outputPath))
+                    {
+                        // Cast to PngImage to access HasAlpha property
+                        var png = pngImage as PngImage;
+                        if (png != null)
+                        {
+                            Console.WriteLine($"Frame {i}: HasAlpha = {png.HasAlpha}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Frame {i}: Unable to determine alpha (not a PNG image).");
+                        }
+                    }
                 }
             }
         }
@@ -53,9 +85,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a QA engineer needs to verify that each frame extracted from an animated GIF retains its original transparency after conversion to PNG for a web‑based image gallery.
- * 2. When a developer is building a batch conversion tool that extracts every frame of a GIF, saves them as PNG files, and logs whether each frame contains a transparent color to ensure correct rendering in mobile apps.
- * 3. When a digital asset manager wants to audit a collection of animated GIFs by converting each frame to PNG and recording transparency status to maintain consistency across a content management system.
- * 4. When a testing script must automatically generate PNG thumbnails from GIF animation frames and capture the transparency flag to detect any loss of alpha channel during the conversion process.
- * 5. When an e‑learning platform processes animated GIFs into individual PNG slides and needs to log transparency information to guarantee that overlay graphics appear correctly in the final course material.
+ * 1. When a developer needs to verify that the alpha channel of each PNG extracted from an animated GIF retains proper transparency for web UI quality assurance.
+ * 2. When a QA engineer wants to automatically log the transparency status of PNG frames generated from a GIF to ensure compliance with accessibility guidelines.
+ * 3. When an e‑commerce platform converts product animation GIFs to PNG sequences and must confirm that background transparency is preserved before publishing.
+ * 4. When a game asset pipeline extracts frames from sprite‑sheet GIFs using C# and Aspose.Imaging and needs to audit each PNG’s transparency for correct rendering in the engine.
+ * 5. When a digital publishing workflow generates PNG thumbnails from animated GIFs and requires a transparent‑pixel check to avoid unwanted white backgrounds in the final PDF.
  */

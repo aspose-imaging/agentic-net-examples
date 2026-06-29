@@ -1,7 +1,8 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
 class Program
@@ -10,52 +11,58 @@ class Program
     {
         try
         {
-            // Output file path (hardcoded)
-            string outputPath = "output\\traffic_light.bmp";
+            // Output file path (hard‑coded)
+            string outputPath = @"C:\temp\traffic_light.bmp";
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define image dimensions
-            int width = 200;
-            int height = 500;
-
-            // Create BMP options
+            // Create BMP options with a file source
             BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            bmpOptions.BitsPerPixel = 24; // 24‑bit color
 
-            // Create a new image canvas
-            using (Image image = Image.Create(bmpOptions, width, height))
+            // Define canvas size (width x height)
+            int canvasWidth = 100;
+            int canvasHeight = 300;
+
+            // Create the image canvas bound to the output file
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, canvasWidth, canvasHeight))
             {
                 // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-                // Clear background to black
+                // Optional: clear background to black
                 graphics.Clear(Aspose.Imaging.Color.Black);
 
-                // Draw the traffic light housing (white outline)
-                Pen housingPen = new Pen(Aspose.Imaging.Color.White, 3);
-                graphics.DrawRectangle(housingPen, new Rectangle(50, 50, 100, 400));
+                // Circle parameters
+                int diameter = 80;
+                int centerX = (canvasWidth - diameter) / 2;
+                int spacing = 10; // space between circles
+                int firstY = spacing;
 
-                // Draw red light
+                // Red light
                 using (SolidBrush redBrush = new SolidBrush(Aspose.Imaging.Color.Red))
                 {
-                    graphics.FillEllipse(redBrush, new Rectangle(75, 80, 50, 50));
+                    graphics.FillEllipse(redBrush, new Aspose.Imaging.Rectangle(centerX, firstY, diameter, diameter));
                 }
 
-                // Draw yellow light
+                // Yellow light
                 using (SolidBrush yellowBrush = new SolidBrush(Aspose.Imaging.Color.Yellow))
                 {
-                    graphics.FillEllipse(yellowBrush, new Rectangle(75, 190, 50, 50));
+                    int y = firstY + diameter + spacing;
+                    graphics.FillEllipse(yellowBrush, new Aspose.Imaging.Rectangle(centerX, y, diameter, diameter));
                 }
 
-                // Draw green light
-                using (SolidBrush greenBrush = new SolidBrush(Aspose.Imaging.Color.Green))
+                // Green light
+                using (SolidBrush greenBrush = new SolidBrush(Aspose.Imaging.Color.Lime))
                 {
-                    graphics.FillEllipse(greenBrush, new Rectangle(75, 300, 50, 50));
+                    int y = firstY + 2 * (diameter + spacing);
+                    graphics.FillEllipse(greenBrush, new Aspose.Imaging.Rectangle(centerX, y, diameter, diameter));
                 }
 
-                // Save the image to the specified path
-                image.Save(outputPath, bmpOptions);
+                // Save the bound image
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -67,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP traffic‑light icon with stacked red, yellow, and green circles for a Windows desktop application UI using C# and Aspose.Imaging.
- * 2. When a developer wants to create a simple traffic signal illustration in a black‑background BMP file for documentation, tutorials, or training materials.
- * 3. When a developer must programmatically draw a white‑outlined housing and colored circles to simulate a traffic control panel in an image processing demo.
- * 4. When a developer requires a quick method to render stacked colored ellipses in a BMP image for testing color detection or image analysis algorithms.
- * 5. When a developer needs to embed a lightweight traffic‑light graphic into a report or PDF by first saving it as a BMP using Aspose.Imaging’s Graphics and Brush classes.
+ * 1. When a developer needs to generate a 24‑bit BMP traffic‑light icon for a Windows desktop application’s status indicator, they can use this Aspose.Imaging C# code to draw three stacked circles.
+ * 2. When an IoT dashboard requires lightweight bitmap images of traffic signals that can be created on‑the‑fly without external assets, this code provides a programmatic way to render the icon in BMP format.
+ * 3. When a game engine needs a simple traffic‑light sprite for a 2‑D simulation and wants to avoid loading PNG files, the example shows how to draw the icon directly into a BMP canvas using Aspose.Imaging graphics.
+ * 4. When an automated testing framework must embed a traffic‑light symbol into generated report screenshots, the snippet demonstrates creating the BMP image with solid brushes and ellipse drawing in C#.
+ * 5. When a documentation generator wants to include a custom traffic‑light illustration in its PDF output and prefers to create the source BMP programmatically, this code illustrates the necessary steps with Aspose.Imaging.
  */

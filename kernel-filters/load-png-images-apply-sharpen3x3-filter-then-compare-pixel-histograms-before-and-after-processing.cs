@@ -1,53 +1,68 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output_sharpened.png";
+            string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for pixel access and filtering
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Compute histogram before processing
-                int[] beforeHistogram = ComputeHistogram(rasterImage);
+                int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
 
-                // Apply Sharpen 3x3 filter (default constructor)
-                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions());
+                int[] histR = new int[256];
+                int[] histG = new int[256];
+                int[] histB = new int[256];
 
-                // Compute histogram after processing
-                int[] afterHistogram = ComputeHistogram(rasterImage);
+                foreach (int pixel in pixels)
+                {
+                    int r = (pixel >> 16) & 0xFF;
+                    int g = (pixel >> 8) & 0xFF;
+                    int b = pixel & 0xFF;
+                    histR[r]++;
+                    histG[g]++;
+                    histB[b]++;
+                }
 
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                Console.WriteLine("Original Histogram (Red channel):");
+                for (int i = 0; i < 256; i++)
+                {
+                    if (histR[i] > 0)
+                        Console.WriteLine($"{i}: {histR[i]}");
+                }
 
-                // Output histogram comparison
-                Console.WriteLine("Histogram before sharpening:");
-                PrintHistogram(beforeHistogram);
+                Console.WriteLine("Original Histogram (Green channel):");
+                for (int i = 0; i < 256; i++)
+                {
+                    if (histG[i] > 0)
+                        Console.WriteLine($"{i}: {histG[i]}");
+                }
 
-                Console.WriteLine("\nHistogram after sharpening:");
-                PrintHistogram(afterHistogram);
+                Console.WriteLine("Original Histogram (Blue channel):");
+                for (int i = 0; i < 256; i++)
+                {
+                    if (histB[i] > 0)
+                        Console.WriteLine($"{i}: {histB[i]}");
+                }
+
+                PngOptions options = new PngOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -55,43 +70,13 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    // Computes a simple grayscale histogram (256 bins) for a RasterImage
-    static int[] ComputeHistogram(RasterImage raster)
-    {
-        int[] histogram = new int[256];
-        for (int y = 0; y < raster.Height; y++)
-        {
-            for (int x = 0; x < raster.Width; x++)
-            {
-                // Get pixel color
-                var color = raster.GetPixel(x, y);
-                // Convert to grayscale intensity using average method
-                int intensity = (color.R + color.G + color.B) / 3;
-                histogram[intensity]++;
-            }
-        }
-        return histogram;
-    }
-
-    // Prints histogram values to the console
-    static void PrintHistogram(int[] histogram)
-    {
-        for (int i = 0; i < histogram.Length; i++)
-        {
-            if (histogram[i] > 0)
-            {
-                Console.WriteLine($"Intensity {i}: {histogram[i]}");
-            }
-        }
-    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to enhance the visual sharpness of PNG assets for a web gallery while verifying that the overall brightness distribution remains unchanged, they can load the image, apply the Sharpen3x3 filter, and compare before‑and‑after histograms.
- * 2. When an e‑commerce platform wants to automatically improve product photo clarity before uploading to a CDN and ensure the color balance is preserved, the code can process each PNG, sharpen it, and log histogram differences.
- * 3. When a medical imaging application must preprocess PNG scans to highlight fine details without altering the grayscale intensity distribution, the developer can use this routine to apply a 3×3 sharpen filter and validate the histogram.
- * 4. When a game developer prepares sprite sheets in PNG format and wants to programmatically confirm that sharpening does not introduce unexpected tonal shifts, they can run the code to compute and compare pixel histograms.
- * 5. When a batch‑processing tool for digital archives needs to sharpen scanned PNG documents and produce a report showing how the pixel intensity histogram changes, this example provides the necessary C# steps.
+ * 1. When a developer needs to sharpen scanned PNG documents such as receipts or blueprints and verify that the visual enhancement does not alter the original color distribution by comparing pre‑ and post‑processing histograms.
+ * 2. When building an automated quality‑control pipeline for a photo‑sharing app that applies a Sharpen3x3 filter to user‑uploaded PNG images and logs histogram changes to detect over‑sharpening artifacts.
+ * 3. When creating a batch‑processing tool for e‑commerce product catalogs where each PNG is sharpened with a 3×3 kernel and the channel histograms are compared to ensure consistent color balance across all images.
+ * 4. When developing a medical imaging viewer that sharpens PNG radiology scans and compares the original and sharpened histograms to confirm diagnostic details are enhanced without distorting intensity levels.
+ * 5. When implementing a machine‑learning preprocessing step that sharpens PNG training samples and records original versus sharpened histograms to analyze the impact of sharpening on feature extraction.
  */

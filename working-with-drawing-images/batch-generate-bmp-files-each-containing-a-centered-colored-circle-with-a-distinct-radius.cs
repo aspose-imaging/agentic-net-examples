@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
@@ -12,59 +11,52 @@ class Program
     {
         try
         {
-            // Output directory for BMP files
-            string outputDir = @"C:\temp\circles";
-            Directory.CreateDirectory(outputDir);
-
-            // Canvas size (must accommodate the largest circle)
+            // Define image dimensions
             int canvasWidth = 200;
             int canvasHeight = 200;
 
             // Define radii and corresponding colors for each BMP
-            var circles = new List<(int radius, Color color)>
+            int[] radii = new int[] { 20, 40, 60 };
+            Color[] colors = new Color[] { Color.Red, Color.Green, Color.Blue };
+
+            for (int i = 0; i < radii.Length; i++)
             {
-                (30, Color.Red),
-                (40, Color.Green),
-                (50, Color.Blue)
-            };
+                int radius = radii[i];
+                Color fillColor = colors[i];
 
-            int index = 1;
-            foreach (var (radius, color) in circles)
-            {
-                string outputPath = Path.Combine(outputDir, $"circle_{index}.bmp");
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Output file path (hardcoded)
+                string outputPath = $"output_{radius}.bmp";
 
-                // Create source and BMP options
-                Source source = new FileCreateSource(outputPath, false);
-                BmpOptions options = new BmpOptions
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                // Create BMP options with bound file source
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.Source = new FileCreateSource(outputPath, false);
+                bmpOptions.BitsPerPixel = 24;
+
+                // Create the image canvas bound to the output file
+                using (Image canvas = Image.Create(bmpOptions, canvasWidth, canvasHeight))
                 {
-                    Source = source,
-                    BitsPerPixel = 24
-                };
+                    // Clear background to white
+                    Graphics graphics = new Graphics(canvas);
+                    graphics.Clear(Color.White);
 
-                // Create a bound BMP image
-                using (Image image = Image.Create(options, canvasWidth, canvasHeight))
-                {
-                    // Initialize graphics for drawing
-                    Graphics graphics = new Graphics(image);
+                    // Calculate centered rectangle for the circle
+                    int diameter = radius * 2;
+                    int offsetX = (canvasWidth - diameter) / 2;
+                    int offsetY = (canvasHeight - diameter) / 2;
+                    Rectangle circleBounds = new Rectangle(offsetX, offsetY, diameter, diameter);
 
-                    // Calculate rectangle to center the circle
-                    int x = (canvasWidth - radius * 2) / 2;
-                    int y = (canvasHeight - radius * 2) / 2;
-                    Rectangle rect = new Rectangle(x, y, radius * 2, radius * 2);
-
-                    // Fill the centered circle with the specified color
-                    using (SolidBrush brush = new SolidBrush(color))
+                    // Fill the circle with the specified color
+                    using (SolidBrush brush = new SolidBrush(fillColor))
                     {
-                        graphics.FillEllipse(brush, rect);
+                        graphics.FillEllipse(brush, circleBounds);
                     }
 
                     // Save the bound image
-                    image.Save();
+                    canvas.Save();
                 }
-
-                index++;
             }
         }
         catch (Exception ex)
@@ -76,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a set of BMP icons with centered colored circles of varying radii for a UI theme or button set.
- * 2. When an automation script must create placeholder images for testing image‑processing pipelines that expect 24‑bit BMP files with specific dimensions.
- * 3. When a reporting tool requires dynamically generated chart markers saved as BMP files to embed in PDF or Word documents.
- * 4. When a game developer wants to pre‑render simple circular sprites in different colors and sizes to reduce runtime drawing overhead.
- * 5. When a data‑visualization service needs to batch‑produce thumbnail images showing colored circles to represent categorical data in dashboards.
+ * 1. When a developer needs to create a set of BMP icons representing status indicators (e.g., low, medium, high) with different colored circles for a Windows desktop application.
+ * 2. When a game developer wants to generate placeholder sprite sheets in BMP format containing centered colored circles of varying radii for testing collision detection logic.
+ * 3. When an automation script must produce printable BMP markers with specific radii and colors for labeling components on a PCB layout.
+ * 4. When a data‑visualization tool requires pre‑rendered BMP symbols of different sizes and hues to annotate points on a static map image.
+ * 5. When a quality‑control system needs to batch create BMP test patterns with centered circles to verify scanner calibration across multiple resolutions.
  */

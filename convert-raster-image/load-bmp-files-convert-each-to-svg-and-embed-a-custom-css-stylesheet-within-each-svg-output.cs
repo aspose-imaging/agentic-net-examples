@@ -4,6 +4,32 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
+class CssEmbeddingCallback : SvgResourceKeeperCallback
+{
+    private readonly string _css;
+
+    public CssEmbeddingCallback(string css)
+    {
+        _css = css;
+    }
+
+    public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
+    {
+        string svgContent = System.Text.Encoding.UTF8.GetString(htmlData);
+        int insertPos = svgContent.IndexOf('>');
+        if (insertPos != -1)
+        {
+            string before = svgContent.Substring(0, insertPos + 1);
+            string after = svgContent.Substring(insertPos + 1);
+            string styleTag = $"<style type=\"text/css\"><![CDATA[{_css}]]></style>";
+            svgContent = before + styleTag + after;
+        }
+
+        File.WriteAllText(suggestedFileName, svgContent);
+        return suggestedFileName;
+    }
+}
+
 class Program
 {
     static void Main()
@@ -13,57 +39,38 @@ class Program
             // Hardcoded input BMP files
             string[] inputPaths = new[]
             {
-                @"C:\Images\image1.bmp",
-                @"C:\Images\image2.bmp"
+                "C:\\Images\\sample1.bmp",
+                "C:\\Images\\sample2.bmp"
             };
 
             // Custom CSS to embed in each SVG
-            string customCss = @"
-                /* Custom CSS */
-                .myClass { fill: red; }
-            ";
+            string customCss = @".myClass { fill: red; }";
 
             foreach (string inputPath in inputPaths)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output SVG path (same folder, .svg extension)
                 string outputPath = Path.ChangeExtension(inputPath, ".svg");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load BMP image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Prepare SVG options with rasterization settings
-                    var vectorRasterizationOptions = new SvgRasterizationOptions
+                    var vectorOptions = new SvgRasterizationOptions
                     {
                         PageSize = image.Size
                     };
 
                     var svgOptions = new SvgOptions
                     {
-                        VectorRasterizationOptions = vectorRasterizationOptions
+                        VectorRasterizationOptions = vectorOptions,
+                        Callback = new CssEmbeddingCallback(customCss)
                     };
 
-                    // Save as SVG
                     image.Save(outputPath, svgOptions);
-                }
-
-                // Embed custom CSS into the generated SVG
-                string svgContent = File.ReadAllText(outputPath);
-                int insertPos = svgContent.IndexOf('>'); // after the opening <svg ...> tag
-                if (insertPos != -1)
-                {
-                    string styleElement = $"\n<style type=\"text/css\">\n{customCss}\n</style>\n";
-                    svgContent = svgContent.Insert(insertPos + 1, styleElement);
-                    File.WriteAllText(outputPath, svgContent);
                 }
             }
         }
@@ -73,3 +80,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑convert legacy BMP assets to scalable SVG graphics while applying a brand‑specific CSS style for consistent coloring in web applications.
+ * 2. When an automation script must generate SVG icons from BMP files and embed a custom stylesheet so the icons inherit theme colors defined in a CSS file.
+ * 3. When a reporting tool requires vector‑based diagrams derived from BMP screenshots, with embedded CSS to control stroke and fill properties without external style sheets.
+ * 4. When a content management system imports user‑uploaded BMP images and stores them as SVG files that already contain a predefined CSS class for responsive styling.
+ * 5. When a desktop application processes a set of BMP maps and outputs SVG maps with an inline style block to enforce map element styles across different browsers.
+ */

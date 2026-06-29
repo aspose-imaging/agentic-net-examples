@@ -9,7 +9,6 @@ class Program
     {
         try
         {
-            // Batch directory setup (atomic block)
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
@@ -30,7 +29,6 @@ class Program
 
             foreach (string inputPath in files)
             {
-                // Input file existence check
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -38,27 +36,19 @@ class Program
                 }
 
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+                string outputPdfPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
 
-                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    if (!image.IsCached)
-                        image.CacheData();
+                    RasterImage raster = (RasterImage)image;
 
-                    // Resize to 800x800 using nearest neighbour resampling
-                    image.Resize(800, 800, ResizeType.NearestNeighbourResample);
+                    raster.Resize(800, 800);
 
-                    // Apply sharpening filter
-                    image.Filter(image.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
 
-                    // Save as PDF
-                    using (PdfOptions pdfOptions = new PdfOptions())
-                    {
-                        image.Save(outputPath, pdfOptions);
-                    }
+                    raster.Save(outputPdfPath, new PdfOptions());
                 }
             }
         }
@@ -68,3 +58,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert a folder of legacy BMP scans into searchable PDF documents while standardizing each page to an 800 × 800 pixel size and enhancing detail with a sharpening filter.
+ * 2. When an e‑commerce platform must automatically process product photo BMP uploads, resize them to a uniform 800 × 800 resolution, apply sharpening for clearer visuals, and store the results as PDF catalogs.
+ * 3. When a medical imaging system requires batch preparation of BMP radiology images for archival, resizing them to a consistent size, sharpening to improve diagnostic clarity, and saving them as PDF reports.
+ * 4. When a publishing workflow needs to transform a collection of BMP illustrations into print‑ready PDFs, ensuring each image is resized to 800 × 800 pixels and sharpened to maintain line crispness.
+ * 5. When a document management solution must ingest BMP files from scanners, uniformly resize and sharpen them, and convert them to PDF for easy viewing and indexing.
+ */

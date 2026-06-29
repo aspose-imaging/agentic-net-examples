@@ -1,79 +1,80 @@
 using System;
 using System.IO;
+using System.Drawing;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ProgressManagement;
 
 class Program
 {
-    // Simple console progress bar
-    static void DrawProgressBar(int completed, int total)
+    // Progress callback for load/save operations (optional, shows internal progress)
+    private static void ProgressCallback(ProgressEventHandlerInfo info)
     {
-        int barWidth = 50;
-        double ratio = (double)completed / total;
-        int filled = (int)Math.Round(ratio * barWidth);
-        string bar = new string('#', filled).PadRight(barWidth, '-');
-        int percent = (int)(ratio * 100);
-        Console.Write($"\rProcessing: [{bar}] {percent}%");
+        // Simple console output for internal Aspose.Imaging progress
+        Console.WriteLine($"{info.EventType} : {info.Value}/{info.MaxValue}");
     }
 
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputDirectory = @"C:\Images\Input";
+        string outputDirectory = @"C:\Images\Output";
+
         try
         {
-            // Hard‑coded input and output directories
-            string inputFolder = @"C:\Images\Input";
-            string outputFolder = @"C:\Images\Output";
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-            // Get image files (you can extend the filter as needed)
-            string[] files = Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly);
-            // Filter common image extensions
-            files = Array.FindAll(files, f =>
-                f.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
-                f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
-                f.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase));
-
+            // Get all image files in the input directory (common extensions)
+            string[] files = Directory.GetFiles(inputDirectory, "*.*", SearchOption.TopDirectoryOnly);
             int totalFiles = files.Length;
             if (totalFiles == 0)
             {
-                Console.WriteLine("No image files found.");
+                Console.WriteLine("No files found in the input directory.");
                 return;
             }
 
-            for (int i = 0; i < totalFiles; i++)
-            {
-                string inputPath = files[i];
+            int processedCount = 0;
 
-                // Input file existence check
+            foreach (string inputPath in files)
+            {
+                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Prepare output path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_sharpened.png";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
+                // Determine output file path (same name with suffix)
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string extension = Path.GetExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, $"{fileName}_sharpen{extension}");
 
-                // Ensure output directory exists
+                // Ensure output directory exists (already created above, but follow rule)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load image, apply sharpen filter, and save
-                using (Image image = Image.Load(inputPath))
+                // Load image with progress handler (optional)
+                using (Image image = Image.Load(inputPath, new LoadOptions { ProgressEventHandler = ProgressCallback }))
                 {
-                    RasterImage raster = (RasterImage)image;
-                    // Sharpen filter with kernel size 5 and sigma 4.0
-                    raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
-                    raster.Save(outputPath);
+                    // Cast to RasterImage to apply filter
+                    RasterImage rasterImage = (RasterImage)image;
+
+                    // Apply sharpen filter (kernel size 5, sigma 4.0)
+                    var sharpenOptions = new SharpenFilterOptions(5, 4.0);
+                    rasterImage.Filter(rasterImage.Bounds, sharpenOptions);
+
+                    // Save image with progress handler (optional)
+                    rasterImage.Save(outputPath, new Aspose.Imaging.ImageOptions.PngOptions { ProgressEventHandler = ProgressCallback });
                 }
 
-                // Update progress bar
-                DrawProgressBar(i + 1, totalFiles);
+                processedCount++;
+
+                // Update simple console progress bar
+                double percent = (double)processedCount / totalFiles * 100;
+                Console.Write($"\rProcessing: {processedCount}/{totalFiles} ({percent:0.00}%)");
             }
 
-            // Move to next line after progress bar completes
-            Console.WriteLine();
-            Console.WriteLine("Processing completed.");
+            Console.WriteLine("\nProcessing completed.");
         }
         catch (Exception ex)
         {
@@ -84,9 +85,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑process a folder of JPEG, PNG or BMP files with Aspose.Imaging’s Sharpen filter and wants a console progress bar to show real‑time completion percentage.
- * 2. When an automated image‑enhancement pipeline must convert raw photos to sharpened PNGs while providing visual feedback in a C# command‑line tool.
- * 3. When a Windows service processes incoming product images, applies a kernel filter using Aspose.Imaging, and logs progress to the console for monitoring.
- * 4. When a QA engineer runs regression tests on image‑filtering code and needs a simple progress indicator to verify that all test images are processed without hanging.
- * 5. When a developer integrates Aspose.Imaging into a build script that optimizes graphics assets and wants to display a live progress bar for each file processed.
+ * 1. When a desktop photo‑organizer needs to batch sharpen thousands of JPEG and PNG files before publishing them to an online gallery, this code applies a kernel filter to each image while updating a progress bar for the user.
+ * 2. When an automated document‑processing workflow must enhance scanned TIFF pages with edge‑sharpening and provide real‑time status feedback, developers can use this snippet to filter each file and report progress.
+ * 3. When a C# image‑editing application offers a “Batch Sharpen” feature that processes a selected folder and keeps the UI responsive by showing how many images have completed filtering, the example demonstrates the required Aspose.Imaging integration.
+ * 4. When a digital asset management system needs to re‑apply a custom sharpening kernel to all assets in a legacy archive and log the per‑file progress for monitoring, this code provides the necessary batch‑processing logic.
+ * 5. When a Windows service watches an input directory, applies a sharpening filter to newly added images, writes the results to an output folder, and sends progress updates to a dashboard, this example shows how to implement it.
  */

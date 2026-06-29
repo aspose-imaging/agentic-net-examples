@@ -3,60 +3,38 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded paths
-            string originalPath = "original.bmp";
-            string signedPath = "signed.bmp";
-            string password = "Secure123";
+            // Hardcoded output path
+            string outputPath = "output.bmp";
 
-            // Create a simple BMP image (100x100, 24bpp)
-            int width = 100;
-            int height = 100;
-            var bmpCreateOptions = new BmpOptions
-            {
-                BitsPerPixel = 24
-            };
-            using (var image = (RasterImage)Image.Create(bmpCreateOptions, width, height))
-            {
-                // Fill with a solid color (e.g., light gray)
-                image.Save(originalPath);
-            }
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Ensure the original file exists before loading
-            if (!File.Exists(originalPath))
-            {
-                Console.Error.WriteLine($"File not found: {originalPath}");
-                return;
-            }
+            // Create a file source bound to the output path
+            Source source = new FileCreateSource(outputPath, false);
 
-            // Load the original image, embed digital signature, and save as signed image
-            using (var image = (RasterImage)Image.Load(originalPath))
-            {
-                image.EmbedDigitalSignature(password);
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(signedPath) ?? string.Empty);
-                image.Save(signedPath);
-            }
+            // BMP save options with the source
+            BmpOptions options = new BmpOptions() { Source = source };
 
-            // Verify the digital signature on the signed image
-            if (!File.Exists(signedPath))
+            // Create a 200x200 BMP canvas (minimum size requirement)
+            using (RasterImage canvas = (RasterImage)Image.Create(options, 200, 200))
             {
-                Console.Error.WriteLine($"File not found: {signedPath}");
-                return;
-            }
+                // Embed digital signature with the specified password
+                canvas.EmbedDigitalSignature("Secure123");
 
-            using (var signedImage = (RasterImage)Image.Load(signedPath))
-            {
-                bool isSigned = signedImage.IsDigitalSigned(password);
-                Console.WriteLine(isSigned
-                    ? "The image is digitally signed and verification succeeded."
-                    : "The image is NOT digitally signed or verification failed.");
+                // Save the bound image
+                canvas.Save();
+
+                // Verify the digital signature using the same password
+                bool isSigned = canvas.IsDigitalSigned("Secure123");
+                Console.WriteLine($"Signature valid: {isSigned}");
             }
         }
         catch (Exception ex)
@@ -65,3 +43,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer must generate a BMP thumbnail for a document management system and ensure its authenticity by embedding a password‑protected digital signature.
+ * 2. When an application needs to create a secure BMP watermark for legal contracts, embedding a signature that can be later verified with the same password.
+ * 3. When a C# service produces BMP icons for software installers and wants to prevent tampering by signing the image with a known passphrase.
+ * 4. When a forensic tool requires generating a BMP evidence image and embedding a digital signature to guarantee chain‑of‑custody integrity.
+ * 5. When a desktop utility saves user‑drawn BMP graphics and needs to later confirm that the file has not been altered by checking the embedded signature with the original password.
+ */

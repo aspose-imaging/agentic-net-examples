@@ -10,36 +10,27 @@ class Program
     static void Main(string[] args)
     {
         string inputPath = "input.tif";
-        string newFramePath = "newframe.jpg";
         string outputPath = "output/output.tif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            if (!File.Exists(newFramePath))
-            {
-                Console.Error.WriteLine($"File not found: {newFramePath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                using (RasterImage raster = (RasterImage)Image.Load(newFramePath))
-                {
-                    TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.TiffJpegRgb);
-                    frameOptions.Compression = TiffCompressions.Jpeg;
-                    frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                    frameOptions.Photometric = TiffPhotometrics.Rgb;
-                    frameOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+                TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
+                frameOptions.Compression = TiffCompressions.Jpeg;
+                frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+                frameOptions.Photometric = TiffPhotometrics.Rgb;
 
-                    TiffFrame newFrame = new TiffFrame(raster, frameOptions);
+                using (TiffFrame newFrame = new TiffFrame(frameOptions, tiffImage.Width, tiffImage.Height))
+                {
                     tiffImage.AddFrame(newFrame);
                 }
 
@@ -55,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a healthcare application needs to append a new X‑ray scan as a JPEG‑compressed page to an existing multi‑page TIFF patient record while preserving DICOM metadata.
- * 2. When a GIS system must add a high‑resolution satellite photo as an additional frame to a TIFF catalog, using JPEG compression to keep file size low and embedding a custom comment tag that describes the acquisition date.
- * 3. When a legal document management platform wants to insert a scanned signature page into a multi‑page TIFF contract, compressing the page with JPEG to reduce storage and adding a comment tag indicating the signer’s name.
- * 4. When a digital publishing workflow needs to combine a newly created cover image with an existing TIFF manuscript, using Aspose.Imaging in C# to add the JPEG‑compressed cover as a new frame and store a comment tag with the ISBN.
- * 5. When an archival system for historical photographs adds a restored JPEG image as an extra frame to an original TIFF collection, applying JPEG compression for efficient archiving and attaching a comment tag that records the restoration technician’s notes.
+ * 1. When a medical imaging application needs to append a new high‑resolution scan to an existing multi‑page TIFF while keeping file size low by using JPEG compression and storing a descriptive comment tag.
+ * 2. When a document management system must combine a newly scanned page with an archived TIFF bundle, applying JPEG compression to the added frame and embedding a custom comment for audit tracking.
+ * 3. When a GIS tool adds an updated satellite image layer to a multi‑page TIFF map, using JPEG compression for the new frame and inserting a comment tag that records the capture date and sensor details.
+ * 4. When an e‑commerce platform generates a product catalog TIFF that includes a freshly photographed item, compressing the new frame with JPEG and adding a comment tag containing SKU and pricing information.
+ * 5. When a legal firm merges a newly signed PDF page converted to TIFF into an existing case file TIFF, applying JPEG compression to the added frame and embedding a comment tag that references the case number and signing date.
  */

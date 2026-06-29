@@ -6,52 +6,59 @@ using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output directories
-            string inputFolder = @"C:\InputEmf";
-            string outputFolder = @"C:\OutputPdf";
+            // Set up base, input, and output directories
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Get all EMF files in the input folder
-            string[] emfFiles = Directory.GetFiles(inputFolder, "*.emf");
-
-            foreach (string inputPath in emfFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify that the input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            // Get all files (filter later for .emf)
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (var inputPath in files)
+            {
+                // Process only EMF files
+                if (!string.Equals(Path.GetExtension(inputPath), ".emf", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Derive output PDF path (same file name, .pdf extension)
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".pdf");
+                // Determine output PDF path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EMF image
+                // Load EMF image and save as PDF with title as bookmark
                 using (Image image = Image.Load(inputPath))
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    // Prepare PDF options
-                    var pdfOptions = new PdfOptions();
-
-                    // Set core PDF options – enable a bookmark level
-                    pdfOptions.PdfCoreOptions = new PdfCoreOptions
-                    {
-                        BookmarksOutlineLevel = 1 // first‑level outline entry
-                    };
-
-                    // Use the original file name as the document title (appears as a bookmark)
                     pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
                     {
-                        Title = fileNameWithoutExt
+                        Title = Path.GetFileNameWithoutExtension(inputPath)
                     };
 
-                    // Save as PDF
                     image.Save(outputPath, pdfOptions);
                 }
             }
@@ -65,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a company needs to archive a collection of vector‑based EMF diagrams as searchable PDF files with each diagram listed as a bookmark for quick navigation.
- * 2. When an engineering team wants to generate project documentation by converting multiple AutoCAD‑exported EMF schematics into individual PDFs, using the original filenames as first‑level outline entries.
- * 3. When a legal department must submit a batch of signed EMF forms as PDFs, preserving the form names as PDF bookmarks to satisfy court filing requirements.
- * 4. When a publishing workflow requires turning a folder of EMF illustrations into PDF assets while automatically creating bookmarks that match the illustration titles for e‑book generation.
- * 5. When a software vendor provides a tool that transforms user‑uploaded EMF assets into PDF reports, ensuring each report page is titled with the source file name for easier indexing in a content management system.
+ * 1. When a developer needs to generate a searchable PDF portfolio from a collection of Windows Metafile (EMF) diagrams and wants each diagram listed as a clickable bookmark using C# and Aspose.Imaging.
+ * 2. When an automated reporting tool must convert dozens of EMF charts produced by a legacy application into PDF files for distribution, preserving the original filenames as PDF bookmarks for easy navigation.
+ * 3. When a document management system requires batch processing of EMF assets into PDF format while maintaining a clear table of contents based on the source file names, leveraging Aspose.Imaging’s Image.Load and PdfOptions in .NET.
+ * 4. When a CI/CD pipeline includes a step that validates visual assets by converting EMF icons to PDF and embedding their filenames as bookmarks to simplify review by QA engineers.
+ * 5. When a cloud‑based microservice receives EMF files via an API and needs to return PDF documents with each file’s name as a bookmark, using the provided C# code to handle the conversion and naming automatically.
  */

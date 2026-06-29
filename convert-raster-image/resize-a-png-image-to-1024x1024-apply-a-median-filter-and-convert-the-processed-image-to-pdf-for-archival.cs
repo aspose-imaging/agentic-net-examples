@@ -6,37 +6,27 @@ using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\source.png";
-        string outputPath = @"C:\Images\archived.pdf";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "Input/sample.png";
+            string outputPath = "Output/processed.pdf";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for pixel operations
                 RasterImage raster = (RasterImage)image;
-
-                // Resize to 1024x1024
                 raster.Resize(1024, 1024);
-
-                // Apply median filter with size 5
                 raster.Filter(raster.Bounds, new MedianFilterOptions(5));
 
-                // Save the processed image as PDF
                 PdfOptions pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
@@ -47,3 +37,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a standardized 1024x1024 thumbnail of a PNG, reduce noise with a median filter, and store it as a searchable PDF for a digital asset management system.
+ * 2. When an e‑commerce platform must compress product images, clean up artifacts, and archive the final images in PDF format for compliance reporting.
+ * 3. When a medical imaging application requires converting high‑resolution PNG scans to a fixed size, denoise them, and save them as PDF records for patient archives.
+ * 4. When a legal document management tool needs to ingest PNG evidence files, resize them for consistent viewing, apply a median filter to improve clarity, and bundle them into PDF files for court submission.
+ * 5. When a content management system automates the preparation of PNG graphics for print, resizing them, smoothing noise, and exporting to PDF to ensure long‑term preservation.
+ */

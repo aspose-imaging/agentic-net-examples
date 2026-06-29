@@ -1,10 +1,11 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,7 +13,7 @@ class Program
     {
         try
         {
-            // Input/Output directory setup
+            // Input and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
@@ -29,11 +30,13 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
             // Collect sizes of grayscale JPEGs
-            List<Size> sizes = new List<Size>();
+            List<int> widths = new List<int>();
+            List<int> heights = new List<int>();
+            List<string> jpegPaths = new List<string>();
+
             foreach (string filePath in files)
             {
                 if (!File.Exists(filePath))
@@ -42,52 +45,53 @@ class Program
                     return;
                 }
 
-                using (JpegImage img = (JpegImage)Image.Load(filePath))
+                // Load JPEG, convert to grayscale, and store temporary path
+                string tempGrayPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(filePath) + "_gray.jpg");
+                Directory.CreateDirectory(Path.GetDirectoryName(tempGrayPath));
+
+                using (JpegImage jpeg = (JpegImage)Image.Load(filePath))
                 {
-                    img.Grayscale();
-                    sizes.Add(new Size(img.Width, img.Height));
+                    jpeg.Grayscale();
+                    jpeg.Save(tempGrayPath);
                 }
+
+                using (JpegImage gray = (JpegImage)Image.Load(tempGrayPath))
+                {
+                    widths.Add(gray.Width);
+                    heights.Add(gray.Height);
+                }
+
+                jpegPaths.Add(tempGrayPath);
             }
 
-            if (sizes.Count == 0)
+            if (jpegPaths.Count == 0)
             {
-                Console.WriteLine("No images found to process.");
+                Console.WriteLine("No images to process.");
                 return;
             }
 
-            // Calculate canvas dimensions for horizontal merge
-            int totalWidth = 0;
-            int maxHeight = 0;
-            foreach (Size sz in sizes)
-            {
-                totalWidth += sz.Width;
-                if (sz.Height > maxHeight) maxHeight = sz.Height;
-            }
+            int totalWidth = widths.Sum();
+            int maxHeight = heights.Max();
 
-            // Create an unbound raster canvas
-            using (RasterImage canvas = (RasterImage)Image.Create(new JpegOptions(), totalWidth, maxHeight))
+            // Create final merged JPEG
+            string finalPath = Path.Combine(outputDirectory, "merged.jpg");
+            Directory.CreateDirectory(Path.GetDirectoryName(finalPath));
+            Source finalSource = new FileCreateSource(finalPath, false);
+            JpegOptions finalOptions = new JpegOptions() { Source = finalSource, Quality = 100 };
+
+            using (JpegImage canvas = (JpegImage)Image.Create(finalOptions, totalWidth, maxHeight))
             {
                 int offsetX = 0;
-                foreach (string filePath in files)
+                foreach (string grayPath in jpegPaths)
                 {
-                    using (JpegImage img = (JpegImage)Image.Load(filePath))
+                    using (JpegImage img = (JpegImage)Image.Load(grayPath))
                     {
-                        img.Grayscale();
-                        Rectangle destRect = new Rectangle(offsetX, 0, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
+                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
-
-                // Prepare output PDF path
-                string outputPath = Path.Combine(outputDirectory, "merged.pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save canvas as PDF
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    canvas.Save(outputPath, pdfOptions);
-                }
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -99,9 +103,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a printable PDF brochure that shows product JPEG photos in grayscale side‑by‑side, this code converts each image, merges them horizontally, and exports the result as a PDF.
- * 2. When a developer wants to generate a compact PDF report of scanned receipts by first applying a grayscale conversion to each JPEG and then stitching them together horizontally for easy comparison.
- * 3. When a developer must prepare a medical imaging PDF that displays multiple X‑ray JPEGs in grayscale on a single horizontal canvas for quick radiologist review.
- * 4. When a developer is automating the production of an architectural portfolio PDF where each design JPEG is standardized to grayscale and combined horizontally for a consistent visual layout.
- * 5. When a developer is building an audit‑trail document that consolidates security‑camera snapshot JPEGs into a single grayscale PDF, merging the images horizontally to preserve chronological order.
+ * 1. When a developer needs to generate a printable PDF catalog of product photos where all JPEG images are converted to grayscale and merged horizontally for consistent branding.
+ * 2. When an archival system requires converting scanned color JPEG documents to grayscale and concatenating them side‑by‑side into a single PDF to save storage space.
+ * 3. When a web application creates a before‑and‑after comparison PDF by turning each JPEG into grayscale and stitching them horizontally for easy visual analysis.
+ * 4. When an e‑learning platform prepares study material by merging multiple grayscale JPEG diagrams into a single PDF page to simplify distribution.
+ * 5. When a legal compliance tool must produce a PDF report that includes grayscale versions of evidence JPEGs arranged horizontally to meet document formatting standards.
  */

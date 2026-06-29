@@ -10,28 +10,24 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.psd";
-            string outputPath = "Output/softened.png";
+            string inputPath = "input.psd";
+            string outputPath = "output.png";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PSD image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
-                RasterImage raster = (RasterImage)image;
-
-                // Apply Gaussian blur (radius 5, sigma 4.0) to the entire image
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                // Apply Gaussian blur if the image is raster
+                if (image is RasterImage raster)
+                {
+                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                }
 
                 // Prepare PNG export options with text rendering hint
                 PngOptions pngOptions = new PngOptions
@@ -39,13 +35,11 @@ class Program
                     Source = new FileCreateSource(outputPath, false),
                     VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
+                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel
                     }
                 };
 
-                // Save the blurred image as PNG
-                raster.Save(outputPath, pngOptions);
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -57,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web designer needs to generate a softened PNG thumbnail from a layered PSD file to improve page load speed while preserving text clarity.
- * 2. When an e‑commerce platform automatically blurs product background PSD images, applies a specific text rendering hint for overlay labels, and saves the result as PNG for web display.
- * 3. When a digital publishing workflow converts high‑resolution PSD artwork into PNG assets with a Gaussian blur effect while ensuring crisp vector text using the SingleBitPerPixel rendering hint.
- * 4. When a mobile app creates stylized PNG icons from original PSD designs by applying a blur filter and configuring text rendering to keep text legible on low‑resolution screens.
- * 5. When an automated reporting system processes PSD charts, softens visual elements with a Gaussian blur, sets the appropriate text rendering hint, and exports the final image as PNG for inclusion in PDF reports.
+ * 1. When a developer needs to soften a Photoshop PSD layer before generating a web‑ready PNG thumbnail, applying a Gaussian blur and preserving text clarity with a specific rendering hint.
+ * 2. When an automated pipeline must convert high‑resolution PSD designs into PNG assets for mobile apps while ensuring any embedded vector text is rasterized with single‑bit per pixel rendering for consistent appearance.
+ * 3. When a content management system imports user‑uploaded PSD files, applies a blur effect to hide sensitive details, and saves the result as a PNG for fast preview loading.
+ * 4. When a batch‑processing tool processes a folder of PSD files, adds a subtle Gaussian blur to background elements, and exports them to PNG with Aspose.Imaging’s TextRenderingHint to maintain crisp typography.
+ * 5. When a digital publishing workflow requires converting layered PSD artwork into PNG images with controlled text rasterization, using C# and Aspose.Imaging to apply blur and set the rendering hint in one step.
  */

@@ -12,45 +12,39 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.apng";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source PNG as a raster image
             using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                // Configure APNG creation options
+                const int frameDuration = 100; // milliseconds
+                const int animationDuration = 1000; // total animation duration in milliseconds
+                int numFrames = animationDuration / frameDuration;
+
                 ApngOptions createOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100u, // 100 ms per frame
+                    DefaultFrameTime = (uint)frameDuration,
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                // Create the APNG image with the same dimensions as the source
                 using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
                 {
-                    // Remove the default single frame
                     apngImage.RemoveAllFrames();
 
-                    // Add multiple frames (example: 5 frames) using the same source image
-                    int frameCount = 5;
-                    for (int i = 0; i < frameCount; i++)
+                    for (int i = 0; i < numFrames; i++)
                     {
                         apngImage.AddFrame(sourceImage);
                     }
 
-                    // Save the APNG (output path already bound via FileCreateSource)
                     apngImage.Save();
                 }
             }
@@ -61,3 +55,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer wants to create a looping animated icon for a desktop application by converting a static PNG logo into an APNG with a 100 ms frame delay.
+ * 2. When a web developer needs to generate lightweight animated graphics for a website banner by duplicating a single PNG frame into an APNG sequence using C# and Aspose.Imaging.
+ * 3. When an e‑learning platform programmatically produces animated step‑by‑step illustrations from a base PNG diagram, ensuring each frame displays for 100 ms in the resulting APNG file.
+ * 4. When a game developer automates the creation of sprite animations from a single PNG asset, using Aspose.Imaging to build an APNG with consistent frame timing for UI elements.
+ * 5. When a mobile app backend service converts uploaded PNG avatars into short looping APNG avatars with a 100 ms delay per frame for use in chat interfaces.
+ */

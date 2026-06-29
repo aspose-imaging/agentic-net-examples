@@ -1,38 +1,34 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string outputPath = "output\\filled_rectangle.png";
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\temp\filled_rectangle.png";
-
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a PNG image of size 200x200
             PngOptions pngOptions = new PngOptions();
-            using (Image image = Image.Create(pngOptions, 200, 200))
+            pngOptions.Source = new FileCreateSource(outputPath, false);
+
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 200, 200))
             {
-                // Initialize graphics object
-                Graphics graphics = new Graphics(image);
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-                // Define a blue solid brush and fill the rectangle
-                SolidBrush blueBrush = new SolidBrush(Color.Blue);
-                graphics.FillRectangle(blueBrush, new Rectangle(20, 20, 160, 160));
+                using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Blue))
+                {
+                    graphics.FillRectangle(brush, new Aspose.Imaging.Rectangle(20, 20, 160, 160));
+                }
 
-                // Define a thick black pen and draw the rectangle outline
-                Pen blackPen = new Pen(Color.Black, 5);
-                graphics.DrawRectangle(blackPen, new Rectangle(20, 20, 160, 160));
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 5);
+                graphics.DrawRectangle(pen, new Aspose.Imaging.Rectangle(20, 20, 160, 160));
 
-                // Save the image to the specified path
-                image.Save(outputPath);
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -44,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a PNG thumbnail for a product catalog, a developer can use Aspose.Imaging to draw a filled blue rectangle with a thick black border to highlight the product area.
- * 2. When creating a custom watermark image for PDF reports, the code can produce a 200×200 PNG containing a solid blue rectangle outlined in black as a visual placeholder.
- * 3. When building a UI mock‑up tool that exports design elements to PNG, a developer may need to render a blue rectangle with a black outline to represent a button or panel.
- * 4. When automating the production of test images for computer‑vision algorithms, the snippet can generate a simple PNG with a filled blue rectangle and thick black border to serve as a known geometric shape.
- * 5. When developing a game asset pipeline that requires pre‑rendered sprites, a developer can use this code to create a PNG sprite consisting of a blue rectangle outlined in black for collision debugging.
+ * 1. When a developer needs to generate a PNG badge with a solid blue background and a thick black border for a web dashboard, this code creates the image using Aspose.Imaging, SolidBrush and Pen.
+ * 2. When creating a placeholder image for a UI component that requires a filled rectangle with a specific color and outline thickness, the example shows how to draw and save a 200×200 PNG using C# and Aspose.Imaging.
+ * 3. When producing a printable label in C# where the main area is a blue rectangle highlighted by a bold black frame, the code demonstrates filling and outlining the shape with SolidBrush and Pen.
+ * 4. When automating the creation of a simple thumbnail that visually separates content sections using a colored rectangle with a contrasting border, this snippet uses Aspose.Imaging.Graphics to draw and save the PNG.
+ * 5. When writing documentation or tutorials that need a clear example of basic drawing primitives such as FillRectangle and DrawRectangle with SolidBrush and Pen, the code provides a ready‑to‑run C# solution.
  */

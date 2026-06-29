@@ -27,26 +27,23 @@ class Program
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options for OTG
-                var otgRasterizationOptions = new OtgRasterizationOptions
+                // Set up rasterization options for OTG
+                OtgRasterizationOptions otgRasterOptions = new OtgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
 
-                // Prepare PDF save options and attach rasterization options
-                var pdfOptions = new PdfOptions
+                // Configure PDF save options and set custom author metadata
+                PdfOptions pdfOptions = new PdfOptions
                 {
-                    VectorRasterizationOptions = otgRasterizationOptions
+                    VectorRasterizationOptions = otgRasterOptions,
+                    PdfDocumentInfo = new PdfDocumentInfo
+                    {
+                        Author = "Custom Author"
+                    }
                 };
 
-                // Set custom author metadata
-                var docInfo = new PdfDocumentInfo
-                {
-                    Author = "Custom Author"
-                };
-                pdfOptions.PdfDocumentInfo = docInfo;
-
-                // Save the image as PDF
+                // Save as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -56,3 +53,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a medical imaging system needs to archive OTG vector graphics as searchable PDFs with a specific author name for regulatory compliance.
+ * 2. When an engineering design tool exports OTG schematics and wants to bundle them into PDFs that include the designer’s name in the document metadata.
+ * 3. When a publishing workflow converts OTG illustrations into PDF brochures while embedding the editor’s name as the author property for branding.
+ * 4. When a legal document management solution transforms OTG diagrams into PDFs and records the attorney’s name in the PDF metadata for audit trails.
+ * 5. When an automated batch process generates PDF manuals from OTG assets and sets a custom author field to identify the content creator.
+ */

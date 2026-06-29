@@ -1,35 +1,45 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
-            string outputPath = "output.bmp";
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir);
+            // Output file path (hard‑coded)
+            string outputPath = "output/output.bmp";
 
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Configure BMP options
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 500, 500))
+            // Create a 500×500 BMP image
+            using (Image image = Image.Create(bmpOptions, 500, 500))
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.Wheat);
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.Wheat);
 
-                Aspose.Imaging.Pen ellipsePen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3);
-                graphics.DrawEllipse(ellipsePen, new Aspose.Imaging.Rectangle(100, 100, 300, 200));
+                // Draw an ellipse
+                Pen ellipsePen = new Pen(Color.Blue, 3);
+                graphics.DrawEllipse(ellipsePen, new Rectangle(100, 100, 300, 150));
 
+                // Apply a 45‑degree rotation transform
                 graphics.RotateTransform(45);
 
-                Aspose.Imaging.Pen rectPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 3);
-                graphics.DrawRectangle(rectPen, new Aspose.Imaging.Rectangle(150, 150, 200, 100));
+                // Draw a rectangle after rotation
+                Pen rectPen = new Pen(Color.Red, 3);
+                graphics.DrawRectangle(rectPen, new Rectangle(150, 150, 200, 100));
 
+                // Save the image (file is already bound via FileCreateSource)
                 image.Save();
             }
         }
@@ -42,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP report thumbnail that shows a blue ellipse and a rotated red rectangle for a printable document preview.
- * 2. When an application must programmatically create a BMP watermark image with geometric shapes, using Aspose.Imaging to draw an ellipse and then rotate the canvas before adding a rectangle.
- * 3. When a game asset pipeline requires a BMP sprite sheet where an ellipse defines a collision zone and a rotated rectangle indicates the sprite’s orientation, all drawn via C# graphics transforms.
- * 4. When a diagnostic tool needs to output a BMP diagnostic diagram that visualizes sensor ranges as an ellipse and then rotates a rectangle to represent a shifted field of view.
- * 5. When a web service generates on‑the‑fly BMP icons with custom shapes, applying a rotation transform to align a rectangle with a logo while keeping the original ellipse for branding.
+ * 1. When a developer needs to generate a BMP file with custom vector graphics, such as an ellipse and a rotated rectangle, for use in legacy Windows applications or printing workflows.
+ * 2. When creating a simple diagram or badge in C# where precise control over shape positioning and rotation is required, leveraging Aspose.Imaging’s Graphics API.
+ * 3. When producing test images for automated UI testing that must include specific geometric shapes and transformations to validate rendering pipelines.
+ * 4. When exporting design assets from a .NET service to a 24‑bit BMP format for compatibility with embedded systems that only support basic image formats.
+ * 5. When building a server‑side image generation tool that programmatically draws shapes and applies rotation before saving the result as a BMP for downstream processing.
  */

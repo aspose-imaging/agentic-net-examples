@@ -8,12 +8,11 @@ class Program
 {
     static void Main()
     {
-        // Wrap the whole logic in a try-catch to handle unexpected errors gracefully
         try
         {
-            // Hard‑coded input and output file paths
+            // Hardcoded input and output file paths
             string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample.jpg";
+            string outputPath = @"C:\Images\sample_converted.jpg";
 
             // Verify that the input file exists
             if (!File.Exists(inputPath))
@@ -22,22 +21,19 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare JPEG save options with a standard quality level
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Quality = 100 // standard high quality
-                };
+                // Prepare JPEG save options with default quality
+                JpegOptions jpegOptions = new JpegOptions();
 
-                // Configure vector rasterization for OTG to JPEG conversion
+                // Configure vector rasterization for OTG files
                 OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
                 {
-                    // Preserve the original image size
+                    // Preserve original size
                     PageSize = image.Size
                 };
                 jpegOptions.VectorRasterizationOptions = otgRasterization;
@@ -48,8 +44,16 @@ class Program
         }
         catch (Exception ex)
         {
-            // Output any runtime error without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a JPEG preview of an OpenDocument graphic (OTG) for web display or email attachment.
+ * 2. When an application must batch‑convert user‑uploaded OTG diagrams to JPEG to store them in a database that only supports raster image file formats.
+ * 3. When a reporting tool has to embed vector‑based OTG charts into PDF reports that require JPEG raster images for compatibility using C# and Aspose.Imaging.
+ * 4. When a mobile app needs to display OTG icons on devices that only support JPEG decoding, requiring on‑the‑fly conversion with default quality settings.
+ * 5. When a document management system must create thumbnail images of OTG files using Aspose.Imaging’s vector rasterization options and save them as JPEG for quick browsing.
+ */

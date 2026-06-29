@@ -9,11 +9,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input and output file paths
             string inputPath = @"C:\Images\sample.odg";
             string outputPath = @"C:\Images\sample.png";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,7 +26,7 @@ class Program
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG options for progressive (interlaced) rendering
+                // Configure PNG saving options with interlacing (progressive)
                 PngOptions pngOptions = new PngOptions
                 {
                     Progressive = true
@@ -42,3 +42,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to display OpenDocument graphics on a website and wants faster progressive loading, they can convert ODG to interlaced PNG using C# and Aspose.Imaging.
+ * 2. When an e‑learning platform stores diagram assets as ODG files but requires PNG thumbnails that load gradually for better user experience, this code provides the conversion.
+ * 3. When a mobile app downloads large ODG illustrations and must show a preview while the full image loads, the interlaced PNG output enables progressive rendering.
+ * 4. When an automated build pipeline generates documentation PDFs and needs to embed ODG diagrams as web‑friendly PNGs with progressive loading for faster page rendering, the code can be used.
+ * 5. When a content management system migrates legacy ODG artwork to a modern image format and wants to improve page load times by using interlaced PNGs, this snippet performs the conversion.
+ */

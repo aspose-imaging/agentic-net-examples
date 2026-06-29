@@ -17,34 +17,25 @@ class Program
 
         try
         {
-            // Set up BMP options with a file create source
+            // Set BMP options and bind to the output file
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a 200x200 image canvas
-            using (Image image = Image.Create(bmpOptions, 200, 200))
+            // Create a 500x500 image
+            using (Image image = Image.Create(bmpOptions, 500, 500))
             {
-                // Initialize graphics for drawing
+                // Initialize graphics for the image
                 Graphics graphics = new Graphics(image);
-
-                // Optional: clear background to white
                 graphics.Clear(Color.White);
 
-                // Define rectangle bounds
-                Rectangle rect = new Rectangle(50, 50, 100, 100);
-
-                // Draw rectangle outline
-                Pen pen = new Pen(Color.Black, 2);
-                graphics.DrawRectangle(pen, rect);
-
-                // Fill rectangle with a solid brush
+                // Fill a rectangle with a solid brush
                 using (SolidBrush brush = new SolidBrush(Color.Blue))
                 {
-                    graphics.FillRectangle(brush, rect);
+                    graphics.FillRectangle(brush, new Rectangle(100, 100, 300, 200));
                 }
 
-                // Save the image (output path already bound via FileCreateSource)
+                // Save the image (output is already bound to the file)
                 image.Save();
             }
         }
@@ -57,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a 24‑bit BMP thumbnail with a highlighted region for a Windows desktop application, they can use this C# code to draw and fill a rectangle on a 200×200 canvas.
- * 2. When generating placeholder images for automated UI tests, the code can quickly produce a BMP file with a solid‑colored rectangle to verify layout rendering.
- * 3. When exporting simple diagram elements such as a colored box from a .NET service, the Graphics.FillRectangle with SolidBrush creates a BMP that can be embedded in reports.
- * 4. When building a batch image‑processing tool that marks detected objects by drawing filled rectangles on BMP files, this snippet shows how to draw and fill the shape programmatically.
- * 5. When teaching beginners about basic image manipulation in C#, the example demonstrates creating a BMP, clearing the background, and using Pen and SolidBrush to outline and fill a rectangle.
+ * 1. When a developer needs to programmatically generate a BMP file in C# and draw a solid‑colored rectangle for a simple diagram or placeholder image.
+ * 2. When an application must create a 500×500 bitmap thumbnail and fill a region with a specific color using Aspose.Imaging’s Graphics.FillRectangle and SolidBrush.
+ * 3. When a reporting tool requires embedding a blue rectangle into a white background BMP to highlight a section of a generated chart.
+ * 4. When a Windows service automates the production of custom‑size BMP assets for UI skins, needing to clear the canvas and fill a rectangle with a solid brush.
+ * 5. When a batch process creates printable BMP graphics for signage, using Aspose.Imaging to set BitsPerPixel, clear the image, and fill a rectangle with a chosen color.
  */

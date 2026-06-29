@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -9,30 +10,37 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.bmp";
-            string outputPath = "output/sample.jpg";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\sample.bmp";
+            string outputPath = @"C:\Images\sample_converted.jpg";
 
-            // Verify input file exists
+            // Desired JPEG quality (1-100)
+            int jpegQuality = 85;
+
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load BMP image
+            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG save options with desired quality
-                JpegOptions jpegOptions = new JpegOptions
+                // Configure JPEG save options
+                var jpegOptions = new JpegOptions
                 {
-                    Quality = 85 // Adjust quality (1-100) as needed
+                    Quality = jpegQuality,
+                    BitsPerChannel = 8,
+                    CompressionType = JpegCompressionMode.Progressive,
+                    ResolutionSettings = new ResolutionSetting(96.0, 96.0),
+                    ResolutionUnit = ResolutionUnit.Inch
                 };
 
-                // Save as JPEG
+                // Save the image as JPEG with the specified options
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -45,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# developer needs to reduce the file size of high‑resolution BMP screenshots for faster web page loading, they can use Aspose.Imaging to convert the BMP to a JPEG with a configurable quality setting.
- * 2. When building a .NET desktop application that archives scanned documents, the code enables automatic conversion of BMP scans to JPEGs while preserving visual fidelity by adjusting the compression level.
- * 3. When creating an email‑sending service in C#, the developer can transform BMP attachments into JPEG format with a chosen quality to stay within attachment size limits.
- * 4. When a photo‑management tool must generate thumbnail previews, the BMP images can be batch‑converted to JPEG using Aspose.Imaging’s JpegOptions to control the balance between image clarity and storage space.
- * 5. When integrating a cloud‑based image‑processing API, the code allows the service to accept BMP uploads and return JPEG outputs with a specified quality, ensuring consistent results across different client applications.
+ * 1. When a desktop application needs to batch‑convert legacy BMP screenshots to smaller JPEG files for faster web upload while controlling the compression quality.
+ * 2. When an e‑commerce platform generates product thumbnails from high‑resolution BMP assets and must save them as progressive JPEGs with a specific quality setting to balance visual fidelity and page load speed.
+ * 3. When a document‑management system receives scanned BMP images and must store them as JPEGs with 96 dpi resolution and 8‑bit channels to reduce storage costs without losing readability.
+ * 4. When a Windows service processes user‑uploaded BMP logos and needs to output JPEG files with configurable quality for email newsletters that support only JPEG image format.
+ * 5. When a photo‑editing tool offers a “Save As JPEG” feature that lets developers specify the compression level, resolution unit, and progressive encoding for BMP files using the Aspose.Imaging .NET API.
  */

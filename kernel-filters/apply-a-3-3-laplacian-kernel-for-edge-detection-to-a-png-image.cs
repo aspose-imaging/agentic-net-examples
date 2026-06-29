@@ -1,18 +1,16 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,19 +19,18 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
 
-                double[,] laplacianKernel = new double[,]
+                double[,] kernel = new double[,]
                 {
                     { 0, -1, 0 },
                     { -1, 4, -1 },
                     { 0, -1, 0 }
                 };
 
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(laplacianKernel));
-
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
                 raster.Save(outputPath, new PngOptions());
             }
         }
@@ -46,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to highlight edges in a PNG photograph for computer‑vision preprocessing, they can apply a 3×3 Laplacian kernel using Aspose.Imaging in C#.
- * 2. When building a .NET desktop application that converts scanned PNG documents into line‑art, the code can perform edge detection to improve contrast and readability.
- * 3. When creating an automated quality‑control pipeline that flags defects in product images, applying the Laplacian filter to PNG files helps detect sharp transitions indicating scratches or dents.
- * 4. When developing a web service that returns stylized PNG thumbnails with emphasized outlines, the C# routine loads the image, runs the convolution filter, and saves the edge‑detected result for fast delivery.
- * 5. When integrating image analysis into a medical imaging tool that requires edge detection on PNG scans, the sample shows how to perform the operation with Aspose.Imaging’s RasterImage class.
+ * 1. When a developer needs to highlight object boundaries in a PNG screenshot for a visual inspection tool, they can apply a 3×3 Laplacian kernel using Aspose.Imaging's convolution filter.
+ * 2. When preparing PNG assets for a machine‑learning pipeline that requires edge maps as input, the code can generate sharp edge detection results with a single C# call.
+ * 3. When building a desktop application that lets users compare before‑and‑after effects of image sharpening, the Laplacian filter can be used to create the “after” PNG showing detected edges.
+ * 4. When automating quality‑control checks on scanned PNG documents, applying the Laplacian kernel helps reveal missing or broken lines that need to be flagged.
+ * 5. When creating stylized thumbnails for a web gallery where edge outlines enhance visual appeal, developers can run this C# routine to produce edge‑detected PNG images on the fly.
  */

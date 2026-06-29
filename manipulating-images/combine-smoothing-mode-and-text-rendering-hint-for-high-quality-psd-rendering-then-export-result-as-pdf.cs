@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Psd;
 using Aspose.Imaging.FileFormats.Pdf;
 
@@ -12,53 +11,49 @@ class Program
     {
         try
         {
-            // Input SVG file
-            string inputPath = "Input/sample.svg";
-            // Output PSD file
-            string psdPath = "Output/result.psd";
-            // Output PDF file
-            string pdfPath = "Output/result.pdf";
-
-            // Validate input file existence
+            // Input vector image (e.g., SVG)
+            string inputPath = Path.Combine("Input", "sample.svg");
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directories exist
+            // Output PSD path
+            string psdPath = Path.Combine("Output", "result.psd");
             Directory.CreateDirectory(Path.GetDirectoryName(psdPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
 
-            // Load the vector image (e.g., SVG)
+            // Load the vector image and save as PSD with high‑quality rasterization settings
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD options with high‑quality rasterization settings
-                using (PsdOptions psdOptions = new PsdOptions())
+                var psdOptions = new PsdOptions
                 {
-                    psdOptions.Source = new FileCreateSource(psdPath, false);
-                    psdOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    // Configure vector rasterization for high quality
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
                         BackgroundColor = Color.White,
                         PageWidth = image.Width,
                         PageHeight = image.Height,
                         SmoothingMode = SmoothingMode.AntiAlias,
                         TextRenderingHint = TextRenderingHint.AntiAlias
-                    };
+                    },
+                    // Optional PSD settings
+                    ColorMode = ColorModes.Rgb,
+                    CompressionMethod = CompressionMethod.Raw
+                };
 
-                    // Save as PSD
-                    image.Save(psdPath, psdOptions);
-                }
+                image.Save(psdPath, psdOptions);
             }
+
+            // Output PDF path
+            string pdfPath = Path.Combine("Output", "result.pdf");
+            Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
 
             // Load the generated PSD and export to PDF
             using (Image psdImage = Image.Load(psdPath))
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    // Save as PDF
-                    psdImage.Save(pdfPath, pdfOptions);
-                }
+                var pdfOptions = new PdfOptions();
+                psdImage.Save(pdfPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -70,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG logo into a print‑ready PDF with anti‑aliased rasterization, they can use this code to first render a high‑quality PSD and then export it as PDF.
- * 2. When building an automated pipeline that archives vector illustrations as lossless PSD files while preserving smooth text and graphics for future editing, this snippet ensures the PSD is created with SmoothingMode.AntiAlias and TextRenderingHint.AntiAlias before PDF export.
- * 3. When generating product catalogs where SVG icons must appear crisp on both screen and printed pages, the code provides a reliable way to rasterize the vectors with high‑quality settings and produce a PDF for distribution.
- * 4. When a web service needs to offer on‑the‑fly conversion of user‑uploaded SVG diagrams into searchable PDFs, the example demonstrates how to apply high‑quality rendering options during PSD creation to maintain visual fidelity.
- * 5. When creating marketing brochures that require exact color reproduction and smooth typography from vector assets, developers can employ this workflow to render the SVG into a PSD with anti‑aliasing and then output a PDF ready for professional printing.
+ * 1. When a web application needs to convert user‑uploaded SVG logos into print‑ready PSD files with anti‑aliased edges and crisp text before generating a PDF brochure.
+ * 2. When a desktop publishing tool automates the creation of high‑resolution PSD mockups from vector illustrations and then bundles them into a PDF portfolio for client review.
+ * 3. When an e‑commerce platform rasterizes product vector graphics into PSD for Photoshop editing while preserving smooth curves and text, and then exports the final design as a PDF invoice attachment.
+ * 4. When a marketing automation script processes brand assets by rendering SVG icons with SmoothingMode.AntiAlias and TextRenderingHint.AntiAlias into PSD files and subsequently creates PDF catalogs for distribution.
+ * 5. When a document management system ingests vector diagrams, converts them to high‑quality PSD layers for archival, and then generates searchable PDF versions for easy access.
  */

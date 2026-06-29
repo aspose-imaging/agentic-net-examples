@@ -1,9 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Metadata;
 
 class Program
 {
@@ -26,22 +24,20 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the WebP image
-            using (WebPImage webPImage = new WebPImage(inputPath))
+            using (Image webpImage = Image.Load(inputPath))
             {
                 // Prepare PDF options and preserve metadata
-                PdfOptions pdfOptions = new PdfOptions
+                var pdfOptions = new PdfOptions
                 {
-                    KeepMetadata = true
+                    KeepMetadata = true,
+                    // Transfer EXIF data from the source image if present
+                    ExifData = webpImage.Metadata?.ExifData,
+                    // Transfer XMP data as well (optional)
+                    XmpData = webpImage.Metadata?.XmpData
                 };
 
-                // Copy EXIF data from the WebP image to PDF options, if present
-                if (webPImage.Metadata is ImageMetadata imgMeta && imgMeta.ExifData != null)
-                {
-                    pdfOptions.ExifData = imgMeta.ExifData;
-                }
-
-                // Save as PDF with preserved EXIF metadata
-                webPImage.Save(outputPath, pdfOptions);
+                // Save as PDF preserving EXIF metadata
+                webpImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -50,3 +46,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a photography website needs to convert user‑uploaded WebP images to PDF portfolios while keeping the original camera EXIF data for attribution and copyright tracking.
+ * 2. When a mobile app generates PDF receipts that embed WebP screenshots of a scene and must retain GPS coordinates and timestamp metadata for audit purposes.
+ * 3. When a digital asset management system migrates archived WebP files to searchable PDF documents and wants to preserve EXIF tags so assets remain searchable by camera model or capture date.
+ * 4. When an e‑commerce platform creates printable product catalogs from WebP product photos and needs to retain XMP and EXIF metadata for compliance with brand guidelines and image provenance.
+ * 5. When a legal firm converts WebP evidence images to PDF case files and must maintain the original EXIF metadata to support chain‑of‑custody documentation.
+ */

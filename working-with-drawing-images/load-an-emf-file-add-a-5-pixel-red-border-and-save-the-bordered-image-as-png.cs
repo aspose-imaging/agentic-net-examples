@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Emf.Graphics;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
@@ -13,7 +13,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.emf";
-            string outputPath = "output\\bordered.png";
+            string outputPath = "output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,30 +26,24 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EMF image
-            using (Image image = Image.Load(inputPath))
+            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
             {
-                // Cast to MetaImage to modify the canvas
-                var metaImage = (Aspose.Imaging.FileFormats.Emf.MetaImage)image;
+                // Set the background color to red (will fill the added border area)
+                emfImage.BackgroundColor = Color.Red;
+
+                // Define a 5‑pixel border
                 int border = 5;
 
-                // Expand canvas by 5 pixels on each side
-                metaImage.ResizeCanvas(new Rectangle(-border, -border,
-                    metaImage.Width + border * 2, metaImage.Height + border * 2));
+                // Expand the canvas to create the border
+                emfImage.ResizeCanvas(new Rectangle(
+                    -border,                     // left offset
+                    -border,                     // top offset
+                    emfImage.Width + 2 * border, // new width
+                    emfImage.Height + 2 * border // new height
+                ));
 
-                // Draw a red rectangle as the border
-                var graphics = EmfRecorderGraphics2D.FromEmfImage((EmfImage)image);
-                int innerX = border;
-                int innerY = border;
-                int innerWidth = metaImage.Width - border * 2;
-                int innerHeight = metaImage.Height - border * 2;
-                graphics.DrawRectangle(new Pen(Color.Red, border), innerX, innerY, innerWidth, innerHeight);
-
-                // Finalize recording and save as PNG
-                using (EmfImage borderedEmf = graphics.EndRecording())
-                {
-                    var pngOptions = new PngOptions();
-                    borderedEmf.Save(outputPath, pngOptions);
-                }
+                // Save the result as PNG
+                emfImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -61,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy EMF vector graphics into web‑friendly PNGs while adding a visible red border for branding or visual separation.
- * 2. When an application must programmatically enlarge the canvas of an EMF file by a few pixels and draw a colored outline to meet printing margin requirements.
- * 3. When a reporting tool generates EMF charts and the developer wants to automatically embed a 5‑pixel red frame before exporting the images as PNG for email attachments.
- * 4. When a desktop utility processes batch EMF icons, adds a consistent red border for UI consistency, and saves the results as PNG thumbnails.
- * 5. When a C# service integrates Aspose.Imaging to ensure that imported EMF diagrams are highlighted with a red border and stored in PNG format for downstream analytics pipelines.
+ * 1. When a developer needs to convert a vector EMF logo into a PNG thumbnail with a consistent 5‑pixel red border for web display.
+ * 2. When an application must add a colored frame to legacy EMF diagrams before embedding them in a PDF report.
+ * 3. When a batch‑processing tool has to standardize the canvas size of EMF icons by expanding them with a red border and saving as PNG for UI assets.
+ * 4. When a Windows service generates red‑bordered PNG previews of EMF drawings for a document management system.
+ * 5. When a C# program automates the preparation of EMF charts for email newsletters by adding a red border and converting them to PNG format.
  */

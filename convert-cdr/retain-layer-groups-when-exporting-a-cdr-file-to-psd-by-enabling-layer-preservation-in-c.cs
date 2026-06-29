@@ -8,43 +8,34 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input/sample.cdr";
+        string outputPath = "Output/sample.psd";
+
         try
         {
-            // Input and output paths
-            string inputPath = "Input/sample.cdr";
-            string outputPath = "Output/sample.psd";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load CDR image
             using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                // Prepare PSD export options
-                var psdOptions = new PsdOptions();
-
-                // Preserve all pages as layers
-                psdOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, cdr.PageCount - 1));
-
-                // Set vector rasterization options
-                psdOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                using (PsdOptions psdOptions = new PsdOptions())
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = cdr.Width,
-                    PageHeight = cdr.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
+                    psdOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    };
 
-                // Save as PSD with layer groups preserved
-                cdr.Save(outputPath, psdOptions);
+                    cdr.Save(outputPath, psdOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -53,3 +44,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a graphic designer needs to convert a CorelDRAW (CDR) file into an Adobe Photoshop (PSD) file while keeping the original layer groups intact for further editing in Photoshop.
+ * 2. When an automated build pipeline processes batch CDR assets and must preserve vector layers and groups during conversion to PSD for downstream compositing.
+ * 3. When a web application allows users to upload CDR logos and returns a PSD version that retains editable layers for branding teams.
+ * 4. When a digital asset management system migrates legacy CDR artwork to PSD format and requires layer preservation to maintain editability without manual recreation.
+ * 5. When a C# desktop tool generates print‑ready PSD files from CDR source files, ensuring that each layer group remains separate for color‑separation workflows.
+ */

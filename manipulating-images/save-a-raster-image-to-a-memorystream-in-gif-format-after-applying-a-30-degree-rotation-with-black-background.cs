@@ -1,49 +1,45 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input path
-            string inputPath = @"C:\temp\sample.gif";
+            // Hardcoded input and dummy output paths
+            string inputPath = "input.jpg";
+            string outputPath = "output/output.gif";
 
-            // Verify input file exists
+            // Input file existence check
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            // Ensure output directory exists (even though we save to a stream)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the raster image
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // If the image is a GIF, use the Rotate method that accepts background color
-                if (image is GifImage gifImage)
-                {
-                    // Rotate 30 degrees clockwise, keep original dimensions, fill background with black
-                    gifImage.Rotate(30f, false, Color.Black);
-                }
-                else
-                {
-                    // For non‑GIF images, fallback to a no‑op rotation (or implement alternative logic)
-                    image.RotateFlip(RotateFlipType.RotateNoneFlipNone);
-                }
+                // Rotate 30 degrees with black background, resizing proportionally
+                image.Rotate(30f, true, Aspose.Imaging.Color.Black);
 
                 // Prepare GIF save options
-                GifOptions saveOptions = new GifOptions();
-
-                // Save the rotated image to a MemoryStream in GIF format
-                using (MemoryStream memoryStream = new MemoryStream())
+                using (GifOptions options = new GifOptions())
                 {
-                    image.Save(memoryStream, saveOptions);
-                    Console.WriteLine($"Image saved to MemoryStream, length = {memoryStream.Length} bytes");
+                    options.BackgroundColor = Aspose.Imaging.Color.Black;
+
+                    // Save to a memory stream in GIF format
+                    using (MemoryStream stream = new MemoryStream())
+                    {
+                        image.Save(stream, options);
+                        Console.WriteLine($"Image saved to memory stream. Length: {stream.Length} bytes.");
+                    }
                 }
             }
         }
@@ -53,3 +49,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web service needs to generate a thumbnail preview of a user‑uploaded JPEG, rotate it 30° for a stylized effect, and return the result as a GIF stream without writing to disk.
+ * 2. When an email‑marketing platform creates animated GIF banners on the fly, applying a 30‑degree rotation with a black background to fit a design template and sending the image as a memory stream attachment.
+ * 3. When a desktop application converts scanned photos to GIF for legacy printer compatibility, rotating each image 30° to correct orientation and using a MemoryStream to avoid temporary files.
+ * 4. When a cloud function processes images for a mobile app, applying a 30° rotation with black padding, encoding the output as GIF, and streaming it directly to a CDN endpoint.
+ * 5. When a reporting tool embeds rotated product images into PDF reports, saving the rotated JPEG as a GIF in a MemoryStream to embed without persisting intermediate files.
+ */

@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.cdr";
-            string outputPath = @"C:\Images\adjusted.gif";
+            string inputPath = @"C:\temp\sample.cdr";
+            string outputPath = @"C:\temp\adjusted.gif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -25,39 +25,35 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR image
+            // Load CDR image
             using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                // Prepare GIF options with vector rasterization settings matching the CDR size
-                GifOptions rasterOptions = new GifOptions
+                // Prepare GIF options with vector rasterization settings
+                GifOptions gifOptions = new GifOptions
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    VectorRasterizationOptions = new CdrRasterizationOptions
                     {
                         PageWidth = cdr.Width,
                         PageHeight = cdr.Height
                     }
                 };
 
-                // Rasterize CDR to GIF in memory
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    cdr.Save(ms, rasterOptions);
-                    ms.Position = 0;
+                // Save rasterized GIF
+                cdr.Save(outputPath, gifOptions);
+            }
 
-                    // Load the rasterized GIF
-                    using (GifImage gif = (GifImage)Image.Load(ms))
-                    {
-                        // Adjust gamma (example value)
-                        gif.AdjustGamma(2.2f);
+            // Load the generated GIF to adjust gamma and verify alpha channel
+            using (GifImage gif = (GifImage)Image.Load(outputPath))
+            {
+                // Verify if the GIF has an alpha channel
+                bool hasAlpha = gif.HasAlpha;
+                Console.WriteLine($"GIF has alpha channel: {hasAlpha}");
 
-                        // Verify alpha channel presence
-                        bool hasAlpha = gif.HasAlpha;
-                        Console.WriteLine($"GIF has alpha channel: {hasAlpha}");
+                // Adjust gamma (example value 2.0)
+                gif.AdjustGamma(2.0f);
 
-                        // Save the adjusted GIF to the output path
-                        gif.Save(outputPath, new GifOptions());
-                    }
-                }
+                // Save the adjusted GIF (overwrite)
+                gif.Save(outputPath, new GifOptions());
             }
         }
         catch (Exception ex)
@@ -69,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a CorelDRAW (CDR) illustration to a web‑friendly GIF, apply gamma correction for accurate brightness, and confirm that the resulting GIF retains its alpha channel for transparent overlays.
- * 2. When an automated image‑processing pipeline must batch‑process CDR files, rasterize them to GIF with the original dimensions, adjust the gamma to standardize color appearance, and verify alpha channel presence before publishing.
- * 3. When a UI designer wants to preview a CDR logo as a GIF with corrected gamma for on‑screen consistency and programmatically ensure the GIF includes an alpha channel for compositing.
- * 4. When a content‑management system integrates Aspose.Imaging for .NET to ingest vector CDR assets, convert them to GIF using VectorRasterizationOptions, apply a 2.2 gamma curve, and check for alpha support before storing the files.
- * 5. When a developer builds a desktop tool that loads a CDR image, rasterizes it to a same‑size GIF, performs gamma adjustment to compensate for display differences, and validates the presence of an alpha channel to guarantee proper blending in downstream applications.
+ * 1. When a developer needs to convert a CorelDRAW CDR illustration to a GIF, verify that the resulting image retains its alpha channel for transparency, and adjust the gamma to improve brightness, this code provides a complete solution.
+ * 2. When building an automated workflow that rasterizes CDR assets into GIFs for web publishing, checks for an alpha channel to preserve transparent backgrounds, and applies gamma correction to match display standards, the example can be used directly.
+ * 3. When creating a batch‑processing tool that ingests multiple CDR files, converts each to a GIF, confirms the presence of an alpha channel for overlay use, and fine‑tunes gamma to ensure consistent visual quality, this code demonstrates the required steps.
+ * 4. When integrating Aspose.Imaging into a C# application that must accept user‑uploaded CDR graphics, render them as GIFs, validate that the GIF includes an alpha channel, and adjust gamma to compensate for low‑contrast screens, the provided snippet shows how to achieve it.
+ * 5. When developing a desktop utility for designers to preview CorelDRAW drawings as GIFs, verify transparency via the alpha channel, and apply gamma adjustments for accurate color representation before exporting, this code offers a ready‑to‑use implementation.
  */

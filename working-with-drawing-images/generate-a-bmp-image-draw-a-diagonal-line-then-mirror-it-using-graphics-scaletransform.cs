@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -17,22 +17,22 @@ class Program
             int height = 200;
 
             BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            using (Image image = Image.Create(bmpOptions, width, height))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, width, height))
             {
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                Pen pen = new Pen(Color.Black, 2);
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
+                graphics.DrawLine(pen, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Point(width, height));
 
-                graphics.DrawLine(pen, new Point(0, 0), new Point(width - 1, height - 1));
+                graphics.ScaleTransform(-1, 1);
+                graphics.TranslateTransform(-width, 0);
 
-                graphics.ScaleTransform(-1f, 1f);
-                graphics.TranslateTransform(width, 0);
+                graphics.DrawLine(pen, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Point(width, height));
 
-                graphics.DrawLine(pen, new Point(0, 0), new Point(width - 1, height - 1));
-
-                image.Save(outputPath, bmpOptions);
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -44,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP thumbnail with a mirrored diagonal line for a Windows desktop widget.
- * 2. When an application must create a simple black‑on‑white test pattern in BMP format to verify printer alignment.
- * 3. When a game engine requires a procedural texture that shows both the original and horizontally flipped diagonal lines for debugging sprite mirroring.
- * 4. When an automated report generator has to embed a BMP illustration of a symmetric design using C# Graphics.ScaleTransform.
- * 5. When a legacy system expects a BMP file containing a mirrored diagonal line to serve as a placeholder image in a UI.
+ * 1. When a developer needs to generate a BMP image with a diagonal line and its mirrored counterpart for a document preview watermark using Aspose.Imaging and C#.
+ * 2. When creating a simple test pattern in a .NET console application to validate that Graphics.ScaleTransform correctly flips graphics horizontally in a BMP file.
+ * 3. When building a batch process that adds symmetric diagonal lines to product label images saved as BMP format for visual consistency across a catalog.
+ * 4. When developing a diagnostic tool that visualizes coordinate transformations by drawing an original and a mirrored diagonal line in the same bitmap using Aspose.Imaging.Graphics.
+ * 5. When implementing a lightweight graphics routine to produce mirrored line art for educational tutorials on image processing concepts such as scaling and translation in C#.
  */

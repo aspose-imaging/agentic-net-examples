@@ -1,8 +1,10 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 public class Program
 {
@@ -10,17 +12,21 @@ public class Program
     {
         try
         {
-            string inputPath = "corrupted.tif";
-            string outputPath = "recovered.tif";
+            // Hardcoded input and output paths
+            string inputPath = "Corrupted.tif";
+            string outputPath = "output/Recovered.tif";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the corrupted TIFF with recovery mode
             var loadOptions = new LoadOptions
             {
                 DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
@@ -29,18 +35,11 @@ public class Program
 
             using (Image image = Image.Load(inputPath, loadOptions))
             {
-                // Cast to TiffImage for TIFF-specific operations
-                TiffImage tiff = image as TiffImage;
-                if (tiff != null)
-                {
-                    // Example of accessing image properties
-                    int width = tiff.Width;
-                    int height = tiff.Height;
-                    // Additional processing can be performed here
-                }
+                // Additional processing can be performed here
 
-                // Save the recovered image
-                image.Save(outputPath);
+                // Save the recovered image as TIFF
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +51,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system receives a partially damaged DICOM‑exported TIFF file and needs to recover it with Aspose.Imaging’s ConsistentRecover mode before extracting pixel data for analysis.
- * 2. When a document management workflow encounters a corrupted scanned TIFF invoice and must restore the image to white‑background consistency so it can be indexed and OCR‑processed.
- * 3. When a GIS application loads large satellite TIFF tiles that were truncated during transfer and requires automatic background‑color filling to keep the map rendering pipeline functional.
- * 4. When an e‑commerce platform imports user‑uploaded product photos in TIFF format that contain header errors, and the developer needs to recover the images and then resize them for web thumbnails.
- * 5. When a digital archiving tool processes historic TIFF photographs with missing metadata and must use the first recovery mode to load the images for further color correction and archival storage.
+ * 1. When a C# medical imaging application receives a corrupted TIFF scan and uses Aspose.Imaging’s ConsistentRecover mode to restore the image before diagnostic analysis.
+ * 2. When a document management system written in C# must open damaged multi‑page TIFF invoices and recover them with Aspose.Imaging for OCR processing.
+ * 3. When a GIS developer needs to load a corrupted satellite TIFF raster in a .NET application and recover it using Aspose.Imaging’s DataRecoveryMode to continue mapping operations.
+ * 4. When a digital archiving service processes batches of corrupted TIFF photographs in C# and employs Aspose.Imaging to recover and save them in a consistent format for long‑term storage.
+ * 5. When a printing workflow built on .NET encounters a corrupted TIFF artwork file and uses Aspose.Imaging’s recovery mode to fix the image before color‑accurate printing.
  */

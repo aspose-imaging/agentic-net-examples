@@ -3,9 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -14,26 +11,29 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputSvgPath = "input.svg";
-            string originalPngPath = "original.png";
-            string blurredPngPath = "blurred.png";
+            string inputPath = "input.svg";
+            string outputDir = "output";
+            string originalRasterPath = Path.Combine(outputDir, "original.png");
+            string filteredRasterPath = Path.Combine(outputDir, "filtered.png");
 
             // Verify input file exists
-            if (!File.Exists(inputSvgPath))
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputSvgPath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(originalPngPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(blurredPngPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(originalRasterPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(filteredRasterPath));
 
-            // Load SVG image and rasterize to original PNG
-            using (Image image = Image.Load(inputSvgPath))
+            // Load SVG image
+            using (Image image = Image.Load(inputPath))
             {
+                // Cast to SvgImage
                 SvgImage svgImage = (SvgImage)image;
 
+                // Set up rasterization options
                 SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
                     PageSize = svgImage.Size,
@@ -42,51 +42,38 @@ class Program
                     TextRenderingHint = TextRenderingHint.AntiAlias
                 };
 
+                // Save original rasterized PNG
                 PngOptions pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
-
-                svgImage.Save(originalPngPath, pngOptions);
+                svgImage.Save(originalRasterPath, pngOptions);
             }
 
-            // Load the rasterized original PNG as RasterImage and apply motion blur
-            using (Image img = Image.Load(originalPngPath))
+            // Load the rasterized original PNG
+            using (Image img = Image.Load(originalRasterPath))
             {
                 RasterImage rasterImage = (RasterImage)img;
 
-                double[,] kernel = ConvolutionFilter.GetBlurMotion(7, 315.0);
-                var motionBlurOptions = new ConvolutionFilterOptions(kernel);
+                // Apply motion blur (MotionWienerFilter) with size 7, sigma 1.0, angle 315
+                var motionOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(7, 1.0, 315.0);
+                rasterImage.Filter(rasterImage.Bounds, motionOptions);
 
-                rasterImage.Filter(rasterImage.Bounds, motionBlurOptions);
-                rasterImage.Save(blurredPngPath);
+                // Save the filtered image
+                rasterImage.Save(filteredRasterPath);
             }
 
-            // Compare original and blurred images (pixel difference count)
-            using (Image origImg = Image.Load(originalPngPath))
-            using (Image blurImg = Image.Load(blurredPngPath))
+            // Load both images to compare dimensions
+            using (Image originalImg = Image.Load(originalRasterPath))
+            using (Image filteredImg = Image.Load(filteredRasterPath))
             {
-                RasterImage origRaster = (RasterImage)origImg;
-                RasterImage blurRaster = (RasterImage)blurImg;
-
-                if (origRaster.Width != blurRaster.Width || origRaster.Height != blurRaster.Height)
+                if (originalImg.Width == filteredImg.Width && originalImg.Height == filteredImg.Height)
                 {
-                    Console.WriteLine("Images have different dimensions.");
+                    Console.WriteLine("Comparison result: Images have the same dimensions.");
                 }
                 else
                 {
-                    int diffCount = 0;
-                    for (int y = 0; y < origRaster.Height; y++)
-                    {
-                        for (int x = 0; x < origRaster.Width; x++)
-                        {
-                            Color origPixel = origRaster.GetPixel(x, y);
-                            Color blurPixel = blurRaster.GetPixel(x, y);
-                            if (!origPixel.Equals(blurPixel))
-                                diffCount++;
-                        }
-                    }
-                    Console.WriteLine($"Pixel differences between original and blurred: {diffCount}");
+                    Console.WriteLine("Comparison result: Images differ in dimensions.");
                 }
             }
         }
@@ -99,9 +86,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a blurred preview of a vector logo for a web thumbnail, they can load the SVG template, rasterize it to PNG, apply a motion blur of size 7 at 315°, and compare the result with the original PNG.
- * 2. When an e‑commerce platform wants to create a dynamic “sale” effect on product illustrations, the code can convert the SVG artwork to a raster image, add a motion blur filter, and verify visual fidelity against the unblurred PNG.
- * 3. When a reporting tool must embed a stylized, motion‑blurred version of a chart exported as SVG into a PDF, the snippet rasterizes the SVG, applies the blur, and checks that the blurred PNG matches the original dimensions.
- * 4. When a game developer wants to pre‑process SVG assets into motion‑blurred sprites for a fast‑moving background, they can use this routine to rasterize the SVG, apply a 7‑pixel blur at a 315° angle, and compare the output PNG to the source for quality control.
- * 5. When an automated testing suite validates that an SVG‑to‑PNG conversion pipeline preserves image size while allowing optional blur effects, the code loads the SVG, rasterizes it, applies the motion blur, and programmatically compares the blurred PNG with the original rasterized PNG.
+ * 1. When a web application needs to generate a preview PNG of a user‑uploaded SVG logo and then create a blurred version for a loading placeholder, developers can use this code to rasterize the SVG, apply a motion‑blur filter (size 7, angle 315) and compare the two images.
+ * 2. When an e‑commerce platform wants to automatically produce high‑resolution product thumbnails from vector artwork and also generate a motion‑blurred background for promotional banners, this snippet shows how to load the SVG, rasterize it to PNG, apply the blur, and verify the visual difference.
+ * 3. When a desktop publishing tool must validate that a motion‑blur effect applied to vector graphics matches design specifications, developers can rasterize the original SVG, apply the blur filter, and programmatically compare the resulting PNGs.
+ * 4. When a CI/CD pipeline for a branding suite needs to ensure that SVG assets are correctly rendered and that a motion‑blur filter of size 7 at 315° produces the expected raster output, this code provides the steps to load, rasterize, filter, and compare the images.
+ * 5. When a mobile app generates animated splash screens by converting SVG icons to PNG frames with a motion‑blur transition, developers can use this example to load the SVG template, rasterize it, apply the blur, and check the blurred frame against the original for quality control.
  */

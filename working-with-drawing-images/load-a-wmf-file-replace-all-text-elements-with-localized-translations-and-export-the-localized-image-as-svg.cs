@@ -9,8 +9,8 @@ class Program
     {
         try
         {
-            string inputPath = @"C:\Images\source.wmf";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = @"C:\temp\input.wmf";
+            string outputPath = @"C:\temp\output.svg";
 
             if (!File.Exists(inputPath))
             {
@@ -22,8 +22,11 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                PngOptions options = new PngOptions();
-                image.Save(outputPath, options);
+                SvgOptions saveOptions = new SvgOptions
+                {
+                    TextAsShapes = false
+                };
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -35,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy WMF diagrams into SVG files while automatically swapping embedded English labels with translated strings for a multilingual web portal.
- * 2. When a software team wants to generate localized vector icons from WMF assets on the fly in a C# microservice that serves region‑specific SVG graphics.
- * 3. When an enterprise application must replace corporate branding text inside WMF logos with country‑specific slogans before exporting them as scalable SVG images for print and digital media.
- * 4. When a content management system requires batch processing of WMF templates, injecting localized product names into each file and saving the results as SVG for responsive UI rendering.
- * 5. When a developer is building an automated build pipeline that reads WMF UI mockups, inserts translated UI captions, and outputs SVG assets for inclusion in internationalized mobile apps.
+ * 1. When a developer needs to convert legacy Windows Metafile (WMF) diagrams into scalable SVG files while preserving editable text for later localization using Aspose.Imaging in a C# application.
+ * 2. When a software product requires generating multilingual UI icons by loading WMF assets, swapping the embedded text with translated strings, and exporting them as SVG for responsive web interfaces.
+ * 3. When an engineering documentation workflow must transform WMF schematics into SVG format so that the text remains selectable and can be indexed by search engines after translation.
+ * 4. When an automated build script has to batch‑process WMF assets, replace their text nodes with locale‑specific content, and save the results as SVG to support accessibility standards.
+ * 5. When a developer is building a .NET service that ingests WMF files, applies localized captions, and delivers SVG output for integration with modern HTML5 canvas or SVG editors.
  */

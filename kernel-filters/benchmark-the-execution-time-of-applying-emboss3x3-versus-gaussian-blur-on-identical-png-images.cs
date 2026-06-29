@@ -12,9 +12,9 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.png";
-            string embossOutputPath = @"C:\temp\sample.emboss.png";
-            string gaussianOutputPath = @"C:\temp\sample.gaussian.png";
+            string inputPath = @"c:\temp\sample.png";
+            string outputEmbossPath = @"c:\temp\sample.emboss.png";
+            string outputGaussianPath = @"c:\temp\sample.gaussian.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,28 +24,28 @@ class Program
             }
 
             // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(embossOutputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(gaussianOutputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputEmbossPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputGaussianPath));
 
             // Benchmark Emboss3x3 filter
             Stopwatch swEmboss = Stopwatch.StartNew();
-            using (Image image = Image.Load(inputPath))
+            using (Image img = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                RasterImage raster = (RasterImage)img;
                 // Apply Emboss3x3 convolution filter
                 raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
-                raster.Save(embossOutputPath);
+                raster.Save(outputEmbossPath);
             }
             swEmboss.Stop();
 
-            // Benchmark Gaussian blur filter (radius 5, sigma 4.0)
+            // Benchmark Gaussian blur filter
             Stopwatch swGaussian = Stopwatch.StartNew();
-            using (Image image = Image.Load(inputPath))
+            using (Image img = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                // Apply Gaussian blur filter
+                RasterImage raster = (RasterImage)img;
+                // Apply Gaussian blur with radius 5 and sigma 4.0
                 raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-                raster.Save(gaussianOutputPath);
+                raster.Save(outputGaussianPath);
             }
             swGaussian.Stop();
 
@@ -62,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When optimizing a photo‑editing application, a developer can use this code to compare the processing speed of the Aspose.Imaging Emboss3x3 filter versus a Gaussian blur on PNG files.
- * 2. When evaluating hardware performance for batch image transformations, the benchmark helps determine whether the convolution‑based emboss effect or the Gaussian blur kernel is more suitable for real‑time processing.
- * 3. When building a server‑side image‑processing service that must meet latency SLAs, the developer can run this test to decide which filter to expose via an API for PNG uploads.
- * 4. When creating automated CI/CD tests for image‑filter quality, the timing results from this snippet allow the team to detect regressions in the Emboss3x3 or Gaussian blur implementations.
- * 5. When teaching image‑processing concepts, an instructor can demonstrate how different convolution filters impact execution time on identical PNG images using the provided C# benchmark.
+ * 1. When a developer needs to compare the performance of a 3x3 emboss convolution filter versus a Gaussian blur on high‑resolution PNG files in a C# application using Aspose.Imaging.
+ * 2. When optimizing an image‑processing pipeline, a programmer can benchmark how long each filter takes to process identical raster images to decide which effect meets real‑time requirements.
+ * 3. When building a photo‑editing tool that offers both emboss and blur effects, the code helps determine the most efficient filter to apply on user‑uploaded PNGs to keep UI responsiveness.
+ * 4. When evaluating server‑side batch processing of PNG assets, a developer can use the stopwatch measurements to estimate CPU load and processing time for each filter before scaling the service.
+ * 5. When documenting performance trade‑offs in a technical blog or API guide, the example provides concrete millisecond timings for Aspose.Imaging’s ConvolutionFilter.
  */

@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
 
@@ -13,51 +12,46 @@ class Program
         try
         {
             // Define output path
-            string outputPath = @"C:\Temp\gradientPath.png";
+            string outputPath = "output\\gradient.png";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create PNG options with a file create source bound to the output path
+            // Create PNG options
             PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
 
             // Define image dimensions
-            int width = 500;
-            int height = 500;
+            int width = 300;
+            int height = 300;
 
-            // Create the image canvas
+            // Create a new image
             using (Image image = Image.Create(pngOptions, width, height))
             {
-                // Initialize graphics for drawing
+                // Initialize graphics for the image
                 Graphics graphics = new Graphics(image);
 
                 // Clear background
                 graphics.Clear(Color.White);
 
-                // Create a graphics path
+                // Create a graphics path with a rectangle shape
                 GraphicsPath path = new GraphicsPath();
-
-                // Create a figure and add shapes
                 Figure figure = new Figure();
-                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 400f, 400f)));
-                figure.AddShape(new EllipseShape(new RectangleF(100f, 100f, 300f, 300f)));
-
-                // Add the figure to the path
+                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
                 path.AddFigure(figure);
 
-                // Create a solid brush (replace with a gradient brush if available)
-                using (SolidBrush brush = new SolidBrush())
+                // Create a linear gradient brush (blue to red)
+                using (LinearGradientBrush brush = new LinearGradientBrush(
+                    new PointF(50f, 50f),
+                    new PointF(250f, 250f),
+                    Color.Blue,
+                    Color.Red))
                 {
-                    brush.Color = Color.LightBlue;
-                    brush.Opacity = 100;
-
-                    // Fill the path with the brush
+                    // Fill the path with the gradient brush
                     graphics.FillPath(brush, path);
                 }
 
-                // Save the image (source is already bound to outputPath)
-                image.Save();
+                // Save the image to the output file
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -69,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PNG badge with a custom‑shaped logo that is filled with a linear gradient for branding purposes.
- * 2. When an application must create dynamic report graphics, such as gradient‑filled circular progress indicators, and save them as high‑resolution PNG files.
- * 3. When a web service produces on‑the‑fly map overlays where polygons are rendered with smooth color transitions using a gradient brush.
- * 4. When a desktop tool creates printable flyers and wants to add decorative frames or watermarks with gradient‑filled rectangles and ellipses.
- * 5. When a game engine exports UI assets, like buttons or icons, by programmatically drawing shapes with gradient fills and exporting them as PNG images for later use.
+ * 1. When a developer needs to generate a PNG badge with a gradient‑filled rectangle for a web application, they can use Aspose.Imaging in C# to draw the shape with Graphics.FillPath and a LinearGradientBrush.
+ * 2. When building a reporting dashboard that requires dynamic chart backgrounds, a developer can create gradient‑filled paths on the fly using Aspose.Imaging’s Graphics and LinearGradientBrush to produce PNG or JPEG assets.
+ * 3. When adding a branded gradient border around a QR code, a developer can render the border as a gradient‑filled path with Aspose.Imaging and save it as a PNG file.
+ * 4. When a Windows desktop application needs to create custom icons with smooth color transitions, a developer can use C# and Aspose.Imaging to fill a shape with a linear gradient via Graphics.FillPath.
+ * 5. When automating the production of promotional flyers where key sections are highlighted with gradient rectangles, a developer can programmatically draw those shapes using Aspose.Imaging’s GraphicsPath and LinearGradientBrush and export them as PNG images.
  */

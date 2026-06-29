@@ -1,18 +1,20 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded paths
             string inputPath = @"C:\Images\sample.odg";
-            string outputPath = @"C:\Images\output.png";
+            string outputPath = @"C:\Images\output.pdf";
+            string fontsFolderPath = @"C:\Fonts";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,28 +26,44 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Configure font substitution:
-                // Load system font folders so missing fonts can be resolved
-                string[] systemFontFolders = FontSettings.GetDefaultFontsFolders();
-                FontSettings.SetFontsFolders(systemFontFolders, true);
-                // Set a default fallback font name
-                FontSettings.DefaultFontName = "Arial";
-
-                // Prepare rasterization options for PNG output
-                var rasterOptions = new PngOptions
+            // Configure custom font source delegate
+            var loadOptions = new LoadOptions();
+            loadOptions.AddCustomFontSource(
+                (object[] args) =>
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
+                    var fontList = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                    if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
                     {
-                        BackgroundColor = Color.White,
-                        PageSize = image.Size
+                        foreach (var file in Directory.GetFiles(fontsPath))
+                        {
+                            byte[] data = File.ReadAllBytes(file);
+                            string name = Path.GetFileNameWithoutExtension(file);
+                            fontList.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
+                        }
                     }
+                    return fontList.ToArray();
+                },
+                fontsFolderPath);
+
+            // Load ODG image with custom fonts
+            using (Image image = Image.Load(inputPath, loadOptions))
+            {
+                // Prepare rasterization options for ODG
+                var rasterOptions = new OdgRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageSize = image.Size
                 };
 
-                // Save the image with the configured options
-                image.Save(outputPath, rasterOptions);
+                // Prepare PDF save options
+                var pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save the image to PDF with font substitution
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -57,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a company needs to convert OpenDocument graphics (ODG) created with proprietary fonts into PNG thumbnails for a web portal, and the target machines may not have those fonts installed.
- * 2. When an automated document processing pipeline must render ODG diagrams to PNG images on a server that lacks the original font files, requiring fallback to a standard font like Arial.
- * 3. When a developer builds a C# desktop application that allows users to preview ODG drawings as PNGs, and the app must handle missing fonts gracefully by substituting system fonts.
- * 4. When migrating legacy ODG assets to a cloud storage solution that only supports raster formats, and the conversion code must ensure consistent text appearance despite absent custom fonts.
- * 5. When generating printable PNG reports from ODG charts in a batch job, and the job must guarantee that any missing fonts are replaced with a default font to avoid rendering errors.
+ * 1. When converting OpenDocument Graphics (ODG) files to PDF in a C# application and the source document uses fonts that are not installed on the server, developers can use this code to supply a custom fonts folder and ensure the PDF preserves the original typography.
+ * 2. When generating printable reports from ODG templates in an automated workflow, and the deployment environment lacks the required corporate fonts, this approach allows the application to substitute missing fonts during rasterization.
+ * 3. When building a document archival system that ingests ODG drawings from various users and must store them as PDF with consistent visual appearance, developers can configure font substitution to avoid missing‑font warnings.
+ * 4. When creating a cross‑platform .NET service that renders ODG diagrams to PDF on headless Linux containers, this code enables loading custom font files from a mounted directory to replace unavailable system fonts.
+ * 5. When implementing a batch conversion tool that processes a large collection of ODG images into PDFs and needs to guarantee brand‑compliant fonts without installing them on each workstation, the custom font source delegate ensures correct font rendering automatically.
  */

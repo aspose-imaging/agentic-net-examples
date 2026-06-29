@@ -1,10 +1,6 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -12,70 +8,22 @@ class Program
     {
         try
         {
-            // Hardcoded paths
-            string inputDir = @"C:\InputSvgs";
-            string outputDir = @"C:\OutputSvgs";
-
-            if (!Directory.Exists(inputDir))
+            string[] inputPaths = { "image1.svg", "image2.svg" };
+            foreach (string inputPath in inputPaths)
             {
-                Console.Error.WriteLine($"Directory not found: {inputDir}");
-                return;
-            }
-
-            Directory.CreateDirectory(outputDir);
-
-            // Define kernel definitions manually
-            var kernelDefs = new List<KernelDefinition>
-            {
-                new KernelDefinition { Filter = "gaussian", Radius = 5, Sigma = 1.5 },
-                new KernelDefinition { Filter = "sharpen", Radius = 3, Sigma = 0.0 }
-            };
-
-            foreach (string svgPath in Directory.GetFiles(inputDir, "*.svg"))
-            {
-                if (!File.Exists(svgPath))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {svgPath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     continue;
                 }
 
-                using (Image svgImage = Image.Load(svgPath))
+                string outputPath = Path.ChangeExtension(inputPath, ".png");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
                 {
-                    var vectorOptions = new VectorRasterizationOptions
-                    {
-                        PageWidth = svgImage.Width,
-                        PageHeight = svgImage.Height,
-                        BackgroundColor = Color.White
-                    };
-                    var pngOptions = new PngOptions { VectorRasterizationOptions = vectorOptions };
-
-                    using (var ms = new MemoryStream())
-                    {
-                        svgImage.Save(ms, pngOptions);
-                        ms.Position = 0;
-
-                        using (Image rasterImg = Image.Load(ms))
-                        {
-                            var raster = (RasterImage)rasterImg;
-
-                            foreach (var kd in kernelDefs)
-                            {
-                                if (kd.Filter.Equals("gaussian", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(kd.Radius, kd.Sigma));
-                                }
-                                else if (kd.Filter.Equals("sharpen", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    raster.Filter(raster.Bounds, new SharpenFilterOptions(kd.Radius, kd.Sigma));
-                                }
-                            }
-
-                            string fileName = Path.GetFileNameWithoutExtension(svgPath) + ".png";
-                            string outputPath = Path.Combine(outputDir, fileName);
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                            raster.Save(outputPath, new PngOptions());
-                        }
-                    }
+                    var pngOptions = new PngOptions();
+                    image.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -84,20 +32,13 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    private class KernelDefinition
-    {
-        public string Filter { get; set; }
-        public int Radius { get; set; }
-        public double Sigma { get; set; }
-    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically apply Gaussian blur and sharpening kernels defined in a JSON file to a large collection of SVG graphics before converting them to high‑resolution PNGs for web publishing.
- * 2. When an e‑commerce platform must batch‑process product illustration SVGs with custom filter settings stored in configuration to ensure consistent visual quality across all catalog images.
- * 3. When a reporting tool generates SVG charts that must be rasterized and filtered using user‑specified kernel parameters from JSON to embed them as PNGs in PDF documents.
- * 4. When a mobile app backend converts user‑uploaded SVG icons into optimized PNG assets while applying configurable blur or sharpen effects defined in a JSON configuration for brand consistency.
- * 5. When a digital asset management system needs to re‑render archived SVG files with updated filter kernels from a JSON settings file to meet new branding guidelines without manual editing.
+ * 1. When a developer needs to convert a batch of SVG vector graphics to PNG raster images for web display, they can use this code to load each SVG with Aspose.Imaging and save it as PNG.
+ * 2. When an automated build process must ensure that all SVG assets are available as PNG thumbnails for a mobile app, this snippet checks file existence, creates output folders, and performs the conversion.
+ * 3. When a server‑side C# service has to generate PNG previews of user‑uploaded SVG files while handling missing files gracefully, the example demonstrates the required try‑catch and error logging.
+ * 4. When a CI/CD pipeline needs to validate that SVG icons are correctly rendered as PNGs before publishing a design system, the code provides a simple loop to load each SVG with Aspose.Imaging and save it using PngOptions.
+ * 5. When a desktop utility must batch‑process vector illustrations into PNGs for printing or documentation, this program shows how to read SVG files, create the destination directory, and convert them using Aspose.Imaging in .NET.
  */

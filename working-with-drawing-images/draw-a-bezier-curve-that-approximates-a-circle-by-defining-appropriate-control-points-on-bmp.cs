@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -15,57 +16,54 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up BMP options with a file stream source
+            // Set up BMP options with a file create source bound to the output path
             BmpOptions bmpOptions = new BmpOptions();
-            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+            // Create a 400x400 image
+            using (Image image = Image.Create(bmpOptions, 400, 400))
             {
-                bmpOptions.Source = new StreamSource(stream);
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // Create a 400x400 image canvas
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 400, 400))
-                {
-                    // Initialize graphics for drawing
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                    graphics.Clear(Aspose.Imaging.Color.White);
+                // Pen for drawing the Bezier curves
+                Pen pen = new Pen(Color.Blue, 2);
 
-                    // Pen for the Bezier curve
-                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 2);
+                // Circle approximation parameters
+                float radius = 100f;
+                float control = 0.55228475f * radius; // Approximation factor
 
-                    // Parameters for a circle approximation
-                    float radius = 150f;
-                    float c = 0.5522847498f * radius; // Control point offset
+                // First quadrant
+                graphics.DrawBezier(pen,
+                    new Point(200, 100),
+                    new Point(200 + (int)control, 100),
+                    new Point(300, 200 - (int)control),
+                    new Point(300, 200));
 
-                    // First quarter
-                    graphics.DrawBezier(pen,
-                        new Aspose.Imaging.PointF(200 + radius, 200),
-                        new Aspose.Imaging.PointF(200 + radius, 200 + c),
-                        new Aspose.Imaging.PointF(200 + c, 200 + radius),
-                        new Aspose.Imaging.PointF(200, 200 + radius));
+                // Second quadrant
+                graphics.DrawBezier(pen,
+                    new Point(300, 200),
+                    new Point(300, 200 + (int)control),
+                    new Point(200 + (int)control, 300),
+                    new Point(200, 300));
 
-                    // Second quarter
-                    graphics.DrawBezier(pen,
-                        new Aspose.Imaging.PointF(200, 200 + radius),
-                        new Aspose.Imaging.PointF(200 - c, 200 + radius),
-                        new Aspose.Imaging.PointF(200 - radius, 200 + c),
-                        new Aspose.Imaging.PointF(200 - radius, 200));
+                // Third quadrant
+                graphics.DrawBezier(pen,
+                    new Point(200, 300),
+                    new Point(200 - (int)control, 300),
+                    new Point(100, 200 + (int)control),
+                    new Point(100, 200));
 
-                    // Third quarter
-                    graphics.DrawBezier(pen,
-                        new Aspose.Imaging.PointF(200 - radius, 200),
-                        new Aspose.Imaging.PointF(200 - radius, 200 - c),
-                        new Aspose.Imaging.PointF(200 - c, 200 - radius),
-                        new Aspose.Imaging.PointF(200, 200 - radius));
-
-                    // Fourth quarter
-                    graphics.DrawBezier(pen,
-                        new Aspose.Imaging.PointF(200, 200 - radius),
-                        new Aspose.Imaging.PointF(200 + c, 200 - radius),
-                        new Aspose.Imaging.PointF(200 + radius, 200 - c),
-                        new Aspose.Imaging.PointF(200 + radius, 200));
-
-                    // Save the image
-                    image.Save();
-                }
+                // Fourth quadrant
+                graphics.DrawBezier(pen,
+                    new Point(100, 200),
+                    new Point(100, 200 - (int)control),
+                    new Point(200 - (int)control, 100),
+                    new Point(200, 100));
+                
+                // Save the image (bound to the output file)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -77,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a high‑resolution BMP icon that contains a perfect‑looking circular button using only vector drawing commands, they can use this code to approximate the circle with Bezier curves.
- * 2. When creating automated test images for a graphics pipeline that expects BMP files with precise geometric shapes, this snippet provides a reproducible way to draw a circle without relying on external assets.
- * 3. When building a PDF or report generator that embeds raster graphics of circular logos, the code can render the logo into a BMP stream with Aspose.Imaging before embedding.
- * 4. When a game or UI tool requires pre‑rendered circular sprites stored as BMP files for legacy hardware, developers can programmatically produce them with the Bezier‑based circle routine.
- * 5. When implementing a batch image‑processing job that adds a circular watermark to existing BMP photos, the example shows how to draw the circle directly onto a new BMP canvas using C# and Aspose.Imaging.
+ * 1. When a developer needs to generate a high‑resolution BMP file containing a mathematically accurate circle for use in legacy Windows applications, they can use this Aspose.Imaging C# code to draw a Bezier‑based circle approximation.
+ * 2. When creating test images for automated visual regression testing of image‑processing pipelines, the code provides a reproducible BMP with a blue circle drawn via Bezier curves.
+ * 3. When exporting vector‑style graphics to a raster BMP format for inclusion in documentation or reports, the example shows how to calculate control points and render the shape with Aspose.Imaging’s Graphics class.
+ * 4. When a game developer wants to pre‑render circular UI elements such as buttons or icons into BMP assets without relying on external design tools, this snippet demonstrates the C# workflow for drawing the circle programmatically.
+ * 5. When building a custom barcode or QR‑code generator that requires a circular alignment pattern embedded in a BMP image, the code illustrates how to draw the circle using Bezier curves and save it directly to disk.
  */

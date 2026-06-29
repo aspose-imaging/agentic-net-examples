@@ -8,36 +8,32 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.eps";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = "input/input.eps";
+        string outputPath = "output/output.png";
 
         try
         {
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            string? outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EPS image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG save options to use grayscale color type
+                // Configure PNG export options to use grayscale color type
                 var pngOptions = new PngOptions
                 {
-                    ColorType = PngColorType.Grayscale,
-                    // Optional: set other options such as compression level if desired
-                    // CompressionLevel = 9,
-                    // Progressive = true
+                    ColorType = PngColorType.Grayscale
                 };
 
-                // Save the image as a grayscale PNG
+                // Save as PNG with the specified options
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -50,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert vector EPS artwork into lightweight grayscale PNGs for inclusion in PDF reports that require consistent monochrome rendering.
- * 2. When an e‑commerce platform must generate thumbnail previews of EPS product logos as grayscale PNG images to reduce file size while preserving visual fidelity.
- * 3. When a document management system automates the archival of EPS diagrams by saving them as grayscale PNG files to ensure uniform appearance across different viewing applications.
- * 4. When a scientific publishing workflow converts EPS plots into grayscale PNGs for print‑ready manuscripts that demand consistent color depth and reproducibility.
- * 5. When a batch processing script uses Aspose.Imaging in C# to export multiple EPS files as grayscale PNGs for machine‑learning preprocessing that expects single‑channel image inputs.
+ * 1. When a developer needs to use Aspose.Imaging in C# to convert EPS vector graphics to a grayscale PNG (using PngColorType.Grayscale) for inclusion in a print‑ready PDF.
+ * 2. When an e‑commerce site must programmatically export product logo EPS files as low‑size grayscale PNGs via PngOptions to reduce page load times.
+ * 3. When a scientific reporting application requires consistent grayscale PNG output from EPS plots, using the PngColorType enumeration to meet journal image standards.
+ * 4. When an automated CI/CD pipeline processes design assets by loading EPS images and saving them as grayscale PNGs with Aspose.Imaging to store in a documentation repository.
+ * 5. When a mobile backend service receives EPS uploads and needs to convert them to grayscale PNGs in C# for uniform rendering on all devices.
  */

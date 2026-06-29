@@ -1,53 +1,52 @@
 using System;
 using System.IO;
+using System.Globalization;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Exif;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        const string inputPath = "input.jpg";
+        const string outputPath = "output.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.jpg";
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputPath = @"C:\Images\output.jpg";
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load JPEG image
-            using (JpegImage image = (JpegImage)Image.Load(inputPath))
+            // Load the JPEG image
+            using (Image image = Image.Load(inputPath))
             {
-                // Try to modify the DateTimeOriginal EXIF tag
-                JpegExifData jpegExif = image.ExifData as JpegExifData;
-                if (jpegExif != null && !string.IsNullOrEmpty(jpegExif.DateTime))
+                // Cast to JpegImage to access EXIF data
+                JpegImage jpeg = image as JpegImage;
+                if (jpeg != null && jpeg.ExifData != null)
                 {
-                    // EXIF date format: "yyyy:MM:dd HH:mm:ss"
-                    if (DateTime.TryParseExact(jpegExif.DateTime, "yyyy:MM:dd HH:mm:ss", null,
-                        System.Globalization.DateTimeStyles.None, out DateTime dt))
+                    // Read the DateTimeOriginal tag
+                    string original = jpeg.ExifData.DateTimeOriginal;
+                    if (!string.IsNullOrEmpty(original))
                     {
-                        dt = dt.AddHours(1);
-                        jpegExif.DateTime = dt.ToString("yyyy:MM:dd HH:mm:ss");
-                    }
-                }
-                else
-                {
-                    // Fallback to generic ExifData if specific property is unavailable
-                    ExifData exif = image.ExifData;
-                    if (exif != null && !string.IsNullOrEmpty(exif.DateTimeOriginal))
-                    {
-                        if (DateTime.TryParseExact(exif.DateTimeOriginal, "yyyy:MM:dd HH:mm:ss", null,
-                            System.Globalization.DateTimeStyles.None, out DateTime dt))
+                        // EXIF date format: "yyyy:MM:dd HH:mm:ss"
+                        if (DateTime.TryParseExact(
+                                original,
+                                "yyyy:MM:dd HH:mm:ss",
+                                CultureInfo.InvariantCulture,
+                                DateTimeStyles.None,
+                                out DateTime dt))
                         {
+                            // Add one hour
                             dt = dt.AddHours(1);
-                            exif.DateTimeOriginal = dt.ToString("yyyy:MM:dd HH:mm:ss");
+                            // Write back the adjusted value
+                            jpeg.ExifData.DateTimeOriginal = dt.ToString("yyyy:MM:dd HH:mm:ss");
                         }
                     }
                 }
@@ -65,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer needs to correct JPEG timestamps after discovering the camera’s clock was set one hour behind the local time zone, this code can read the DateTimeOriginal EXIF tag and add the missing hour.
- * 2. When a travel blog aggregates images from multiple countries and must normalize all photo timestamps to a single reference time, developers can use this snippet to adjust each JPEG’s original capture time by one hour.
- * 3. When a legal evidence management system requires accurate time stamps for JPEGs and must compensate for daylight‑saving time errors, the code updates the EXIF DateTimeOriginal field accordingly.
- * 4. When an automated image‑processing pipeline imports batch photos and needs to align them with server logs that are one hour ahead, this C# routine reads and increments the EXIF capture time.
- * 5. When a digital asset management (DAM) tool imports JPEGs whose metadata was recorded in a different time zone, developers can apply this code to shift the DateTimeOriginal tag forward by one hour for consistent cataloging.
+ * 1. When a photographer needs to correct JPEG timestamps after a daylight‑saving‑time change by reading the EXIF DateTimeOriginal tag and adding one hour using C# and Aspose.Imaging.
+ * 2. When a web application must adjust image capture times to a different time zone before displaying them in a gallery, by loading the JPEG, modifying the DateTimeOriginal EXIF value, and saving the file.
+ * 3. When an archival system imports JPEG files and has to synchronize their original timestamps with a server clock that is one hour ahead, using Aspose.Imaging’s JpegImage.ExifData.
+ * 4. When a mobile‑to‑desktop sync tool corrects the camera’s clock drift by adding an hour to the EXIF DateTimeOriginal of each uploaded JPEG image in a .NET workflow.
+ * 5. When a digital forensics script validates and normalizes photo timestamps by reading the EXIF DateTimeOriginal tag and applying a one‑hour offset with Aspose.Imaging for .NET.
  */

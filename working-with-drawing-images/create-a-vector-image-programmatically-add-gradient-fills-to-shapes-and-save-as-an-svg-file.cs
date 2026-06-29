@@ -4,63 +4,36 @@ using Aspose.Imaging;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\Temp\gradient_demo.svg";
+            // Output path for the SVG file
+            string outputPath = "output\\vector.svg";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Image dimensions and DPI
-            int width = 600;
-            int height = 400;
+            // Define canvas size and DPI
+            int width = 800;
+            int height = 600;
             int dpi = 96;
 
             // Create an SVG graphics context
             SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-            // Draw a black border rectangle
-            graphics.DrawRectangle(new Pen(Color.Black, 2), 0, 0, width, height);
+            // Create a pen for the rectangle outline
+            Pen rectPen = new Pen(Color.Blue, 2);
+            // Gradient fills are not supported for FillRectangle; using solid fill as fallback
+            SolidBrush rectBrush = new SolidBrush(Color.LightBlue);
+            // Fill and draw the rectangle
+            graphics.FillRectangle(rectPen, rectBrush, 50, 50, 300, 200);
+            graphics.DrawRectangle(rectPen, 50, 50, 300, 200);
 
-            // NOTE: Gradient fills are not supported with FillXXX methods in Aspose.Imaging.
-            // Therefore, we use a solid brush as a fallback.
-            // Fill the background with a solid light gray color.
-            graphics.FillRectangle(
-                new Pen(Color.LightGray, 1),
-                new SolidBrush(Color.LightGray),
-                0,
-                0,
-                width,
-                height);
-
-            // Create a path consisting of a rectangle and an ellipse
-            Figure figure = new Figure { IsClosed = true };
-            GraphicsPath path = new GraphicsPath();
-            path.AddFigure(figure);
-            figure.AddShapes(new Shape[]
-            {
-                new RectangleShape(new Rectangle(100, 100, 200, 150)),
-                new EllipseShape(new Rectangle(350, 100, 200, 150))
-            });
-
-            // Fill the path with a solid blue brush and outline with a dark blue pen
-            graphics.FillPath(
-                new Pen(Color.DarkBlue, 2),
-                new SolidBrush(Color.Blue),
-                path);
-
-            // Add some text
-            Font font = new Font("Arial", 36, FontStyle.Regular);
-            graphics.DrawString(font, "Gradient Demo", new Point(150, 300), Color.DarkRed);
-
-            // Finalize and save the SVG image
+            // Finalize the SVG image and save it
             using (SvgImage svgImage = graphics.EndRecording())
             {
                 svgImage.Save(outputPath);
@@ -75,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a scalable SVG logo with custom geometric shapes and programmatically apply solid or gradient‑like fills using Aspose.Imaging for .NET in C#, this code demonstrates how to draw rectangles, ellipses, and text and save the vector image as an SVG file.
- * 2. When an automated reporting tool must embed a vector‑based chart header that includes colored shapes and a background fill without relying on external image assets, the example shows how to generate the SVG on the fly with Aspose.Imaging’s SvgGraphics2D class.
- * 3. When a web application requires dynamic generation of SVG icons that match the site’s color scheme and DPI settings, developers can use this snippet to programmatically construct the icon, apply a solid brush as a fallback for gradient fills, and write the result to a .svg file.
- * 4. When a desktop utility needs to export a printable brochure section as a resolution‑independent vector file, the code illustrates how to set the image dimensions, draw a border, fill the background, and render shapes using C# and Aspose.Imaging’s vector drawing API.
- * 5. When a CI/CD pipeline must produce SVG assets for documentation or UI mockups as part of an automated build, this example provides a concise way to create the vector image, apply color fills, and store it in a known folder using standard .NET file‑system calls.
+ * 1. When a developer needs to generate a scalable vector graphic (SVG) on the fly in a C# web service, such as creating a custom chart thumbnail for a dashboard, they can use Aspose.Imaging to programmatically draw shapes and save the result as an SVG file.
+ * 2. When an e‑commerce platform wants to produce product‑specific promotional banners with precise dimensions and DPI, the code can create a vector canvas, draw rectangles with solid or gradient fills, and export them as lightweight SVG images for responsive web pages.
+ * 3. When a reporting tool must embed vector illustrations—like highlighted sections or call‑out boxes—directly into PDF or HTML reports, developers can employ this snippet to render the shapes in SVG and then embed the file without rasterization artifacts.
+ * 4. When an automated testing framework needs to verify that UI components render correctly at different resolutions, the code can programmatically generate SVG placeholders with defined width, height, and DPI to compare against expected vector assets.
+ * 5. When a desktop application offers users the ability to design simple vector logos or icons and then export them for print or web use, this example shows how to create the SVG file with Aspose.Imaging’s SvgGraphics2D and save it to a user‑specified folder.
  */

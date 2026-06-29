@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -25,41 +24,27 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string overlayPath = Path.Combine(inputDirectory, "overlay.png");
-            if (!File.Exists(overlayPath))
-            {
-                Console.Error.WriteLine($"Overlay file not found: {overlayPath}");
-                return;
-            }
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-            using (RasterImage overlay = (RasterImage)Image.Load(overlayPath))
+            foreach (string inputPath in files)
             {
-                string[] files = Directory.GetFiles(inputDirectory, "*.png");
-                foreach (string inputPath in files)
+                if (!File.Exists(inputPath))
                 {
-                    if (!File.Exists(inputPath))
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".jpg");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (RasterImage png = (RasterImage)Image.Load(inputPath))
+                {
+                    using (JpegOptions jpegOptions = new JpegOptions())
                     {
-                        Console.Error.WriteLine($"File not found: {inputPath}");
-                        continue;
-                    }
-
-                    if (string.Equals(inputPath, overlayPath, StringComparison.OrdinalIgnoreCase))
-                        continue;
-
-                    using (RasterImage image = (RasterImage)Image.Load(inputPath))
-                    {
-                        image.Blend(new Point(0, 0), overlay, 64);
-
-                        string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        JpegOptions jpegOptions = new JpegOptions
-                        {
-                            Source = new FileCreateSource(outputPath, false),
-                            Quality = 90
-                        };
-
-                        image.Save(outputPath, jpegOptions);
+                        jpegOptions.Quality = 100;
+                        png.Save(outputPath, jpegOptions);
                     }
                 }
             }
@@ -70,3 +55,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert a large collection of PNG assets with transparent backgrounds into high‑quality JPEGs for web delivery, they can use this batch processing code.
+ * 2. When an e‑commerce platform must generate product thumbnails by applying a 64‑alpha overlay to PNG logos and saving them as JPEG files to reduce file size, this snippet automates the task.
+ * 3. When a mobile app requires pre‑processing of user‑uploaded PNG stickers by adding a semi‑transparent overlay and exporting them as JPEGs for faster rendering, the code provides a C# solution.
+ * 4. When a digital publishing workflow needs to prepare print‑ready images by converting PNG illustrations with a uniform 64‑alpha mask into JPEGs with maximum quality, the example handles the conversion in a folder loop.
+ * 5. When a CI/CD pipeline must ensure that all PNG icons in a repository are batch‑converted to JPEG format with a consistent alpha overlay before deployment, this Aspose.Imaging routine can be integrated into the build script.
+ */

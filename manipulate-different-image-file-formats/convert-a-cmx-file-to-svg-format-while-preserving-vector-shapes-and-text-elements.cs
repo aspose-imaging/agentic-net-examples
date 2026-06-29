@@ -8,42 +8,39 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.cmx";
-        string outputPath = @"C:\temp\sample.svg";
-
         try
         {
-            // Verify input file exists
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\sample.cmx";
+            string outputPath = @"C:\temp\sample.svg";
+
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CMX image
             using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
             {
-                // Set up SVG save options
-                var svgOptions = new SvgOptions
+                // Configure SVG save options
+                SvgOptions svgOptions = new SvgOptions
                 {
                     // Render text as vector shapes to preserve appearance
-                    TextAsShapes = true
+                    TextAsShapes = true,
+                    // Set CMX-specific rasterization options
+                    VectorRasterizationOptions = new CmxRasterizationOptions
+                    {
+                        // Use the source image size for the SVG page size
+                        PageSize = cmxImage.Size,
+                        // Optional: set a background color
+                        BackgroundColor = Color.White
+                    }
                 };
-
-                // Configure rasterization options specific to CMX
-                var rasterOptions = new CmxRasterizationOptions
-                {
-                    // Use the source image size for the SVG page
-                    PageSize = cmxImage.Size,
-                    // Optional: set a background color if needed
-                    BackgroundColor = Color.White
-                };
-
-                svgOptions.VectorRasterizationOptions = rasterOptions;
 
                 // Save the image as SVG
                 cmxImage.Save(outputPath, svgOptions);
@@ -58,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD engineer needs to embed legacy CorelDRAW CMX drawings into a web page as scalable SVG graphics while preserving vector shapes and exact text appearance.
- * 2. When a document conversion service must batch‑process CMX files into SVG to enable resolution‑independent printing and editing in vector editors using C# image processing APIs.
- * 3. When a GIS application imports CMX map symbols and converts them to SVG so the symbols remain fully vectorized and text is rendered as shapes for responsive UI components.
- * 4. When an e‑learning platform transforms CMX illustrations into SVG to support interactive scaling, accessibility, and cross‑browser rendering without rasterizing the original text.
- * 5. When a legacy design workflow requires an automated C# script that preserves vector shapes and text while migrating CMX assets to modern SVG format for version control and collaborative editing.
+ * 1. When a CAD engineer needs to embed legacy CorelDRAW CMX drawings into a web page that only supports SVG, they can use this code to convert the CMX file while preserving vector shapes and text.
+ * 2. When a document management system must archive design assets in a resolution‑independent format, developers can run this conversion to store CMX files as SVG with text rendered as shapes.
+ * 3. When a print‑to‑PDF workflow requires an intermediate SVG representation of a CMX illustration to apply further transformations, the code provides a reliable C# method to generate that SVG.
+ * 4. When a mobile app needs to display CMX graphics on devices that lack CorelDRAW support, the conversion to SVG ensures the vector artwork and text appear correctly on any screen.
+ * 5. When a batch processing script must standardize a collection of CMX assets for a branding portal, this snippet automates the conversion to SVG while keeping the original layout and colors.
  */

@@ -1,50 +1,62 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
         string inputPath = "input.png";
         string outputPath = "output.png";
 
         try
         {
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
-                Aspose.Imaging.GraphicsPath path = new Aspose.Imaging.GraphicsPath();
-                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
+                // Create a figure and add shapes (including a curve)
+                Figure figure = new Figure();
+                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
+                figure.AddShape(new EllipseShape(new RectangleF(100f, 100f, 200f, 150f)));
 
-                Aspose.Imaging.PointF[] bezierPoints = new Aspose.Imaging.PointF[]
+                // Bezier curve points
+                PointF[] bezierPoints = new PointF[]
                 {
-                    new Aspose.Imaging.PointF(50f, 200f),
-                    new Aspose.Imaging.PointF(150f, 50f),
-                    new Aspose.Imaging.PointF(250f, 350f),
-                    new Aspose.Imaging.PointF(350f, 150f)
+                    new PointF(150f, 150f),
+                    new PointF(200f, 50f),
+                    new PointF(250f, 250f),
+                    new PointF(300f, 150f)
                 };
-
                 figure.AddShape(new BezierShape(bezierPoints, true));
-                figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(10f, 10f, 200f, 200f)));
 
+                // Build the graphics path
+                GraphicsPath path = new GraphicsPath();
                 path.AddFigure(figure);
+
+                // Flatten curves into line segments
                 path.Flatten();
 
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 2);
-                graphics.DrawPath(pen, path);
+                // Draw the flattened path onto the image
+                Graphics graphics = new Graphics(image);
+                graphics.DrawPath(new Pen(Color.Blue, 2), path);
 
-                PngOptions pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                // Save the modified image as PNG
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -56,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating thumbnail previews of vector‑based drawings stored as PNG files, a developer can flatten the GraphicsPath to turn complex Bezier curves and rectangles into straight line segments for fast rasterization.
- * 2. When exporting CAD or GIS diagrams to a lightweight image format, flattening the path ensures that the resulting PNG can be rendered consistently on devices that do not support curve primitives.
- * 3. When creating a print‑ready raster image from a mixed shape figure, using GraphicsPath.Flatten simplifies the drawing pipeline by converting all curves to polylines before drawing with a Pen.
- * 4. When implementing a server‑side image‑processing service that must overlay custom shapes on user‑uploaded PNGs, flattening the path reduces CPU usage and memory overhead during the DrawPath operation.
- * 5. When developing a game asset pipeline that converts designer‑drawn Bezier paths into pixel‑perfect sprites, flattening the GraphicsPath allows the sprite to be saved as a PNG with only straight‑line segments for reliable collision detection.
+ * 1. When generating thumbnail previews of vector graphics for web pages, a developer can flatten the Bezier curves in a GraphicsPath and render them as straight line segments onto a PNG image to ensure fast, consistent display across browsers.
+ * 2. When exporting CAD drawings to raster formats for printing, flattening the curves in the GraphicsPath allows the Aspose.Imaging library to convert complex shapes into simple line segments, reducing processing time and avoiding rendering artifacts in the output PNG.
+ * 3. When creating simplified collision masks for game sprites, a developer can flatten the curve‑based shapes in a GraphicsPath and draw the resulting polygon onto a PNG file that the physics engine can efficiently analyze.
+ * 4. When preparing images for laser engraving where only straight lines are supported, flattening the BezierShape in the GraphicsPath and saving the result as a high‑resolution PNG ensures the device receives a compatible vector‑to‑raster conversion.
+ * 5. When performing batch image annotation that adds geometric overlays to existing PNG files, flattening the path guarantees that the drawn rectangles, ellipses, and curves are rendered as uniform line segments, making the annotations predictable across different display devices.
  */

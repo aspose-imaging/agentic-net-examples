@@ -9,16 +9,15 @@ class Program
     {
         try
         {
-            // Define base, input, and output directories
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            // Define input and output directories
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
             // Ensure input directory exists
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add BMP files and rerun.");
                 return;
             }
 
@@ -28,37 +27,37 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+            // Get all BMP files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
 
             foreach (string inputPath in files)
             {
-                // Validate input file existence
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Process only BMP files
-                if (!string.Equals(Path.GetExtension(inputPath), ".bmp", StringComparison.OrdinalIgnoreCase))
-                {
                     continue;
                 }
 
-                // Prepare output path for the thumbnail
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + "_thumb.bmp");
+                // Build the output thumbnail path
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + "_thumb.bmp");
+
+                // Ensure the output directory exists before saving
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load, resize, and save the thumbnail
+                // Load the BMP image, resize, and save as thumbnail
                 using (Image image = Image.Load(inputPath))
                 {
-                    const int thumbWidth = 150;
-                    const int thumbHeight = 150;
-                    image.Resize(thumbWidth, thumbHeight);
+                    // Resize to a fixed thumbnail size (e.g., 150x150 pixels)
+                    image.Resize(150, 150, ResizeType.NearestNeighbourResample);
+
+                    // Save using default BMP options
                     BmpOptions options = new BmpOptions();
                     image.Save(outputPath, options);
                 }
+
+                Console.WriteLine($"Thumbnail saved: {outputPath}");
             }
         }
         catch (Exception ex)
@@ -70,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building a desktop photo management app that shows a grid of BMP pictures, a developer can use this code to create uniform thumbnail previews for fast loading in the gallery view.
- * 2. When an e‑commerce platform stores product schematics as BMP files and needs to display small preview icons on category pages, this snippet generates consistent thumbnail images on the server side using Aspose.Imaging for .NET.
- * 3. When automating a batch process that converts scanned BMP documents into thumbnail versions for a web‑based document library, the code resizes each file and saves it with a “_thumb” suffix for easy retrieval.
- * 4. When integrating a Windows Forms application with a file‑explorer style UI, developers can call this routine to pre‑generate BMP thumbnails so the UI can render them instantly without loading the full‑size images.
- * 5. When creating a content‑management workflow that archives BMP assets and needs low‑resolution previews for editorial review, the example produces fixed‑size thumbnail files that can be embedded in HTML or email summaries.
+ * 1. When building a web gallery that shows preview thumbnails of user‑uploaded BMP files, a developer can use this code to generate fixed‑size 150×150 BMP thumbnails for fast loading.
+ * 2. When creating a desktop photo‑management application that needs to display small previews of high‑resolution BMP images in a list view, this snippet resizes each image and saves a thumbnail in the same format.
+ * 3. When automating a batch‑processing pipeline that converts a folder of BMP scans into uniform thumbnail images for inclusion in PDF reports, the code provides a simple C# solution using Aspose.Imaging.
+ * 4. When developing an e‑commerce platform that stores product drawings as BMP files and requires consistent thumbnail icons for catalog pages, the example shows how to generate and store those icons programmatically.
+ * 5. When implementing a content‑management system that validates incoming BMP uploads and creates preview images for editors, this routine resizes the original files and saves the thumbnails to a designated output directory.
  */

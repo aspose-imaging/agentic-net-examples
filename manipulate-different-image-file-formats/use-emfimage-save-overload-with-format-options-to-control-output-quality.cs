@@ -10,8 +10,8 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\input.emf";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.emf";
             string outputPath = @"C:\Images\output.emf";
 
             // Verify input file exists
@@ -27,20 +27,20 @@ class Program
             // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare rasterization options (e.g., set page size to original image size)
-                var rasterizationOptions = new EmfRasterizationOptions
+                // Configure rasterization options (quality settings)
+                var rasterOptions = new EmfRasterizationOptions
                 {
                     PageSize = image.Size,
-                    // Example of quality-related settings
-                    BackgroundColor = Color.White,
-                    // You can adjust other properties such as TextRenderingHint, SmoothingMode, etc.
+                    BackgroundColor = Aspose.Imaging.Color.White,
+                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.None
                 };
 
                 // Configure EMF save options
                 var saveOptions = new EmfOptions
                 {
-                    VectorRasterizationOptions = rasterizationOptions,
-                    Compress = true // Enable compression for smaller file size
+                    VectorRasterizationOptions = rasterOptions,
+                    Compress = true // enable compression for smaller output
                 };
 
                 // Save the image with the specified options
@@ -56,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must convert a high‑resolution EMF diagram to a compressed EMF file while preserving the original page size and background color for faster transmission over a network.
- * 2. When a developer needs to batch‑process vector graphics in a Windows desktop tool and ensure each saved EMF file uses specific rasterization settings such as smoothing mode and text rendering hint to maintain visual fidelity.
- * 3. When generating printable reports that embed EMF charts, and the code must enforce compression and consistent page dimensions to keep the PDF file size low without losing quality.
- * 4. When integrating Aspose.Imaging into a document‑management system that validates incoming EMF files and re‑saves them with a white background to avoid transparency issues in downstream viewers.
- * 5. When an automated build pipeline must re‑encode source EMF assets with custom EmfOptions to guarantee that all output files meet a company‑wide standard for image compression and color handling.
+ * 1. When a C# application must convert high‑resolution vector drawings stored as EMF files into compressed EMF files for faster download in a web portal.
+ * 2. When a reporting tool generates charts as EMF and needs to ensure consistent background color and text rendering before embedding the image in PDF reports.
+ * 3. When a batch‑processing service processes scanned documents, rasterizes them with specific smoothing and page size settings, and saves them as optimized EMF for archival.
+ * 4. When a desktop publishing software needs to preserve vector fidelity while reducing file size by enabling compression and controlling rasterization options for printed brochures.
+ * 5. When an automated workflow validates that an input EMF exists, creates the output directory, and saves the image with custom rasterization parameters to meet corporate branding guidelines.
  */

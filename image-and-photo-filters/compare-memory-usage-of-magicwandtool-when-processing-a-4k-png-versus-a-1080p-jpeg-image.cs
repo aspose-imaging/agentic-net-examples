@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
@@ -11,11 +10,11 @@ class Program
     {
         try
         {
-            // Input and output paths
+            // Hardcoded input and output paths
             string pngInputPath = "input4k.png";
             string jpegInputPath = "input1080.jpg";
-            string pngOutputPath = "output4k.png";
-            string jpegOutputPath = "output1080.jpg";
+            string pngOutputPath = "output4k_processed.png";
+            string jpegOutputPath = "output1080_processed.jpg";
 
             // Validate input files
             if (!File.Exists(pngInputPath))
@@ -30,11 +29,16 @@ class Program
             }
 
             // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(jpegOutputPath));
+            string pngOutputDir = Path.GetDirectoryName(pngOutputPath);
+            if (!string.IsNullOrEmpty(pngOutputDir))
+                Directory.CreateDirectory(pngOutputDir);
 
-            // Process 4K PNG with MagicWandTool
-            long beforePng = GC.GetTotalMemory(true);
+            string jpegOutputDir = Path.GetDirectoryName(jpegOutputPath);
+            if (!string.IsNullOrEmpty(jpegOutputDir))
+                Directory.CreateDirectory(jpegOutputDir);
+
+            // Process 4K PNG
+            long memBeforePng = GC.GetTotalMemory(true);
             using (RasterImage pngImage = (RasterImage)Image.Load(pngInputPath))
             {
                 MagicWandTool
@@ -43,11 +47,11 @@ class Program
 
                 pngImage.Save(pngOutputPath, new PngOptions());
             }
-            long afterPng = GC.GetTotalMemory(true);
-            long pngMemoryUsed = afterPng - beforePng;
+            long memAfterPng = GC.GetTotalMemory(true);
+            long pngMemoryUsed = memAfterPng - memBeforePng;
 
-            // Process 1080p JPEG with MagicWandTool
-            long beforeJpeg = GC.GetTotalMemory(true);
+            // Process 1080p JPEG
+            long memBeforeJpeg = GC.GetTotalMemory(true);
             using (RasterImage jpegImage = (RasterImage)Image.Load(jpegInputPath))
             {
                 MagicWandTool
@@ -56,12 +60,12 @@ class Program
 
                 jpegImage.Save(jpegOutputPath, new JpegOptions());
             }
-            long afterJpeg = GC.GetTotalMemory(true);
-            long jpegMemoryUsed = afterJpeg - beforeJpeg;
+            long memAfterJpeg = GC.GetTotalMemory(true);
+            long jpegMemoryUsed = memAfterJpeg - memBeforeJpeg;
 
             // Output memory usage comparison
-            Console.WriteLine($"Memory used for PNG (4K) MagicWand processing: {pngMemoryUsed} bytes");
-            Console.WriteLine($"Memory used for JPEG (1080p) MagicWand processing: {jpegMemoryUsed} bytes");
+            Console.WriteLine($"Memory used for MagicWand on 4K PNG: {pngMemoryUsed} bytes");
+            Console.WriteLine($"Memory used for MagicWand on 1080p JPEG: {jpegMemoryUsed} bytes");
         }
         catch (Exception ex)
         {
@@ -69,3 +73,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to benchmark the memory footprint of the MagicWandTool on a 4K PNG versus a 1080p JPEG to decide which format to use in a high‑throughput image‑processing pipeline.
+ * 2. When a cloud‑based service must ensure that applying MagicWand selections on large PNG assets does not exceed the allocated .NET heap before scaling to thousands of concurrent users.
+ * 3. When a desktop application wants to compare the RAM consumption of MagicWand operations on lossless PNG files against lossy JPEG files to optimize performance on low‑memory machines.
+ * 4. When a CI/CD test suite validates that the MagicWandTool’s memory usage remains within acceptable limits for both 4K and 1080p inputs before releasing a new version of the imaging library.
+ * 5. When a developer is profiling the impact of different image formats on garbage‑collection pauses while using MagicWandTool in a C# batch‑processing job.
+ */

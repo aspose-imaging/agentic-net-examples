@@ -12,64 +12,56 @@ class Program
     {
         try
         {
-            // Hardcoded input directory and output file
-            string inputDir = "input_images";
-            string outputPath = "output/animation.apng";
+            // Hardcoded input PNG file paths (alphabetical order)
+            string inputPath1 = "frames\\frame1.png";
+            string inputPath2 = "frames\\frame2.png";
+            string inputPath3 = "frames\\frame3.png";
+
+            // Verify each input file exists
+            if (!File.Exists(inputPath1)) { Console.Error.WriteLine($"File not found: {inputPath1}"); return; }
+            if (!File.Exists(inputPath2)) { Console.Error.WriteLine($"File not found: {inputPath2}"); return; }
+            if (!File.Exists(inputPath3)) { Console.Error.WriteLine($"File not found: {inputPath3}"); return; }
+
+            // Hardcoded output APNG path
+            string outputPath = "output\\animation.apng";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Hardcoded frame file paths (alphabetical order)
-            string[] framePaths = new string[]
+            // Load the first image to obtain canvas dimensions
+            using (RasterImage firstImage = (RasterImage)Image.Load(inputPath1))
             {
-                Path.Combine(inputDir, "frame1.png"),
-                Path.Combine(inputDir, "frame2.png"),
-                Path.Combine(inputDir, "frame3.png")
-            };
-
-            // Verify each input file exists
-            foreach (string path in framePaths)
-            {
-                if (!File.Exists(path))
+                // Configure APNG creation options
+                ApngOptions createOptions = new ApngOptions
                 {
-                    Console.Error.WriteLine($"File not found: {path}");
-                    return;
-                }
-            }
+                    Source = new FileCreateSource(outputPath, false),
+                    DefaultFrameTime = 100, // default frame duration in milliseconds
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
 
-            // Load first frame to obtain dimensions
-            int width, height;
-            using (RasterImage first = (RasterImage)Image.Load(framePaths[0]))
-            {
-                width = first.Width;
-                height = first.Height;
-            }
-
-            // Create APNG options with output source
-            ApngOptions createOptions = new ApngOptions
-            {
-                Source = new FileCreateSource(outputPath, false),
-                DefaultFrameTime = 100, // default frame duration in ms
-                ColorType = PngColorType.TruecolorWithAlpha
-            };
-
-            // Create APNG image canvas
-            using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
-            {
-                // Remove the default single frame
-                apngImage.RemoveAllFrames();
-
-                // Add each frame to the animation
-                foreach (string path in framePaths)
+                // Create the APNG canvas bound to the output file
+                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, firstImage.Width, firstImage.Height))
                 {
-                    using (RasterImage frame = (RasterImage)Image.Load(path))
+                    // Remove the automatically added initial frame
+                    apngImage.RemoveAllFrames();
+
+                    // Add the first frame
+                    apngImage.AddFrame(firstImage);
+
+                    // Load and add subsequent frames
+                    using (RasterImage img2 = (RasterImage)Image.Load(inputPath2))
                     {
-                        apngImage.AddFrame(frame);
+                        apngImage.AddFrame(img2);
                     }
-                }
 
-                // Save the APNG (output path already bound)
-                apngImage.Save();
+                    using (RasterImage img3 = (RasterImage)Image.Load(inputPath3))
+                    {
+                        apngImage.AddFrame(img3);
+                    }
+
+                    // Save the APNG (output path already bound via Source)
+                    apngImage.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -78,3 +70,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate an animated PNG (APNG) for a web banner from a series of sequentially named PNG frames stored in a folder.
+ * 2. When an e‑learning platform wants to convert step‑by‑step tutorial screenshots (frame1.png, frame2.png, …) into a single APNG file for smoother playback in browsers.
+ * 3. When a game developer creates sprite animations offline by assembling PNG sprite sheets into an APNG to preview character motions without writing custom rendering code.
+ * 4. When a marketing team automates the production of product showcase animations by combining product photo PNGs into an APNG that can be embedded in email newsletters.
+ * 5. When a mobile app generates lightweight animated icons by merging PNG assets into an APNG at runtime using C# and Aspose.Imaging.
+ */

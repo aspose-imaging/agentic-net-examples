@@ -5,51 +5,42 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDir = @"C:\Images\Input\";
-        string outputDir = @"C:\Images\Output\";
-
-        // List of PSD files to process
-        string[] psdFiles = new string[]
-        {
-            "sample1.psd",
-            "sample2.psd",
-            "sample3.psd"
-        };
-
         try
         {
-            foreach (string fileName in psdFiles)
-            {
-                // Build full input path
-                string inputPath = Path.Combine(inputDir, fileName);
+            // Hardcoded input and output directories
+            string inputFolder = "C:\\InputPsds";
+            string outputFolder = "C:\\OutputPngs";
 
-                // Verify input file exists
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputFolder);
+
+            // Get all PSD files in the input folder
+            string[] files = Directory.GetFiles(inputFolder, "*.psd");
+
+            foreach (string inputPath in files)
+            {
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load the PSD image
+                // Build the output PNG path
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileName + ".png");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the PSD image, apply gamma correction, and save as PNG
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to access AdjustGamma
-                    RasterImage rasterImage = (RasterImage)image;
-
-                    // Apply gamma correction (same value for all channels)
-                    rasterImage.AdjustGamma(2.0f);
-
-                    // Build output path with PNG extension
-                    string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".png");
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the adjusted image as PNG
-                    rasterImage.Save(outputPath, new PngOptions());
+                    RasterImage raster = (RasterImage)image;
+                    raster.AdjustGamma(2.2f); // Example gamma value
+                    raster.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -59,3 +50,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a graphic design studio needs to batch‑convert a collection of Photoshop PSD files to web‑ready PNGs while applying a gamma correction of 2.2 to ensure consistent brightness across browsers.
+ * 2. When an e‑commerce platform must automatically generate product thumbnails from layered PSD assets, adjusting gamma to match the site’s color profile before saving them as PNG images.
+ * 3. When a digital archiving system processes incoming PSD artwork, applying gamma correction to preserve visual fidelity and storing the results in PNG format for long‑term, lossless storage.
+ * 4. When a marketing automation tool needs to prepare a set of PSD‑based promotional banners for email campaigns, correcting gamma and exporting each as a PNG to reduce file size and improve load times.
+ * 5. When a game development pipeline converts PSD sprite sheets to PNG textures, using Aspose.Imaging in C# to batch adjust gamma for consistent in‑game lighting and then save the textures for the engine.
+ */

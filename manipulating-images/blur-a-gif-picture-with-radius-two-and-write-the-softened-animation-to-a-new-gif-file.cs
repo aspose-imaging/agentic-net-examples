@@ -10,27 +10,27 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hard‑coded input and output file paths
             string inputPath = "input.gif";
             string outputPath = "output.gif";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to GifImage to access GIF-specific members
+                // Cast to GifImage to access GIF‑specific functionality
                 GifImage gifImage = (GifImage)image;
 
-                // Apply Gaussian blur with radius 2 (sigma set to 1.0) to the whole image
+                // Apply a Gaussian blur with radius 2 (sigma set to 1.0) to the whole animation
                 gifImage.Filter(gifImage.Bounds, new GaussianBlurFilterOptions(2, 1.0));
 
                 // Save the blurred animation
@@ -39,6 +39,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -46,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a web banner that uses an animated GIF and the designer wants a subtle soft‑focus effect, a developer can use this C# code with Aspose.Imaging to apply a Gaussian blur of radius 2 and output a new GIF.
- * 2. When preprocessing user‑uploaded animated GIFs for a social‑media app to reduce visual noise before displaying them, a developer can run this code to blur each frame uniformly.
- * 3. When generating a privacy‑preserving preview of an animated GIF in a document management system, a developer can apply a radius‑2 Gaussian blur using Aspose.Imaging for .NET and save the softened animation.
- * 4. When converting a high‑contrast GIF animation into a background element for a mobile game UI, a developer can employ this snippet to soften the image while preserving the animation timing.
- * 5. When automating a batch job that adds a consistent blur effect to promotional GIFs before publishing them to an email campaign, a developer can integrate this code to process each file and write the blurred output GIF.
+ * 1. When creating a social media post that requires a subtle background blur on an animated GIF to highlight overlay text, a developer can use this code to apply a Gaussian blur with radius two and save the softened animation.
+ * 2. When preparing an animated tutorial where the original GIF is too sharp and distracts from voice‑over instructions, a developer can blur the frames using Aspose.Imaging for .NET to produce a smoother visual.
+ * 3. When generating a privacy‑compliant preview of an animated GIF that contains sensitive details, a developer can apply a radius‑2 Gaussian blur to obscure the content while preserving the animation.
+ * 4. When optimizing an animated banner for a website that needs a gentle blur effect to match a design theme, a developer can load the GIF, apply the blur filter, and output a new GIF file.
+ * 5. When building a desktop application that lets users apply quick visual effects to their GIFs, a developer can implement this code to provide a one‑click “soften” option that blurs the entire animation with a radius of two.
  */

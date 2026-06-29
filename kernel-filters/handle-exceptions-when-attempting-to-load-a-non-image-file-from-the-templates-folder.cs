@@ -8,7 +8,7 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"templates/sample.txt";          // non‑image file for testing
+        string inputPath = @"templates/nonimage.txt";
         string outputPath = @"output/result.png";
 
         try
@@ -23,30 +23,38 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Attempt to load the file as an image
+            // Check if the file can be loaded as an image
+            if (!Image.CanLoad(inputPath))
+            {
+                Console.Error.WriteLine($"Cannot load image: {inputPath}");
+                return;
+            }
+
+            // Attempt to load the image and handle load exceptions
             try
             {
                 using (Image image = Image.Load(inputPath))
                 {
-                    // If loading succeeds, save the image to the output path
+                    // Perform any desired processing here (none in this example)
+
+                    // Save the image to the output path
                     image.Save(outputPath);
-                    Console.WriteLine($"Image saved to {outputPath}");
                 }
             }
             catch (ImageLoadException ile)
             {
-                // Specific handling for non‑image files
-                Console.Error.WriteLine($"Unable to load image: {ile.Message}");
+                Console.Error.WriteLine($"Image load error: {ile.Message}");
+                return;
             }
-            catch (Exception ex)
+            catch (ImageException ie) // Catch other Aspose.Imaging related exceptions
             {
-                // General loading errors
-                Console.Error.WriteLine($"Error loading image: {ex.Message}");
+                Console.Error.WriteLine($"Aspose.Imaging error: {ie.Message}");
+                return;
             }
         }
         catch (Exception ex)
         {
-            // Catch any unexpected runtime errors
+            // Catch any unexpected exceptions
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -54,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application processes user‑uploaded files from a “templates” folder and must ensure each file is a valid image before converting it to PNG, this code catches ImageLoadException for unsupported formats like .txt.
- * 2. When an automated batch job scans template resources on a shared drive and needs to skip non‑image documents without crashing the service, the nested try‑catch gracefully handles .txt or .pdf files.
- * 3. When a desktop utility generates thumbnails from a set of template assets and wants to log a clear error if a resource is a plain text file rather than a JPEG or BMP, this pattern provides specific exception handling.
- * 4. When a CI/CD pipeline validates that all assets in the “templates” directory are proper image files before publishing a product, the code detects and reports non‑image files such as .txt to prevent build failures.
- * 5. When a cloud‑based image conversion API reads configuration files from a templates folder and must return a user‑friendly error when the file is not an image, the ImageLoadException catch block supplies the necessary feedback.
+ * 1. When a developer needs to validate user‑uploaded files in a C# web application and ensure only supported image formats (e.g., JPEG, PNG, BMP) are processed, this code detects non‑image files in the templates folder and logs a clear error.
+ * 2. When building an automated batch‑conversion tool that reads files from a templates directory and saves them as PNG, the code prevents runtime crashes by checking Image.CanLoad before attempting to load unsupported text or PDF files.
+ * 3. When integrating Aspose.Imaging into a Windows service that monitors a folder for new assets, the example shows how to gracefully handle ImageLoadException if a stray non‑image file appears, keeping the service running.
+ * 4. When creating a desktop utility that allows users to select a source file and generate a thumbnail, the code demonstrates how to verify the file exists, confirm it is an image, and catch any Aspose.Imaging‑specific errors before saving the result.
+ * 5. When developing a CI/CD pipeline that validates image resources in a repository, this snippet can be used to programmatically reject non‑image files in the templates folder and provide actionable error messages for developers.
  */

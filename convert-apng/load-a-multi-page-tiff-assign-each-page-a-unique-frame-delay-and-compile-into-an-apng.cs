@@ -11,58 +11,49 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input\\multi_page.tif";
-            string outputPath = "Output\\animation.apng";
+            string inputPath = "Input\\multi.tif";
+            string outputPath = "Output\\result.apng";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the multi‑page TIFF
             using (Image tiffImage = Image.Load(inputPath))
             {
                 if (tiffImage is IMultipageImage multipage)
                 {
-                    // Prepare APNG creation options
+                    Image firstPage = multipage.Pages[0];
+                    int width = firstPage.Width;
+                    int height = firstPage.Height;
+
                     ApngOptions apngOptions = new ApngOptions
                     {
                         Source = new FileCreateSource(outputPath, false)
                     };
 
-                    // Use dimensions of the first page for the APNG canvas
-                    int width = multipage.Pages[0].Width;
-                    int height = multipage.Pages[0].Height;
-
-                    // Create the APNG image
-                    using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, width, height))
+                    using (ApngImage apng = (ApngImage)Image.Create(apngOptions, width, height))
                     {
-                        // Remove the default frame that exists upon creation
-                        apngImage.RemoveAllFrames();
+                        apng.RemoveAllFrames();
 
-                        // Add each TIFF page as a frame with a unique delay
                         for (int i = 0; i < multipage.PageCount; i++)
                         {
-                            RasterImage page = (RasterImage)multipage.Pages[i];
-                            uint frameDelay = (uint)((i + 1) * 100); // Example: 100 ms, 200 ms, ...
-
-                            // Add the frame with the specified delay
-                            apngImage.AddFrame(page, frameDelay);
+                            Image page = multipage.Pages[i];
+                            RasterImage rasterPage = (RasterImage)page;
+                            uint delay = (uint)((i + 1) * 100); // unique delay per frame
+                            apng.AddFrame(rasterPage, delay);
                         }
 
-                        // Save the resulting APNG
-                        apngImage.Save();
+                        apng.Save();
                     }
                 }
                 else
                 {
-                    Console.Error.WriteLine("Loaded image is not a multipage image.");
+                    Console.Error.WriteLine("The input image is not a multipage image.");
+                    return;
                 }
             }
         }
@@ -72,3 +63,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When creating animated product catalogs that need to display each high‑resolution TIFF page for a different duration in a web‑friendly APNG file.
+ * 2. When converting scanned multi‑page documents into an animated PNG where each page’s display time reflects its importance, using C# and Aspose.Imaging.
+ * 3. When building a medical imaging viewer that turns a multi‑slice TIFF series into an APNG animation with custom frame delays to highlight varying scan intervals.
+ * 4. When generating time‑lapse visualizations from satellite imagery stored as a multi‑page TIFF, assigning increasing delays per frame before exporting to APNG.
+ * 5. When developing an e‑learning module that animates step‑by‑step diagrams stored in a TIFF stack, setting unique delays for each step and saving the result as an APNG for cross‑platform playback.
+ */

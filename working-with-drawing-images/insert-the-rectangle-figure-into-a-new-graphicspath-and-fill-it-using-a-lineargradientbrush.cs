@@ -6,52 +6,45 @@ using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main()
     {
-        // Hard‑coded paths
-        string outputPath = @"C:\temp\output.bmp";
-
         try
         {
+            // Output file path (hard‑coded)
+            string outputPath = @"C:\temp\output.png";
+
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create BMP options with a file source pointing to the output path
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
-            };
+            // Set up PNG options with a bound FileCreateSource
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a new image (500x500) using the options
-            using (Image image = Image.Create(bmpOptions, 500, 500))
+            // Create a 500x500 image canvas
+            using (Image image = Image.Create(pngOptions, 500, 500))
             {
-                // Initialize graphics for drawing
+                // Initialize graphics and clear background
                 Graphics graphics = new Graphics(image);
-
-                // Optional: clear background
                 graphics.Clear(Color.White);
 
-                // Define rectangle bounds
+                // Define a rectangle shape
                 RectangleF rect = new RectangleF(50f, 50f, 400f, 400f);
-
-                // Create a rectangle shape and add it to a figure
                 Figure figure = new Figure();
                 figure.AddShape(new RectangleShape(rect));
 
-                // Create a graphics path and add the figure
+                // Add the figure to a graphics path
                 GraphicsPath path = new GraphicsPath();
                 path.AddFigure(figure);
 
-                // Create a linear gradient brush (blue to red)
-                LinearGradientBrush brush = new LinearGradientBrush(rect, Color.Blue, Color.Red, 0f);
+                // Fill the rectangle path with a solid brush
+                using (SolidBrush brush = new SolidBrush(Color.Blue))
+                {
+                    graphics.FillPath(brush, path);
+                }
 
-                // Fill the rectangle figure using the gradient brush
-                graphics.FillPath(brush, path);
-
-                // Save the image (the output path is already defined in the options)
+                // Save the image (output path already bound to the source)
                 image.Save();
             }
         }
@@ -64,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a .NET developer must create a 500 × 500 BMP file with a blue‑to‑red gradient‑filled rectangle for a dynamic report header using Aspose.Imaging’s GraphicsPath and LinearGradientBrush.
- * 2. When an application needs to generate a printable badge image where a rectangular background is filled with a smooth color transition, leveraging C# and Aspose.Imaging’s FillPath method.
- * 3. When a software solution requires programmatically drawing a gradient rectangle onto a white canvas to produce custom UI icons in BMP format with Aspose.Imaging.
- * 4. When an automated batch process has to overlay a gradient‑filled rectangle onto images for watermarking or branding, using Aspose.Imaging’s Figure, GraphicsPath, and LinearGradientBrush classes.
- * 5. When a developer is building a graphics‑intensive game asset pipeline that needs to render gradient rectangles into BMP textures directly from C# code with Aspose.Imaging.
+ * 1. When creating a PNG thumbnail that displays a gradient‑filled rectangular banner by adding a Figure to a GraphicsPath and filling it with a LinearGradientBrush in a .NET e‑commerce application.
+ * 2. When generating a dynamic report chart where a LinearGradientBrush‑filled rectangle, added via GraphicsPath, serves as a legend background in an Aspose.Imaging‑based PDF export.
+ * 3. When building a custom UI skin for a Windows Forms app and need to draw a scalable rectangle on a 500×500 canvas by inserting it into a GraphicsPath and applying a LinearGradientBrush for the button background.
+ * 4. When producing a marketing email image that requires a smooth color transition inside a rectangular call‑to‑action area, using C# Aspose.Imaging to add the rectangle to a GraphicsPath and fill it with a LinearGradientBrush.
+ * 5. When automating the creation of printable certificates and want to add a gradient‑filled rectangular seal or border by adding the shape to a GraphicsPath and rendering it with a LinearGradientBrush in the PNG output.
  */

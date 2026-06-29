@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Diagnostics;
-using System.Drawing;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
@@ -15,62 +14,42 @@ class Program
             string inputDir = @"C:\Images\Input\";
             string outputDir = @"C:\Images\Output\";
 
-            // List of image files to process (hardcoded)
-            string[] files = new string[]
+            // List of input image files
+            string[] inputFiles = new string[]
             {
-                "sample1.png",
-                "sample2.png",
-                "sample3.png"
+                Path.Combine(inputDir, "sample1.png"),
+                Path.Combine(inputDir, "sample2.png")
             };
 
-            // Define filters to apply
-            var filters = new (string Name, Func<FilterOptionsBase> Options)[]
+            foreach (string inputPath in inputFiles)
             {
-                ("Median", () => new MedianFilterOptions(5)),
-                ("GaussianBlur", () => new GaussianBlurFilterOptions(5, 4.0)),
-                ("Sharpen", () => new SharpenFilterOptions(5, 4.0))
-            };
-
-            foreach (var fileName in files)
-            {
-                string inputPath = Path.Combine(inputDir, fileName);
-
-                // Input file existence check
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                foreach (var filter in filters)
-                {
-                    // Load image
-                    using (Image image = Image.Load(inputPath))
-                    {
-                        RasterImage rasterImage = (RasterImage)image;
+                // Apply Median filter
+                ProcessFilter(
+                    inputPath,
+                    outputDir,
+                    "Median",
+                    () => new MedianFilterOptions(5));
 
-                        // Create filter options
-                        FilterOptionsBase options = filter.Options();
+                // Apply Gaussian Blur filter
+                ProcessFilter(
+                    inputPath,
+                    outputDir,
+                    "GaussianBlur",
+                    () => new GaussianBlurFilterOptions(5, 4.0));
 
-                        // Measure filter application time
-                        Stopwatch sw = Stopwatch.StartNew();
-                        rasterImage.Filter(rasterImage.Bounds, options);
-                        sw.Stop();
-
-                        // Prepare output path
-                        string outputFileName = $"{Path.GetFileNameWithoutExtension(fileName)}_{filter.Name}.png";
-                        string outputPath = Path.Combine(outputDir, outputFileName);
-
-                        // Ensure output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save filtered image
-                        rasterImage.Save(outputPath);
-
-                        // Log duration
-                        Console.WriteLine($"Applied {filter.Name} to {fileName} in {sw.ElapsedMilliseconds} ms. Saved to {outputPath}");
-                    }
-                }
+                // Apply Sharpen filter
+                ProcessFilter(
+                    inputPath,
+                    outputDir,
+                    "Sharpen",
+                    () => new SharpenFilterOptions(5, 4.0));
             }
         }
         catch (Exception ex)
@@ -78,13 +57,39 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
+
+    // Applies a specific filter to the image, measures duration, and saves the result.
+    static void ProcessFilter(string inputPath, string outputDir, string filterName, Func<FilterOptionsBase> optionsFactory)
+    {
+        // Load the image
+        using (Image image = Image.Load(inputPath))
+        {
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Measure filter application time
+            Stopwatch sw = Stopwatch.StartNew();
+            rasterImage.Filter(rasterImage.Bounds, optionsFactory());
+            sw.Stop();
+
+            // Prepare output path and ensure directory exists
+            string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}.{filterName}.png";
+            string outputPath = Path.Combine(outputDir, outputFileName);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Save the filtered image
+            rasterImage.Save(outputPath);
+
+            // Log duration
+            Console.WriteLine($"{filterName} filter applied to {inputPath} in {sw.ElapsedMilliseconds} ms. Saved to {outputPath}");
+        }
+    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to profile the performance of median, Gaussian blur, and sharpen filters on a batch of PNG images to ensure the processing pipeline meets SLA requirements.
- * 2. When building an automated image‑enhancement service that applies multiple filters to uploaded JPEG files and must log the execution time of each filter for cost estimation.
- * 3. When optimizing a desktop C# application that uses Aspose.Imaging to process large raster images and wants to compare the runtime of different filter options before selecting the most efficient one.
- * 4. When creating a CI/CD test that validates that recent changes to the Aspose.Imaging filter algorithms do not introduce regressions by measuring filter execution times on a predefined set of sample images.
- * 5. When generating a performance report for a cloud‑based image‑processing microservice that applies median, Gaussian blur, and sharpen filters to PNG assets and needs precise Stopwatch measurements for each step.
+ * 1. When a developer needs to benchmark the performance of Median, Gaussian Blur, and Sharpen filters on a set of PNG images before deploying an automated image‑processing pipeline.
+ * 2. When an e‑commerce platform wants to log the time taken to apply quality‑enhancing filters to product photos in bulk so they can optimize server resources.
+ * 3. When a medical imaging application must verify that applying filters to DICOM‑converted JPEG files meets latency requirements for real‑time diagnostics.
+ * 4. When a photo‑editing SaaS service wants to record per‑filter execution times to generate usage reports and SLA metrics for its C# backend.
+ * 5. When a game development studio needs to measure and compare filter processing speeds across different image formats (PNG, BMP) to decide which assets to pre‑process during build time.
  */

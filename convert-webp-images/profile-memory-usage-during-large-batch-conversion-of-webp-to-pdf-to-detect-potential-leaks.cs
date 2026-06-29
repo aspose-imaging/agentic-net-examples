@@ -10,49 +10,54 @@ class Program
     {
         try
         {
-            // Hardcoded directories for input WebP files and output PDF files
-            string inputDir = @"C:\Images\WebP";
-            string outputDir = @"C:\Images\Pdf";
+            // Hardcoded input and output directories
+            string inputDir = @"C:\Temp\WebPBatch";
+            string outputDir = @"C:\Temp\PdfBatch";
 
-            // List of WebP files to process (hardcoded)
-            string[] files = new string[]
-            {
-                "image1.webp",
-                "image2.webp",
-                "image3.webp"
-                // Add more file names as needed
-            };
+            // Ensure the output base directory exists
+            Directory.CreateDirectory(outputDir);
 
-            foreach (var fileName in files)
+            // Retrieve all WebP files in the input directory
+            string[] inputFiles = Directory.GetFiles(inputDir, "*.webp", SearchOption.TopDirectoryOnly);
+
+            foreach (string inputPath in inputFiles)
             {
-                // Build full input path and verify existence
-                string inputPath = Path.Combine(inputDir, fileName);
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Build full output path (PDF) and ensure its directory exists
-                string outputFileName = Path.ChangeExtension(fileName, ".pdf");
-                string outputPath = Path.Combine(outputDir, outputFileName);
+                // Build the corresponding PDF output path
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + ".pdf");
+
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Record memory usage before conversion
-                long memoryBefore = Process.GetCurrentProcess().PrivateMemorySize64;
+                long memBefore = Process.GetCurrentProcess().PrivateMemorySize64;
+                long gcBefore = GC.GetTotalMemory(forceFullCollection: false);
 
-                // Load WebP image and save as PDF
+                // Load the WebP image and save it as PDF
                 using (Image image = Image.Load(inputPath))
                 {
-                    PdfOptions pdfOptions = new PdfOptions();
-                    image.Save(outputPath, pdfOptions);
+                    image.Save(outputPath, new PdfOptions());
                 }
 
-                // Record memory usage after conversion
-                long memoryAfter = Process.GetCurrentProcess().PrivateMemorySize64;
-                long diffKB = (memoryAfter - memoryBefore) / 1024;
+                // Force garbage collection to get a more accurate post‑conversion measurement
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
 
-                Console.WriteLine($"Converted {fileName}: Memory before={memoryBefore / 1024}KB, after={memoryAfter / 1024}KB, diff={diffKB}KB");
+                // Record memory usage after conversion
+                long memAfter = Process.GetCurrentProcess().PrivateMemorySize64;
+                long gcAfter = GC.GetTotalMemory(forceFullCollection: false);
+
+                // Output conversion result and memory delta
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
+                Console.WriteLine($"Process memory change: {memAfter - memBefore} bytes");
+                Console.WriteLine($"GC memory change: {gcAfter - gcBefore} bytes");
             }
         }
         catch (Exception ex)
@@ -61,3 +66,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a cloud‑based image‑processing service needs to convert thousands of user‑uploaded WebP graphics to PDF reports while ensuring the .NET application does not leak memory over long‑running batches.
+ * 2. When an enterprise document‑management system automates archival of WebP‑based marketing assets into searchable PDF files and wants to monitor private memory and GC usage to maintain server stability.
+ * 3. When a desktop utility that processes large folders of WebP screenshots into PDF portfolios is tested for memory consumption to guarantee smooth operation on low‑RAM workstations.
+ * 4. When a CI/CD pipeline validates that a new version of the Aspose.Imaging for .NET library handles bulk WebP‑to‑PDF conversions without increasing the process’s private memory footprint.
+ * 5. When a SaaS platform that offers on‑demand PDF generation from WebP images needs to profile memory usage to detect and fix potential leaks before scaling to millions of conversions per day.
+ */

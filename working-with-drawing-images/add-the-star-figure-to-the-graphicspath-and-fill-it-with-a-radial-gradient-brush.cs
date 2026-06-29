@@ -1,33 +1,31 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\star_output.tiff";
-
         try
         {
-            // Ensure the output directory exists
+            // Hardcoded output path
+            string outputPath = @"C:\temp\star_output.png";
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a blank TIFF image (500x500)
-            var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            using (Image image = Image.Create(tiffOptions, 500, 500))
+            // Create a PNG image of size 500x500
+            var pngOptions = new PngOptions();
+            using (Image image = Image.Create(pngOptions, 500, 500))
             {
                 // Initialize graphics object
                 var graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                // Define star vertices
+                // Define points for a 5‑pointed star
                 PointF[] starPoints = new PointF[]
                 {
                     new PointF(250f, 50f),
@@ -42,23 +40,25 @@ class Program
                     new PointF(220f, 180f)
                 };
 
-                // Build a closed figure from the star points
+                // Create a closed figure containing the star polygon
                 var figure = new Figure { IsClosed = true };
                 figure.AddShape(new PolygonShape(starPoints));
 
-                // Create a GraphicsPath and add the figure
+                // Build a graphics path from the figure
                 var path = new GraphicsPath();
                 path.AddFigure(figure);
 
-                // Create a radial (path) gradient brush based on the same path
-                var brush = new PathGradientBrush(path);
-                brush.CenterColor = Color.Yellow;
-                brush.SurroundColors = new Color[] { Color.Red };
+                // Create a radial gradient brush based on the path
+                var brush = new PathGradientBrush(path)
+                {
+                    CenterColor = Color.Yellow,
+                    SurroundColors = new Color[] { Color.Red }
+                };
 
-                // Fill the star shape with the gradient brush
+                // Fill the star with the gradient brush
                 graphics.FillPath(brush, path);
 
-                // Save the resulting image
+                // Save the image
                 image.Save(outputPath);
             }
         }
@@ -71,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a printable promotional flyer with a star‑shaped badge that has a smooth yellow‑to‑transparent radial gradient and must be saved as a high‑resolution TIFF for professional printing.
- * 2. When an e‑commerce platform wants to overlay a glowing star watermark on product images, using a PathGradientBrush to create a subtle radial fade and storing the result in a lossless TIFF for catalog archives.
- * 3. When a scientific visualization tool requires drawing a highlighted star marker on a 500×500 raster canvas to emphasize data points, employing Aspose.Imaging’s GraphicsPath and radial gradient brush for crisp anti‑aliased rendering.
- * 4. When a game developer creates in‑game achievement icons programmatically, generating a star shape with a yellow center and orange rim using a PathGradientBrush and exporting it as a TIFF asset for further processing.
- * 5. When a reporting system automatically produces certification badges that include a star emblem with a radial color transition, using C# and Aspose.Imaging to draw the shape and save it as a TIFF file for inclusion in PDF reports.
+ * 1. When creating a custom badge or logo for a mobile app, a developer can use this code to draw a star shape and fill it with a radial gradient to give a glossy, eye‑catching effect in a PNG file.
+ * 2. When generating printable certificates or awards, the code can render a star emblem with a yellow‑to‑red gradient that scales to 500 × 500 pixels and can be saved as a high‑resolution PNG for inclusion in PDF documents.
+ * 3. When building an online game’s achievement icons, a developer can programmatically produce star graphics with a radial gradient brush, ensuring consistent colors and vector‑based shapes across all platforms.
+ * 4. When automating the creation of promotional email banners, the snippet can be used to add a star illustration with a smooth gradient background, then export the result as a PNG that loads quickly in webmail clients.
+ * 5. When developing a data‑visualization dashboard that highlights top‑ranked items, the code can generate a star marker with a radial gradient to overlay on charts, using Aspose.Imaging’s GraphicsPath and PathGradientBrush for precise rendering.
  */

@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging;
 
@@ -10,7 +9,7 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output file paths
         string inputPath = @"C:\temp\sample.cdr";
         string outputPath = @"C:\temp\sample_cropped.gif";
 
@@ -26,21 +25,20 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CorelDRAW file
+            // Load the CorelDRAW (CDR) image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to CdrImage to access vector-specific features
+                // Cast to CdrImage to access vector-specific functionality
                 CdrImage cdrImage = (CdrImage)image;
 
-                // Define a 200x200 rectangle starting at (0,0)
+                // Define a 200x200 rectangle starting at the top-left corner (0,0)
                 Rectangle cropArea = new Rectangle(0, 0, 200, 200);
 
-                // Crop the image
+                // Crop the image to the defined rectangle
                 cdrImage.Crop(cropArea);
 
                 // Save the cropped image as GIF
-                GifOptions gifOptions = new GifOptions();
-                cdrImage.Save(outputPath, gifOptions);
+                cdrImage.Save(outputPath, new GifOptions());
             }
         }
         catch (Exception ex)
@@ -52,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 200 × 200 thumbnail GIF from a CorelDRAW (CDR) illustration for a web catalog, they can load the CDR file, crop the region, and save it as a GIF using Aspose.Imaging for .NET.
- * 2. When an e‑commerce platform requires a fixed‑size preview of a product design stored in a CorelDRAW file, this code extracts a 200 px square area and outputs it as a lightweight GIF for quick loading.
- * 3. When automating the creation of animated email banners that start with a static 200 × 200 frame taken from a CDR source, the snippet loads the vector file, crops the desired region, and saves it as a GIF.
- * 4. When a content management system must display a consistent 200 px square icon derived from a CorelDRAW logo, developers can use this code to crop the logo and convert it to a GIF for cross‑browser compatibility.
- * 5. When a batch‑processing tool needs to convert multiple CorelDRAW drawings into small GIF snapshots for documentation, the example shows how to load each CDR, crop a 200 × 200 area, and save the result as a GIF with Aspose.Imaging.
+ * 1. When a developer needs to extract a thumbnail from a CorelDRAW (CDR) design for a web gallery, they can load the CDR file, crop a 200×200 region, and save it as a GIF.
+ * 2. When an e‑commerce platform must generate small preview images of vector logos stored in CDR format for product listings, this code can crop the logo to a 200×200 square and output a GIF.
+ * 3. When a reporting tool requires embedding a fixed‑size graphic from a CorelDRAW source into PDF reports, the developer can use this snippet to crop the CDR to 200×200 pixels and convert it to a GIF.
+ * 4. When a mobile app needs a lightweight animated or static icon derived from a CDR illustration, the code can crop the vector to a 200×200 area and save it as a GIF for fast loading.
+ * 5. When a content management system must automatically generate consistent 200×200 preview thumbnails for uploaded CDR files, this C# example shows how to crop and convert the image to GIF format.
  */

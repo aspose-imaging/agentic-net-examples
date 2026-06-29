@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
@@ -10,9 +12,10 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "template.svg";
-            string outputPath = "result.png";
+            // Hardcoded paths
+            string inputPath = "input.svg";
+            string tempPath = "temp\\temp.png";
+            string outputPath = "output\\result.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,48 +24,38 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure directories exist for temporary and output files
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Temporary rasterized PNG path
-            string tempPath = Path.Combine(Path.GetTempPath(), "temp_raster.png");
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
-
-            // Load SVG and rasterize to temporary PNG
+            // Load SVG and rasterize to a temporary PNG
             using (Image svgImage = Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = svgImage.Size
-                };
                 var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    VectorRasterizationOptions = new SvgRasterizationOptions { PageSize = svgImage.Size }
                 };
                 svgImage.Save(tempPath, pngOptions);
             }
 
-            // Load raster image, apply custom convolution kernel, and save final result
+            // Load the rasterized PNG, apply custom convolution filter, and save the result
             using (Image rasterImage = Image.Load(tempPath))
             {
-                var raster = (RasterImage)rasterImage;
+                RasterImage raster = (RasterImage)rasterImage;
 
                 // Custom kernel emphasizing diagonal edges
                 double[,] kernel = new double[,]
                 {
                     { -1, 0, 1 },
                     {  0, 0, 0 },
-                    {  1, 0,-1 }
+                    {  1, 0, -1 }
                 };
 
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
-                raster.Save(outputPath, new PngOptions());
-            }
+                var convOptions = new ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, convOptions);
 
-            // Clean up temporary file
-            if (File.Exists(tempPath))
-            {
-                File.Delete(tempPath);
+                var saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -74,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to convert an SVG logo into a PNG thumbnail with enhanced diagonal edge detection for sharper visual emphasis.
- * 2. When a web application needs to generate raster images from vector icons and apply a custom convolution filter to highlight diagonal lines before serving them to browsers.
- * 3. When an automated reporting tool must embed vector diagrams as PNGs with edge‑enhanced styling to improve readability in printed PDFs.
- * 4. When a game asset pipeline requires converting SVG assets to PNG textures and applying a diagonal edge kernel to create stylized outlines for in‑game UI elements.
- * 5. When a data‑visualization service processes SVG charts, rasterizes them, and emphasizes diagonal trends using a custom convolution filter before exporting the final PNG chart.
+ * 1. When a developer needs to convert an SVG logo into a PNG thumbnail while highlighting diagonal edges for a sharper UI icon.
+ * 2. When a web application must generate raster images from vector diagrams and apply a custom edge‑detection filter to emphasize structural lines in reports.
+ * 3. When an e‑commerce platform wants to automatically create product‑image watermarks that accentuate diagonal patterns for brand consistency.
+ * 4. When a scientific visualization tool requires preprocessing of SVG charts into PNGs with a diagonal‑edge convolution to improve feature detection in downstream analysis.
+ * 5. When a desktop publishing software needs to rasterize SVG artwork and apply a custom kernel to enhance diagonal details before exporting the final PNG asset.
  */

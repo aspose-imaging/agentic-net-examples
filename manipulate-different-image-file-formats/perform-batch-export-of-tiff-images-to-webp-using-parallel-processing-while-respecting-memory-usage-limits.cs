@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -11,24 +12,20 @@ class Program
     {
         try
         {
-            // Hardcoded input TIFF files
-            string[] inputFiles = new[]
-            {
-                @"C:\Images\Input1.tif",
-                @"C:\Images\Input2.tif",
-                @"C:\Images\Input3.tif"
-            };
+            // Hardcoded input and output directories
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-            // Hardcoded output directory
-            string outputDir = @"C:\Images\WebPOutput";
-
-            // Ensure the output directory exists once
+            // Ensure output directory exists
             Directory.CreateDirectory(outputDir);
+
+            // Get all TIFF files in the input directory
+            string[] tiffFiles = Directory.GetFiles(inputDir, "*.tif");
 
             // Limit parallelism to avoid excessive memory consumption
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 2 };
 
-            Parallel.ForEach(inputFiles, parallelOptions, inputPath =>
+            Parallel.ForEach(tiffFiles, parallelOptions, inputPath =>
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -37,39 +34,35 @@ class Program
                     return;
                 }
 
-                // Derive output file path (same name with .webp extension)
+                // Determine output path (same name with .webp extension)
                 string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".webp");
 
-                // Ensure the output directory exists (unconditional as per rules)
+                // Ensure the output directory exists (unconditional as required)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the TIFF image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Optional: set a page exporting action for multipage TIFFs
+                    // If the image is a multipage TIFF, set a page exporting action to free resources per page
                     if (image is TiffImage tiffImage)
                     {
                         tiffImage.PageExportingAction = (index, page) =>
                         {
-                            // Release resources after each page is processed
+                            // Force garbage collection to keep memory usage low
                             GC.Collect();
                         };
                     }
 
-                    // Configure WebP export options
+                    // Configure WebP export options (adjust as needed)
                     var webpOptions = new WebPOptions
                     {
-                        // Example settings – adjust as needed
                         Lossless = false,
-                        Quality = 80,
-                        KeepMetadata = true
+                        Quality = 80 // Example quality setting
                     };
 
                     // Save as WebP
                     image.Save(outputPath, webpOptions);
                 }
-
-                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             });
         }
         catch (Exception ex)
@@ -81,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a large collection of high‑resolution TIFF scans into smaller WebP files for faster web delivery while keeping CPU usage under control.
- * 2. When an e‑commerce platform must generate WebP thumbnails from multi‑page product catalog TIFFs in parallel without exhausting server memory.
- * 3. When a medical imaging system wants to archive multi‑page DICOM‑derived TIFF reports as WebP images to reduce storage costs while processing several files simultaneously.
- * 4. When a digital asset management tool requires automated batch conversion of TIFF artwork to WebP for mobile apps, using Aspose.Imaging in C# with limited parallel threads to stay within memory quotas.
- * 5. When a cloud‑based image pipeline needs to process incoming TIFF uploads and output WebP versions in a background job, ensuring each page is released promptly to avoid memory leaks.
+ * 1. When a developer needs to convert a large collection of high‑resolution TIFF scans into smaller WebP files for faster web delivery while keeping memory usage low.
+ * 2. When an e‑commerce platform must generate WebP thumbnails from multi‑page product catalog TIFFs in parallel to speed up the publishing pipeline without exhausting server RAM.
+ * 3. When a digital archiving system requires automated nightly batch processing of TIFF documents into WebP format for storage optimization, using controlled parallelism to avoid out‑of‑memory errors.
+ * 4. When a photo‑editing application wants to provide users with a one‑click batch export feature that transforms TIFF portfolios into WebP images while ensuring the process runs efficiently on modest hardware.
+ * 5. When a content‑management workflow needs to migrate legacy TIFF assets to WebP for modern browsers, employing parallel tasks with a max degree of parallelism to balance performance and resource consumption.
  */

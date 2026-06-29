@@ -7,60 +7,50 @@ using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input directory containing TIFF frames and output GIF path
-            string inputDirectory = @"C:\temp\tiffframes";
-            string outputPath = @"C:\temp\output.gif";
+            string[] inputPaths = {
+                "frame1.tif",
+                "frame2.tif",
+                "frame3.tif"
+            };
 
-            // Ensure the output directory exists
+            foreach (var path in inputPaths)
+            {
+                if (!File.Exists(path))
+                {
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
+                }
+            }
+
+            string outputPath = "Output\\animated.gif";
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Get all TIFF files in the input directory
-            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
-            if (tiffFiles.Length == 0)
+            using (RasterImage firstFrame = (RasterImage)Image.Load(inputPaths[0]))
             {
-                Console.Error.WriteLine("No TIFF files found in the input directory.");
-                return;
-            }
-
-            // Load the first TIFF frame
-            string firstFile = tiffFiles[0];
-            if (!File.Exists(firstFile))
-            {
-                Console.Error.WriteLine($"File not found: {firstFile}");
-                return;
-            }
-
-            using (RasterImage firstFrame = (RasterImage)Image.Load(firstFile))
-            using (GifImage gif = new GifImage(new GifFrameBlock(firstFrame)))
-            {
-                // Add remaining TIFF frames to the GIF
-                for (int i = 1; i < tiffFiles.Length; i++)
+                using (GifImage gif = new GifImage(new GifFrameBlock((ushort)firstFrame.Width, (ushort)firstFrame.Height)))
                 {
-                    string filePath = tiffFiles[i];
-                    if (!File.Exists(filePath))
+                    gif.AddPage(firstFrame);
+
+                    for (int i = 1; i < inputPaths.Length; i++)
                     {
-                        Console.Error.WriteLine($"File not found: {filePath}");
-                        continue;
+                        using (RasterImage frame = (RasterImage)Image.Load(inputPaths[i]))
+                        {
+                            gif.AddPage(frame);
+                        }
                     }
 
-                    using (RasterImage frame = (RasterImage)Image.Load(filePath))
+                    GifOptions options = new GifOptions
                     {
-                        gif.AddPage(frame);
-                    }
+                        MaxDiff = 80
+                    };
+
+                    gif.Save(outputPath, options);
                 }
-
-                // Configure lossy compression options
-                GifOptions saveOptions = new GifOptions
-                {
-                    MaxDiff = 80 // Recommended value for optimal lossy compression
-                };
-
-                // Save the animated GIF with lossy compression
-                gif.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -72,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to convert a series of high‑resolution TIFF screenshots into a lightweight animated GIF for faster page load while preserving the animation sequence.
- * 2. When an e‑learning platform must generate animated instructional GIFs from scanned TIFF slides and reduce file size with lossy compression to fit within LMS bandwidth limits.
- * 3. When a digital marketing team wants to create a compact product‑showcase GIF from a TIFF photo shoot, ensuring the animation loops correctly after compression.
- * 4. When a mobile app processes TIFF camera bursts into an animated GIF and applies lossy compression to meet app‑store size restrictions without breaking frame order.
- * 5. When a scientific visualization tool assembles time‑lapse TIFF images into an animated GIF and needs to shrink the output for email distribution while keeping the temporal integrity of the frames.
+ * 1. When a web developer needs to create a lightweight animated banner from high‑resolution TIFF frames for faster page load, they can use this code to apply lossy compression to the GIF while preserving the animation sequence.
+ * 2. When an e‑learning platform wants to convert a series of scanned lecture slides stored as TIFF images into an animated GIF for mobile devices, this snippet reduces the GIF file size without breaking slide transitions.
+ * 3. When a digital marketing team must email a product showcase animation created from TIFF images and stay under attachment size limits, the code generates a compressed GIF that retains the original frame timing.
+ * 4. When a game developer needs to bundle animated UI icons generated from TIFF assets into a single GIF file and control visual quality with the MaxDiff parameter, this example shows how to apply lossy compression in C#.
+ * 5. When a scientific visualization tool converts a sequence of high‑detail TIFF microscopy images into an animated GIF for quick preview, the code ensures animation integrity while shrinking the preview file size.
  */

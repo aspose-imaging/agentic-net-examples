@@ -6,12 +6,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\sample.rotated.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.bmp";
-            string outputPath = @"C:\Images\output_rotated.bmp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,9 +22,10 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load BMP image, rotate, verify dimensions, and save
+            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
+                // Store original dimensions
                 int originalWidth = image.Width;
                 int originalHeight = image.Height;
 
@@ -34,7 +35,7 @@ class Program
                 // Verify dimensions remain unchanged
                 if (image.Width != originalWidth || image.Height != originalHeight)
                 {
-                    Console.Error.WriteLine("Dimensions changed after rotation.");
+                    Console.WriteLine("Dimensions changed after rotation.");
                 }
                 else
                 {
@@ -51,3 +52,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to re‑orient scanned BMP documents by 270° for correct portrait display while ensuring the image size stays the same.
+ * 2. When an automated batch job must rotate legacy BMP assets for a game’s sprite sheet without altering their pixel dimensions.
+ * 3. When a Windows desktop application processes user‑uploaded BMP photos and must rotate them 270° clockwise before saving, while confirming the width and height remain unchanged.
+ * 4. When a C# service generates printable BMP labels that require a 270° rotation to match printer orientation, and the code must verify that the label dimensions are preserved.
+ * 5. When a migration script updates BMP files from an old system, applying a 270° RotateFlip operation and checking that the image dimensions are consistent for downstream processing.
+ */

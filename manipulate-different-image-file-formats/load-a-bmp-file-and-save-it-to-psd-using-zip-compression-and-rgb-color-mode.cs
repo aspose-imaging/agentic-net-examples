@@ -6,34 +6,41 @@ using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.bmp";
-        string outputPath = "output/output.psd";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\output.psd";
 
         try
         {
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                PsdOptions psdOptions = new PsdOptions
+                // Configure PSD save options: ZIP-like RLE compression and RGB color mode
+                var psdOptions = new PsdOptions
                 {
                     CompressionMethod = CompressionMethod.RLE,
                     ColorMode = ColorModes.Rgb
                 };
 
+                // Save as PSD with the specified options
                 image.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -41,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy BMP graphics into Photoshop‑compatible PSD files with lossless RLE compression and RGB color mode for further editing in a .NET application.
- * 2. When an automated build process must generate PSD assets from BMP source files to maintain color fidelity while reducing file size using Aspose.Imaging in C#.
- * 3. When a content management system requires on‑the‑fly conversion of uploaded BMP images to PSD format with RGB channels for designers to work on in Adobe Photoshop.
- * 4. When a batch‑processing tool has to migrate a collection of BMP icons into PSD files with RLE compression to prepare them for high‑resolution print workflows.
- * 5. When a Windows service needs to read BMP files, apply the RGB color mode, and save them as compressed PSD files for archival storage using Aspose.Imaging for .NET.
+ * 1. When a graphics pipeline receives BMP assets from legacy hardware and must convert them to layered PSD files with lossless RLE compression for Photoshop editing.
+ * 2. When an e‑commerce platform needs to generate high‑quality PSD mockups from user‑uploaded BMP logos while preserving RGB color fidelity.
+ * 3. When a desktop publishing application automates batch conversion of BMP scans into PSD files to enable designers to apply Photoshop filters without changing color mode.
+ * 4. When a digital asset management system stores source images as BMP and requires on‑the‑fly conversion to PSD with ZIP‑style RLE compression for efficient storage and quick preview.
+ * 5. When a C# service integrates Aspose.Imaging to transform BMP screenshots into PSD files that maintain RGB color space and use PSD’s built‑in RLE compression for archival purposes.
  */

@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -11,45 +11,45 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "templates/input.svg";
-            string outputPath = "output/filtered.png";
+            string outputPath = "output/output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
-            using (Image svgImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Rasterize SVG to PNG in memory
+                SvgImage svgImage = (SvgImage)image;
+
+                // Set up rasterization options for SVG to PNG conversion
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+                rasterOptions.PageSize = svgImage.Size;
+
+                PngOptions pngOptions = new PngOptions();
+                pngOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Rasterize SVG into a memory stream
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    PngOptions pngOptions = new PngOptions();
-                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = svgImage.Size
-                    };
-                    pngOptions.VectorRasterizationOptions = rasterOptions;
-
                     svgImage.Save(ms, pngOptions);
                     ms.Position = 0;
 
                     // Load the rasterized image
-                    using (Image rasterImage = Image.Load(ms))
+                    using (Image rasterImageContainer = Image.Load(ms))
                     {
-                        RasterImage raster = (RasterImage)rasterImage;
+                        RasterImage rasterImage = (RasterImage)rasterImageContainer;
 
-                        // Apply predefined Emboss5x5 filter
-                        raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
+                        // Apply Emboss5x5 convolution filter
+                        rasterImage.Filter(rasterImage.Bounds,
+                            new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                                Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5));
 
-                        // Save the filtered image
+                        // Save the filtered image as PNG
                         rasterImage.Save(outputPath, new PngOptions());
                     }
                 }
@@ -64,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application uses Aspose.Imaging for .NET to convert SVG icons to PNG thumbnails and apply the Emboss5x5 convolution filter for a subtle 3‑D effect.
- * 2. When an e‑commerce site automates the creation of embossed product badge images by loading SVG templates, rasterizing them with Aspose.Imaging, and saving the result as PNG.
- * 3. When a reporting engine generates PDF reports that embed high‑resolution diagrams, it can load SVG charts, rasterize them with Aspose.Imaging, apply the Emboss5x5 filter, and export the PNG for consistent rendering.
- * 4. When desktop publishing software offers a “Add Emboss” feature, it can use Aspose.Imaging for .NET to load vector logos in SVG, rasterize them, apply the predefined Emboss5x5 filter, and save the stylized PNG.
- * 5. When a game development pipeline processes UI assets, developers can use Aspose.Imaging to load SVG UI elements, rasterize them to PNG, apply the Emboss5x5 convolution filter, and integrate the textured images into the game.
+ * 1. When a web application needs to generate stylized PNG thumbnails from SVG icons with an embossed effect for UI hover states.
+ * 2. When an e‑commerce platform wants to convert product vector illustrations into high‑resolution PNG images and add depth using the Emboss5x5 filter before displaying them on product pages.
+ * 3. When a reporting tool automatically creates printable PNG charts from SVG diagrams and applies an emboss filter to enhance visual contrast in PDF exports.
+ * 4. When a mobile game developer pre‑processes SVG assets into PNG textures with an emboss effect to achieve a 3‑D look without increasing runtime processing.
+ * 5. When a document automation system batch‑processes SVG logos, rasterizes them to PNG, and applies the Emboss5x5 convolution to meet branding guidelines for embossed watermarking.
  */

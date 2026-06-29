@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -14,7 +13,7 @@ class Program
             string inputPath = "input.png";
             string outputPath = "output.png";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,14 +26,15 @@ class Program
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage for filtering
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Define a custom convolution kernel (example sharpen kernel)
+                // Define a custom convolution kernel
                 double[,] kernel = new double[,]
                 {
-                    { 0, -1, 0 },
-                    { -1, 5, -1 },
-                    { 0, -1, 0 }
+                    { 0.0, 0.5, 0.0 },
+                    { 0.5, 0.0, 0.5 },
+                    { 0.0, 0.5, 0.0 }
                 };
 
                 // Validate that the sum of kernel coefficients equals 1
@@ -47,21 +47,16 @@ class Program
                 const double tolerance = 1e-6;
                 if (Math.Abs(sum - 1.0) > tolerance)
                 {
-                    // Normalize the kernel to ensure the sum equals 1
-                    for (int i = 0; i < kernel.GetLength(0); i++)
-                    {
-                        for (int j = 0; j < kernel.GetLength(1); j++)
-                        {
-                            kernel[i, j] /= sum;
-                        }
-                    }
+                    Console.Error.WriteLine($"Kernel sum is {sum}, which does not equal 1. Adjust the kernel to avoid brightness shift.");
+                    return;
                 }
 
-                // Apply the convolution filter with the (possibly normalized) kernel
-                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(kernel));
+                // Apply the convolution filter using the validated kernel
+                rasterImage.Filter(rasterImage.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
 
-                // Save the processed image as PNG
-                rasterImage.Save(outputPath, new PngOptions());
+                // Save the processed image
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -73,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to apply a custom sharpening filter to PNG images without unintentionally brightening the picture, they can use this code to normalize the convolution kernel.
- * 2. When processing a batch of scanned documents in JPEG format and applying edge‑enhancement kernels, the validation step ensures consistent exposure across all pages.
- * 3. When building a C# desktop application that lets users adjust image contrast using user‑defined kernels, the sum‑check prevents the resulting bitmap from appearing washed out.
- * 4. When integrating Aspose.Imaging into an automated photo‑processing pipeline that adds a custom blur kernel to TIFF files, normalizing the kernel avoids unwanted brightness shifts in the output.
- * 5. When creating a real‑time image‑filtering service that receives arbitrary kernel matrices via an API, the code safeguards against brightness artifacts before applying the convolution filter.
+ * 1. When a .NET developer wants to apply a custom convolution filter to PNG or JPEG images using Aspose.Imaging and must guarantee that the filter does not introduce a brightness shift, they can use this code to validate that the kernel coefficients sum to one.
+ * 2. When building an automated image‑processing pipeline that sharpens scanned documents, the code ensures the custom kernel is normalized so the output retains the original document’s exposure levels.
+ * 3. When creating a photo‑editing tool that lets users define their own blur or emboss kernels, the validation step prevents accidental over‑exposure by checking the kernel sum before applying the filter.
+ * 4. When integrating Aspose.Imaging into a C# web service that resizes and enhances user‑uploaded avatars, the code confirms the custom kernel is correctly weighted to maintain consistent brightness across all images.
+ * 5. When performing batch processing of satellite imagery where precise radiometric balance is critical, the kernel‑sum check safeguards against unintended brightness changes during convolution filtering.
  */

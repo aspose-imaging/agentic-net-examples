@@ -9,40 +9,35 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputWebp";
-            string outputDirectory = @"C:\OutputApng";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // Get all animated WEBP files in the input directory
-            string[] webpFiles = Directory.GetFiles(inputDirectory, "*.webp");
-
-            foreach (string inputPath in webpFiles)
+            // Hardcoded list of animated WEBP files to convert
+            string[] inputFiles = new string[]
             {
-                // Verify the input file exists
+                @"C:\Images\anim1.webp",
+                @"C:\Images\anim2.webp",
+                // Add additional input paths as needed
+            };
+
+            foreach (string inputPath in inputFiles)
+            {
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output file path (same name with .png extension)
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                // Build output path with .png extension (APNG)
+                string outputPath = Path.ChangeExtension(inputPath, ".png");
 
-                // Ensure the output directory exists (unconditional as required)
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the animated WEBP image and save it as APNG preserving frames and timing
+                // Load the animated WEBP image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // ApngOptions without custom settings preserves original frame order and timing
+                    // Save as APNG, preserving original frame order and timing
                     image.Save(outputPath, new ApngOptions());
                 }
-
-                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -51,3 +46,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to migrate a library of animated WEBP assets to the widely‑supported APNG format for use in web applications while keeping the original frame order and timing metadata.
+ * 2. When an e‑learning platform wants to convert user‑uploaded animated WEBP stickers into APNGs so they render correctly across browsers that only support PNG animation.
+ * 3. When a game developer must batch‑process sprite animations stored as animated WEBP files into APNGs for integration with a Unity UI that reads PNG sequences.
+ * 4. When a marketing automation tool has to transform promotional animated WEBP banners into APNGs before embedding them in email newsletters that require PNG compatibility.
+ * 5. When a content management system needs to archive animated WEBP illustrations as APNG files to ensure long‑term accessibility and preserve frame timing for future playback.
+ */

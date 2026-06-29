@@ -1,77 +1,42 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input directory containing individual frame images
-        string inputDir = @"C:\temp\frames";
-        // Hardcoded output path for the animated GIF
-        string outputPath = @"C:\temp\output\animated_dithered.gif";
-
         try
         {
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string inputPath = "input.gif";
+            string outputPath = "output_dithered.gif";
 
-            // Retrieve all files in the input directory
-            string[] frameFiles = Directory.GetFiles(inputDir);
-            if (frameFiles.Length == 0)
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"No frames found in: {inputDir}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the first frame to initialize the GifImage
-            string firstPath = frameFiles[0];
-            if (!File.Exists(firstPath))
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                Console.Error.WriteLine($"File not found: {firstPath}");
-                return;
+                Directory.CreateDirectory(outputDir);
             }
 
-            using (Image firstImg = Image.Load(firstPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Cast to RasterImage to access Dither
-                RasterImage firstRaster = (RasterImage)firstImg;
-                // Apply Floyd‑Steinberg dithering with a 4‑bit palette
-                firstRaster.Dither(DitheringMethod.FloydSteinbergDithering, 4, null);
+                GifImage gifImage = (GifImage)image;
 
-                // Create a GifFrameBlock from the dithered raster image
-                using (GifFrameBlock firstBlock = new GifFrameBlock(firstRaster))
+                for (int i = 0; i < gifImage.PageCount; i++)
                 {
-                    // Initialize the animated GIF with the first block
-                    using (GifImage gifImage = new GifImage(firstBlock))
-                    {
-                        // Process remaining frames
-                        for (int i = 1; i < frameFiles.Length; i++)
-                        {
-                            string path = frameFiles[i];
-                            if (!File.Exists(path))
-                            {
-                                Console.Error.WriteLine($"File not found: {path}");
-                                continue; // Skip missing files
-                            }
-
-                            using (Image img = Image.Load(path))
-                            {
-                                RasterImage raster = (RasterImage)img;
-                                raster.Dither(DitheringMethod.FloydSteinbergDithering, 4, null);
-                                using (GifFrameBlock block = new GifFrameBlock(raster))
-                                {
-                                    gifImage.AddBlock(block);
-                                }
-                            }
-                        }
-
-                        // Save the animated GIF with enhanced texture
-                        gifImage.Save(outputPath);
-                    }
+                    gifImage.ActiveFrame = (GifFrameBlock)gifImage.Pages[i];
+                    gifImage.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 1, null);
                 }
+
+                GifOptions gifOptions = new GifOptions();
+                gifImage.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -83,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to generate an animated GIF from a series of high‑resolution PNG frames and add Floyd‑Steinberg dithering to reduce file size while preserving texture.
- * 2. When a game studio needs to create retro‑style sprite animations in GIF format and apply a 4‑bit palette dither to achieve a pixel‑art look across all frames.
- * 3. When an e‑learning platform must convert a set of scanned lecture slides into a lightweight animated GIF with consistent dithering to improve readability on low‑bandwidth connections.
- * 4. When a marketing automation tool assembles product showcase images into an animated GIF and uses Aspose.Imaging’s Dither method to ensure uniform color reduction for email campaigns.
- * 5. When a social media app processes user‑uploaded frame sequences into an animated GIF and applies Floyd‑Steinberg dithering to maintain visual quality on devices that only support 256 colors.
+ * 1. When creating an animated GIF from a series of low‑color screenshots, a developer can dither each frame with Floyd‑Steinberg to add texture and reduce banding before saving the final GIF.
+ * 2. When converting a high‑resolution video clip into a small animated GIF for web use, applying per‑frame dithering ensures the limited 256‑color palette still preserves visual detail.
+ * 3. When generating GIF‑based data visualizations (e.g., heat‑map animations) that need a smoother gradient, a developer can dither each frame to improve perceived color depth.
+ * 4. When building an e‑learning module that displays step‑by‑step diagrams as an animated GIF, dithering each frame helps maintain readability on devices with limited color support.
+ * 5. When optimizing legacy GIF assets for modern browsers, a developer can load the original GIF, dither each frame, and re‑save it to achieve a more polished texture without increasing file size.
  */

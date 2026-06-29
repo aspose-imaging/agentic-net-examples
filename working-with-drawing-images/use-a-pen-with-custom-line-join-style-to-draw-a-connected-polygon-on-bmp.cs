@@ -3,53 +3,51 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded output path
+        string outputPath = @"C:\temp\polygon.bmp";
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\temp\polygon.bmp";
+            // Set up BMP options with a file source bound to the output path
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set BMP options and specify the file to create
-            BmpOptions bmpOptions = new BmpOptions
+            // Create a new image canvas (500x500)
+            using (Image image = Image.Create(bmpOptions, 500, 500))
             {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
-            };
-
-            // Create a 400x400 BMP image
-            using (Image image = Image.Create(bmpOptions, 400, 400))
-            {
-                // Initialize graphics object
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Clear background to white
+                // Clear background
                 graphics.Clear(Color.White);
 
                 // Create a pen with custom line join style
-                Pen pen = new Pen(Color.Blue, 5);
-                pen.LineJoin = LineJoin.Round; // custom join style
+                Pen pen = new Pen(Color.Blue, 5f);
+                pen.LineJoin = LineJoin.Round; // Custom line join
 
-                // Define polygon vertices
-                Point[] points = new Point[]
+                // Define polygon points (a simple pentagon)
+                Point[] polygonPoints = new Point[]
                 {
-                    new Point(50, 300),
-                    new Point(200, 50),
-                    new Point(350, 300),
-                    new Point(50, 150) // additional point to keep polygon connected
+                    new Point(250, 100),
+                    new Point(350, 200),
+                    new Point(300, 350),
+                    new Point(200, 350),
+                    new Point(150, 200)
                 };
 
-                // Draw the polygon
-                graphics.DrawPolygon(pen, points);
+                // Draw the connected polygon
+                graphics.DrawPolygon(pen, polygonPoints);
 
-                // Save the image to the specified path
+                // Save the image (output path already bound)
                 image.Save();
             }
         }
@@ -62,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP thumbnail with a custom‑styled polygon overlay for a reporting dashboard.
- * 2. When a C# application must create a printable 400×400 bitmap showing a highlighted area using a rounded‑join pen for architectural diagrams.
- * 3. When an automated image‑processing pipeline requires drawing connected polygonal boundaries on a BMP file to mark regions of interest in medical imaging.
- * 4. When a game‑level editor needs to export level outlines as 24‑bit BMP images with smooth polygon edges for asset previews.
- * 5. When a data‑visualization tool wants to render a custom‑shaped marker on a bitmap background and save it directly to disk without intermediate streams.
+ * 1. When a developer needs to generate a high‑resolution BMP map overlay with smooth polygon edges for a GIS application, they can use this code to draw a pentagon with a round line join.
+ * 2. When creating printable engineering diagrams in C# where the outlines must have consistent thickness and rounded corners, this snippet shows how to render a polygon onto a 24‑bit BMP file using Aspose.Imaging.
+ * 3. When building a custom badge or logo generator that outputs BMP images for legacy systems, the code demonstrates how to draw a connected shape with a blue pen and custom line join style.
+ * 4. When a game developer wants to pre‑render static terrain features as BMP textures with anti‑aliased polygon borders, they can employ this example to produce the assets programmatically.
+ * 5. When automating the production of certification stamps that require a precise polygon shape with rounded joins in a BMP file, this code provides a straightforward way to create and save the image.
  */

@@ -2,73 +2,66 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.CoreExceptions.ImageFormats;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Define input and output directories
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            // Hardcoded input and output directories
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-            // Validate input directory
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
-                return;
-            }
-
-            // Validate output directory
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            // Ensure the output base directory exists
+            Directory.CreateDirectory(outputDir);
 
             // Get all PNG files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.png");
+            string[] inputFiles = Directory.GetFiles(inputDir, "*.png");
 
-            foreach (string inputPath in files)
+            foreach (string inputPath in inputFiles)
             {
-                // Verify the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     continue;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + "_processed.png");
+                // Determine corresponding output path
+                string fileName = Path.GetFileName(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName);
 
-                // Set PNG options with a memory limit to mitigate out‑of‑memory issues
-                PngOptions options = new PngOptions
-                {
-                    BufferSizeHint = 100 // limit internal buffers to 100 MB
-                };
+                // Ensure the output directory for this file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 try
                 {
-                    // Load the image
+                    // Load the PNG image
                     using (Image image = Image.Load(inputPath))
                     {
-                        // Ensure the output directory for this file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Set a memory limit to mitigate out‑of‑memory issues
+                        var saveOptions = new PngOptions
+                        {
+                            BufferSizeHint = 200 // limit internal buffers to 200 MB
+                        };
 
-                        // Save the image with the specified options
-                        image.Save(outputPath, options);
+                        // Save the image to the output location using the specified options
+                        image.Save(outputPath, saveOptions);
                     }
                 }
-                catch (OutOfMemoryException oomEx)
+                catch (PngImageException ex)
                 {
-                    Console.Error.WriteLine($"Out of memory while processing {inputPath}: {oomEx.Message}");
-                    // Continue with next file
+                    Console.Error.WriteLine($"PngImageException processing {inputPath}: {ex.Message}");
+                }
+                catch (OutOfMemoryException ex)
+                {
+                    Console.Error.WriteLine($"Out of memory processing {inputPath}: {ex.Message}");
                 }
                 catch (Exception ex)
                 {
                     Console.Error.WriteLine($"Error processing {inputPath}: {ex.Message}");
-                    // Continue with next file
                 }
             }
         }
@@ -81,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service must convert thousands of high‑resolution PNG assets to a standardized format without crashing due to memory limits, this code can batch‑process them safely.
- * 2. When an automated build pipeline generates large PNG screenshots from UI tests and needs to resize or apply filters while preventing out‑of‑memory exceptions, the sample provides a reliable approach.
- * 3. When a desktop application imports a folder of 4K PNG images for archival and must ensure each file is loaded, processed, and saved without exhausting the .NET heap, the code demonstrates proper memory‑bounded handling.
- * 4. When a cloud‑based image‑processing microservice receives a bulk upload of high‑detail PNG files and must write processed copies to a separate directory while respecting a 100 MB buffer limit, this pattern is applicable.
- * 5. When a data‑migration script moves legacy PNG graphics to a new storage location and applies PNGOptions to limit internal buffers, it helps avoid out‑of‑memory errors during large‑scale batch operations.
+ * 1. When a photo‑editing service needs to convert thousands of high‑resolution PNG assets to a standardized format without crashing due to memory limits.
+ * 2. When a medical imaging application processes large PNG scans in batch and must prevent out‑of‑memory exceptions on a server with limited RAM.
+ * 3. When an e‑commerce platform generates product thumbnails from high‑resolution PNG files overnight and wants to ensure the batch job completes reliably.
+ * 4. When a GIS tool re‑projects and saves massive PNG map tiles and needs to cap internal buffers to avoid memory overflow.
+ * 5. When a digital archiving system migrates legacy PNG documents to a new storage location and must handle occasional missing files while protecting against memory exhaustion.
  */

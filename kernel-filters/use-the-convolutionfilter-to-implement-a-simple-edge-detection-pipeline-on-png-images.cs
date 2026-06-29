@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,9 +10,9 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output_edge.png";
+            string outputPath = "output/output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -30,19 +30,15 @@ class Program
                 // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
-                // Define a simple Laplacian edge‑detection kernel
-                double[,] edgeKernel = new double[,]
-                {
-                    { -1, -1, -1 },
-                    { -1,  8, -1 },
-                    { -1, -1, -1 }
-                };
-
-                // Apply the convolution filter to the whole image
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(edgeKernel));
+                // Apply edge detection using a convolution kernel (Emboss3x3 as a simple edge detector)
+                raster.Filter(
+                    raster.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
 
                 // Save the processed image as PNG
-                raster.Save(outputPath, new PngOptions());
+                PngOptions saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -54,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically highlight object boundaries in PNG screenshots for a visual inspection tool, they can use Aspose.Imaging’s ConvolutionFilter to apply a Laplacian edge‑detection kernel.
- * 2. When building a C# batch‑processing pipeline that converts scanned PNG documents into edge‑enhanced images for OCR pre‑processing, the code demonstrates how to load, filter, and save each file.
- * 3. When creating a web service that returns a stylized outline of user‑uploaded PNG graphics, developers can employ the RasterImage.Filter method with a convolution matrix to generate edge‑only previews.
- * 4. When integrating automated quality‑control checks that flag blurry PNG assets in a CI/CD workflow, the edge detection filter can reveal loss of detail by comparing the filtered output to expected edge patterns.
- * 5. When developing an educational desktop app that visualizes basic image‑processing algorithms, this example shows how to implement a simple edge detector on PNG images using C# and Aspose.Imaging.
+ * 1. When a developer needs to automatically highlight object boundaries in scanned PNG documents for OCR preprocessing.
+ * 2. When a web application must generate stylized edge‑enhanced thumbnails of user‑uploaded PNG photos.
+ * 3. When a security system processes PNG screenshots to detect motion outlines for anomaly detection.
+ * 4. When an e‑learning platform converts PNG diagrams into edge‑detected images to improve visual contrast for low‑bandwidth devices.
+ * 5. When a batch job applies edge detection to PNG assets before feeding them into a machine‑learning model for feature extraction.
  */

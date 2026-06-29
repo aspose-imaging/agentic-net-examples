@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input/sample.djvu";
-            string outputPath = "Output/portion.pdf";
+            string inputPath = "input.djvu";
+            string outputPath = "output.pdf";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -24,20 +24,22 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DjVu document
-            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+            // Load DjVu document from file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Define the export rectangle (x, y, width, height)
-                var exportArea = new Rectangle(20, 20, 250, 250);
+                // Prepare PDF export options with specific page and rectangle area
+                PdfOptions pdfOptions = new PdfOptions();
 
-                // Set up PDF save options with DjvuMultiPageOptions for page 0 and the export area
-                var pdfOptions = new PdfOptions
-                {
-                    MultiPageOptions = new DjvuMultiPageOptions(0, exportArea)
-                };
+                // Define export rectangle (x, y, width, height)
+                Rectangle exportArea = new Rectangle(20, 20, 250, 250);
 
-                // Save the specified portion to PDF
-                djvu.Save(outputPath, pdfOptions);
+                // Export only the first page (index 0) with the defined area
+                int[] pages = new int[] { 0 };
+                pdfOptions.MultiPageOptions = new DjvuMultiPageOptions(pages, exportArea);
+
+                // Save the selected portion to PDF
+                djvuImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract a defined rectangular area from a DjVu document and convert that portion into a PDF for embedding in a client‑facing report, this code provides a straightforward solution.
- * 2. When an application must generate a printable PDF preview of a selected region of a scanned DjVu file, such as a signature block or diagram, the snippet shows how to load the DjVu, define the rectangle, and save it as PDF using Aspose.Imaging for .NET.
- * 3. When a workflow requires isolating a specific page segment from a large DjVu archive—like a map excerpt—and delivering it as a lightweight PDF to end users, the example demonstrates the necessary C# operations.
- * 4. When a developer is building a document‑processing service that needs to convert only a portion of a DjVu image (e.g., a form field) to PDF to reduce file size and preserve layout, this code illustrates the required rectangle and multi‑page options.
- * 5. When integrating Aspose.Imaging into a .NET application to programmatically crop a DjVu file and export the cropped area as a PDF for archival or compliance purposes, the provided code handles file validation, rectangle definition, and PDF saving in one flow.
+ * 1. When a developer needs to extract a specific region of a scanned DjVu page (e.g., a signature block) and embed it into a PDF report.
+ * 2. When an application must generate a PDF preview of a selected area from a multi‑page DjVu document for faster loading in a web viewer.
+ * 3. When a document management system requires converting only the first page’s defined rectangle of a DjVu file to PDF to reduce file size.
+ * 4. When a legal tech solution needs to isolate a portion of a DjVu blueprint (coordinates 20,20,250,250) and save it as a PDF for client review.
+ * 5. When an automated batch process must read DjVu files, crop a fixed rectangle, and output PDFs for archival compliance.
  */

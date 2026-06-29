@@ -1,73 +1,68 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Shapes;
 using Aspose.Imaging.Watermark;
 using Aspose.Imaging.Watermark.Options;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output directories
+        string inputDirectory = "InputImages";
+        string outputDirectory = "OutputImages";
+
         try
         {
-            string inputDir = "Input";
-            string outputDir = "Output";
-
-            // Ensure input directory exists
-            if (!Directory.Exists(inputDir))
+            // Validate input directory existence
+            if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputDir);
-                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
                 return;
             }
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            // Get all PNG files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-            string[] files = Directory.GetFiles(inputDir, "*.png");
-
-            foreach (var inputPath in files)
+            foreach (string inputPath in files)
             {
+                // Check if the individual file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + "_processed.png");
+                // Prepare output file path
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + "_cleaned.png");
 
-                // Ensure output directory exists (null‑safe)
-                string outputDirPath = Path.GetDirectoryName(outputPath);
-                if (!string.IsNullOrEmpty(outputDirPath))
+                // Ensure the output directory exists before saving
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the image and apply the Telea watermark removal with an ellipse mask
+                using (Image image = Image.Load(inputPath))
                 {
-                    Directory.CreateDirectory(outputDirPath);
-                }
+                    RasterImage raster = (RasterImage)image;
 
-                using (var image = Image.Load(inputPath))
-                {
-                    var pngImage = (PngImage)image;
-
-                    // Create a common ellipse mask
+                    // Create an ellipse mask covering the central area of the image
                     var mask = new GraphicsPath();
                     var figure = new Figure();
-                    // Example ellipse covering the central area of the image
-                    figure.AddShape(new EllipseShape(new RectangleF(50, 50, pngImage.Width - 100, pngImage.Height - 100)));
+
+                    float x = image.Width * 0.25f;
+                    float y = image.Height * 0.25f;
+                    float w = image.Width * 0.5f;
+                    float h = image.Height * 0.5f;
+
+                    figure.AddShape(new EllipseShape(new RectangleF(x, y, w, h)));
                     mask.AddFigure(figure);
 
                     var options = new TeleaWatermarkOptions(mask);
+                    RasterImage result = WatermarkRemover.PaintOver(raster, options);
 
-                    using (var result = WatermarkRemover.PaintOver(pngImage, options))
-                    {
-                        var saveOptions = new PngOptions { Source = new FileCreateSource(outputPath, false) };
-                        result.Save(outputPath, saveOptions);
-                    }
+                    // Save the processed image
+                    result.Save(outputPath);
                 }
             }
         }
@@ -77,3 +72,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to automatically clean watermarks from a large collection of PNG photos by applying the same elliptical mask and Telea inpainting algorithm to each file.
+ * 2. When a .NET application must prepare a batch of product images for an e‑commerce site, removing logo overlays from the central region of every PNG using Aspose.Imaging’s Telea watermark removal.
+ * 3. When a photo‑editing workflow requires processing dozens of scanned PNG documents to erase stamps that occupy the middle of each page with a consistent ellipse mask.
+ * 4. When a game‑asset pipeline needs to strip placeholder graphics from PNG sprites in bulk, using the Telea algorithm to fill the masked area seamlessly.
+ * 5. When an automated archival script has to sanitize confidential PNG screenshots by masking and inpainting a specific central area across all files in a folder.
+ */

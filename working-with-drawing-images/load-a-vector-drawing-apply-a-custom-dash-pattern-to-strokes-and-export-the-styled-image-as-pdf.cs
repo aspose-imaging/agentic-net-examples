@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -22,20 +23,22 @@ class Program
 
             using (Image vectorImage = Image.Load(inputPath))
             {
+                Pen dashPen = new Pen(Color.Black, 2);
+                dashPen.DashStyle = DashStyle.Custom;
+                dashPen.DashPattern = new float[] { 5f, 2f, 1f, 2f };
+
+                Graphics graphics = new Graphics(vectorImage);
+                graphics.DrawRectangle(dashPen, new Rectangle(10, 10, vectorImage.Width - 20, vectorImage.Height - 20));
+
                 PdfOptions pdfOptions = new PdfOptions();
-
-                using (Image pdfImage = Image.Create(pdfOptions, vectorImage.Width, vectorImage.Height))
+                pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                 {
-                    Graphics graphics = new Graphics(pdfImage);
-                    graphics.Clear(Color.White);
-                    graphics.DrawImage(vectorImage, new Point(0, 0));
+                    PageWidth = vectorImage.Width,
+                    PageHeight = vectorImage.Height,
+                    BackgroundColor = Color.White
+                };
 
-                    Pen dashPen = new Pen(Color.Red, 2);
-                    dashPen.DashPattern = new float[] { 5f, 3f, 2f, 3f };
-                    graphics.DrawRectangle(dashPen, new Rectangle(0, 0, vectorImage.Width, vectorImage.Height));
-
-                    pdfImage.Save(outputPath, pdfOptions);
-                }
+                vectorImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG vector drawing into a PDF report while adding a custom red dashed border around the artwork.
- * 2. When an engineering application must export schematics as PDF files with highlighted outlines using a specific dash pattern for better visual distinction.
- * 3. When a web service generates printable invoices from SVG logos and wants to emphasize the logo edges with a red dash style before saving as PDF.
- * 4. When a desktop tool creates PDF portfolios of design assets and requires a consistent dashed frame around each vector image for branding purposes.
- * 5. When an automated batch process converts multiple SVG files to PDF and applies a custom dash pattern to indicate revision status on the document borders.
+ * 1. When a developer needs to convert an SVG floor‑plan into a printable PDF while highlighting room boundaries with a custom dash pattern.
+ * 2. When a web application must generate a PDF brochure from vector logos and apply a stylized dashed outline to each logo for branding consistency.
+ * 3. When an engineering tool has to export circuit diagrams as PDFs and emphasize selected wires using a custom dash pattern for review meetings.
+ * 4. When a reporting system creates PDF invoices from SVG icons and wants to draw a dashed border around the icon area to meet corporate style guidelines.
+ * 5. When a desktop utility processes user‑uploaded SVG illustrations and adds a custom dashed frame before saving the result as a high‑resolution PDF document.
  */

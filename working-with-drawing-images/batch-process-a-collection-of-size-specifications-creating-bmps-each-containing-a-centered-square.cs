@@ -1,9 +1,10 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -11,46 +12,29 @@ class Program
     {
         try
         {
-            // Define size specifications (width, height)
-            int[][] specs = new int[][]
+            string outputDir = "Output";
+            Directory.CreateDirectory(outputDir);
+
+            var specs = new List<(int width, int height)>
             {
-                new int[] { 200, 200 },
-                new int[] { 300, 150 },
-                new int[] { 400, 400 }
+                (200, 200),
+                (300, 150),
+                (400, 400)
             };
 
-            for (int i = 0; i < specs.Length; i++)
+            foreach (var spec in specs)
             {
-                int width = specs[i][0];
-                int height = specs[i][1];
+                int width = spec.width;
+                int height = spec.height;
+                string outputPath = Path.Combine(outputDir, $"image_{width}x{height}.bmp");
 
-                // Output path for each BMP
-                string outputPath = Path.Combine("output", $"image_{i}.bmp");
-
-                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Create BMP options with bound file source
-                BmpOptions bmpOptions = new BmpOptions();
-                bmpOptions.BitsPerPixel = 24;
-                bmpOptions.Source = new FileCreateSource(outputPath, false);
+                Source source = new FileCreateSource(outputPath, false);
+                BmpOptions bmpOptions = new BmpOptions() { Source = source, BitsPerPixel = 24 };
 
-                // Create canvas
-                using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
+                using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, width, height))
                 {
-                    // Calculate centered square dimensions
-                    int side = Math.Min(width, height) / 2;
-                    int offsetX = (width - side) / 2;
-                    int offsetY = (height - side) / 2;
-
-                    // Draw centered square
-                    using (SolidBrush brush = new SolidBrush(Color.Blue))
-                    {
-                        Graphics graphics = new Graphics(canvas);
-                        graphics.FillRectangle(brush, new Rectangle(offsetX, offsetY, side, side));
-                    }
-
-                    // Save the bound image
                     canvas.Save();
                 }
             }
@@ -64,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a set of BMP thumbnails of varying dimensions for a product catalog, using Aspose.Imaging to draw a centered square logo on each canvas.
- * 2. When an automation script must create placeholder BMP images for UI mockups, employing C# and Aspose.Imaging to draw a centered colored square in canvases of different sizes.
- * 3. When a batch image generation tool is required to produce test BMP assets for a game engine, using Aspose.Imaging’s RasterImage and Graphics classes to place a centered square for alignment verification.
- * 4. When a reporting system needs to export chart legends as BMP files, leveraging Aspose.Imaging to draw a centered square marker that scales with each image’s width and height.
- * 5. When a developer wants to pre‑render printable label templates in BMP format, using Aspose.Imaging to draw a centered square watermark that automatically adapts to each label’s dimensions.
+ * 1. When a developer needs to generate a batch of blank BMP files of various resolutions for testing image‑processing pipelines, they can use this Aspose.Imaging C# code to create the canvases automatically.
+ * 2. When an application must export user‑defined canvas sizes as 24‑bit BMP assets for a graphics editor, the code demonstrates how to create and save each image with the appropriate width and height.
+ * 3. When a build script has to produce placeholder BMP images for different device screen sizes (e.g., 200×200, 300×150, 400×400) to be bundled with a Windows desktop installer, this snippet shows the required Aspose.Imaging operations.
+ * 4. When a developer wants to programmatically generate a set of BMP files for unit tests that verify file‑system handling of image sources, the example illustrates using FileCreateSource and BmpOptions in C#.
+ * 5. When an automated reporting tool must create BMP charts of predefined dimensions before drawing graphics, the code provides a quick way to create the empty bitmap canvas that can later be populated.
  */

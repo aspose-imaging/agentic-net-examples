@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,11 +9,10 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.eps";
+            string tempPngPath = "temp.png";
             string outputPath = "output.jpg";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,40 +22,32 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Rasterize EPS to a high‑resolution PNG in memory
-            using (var epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
-            using (var pngStream = new MemoryStream())
+            // Load EPS and rasterize to PNG
+            using (Aspose.Imaging.FileFormats.Eps.EpsImage epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
             {
                 var pngOptions = new PngOptions
                 {
-                    // High resolution rasterization settings
-                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    VectorRasterizationOptions = new EpsRasterizationOptions
                     {
-                        PageWidth = 2000,   // desired width in pixels
-                        PageHeight = 2000   // desired height in pixels
+                        PageWidth = 2000,
+                        PageHeight = 2000
                     }
                 };
+                epsImage.Save(tempPngPath, pngOptions);
+            }
 
-                // Save EPS as PNG into the memory stream
-                epsImage.Save(pngStream, pngOptions);
-                pngStream.Position = 0; // reset stream for reading
+            // Load the rasterized PNG, apply sharpening filter, and save as high‑resolution JPEG
+            using (Image img = Image.Load(tempPngPath))
+            {
+                RasterImage raster = (RasterImage)img;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
 
-                // Load the rasterized image
-                using (var rasterImage = (RasterImage)Image.Load(pngStream))
+                var jpegOptions = new JpegOptions
                 {
-                    // Apply sharpening filter to the entire image
-                    rasterImage.Filter(rasterImage.Bounds,
-                        new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-
-                    // Prepare JPEG save options (high quality)
-                    var jpegOptions = new JpegOptions
-                    {
-                        Quality = 100
-                    };
-
-                    // Save the sharpened image as JPEG
-                    rasterImage.Save(outputPath, jpegOptions);
-                }
+                    Quality = 100,
+                    ResolutionSettings = new ResolutionSetting(300, 300)
+                };
+                raster.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -69,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print‑shop application must convert client‑provided EPS logos into crisp, high‑resolution JPEGs for on‑demand brochure printing, it can rasterize the vector file, sharpen the details, and save the result using Aspose.Imaging for .NET.
- * 2. When an e‑commerce platform needs to generate product thumbnail images from supplier EPS artwork, applying a sharpening filter ensures the JPEG previews look sharp on high‑DPI screens.
- * 3. When a digital asset management system imports legacy EPS files and creates searchable, high‑quality JPEG previews for quick browsing, the code rasterizes, sharpens, and exports the images at the required resolution.
- * 4. When a marketing automation tool prepares email campaign assets by converting EPS banners into optimized JPEGs, the sharpening step enhances edge clarity for better visual impact.
- * 5. When a scientific publishing workflow transforms EPS figures into high‑resolution JPEGs for online journals, applying a sharpening filter preserves fine details while meeting web‑friendly image standards.
+ * 1. When a designer must generate a web‑ready high‑resolution JPEG preview of an EPS logo and wants to sharpen the rasterized image for clearer edges using Aspose.Imaging in C#.
+ * 2. When a publishing workflow requires converting EPS illustrations to PNG, applying a sharpening filter, and then saving them as 300 dpi JPEGs for print‑quality proofs.
+ * 3. When an e‑commerce platform needs to transform product EPS vector files into sharpened, high‑resolution JPEG thumbnails for faster page loading.
+ * 4. When a marketing automation script must batch‑process EPS banners, enhance detail with a SharpenFilterOptions, and output JPEGs at maximum quality for email campaigns.
+ * 5. When a desktop application needs to load an EPS file, rasterize it to a temporary PNG, apply image sharpening, and export a 300 dpi JPEG for archival storage.
  */

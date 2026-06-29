@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Png;
-using System.Drawing;
 
 class Program
 {
@@ -26,13 +25,13 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Perform image processing without blocking the calling thread
+            // Run the image processing on a background thread
             await Task.Run(() =>
             {
                 // Load the PNG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to access filtering methods
+                    // Cast to RasterImage to access filtering
                     RasterImage rasterImage = (RasterImage)image;
 
                     // Configure Gaussian blur (size = 5, sigma = 4.0)
@@ -55,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building a Windows Forms or WPF photo editor that lets users apply a Gaussian blur to a PNG without freezing the UI, you can use async/await with Aspose.Imaging to process the image in the background.
- * 2. When creating a web‑based image upload service that automatically smooths user‑submitted PNG files, the asynchronous blur code ensures the server thread remains responsive.
- * 3. When developing a mobile Xamarin.Forms app that adds a soft focus effect to PNG screenshots, you need non‑blocking image processing to keep the UI fluid.
- * 4. When implementing a batch‑processing tool that reads PNG files from a folder, applies a Gaussian blur, and writes the results while allowing the console UI to stay interactive, the async pattern prevents the command line from hanging.
- * 5. When integrating a real‑time preview feature in a .NET desktop application that shows a blurred version of a PNG as the user adjusts parameters, you must run the filter on a background thread to avoid UI lag.
+ * 1. When a desktop application needs to blur a user‑selected PNG file without freezing the UI, developers can use async/await with Aspose.Imaging’s GaussianBlurFilterOptions.
+ * 2. When an automated batch‑processing tool must generate a softened preview of high‑resolution PNG images while keeping the main thread responsive, this code runs the filter on a background thread.
+ * 3. When a photo‑editing plugin for a WPF app wants to apply a Gaussian blur effect to a PNG layer without blocking UI interactions, the async pattern ensures smooth user experience.
+ * 4. When a server‑side service processes uploaded PNG avatars and needs to apply a blur for privacy reasons while handling other requests concurrently, the code demonstrates non‑blocking image manipulation.
+ * 5. When a Windows Forms utility offers a “blur background” feature for PNG screenshots and must keep the interface responsive during processing, developers can employ the shown async/await approach.
  */

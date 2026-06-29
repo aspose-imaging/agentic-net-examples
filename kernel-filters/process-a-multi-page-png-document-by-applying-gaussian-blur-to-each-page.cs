@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
@@ -12,7 +12,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output/output.png";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -20,15 +20,32 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
 
             using (Image image = Image.Load(inputPath))
             {
-                PngOptions options = new PngOptions
+                ApngImage apng = image as ApngImage;
+                if (apng == null)
                 {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-                image.Save(outputPath, options);
+                    Console.Error.WriteLine("Input image is not a multi-page PNG (APNG).");
+                    return;
+                }
+
+                for (int i = 0; i < apng.PageCount; i++)
+                {
+                    RasterImage page = apng.Pages[i] as RasterImage;
+                    if (page != null)
+                    {
+                        page.Filter(page.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                    }
+                }
+
+                ApngOptions saveOptions = new ApngOptions();
+                apng.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -40,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically blur sensitive information across all pages of a multi‑page PNG invoice before sharing it with external partners.
- * 2. When a C# application must prepare multi‑page PNG maps for a web portal by applying a Gaussian blur to each page to create a low‑resolution preview.
- * 3. When a document management system requires batch processing of scanned multi‑page PNG forms, using Aspose.Imaging for .NET to add Gaussian blur for privacy compliance.
- * 4. When an image‑processing pipeline in a .NET service needs to generate stylized thumbnails of each page in a multi‑page PNG brochure by applying a Gaussian blur filter.
- * 5. When a developer wants to integrate Aspose.Imaging into a Windows desktop tool that sanitizes multi‑page PNG blueprints by blurring proprietary details on every page before export.
+ * 1. When you need to automatically blur sensitive content (e.g., faces or license plates) across every frame of an animated PNG (APNG) before publishing it online.
+ * 2. When you want to apply a consistent Gaussian blur effect to each page of a multi‑page PNG to create a smooth, stylized animation for a mobile app splash screen.
+ * 3. When you must preprocess a sequence of PNG frames by reducing high‑frequency noise with a Gaussian blur before feeding them into a computer‑vision model.
+ * 4. When you are generating low‑resolution preview thumbnails of an APNG and need to soften the image details uniformly across all pages for faster loading.
+ * 5. When you are converting a series of raster images into an APNG and want to ensure every frame has the same blur radius to maintain visual continuity in a web banner.
  */

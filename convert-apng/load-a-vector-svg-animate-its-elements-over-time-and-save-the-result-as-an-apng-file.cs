@@ -4,66 +4,87 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output.apng";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output.apng";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load SVG and rasterize to a raster image (PNG in memory)
+            // Load SVG image
             using (Image svgImage = Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions { PageSize = svgImage.Size };
-                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
+                int width = svgImage.Width;
+                int height = svgImage.Height;
 
-                using (MemoryStream ms = new MemoryStream())
+                // Prepare APNG creation options
+                ApngOptions apngOptions = new ApngOptions
                 {
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
+                    Source = new FileCreateSource(outputPath, false),
+                    DefaultFrameTime = 100, // 100 ms per frame
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
 
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                using (ApngImage apng = (ApngImage)Image.Create(apngOptions, width, height))
+                {
+                    apng.RemoveAllFrames();
+
+                    int frameCount = 10;
+                    for (int i = 0; i < frameCount; i++)
                     {
-                        const int animationDuration = 1000; // total ms
-                        const int frameDuration = 100; // ms per frame
-                        int totalFrames = animationDuration / frameDuration;
-
-                        var createOptions = new ApngOptions
+                        // Create a blank canvas for the frame
+                        using (RasterImage canvas = (RasterImage)Image.Create(
+                            new BmpOptions { Source = new FileCreateSource(Path.GetTempFileName(), false) },
+                            width, height))
                         {
-                            Source = new FileCreateSource(outputPath, false),
-                            DefaultFrameTime = (uint)frameDuration,
-                            ColorType = PngColorType.TruecolorWithAlpha
-                        };
+                            // Clear canvas
+                            Graphics graphics = new Graphics(canvas);
+                            graphics.Clear(Color.Transparent);
 
-                        using (ApngImage apng = (ApngImage)Image.Create(createOptions, raster.Width, raster.Height))
-                        {
-                            apng.RemoveAllFrames();
-
-                            // Add frames with varying gamma to create a simple fade animation
-                            for (int i = 0; i < totalFrames; i++)
+                            // Rasterize SVG to a temporary raster image
+                            using (MemoryStream ms = new MemoryStream())
                             {
-                                apng.AddFrame(raster);
-                                ApngFrame lastFrame = (ApngFrame)apng.Pages[apng.PageCount - 1];
-                                float gamma = (float)i / totalFrames;
-                                lastFrame.AdjustGamma(gamma);
+                                PngOptions pngOptions = new PngOptions
+                                {
+                                    VectorRasterizationOptions = new SvgRasterizationOptions
+                                    {
+                                        PageWidth = width,
+                                        PageHeight = height
+                                    }
+                                };
+                                svgImage.Save(ms, pngOptions);
+                                ms.Position = 0;
+
+                                using (RasterImage rasterSvg = (RasterImage)Image.Load(ms))
+                                {
+                                    // Apply simple translation animation
+                                    int offsetX = i * 10; // move 10 pixels per frame
+                                    int offsetY = 0;
+
+                                    graphics.DrawImage(rasterSvg, new Point(offsetX, offsetY));
+                                }
                             }
 
-                            apng.Save();
+                            // Add the composed frame to APNG
+                            apng.AddFrame(canvas);
                         }
                     }
+
+                    // Save the animated PNG
+                    apng.Save();
                 }
             }
         }
@@ -73,3 +94,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer wants to convert a vector logo in SVG format into an animated PNG (APNG) for use in web banners that require smooth frame‑by‑frame animation.
+ * 2. When a game developer needs to programmatically animate SVG icons and export them as APNG sprites to reduce asset size while preserving transparency.
+ * 3. When a marketing automation script must generate time‑based product showcase animations from SVG illustrations and save them as APNG files for email newsletters.
+ * 4. When a desktop application needs to create animated status indicators by rasterizing SVG elements frame by frame and bundling them into an APNG with a custom frame delay.
+ * 5. When a reporting tool has to embed animated vector diagrams into PDF reports by first converting the SVG to an APNG using C# and Aspose.Imaging.
+ */

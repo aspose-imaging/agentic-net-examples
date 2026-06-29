@@ -3,18 +3,17 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.eps";
-        string outputPath = "output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input\\sample.eps";
+            string outputPath = "output\\sample.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,20 +21,20 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image
+            // Load the EPS image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PNG options with indexed color (256‑color palette)
+                // Configure PNG options for 256‑color indexed palette
                 var pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.IndexedColor,
-                    // Generate a palette that best fits the image using histogram method
-                    Palette = ColorPaletteHelper.GetCloseImagePalette(
-                        (RasterImage)image,          // Cast to RasterImage for palette extraction
-                        256,                         // Desired number of colors
+                    // Generate a palette that best fits the image (256 colors)
+                    Palette = Aspose.Imaging.ColorPaletteHelper.GetCloseImagePalette(
+                        (RasterImage)image,
+                        256,
                         PaletteMiningMethod.Histogram)
                 };
 
@@ -52,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application must display vector‑based EPS logos on browsers that only support PNG, a developer can load the EPS, reduce it to a 256‑color palette, and save it as an optimized PNG for fast loading.
- * 2. When generating printable product catalogs, a developer can convert high‑resolution EPS artwork to a 256‑color PNG to meet the printer’s limited color gamut while keeping file sizes small.
- * 3. When building a mobile app that caches promotional graphics, a developer can use this code to transform EPS files into indexed‑color PNGs, ensuring low memory usage on devices.
- * 4. When automating the archival of design assets, a developer can standardize all EPS files by converting them to 256‑color PNGs for consistent storage and easy preview in file browsers.
- * 5. When creating email newsletters that embed images, a developer can convert EPS illustrations to 256‑color PNGs to comply with email client size restrictions and maintain visual fidelity.
+ * 1. When a web application needs to display legacy EPS vector graphics as lightweight PNG thumbnails with a limited 256‑color palette for faster page loads.
+ * 2. When an e‑commerce platform converts vendor‑provided EPS logos into PNG icons that must meet a 256‑color limit to comply with a mobile app’s image size constraints.
+ * 3. When a document‑management system archives EPS drawings by generating PNG previews that use indexed color to reduce storage space while preserving visual fidelity.
+ * 4. When a batch‑processing tool prepares EPS artwork for printing on low‑resolution devices by reducing the color depth to 256 colors and saving it as PNG for compatibility.
+ * 5. When a content‑delivery network optimizes EPS files for email newsletters by converting them to 256‑color PNGs to ensure consistent rendering across email clients.
  */

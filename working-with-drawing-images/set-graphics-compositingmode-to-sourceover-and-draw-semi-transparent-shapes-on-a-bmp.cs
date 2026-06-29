@@ -9,29 +9,29 @@ class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = "output/output.bmp";
-
         try
         {
+            string outputPath = @"output.bmp";
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            using (Image image = Image.Create(bmpOptions, 400, 300))
+            using (Image image = Image.Create(bmpOptions, 400, 400))
             {
                 Graphics graphics = new Graphics(image);
 
-                using (SolidBrush rectBrush = new SolidBrush(Color.Blue))
+                using (SolidBrush blueBrush = new SolidBrush(Color.Blue))
                 {
-                    rectBrush.Opacity = 0.5f;
-                    graphics.FillRectangle(rectBrush, new Rectangle(50, 50, 200, 150));
+                    blueBrush.Opacity = 0.5f;
+                    graphics.FillRectangle(blueBrush, new Rectangle(50, 50, 200, 150));
                 }
 
-                using (SolidBrush ellipseBrush = new SolidBrush(Color.Red))
+                using (SolidBrush redBrush = new SolidBrush(Color.Red))
                 {
-                    ellipseBrush.Opacity = 0.5f;
-                    graphics.FillEllipse(ellipseBrush, new Rectangle(150, 100, 200, 150));
+                    redBrush.Opacity = 0.5f;
+                    graphics.FillEllipse(redBrush, new Rectangle(150, 150, 200, 200));
                 }
 
                 image.Save();
@@ -46,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add a semi‑transparent watermark to a BMP file for branding printed documents, they can use Aspose.Imaging’s Graphics with CompositingMode.SourceOver to overlay a blue rectangle and red ellipse with 50 % opacity.
- * 2. When generating custom map tiles in a GIS application, a developer can draw translucent shapes on a BMP to highlight regions without obscuring the underlying raster data.
- * 3. When creating UI mock‑ups or button icons in a Windows desktop app, a developer can use the code to compose overlapping semi‑transparent shapes on a BMP to preview visual hierarchy.
- * 4. When producing printable reports that require highlighted sections, a developer can employ Aspose.Imaging to draw semi‑transparent rectangles on a BMP background to draw attention to key data.
- * 5. When building a simple game asset pipeline, a developer can use the Graphics.FillEllipse and FillRectangle methods with SourceOver compositing to blend colored shapes into a BMP sprite sheet for later animation.
+ * 1. When a developer needs to add a semi‑transparent watermark rectangle to a BMP report image using C# and Aspose.Imaging, they can set Graphics.CompositingMode to SourceOver and draw the shape with a brush opacity of 0.5.
+ * 2. When generating custom map tiles where roads or regions must be highlighted with translucent overlays on a BMP background, the code lets you blend the shapes correctly by using SourceOver compositing.
+ * 3. When creating UI button icons that require a blue hover effect and a red click effect layered on the same BMP canvas, the semi‑transparent fills ensure the colors blend naturally.
+ * 4. When producing printable product labels that combine a semi‑transparent background pattern with a foreground logo on a BMP file, SourceOver compositing preserves the intended visual hierarchy.
+ * 5. When building a simple chart image that overlays a translucent data region on top of an existing BMP plot, the code provides the necessary C# image processing steps to merge the shapes without losing the underlying pixels.
  */

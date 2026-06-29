@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"c:\temp\input.png";
-            string outputPath = @"c:\temp\output.png";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,9 +23,9 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the image
+            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage rasterImage = (RasterImage)image;
@@ -51,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to enhance the texture of a PNG logo by applying an Emboss5x5 filter followed by a Gaussian blur to create a subtle 3‑D appearance for UI elements.
- * 2. When a web application must preprocess user‑uploaded PNG screenshots, adding depth with an emboss effect and then smoothing edges with a Gaussian blur before storing them in a CDN.
- * 3. When an automated batch job generates printable PNG assets, using the Emboss5x5 filter to highlight details and a Gaussian blur to reduce noise for higher quality print output.
- * 4. When a desktop C# tool converts raw PNG images into stylized graphics for a game, chaining the emboss convolution and Gaussian blur to achieve a painterly effect without external editors.
- * 5. When a digital marketing platform creates thumbnail previews of PNG product images, applying emboss to emphasize features and Gaussian blur to soften background textures for a consistent visual style.
+ * 1. When a developer wants to add a subtle three‑dimensional texture to a PNG logo and then smooth the result to reduce harsh edges, they can chain the Emboss5x5 filter followed by a Gaussian blur.
+ * 2. When preparing product photos for an e‑commerce site, a developer may emboss the image to highlight surface details and then apply a Gaussian blur to create a soft‑focus effect that keeps the focus on the product.
+ * 3. When generating stylized map tiles, a developer can emboss terrain features to enhance depth perception and then blur them to blend the effect with surrounding tiles.
+ * 4. When creating a custom watermark on a PNG graphic, a developer can emboss the watermark to make it stand out and then blur it slightly to integrate it smoothly with the background.
+ * 5. When processing scanned documents for a digital archive, a developer may emboss the text to improve readability and then apply a Gaussian blur to reduce noise introduced by the embossing step.
  */

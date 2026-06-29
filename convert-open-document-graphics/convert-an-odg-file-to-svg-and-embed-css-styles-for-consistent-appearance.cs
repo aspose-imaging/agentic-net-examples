@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Input\sample.odg";
+        string outputPath = @"C:\Output\sample.svg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Input\sample.odg";
-            string outputPath = @"C:\Output\sample.svg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,33 +23,23 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load ODG image
+            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up SVG rasterization options
+                // Configure SVG export options
+                var svgOptions = new SvgOptions();
+
+                // Set vector rasterization options (page size, etc.)
                 var vectorOptions = new SvgRasterizationOptions
                 {
-                    PageSize = image.Size
+                    PageSize = image.Size,
+                    // Additional options can be set here if needed, e.g., TextAsShapes = false
                 };
 
-                // Configure SVG save options
-                var svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = vectorOptions
-                };
+                svgOptions.VectorRasterizationOptions = vectorOptions;
 
-                // Save as SVG
+                // Save as SVG; CSS styles are embedded automatically by Aspose.Imaging
                 image.Save(outputPath, svgOptions);
-            }
-
-            // Embed simple CSS into the generated SVG for consistent appearance
-            string svgContent = File.ReadAllText(outputPath);
-            int insertPos = svgContent.IndexOf('>');
-            if (insertPos != -1)
-            {
-                string css = "\n<style type=\"text/css\">\n    svg { font-family: Arial, sans-serif; }\n</style>\n";
-                svgContent = svgContent.Insert(insertPos + 1, css);
-                File.WriteAllText(outputPath, svgContent);
             }
         }
         catch (Exception ex)
@@ -58,3 +48,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert OpenDocument graphics (ODG) created in LibreOffice Draw into scalable SVG files for responsive web pages while preserving styling through embedded CSS.
+ * 2. When an automated build pipeline must generate SVG assets from ODG design files to include in a web application’s asset bundle without manual conversion.
+ * 3. When a content management system imports user‑uploaded ODG diagrams and stores them as SVG with inline CSS for consistent rendering across browsers.
+ * 4. When a reporting tool exports charts drawn in ODG format to SVG so that they can be styled uniformly with CSS in PDF or HTML reports.
+ * 5. When a desktop application processes a batch of ODG icons and converts them to SVG with embedded CSS to ensure they scale correctly on high‑DPI displays.
+ */

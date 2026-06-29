@@ -2,8 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,9 +10,9 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.svg";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.svg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -28,19 +27,18 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access pixel data
+                // Cast to RasterImage to work with palette helper
                 RasterImage raster = (RasterImage)image;
 
-                // Generate a 16‑color palette using the histogram mining method
+                // Generate a palette with 16 colors using histogram mining
                 IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette(
                     raster,
                     16,
                     PaletteMiningMethod.Histogram);
 
-                // Prepare SVG save options and attach the palette
+                // Prepare SVG save options with the generated palette
                 SvgOptions svgOptions = new SvgOptions
                 {
-                    // The Palette property is available on ImageOptionsBase
                     Palette = palette
                 };
 
@@ -54,3 +52,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert high‑resolution PNG graphics into lightweight SVG files with a limited 16‑color palette for faster web page loading.
+ * 2. When an application must generate scalable vector icons from existing PNG assets while preserving color consistency by using histogram‑based palette reduction.
+ * 3. When a batch‑processing tool has to ensure that PNG logos are transformed into SVG format that complies with a corporate brand palette of 16 colors.
+ * 4. When a mobile app requires vector images with a small color table to reduce memory usage, and the code extracts a 16‑color palette before saving as SVG.
+ * 5. When an automated workflow needs to validate that a PNG file exists, create the output directory, and then export the image as SVG with a custom palette for downstream printing pipelines.
+ */

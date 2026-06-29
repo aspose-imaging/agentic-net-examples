@@ -9,8 +9,9 @@ class Program
     {
         try
         {
-            // Hardcoded input path
-            string inputPath = @"C:\temp\input.webp";
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\input.webp";
+            string outputPath = "C:\\temp\\framecount.txt";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -19,22 +20,24 @@ class Program
                 return;
             }
 
-            // Open a file stream for reading
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Open a file stream for the WebP image
             using (FileStream stream = File.OpenRead(inputPath))
             {
-                // Load the image using Aspose.Imaging.Image.Load with the stream
+                // Load the image from the stream
                 using (Image image = Image.Load(stream))
                 {
                     // Cast to WebPImage to access PageCount (frame count)
-                    if (image is WebPImage webPImage)
-                    {
-                        int frameCount = webPImage.PageCount;
-                        Console.WriteLine($"Frame count: {frameCount}");
-                    }
-                    else
-                    {
-                        Console.Error.WriteLine("Loaded image is not a WebP image.");
-                    }
+                    WebPImage webPImage = image as WebPImage;
+                    int frameCount = webPImage != null ? webPImage.PageCount : 0;
+
+                    // Log the frame count to console
+                    Console.WriteLine($"Frame count: {frameCount}");
+
+                    // Write the frame count to the output file
+                    File.WriteAllText(outputPath, $"Frame count: {frameCount}");
                 }
             }
         }
@@ -47,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building a C# web service that validates uploaded animated WebP files, a developer can use Image.Load with a FileStream to read the image and log its frame count to ensure it meets the required number of frames.
- * 2. When creating a desktop application that generates thumbnails only for the first frame of an animated WebP, a developer needs to open the file via a stream, cast to WebPImage, and retrieve the PageCount to decide if the image is animated.
- * 3. When implementing a batch processing script that skips non‑animated WebP images, a developer can load each file with Image.Load and check the WebPImage.PageCount to filter out single‑frame images.
- * 4. When developing a media‑asset pipeline that logs metadata for compliance reports, a developer can read WebP files through a stream and record the frame count as part of the image’s technical specifications.
- * 5. When troubleshooting performance issues in an image‑conversion tool, a developer may load a WebP image from a stream and output its frame count to verify that the expected number of animation frames is being processed.
+ * 1. When a developer wants to verify the number of animation frames in a WebP image before processing it for a web carousel, they can use Image.Load with a FileStream to read the file and log the frame count.
+ * 2. When building a server‑side image‑validation service that rejects multi‑frame WebP files exceeding a certain limit, the code can load the image from a stream and extract the PageCount for comparison.
+ * 3. When generating a report of assets in a digital‑asset‑management system, a developer can read each WebP file via a stream, obtain its frame count, and write the result to a log file for inventory purposes.
+ * 4. When creating a batch‑processing tool that converts animated WebP files to GIFs only if they contain more than one frame, the code demonstrates how to load the image, read the frame count, and decide the next step.
+ * 5. When troubleshooting rendering issues in a C# application that displays WebP animations, a developer can use this snippet to load the image from a stream, output the frame count to the console, and confirm the source file’s structure.
  */

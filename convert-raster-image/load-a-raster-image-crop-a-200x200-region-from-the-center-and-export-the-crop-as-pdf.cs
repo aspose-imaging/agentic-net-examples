@@ -10,7 +10,7 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.jpg";
+            string inputPath = @"C:\Images\input.png";
             string outputPath = @"C:\Images\output.pdf";
 
             // Verify input file exists
@@ -47,3 +47,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a printable PDF thumbnail of a user‑uploaded PNG by extracting a 200 × 200 region from the image’s center.
+ * 2. When an e‑commerce platform wants to create a centered preview PDF of product photos for catalog PDFs without loading the entire image into memory.
+ * 3. When a document management system must convert scanned raster pages into PDF files that contain only the central area of interest for compliance reports.
+ * 4. When a mobile app backend processes profile pictures, cropping the middle 200 × 200 pixels and saving the result as a PDF for archival storage.
+ * 5. When a reporting tool automatically extracts a centered square from high‑resolution PNG charts and embeds it as a PDF page for inclusion in generated reports.
+ */

@@ -10,49 +10,18 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
+            string outputPath = @"C:\temp\output.png";
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load source image to obtain dimensions
-            using (Image src = Image.Load(inputPath))
+            var pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
+
+            using (Image image = Image.Create(pngOptions, 500, 500))
             {
-                int width = src.Width;
-                int height = src.Height;
-
-                // Create a new PNG image with the same size
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new FileCreateSource(outputPath, false);
-                using (Image outImg = Image.Create(pngOptions, width, height))
-                {
-                    // Initialize graphics for drawing
-                    Graphics graphics = new Graphics(outImg);
-
-                    // Set a clipping region (inner rectangle)
-                    graphics.Clip = new Region(new Rectangle(50, 50, width - 100, height - 100));
-
-                    // Draw a red rectangle (will be clipped)
-                    graphics.DrawRectangle(new Pen(Color.Red, 5), new Rectangle(0, 0, width, height));
-
-                    // Reset the clipping region to restore full canvas
-                    graphics.Clip = null;
-
-                    // Draw a green rectangle (covers full canvas)
-                    graphics.DrawRectangle(new Pen(Color.Green, 5), new Rectangle(0, 0, width, height));
-
-                    // Save the resulting image
-                    outImg.Save();
-                }
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -64,9 +33,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a PNG thumbnail and need to draw a red border only inside a safe area, then reset the clipping region to add a full‑canvas green overlay later.
- * 2. When applying a clipped mask to highlight a specific region of an image and then want to place a watermark that covers the entire picture, resetting the clip with Graphics.ResetClip is required.
- * 3. When creating a composite PNG where a decorative frame is drawn inside an inner rectangle and a background color must be painted across the whole image, you must clear the clipping region after the frame is rendered.
- * 4. When processing scanned documents and you want to outline a region of interest with a red rectangle while still being able to draw annotations on the rest of the page, resetting the clipping region restores full drawing capability.
- * 5. When building a UI mock‑up that first restricts drawing to a content pane and later adds a full‑page grid or guide lines, you need to call Graphics.ResetClip to remove the previous clipping region.
+ * 1. When creating a multi‑layer PNG thumbnail in C# with Aspose.Imaging and you need to limit drawing to a specific rectangle for one layer, calling Graphics.ResetClip afterward restores the full canvas for the next layer.
+ * 2. When generating a PDF preview image where text is clipped to a column width, using Graphics.ResetClip after rendering the column ensures subsequent graphics like watermarks are drawn across the entire page.
+ * 3. When applying a circular mask to a portrait photo and then adding a border around the whole image, resetting the clipping region with Graphics.ResetClip prevents the border from being confined to the circle.
+ * 4. When compositing several icons onto a single 500 × 500 PNG sprite sheet and each icon is drawn within its own clipped region, Graphics.ResetClip is required after each icon to avoid bleed‑through into neighboring icons.
+ * 5. When programmatically stamping a QR code onto a product label image and the QR code is drawn inside a predefined area, calling Graphics.ResetClip after the stamp allows later operations such as adding a full‑width footer text.
  */

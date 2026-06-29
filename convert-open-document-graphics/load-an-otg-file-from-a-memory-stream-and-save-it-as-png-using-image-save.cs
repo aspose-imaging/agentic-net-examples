@@ -1,18 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.OpenDocument;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "sample.otg";
+        string outputPath = "result.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.otg";
-            string outputPath = "Output/sample.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,21 +21,32 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the OTG file into a memory stream
-            byte[] fileBytes = File.ReadAllBytes(inputPath);
-            using (MemoryStream memoryStream = new MemoryStream(fileBytes))
+            // Load OTG file into a memory stream
+            using (FileStream fileStream = File.OpenRead(inputPath))
+            using (MemoryStream memoryStream = new MemoryStream())
             {
-                // Load the image from the memory stream
-                using (Image image = Image.Load(memoryStream))
+                fileStream.CopyTo(memoryStream);
+                memoryStream.Position = 0;
+
+                // Wrap the memory stream in a StreamContainer required by OtgImage
+                var streamContainer = new StreamContainer(memoryStream);
+
+                // Create OtgImage from the stream container
+                using (OtgImage otgImage = new OtgImage(streamContainer))
                 {
-                    // Set PNG save options
-                    PngOptions pngOptions = new PngOptions();
+                    // Prepare PNG save options with OTG rasterization settings
+                    var pngOptions = new PngOptions();
+                    var otgRaster = new OtgRasterizationOptions
+                    {
+                        PageSize = otgImage.Size // preserve original size
+                    };
+                    pngOptions.VectorRasterizationOptions = otgRaster;
 
                     // Save the image as PNG
-                    image.Save(outputPath, pngOptions);
+                    otgImage.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -44,3 +56,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web service receives an OTG file as a byte array and needs to generate a PNG thumbnail for browser preview.
+ * 2. When a desktop application batch‑converts OTG images stored in a database BLOB field into PNG files for printing or archival.
+ * 3. When a mobile app downloads an OTG image over HTTP, loads it into a MemoryStream to avoid disk I/O, and saves it as PNG for UI display.
+ * 4. When an automated report generator extracts vector graphics from an OTG template, rasterizes them at the original size, and embeds the resulting PNG into a PDF.
+ * 5. When a cloud function processes OTG email attachments, streams the content directly to memory, and creates PNG versions for indexing by an image search engine.
+ */

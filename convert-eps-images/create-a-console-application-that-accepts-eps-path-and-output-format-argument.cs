@@ -2,10 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -15,10 +11,9 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "Input/sample.eps";
-            string format = args.Length > 1 ? args[1] : args[0]; // use first argument as format if second missing
-            string outputPath = Path.Combine("Output", $"result.{format}");
+            string outputPath = "Output/result.png";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,45 +23,21 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image
-            using (var image = (EpsImage)Image.Load(inputPath))
+            // Load EPS image (fully qualified type to avoid extra using)
+            using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
             {
-                // Choose appropriate save options based on format
-                switch (format.ToLower())
+                // Set PNG options with rasterization settings for EPS
+                var options = new PngOptions
                 {
-                    case "png":
-                        var pngOptions = new PngOptions();
-                        image.Save(outputPath, pngOptions);
-                        break;
-                    case "jpg":
-                    case "jpeg":
-                        var jpegOptions = new JpegOptions();
-                        image.Save(outputPath, jpegOptions);
-                        break;
-                    case "bmp":
-                        var bmpOptions = new BmpOptions();
-                        image.Save(outputPath, bmpOptions);
-                        break;
-                    case "gif":
-                        var gifOptions = new GifOptions();
-                        image.Save(outputPath, gifOptions);
-                        break;
-                    case "tiff":
-                    case "tif":
-                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                        image.Save(outputPath, tiffOptions);
-                        break;
-                    case "pdf":
-                        var pdfOptions = new PdfOptions();
-                        image.Save(outputPath, pdfOptions);
-                        break;
-                    case "webp":
-                        var webpOptions = new WebPOptions();
-                        image.Save(outputPath, webpOptions);
-                        break;
-                    default:
-                        throw new NotSupportedException($"Format '{format}' is not supported.");
-                }
+                    VectorRasterizationOptions = new EpsRasterizationOptions
+                    {
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    }
+                };
+
+                // Save the image in the desired format
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -75,3 +46,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer must batch‑convert EPS artwork files to PNG thumbnails for a web gallery, this console app can read the EPS path and output a rasterized PNG using Aspose.Imaging.
+ * 2. When an automated build pipeline needs to validate that a supplied EPS design exists and then generate a PNG preview for documentation, the code checks the file, creates the output folder, and saves the image.
+ * 3. When a Windows service processes user‑uploaded EPS logos and stores them as PNGs for email signatures, the program’s file‑existence guard and rasterization options ensure reliable conversion.
+ * 4. When a desktop utility must allow a non‑technical user to specify an EPS source and desired image format (e.g., PNG) via command‑line arguments, this C# example demonstrates the necessary loading and saving steps.
+ * 5. When a CI/CD script requires a quick C# tool to transform vector EPS assets into raster PNGs for inclusion in a mobile app’s asset bundle, the code provides the end‑to‑end conversion workflow.
+ */

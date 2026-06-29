@@ -24,16 +24,16 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Open a file stream for the DICOM image
+            // Open the DICOM file as a stream
             using (FileStream stream = File.OpenRead(inputPath))
             {
-                // Configure low‑memory loading (e.g., 256 KB buffer)
+                // Configure low‑memory loading options
                 LoadOptions loadOptions = new LoadOptions
                 {
-                    BufferSizeHint = 256 * 1024
+                    BufferSizeHint = 256 * 1024 // 256 KB buffer
                 };
 
-                // Load the DICOM image using the low‑memory strategy
+                // Load the DICOM image with the specified options
                 using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
                 {
                     // Apply Otsu threshold binarization
@@ -53,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology workstation must convert large DICOM scans to lightweight PNG thumbnails on a memory‑constrained PC, this code loads the DICOM image with a low‑memory buffer, applies Otsu binarization, and saves the result as PNG.
- * 2. When a telemedicine platform needs to preprocess patient X‑ray files by automatically applying Otsu thresholding before transmitting them as PNG over the network, developers can use this snippet.
- * 3. When a research lab processes thousands of DICOM images on a server with limited RAM and wants to generate binary masks for image analysis, the low‑memory loading and BinarizeOtsu call provide an efficient solution.
- * 4. When a C# desktop application requires displaying a high‑contrast version of a DICOM image without loading the entire file into memory, this example demonstrates how to stream the file, binarize it, and export to PNG.
- * 5. When an automated QA tool validates DICOM files by converting them to binarized PNGs for visual comparison, the code shows how to safely read the DICOM, apply Otsu threshold, and save the output using Aspose.Imaging for .NET.
+ * 1. When a radiology application must convert large DICOM scans to high‑contrast binary PNGs for quick visual review on devices with limited RAM.
+ * 2. When a medical research workflow processes thousands of DICOM files on a low‑memory server and needs Otsu thresholding before statistical analysis.
+ * 3. When a telemedicine platform needs to load a DICOM image using a small buffer, apply automatic binarization, and serve the result as a PNG for web browsers.
+ * 4. When a healthcare data‑migration tool extracts DICOM images, applies Otsu binarization to highlight regions of interest, and saves them in a portable PNG format.
+ * 5. When an AI diagnostic model requires pre‑processed binary PNG inputs, and developers must efficiently load DICOM files, apply Otsu thresholding, and export the images for model consumption.
  */

@@ -3,51 +3,32 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output/output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image as a raster image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Cache data for better performance
                 if (!image.IsCached)
                     image.CacheData();
 
-                // Crop the image using a rectangle (example values)
-                var cropRect = new Rectangle(50, 50, 200, 200);
-                image.Crop(cropRect);
-
-                // Resize the image to 400x400 pixels
+                image.Crop(new Rectangle(50, 50, 200, 200));
                 image.Resize(400, 400);
-
-                // Embed a digital signature with a valid password
-                image.EmbedDigitalSignature("secure123");
-
-                // Save the processed image as PNG
-                var pngOptions = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-                image.Save(outputPath, pngOptions);
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -56,3 +37,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a thumbnail from a large PNG by cropping a region of interest and resizing it to a standard 400 × 400 pixel size for display in a web gallery.
+ * 2. When an e‑commerce platform must extract a product logo from a PNG file, crop out surrounding whitespace, and resize it to a fixed square size before embedding it in email newsletters.
+ * 3. When a mobile app processes user‑uploaded PNG avatars, automatically crops the central area and scales it to 400 × 400 pixels to ensure consistent profile picture dimensions across devices.
+ * 4. When a document management system prepares PNG scans for OCR by cropping the relevant page area and resizing it to a uniform size to improve recognition accuracy.
+ * 5. When a digital signage solution needs to pre‑process PNG artwork by cutting a specific rectangle and scaling it to 400 × 400 pixels so the image fits the required screen slot without distortion.
+ */

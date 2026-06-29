@@ -14,7 +14,7 @@ class Program
         try
         {
             string inputPath = "input.tif";
-            string outputPath = "output\\result.tif";
+            string outputPath = "output.tif";
 
             if (!File.Exists(inputPath))
             {
@@ -22,36 +22,39 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
 
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Options for the new frame with custom photometric interpretation
+                // Create options for the new frame with a custom photometric interpretation
                 TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-                frameOptions.BitsPerSample = new ushort[] { 8 };
-                frameOptions.Photometric = TiffPhotometrics.MinIsBlack;
-                frameOptions.Compression = TiffCompressions.Jpeg;
-                frameOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+                frameOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+                frameOptions.Photometric = TiffPhotometrics.MinIsBlack; // custom photometric
+                frameOptions.Compression = TiffCompressions.Jpeg; // JPEG compression for the frame (optional)
 
-                // Create a new 100x100 frame
+                // Create a new frame (100x100 pixels)
                 TiffFrame newFrame = new TiffFrame(frameOptions, 100, 100);
 
-                // Fill the frame with a solid gray color
+                // Fill the new frame with a simple gradient
                 Graphics graphics = new Graphics(newFrame);
-                using (SolidBrush brush = new SolidBrush(Color.Gray))
-                {
-                    graphics.FillRectangle(brush, newFrame.Bounds);
-                }
+                LinearGradientBrush brush = new LinearGradientBrush(
+                    new Point(0, 0),
+                    new Point(newFrame.Width, newFrame.Height),
+                    Color.White,
+                    Color.Black);
+                graphics.FillRectangle(brush, newFrame.Bounds);
 
-                // Add the new frame to the TIFF image
+                // Add the new frame to the existing TIFF image
                 tiffImage.AddFrame(newFrame);
 
-                // Save the updated TIFF using JPEG compression
+                // Save the updated TIFF image using JPEG compression
                 TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
                 saveOptions.Compression = TiffCompressions.Jpeg;
                 saveOptions.Photometric = TiffPhotometrics.Rgb;
-                saveOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                saveOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
 
                 tiffImage.Save(outputPath, saveOptions);
             }
@@ -65,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed a grayscale thumbnail into a multi‑page TIFF archive for medical imaging, using a custom MinIsBlack photometric interpretation and JPEG compression to keep the file size small.
- * 2. When a GIS application must add a small raster overlay with specific BitsPerSample and planar configuration to an existing satellite‑image TIFF stack, preserving JPEG compression for efficient storage.
- * 3. When an e‑commerce platform wants to generate a low‑resolution preview frame inside a product catalog TIFF file, filling it with a solid gray color and saving the result with JPEG compression to speed up page loads.
- * 4. When a document management system requires inserting a placeholder page with custom photometric settings into a scanned multi‑page TIFF and ensure the final document remains compatible with JPEG‑compressed TIFF viewers.
- * 5. When a digital archiving workflow programmatically adds a new 100×100 frame with custom photometric interpretation to a TIFF file and saves it using JPEG compression to optimize storage space.
+ * 1. When a developer needs to embed a high‑resolution preview image inside a multi‑page TIFF document for a medical imaging archive, using Aspose.Imaging for .NET to add a frame with MinIsBlack photometric interpretation and JPEG compression to reduce file size.
+ * 2. When creating a multi‑layer GIS map where each layer is stored as a separate TIFF frame, a developer can use Aspose.Imaging for .NET to set a custom photometric (MinIsBlack) and apply JPEG compression to keep the dataset compact.
+ * 3. When generating a digital archive of scanned historical photographs and wants to add a thumbnail frame with a gradient background, Aspose.Imaging for .NET enables adding the frame with a custom photometric interpretation and JPEG compression to balance quality and storage.
+ * 4. When building a document management system that stores scanned contracts as multi‑page TIFFs and requires an additional watermarked preview frame, a developer can use Aspose.Imaging for .NET to add the frame with MinIsBlack photometric settings and JPEG compression for efficient storage.
+ * 5. When developing a scientific imaging pipeline that appends calibration charts as extra TIFF frames, Aspose.Imaging for .NET allows setting the photometric to MinIsBlack and compressing the frame with JPEG to maintain compatibility with analysis software.
  */

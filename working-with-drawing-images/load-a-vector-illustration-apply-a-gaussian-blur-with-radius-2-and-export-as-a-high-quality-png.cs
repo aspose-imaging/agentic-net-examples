@@ -2,58 +2,45 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the SVG image
-            using (Image svgImage = Image.Load(inputPath))
-            {
-                // Set up rasterization options for PNG output
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = svgImage.Size
-                };
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\vector_input.emf";
+            string outputPath = @"C:\Images\output_blur.png";
 
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the vector illustration
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to apply raster filters
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Apply Gaussian blur with radius 2 and sigma 1.0
+                var blurOptions = new GaussianBlurFilterOptions(2, 1.0);
+                rasterImage.Filter(rasterImage.Bounds, blurOptions);
+
+                // Save as high‑quality PNG
                 var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    // High quality settings can be adjusted here if needed
+                    // For example: CompressionLevel = PngCompressionLevel.BestCompression
                 };
-
-                // Rasterize SVG to PNG in memory
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
-
-                    // Load the rasterized PNG
-                    using (Image rasterImageContainer = Image.Load(ms))
-                    {
-                        RasterImage rasterImage = (RasterImage)rasterImageContainer;
-
-                        // Apply Gaussian blur with radius 2 and sigma 1.0
-                        var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(2, 1.0);
-                        rasterImage.Filter(rasterImage.Bounds, blurOptions);
-
-                        // Save the blurred image as high-quality PNG
-                        rasterImage.Save(outputPath, new PngOptions());
-                    }
-                }
+                rasterImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -65,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to convert an SVG logo into a blurred PNG thumbnail for faster page loading and consistent appearance across browsers.
- * 2. When a desktop application generates preview images of vector diagrams and wants to apply a subtle Gaussian blur to soften edges before saving them as high‑quality PNG files.
- * 3. When an e‑commerce platform creates product watermarks by rasterizing SVG badges, applying a radius‑2 blur for a smooth effect, and exporting the result as PNG for display on product pages.
- * 4. When a reporting tool transforms SVG charts into PNG assets, adds a gentle blur to reduce visual noise, and stores the images for inclusion in PDF or email reports.
- * 5. When a mobile app preprocesses SVG icons, applies a Gaussian blur to achieve a soft‑shadow look, and saves them as high‑resolution PNGs for use in the app’s UI.
+ * 1. When a developer needs to convert a Windows Metafile (EMF) vector illustration into a raster PNG with a soft focus effect for web thumbnails.
+ * 2. When an application must generate high‑quality PNG previews of vector logos with a Gaussian blur radius of 2 to hide proprietary details before sharing.
+ * 3. When a batch‑processing tool has to apply a subtle blur to vector‑based icons and export them as PNG files for use in UI mockups.
+ * 4. When a reporting system requires rasterizing EMF charts, applying a Gaussian blur to reduce visual noise, and saving the result as a lossless PNG.
+ * 5. When a developer wants to programmatically load a vector illustration, apply a Gaussian blur filter, and output a PNG with configurable compression for digital asset pipelines.
  */

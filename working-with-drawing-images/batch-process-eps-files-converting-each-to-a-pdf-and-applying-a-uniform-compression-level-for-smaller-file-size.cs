@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -14,6 +14,9 @@ class Program
             // Hardcoded input and output directories
             string inputDirectory = @"C:\InputEps";
             string outputDirectory = @"C:\OutputPdf";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
             // Get all EPS files in the input directory
             string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
@@ -27,25 +30,25 @@ class Program
                     return;
                 }
 
-                // Determine output PDF path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                // Build output PDF path (same file name with .pdf extension)
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
 
-                // Ensure output directory exists
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Set PDF options with uniform compression
-                var pdfOptions = new PdfOptions
-                {
-                    PdfCoreOptions = new PdfCoreOptions
-                    {
-                        Compression = PdfImageCompressionOptions.Flate
-                    }
-                };
-
-                // Load EPS image and save as PDF
+                // Load the EPS image
                 using (var image = (EpsImage)Image.Load(inputPath))
                 {
+                    // Configure PDF options with uniform compression
+                    var pdfOptions = new PdfOptions
+                    {
+                        PdfCoreOptions = new PdfCoreOptions
+                        {
+                            Compression = PdfImageCompressionOptions.Flate // Uniform compression for smaller size
+                        }
+                    };
+
+                    // Save as PDF
                     image.Save(outputPath, pdfOptions);
                 }
             }
@@ -59,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop needs to convert a large collection of vector EPS artwork into PDF files for client delivery while keeping file sizes low.
- * 2. When an e‑learning platform automates the transformation of uploaded EPS diagrams into compressed PDFs for faster web viewing.
- * 3. When a corporate compliance team archives engineering schematics stored as EPS by batch‑converting them to PDF with uniform Flate compression for consistent storage.
- * 4. When a marketing department prepares a batch of EPS logos for inclusion in PDF brochures and wants to ensure all PDFs use the same compression level to meet email attachment limits.
- * 5. When a legal document management system processes incoming EPS contracts, converting each to a searchable PDF with standardized compression to reduce server storage costs.
+ * 1. When a graphic design studio must convert dozens of EPS logo files into PDF portfolios while applying uniform Flate compression to reduce download size.
+ * 2. When an engineering firm needs to automate the transformation of EPS schematics into compressed PDFs for inclusion in digital manuals.
+ * 3. When a marketing department wants to batch‑process EPS advertisements into PDF format for email campaigns, ensuring each PDF is optimally compressed for faster delivery.
+ * 4. When a legal office requires a script to turn EPS evidence images into PDF documents with consistent compression to meet file‑size limits for electronic filing.
+ * 5. When a cloud‑based document management system must ingest a folder of EPS assets and store them as compressed PDFs for archival and quick preview.
  */

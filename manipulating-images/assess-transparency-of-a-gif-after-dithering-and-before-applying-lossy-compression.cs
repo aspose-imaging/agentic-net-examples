@@ -8,43 +8,52 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded paths
+        string inputPath = @"c:\temp\input.gif";
+        string ditheredPngPath = @"c:\temp\dithered.png";
+        string lossyGifPath = @"c:\temp\dithered_lossy.gif";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.gif";
-            string outputPath = @"C:\temp\sample.dithered.gif";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to GifImage to access GIF‑specific members
                 GifImage gifImage = (GifImage)image;
 
-                // Apply dithering (example: Floyd‑Steinberg with a 4‑bit palette)
+                // Apply Floyd‑Steinberg dithering with a 4‑bit palette
                 gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 4, null);
 
                 // Assess transparency after dithering
                 bool hasTransparency = gifImage.HasTransparentColor;
                 Console.WriteLine($"Has transparent color after dithering: {hasTransparency}");
 
-                // Save the dithered image without lossy compression (MaxDiff = 0)
-                GifOptions saveOptions = new GifOptions
+                // Ensure output directory exists for PNG
+                Directory.CreateDirectory(Path.GetDirectoryName(ditheredPngPath));
+                // Save the dithered image as PNG (lossless) for inspection
+                gifImage.Save(ditheredPngPath, new PngOptions());
+
+                // Prepare GIF options for lossy compression
+                GifOptions gifOptions = new GifOptions
                 {
-                    MaxDiff = 0,               // lossless
+                    // Enable palette correction for better color matching
                     DoPaletteCorrection = true,
-                    ColorResolution = 7       // typical value
+                    // Set maximum pixel difference to trigger lossy compression
+                    MaxDiff = 80
                 };
 
-                gifImage.Save(outputPath, saveOptions);
+                // Ensure output directory exists for lossy GIF
+                Directory.CreateDirectory(Path.GetDirectoryName(lossyGifPath));
+                // Save the dithered image as a lossy GIF
+                gifImage.Save(lossyGifPath, gifOptions);
+                Console.WriteLine("Lossy GIF saved successfully.");
             }
         }
         catch (Exception ex)
@@ -56,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to ensure that a GIF used in an animated banner retains its transparent background after applying Floyd‑Steinberg dithering before optimizing the file size.
- * 2. When a mobile app developer wants to verify that a user‑uploaded GIF keeps its transparent color after reducing the palette to 4‑bit for faster rendering on low‑end devices.
- * 3. When a game UI designer must confirm that a sprite sheet saved as a GIF remains transparent after dithering, so the sprites blend correctly with the game background.
- * 4. When an e‑learning content creator needs to check that instructional GIFs preserve transparency after palette correction and before saving with lossless compression to meet accessibility standards.
- * 5. When a digital marketing analyst automates batch processing of promotional GIFs and wants to detect any loss of transparency caused by dithering before applying lossy compression for email campaigns.
+ * 1. When a web developer needs to verify that a GIF retains its transparent background after applying Floyd‑Steinberg dithering before converting it to a lossy GIF for faster page loads.
+ * 2. When a mobile app programmer wants to ensure that a dithered GIF’s transparency flag is still set before saving a compressed version to reduce bandwidth usage on cellular networks.
+ * 3. When a game UI designer must check that a palette‑reduced GIF used for sprite animation keeps its transparent pixels after dithering, so the sprite blends correctly with the game scene.
+ * 4. When an e‑learning content creator needs to confirm that a GIF with a 4‑bit palette maintains transparency after dithering before exporting a smaller lossy GIF for LMS compatibility.
+ * 5. When a digital marketing analyst automates image‑optimization pipelines and wants to detect loss of transparency after dithering to avoid broken transparent overlays in email newsletters.
  */

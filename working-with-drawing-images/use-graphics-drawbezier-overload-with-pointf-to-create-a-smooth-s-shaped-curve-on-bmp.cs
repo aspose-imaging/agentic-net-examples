@@ -3,51 +3,44 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Sources;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Output BMP file path
-            string outputPath = @"output.bmp";
+            // Hardcoded output path
+            string outputPath = @"C:\temp\s_curve.bmp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Canvas size
-            int width = 500;
-            int height = 500;
-
-            // BMP options with bound file source
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create the image canvas
-            using (Image image = Image.Create(bmpOptions, width, height))
+            // Create a BMP image with desired dimensions
+            BmpOptions bmpOptions = new BmpOptions
             {
-                // Initialize graphics for drawing
+                BitsPerPixel = 24
+            };
+            using (Image image = Image.Create(bmpOptions, 500, 500))
+            {
+                // Initialize graphics surface
                 Graphics graphics = new Graphics(image);
-
-                // Clear background to white
                 graphics.Clear(Color.White);
 
-                // Pen for the S‑shaped curve
-                Pen pen = new Pen(Color.Blue, 3);
+                // Define pen for drawing
+                Pen pen = new Pen(Color.Blue, 2);
 
-                // Define points for the S‑curve using PointF
-                PointF pt1 = new PointF(100, 400); // start
-                PointF pt2 = new PointF(150, 100); // first control
-                PointF pt3 = new PointF(350, 400); // second control
-                PointF pt4 = new PointF(400, 100); // end
+                // Define points for an S‑shaped Bézier curve
+                PointF pt1 = new PointF(50, 250);   // start point
+                PointF pt2 = new PointF(150, 50);   // first control point
+                PointF pt3 = new PointF(350, 450);  // second control point
+                PointF pt4 = new PointF(450, 250);  // end point
 
-                // Draw the Bezier curve
+                // Draw the Bézier curve using PointF overload
                 graphics.DrawBezier(pen, pt1, pt2, pt3, pt4);
 
-                // Save the image (file is already bound)
-                image.Save();
+                // Save the image to the specified path
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -59,9 +52,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP signature image with a smooth S‑shaped curve for a custom watermark, they can use Aspose.Imaging’s Graphics.DrawBezier overload with PointF coordinates.
- * 2. When creating a printable schematic in C# that requires a precise S‑curve path, such as a road layout diagram saved as a BMP file, the code demonstrates how to draw it with a blue pen.
- * 3. When building an automated report generator that embeds decorative S‑shaped separators in BMP charts, the DrawBezier method with PointF provides pixel‑accurate control over the curve shape.
- * 4. When developing a game asset pipeline that programmatically creates BMP textures containing fluid‑like S‑curves for UI elements, this example shows how to render the curve and save it directly to disk.
- * 5. When implementing a scientific visualization tool that needs to illustrate S‑shaped data trends in a BMP image without external graphics libraries, the code illustrates using Aspose.Imaging’s Graphics and Pen classes to draw the curve.
+ * 1. When a developer needs to generate a 24‑bit BMP signature stamp with a smooth S‑shaped curve for branding in a desktop C# application using Aspose.Imaging.
+ * 2. When creating custom vector‑based icons in a .NET tool that must be drawn with Graphics.DrawBezier and saved as BMP files without relying on external graphic editors.
+ * 3. When programmatically drawing flow‑chart connectors that require an S‑curve to improve readability in automatically generated diagrams using PointF coordinates.
+ * 4. When producing test images that contain precise Bézier paths to validate image‑processing algorithms such as edge detection in Aspose.Imaging for .NET.
+ * 5. When building a C# utility that renders smooth curve overlays on scanned documents and saves the result as a BMP for compatibility with legacy systems.
  */
