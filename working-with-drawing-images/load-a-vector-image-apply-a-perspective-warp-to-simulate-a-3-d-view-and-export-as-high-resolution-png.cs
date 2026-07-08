@@ -2,49 +2,45 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
         try
         {
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image vectorImage = Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions
+                // Configure rasterization options for high‑resolution output
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
                     PageSize = vectorImage.Size,
-                    BackgroundColor = Color.White
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
+                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias
                 };
 
-                var pngOptions = new PngOptions
+                // PNG export options with desired DPI
+                PngOptions pngOptions = new PngOptions
                 {
+                    ResolutionSettings = new ResolutionSetting(300, 300),
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                using (var ms = new MemoryStream())
-                {
-                    vectorImage.Save(ms, pngOptions);
-                    ms.Position = 0;
+                // Perspective warp is not directly supported by Aspose.Imaging.
+                // If needed, custom processing should be implemented here.
 
-                    using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
-                    {
-                        rasterImage.Save(outputPath, new PngOptions());
-                    }
-                }
+                vectorImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -56,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate high‑resolution PNG thumbnails from user‑uploaded SVG logos using Aspose.Imaging in C#.
- * 2. When an e‑learning platform programmatically converts scalable vector diagrams (SVG) into PNG images for inclusion in PDF course materials.
- * 3. When a desktop publishing tool rasterizes SVG icons into PNG sprites for a Windows Forms UI by loading the vector file and saving it as PNG.
- * 4. When a reporting service transforms SVG chart files into PNG images to embed in email reports that require a fixed raster format.
- * 5. When a CI/CD pipeline validates SVG assets by converting them to PNG and verifying the output dimensions and quality with Aspose.Imaging for .NET.
+ * 1. When a developer needs to convert an SVG logo into a print‑ready 300 DPI PNG for marketing brochures, they can use this code to rasterize the vector at high resolution.
+ * 2. When a web application must generate thumbnail previews of user‑uploaded SVG diagrams as PNG files with anti‑aliased rendering, this snippet provides the necessary C# workflow.
+ * 3. When an e‑learning platform wants to display 2‑D icons from SVG assets on high‑density screens, the code enables loading the vector, applying optional custom perspective transformations, and exporting a crisp PNG.
+ * 4. When a desktop publishing tool requires batch processing of SVG illustrations into PNG assets while preserving original dimensions and applying smoothing and text rendering hints, this example shows how to automate it with Aspose.Imaging.
+ * 5. When a developer is building a reporting service that embeds vector charts as PNG images in PDF reports and needs to ensure the output matches the original size and resolution, this code demonstrates the required rasterization and DPI settings.
  */

@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\sample_compressed.jpg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.jpg";
+            string outputPath = @"C:\temp\output_high_compression.jpg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,18 +27,21 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG save options with high compression (low quality)
-                JpegOptions jpegOptions = new JpegOptions
+                // Configure JPEG save options for high compression (low quality)
+                JpegOptions saveOptions = new JpegOptions
                 {
-                    Quality = 10, // Quality range 1-100; lower value = higher compression
-                    CompressionType = JpegCompressionMode.Baseline
+                    // Use progressive compression (optional)
+                    CompressionType = JpegCompressionMode.Progressive,
+                    // Set a low quality value to increase compression
+                    Quality = 10,
+                    // Keep other defaults (bits per channel, resolution, etc.)
                 };
 
-                // Save the image with the specified JPEG options
-                image.Save(outputPath, jpegOptions);
+                // Save the image with the specified options
+                image.Save(outputPath, saveOptions);
 
-                // Report the quality setting used
-                Console.WriteLine($"Saved JPEG with quality setting: {jpegOptions.Quality}");
+                // Output the quality setting used for saving
+                Console.WriteLine($"Image saved with JPEG quality setting: {saveOptions.Quality}");
             }
         }
         catch (Exception ex)
@@ -50,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# developer needs to generate a low‑size JPEG preview of a high‑resolution BMP for a web gallery, they can use Aspose.Imaging to apply a high compression level (quality = 10) and quickly estimate the resulting image quality.
- * 2. When an application must reduce storage costs by converting large bitmap assets to highly compressed JPEG files, the code demonstrates how to set the JpegOptions quality parameter and verify the saved quality setting in .NET.
- * 3. When sending images via email from a .NET service, a developer can use this snippet to compress BMP files into small JPEG attachments, ensuring the compression mode (Baseline) and quality level are appropriate for bandwidth‑limited environments.
- * 4. When building a mobile app that displays thumbnail placeholders before loading full‑resolution pictures, the code shows how to generate a JPEG with aggressive compression to test visual acceptability while keeping the file size minimal.
- * 5. When performing automated regression testing of image‑processing pipelines, a tester can employ this example to programmatically compress source BMP images, record the JPEG quality value, and compare the output size and visual fidelity across different quality settings.
+ * 1. When a web application needs to generate thumbnail previews for a photo gallery and must reduce bandwidth by saving JPEGs with very low quality using Aspose.Imaging in C#.
+ * 2. When an e‑commerce platform wants to create lightweight product images for mobile devices by applying high JPEG compression and wants to log the quality setting used.
+ * 3. When a digital archiving system must store scanned documents as high‑compression JPEGs to save storage space while still being able to report the compression level applied.
+ * 4. When a batch‑processing tool for email newsletters compresses user‑uploaded photos to meet size limits and needs to verify the JPEG quality parameter set via JpegOptions.
+ * 5. When a C# desktop utility prepares images for upload to a cloud service that enforces strict file‑size quotas, using Aspose.Imaging to save the images with progressive JPEG compression at a quality of 10.
  */

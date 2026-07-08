@@ -3,70 +3,36 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.gif";
+        string outputPath = "output\\adjusted.gif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input GIF frame paths
-            string frame1 = "frame1.gif";
-            string frame2 = "frame2.gif";
-            string frame3 = "frame3.gif";
-
-            // Hardcoded output animated GIF path
-            string outputPath = "output.gif";
-
-            // Validate input files
-            if (!File.Exists(frame1))
+            // Load GIF image
+            using (GifImage gif = (GifImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {frame1}");
-                return;
-            }
-            if (!File.Exists(frame2))
-            {
-                Console.Error.WriteLine($"File not found: {frame2}");
-                return;
-            }
-            if (!File.Exists(frame3))
-            {
-                Console.Error.WriteLine($"File not found: {frame3}");
-                return;
-            }
+                // Apply gamma correction (balanced luminance)
+                gif.AdjustGamma(1.2f);
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
-
-            // Load the first frame, adjust gamma, and create the animated GIF with its first frame
-            using (GifImage firstGif = (GifImage)Image.Load(frame1))
-            {
-                firstGif.AdjustGamma(0.8f); // Adjust gamma for balanced luminance
-
-                using (GifImage animatedGif = new GifImage((GifFrameBlock)firstGif.ActiveFrame))
-                {
-                    // Load and add remaining frames
-                    string[] otherFrames = { frame2, frame3 };
-                    foreach (string path in otherFrames)
-                    {
-                        using (GifImage frameGif = (GifImage)Image.Load(path))
-                        {
-                            frameGif.AdjustGamma(0.8f);
-                            animatedGif.AddPage((RasterImage)frameGif);
-                        }
-                    }
-
-                    // Set infinite looping (0 means infinite in GIF spec)
-                    animatedGif.LoopsCount = 0;
-
-                    // Save the animated GIF with default options
-                    animatedGif.Save(outputPath, new GifOptions());
-                }
+                // Save the adjusted GIF with default options
+                GifOptions options = new GifOptions();
+                gif.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -75,3 +41,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer wants to correct the overall brightness of an animated GIF by applying gamma correction with Aspose.Imaging before embedding it in a web page.
+ * 2. When a developer needs to preprocess a sequence of GIF frames to achieve balanced luminance for a marketing email campaign that uses animated GIFs.
+ * 3. When a developer must ensure that a user‑generated GIF uploaded to a mobile app has consistent contrast across all frames by adjusting its gamma value.
+ * 4. When a developer is creating a slideshow of product images in GIF format and wants to normalize the lighting of each frame to avoid flickering.
+ * 5. When a developer is automating the preparation of GIF assets for a digital signage system and needs to apply a uniform gamma correction to meet visual standards.
+ */

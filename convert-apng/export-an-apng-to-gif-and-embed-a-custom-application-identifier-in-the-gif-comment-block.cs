@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -10,28 +9,21 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.apng";
-            string outputPath = "output.gif";
+            string inputPath = "Input\\animation.apng";
+            string outputPath = "Output\\animation.gif";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the APNG image
-            using (Image image = Image.Load(inputPath))
+            using (Image apngImage = Image.Load(inputPath))
             {
-                // Prepare GIF save options
-                GifOptions gifOptions = new GifOptions();
-
-                // Save as GIF with the specified options
-                image.Save(outputPath, gifOptions);
+                var gifOptions = new GifOptions();
+                apngImage.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -40,3 +32,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web developer needs to convert animated PNGs created by a design tool into GIFs for compatibility with older browsers while tagging the file with the application name for tracking.
+ * 2. When a mobile app generates APNG stickers and must export them as GIFs for messaging platforms that only accept GIFs, embedding a custom identifier to trace the source app.
+ * 3. When an e‑learning platform converts animated instructional graphics from APNG to GIF to embed in PowerPoint slides, adding a comment block that records the content management system version.
+ * 4. When a marketing automation system processes user‑uploaded APNG banners and converts them to GIFs for email newsletters, inserting a custom application ID in the GIF metadata for analytics.
+ * 5. When a game developer exports in‑game animated icons from APNG to GIF for use in a legacy UI engine, and includes a comment with the game engine’s build number for debugging.
+ */

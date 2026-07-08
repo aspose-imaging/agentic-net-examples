@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,42 +9,21 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.cmx";
-            string outputPath = "output\\result.pdf";
+            string inputPath = "input/sample.cmx";
+            string outputPath = "output/result.pdf";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load CMX vector image
-            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare PDF export options
-                PdfOptions pdfOptions = new PdfOptions();
-
-                // Configure vector rasterization options for proper rendering
-                if (cmxImage is VectorImage)
-                {
-                    var rasterOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = cmxImage.Width,
-                        PageHeight = cmxImage.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    };
-                    pdfOptions.VectorRasterizationOptions = rasterOptions;
-                }
-
-                // Save as PDF
-                cmxImage.Save(outputPath, pdfOptions);
+                var pdfOptions = new PdfOptions();
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -55,3 +32,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a C# application in a printing house receives multi‑page CMX artwork and must create a single PDF so clients can preview each page of the design.
+ * 2. When a CAD team uses C# to archive legacy CorelDRAW CMX drawings as multi‑page PDFs, preserving each drawing as an individual PDF page for future reference.
+ * 3. When a document management system built with .NET needs to import CMX files and store them as searchable, multi‑page PDFs that can be opened in any PDF viewer.
+ * 4. When an automated C# batch process converts CMX technical schematics into a PDF manual, ensuring each schematic appears on its own PDF page for easy navigation.
+ * 5. When a legal workflow in a .NET environment requires converting CMX evidence files into a single PDF document, with each page of the original CMX becoming a separate page in the PDF for court submission.
+ */

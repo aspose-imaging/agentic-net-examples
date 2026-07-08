@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -10,30 +10,24 @@ class Program
         try
         {
             // Hardcoded paths
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
-            string csvPath = "crop_data.csv";
+            string csvPath = "input.csv";
+            string inputDirectory = "InputImages";
+            string outputDirectory = "OutputImages";
 
-            // Ensure output directory exists
+            // Ensure output root exists
             Directory.CreateDirectory(outputDirectory);
 
             // Read CSV lines
-            if (!File.Exists(csvPath))
-            {
-                Console.Error.WriteLine($"File not found: {csvPath}");
-                return;
-            }
-
-            var lines = File.ReadAllLines(csvPath);
-            foreach (var line in lines)
+            string[] lines = File.ReadAllLines(csvPath);
+            foreach (string line in lines)
             {
                 if (string.IsNullOrWhiteSpace(line))
                     continue;
 
-                // Expected CSV format: filename,x,y,width,height
-                var parts = line.Split(',');
+                // Expected format: filename,x,y,width,height
+                string[] parts = line.Split(',');
                 if (parts.Length < 5)
-                    continue; // Skip malformed lines
+                    continue;
 
                 string fileName = parts[0].Trim();
                 int x = int.Parse(parts[1].Trim());
@@ -42,29 +36,23 @@ class Program
                 int height = int.Parse(parts[4].Trim());
 
                 string inputPath = Path.Combine(inputDirectory, fileName);
-                string outputPath = Path.Combine(outputDirectory, fileName);
-
-                // Input file existence check
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
+
+                string outputFileName = Path.GetFileNameWithoutExtension(fileName) + "_cropped" + Path.GetExtension(fileName);
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
                 // Ensure output subdirectory exists
-                string outputDir = Path.GetDirectoryName(outputPath);
-                if (!string.IsNullOrEmpty(outputDir))
-                {
-                    Directory.CreateDirectory(outputDir);
-                }
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load, crop, and save
-                using (Image image = Image.Load(inputPath))
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    RasterImage raster = (RasterImage)image;
-                    Rectangle cropRect = new Rectangle(x, y, width, height);
-                    raster.Crop(cropRect);
-                    raster.Save(outputPath);
+                    var cropArea = new Rectangle(x, y, width, height);
+                    image.Crop(cropArea);
+                    image.Save(outputPath);
                 }
             }
         }
@@ -74,3 +62,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑crop thousands of JPEG photos based on rectangle coordinates listed in a CSV file, such as extracting product thumbnails from a catalog.
+ * 2. When an e‑commerce platform must automatically generate cropped preview images for uploaded product pictures using CSV‑defined crop areas.
+ * 3. When a digital archiving system has to trim scanned JPEG document pages to remove margins by reading the crop rectangles from a CSV manifest.
+ * 4. When a marketing team provides a list of banner sections to extract from high‑resolution JPEG assets, and a C# script must read the CSV coordinates and output the cropped pieces for social media.
+ * 5. When a photo‑management application needs to process user‑defined crop areas stored in a CSV file to create uniformly sized JPEG thumbnails for a gallery view.
+ */

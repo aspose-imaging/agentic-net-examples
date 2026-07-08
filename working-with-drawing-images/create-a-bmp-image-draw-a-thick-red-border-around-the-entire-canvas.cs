@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
@@ -10,21 +11,35 @@ class Program
     {
         try
         {
-            string outputPath = @"C:\temp\border.bmp";
+            // Define output path
+            string outputPath = @"C:\temp\bordered_image.bmp";
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            var source = new FileCreateSource(outputPath, false);
+            // Create a source bound to the output file
+            Source source = new FileCreateSource(outputPath, false);
+
+            // Set BMP options with the source
             BmpOptions options = new BmpOptions() { Source = source };
 
-            int width = 500;
-            int height = 500;
+            // Define canvas size
+            int width = 800;
+            int height = 600;
 
-            using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(options, width, height))
+            // Create BMP canvas bound to the file
+            using (BmpImage canvas = (BmpImage)Image.Create(options, width, height))
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 10);
-                graphics.DrawRectangle(pen, 0, 0, canvas.Width, canvas.Height);
+                // Create graphics for drawing
+                Graphics graphics = new Graphics(canvas);
+
+                // Define a thick red pen
+                Pen redPen = new Pen(Color.Red, 10);
+
+                // Draw rectangle border around the entire canvas
+                graphics.DrawRectangle(redPen, 0, 0, canvas.Width, canvas.Height);
+
+                // Save the bound image
                 canvas.Save();
             }
         }
@@ -37,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP image with a thick red border to use as a highlighted thumbnail in a Windows desktop application that displays image previews.
- * 2. When an automated reporting tool must add a visible red frame to BMP charts before embedding them into PDF documents for visual emphasis.
- * 3. When a batch image processing script creates BMP assets with a red outline to mark UI components in a game development pipeline using Aspose.Imaging for C#.
- * 4. When a legacy manufacturing system requires BMP files with a colored border for printing labels on industrial printers that only accept the BMP format.
- * 5. When a diagnostic utility draws a thick red border around a BMP screenshot to indicate error regions during automated UI testing.
+ * 1. When a developer needs to generate a BMP thumbnail with a visible red frame for a legacy Windows application that only accepts BMP files.
+ * 2. When an automated report generator must add a thick red border to each exported BMP chart to highlight it in printed documentation.
+ * 3. When a batch image processing tool creates placeholder BMP images with a colored outline to indicate missing content in a media asset pipeline.
+ * 4. When a game asset pipeline requires BMP textures with a red margin to be recognized by an older engine that uses border color for collision detection.
+ * 5. When a document conversion service adds a red rectangular border around BMP pages to comply with branding guidelines before merging them into a PDF.
  */

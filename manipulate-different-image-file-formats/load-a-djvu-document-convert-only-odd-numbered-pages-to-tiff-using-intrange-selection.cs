@@ -10,12 +10,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.djvu";
+        string outputPath = @"C:\temp\odd_pages.tif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input\\sample.djvu";
-            string outputPath = "output\\odd_pages.tif";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,26 +26,28 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DjVu document
+            // Load DjVu document from stream
             using (Stream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Collect indexes of odd-numbered pages (1‑based numbering)
-                List<int> oddPageIndexes = new List<int>();
-                for (int i = 0; i < djvuImage.PageCount; i++)
+                // Prepare TIFF save options
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Compression = TiffCompressions.Deflate;
+                tiffOptions.BitsPerSample = new ushort[] { 1 };
+
+                // Determine odd‑numbered pages (1‑based odd => 0‑based even indices)
+                int pageCount = djvuImage.PageCount;
+                List<int> oddPageIndices = new List<int>();
+                for (int i = 0; i < pageCount; i++)
                 {
-                    // i = 0 corresponds to page 1
-                    if ((i % 2) == 0)
+                    if (i % 2 == 0) // zero‑based even index corresponds to odd page number
                     {
-                        oddPageIndexes.Add(i);
+                        oddPageIndices.Add(i);
                     }
                 }
 
-                // Set up TIFF save options
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.Compression = TiffCompressions.Deflate;
-                tiffOptions.BitsPerSample = new ushort[] { 1 }; // optional B/W conversion
-                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(oddPageIndexes.ToArray());
+                // Set pages to export using DjvuMultiPageOptions
+                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(oddPageIndices.ToArray());
 
                 // Save selected pages to TIFF
                 djvuImage.Save(outputPath, tiffOptions);
@@ -60,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a legal firm needs to archive only the odd‑numbered pages of scanned case files stored as DjVu into a searchable multi‑page TIFF for compliance, this C# Aspose.Imaging code performs the conversion.
- * 2. When a publishing house wants to extract every other page from a DjVu manuscript to create a low‑resolution preview TIFF for reviewers, the example shows how to select odd pages with IntRange and save them as a compressed TIFF.
- * 3. When a medical records system must convert patient charts saved in DjVu format to black‑and‑white TIFFs while keeping only the odd pages that contain diagnostic images, this code provides the necessary page‑filtering and compression steps.
- * 4. When an archival project requires batch processing of DjVu documents to generate multi‑page TIFFs that include only the odd‑numbered pages for reduced storage size, developers can apply the shown DjvuMultiPageOptions in C#.
- * 5. When a desktop application needs to load a DjVu file, programmatically identify pages 1, 3, 5, etc., and export them as a deflate‑compressed TIFF for integration with OCR pipelines, the provided snippet illustrates the complete workflow.
+ * 1. When a developer needs to extract only the odd‑numbered pages from a multi‑page DjVu archive and save them as a compressed TIFF for archival or printing.
+ * 2. When an application must generate a lightweight TIFF preview of every other page in a scanned DjVu document to reduce file size while preserving readability.
+ * 3. When a workflow requires converting selected DjVu pages (e.g., page 1, 3, 5…) to a 1‑bit‑per‑pixel TIFF using Deflate compression for OCR preprocessing.
+ * 4. When a .NET service processes incoming DjVu files and needs to output only the odd pages as a multi‑page TIFF to comply with a legacy system that only accepts TIFF input.
+ * 5. When a batch job automates the extraction of odd pages from DjVu manuals and stores them in a TIFF format for inclusion in a digital library that indexes TIFF images.
  */

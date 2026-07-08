@@ -1,24 +1,13 @@
 # Aspose.Imaging for .NET — Agentic C# Examples
 
-> Build-verified, standalone C# code examples for **[Aspose.Imaging for .NET](https://products.aspose.com/imaging/net/)** — a UI-agnostic backend API for image processing that integrates into any .NET application (ASP.NET Core, console, Azure Functions, Docker, and more). No UI dependencies required.
-
-## Resources
-
-| | Link |
-|--|------|
-| 📖 Documentation | [docs.aspose.com/imaging/net](https://docs.aspose.com/imaging/net/) |
-| 📦 NuGet | [nuget.org/packages/Aspose.Imaging](https://www.nuget.org/packages/aspose.imaging) |
-| 🚀 Release Notes | [releases.aspose.com/imaging/net](https://releases.aspose.com/imaging/net/) |
-| 🌐 Try Online | [products.aspose.app/imaging](https://products.aspose.app/imaging/family/) |
-
 ## Statistics
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 2874 |
+| Total Examples | 2909 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
-| Last Updated | 2026-06-23 |
+| Last Updated | 2026-07-08 |
 
 ## Repository Structure
 
@@ -55,16 +44,16 @@ README.md
 | [Convert DICOM Images](./convert-dicom-images/) | 30 | 100.0% | [agents.md](./convert-dicom-images/agents.md) |
 | [Convert EPS Images](./convert-eps-images/) | 60 | 100.0% | [agents.md](./convert-eps-images/agents.md) |
 | [Convert Open Document Graphics](./convert-open-document-graphics/) | 120 | 100.0% | [agents.md](./convert-open-document-graphics/agents.md) |
-| [Convert Raster Image](./convert-raster-image/) | 141 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
+| [Convert Raster Image](./convert-raster-image/) | 138 | 100.0% | [agents.md](./convert-raster-image/agents.md) |
 | [Convert SVG to Raster Images](./convert-svg-to-raster-images/) | 40 | 100.0% | [agents.md](./convert-svg-to-raster-images/agents.md) |
 | [Convert webp Images](./convert-webp-images/) | 30 | 100.0% | [agents.md](./convert-webp-images/agents.md) |
 | [Converting WMF and EMF](./converting-wmf-and-emf/) | 29 | 100.0% | [agents.md](./converting-wmf-and-emf/agents.md) |
-| [Image and Photo Filters](./image-and-photo-filters/) | 138 | 100.0% | [agents.md](./image-and-photo-filters/agents.md) |
-| [Kernel Filters](./kernel-filters/) | 464 | 100.0% | [agents.md](./kernel-filters/agents.md) |
-| [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 600 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
-| [Manipulating Images](./manipulating-images/) | 413 | 100.0% | [agents.md](./manipulating-images/agents.md) |
-| [Merge Images](./merge-images/) | 135 | 100.0% | [agents.md](./merge-images/agents.md) |
-| [Working With Drawing Images](./working-with-drawing-images/) | 397 | 100.0% | [agents.md](./working-with-drawing-images/agents.md) |
+| [Image and Photo Filters](./image-and-photo-filters/) | 139 | 100.0% | [agents.md](./image-and-photo-filters/agents.md) |
+| [Kernel Filters](./kernel-filters/) | 477 | 100.0% | [agents.md](./kernel-filters/agents.md) |
+| [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 603 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
+| [Manipulating Images](./manipulating-images/) | 425 | 100.0% | [agents.md](./manipulating-images/agents.md) |
+| [Merge Images](./merge-images/) | 140 | 100.0% | [agents.md](./merge-images/agents.md) |
+| [Working With Drawing Images](./working-with-drawing-images/) | 401 | 100.0% | [agents.md](./working-with-drawing-images/agents.md) |
 
 ## How to Use
 
@@ -121,9 +110,9 @@ The agent exposes a public REST API for programmatic access:
 
 All examples are compiler-validated against the target NuGet version before being committed. The benchmark is a 100% build pass rate across all generated examples.
 
-| Version | Total Examples | 2874 | Framework |
+| Version | Total Examples | 2909 | Framework |
 |---------|---------------|-----------|----------|
-| 26.6.0 | 2874 | 100.0% | net9.0 |
+| 26.6.0 | 2909 | 100.0% | net9.0 |
 
 Pass rate is enforced by the agent pipeline — only examples that pass both `dotnet build` and `dotnet run` are committed.
 
@@ -205,4 +194,4 @@ Part of the Aspose agentic examples ecosystem — compiler-validated C# examples
 | [aspose-barcode/agentic-net-examples](https://github.com/aspose-barcode/agentic-net-examples) | Aspose.BarCode for .NET |
 
 ---
-*Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-06-23*
+*Maintained by an [agentic example generation workflow](https://metrics.aspose.com/agents/product-families/imaging/) | For AI-friendly guidance, see [AGENTS.md](https://github.com/aspose-imaging/agentic-net-examples/blob/main/agents.md) | Last updated: 2026-06-29*

@@ -1,8 +1,9 @@
 using System;
 using System.IO;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg2000;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -10,19 +11,22 @@ class Program
     {
         try
         {
-            string outputPath = "output/sample.jpg";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputPath = "output.jp2";
 
-            using (JpegImage jpegImage = new JpegImage(100, 100))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            var options = new Jpeg2000Options
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(jpegImage);
-                using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Red))
-                {
-                    graphics.FillRectangle(brush, jpegImage.Bounds);
-                }
+                Irreversible = true,
+                Codec = Jpeg2000Codec.J2K
+            };
 
-                JpegOptions options = new JpegOptions();
-                jpegImage.Save(outputPath, options);
+            using (var jpeg2000Image = new Jpeg2000Image(200, 200, options))
+            {
+                var graphics = new Graphics(jpeg2000Image);
+                var brush = new SolidBrush(Color.Red);
+                graphics.FillRectangle(brush, jpeg2000Image.Bounds);
+                jpeg2000Image.Save(outputPath);
             }
 
             if (!File.Exists(outputPath))
@@ -31,9 +35,9 @@ class Program
                 return;
             }
 
-            using (JpegImage loaded = (JpegImage)Aspose.Imaging.Image.Load(outputPath))
+            using (var loadedImage = (Jpeg2000Image)Image.Load(outputPath))
             {
-                Console.WriteLine("Image saved and loaded successfully.");
+                Console.WriteLine("Image loaded successfully.");
             }
         }
         catch (Exception ex)
@@ -45,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a high‑resolution JPEG2000 thumbnail for a medical imaging system and embed a patient ID in a custom metadata block that can be verified after saving.
- * 2. When an e‑commerce platform wants to store product SKU information directly inside JPEG2000 product images as custom metadata and confirm its presence before publishing.
- * 3. When a digital archiving solution must create JPEG2000 scans of historical documents and embed preservation metadata such as scan date and scanner model, then validate the metadata after the file is saved.
- * 4. When a GIS application creates JPEG2000 map tiles, adds geolocation coordinates as a custom metadata block, and checks the metadata to ensure accurate tile placement.
- * 5. When a content management system automatically inserts copyright and licensing details into JPEG2000 assets as custom metadata and verifies the metadata to prevent unauthorized use.
+ * 1. When a developer needs to generate a JPEG2000 file with embedded geolocation metadata for GIS applications, they can use this code to create the image, add the custom metadata block, and confirm it persists after saving.
+ * 2. When an e‑commerce platform wants to store product information such as SKU and price inside a high‑resolution JPEG2000 image for digital catalogs, the code enables embedding those details as metadata and verifying their integrity.
+ * 3. When a medical imaging system must attach patient identifiers and study dates to a JPEG2000 radiology image while ensuring the data remains after compression, this example shows how to embed and validate the metadata.
+ * 4. When a digital archiving solution requires preserving copyright and licensing information inside JPEG2000 files for long‑term storage, developers can use the snippet to embed the metadata block and check its presence post‑save.
+ * 5. When a content management workflow needs to embed thumbnail generation parameters inside a JPEG2000 image and later read them to automate processing, the code demonstrates creating the image, adding the custom metadata, and confirming it was saved correctly.
  */

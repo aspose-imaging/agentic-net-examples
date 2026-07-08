@@ -2,44 +2,45 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\sample.png";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\sample.odg";
+            string outputPath = @"C:\Temp\sample.png";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG save options with rasterization settings
-                var pngOptions = new PngOptions();
-
-                var rasterOptions = new OdgRasterizationOptions
+                // Configure rasterization options with transparent background
+                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
                 {
-                    // Preserve transparency by setting a transparent background
-                    BackgroundColor = Color.Transparent,
-                    // Optional: keep original page size
-                    PageSize = image.Size
+                    BackgroundColor = Aspose.Imaging.Color.Transparent,
+                    PageSize = image.Size // preserve original size
                 };
 
-                pngOptions.VectorRasterizationOptions = rasterOptions;
+                // Set PNG save options and attach rasterization options
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                // Save the image as PNG
+                // Save as PNG preserving transparency
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -49,3 +50,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to render OpenDocument graphics (ODG) on a website that only supports raster formats, they can use this C# Aspose.Imaging code to convert the ODG to a PNG while preserving the transparent background.
+ * 2. When an application must generate thumbnail previews of ODG drawings for a file‑manager UI, this code creates PNG thumbnails that keep the original shape without adding an opaque background.
+ * 3. When a reporting system has to embed ODG diagrams into PDF or Word documents, the code converts the ODG to a PNG with an alpha channel so the images layer correctly in the final report.
+ * 4. When a mobile app imports user‑created ODG illustrations and needs them as stickers, this snippet converts the ODG to a PNG with transparency, allowing the stickers to blend seamlessly on any background.
+ * 5. When an automated build pipeline processes design assets for a game engine that requires texture files with transparency, the code converts the source ODG files to PNGs while maintaining the transparent background.
+ */

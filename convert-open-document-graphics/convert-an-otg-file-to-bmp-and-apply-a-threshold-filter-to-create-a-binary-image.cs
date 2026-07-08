@@ -7,55 +7,60 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.otg";
+        string outputPath = @"C:\Images\output.bmp";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\sample.otg";
-            string rasterPath = @"C:\Images\output.bmp";
-            string binaryPath = @"C:\Images\output_binary.bmp";
+            // Rasterize OTG to BMP using OtgRasterizationOptions
+            string tempBmpPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.bmp");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempBmpPath));
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(rasterPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(binaryPath));
-
-            // Load the OTG image
             using (Image otgImage = Image.Load(inputPath))
             {
-                // Set up rasterization options for vector to raster conversion
                 var otgRasterOptions = new OtgRasterizationOptions
                 {
-                    PageSize = otgImage.Size // preserve original size
+                    PageSize = otgImage.Size
                 };
 
-                // BMP save options with the rasterization settings
                 var bmpOptions = new BmpOptions
                 {
                     VectorRasterizationOptions = otgRasterOptions
                 };
 
-                // Save the rasterized image as BMP
-                otgImage.Save(rasterPath, bmpOptions);
+                otgImage.Save(tempBmpPath, bmpOptions);
             }
 
-            // Load the rasterized BMP image
-            using (Image bmpImage = Image.Load(rasterPath))
+            // Load the rasterized BMP, apply Otsu threshold, and save final binary BMP
+            using (Image bmpImage = Image.Load(tempBmpPath))
             {
-                // Cast to RasterImage to access BinarizeOtsu
-                var raster = (RasterImage)bmpImage;
+                if (bmpImage is RasterImage rasterImage)
+                {
+                    rasterImage.BinarizeOtsu();
+                    var finalBmpOptions = new BmpOptions();
+                    rasterImage.Save(outputPath, finalBmpOptions);
+                }
+                else
+                {
+                    Console.Error.WriteLine("Failed to cast loaded image to RasterImage.");
+                }
+            }
 
-                // Apply Otsu thresholding to obtain a binary image
-                raster.BinarizeOtsu();
-
-                // Save the binary image as BMP
-                var bmpOptions = new BmpOptions(); // default BMP options
-                raster.Save(binaryPath, bmpOptions);
+            // Clean up temporary file
+            if (File.Exists(tempBmpPath))
+            {
+                File.Delete(tempBmpPath);
             }
         }
         catch (Exception ex)
@@ -64,3 +69,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a CAD application needs to export vector OTG drawings as BMP thumbnails and automatically apply an Otsu threshold to produce high‑contrast previews.
+ * 2. When a document management system must convert OTG schematics to binary BMP images for OCR preprocessing by rasterizing the vector data and binarizing with Otsu.
+ * 3. When an industrial inspection tool requires rasterizing OTG floor plans into BMP files and then applying a threshold filter to generate black‑and‑white masks for defect detection.
+ * 4. When a GIS platform wants to transform OTG map layers into BMP rasters and use Otsu binarization to create binary overlays for spatial analysis.
+ * 5. When a legacy printing workflow needs to turn OTG artwork into high‑contrast BMP files by rasterizing the vector content and applying a threshold filter for monochrome laser printers.
+ */

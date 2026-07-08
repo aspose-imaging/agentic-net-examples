@@ -1,51 +1,51 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input path
+        // Hardcoded input and output paths
         string inputPath = "input.jpg";
-        // Hardcoded password for the digital signature
-        string password = "mySecretPassword";
+        string outputPath = "output.txt";
 
         try
         {
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the JPEG image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage to access digital signature methods
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
-                {
-                    Console.Error.WriteLine("The loaded image is not a raster image.");
-                    return;
-                }
+                // Password used for the digital signature
+                string password = "yourPassword";
 
-                // Quick check if the image is digitally signed
-                bool isSigned = raster.IsDigitalSigned(password);
-                Console.WriteLine($"Is digitally signed: {isSigned}");
+                // Fast check if the image is digitally signed
+                bool isSigned = image.IsDigitalSigned(password);
 
-                // If signed, analyze the confidence percentage
+                // Analyze confidence percentage if signed
+                int confidence = 0;
                 if (isSigned)
                 {
-                    int confidence = raster.AnalyzePercentageDigitalSignature(password);
-                    Console.WriteLine($"Digital signature confidence: {confidence}%");
+                    confidence = image.AnalyzePercentageDigitalSignature(password);
                 }
-                else
-                {
-                    Console.WriteLine("No digital signature detected.");
-                }
+
+                // Prepare result string
+                string result = $"Signed: {isSigned}, Confidence: {confidence}%";
+
+                // Write result to output file
+                File.WriteAllText(outputPath, result);
+
+                // Also display on console
+                Console.WriteLine(result);
             }
         }
         catch (Exception ex)
@@ -54,3 +54,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a financial institution processes scanned checks in JPEG format, it can use this code to verify the embedded digital signature and determine the confidence level before approving the transaction.
+ * 2. A legal document management system can employ the snippet to confirm that JPEG evidence photos are digitally signed and assess signature confidence to ensure admissibility in court.
+ * 3. In a secure media publishing workflow, developers can run this routine to check that uploaded JPEG images carry a valid digital signature and report the confidence percentage for quality‑control audits.
+ * 4. For a forensic analysis tool, the code enables investigators to quickly detect whether a suspect’s JPEG files are signed and gauge the signature’s reliability using the provided password.
+ * 5. An enterprise archiving solution can integrate this example to automatically validate the authenticity of archived JPEG assets by reading the digital signature and logging its confidence score.
+ */

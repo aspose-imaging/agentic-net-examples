@@ -10,37 +10,43 @@ class Program
     {
         try
         {
-            string outputPath = "output_grid.bmp";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Output BMP file path (hard‑coded)
+            string outputPath = @"C:\temp\grid.bmp";
 
-            int cellSize = 50;
-            int rows = 10;
-            int cols = 10;
-            int width = cellSize * cols;
-            int height = cellSize * rows;
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Canvas size and cell size
+            int width = 800;
+            int height = 600;
+            int cellSize = 50; // equal square cells
+
+            // Configure BMP options with a file create source (output is bound)
             BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            bmpOptions.Source = new FileCreateSource(outputPath);
 
+            // Create the image canvas
             using (Image image = Image.Create(bmpOptions, width, height))
             {
+                // Graphics object for drawing
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
 
+                // Pen for grid lines
                 Pen pen = new Pen(Color.Black, 1);
 
-                for (int c = 0; c <= cols; c++)
+                // Draw vertical grid lines
+                for (int x = 0; x <= width; x += cellSize)
                 {
-                    int x = c * cellSize;
                     graphics.DrawLine(pen, x, 0, x, height);
                 }
 
-                for (int r = 0; r <= rows; r++)
+                // Draw horizontal grid lines
+                for (int y = 0; y <= height; y += cellSize)
                 {
-                    int y = r * cellSize;
                     graphics.DrawLine(pen, 0, y, width, y);
                 }
 
+                // Save the image (already bound to the output file)
                 image.Save();
             }
         }
@@ -53,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a printable BMP spreadsheet‑style layout for a game board or seating chart, they can use this code to draw a grid of equal cells.
- * 2. When creating a background image for a UI control that requires a tiled pattern, the repeated DrawLine calls produce a BMP grid that can be tiled across the interface.
- * 3. When exporting a data matrix to a BMP file for legacy systems that only accept bitmap images, this code quickly renders the rows and columns as a visual grid.
- * 4. When building a simple image‑based maze or puzzle where walls are aligned on a regular grid, the grid‑drawing routine provides the base BMP canvas for further drawing.
- * 5. When testing image processing pipelines or benchmarking Aspose.Imaging’s Graphics API, developers can use this code to generate a known‑size BMP grid for validation.
+ * 1. When a developer needs to generate a printable BMP worksheet with a uniform grid using Aspose.Imaging’s Graphics.DrawLine and Pen objects for manual data entry or graph paper.
+ * 2. When a game developer wants to create a tiled background BMP image by drawing equal‑sized cells with repeated DrawLine calls for a 2‑D puzzle or board game.
+ * 3. When a reporting tool must overlay a grid onto a BMP chart using C# Graphics and Pen to align plotted points with a fixed cell size.
+ * 4. When a CAD or mapping application requires a simple raster reference grid in BMP, produced with Aspose.Imaging’s DrawLine loop, to help users measure distances.
+ * 5. When an automation script has to produce a BMP template with evenly spaced cells for subsequent image analysis or OCR preprocessing.
  */

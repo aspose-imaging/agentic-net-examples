@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -11,10 +12,12 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
             string outputPath = "output.jpg";
 
-            foreach (var inputPath in inputPaths)
+            // Validate input files
+            foreach (string inputPath in inputPaths)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -23,35 +26,45 @@ class Program
                 }
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            int maxWidth = 0;
-            int totalHeight = 0;
-            foreach (var path in inputPaths)
+            // Collect sizes of all input images
+            List<Size> sizeList = new List<Size>();
+            foreach (string inputPath in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                using (RasterImage img = (RasterImage)Image.Load(inputPath))
                 {
-                    if (img.Width > maxWidth) maxWidth = img.Width;
-                    totalHeight += img.Height;
+                    sizeList.Add(img.Size);
                 }
             }
 
-            FileCreateSource source = new FileCreateSource(outputPath, false);
+            // Calculate canvas dimensions for vertical merge
+            int newWidth = 0;
+            int newHeight = 0;
+            foreach (Size sz in sizeList)
+            {
+                if (sz.Width > newWidth) newWidth = sz.Width;
+                newHeight += sz.Height;
+            }
+
+            // Prepare JPEG options with 4:2:0 subsampling
+            Source src = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions
             {
-                Source = source,
+                Source = src,
                 Quality = 90,
-                ColorType = JpegCompressionColorMode.YCbCr,
-                HorizontalSampling = new byte[] { 2, 1, 1 },
-                VerticalSampling = new byte[] { 2, 1, 1 }
+                HorizontalSampling = new byte[] { 2, 1, 1 }, // 4:2:0
+                VerticalSampling = new byte[] { 2, 1, 1 }    // 4:2:0
             };
 
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, maxWidth, totalHeight))
+            // Create bound JPEG canvas
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
                 int offsetY = 0;
-                foreach (var path in inputPaths)
+                foreach (string inputPath in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
                     {
                         Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
@@ -59,6 +72,7 @@ class Program
                     }
                 }
 
+                // Save the bound image
                 canvas.Save();
             }
         }
@@ -71,9 +85,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate a single JPEG photo strip from multiple user‑uploaded images while keeping the file size low, developers can use this code to vertically merge the pictures and apply 4:2:0 subsampling with Aspose.Imaging for .NET.
- * 2. When an e‑commerce platform creates a product‑comparison image that stacks several product photos in a column, the code ensures the combined JPEG uses YCbCr color mode and reduced chroma resolution to optimize bandwidth.
- * 3. When a reporting tool assembles scanned invoice pages into one continuous JPEG document, the vertical merge with JpegOptions and 4:2:0 subsampling helps meet email attachment size limits.
- * 4. When a mobile game captures a sequence of in‑game screenshots and needs to bundle them into a single JPEG leaderboard image, this approach merges the frames vertically and compresses them efficiently for faster sharing.
- * 5. When a digital signage system prepares a tall banner by stitching together multiple advertisement banners, the code creates a high‑quality JPEG with reduced chroma data, minimizing storage while preserving visual fidelity.
+ * 1. When a developer needs to combine multiple portrait‑oriented JPEG photos into a single vertical strip for a web gallery while keeping the file size low, they can use this code to merge the images and apply 4:2:0 subsampling.
+ * 2. When building an automated receipt‑scanning pipeline that stacks scanned JPEG pages into one document, the code helps create a vertically merged image with reduced bandwidth by setting JPEGOptions subsampling to 4:2:0.
+ * 3. When generating printable photo collages for e‑commerce product listings, a developer can merge individual product images vertically and use 4:2:0 chroma subsampling to meet size limits without noticeable quality loss.
+ * 4. When creating a continuous scrolling banner for a mobile app, the code allows the developer to stitch several banner segments together and compress the result with JPEGOptions quality 90 and 4:2:0 sampling for faster download.
+ * 5. When implementing a server‑side image‑processing service that consolidates user‑uploaded JPEG screenshots into a single tall image, the code ensures the output JPEG uses 4:2:0 subsampling to reduce storage costs while preserving visual fidelity.
  */

@@ -1,32 +1,44 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = "output.bmp";
-
         try
         {
+            // Define output path
+            string outputPath = "output.bmp";
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            FileCreateSource source = new FileCreateSource(outputPath, false);
-            BmpOptions options = new BmpOptions() { Source = source };
+            // Create BMP options with bound file source
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            using (BmpImage canvas = (BmpImage)Aspose.Imaging.Image.Create(options, 200, 200))
+            // Define canvas size
+            int width = 500;
+            int height = 500;
+
+            // Create image canvas
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
-                graphics.Clear(Aspose.Imaging.Color.DarkGray);
-                graphics.DrawLine(
-                    new Aspose.Imaging.Pen(Aspose.Imaging.Color.Yellow, 2),
-                    new Aspose.Imaging.Point(0, 0),
-                    new Aspose.Imaging.Point(200, 200));
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(image);
 
-                canvas.Save();
+                // Clear canvas to dark gray
+                graphics.Clear(Color.DarkGray);
+
+                // Draw bright yellow diagonal line
+                Pen pen = new Pen(Color.Yellow, 1);
+                graphics.DrawLine(pen, new Point(0, 0), new Point(width - 1, height - 1));
+
+                // Save the image (file is already bound to outputPath)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -38,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a simple placeholder image for a Windows desktop application, a developer can use this code to create a 200×200 BMP file with a dark‑gray background and a bright yellow diagonal line.
- * 2. When automating the production of test assets for image‑processing unit tests, this snippet quickly creates a BMP image that contains a known pattern (dark gray canvas with a yellow line) for validation.
- * 3. When building a batch script that adds a visual watermark to a set of BMP icons, a developer can employ this code to draw a high‑contrast yellow diagonal line on a dark background as the watermark.
- * 4. When creating a custom cursor or pointer graphic for a .NET game, the code demonstrates how to programmatically generate a BMP file with a dark gray base and a bright yellow diagonal line to indicate direction.
- * 5. When developing a reporting tool that needs to embed a simple diagram into a BMP file, this example shows how to clear the canvas to dark gray and draw a yellow line to represent a trend line.
+ * 1. When a developer needs to generate a BMP thumbnail with a dark‑gray background and a bright yellow diagonal marker for a file‑preview feature in a Windows desktop application.
+ * 2. When an automated reporting tool must create a simple bitmap chart that highlights a trend line using a yellow diagonal on a gray canvas for quick visual inspection.
+ * 3. When a game engine requires a placeholder texture in BMP format with a distinctive diagonal line to test rendering pipelines during development.
+ * 4. When a batch image‑processing script has to produce diagnostic BMP images that show alignment by drawing a yellow diagonal across a dark gray background.
+ * 5. When a documentation generator wants to embed a small BMP illustration showing a diagonal line example for teaching basic Aspose.Imaging drawing operations in C#.
  */

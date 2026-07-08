@@ -10,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
+            string inputPath = "input.webp";
+            string outputPath = "output/output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,13 +20,13 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Set APNG options with infinite looping (NumPlays = 0)
+                // Configure APNG options with infinite looping (NumPlays = 0)
                 var apngOptions = new ApngOptions
                 {
                     NumPlays = 0
@@ -42,3 +42,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert an animated WebP file to an APNG that loops indefinitely for a continuously playing website banner, this code provides the solution.
+ * 2. When a game developer wants to create an infinite looping sprite animation from a source image using C# and Aspose.Imaging, they can apply the NumPlays = 0 setting shown here.
+ * 3. When a digital signage system requires a never‑ending animated PNG to display promotional content without manual restarts, this example demonstrates how to generate it programmatically.
+ * 4. When an e‑learning platform needs to embed a looping instructional animation in HTML5 without relying on GIF, the code converts the source to an APNG with infinite playback.
+ * 5. When a mobile app developer wants to ensure an animated icon repeats forever on both iOS and Android by converting a WebP animation to an APNG, this snippet shows the required steps.
+ */

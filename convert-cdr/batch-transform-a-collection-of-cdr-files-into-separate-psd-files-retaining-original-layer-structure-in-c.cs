@@ -1,8 +1,10 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,12 +12,10 @@ class Program
     {
         try
         {
-            // Define base, input and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure input directory exists
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -23,57 +23,36 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all CDR files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.cdr");
-            foreach (string inputPath in files)
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files.Where(f => Path.GetExtension(f).Equals(".cdr", StringComparison.OrdinalIgnoreCase)))
             {
-                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Prepare output PSD path
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".psd");
-
-                // Ensure the output directory for this file exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the CDR image
                 using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
                 {
-                    // Cache all pages to avoid repeated loading
-                    cdr.CacheData();
-                    foreach (var page in cdr.Pages)
+                    var pngOptions = new PngOptions
                     {
-                        page.CacheData();
-                    }
-
-                    // Configure PSD export options
-                    PsdOptions psdOptions = new PsdOptions
-                    {
-                        // Rasterize vector content with desired settings
-                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        VectorRasterizationOptions = new VectorRasterizationOptions
                         {
                             BackgroundColor = Color.White,
                             PageWidth = cdr.Width,
-                            PageHeight = cdr.Height,
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None
+                            PageHeight = cdr.Height
                         }
-                        // MultiPageOptions left null to export all pages as layers
                     };
-
-                    // Save as PSD, preserving layers
-                    cdr.Save(outputPath, psdOptions);
+                    cdr.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -83,3 +62,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a design studio must batch‑convert legacy CorelDRAW (.cdr) projects into Photoshop (.psd) files while preserving the original layer hierarchy for seamless hand‑off to Photoshop editors.
+ * 2. When an automated publishing workflow needs to generate high‑resolution PSD assets from a folder of CDR illustrations to apply additional effects or compositing in Adobe Photoshop.
+ * 3. When a cloud‑based image‑processing service offers an API that transforms uploaded CDR files into editable PSD files, enabling users to edit vector layers directly in Photoshop.
+ * 4. When a migration tool is required to move a large library of CorelDRAW assets to a Photoshop‑centric asset management system without flattening the artwork.
+ * 5. When a quality‑control script must render each CDR file as a layered PSD and then export a PNG preview for visual verification before final production.
+ */

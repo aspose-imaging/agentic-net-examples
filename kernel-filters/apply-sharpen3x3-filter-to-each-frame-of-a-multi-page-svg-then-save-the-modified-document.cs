@@ -1,49 +1,75 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\multiframe.svg";
-        string outputPath = @"C:\Images\multiframe_sharpened.svg";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the SVG image
+            string inputPath = "input.svg";
+            string outputDir = "output";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(outputDir);
+
             using (Image image = Image.Load(inputPath))
             {
-                // Check if the image supports multiple pages
-                if (image is IMultipageImage multipage && multipage.Pages != null)
+                if (image is IMultipageImage multipageImage)
                 {
-                    // Iterate over each page/frame
-                    foreach (var page in multipage.Pages)
+                    for (int i = 0; i < multipageImage.PageCount; i++)
                     {
-                        // Cast the page to RasterImage to apply raster filters
-                        if (page is RasterImage rasterPage)
+                        // Get the page as an Image
+                        using (Image pageImage = (Image)multipageImage.Pages[i])
                         {
-                            // Apply Sharpen filter to the entire page
-                            rasterPage.Filter(rasterPage.Bounds, new SharpenFilterOptions());
+                            // Rasterize the SVG page to PNG in memory
+                            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                            {
+                                PageSize = pageImage.Size,
+                                BackgroundColor = Color.White
+                            };
+
+                            PngOptions pngOptions = new PngOptions
+                            {
+                                VectorRasterizationOptions = rasterOptions
+                            };
+
+                            using (MemoryStream ms = new MemoryStream())
+                            {
+                                pageImage.Save(ms, pngOptions);
+                                ms.Position = 0;
+
+                                // Load the rasterized image
+                                using (RasterImage raster = (RasterImage)Image.Load(ms))
+                                {
+                                    // Apply Sharpen3x3 filter
+                                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Sharpen3x3));
+
+                                    // Save the filtered raster image
+                                    string outPath = Path.Combine(outputDir, $"page_{i}.png");
+                                    Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+                                    raster.Save(outPath, new PngOptions());
+                                }
+                            }
                         }
                     }
                 }
-
-                // Save the modified SVG document
-                image.Save(outputPath, new SvgOptions());
+                else
+                {
+                    Console.Error.WriteLine("The loaded image is not a multipage SVG.");
+                }
             }
         }
         catch (Exception ex)
@@ -55,9 +81,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to enhance the visual clarity of each layer in a multi‑page SVG icon set before delivering it to browsers, a developer can use this code to apply a 3×3 sharpen filter to every frame and save the optimized SVG.
- * 2. When an automated graphics pipeline processes vector illustrations that contain multiple pages (e.g., multi‑page diagrams) and must improve edge definition without converting to raster formats, this snippet lets a C# developer sharpen each page in‑place using Aspose.Imaging.
- * 3. When a desktop publishing tool imports multi‑frame SVG assets and wants to ensure that printed output shows crisp details on every page, the code can be integrated to apply the Sharpen3x3 filter to each rasterized frame before saving.
- * 4. When a batch job iterates over a collection of SVG files with several frames and needs to programmatically enhance their sharpness for a digital signage system, the example demonstrates how to load, filter, and re‑save each SVG using C# and Aspose.Imaging.
- * 5. When a SaaS platform offers users the ability to upload multi‑page SVG logos and automatically improves their visual quality for thumbnails, this code provides a straightforward way to apply a sharpen filter to each page and store the result.
+ * 1. When a developer needs to enhance the visual clarity of each page in a multi‑page SVG brochure before converting it to high‑resolution PNGs for web publishing.
+ * 2. When an e‑learning platform wants to automatically sharpen vector diagrams embedded in SVG slide decks so that the rasterized images appear crisp on mobile devices.
+ * 3. When a printing workflow requires applying a Sharpen3x3 filter to every frame of a multi‑page SVG logo collection before exporting them as PNG assets for color‑accurate proofs.
+ * 4. When a GIS application processes multi‑layer SVG maps and needs to improve edge definition of each layer before saving the rasterized tiles as PNG files.
+ * 5. When a digital asset management system batch‑processes multi‑page SVG illustrations, applying a convolution sharpen filter to each page to enhance detail before storing the resulting PNGs in a searchable repository.
  */

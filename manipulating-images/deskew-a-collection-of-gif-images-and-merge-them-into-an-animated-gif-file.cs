@@ -1,66 +1,71 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 using Aspose.Imaging.Sources;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath1 = "input1.gif";
-            string inputPath2 = "input2.gif";
-            string inputPath3 = "input3.gif";
-            string outputPath = "output.gif";
+            // Hardcoded input GIF paths
+            string[] inputPaths = { "gif1.gif", "gif2.gif", "gif3.gif" };
+            // Hardcoded output path
+            string outputPath = "merged.gif";
 
             // Validate input files
-            if (!File.Exists(inputPath1)) { Console.Error.WriteLine($"File not found: {inputPath1}"); return; }
-            if (!File.Exists(inputPath2)) { Console.Error.WriteLine($"File not found: {inputPath2}"); return; }
-            if (!File.Exists(inputPath3)) { Console.Error.WriteLine($"File not found: {inputPath3}"); return; }
+            foreach (string inputPath in inputPaths)
+            {
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+            }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the first GIF to obtain canvas size
-            using (RasterImage firstImg = (RasterImage)Image.Load(inputPath1))
+            // Collect sizes of first frames
+            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            foreach (string inputPath in inputPaths)
             {
-                // Deskew the image
-                firstImg.NormalizeAngle(false, Aspose.Imaging.Color.White);
-                int width = firstImg.Width;
-                int height = firstImg.Height;
-
-                // Create bound output GIF
-                Source src = new FileCreateSource(outputPath, false);
-                GifOptions gifOptions = new GifOptions() { Source = src };
-                using (GifImage canvas = (GifImage)Image.Create(gifOptions, width, height))
+                using (GifImage gif = (GifImage)Image.Load(inputPath))
                 {
-                    // Add the first (deskewed) image as a frame
-                    canvas.AddPage(firstImg);
-
-                    // Process and add the second GIF
-                    using (RasterImage img2 = (RasterImage)Image.Load(inputPath2))
-                    {
-                        img2.NormalizeAngle(false, Aspose.Imaging.Color.White);
-                        canvas.AddPage(img2);
-                    }
-
-                    // Process and add the third GIF
-                    using (RasterImage img3 = (RasterImage)Image.Load(inputPath3))
-                    {
-                        img3.NormalizeAngle(false, Aspose.Imaging.Color.White);
-                        canvas.AddPage(img3);
-                    }
-
-                    // Set infinite looping (0 means infinite in Aspose.Imaging)
-                    canvas.LoopsCount = 0;
-
-                    // Save the bound image
-                    canvas.Save();
+                    RasterImage frame = (RasterImage)gif.Pages[0];
+                    sizes.Add(frame.Size);
                 }
+            }
+
+            // Calculate canvas dimensions (horizontal merge)
+            int canvasWidth = sizes.Sum(s => s.Width);
+            int canvasHeight = sizes.Max(s => s.Height);
+
+            // Create output GIF canvas bound to file
+            Source outputSource = new FileCreateSource(outputPath, false);
+            GifOptions gifOptions = new GifOptions() { Source = outputSource };
+            using (RasterImage canvas = (RasterImage)Image.Create(gifOptions, canvasWidth, canvasHeight))
+            {
+                int offsetX = 0;
+                foreach (string inputPath in inputPaths)
+                {
+                    using (GifImage gif = (GifImage)Image.Load(inputPath))
+                    {
+                        RasterImage frame = (RasterImage)gif.Pages[0];
+                        Rectangle bounds = new Rectangle(offsetX, 0, frame.Width, frame.Height);
+                        canvas.SaveArgb32Pixels(bounds, frame.LoadArgb32Pixels(frame.Bounds));
+                        offsetX += frame.Width;
+                    }
+                }
+
+                // Save the bound image
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -69,3 +74,12 @@ public class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When building a web application that receives scanned animated GIFs from users and needs to automatically correct their orientation with Aspose.Imaging for .NET before creating a single animated GIF preview.
+ * 2. When generating product showcase animations from multiple camera‑captured GIF frames that may be slightly rotated, requiring deskew and side‑by‑side merging into one GIF for e‑commerce sites.
+ * 3. When creating educational tutorials that combine several step‑by‑step GIF screenshots, each needing alignment correction, into a single animated GIF for online courses.
+ * 4. When developing a social‑media tool that aggregates user‑uploaded GIF stickers, deskews them, and merges them into a composite animated GIF for sharing.
+ * 5. When automating the preparation of marketing‑email assets by deskewing and stitching together multiple promotional GIFs into one animated GIF to reduce file size and improve visual consistency.
+ */

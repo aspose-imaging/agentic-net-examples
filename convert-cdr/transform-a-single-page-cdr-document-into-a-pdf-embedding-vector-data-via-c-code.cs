@@ -10,9 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Data\sample.cdr";
-            string outputPath = @"C:\Data\sample_page0.pdf";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\sample.cdr";
+            string outputPath = @"C:\temp\sample.page0.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,27 +24,25 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            int pageNumber = 0;
-
             // Load the CDR image
-            using (CdrImage image = (CdrImage)Image.Load(inputPath))
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Get the specified page
-                CdrImagePage imagePage = (CdrImagePage)image.Pages[pageNumber];
+                // Select the first page (index 0)
+                CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
 
-                // Configure PDF export options with vector rasterization
+                // Prepare PDF export options with vector rasterization settings
                 PdfOptions pdfOptions = new PdfOptions();
                 CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                     SmoothingMode = SmoothingMode.None,
-                    PageWidth = imagePage.Width,
-                    PageHeight = imagePage.Height
+                    PageWidth = page.Width,
+                    PageHeight = page.Height
                 };
                 pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the page as PDF
-                imagePage.Save(outputPath, pdfOptions);
+                // Save the selected page as PDF
+                page.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -53,3 +51,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a graphic designer needs to export a single page from a CorelDRAW (CDR) file to a high‑fidelity PDF for client review, they can use this C# code with Aspose.Imaging to preserve vector data.
+ * 2. When an automated document‑conversion service must generate PDF previews of individual pages from multi‑page CDR files without losing vector quality, the snippet demonstrates how to load, select, and save a page.
+ * 3. When a .NET application integrates with a print‑workflow and requires converting a specific CDR page to PDF while controlling rasterization options such as TextRenderingHint and SmoothingMode, this code provides the exact steps.
+ * 4. When a batch‑processing script needs to verify the existence of a CDR source, create the output folder, and reliably convert the first page to PDF using Aspose.Imaging’s CdrRasterizationOptions, the example shows the necessary error handling.
+ * 5. When a developer is building a file‑conversion API that accepts CorelDRAW files and returns PDF pages with accurate dimensions and vector fidelity, this C# example illustrates the required Image.Load, page selection, and PdfOptions configuration.
+ */

@@ -2,76 +2,76 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            // Hardcoded input and output directories
+            string inputDir = @"C:\SvgInput";
+            string outputDir = @"C:\SvgOutput";
 
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add SVG files and rerun.");
-                return;
-            }
+            // Ensure the base output directory exists
+            Directory.CreateDirectory(outputDir);
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            // Get all SVG files in the input directory
+            string[] svgFiles = Directory.GetFiles(inputDir, "*.svg", SearchOption.TopDirectoryOnly);
 
-            string[] svgFiles = Directory.GetFiles(inputDirectory, "*.svg");
             foreach (string inputPath in svgFiles)
             {
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
+                // Load the SVG image
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Cast to VectorImage to access embedded raster images
                     VectorImage vectorImage = image as VectorImage;
                     if (vectorImage == null)
+                    {
+                        Console.Error.WriteLine($"Not a vector image: {inputPath}");
                         continue;
+                    }
 
+                    // Retrieve embedded images
                     EmbeddedImage[] embeddedImages = vectorImage.GetEmbeddedImages();
                     int index = 0;
+
                     foreach (EmbeddedImage embedded in embeddedImages)
                     {
                         using (embedded)
                         {
-                            RasterImage raster = embedded.Image as RasterImage;
-                            if (raster == null)
-                                continue;
+                            // Create a thumbnail (max 150x150 while preserving aspect ratio)
+                            const int maxThumbSize = 150;
+                            int originalWidth = embedded.Image.Width;
+                            int originalHeight = embedded.Image.Height;
+                            double scale = Math.Min((double)maxThumbSize / originalWidth, (double)maxThumbSize / originalHeight);
+                            int thumbWidth = (int)(originalWidth * scale);
+                            int thumbHeight = (int)(originalHeight * scale);
 
-                            const int thumbSize = 100;
-                            if (raster.Width > raster.Height)
-                            {
-                                int newWidth = thumbSize;
-                                int newHeight = (int)((float)thumbSize * raster.Height / raster.Width);
-                                raster.Resize(newWidth, newHeight);
-                            }
-                            else
-                            {
-                                int newHeight = thumbSize;
-                                int newWidth = (int)((float)thumbSize * raster.Width / raster.Height);
-                                raster.Resize(newWidth, newHeight);
-                            }
+                            // Resize the embedded image to thumbnail size
+                            embedded.Image.Resize(thumbWidth, thumbHeight);
 
+                            // Build output file path
                             string baseName = Path.GetFileNameWithoutExtension(inputPath);
-                            string outputPath = Path.Combine(outputDirectory, $"{baseName}_{index}.png");
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                            string outFile = Path.Combine(outputDir, $"{baseName}_image{index}.png");
 
+                            // Ensure the directory for the output file exists
+                            Directory.CreateDirectory(Path.GetDirectoryName(outFile));
+
+                            // Save the thumbnail as PNG
                             PngOptions pngOptions = new PngOptions();
-                            raster.Save(outputPath, pngOptions);
-                            index++;
+                            embedded.Image.Save(outFile, pngOptions);
                         }
+
+                        index++;
                     }
                 }
             }
@@ -85,9 +85,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web designer needs to generate preview thumbnails for all raster images embedded in a collection of SVG icons stored in a folder, they can use this code to extract the images and save them as small PNG files.
- * 2. When a content management system must index visual assets by creating low‑resolution PNG previews of embedded photos inside SVG diagrams, the batch process automates extraction and thumbnail creation.
- * 3. When an e‑learning platform wants to display quick previews of embedded screenshots within SVG lesson illustrations, the code can scan the SVG directory, pull out the raster images, and output 100‑pixel PNG thumbnails for faster loading.
- * 4. When a digital asset manager needs to audit a repository of SVG marketing assets by extracting all embedded raster graphics and storing them as PNG thumbnails for quality checks, this C# routine provides an efficient solution.
- * 5. When a mobile app development team prepares asset bundles and requires small PNG previews of embedded raster images inside SVG UI assets for documentation purposes, the batch processing script fulfills that need.
+ * 1. When a web‑app needs to generate preview thumbnails for all SVG icons that contain embedded raster images, this batch processor can extract those images and create 150 × 150 PNG thumbnails for fast UI rendering.
+ * 2. When a design team migrates a library of SVG assets to a mobile app that only supports PNG, the code can automatically pull out embedded bitmap graphics from each SVG and convert them to PNG thumbnails for inclusion in the app bundle.
+ * 3. When an e‑commerce platform wants to display low‑resolution previews of product diagrams stored as SVG files with embedded photos, the script can scan the directory, extract the photos, and produce PNG thumbnails for catalog pages.
+ * 4. When a CI/CD pipeline must validate that all SVG files in a repository contain correctly sized raster assets, the batch routine can extract each embedded image and generate PNG thumbnails to be compared against size standards.
+ * 5. When a content management system needs to index visual assets by generating thumbnail previews of embedded images inside SVG files, this C# code can process the folder, extract the raster parts, and save them as PNG thumbnails for search indexing.
  */

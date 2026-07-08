@@ -11,28 +11,39 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "Input\\photo.dng";
             string outputPath = "Output\\photo.jp2";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load DNG image
             using (Image image = Image.Load(inputPath))
             {
-                DngImage dngImage = (DngImage)image;
+                DngImage dng = (DngImage)image;
+                // Ensure demosaicing (use processed data)
+                dng.UseRawData = false;
 
-                using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(dngImage))
+                // Cast to RasterImage for conversion
+                RasterImage raster = dng;
+
+                // Create JPEG2000 image from raster
+                using (Jpeg2000Image jpeg2000 = new Jpeg2000Image(raster))
                 {
-                    Jpeg2000Options options = new Jpeg2000Options
+                    // Configure lossless JPEG2000 options
+                    using (Jpeg2000Options options = new Jpeg2000Options())
                     {
-                        Irreversible = false // lossless compression
-                    };
-                    jpeg2000Image.Save(outputPath, options);
+                        options.Irreversible = false; // lossless compression
+                        jpeg2000.Save(outputPath, options);
+                    }
                 }
             }
         }
@@ -45,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer wants to convert raw DNG files captured with a DSLR into lossless JPEG2000 for archival storage while preserving full color detail via demosaicing in a C# application.
- * 2. When a medical imaging system needs to ingest DNG raw scans and output them as lossless JPEG2000 to meet DICOM compatibility requirements using Aspose.Imaging for .NET.
- * 3. When a web service processes user‑uploaded raw photos and generates high‑quality, bandwidth‑efficient JPEG2000 thumbnails for fast preview without quality loss.
- * 4. When a digital asset management tool batch‑converts raw DNG assets to lossless JPEG2000 to enable efficient indexing and searching while keeping original image fidelity.
- * 5. When a scientific research pipeline requires converting raw sensor data in DNG format to a lossless JPEG2000 format for long‑term storage and reproducible analysis in C#.
+ * 1. When a photography app needs to convert raw DNG files captured by a DSLR into lossless JPEG2000 for archival storage while preserving color fidelity through demosaicing.
+ * 2. When a medical imaging system must ingest DNG raw scans, apply demosaic processing, and export them as JPEG2000 to meet DICOM lossless compression requirements.
+ * 3. When an e‑commerce platform wants to generate high‑quality, lossless preview images from vendor‑provided DNG product photos for use in zoomable galleries.
+ * 4. When a scientific research tool requires batch conversion of raw DNG microscope images to JPEG2000 with lossless compression to enable efficient data sharing without quality loss.
+ * 5. When a digital asset management solution needs to ingest raw DNG camera files, perform demosaicing, and store them as JPEG2000 files to reduce storage size while keeping the original image data intact.
  */

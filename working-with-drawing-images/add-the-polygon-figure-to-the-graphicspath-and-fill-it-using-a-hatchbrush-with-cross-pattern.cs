@@ -4,59 +4,48 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = @"C:\Temp\polygon.png";
+
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\Temp\polygon.png";
-
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up PNG options with file create source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
+            int width = 500;
+            int height = 500;
 
-            // Create image canvas
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            PngOptions pngOptions = new PngOptions();
+            using (Image image = Image.Create(pngOptions, width, height))
             {
-                // Initialize graphics
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                // Create graphics path
-                GraphicsPath graphicsPath = new GraphicsPath();
-
-                // Create figure and add a polygon shape
-                Figure figure = new Figure();
                 PointF[] points = new PointF[]
                 {
-                    new PointF(100f, 100f),
-                    new PointF(400f, 100f),
-                    new PointF(350f, 300f),
-                    new PointF(150f, 300f)
+                    new PointF(100, 100),
+                    new PointF(400, 100),
+                    new PointF(350, 300),
+                    new PointF(150, 300)
                 };
-                figure.AddShape(new PolygonShape(points, true)); // closed polygon
 
-                // Add figure to path
-                graphicsPath.AddFigure(figure);
+                PolygonShape polygon = new PolygonShape(points, true);
 
-                // Fill the polygon with a solid brush
+                Figure figure = new Figure();
+                figure.AddShape(polygon);
+
+                GraphicsPath path = new GraphicsPath();
+                path.AddFigure(figure);
+
                 using (SolidBrush solidBrush = new SolidBrush(Color.Blue))
                 {
-                    graphics.FillPath(solidBrush, graphicsPath);
+                    graphics.FillPath(solidBrush, path);
                 }
 
-                // Optional: draw outline
-                graphics.DrawPath(new Pen(Color.Black, 2), graphicsPath);
-
-                // Save the image
-                image.Save();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -68,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a PNG badge that highlights a region with a cross‑hatched polygon overlay for a web dashboard using Aspose.Imaging’s GraphicsPath and HatchBrush in C#.
- * 2. When generating printable floor‑plan diagrams where rooms are represented as polygons filled with a cross pattern to indicate restricted areas, leveraging Aspose.Imaging for .NET image processing.
- * 3. When building a data‑visualization tool that shades irregular chart areas with a cross hatch fill to improve contrast on a white background, using C# GraphicsPath and HatchBrush.
- * 4. When automating the production of custom map markers that require a polygon shape filled with a cross‑hatch texture for better visibility in GIS applications via Aspose.Imaging.
- * 5. When designing a UI mockup that needs a scalable PNG icon with a polygon silhouette filled with a cross pattern to demonstrate branding guidelines, implemented with Aspose.Imaging’s Figure, GraphicsPath, and HatchBrush.
+ * 1. When generating printable floor‑plan diagrams that require rooms drawn as polygons and filled with a cross‑hatch pattern to indicate restricted areas, a developer can use Aspose.Imaging to create a PNG via a GraphicsPath and HatchBrush.
+ * 2. When building a GIS web application that overlays selected map regions with a cross‑pattern fill for visual emphasis, the polygon can be added to a GraphicsPath and filled using a HatchBrush in C#.
+ * 3. When designing custom certification badges that include a polygonal shield shape filled with a cross hatch to meet branding guidelines, the code enables rendering the shape directly to a PNG file with Aspose.Imaging.
+ * 4. When creating scientific data visualizations that shade irregular plot areas with a cross hatch to differentiate data sets, a developer can define the area as a PolygonShape, add it to a GraphicsPath, and apply a HatchBrush.
+ * 5. When automating the generation of printable QR‑code frames where the frame is a polygon filled with a cross pattern for visual contrast, the Aspose.Imaging API allows drawing and filling the shape programmatically.
  */

@@ -2,10 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -22,41 +20,34 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load EPS image
-            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            using (Image epsImage = Image.Load(inputPath))
             {
-                int width = epsImage.Width;
-                int height = epsImage.Height;
-                int captionHeight = 50; // extra space for caption
-
-                // Rasterize EPS to PNG in memory
-                using (MemoryStream pngStream = new MemoryStream())
+                // Cast to EpsImage for clarity (optional)
+                EpsImage eps = epsImage as EpsImage;
+                if (eps == null)
                 {
-                    epsImage.Save(pngStream, new PngOptions());
-                    pngStream.Position = 0;
-
-                    using (RasterImage raster = (RasterImage)Image.Load(pngStream))
-                    {
-                        // Create SVG canvas with extra height for caption
-                        SvgGraphics2D graphics = new SvgGraphics2D(width, height + captionHeight, 96);
-
-                        // Draw the rasterized EPS image onto the SVG canvas
-                        graphics.DrawImage(raster, new Point(0, 0), new Size(width, height));
-
-                        // Draw caption text at the bottom
-                        Font captionFont = new Font("Arial", 24, FontStyle.Regular);
-                        string captionText = "Sample Caption";
-                        graphics.DrawString(captionFont, captionText, new Point(10, height + 10), Color.Black);
-
-                        // Finalize SVG and save
-                        using (SvgImage svgImage = graphics.EndRecording())
-                        {
-                            svgImage.Save(outputPath);
-                        }
-                    }
+                    Console.Error.WriteLine("Failed to load EPS image.");
+                    return;
                 }
+
+                // Create graphics for drawing on the EPS image
+                Graphics graphics = new Graphics(eps);
+
+                // Prepare font and brush for caption
+                Font font = new Font("Arial", 24, FontStyle.Regular);
+                using (SolidBrush brush = new SolidBrush(Color.Black))
+                {
+                    // Position caption near the bottom-left corner
+                    int captionX = 10;
+                    int captionY = eps.Height - 30;
+                    graphics.DrawString("Caption Text", font, brush, new Point(captionX, captionY));
+                }
+
+                // Save the annotated image as SVG
+                SvgOptions svgOptions = new SvgOptions();
+                eps.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -68,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a publishing workflow needs to convert a designer‑provided EPS logo into an SVG illustration with a descriptive caption for inclusion in responsive web pages.
- * 2. When an e‑learning platform automatically annotates EPS diagrams with lesson titles and saves them as SVG files for scalable display on different devices.
- * 3. When a branding tool programmatically adds product names beneath EPS artwork and outputs SVG assets that can be edited in vector editors.
- * 4. When a reporting system extracts EPS charts, rasterizes them to PNG, overlays a timestamp caption, and stores the result as an SVG for high‑quality printing.
- * 5. When a CAD integration script converts EPS technical drawings to SVG, appends a project identifier at the bottom, and delivers the annotated vector file to downstream GIS applications.
+ * 1. When a developer needs to convert a vector EPS illustration into a web‑friendly SVG while adding a descriptive caption at the bottom of the image.
+ * 2. When an automated report generator must annotate printed EPS charts with titles or notes before embedding them in an SVG dashboard.
+ * 3. When a branding workflow requires adding a trademark or copyright notice to existing EPS logos and exporting the result as scalable SVG for responsive design.
+ * 4. When a batch processing script has to read EPS files, overlay product identifiers using C# graphics drawing, and save the annotated graphics as SVG for downstream publishing.
+ * 5. When a document conversion tool needs to preserve vector quality of EPS artwork, insert explanatory text, and output the final file in SVG format for compatibility with modern browsers.
  */

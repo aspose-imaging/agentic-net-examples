@@ -1,11 +1,8 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,66 +10,26 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "corrupted.tif";
-            string outputPath = "recovered.tif";
-            string reportPath = "recovery_report.txt";
+            string inputPath = "input\\corrupted.tif";
+            string outputPath = "output\\recovered.tif";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directories exist
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(reportPath));
 
-            // Set to collect recovered frame indices
-            HashSet<int> recoveredIndices = new HashSet<int>();
-
-            // First recovery using ConsistentRecover mode
-            var loadOptionsConsistent = new LoadOptions
+            var loadOptions = new LoadOptions
             {
                 DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
                 DataBackgroundColor = Color.White
             };
-            using (TiffImage tiffConsistent = (TiffImage)Image.Load(inputPath, loadOptionsConsistent))
-            {
-                for (int i = 0; i < tiffConsistent.Frames.Length; i++)
-                {
-                    recoveredIndices.Add(i);
-                }
 
-                // Save the consistently recovered image
-                var saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                saveOptions.Source = new FileCreateSource(outputPath, false);
-                tiffConsistent.Save(outputPath, saveOptions);
-            }
-
-            // Second recovery using ConsistentRecover mode (fallback if FullRecover unavailable)
-            var loadOptionsSecond = new LoadOptions
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath, loadOptions))
             {
-                DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
-                DataBackgroundColor = Color.White
-            };
-            using (TiffImage tiffSecond = (TiffImage)Image.Load(inputPath, loadOptionsSecond))
-            {
-                for (int i = 0; i < tiffSecond.Frames.Length; i++)
-                {
-                    recoveredIndices.Add(i);
-                }
-            }
-
-            // Write report of recovered frame indices
-            using (StreamWriter writer = new StreamWriter(reportPath, false))
-            {
-                writer.WriteLine("Recovered Frame Indices:");
-                foreach (int index in recoveredIndices)
-                {
-                    writer.WriteLine(index);
-                }
+                tiff.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -84,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system receives a partially corrupted multi‑page TIFF from a scanner, a developer can use this code to recover all readable frames with ConsistentRecover and FullRecover modes and log which slices were successfully restored.
- * 2. When a digital archiving workflow encounters damaged TIFF documents during batch import, the snippet enables automated recovery of each page and creates a text report that auditors can review to verify data integrity.
- * 3. When a GIS application needs to load large satellite imagery stored as multi‑frame TIFF files that may be truncated during network transfer, the code restores the usable frames and records their indices for later processing.
- * 4. When a publishing platform processes TIFF‑based comic books and some files become corrupted on disk, developers can apply both recovery modes to salvage the pages and generate a recovery_report.txt for quality‑control teams.
- * 5. When a forensic analyst extracts evidence from a corrupted TIFF file found in a seized device, this program recovers the intact frames, saves a clean TIFF, and provides a concise list of recovered frame numbers for documentation.
+ * 1. When a medical imaging system receives a multi‑page DICOM‑converted TIFF that was truncated during network transfer, a developer can use Aspose.Imaging’s DataRecoveryMode to restore the readable pages and log the indices of recovered frames for audit.
+ * 2. When a digital archiving workflow processes scanned historical documents stored as multi‑frame TIFFs and encounters file corruption due to storage media failure, the code can recover intact pages using both ConsistentRecover and FullRecover modes and produce a report of which pages were successfully restored.
+ * 3. When a satellite‑imagery processing pipeline ingests large GeoTIFF files that become partially corrupted by power loss, a developer can apply Aspose.Imaging’s recovery options to salvage usable raster bands and generate a list of recovered band indices for downstream analysis.
+ * 4. When an e‑commerce platform generates product catalogs as multi‑page TIFFs and a batch job fails, leaving some pages unreadable, the recovery code can rebuild the catalog file and output the indices of the recovered pages to notify content managers.
+ * 5. When a printing press receives multi‑layer TIFF artwork files that are damaged during file exchange, a developer can employ both recovery modes to extract the intact layers and create a summary report of recovered layer indices to guide manual re‑creation.
  */

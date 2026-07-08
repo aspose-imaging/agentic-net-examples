@@ -8,42 +8,32 @@ class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = @"c:\temp\output.bmp";
+
         try
         {
-            // Output file path (hardcoded)
-            string outputPath = @"C:\temp\output.bmp";
-
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set BMP options and bind to the output file
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create the image canvas
             using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 400, 300))
             {
-                // Initialize graphics for drawing
                 Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-
-                // Clear background to white
                 graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Define rectangle bounds
-                Aspose.Imaging.Rectangle rect = new Aspose.Imaging.Rectangle(50, 50, 200, 150);
-
-                // Draw rectangle outline
                 Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
+                Aspose.Imaging.Rectangle rect = new Aspose.Imaging.Rectangle(50, 50, 200, 150);
                 graphics.DrawRectangle(pen, rect);
 
-                // Fill rectangle interior with solid blue brush
-                using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Blue))
+                using (SolidBrush brush = new SolidBrush())
                 {
+                    brush.Color = Aspose.Imaging.Color.LightBlue;
+                    brush.Opacity = 100;
                     graphics.FillRectangle(brush, rect);
                 }
 
-                // Save the image (file is already bound to the source)
                 image.Save();
             }
         }
@@ -56,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP file in C# and draw a bordered rectangle filled with a solid color for a simple UI mock‑up or report graphic.
- * 2. When an application must programmatically create a 24‑bit bitmap thumbnail and highlight a region by drawing and filling a rectangle using Aspose.Imaging’s Graphics, Pen, and SolidBrush classes.
- * 3. When a batch‑processing tool has to add a colored overlay to a specific area of an image, such as marking a selection box on a BMP before saving it to disk.
- * 4. When a Windows service generates diagnostic images that include a solid‑filled rectangle to indicate error zones or sensor ranges in a bitmap format.
- * 5. When a developer wants to produce a printable BMP banner with a black‑outlined rectangle filled with blue to serve as a placeholder for dynamic content in a .NET reporting system.
+ * 1. When a developer needs to generate a 24‑bit BMP file and draw a black‑bordered, light‑blue filled rectangle to highlight a region in a Windows desktop preview pane.
+ * 2. When an automated reporting service creates BMP charts and uses Aspose.Imaging.Graphics to outline and fill a rectangle that marks a critical data threshold.
+ * 3. When a game developer wants to produce a simple BMP sprite with a solid‑color rectangle to visualize a hitbox during debugging.
+ * 4. When a batch processing script must add a solid‑filled rectangle overlay to scanned documents saved as BMP to indicate a watermark or signature area.
+ * 5. When a legacy application that only supports BMP images requires programmatic drawing of UI components, such as buttons, using a black pen and a solid brush fill.
  */

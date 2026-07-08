@@ -1,64 +1,71 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "Input/sample.odg";
-            string outputPath = "Output/sample.jpg";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.odg";
+            string tempPngPath = @"C:\Images\temp.png";
+            string outputPath = @"C:\Images\sample_converted.jpg";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
-
-            string tempPngPath = Path.Combine(outputDir ?? string.Empty, "temp.png");
+            // Ensure output directories exist
             Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load ODG vector image and rasterize to PNG
-            using (Image vectorImage = Image.Load(inputPath))
+            // Load the ODG image
+            using (Image odgImg = Image.Load(inputPath))
             {
-                var rasterOptions = new OdgRasterizationOptions
+                // Cast to OdgImage to access vector rasterization options
+                OdgImage odgImage = (OdgImage)odgImg;
+
+                // Prepare PNG options with rasterization settings
+                PngOptions pngOptions = new PngOptions
                 {
-                    BackgroundColor = Color.White,
-                    PageSize = vectorImage.Size
+                    Source = new StreamSource(new MemoryStream(), false),
+                    VectorRasterizationOptions = new OdgRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageSize = odgImage.Size
+                    }
                 };
 
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                vectorImage.Save(tempPngPath, pngOptions);
+                // Save ODG as a temporary PNG (raster image)
+                odgImage.Save(tempPngPath, pngOptions);
             }
 
-            // Load rasterized PNG, apply median filter, and save as JPEG
-            using (Image rasterImage = Image.Load(tempPngPath))
+            // Load the temporary PNG as a raster image
+            using (Image rasterImg = Image.Load(tempPngPath))
             {
-                var raster = (RasterImage)rasterImage;
-                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+                var rasterImage = (RasterImage)rasterImg;
 
-                var jpegOptions = new JpegOptions();
-                raster.Save(outputPath, jpegOptions);
+                // Apply median filter with size 5 to the whole image
+                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+
+                // Save the filtered image as JPEG
+                JpegOptions jpegOptions = new JpegOptions(); // default options
+                rasterImage.Save(outputPath, jpegOptions);
             }
 
-            // Cleanup temporary file
+            // Optionally delete the temporary PNG file
             if (File.Exists(tempPngPath))
             {
-                File.Delete(tempPngPath);
+                try { File.Delete(tempPngPath); } catch { /* ignore cleanup errors */ }
             }
         }
         catch (Exception ex)
@@ -67,3 +74,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to clean up scanned hand‑drawn diagrams stored as ODG files by removing salt‑and‑pepper noise before publishing them as JPEGs on a web portal.
+ * 2. When an application must batch‑process OpenDocument graphics from a CAD system, apply a median filter to smooth edges, and convert the results to JPEG for inclusion in email reports.
+ * 3. When a document management workflow requires converting vector ODG illustrations to raster JPEG thumbnails while preserving visual quality by denoising with a median filter in C#.
+ * 4. When a mobile‑first website needs lightweight JPEG previews of ODG charts, and the server‑side code uses Aspose.Imaging to rasterize, median‑filter, and compress the images.
+ * 5. When a legacy archival tool must transform ODG artwork into JPEG format for archival storage, applying a median filter to mitigate compression artifacts introduced during the conversion.
+ */

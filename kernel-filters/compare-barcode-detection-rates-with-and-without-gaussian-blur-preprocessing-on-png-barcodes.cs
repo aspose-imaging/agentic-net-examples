@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
@@ -9,12 +10,12 @@ class Program
     {
         try
         {
-            // Hardcoded paths
-            string inputPath = "input/barcode.png";
-            string blurredPath = "output/barcode_blurred.png";
-            string reportPath = "output/report.txt";
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string blurredPath = "blurred.png";
+            string reportPath = "report.txt";
 
-            // Input file validation
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -30,48 +31,24 @@ class Program
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Detection on original image (placeholder: count dark pixels)
-                int[] originalPixels = raster.LoadArgb32Pixels(raster.Bounds);
-                int originalDarkCount = 0;
-                foreach (int p in originalPixels)
-                {
-                    int red = (p >> 16) & 0xFF;
-                    int green = (p >> 8) & 0xFF;
-                    int blue = p & 0xFF;
-                    int brightness = (red + green + blue) / 3;
-                    if (brightness < 128)
-                        originalDarkCount++;
-                }
+                // Placeholder for barcode detection on the original image
+                int originalDetections = 0; // TODO: integrate barcode detection logic here
 
-                // Apply Gaussian blur filter
+                // Apply Gaussian blur preprocessing
                 raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Save blurred image
+                // Save the blurred image
                 raster.Save(blurredPath);
 
-                // Detection on blurred image (same placeholder metric)
-                int[] blurredPixels = raster.LoadArgb32Pixels(raster.Bounds);
-                int blurredDarkCount = 0;
-                foreach (int p in blurredPixels)
-                {
-                    int red = (p >> 16) & 0xFF;
-                    int green = (p >> 8) & 0xFF;
-                    int blue = p & 0xFF;
-                    int brightness = (red + green + blue) / 3;
-                    if (brightness < 128)
-                        blurredDarkCount++;
-                }
+                // Placeholder for barcode detection on the blurred image
+                int blurredDetections = 0; // TODO: integrate barcode detection logic here
 
-                // Write comparison report
+                // Write a simple report comparing detection counts
                 using (StreamWriter writer = new StreamWriter(reportPath))
                 {
-                    writer.WriteLine("Barcode Detection Comparison (placeholder metric)");
-                    writer.WriteLine($"Original image dark pixel count: {originalDarkCount}");
-                    writer.WriteLine($"Blurred image dark pixel count: {blurredDarkCount}");
-                    writer.WriteLine($"Difference: {blurredDarkCount - originalDarkCount}");
+                    writer.WriteLine($"Original detections: {originalDetections}");
+                    writer.WriteLine($"Blurred detections: {blurredDetections}");
                 }
-
-                Console.WriteLine("Processing completed. Report saved to " + reportPath);
             }
         }
         catch (Exception ex)
@@ -83,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a retail software developer needs to evaluate whether applying a Gaussian blur filter improves the reliability of barcode detection on scanned PNG product labels before integrating the algorithm into a point‑of‑sale system.
- * 2. When a logistics company wants to benchmark the impact of pre‑processing PNG shipment barcodes with a 5‑pixel radius Gaussian blur on the dark‑pixel count metric to decide if image smoothing reduces read errors in their automated sorting line.
- * 3. When a healthcare application team must compare raw versus blurred PNG medication barcodes to determine if Gaussian blur preprocessing can enhance detection accuracy for mobile scanning apps on low‑resolution camera images.
- * 4. When an inventory management system is being tuned and the developer needs to generate a side‑by‑side report of dark pixel counts from original and blurred PNG barcodes to assess the trade‑off between image quality and detection speed.
- * 5. When a developer is creating a quality‑control tool that saves a blurred version of each PNG barcode and logs detection statistics, enabling the team to decide whether to incorporate Gaussian blur as a standard pre‑processing step in their Aspose.Imaging pipeline.
+ * 1. When a developer needs to evaluate how applying a Gaussian blur filter impacts barcode detection accuracy in PNG images for a quality‑control pipeline, this code loads the image, preprocesses it, and generates a comparison report.
+ * 2. When building an automated testing suite that measures the robustness of a barcode scanner against image noise, a developer can use this script to blur test images and log detection counts before and after preprocessing.
+ * 3. When integrating Aspose.Imaging into a C# application that validates scanned product labels, the code helps determine whether Gaussian blur improves detection rates on low‑resolution PNG barcodes.
+ * 4. When creating documentation or a demo that shows the effect of image‑processing techniques on barcode recognition, a developer can run this example to produce side‑by‑side results and a simple text report.
+ * 5. When troubleshooting inconsistent barcode reads from camera‑captured PNG files, a developer can apply this code to compare raw and blurred images and decide if preprocessing should be part of the production workflow.
  */

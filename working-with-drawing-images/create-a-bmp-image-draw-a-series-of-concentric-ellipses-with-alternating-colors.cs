@@ -1,8 +1,6 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -11,8 +9,8 @@ class Program
     {
         try
         {
-            // Output file path
-            string outputPath = @"C:\temp\concentric_ellipses.bmp";
+            // Output BMP file path
+            string outputPath = @"c:\temp\concentric.bmp";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -23,26 +21,34 @@ class Program
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
             // Create image canvas
-            using (Image image = Image.Create(bmpOptions, 500, 500))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 500, 500))
             {
                 // Initialize graphics
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Draw concentric ellipses with alternating colors
-                int ellipseCount = 5;
-                int marginStep = 20;
-                for (int i = 0; i < ellipseCount; i++)
+                // Parameters for concentric ellipses
+                int centerX = 250;
+                int centerY = 250;
+                int maxRadius = 200;
+                int step = 20;
+                bool useRed = true;
+
+                // Draw ellipses with alternating colors
+                for (int radius = maxRadius; radius > 0; radius -= step)
                 {
-                    int margin = i * marginStep;
-                    int size = 500 - 2 * margin;
-                    Rectangle rect = new Rectangle(margin, margin, size, size);
-                    Color penColor = (i % 2 == 0) ? Color.Red : Color.Blue;
-                    Pen pen = new Pen(penColor, 3);
-                    graphics.DrawEllipse(pen, rect);
+                    Aspose.Imaging.Color ellipseColor = useRed ? Aspose.Imaging.Color.Red : Aspose.Imaging.Color.Blue;
+                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(ellipseColor, 2);
+
+                    int left = centerX - radius;
+                    int top = centerY - radius;
+                    int diameter = radius * 2;
+
+                    graphics.DrawEllipse(pen, left, top, diameter, diameter);
+                    useRed = !useRed;
                 }
 
-                // Save the image (output path already bound)
+                // Save the image
                 image.Save();
             }
         }
@@ -55,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP file with a simple geometric pattern for testing image rendering pipelines.
- * 2. When a developer wants to create a placeholder logo or watermark consisting of concentric ellipses with alternating colors for UI mockups.
- * 3. When a developer must produce a series of BMP assets for a game’s level‑selection screen that uses concentric ellipse graphics as visual cues.
- * 4. When a developer is building an automated report that embeds a BMP diagram of concentric ellipses to illustrate scaling or zoom concepts.
- * 5. When a developer needs to benchmark the performance of Aspose.Imaging’s Graphics.DrawEllipse method on 24‑bit BMP images.
+ * 1. When generating a simple BMP placeholder image for UI testing, a developer can use this C# Aspose.Imaging code to draw concentric ellipses with alternating red and blue outlines.
+ * 2. When creating custom chart backgrounds or radar‑style graphics in a .NET desktop application, the code provides a quick way to render layered ellipses onto a 24‑bit BMP canvas.
+ * 3. When producing printable pattern samples for a design‑to‑manufacturing workflow, the example shows how to programmatically generate a BMP file with precise ellipse spacing using Aspose.Imaging.Graphics.
+ * 4. When automating the generation of diagnostic visual markers for image‑processing pipelines, this snippet creates a BMP image with concentric circles that can be overlaid on test frames.
+ * 5. When building a lightweight C# utility that needs to export vector‑style shapes as a BMP file for legacy systems, the code demonstrates how to draw alternating‑color ellipses with a Pen object.
  */

@@ -7,12 +7,12 @@ using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string inputPath = Path.Combine("Input", "animation.gif");
-            string outputPath = Path.Combine("Output", "animation.webp");
+            string inputPath = "Input\\animation.gif";
+            string outputPath = "Output\\animation.webp";
 
             if (!File.Exists(inputPath))
             {
@@ -22,17 +22,21 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Image gifImage = Image.Load(inputPath))
             {
-                GifImage gif = image as GifImage;
-                WebPOptions options = new WebPOptions();
-
-                if (gif != null)
+                GifImage gif = gifImage as GifImage;
+                if (gif == null)
                 {
-                    options.AnimLoopCount = (ushort)gif.LoopsCount;
+                    Console.Error.WriteLine("The input file is not a valid GIF image.");
+                    return;
                 }
 
-                image.Save(outputPath, options);
+                WebPOptions webpOptions = new WebPOptions
+                {
+                    AnimLoopCount = (ushort)gif.LoopsCount
+                };
+
+                gif.Save(outputPath, webpOptions);
             }
         }
         catch (Exception ex)
@@ -44,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer wants to replace a multi‑frame GIF banner with a smaller WebP animation while keeping the original frame timing and loop settings, they can use this code.
- * 2. When an e‑commerce platform needs to generate product showcase animations in WebP format from existing GIF assets to improve page load speed without losing animation fidelity, this snippet provides the conversion.
- * 3. When a mobile app developer must batch‑process user‑uploaded GIF stickers into WebP animations for reduced storage and bandwidth on iOS/Android devices, the example shows how to preserve delays and loops.
- * 4. When a content management system needs to automatically convert uploaded GIF memes into WebP for SEO‑friendly, high‑quality animated images, the code demonstrates the required C# operations.
- * 5. When a digital marketing analyst wants to create lightweight animated ads by converting GIFs to WebP while maintaining the original animation loop count, this Aspose.Imaging routine handles the task.
+ * 1. When a developer needs to reduce the file size of an animated GIF for faster web page loading while keeping the original animation timing, they can use this code to convert the multi‑frame GIF into a WebP animation with preserved frame delays and loop count.
+ * 2. When building a mobile app that only supports WebP animations, a developer can employ this C# snippet to transform user‑uploaded GIF stickers into a single WebP file without losing the animation loop settings.
+ * 3. When creating an automated image‑processing pipeline that archives social‑media GIFs as WebP for long‑term storage, this code enables conversion of each multi‑frame GIF while maintaining its original playback speed and repeat behavior.
+ * 4. When optimizing email newsletters that embed animated graphics, a developer can use the example to replace bulky GIFs with compact WebP animations, ensuring the same frame timing and loop count for consistent visual experience.
+ * 5. When developing a content‑management system that generates thumbnails and preview animations, this code allows conversion of uploaded GIFs to a single WebP animation, preserving the original animation’s frame delays and loop count for accurate previews.
  */

@@ -1,32 +1,31 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\temp\input.png";
-            string outputPath = @"C:\temp\output.png";
+            // Hardcoded input and output paths
+            string inputPath = "input.drawing";
+            string outputPath = "output.png";
 
-            // Verify that the input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image from disk
+            // Load the drawing image and cast to RasterImage
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to gain access to filtering operations
                 RasterImage raster = (RasterImage)image;
 
                 // Define a vertical edge detection kernel (Sobel operator)
@@ -37,16 +36,18 @@ class Program
                     { -1, 0, 1 }
                 };
 
-                // Apply the custom convolution filter to the whole image
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                // Apply the custom convolution filter to the entire image
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+
+                // Prepare PNG save options
+                PngOptions pngOptions = new PngOptions();
 
                 // Save the processed image as PNG
-                raster.Save(outputPath);
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -54,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to load a PNG drawing with Aspose.Imaging, apply a vertical Sobel convolution filter to highlight edges, and save the enhanced image for further analysis.
- * 2. When an image‑processing pipeline must preprocess hand‑drawn sketches by emphasizing vertical lines using a custom kernel before passing the PNG to a machine‑learning model.
- * 3. When a batch job uses C# and Aspose.Imaging to automatically apply a vertical edge‑detection filter to legacy PNG drawings and output the results as new PNG files.
- * 4. When a desktop application wants to sharpen structural outlines in architectural blueprints by casting the image to RasterImage, applying a vertical convolution kernel, and saving the result as PNG.
- * 5. When a web service provides users with a one‑click option to enhance vertical details in uploaded PNG images by applying a custom kernel with Aspose.Imaging’s Filter method.
+ * 1. When a CAD application needs to generate a high‑contrast preview of a drawing file by emphasizing vertical edges before exporting it as a PNG thumbnail.
+ * 2. When an engineering portal automatically highlights vertical structural lines in technical drawings using a Sobel kernel and saves the result as a lossless PNG for quick web viewing.
+ * 3. When a document management system processes scanned schematics, applies a vertical edge detection filter to improve clarity, and stores the enhanced image as a PNG for archival.
+ * 4. When a GIS tool converts vector map drawings to raster, accentuates vertical road boundaries with a custom convolution filter, and outputs the image as a PNG overlay.
+ * 5. When a manufacturing quality‑control dashboard extracts vertical edge features from machine‑generated drawing files to create sharp PNG images for defect analysis.
  */

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
@@ -10,48 +11,32 @@ class Program
     {
         try
         {
-            // Output directory for generated BMP files
-            string outputDir = @"C:\temp\DiagonalTest\";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Image dimensions
-            int width = 200;
-            int height = 200;
-
-            // Colors for each diagonal line pattern
-            Color[] colors = new Color[]
+            var colorInfos = new List<(Color color, string name)>
             {
-                Color.Red,
-                Color.Green,
-                Color.Blue,
-                Color.Yellow,
-                Color.Magenta,
-                Color.Cyan
+                (Color.Red, "red"),
+                (Color.Green, "green"),
+                (Color.Blue, "blue"),
+                (Color.Yellow, "yellow"),
+                (Color.Magenta, "magenta")
             };
 
-            for (int i = 0; i < colors.Length; i++)
-            {
-                // Output file path for the current image
-                string outputPath = Path.Combine(outputDir, $"diagonal_{i + 1}.bmp");
+            const int width = 200;
+            const int height = 200;
+            const int lineWidth = 5;
 
-                // Ensure the directory for the output file exists
+            foreach (var (color, name) in colorInfos)
+            {
+                string outputPath = $"C:\\temp\\diag_{name}.bmp";
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Create BMP options with a bound file source
                 Source source = new FileCreateSource(outputPath, false);
-                BmpOptions options = new BmpOptions() { Source = source, BitsPerPixel = 24 };
+                BmpOptions bmpOptions = new BmpOptions() { Source = source };
 
-                // Create a raster canvas bound to the output file
-                using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
+                using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
                 {
-                    // Draw a diagonal line across the canvas
                     Graphics graphics = new Graphics(canvas);
-                    Pen pen = new Pen(colors[i], 5);
-                    graphics.DrawLine(pen, new Point(0, 0), new Point(width - 1, height - 1));
-
-                    // Save the bound image
+                    graphics.DrawLine(new Pen(color, lineWidth), new Point(0, 0), new Point(canvas.Width - 1, canvas.Height - 1));
                     canvas.Save();
                 }
             }
@@ -65,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a batch of 24‑bit BMP files with colored diagonal lines to verify that an image‑processing pipeline correctly reads and renders BMP images using Aspose.Imaging for .NET.
- * 2. When creating sample assets for UI mockups or documentation that require distinct color‑coded diagonal patterns across multiple bitmap files generated programmatically in C#.
- * 3. When performing automated visual regression testing of a graphics library and need to produce reference BMP images with known line colors and positions for comparison.
- * 4. When building a diagnostic tool that writes BMP screenshots with diagonal markers to help locate rendering issues in a C# application using Aspose.Imaging’s raster canvas and graphics classes.
- * 5. When preparing placeholder textures for a game or simulation that uses simple BMP textures with diagonal line overlays for debugging texture loading and display.
+ * 1. When a QA engineer needs to generate a set of BMP test images with distinct colored diagonal lines to verify that a downstream image‑processing pipeline correctly reads line colors and orientation.
+ * 2. When a developer is creating sample assets for documentation that demonstrate how Aspose.Imaging’s Graphics.DrawLine method works with different Pen colors in BMP format.
+ * 3. When an automated build script must produce placeholder graphics for UI components, using C# and Aspose.Imaging to create 200 × 200 BMP files with colored diagonal lines as visual markers.
+ * 4. When a software vendor wants to benchmark the performance of raster image creation and saving across multiple color values by batch‑generating BMP files with varying Pen colors.
+ * 5. When a teaching assistant prepares classroom material that shows how to use FileCreateSource and BmpOptions in Aspose.Imaging to programmatically create and save BMP images with simple geometric shapes.
  */

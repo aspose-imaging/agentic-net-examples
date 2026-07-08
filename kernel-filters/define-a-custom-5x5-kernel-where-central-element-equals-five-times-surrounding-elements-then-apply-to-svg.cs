@@ -1,9 +1,10 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -11,63 +12,59 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.svg";
             string outputPath = "output.png";
+            string tempPath = "temp.png";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directories exist
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
 
-            using (Aspose.Imaging.Image svgImage = Aspose.Imaging.Image.Load(inputPath))
+            // Load SVG and rasterize to a temporary PNG
+            using (Image svgImage = Image.Load(inputPath))
             {
-                // Set up vector rasterization options for SVG
-                var vectorOptions = new Aspose.Imaging.ImageOptions.SvgRasterizationOptions
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Aspose.Imaging.Color.White
+                    PageSize = svgImage.Size
                 };
 
-                // PNG options that use the vector rasterization options
-                var pngOptions = new Aspose.Imaging.ImageOptions.PngOptions
+                var pngOptions = new PngOptions
                 {
-                    VectorRasterizationOptions = vectorOptions
+                    VectorRasterizationOptions = rasterOptions
                 };
 
-                // Rasterize SVG to a memory stream
-                using (var ms = new MemoryStream())
-                {
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
+                svgImage.Save(tempPath, pngOptions);
+            }
 
-                    // Load the rasterized image
-                    using (Aspose.Imaging.Image rasterImageContainer = Aspose.Imaging.Image.Load(ms))
+            // Load the rasterized PNG, apply custom 5x5 convolution kernel, and save final output
+            using (Image rasterImageContainer = Image.Load(tempPath))
+            {
+                var rasterImage = (RasterImage)rasterImageContainer;
+
+                // Define 5x5 kernel: surrounding elements = 1, center = 5
+                double[,] kernel = new double[5, 5];
+                for (int y = 0; y < 5; y++)
+                {
+                    for (int x = 0; x < 5; x++)
                     {
-                        var rasterImage = (Aspose.Imaging.RasterImage)rasterImageContainer;
-
-                        // Define a 5x5 kernel: surrounding elements = 1, center = 5
-                        double[,] kernel = new double[5, 5];
-                        for (int y = 0; y < 5; y++)
-                        {
-                            for (int x = 0; x < 5; x++)
-                            {
-                                kernel[y, x] = 1.0;
-                            }
-                        }
-                        kernel[2, 2] = 5.0; // central element
-
-                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-
-                        // Apply the custom convolution filter
-                        rasterImage.Filter(rasterImage.Bounds, filterOptions);
-
-                        // Save the filtered image
-                        rasterImage.Save(outputPath, new Aspose.Imaging.ImageOptions.PngOptions());
+                        kernel[y, x] = 1.0;
                     }
                 }
+                kernel[2, 2] = 5.0; // central element
+
+                var convOptions = new ConvolutionFilterOptions(kernel);
+                rasterImage.Filter(rasterImage.Bounds, convOptions);
+
+                // Save the filtered image as PNG
+                rasterImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -79,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to sharpen the central details of a company logo stored as SVG before converting it to a high‑resolution PNG for marketing materials, they can use this custom 5×5 kernel where the center weight is five times the surrounding weights.
- * 2. When generating thumbnail previews of vector icons for a mobile app, applying the kernel during SVG rasterization enhances the focal point while keeping surrounding edges smooth, resulting in clearer PNG thumbnails.
- * 3. When preparing SVG diagrams for print, a developer can use the code to apply a custom convolution filter that emphasizes the main chart area, ensuring the printed PNG retains visual emphasis on the central data.
- * 4. When creating web‑ready graphics that require a subtle boost in contrast around the core element of an SVG illustration, the custom kernel applied during rasterization provides a controlled sharpening effect in the output PNG.
- * 5. When automating a batch process that converts SVG assets to PNG for a UI theme, incorporating the 5×5 kernel allows developers to consistently enhance central features across all images without manual editing.
+ * 1. When a developer needs to enhance the contrast of vector graphics by applying a custom sharpening filter after rasterizing an SVG to PNG using Aspose.Imaging for .NET.
+ * 2. When a developer wants to emphasize central features in a logo or icon by using a 5x5 convolution kernel where the center weight is five times the surrounding weights, converting the SVG to a high‑resolution PNG.
+ * 3. When a developer must prepare SVG illustrations for print by applying a custom blur‑sharpen hybrid filter via a 5x5 kernel to improve visual clarity before saving as PNG.
+ * 4. When a developer is building an automated pipeline that normalizes SVG assets, rasterizes them, and applies a weighted convolution to reduce noise while preserving detail in the resulting PNG files.
+ * 5. When a developer needs to create a thumbnail generator that rasterizes SVG icons and applies a custom kernel to accentuate edges, ensuring the PNG thumbnails retain crisp outlines.
  */

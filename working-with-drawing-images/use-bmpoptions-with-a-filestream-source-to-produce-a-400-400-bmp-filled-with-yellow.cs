@@ -10,8 +10,8 @@ class Program
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\temp\yellow.bmp";
+            // Output file path
+            string outputPath = @"C:\temp\output.bmp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -19,7 +19,7 @@ class Program
             // Create a FileStream for the output file
             using (FileStream stream = new FileStream(outputPath, FileMode.Create))
             {
-                // Set up BMP options with the stream as source
+                // Configure BmpOptions with the stream source
                 BmpOptions bmpOptions = new BmpOptions();
                 bmpOptions.Source = new StreamSource(stream);
 
@@ -30,7 +30,7 @@ class Program
                     Graphics graphics = new Graphics(image);
                     graphics.Clear(Color.Yellow);
 
-                    // Save the bound image
+                    // Save the bound image to the stream
                     image.Save();
                 }
             }
@@ -44,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically generate a 400 × 400 BMP placeholder image filled with yellow for UI mock‑ups using Aspose.Imaging’s BmpOptions and a FileStream in C#.
- * 2. When an automated test suite must create a solid‑color BMP file on disk to verify that downstream image‑processing components correctly read and handle 24‑bit BMP streams.
- * 3. When an embedded‑device firmware build requires a yellow BMP bitmap of a specific size to be bundled as a resource, and the developer wants to generate it at build time with C# and Aspose.Imaging.
- * 4. When a reporting tool needs to embed a simple yellow color swatch BMP into PDF or Word documents, and the developer uses a FileStream‑based BmpOptions to create the image on the fly.
- * 5. When a batch conversion utility must produce a series of solid‑color BMP files for calibration of printers or displays, and the code uses Aspose.Imaging’s Graphics.Clear method to fill the image with yellow.
+ * 1. A developer can use this code to generate a 400 × 400 yellow BMP file as a placeholder image for UI mockups when the final graphics are not yet available.
+ * 2. This snippet is useful for creating a solid‑color test image in BMP format to validate image‑processing pipelines that rely on Aspose.Imaging and C# FileStream handling.
+ * 3. When a legacy system requires a simple BMP icon, a developer can produce a 400 × 400 yellow bitmap programmatically instead of manually designing the file.
+ * 4. The code can be employed to generate a uniform yellow background BMP for batch printing jobs that need a known canvas size and color.
+ * 5. In automated documentation generation, a developer may create a yellow BMP thumbnail on the fly to illustrate image‑format support without storing static assets.
  */

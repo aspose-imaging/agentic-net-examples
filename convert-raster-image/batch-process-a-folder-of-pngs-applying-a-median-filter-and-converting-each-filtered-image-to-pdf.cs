@@ -10,43 +10,41 @@ class Program
     {
         try
         {
-            // Hardcoded input and output folders
+            // Hardcoded input and output directories
             string inputFolder = @"C:\Images\Input";
             string outputFolder = @"C:\Images\Output";
 
-            // Get all PNG files in the input folder
-            string[] pngFiles = Directory.GetFiles(inputFolder, "*.png");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputFolder);
 
-            foreach (string inputPath in pngFiles)
+            // Process each PNG file in the input folder
+            foreach (string inputPath in Directory.GetFiles(inputFolder, "*.png"))
             {
-                // Verify the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine the output PDF path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the PNG image
+                // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
                     // Cast to RasterImage to apply filters
-                    RasterImage rasterImage = (RasterImage)image;
+                    var rasterImage = (RasterImage)image;
 
-                    // Apply a median filter with size 5 to the whole image
+                    // Apply median filter with size 5 to the whole image
                     rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
-                    // Prepare PDF export options
-                    PdfOptions pdfOptions = new PdfOptions();
+                    // Prepare output PDF path
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                    string outputPath = Path.Combine(outputFolder, outputFileName);
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save the filtered image as PDF
-                    image.Save(outputPath, pdfOptions);
+                    rasterImage.Save(outputPath, new PdfOptions());
                 }
             }
         }
@@ -56,3 +54,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer uses Aspose.Imaging for .NET to batch‑process a folder of PNG screenshots, apply a median filter to remove noise, and save each result as a PDF for documentation archives.
+ * 2. When an e‑commerce site needs to automatically denoise product PNG images with a median filter and convert them to PDF catalogs using C# and Aspose.Imaging.
+ * 3. When a medical records system must cleanse PNG scans of X‑ray images with a median filter and generate PDF files for secure patient files via Aspose.Imaging.
+ * 4. When a GIS application requires smoothing PNG map tiles with a median filter and exporting them as PDF pages for printed reports using Aspose.Imaging for .NET.
+ * 5. When a publishing pipeline has to batch‑convert PNG illustrations to PDF after applying a median filter to improve print quality, leveraging C# and Aspose.Imaging.
+ */

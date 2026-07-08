@@ -1,19 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.webp";
+        string outputPath = @"c:\temp\output.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"c:\temp\input.webp";
-            string outputPath = @"c:\temp\output.bmp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,7 +27,7 @@ class Program
             // Load WebP image, flip horizontally, and save as BMP
             using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Horizontal flip
+                // Horizontal flip (no rotation)
                 webPImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
 
                 // Save to BMP format
@@ -43,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to convert user‑uploaded WebP avatars into BMP thumbnails while mirroring them for a left‑to‑right layout, a developer can use this C# code with Aspose.Imaging.
- * 2. When a legacy Windows desktop program only supports BMP files, but the source graphics are stored as WebP, the code enables a developer to load the WebP, flip it horizontally for correct orientation, and save it as BMP.
- * 3. When an e‑commerce site wants to display product images in a mirrored view for a special promotion, a developer can employ this snippet to read the WebP image, apply a horizontal flip, and export it to BMP for compatibility with older reporting tools.
- * 4. When a batch‑processing service must prepare WebP screenshots for a printing pipeline that requires BMP format and a mirrored layout, the code provides a straightforward C# solution using Aspose.Imaging’s RotateFlip method.
- * 5. When an automated testing framework validates image rendering by comparing expected BMP assets with transformed WebP inputs, a developer can use this example to load the WebP, flip it horizontally, and save the result as BMP for pixel‑perfect comparison.
+ * 1. When a developer must convert a WebP logo uploaded by a client into a BMP file while mirroring it horizontally for use in a legacy Windows desktop application.
+ * 2. When an e‑commerce platform needs to generate BMP product images from WebP assets and display them flipped to match a right‑to‑left language layout.
+ * 3. When a photo‑editing tool requires loading a WebP picture, applying a horizontal flip, and saving the result as BMP to maintain compatibility with older image viewers.
+ * 4. When an automated batch process has to read WebP screenshots, reverse their orientation, and export them as BMP files for archival in a corporate document management system.
+ * 5. When a game development pipeline needs to import WebP textures, flip them horizontally, and output BMP files for use with a legacy rendering engine that only supports BMP format.
  */

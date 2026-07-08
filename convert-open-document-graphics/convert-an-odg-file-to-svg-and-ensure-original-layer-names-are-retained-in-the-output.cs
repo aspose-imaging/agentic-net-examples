@@ -9,9 +9,9 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\temp\sample.odg";
-            string outputPath = @"C:\temp\sample.svg";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\sample.odg";
+            string outputPath = @"C:\Temp\sample.svg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -29,15 +29,8 @@ class Program
                 // Prepare SVG export options
                 var svgOptions = new SvgOptions
                 {
-                    // Preserve original metadata (including layer names)
-                    KeepMetadata = true,
-                    // Set rasterization options so the page size matches the source
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = image.Size,
-                        // Optional: keep background transparent
-                        BackgroundColor = Color.Transparent
-                    }
+                    // Preserve original metadata (including layer names) if possible
+                    KeepMetadata = true
                 };
 
                 // Save as SVG
@@ -50,3 +43,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to integrate automated conversion of OpenDocument Graphics (ODG) files to scalable vector graphics (SVG) in a C# application while preserving original layer names for downstream editing.
+ * 2. When a document management system must batch‑process user‑uploaded ODG diagrams and store them as SVG files with metadata intact to support web rendering and searchable layer information.
+ * 3. When a CAD or illustration tool built on .NET requires exporting designs created in ODG format to SVG so that web‑based viewers can display the artwork with the same layer hierarchy.
+ * 4. When a migration script has to replace legacy ODG assets with SVG equivalents in a content repository, ensuring that layer names are kept for compatibility with existing style sheets.
+ * 5. When an automated reporting service generates vector charts in ODG and needs to deliver them as SVG images to client browsers while retaining layer metadata for interactive features.
+ */

@@ -9,57 +9,47 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
+            // Hardcoded input directory containing PNG files
+            string inputDirectory = @"C:\InputPngs";
+            // Hardcoded output PDF file path
+            string outputPdfPath = @"C:\Output\combined.pdf";
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
 
-            // Get all PNG files in the input directory
-            string[] pngFiles = Directory.GetFiles(inputDir, "*.png");
-
-            // Shared memory stream that will hold all generated PDFs
-            using (MemoryStream sharedPdfStream = new MemoryStream())
+            // Shared memory stream that will hold all PDF pages
+            using (MemoryStream sharedStream = new MemoryStream())
             {
-                foreach (string inputPath in pngFiles)
+                // Get all PNG files in the input directory
+                string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
+
+                foreach (string pngPath in pngFiles)
                 {
                     // Verify the input file exists
-                    if (!File.Exists(inputPath))
+                    if (!File.Exists(pngPath))
                     {
-                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        Console.Error.WriteLine($"File not found: {pngPath}");
                         return;
                     }
 
-                    // Build the output PDF path
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".pdf");
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                     // Load the PNG image
-                    using (Image image = Image.Load(inputPath))
+                    using (Image image = Image.Load(pngPath))
                     {
-                        // Prepare PDF export options (default settings)
+                        // Prepare PDF export options
                         PdfOptions pdfOptions = new PdfOptions();
 
-                        // Save the PDF into the shared memory stream (appended)
-                        image.Save(sharedPdfStream, pdfOptions);
-
-                        // Also save the PDF to an individual file
-                        image.Save(outputPath, pdfOptions);
+                        // Save the image as a PDF page into the shared stream
+                        // The stream position is advanced automatically, effectively appending pages
+                        image.Save(sharedStream, pdfOptions);
                     }
                 }
 
-                // Optionally write the aggregated PDF stream to a single file
-                string aggregatedPath = Path.Combine(outputDir, "Aggregated.pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(aggregatedPath));
-                // Reset stream position before writing
-                sharedPdfStream.Position = 0;
-                using (FileStream file = new FileStream(aggregatedPath, FileMode.Create, FileAccess.Write))
+                // Write the aggregated PDF data to the final output file
+                // Ensure the output directory exists (already created above)
+                using (FileStream fileStream = new FileStream(outputPdfPath, FileMode.Create, FileAccess.Write))
                 {
-                    sharedPdfStream.CopyTo(file);
+                    sharedStream.Position = 0;
+                    sharedStream.CopyTo(fileStream);
                 }
             }
         }
@@ -69,3 +59,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to merge a collection of PNG screenshots from a test suite into a single PDF document for easy distribution, this code can batch‑convert and aggregate the images using a shared MemoryStream.
+ * 2. When an application must generate a printable PDF catalog from a folder of product PNG images without creating intermediate files, the code streams each image directly into the combined PDF.
+ * 3. When a server‑side service has to prepare a PDF portfolio of uploaded PNG receipts for compliance reporting, the shared MemoryStream approach lets it concatenate pages before applying a final compression step.
+ * 4. When a desktop utility is required to archive daily PNG logs into one PDF file to save disk space, the code demonstrates how to load each PNG with Aspose.Imaging and append it to a single PDF stream.
+ * 5. When a workflow automates the conversion of PNG design assets into a multi‑page PDF presentation for stakeholders, this snippet shows how to batch process the images and write the aggregated PDF in one operation.
+ */

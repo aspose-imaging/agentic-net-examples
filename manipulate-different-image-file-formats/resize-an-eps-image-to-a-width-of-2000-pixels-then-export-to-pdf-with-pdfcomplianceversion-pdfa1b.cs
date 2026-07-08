@@ -9,33 +9,33 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.eps";
+        string outputPath = "output.pdf";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input/input.eps";
-            string outputPath = "output/output.pdf";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Load EPS image
+            using (EpsImage image = (EpsImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the EPS image
-            using (var image = (EpsImage)Image.Load(inputPath))
-            {
-                // Calculate new height to keep aspect ratio when width is set to 2000
+                // Calculate new height to preserve aspect ratio for width = 2000
                 int newWidth = 2000;
-                int newHeight = (int)((double)image.Height / image.Width * newWidth);
+                int newHeight = (int)Math.Round((double)image.Height * newWidth / image.Width);
 
-                // Resize using a high‑quality interpolation method
-                image.Resize(newWidth, newHeight, ResizeType.Mitchell);
+                // Resize the image
+                image.Resize(newWidth, newHeight);
 
-                // Prepare PDF options with PDF/A‑1b compliance
+                // Prepare PDF options with PDF/A-1b compliance
                 var pdfOptions = new PdfOptions
                 {
                     PdfCoreOptions = new PdfCoreOptions
@@ -44,7 +44,7 @@ class Program
                     }
                 };
 
-                // Save the resized image as PDF
+                // Save as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -57,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a publishing workflow requires converting high‑resolution EPS artwork to a PDF/A‑1b compliant file of a specific width for archival printing.
- * 2. When an e‑commerce platform needs to generate web‑ready product catalogs by resizing vector EPS logos to 2000 px wide and saving them as PDF/A‑1b for consistent cross‑browser rendering.
- * 3. When a legal document management system must embed EPS diagrams into PDF/A‑1b reports while ensuring the images are scaled to a uniform width for standardized page layout.
- * 4. When a marketing automation tool automates the creation of PDF brochures from EPS brand assets, resizing them to 2000 px to meet design guidelines and guaranteeing PDF/A‑1b compliance for long‑term preservation.
- * 5. When a desktop application processes batch EPS files, resizing each to a 2000‑pixel width and exporting to PDF/A‑1b to satisfy regulatory requirements for searchable, archivable PDFs.
+ * 1. When a developer must convert a vector EPS logo to a PDF/A‑1b compliant file for archival purposes while scaling it to a fixed width of 2000 pixels to fit a print layout.
+ * 2. When a C# application needs to resize an EPS‑based engineering diagram to a standard web‑ready width and export it as a PDF that meets PDF/A‑1b compliance for regulatory submission.
+ * 3. When an automated workflow processes incoming EPS artwork, resizes it to 2000 px wide to maintain consistent branding, and saves it as a PDF/A‑1b document for distribution to clients.
+ * 4. When a document management system imports EPS files, adjusts their dimensions for screen viewing, and stores them as PDF/A‑1b files to ensure long‑term accessibility and legal validity.
+ * 5. When a batch‑processing tool prepares EPS marketing assets for digital publishing by resizing them to 2000 pixels in width and converting them to PDF/A‑1b compliant PDFs for cross‑platform compatibility.
  */

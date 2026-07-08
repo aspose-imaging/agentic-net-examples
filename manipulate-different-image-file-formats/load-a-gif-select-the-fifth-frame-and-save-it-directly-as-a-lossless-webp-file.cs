@@ -2,42 +2,50 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "Input/animation.gif";
-            string outputPath = "Output/frame5.webp";
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\input.gif";
+            string outputPath = "C:\\temp\\output.webp";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (GifImage gif = (GifImage)Image.Load(inputPath))
+            // Load the GIF image
+            using (Image gifImage = Image.Load(inputPath))
             {
-                if (gif.PageCount <= 4)
+                // Cast to multipage interface to access frames
+                IMultipageImage multipage = gifImage as IMultipageImage;
+                if (multipage == null || multipage.PageCount < 5)
                 {
-                    Console.Error.WriteLine("GIF does not contain a fifth frame.");
+                    Console.Error.WriteLine("GIF does not contain at least 5 frames.");
                     return;
                 }
 
-                gif.ActiveFrame = (GifFrameBlock)gif.Pages[4];
-
-                var options = new WebPOptions
+                // Retrieve the fifth frame (zero‑based index 4)
+                using (RasterImage fifthFrame = (RasterImage)multipage.Pages[4])
                 {
-                    Lossless = true
-                };
-
-                gif.Save(outputPath, options);
+                    // Convert the frame to a WebP image and save it losslessly
+                    using (WebPImage webpImage = new WebPImage(fifthFrame))
+                    {
+                        var options = new WebPOptions { Lossless = true };
+                        webpImage.Save(outputPath, options);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -49,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract a specific frame from an animated GIF to use as a high‑quality thumbnail in a web application, they can load the GIF, select the fifth frame, and save it as a lossless WebP file.
- * 2. When converting legacy animated GIF assets to modern web‑friendly formats, a developer may isolate the fifth frame and store it losslessly as WebP to preserve visual fidelity while reducing file size.
- * 3. When generating preview images for a video editing tool that imports GIF animations, a developer can extract the fifth frame and save it as a lossless WebP to provide a crisp preview without compression artifacts.
- * 4. When creating a sprite sheet from an animated GIF for a game, a developer might extract the fifth frame and convert it to lossless WebP to maintain exact colors and transparency for rendering.
- * 5. When building an email marketing platform that supports WebP images, a developer can pull the fifth frame from a GIF banner and save it as a lossless WebP to ensure the image displays correctly across modern email clients.
+ * 1. When a developer needs to extract the fifth frame from a multi‑frame GIF and save it as a lossless WebP image for high‑quality web display.
+ * 2. When building a thumbnail generator that selects the fifth animation frame of a GIF and converts it to a compact, lossless WebP file using C# and Aspose.Imaging.
+ * 3. When migrating legacy animated GIF assets to modern WebP format and only the fifth frame is required for a product showcase or preview.
+ * 4. When creating a server‑side image processing pipeline that validates a GIF, retrieves its fifth frame, and outputs a lossless WebP to reduce bandwidth while preserving detail.
+ * 5. When implementing a C# utility that processes user‑uploaded GIFs, isolates frame number five, and saves it as a WebP image to ensure compatibility with browsers that support lossless WebP.
  */

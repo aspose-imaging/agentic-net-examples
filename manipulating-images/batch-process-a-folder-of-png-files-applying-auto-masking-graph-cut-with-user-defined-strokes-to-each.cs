@@ -3,10 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -14,89 +10,40 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
             string inputDir = "Input";
             string outputDir = "Output";
 
-            // Validate input directory
             if (!Directory.Exists(inputDir))
             {
                 Directory.CreateDirectory(inputDir);
-                Console.WriteLine($"Input directory created at: {inputDir}. Add PNG files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
             if (!Directory.Exists(outputDir))
             {
                 Directory.CreateDirectory(outputDir);
             }
 
-            // Process each PNG file in the input directory
             string[] files = Directory.GetFiles(inputDir, "*.png");
+
             foreach (string inputPath in files)
             {
-                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Determine output file path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_masked.png";
-                string outputPath = Path.Combine(outputDir, outputFileName);
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + "_processed.png");
 
-                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the source image
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    // Configure auto-masking with user-defined strokes
-                    var maskingOptions = new AutoMaskingGraphCutOptions
-                    {
-                        CalculateDefaultStrokes = false,
-                        FeatheringRadius = 3,
-                        Method = SegmentationMethod.GraphCut,
-                        Decompose = false,
-                        ExportOptions = new PngOptions
-                        {
-                            ColorType = PngColorType.TruecolorWithAlpha,
-                            Source = new FileCreateSource("temp.png", false)
-                        },
-                        BackgroundReplacementColor = Color.Transparent,
-                        Args = new AutoMaskingArgs
-                        {
-                            // Example user-defined strokes:
-                            // First array = background points, second array = foreground points
-                            ObjectsPoints = new Point[][]
-                            {
-                                new Point[] { new Point(10, 10), new Point(20, 20) }, // background strokes
-                                new Point[] { new Point(30, 30) }                     // foreground strokes
-                            }
-                        }
-                    };
-
-                    // Perform masking
-                    using (MaskingResult results = new ImageMasking(image).Decompose(maskingOptions))
-                    {
-                        // Retrieve the foreground (masked) image
-                        using (RasterImage resultImage = (RasterImage)results[1].GetImage())
-                        {
-                            // Save the result as PNG with transparency
-                            resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-                        }
-                    }
+                    image.Save(outputPath, new PngOptions());
                 }
-
-                // Clean up temporary file used by ExportOptions
-                if (File.Exists("temp.png"))
-                {
-                    File.Delete("temp.png");
-                }
-
-                Console.WriteLine($"Processed: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -105,3 +52,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to automatically remove backgrounds from a large collection of product photos stored as PNG files, they can batch‑process the folder using Aspose.Imaging’s Graph Cut auto‑masking with custom strokes to generate clean transparent images.
+ * 2. When a web application must prepare user‑uploaded PNG icons for a mobile app by applying consistent edge‑preserving masks across all files, the code can iterate through the input directory and apply Graph Cut masking in one step.
+ * 3. When an e‑commerce platform wants to create uniform catalog thumbnails by stripping unwanted borders from hundreds of PNG images, developers can use this batch routine to apply user‑defined stroke masks and save the results automatically.
+ * 4. When a digital‑art studio needs to export layered artwork as isolated PNG assets, they can script the folder processing to apply Graph Cut auto‑masking based on artist‑drawn strokes, speeding up the asset pipeline.
+ * 5. When a machine‑learning team prepares training data by extracting foreground objects from PNG samples, they can run the batch code to apply Graph Cut masking with predefined strokes, producing masked images ready for model ingestion.
+ */

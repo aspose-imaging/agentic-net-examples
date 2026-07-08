@@ -6,92 +6,91 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    // Hardcoded folders to watch and to store PNG files
-    private const string InputFolder = @"C:\DicomInput";
-    private const string OutputFolder = @"C:\PngOutput";
-
     static void Main()
     {
         try
         {
-            // Ensure the output base folder exists
-            Directory.CreateDirectory(OutputFolder);
+            // Hardcoded paths
+            string watchFolder = @"C:\DICOM\Watch";
+            string outputFolder = @"C:\DICOM\Output";
 
-            // Set up a watcher for new files in the input folder
-            var watcher = new FileSystemWatcher(InputFolder)
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputFolder);
+
+            // Set up a watcher for new DICOM files
+            using (var watcher = new FileSystemWatcher(watchFolder, "*.dcm"))
             {
-                Filter = "*.*",               // watch all files
-                NotifyFilter = NotifyFilters.FileName | NotifyFilters.CreationTime,
-                EnableRaisingEvents = true
-            };
+                watcher.Created += (sender, e) =>
+                {
+                    // Give the file some time to be fully written
+                    System.Threading.Thread.Sleep(500);
 
-            // Subscribe to the Created event
-            watcher.Created += OnNewFileDetected;
+                    string inputPath = e.FullPath;
+                    if (!File.Exists(inputPath))
+                    {
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
 
-            // Keep the application running
-            Console.WriteLine("Monitoring folder for DICOM files. Press Enter to exit.");
-            Console.ReadLine();
+                    // Build output file name (same base name with .png)
+                    string baseName = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputFolder, $"{baseName}.png");
 
-            // Clean up
-            watcher.Dispose();
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    try
+                    {
+                        // Load DICOM image from file stream
+                        using (Stream stream = File.OpenRead(inputPath))
+                        using (DicomImage dicomImage = new DicomImage(stream))
+                        {
+                            // If the DICOM has multiple pages, save each page separately
+                            int pageIndex = 0;
+                            foreach (var dicomPage in dicomImage.DicomPages)
+                            {
+                                string pageOutputPath = Path.Combine(
+                                    outputFolder,
+                                    $"{baseName}_page{pageIndex}.png");
+
+                                Directory.CreateDirectory(Path.GetDirectoryName(pageOutputPath));
+
+                                dicomPage.Save(pageOutputPath, new PngOptions());
+                                pageIndex++;
+                            }
+
+                            // If there is only one page, also save the generic outputPath
+                            if (pageIndex == 1)
+                            {
+                                dicomImage.DicomPages[0].Save(outputPath, new PngOptions());
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine($"Error processing file '{inputPath}': {ex.Message}");
+                    }
+                };
+
+                watcher.EnableRaisingEvents = true;
+
+                Console.WriteLine($"Monitoring folder: {watchFolder}");
+                Console.WriteLine("Press Enter to exit.");
+                Console.ReadLine(); // Keep the application running
+            }
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    // Event handler called when a new file appears in the input folder
-    private static void OnNewFileDetected(object sender, FileSystemEventArgs e)
-    {
-        // Process only DICOM files (common extensions)
-        string extension = Path.GetExtension(e.FullPath).ToLowerInvariant();
-        if (extension != ".dcm" && extension != ".dicom")
-        {
-            return;
-        }
-
-        // Verify the file actually exists
-        if (!File.Exists(e.FullPath))
-        {
-            Console.Error.WriteLine($"File not found: {e.FullPath}");
-            return;
-        }
-
-        // Build the base output path (same file name without extension)
-        string baseFileName = Path.GetFileNameWithoutExtension(e.FullPath);
-        string fileOutputFolder = Path.Combine(OutputFolder, baseFileName);
-
-        // Ensure the folder for this file's PNGs exists
-        Directory.CreateDirectory(fileOutputFolder);
-
-        try
-        {
-            // Open the DICOM file as a stream
-            using (Stream stream = File.OpenRead(e.FullPath))
-            {
-                // Load the DICOM image from the stream
-                using (DicomImage dicomImage = new DicomImage(stream))
-                {
-                    // Iterate over each page and save as PNG
-                    foreach (DicomPage page in dicomImage.DicomPages)
-                    {
-                        string pngPath = Path.Combine(fileOutputFolder, $"{baseFileName}_{page.Index}.png");
-
-                        // Ensure the directory for the PNG exists (already created above)
-                        Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
-
-                        // Save the page as PNG using Aspose.Imaging's PngOptions
-                        page.Save(pngPath, new PngOptions());
-                    }
-                }
-            }
-
-            Console.WriteLine($"Converted DICOM '{e.Name}' to PNG(s) in '{fileOutputFolder}'.");
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error processing file '{e.FullPath}': {ex.Message}");
-        }
-    }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a radiology department needs an automated background service that watches a network folder for incoming DICOM (.dcm) scans and instantly converts each file to a PNG for quick preview in web portals.
+ * 2. When a research lab wants to monitor a data acquisition folder and transform multi‑page DICOM images into separate PNG pages for downstream image analysis pipelines using C# and Aspose.Imaging.
+ * 3. When a hospital IT team must ensure that every new DICOM study saved to a PACS export directory is automatically saved as PNG thumbnails for integration with electronic health record (EHR) systems.
+ * 4. When a telemedicine application requires a real‑time file watcher that detects newly uploaded DICOM files and generates PNG assets for mobile device display without manual intervention.
+ * 5. When a quality‑control workflow needs to continuously convert incoming DICOM files to lossless PNGs so that non‑medical staff can review and annotate images using standard image viewers.
+ */

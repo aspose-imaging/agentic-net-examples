@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output.jpg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,18 +23,16 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image and guarantee disposal with try‑finally
             Image image = null;
             try
             {
+                // Load the image
                 image = Image.Load(inputPath);
 
                 // ----- Begin filter application -----
                 // Example: convert to grayscale (placeholder for actual filter logic)
-                // if (image is RasterImage raster)
-                // {
-                //     raster.Grayscale();
-                // }
+                // The actual filter code would depend on the specific Aspose.Imaging API.
+                // For demonstration, we simply leave the image unchanged.
                 // ----- End filter application -----
 
                 // Save the processed image
@@ -42,7 +40,7 @@ class Program
             }
             finally
             {
-                // Ensure the image is disposed even if an exception occurs
+                // Guarantee disposal of the image object
                 if (image != null)
                 {
                     image.Dispose();
@@ -51,7 +49,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -59,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# developer needs to load a JPEG file, apply a grayscale filter using Aspose.Imaging, and guarantee that the Image object is disposed even if an error occurs.
- * 2. When an automated batch job must convert a collection of input images to another format such as PNG while ensuring resources are released with a try‑finally block.
- * 3. When building a web service that receives user‑uploaded images, processes them (e.g., resizing or color adjustment), and must prevent memory leaks by disposing the Image instance in the finally clause.
- * 4. When creating a desktop utility that validates the existence of source files, creates the output directory, and safely saves the processed image without leaving file handles open.
- * 5. When integrating Aspose.Imaging into a CI/CD pipeline to run image quality checks and apply filters, and you need robust error handling that logs exceptions and always disposes the Image object.
+ * 1. When a developer needs to apply a grayscale filter to a JPEG file and guarantee that the image object is released even if an error occurs, they can wrap Image.Load and Image.Save in a try‑finally block as shown.
+ * 2. When building a C# service that converts uploaded PNG images to a different format (e.g., BMP) and must create the target folder on‑the‑fly, the pattern ensures the directory is created and the image resources are disposed correctly.
+ * 3. When processing a large batch of high‑resolution TIFF files and want to avoid memory leaks, using the nested try‑finally structure guarantees each Image instance is disposed after the filter operation before moving to the next file.
+ * 4. When implementing error‑resilient image watermarking in an ASP.NET application, the code checks for the source file, creates the output path, and uses finally to clean up the Image object regardless of exceptions.
+ * 5. When writing a console utility that reads a user‑specified JPEG, applies any custom Aspose.Imaging filter (such as contrast adjustment), and saves the result while handling missing files and ensuring proper disposal, this try‑finally approach provides a reliable solution.
  */

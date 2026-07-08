@@ -1,6 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -30,11 +33,14 @@ class Program
                     { -1, 0, 1 }
                 };
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
 
-                raster.Filter(raster.Bounds, filterOptions);
+                PngOptions options = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
 
-                raster.Save(outputPath);
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -46,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to enhance the vertical outlines of a landscape photograph stored as a PNG file before publishing it on a website, they can apply this vertical edge convolution filter using Aspose.Imaging for .NET.
- * 2. When building an automated image preprocessing pipeline that prepares raw PNG scenery shots for computer‑vision analysis, the code can be used to emphasize vertical edges to improve feature detection.
- * 3. When creating a desktop application that lets users sharpen the silhouette of trees and buildings in a PNG panorama, the vertical edge kernel can be applied with C# and Aspose.Imaging to produce a clearer visual effect.
- * 4. When generating printable map overlays where vertical contours such as cliffs or road edges need to be highlighted, developers can run this filter on the PNG raster to accentuate those lines.
- * 5. When integrating a batch‑processing tool that converts a folder of landscape PNG images into edge‑enhanced versions for artistic filters, the code provides a simple way to apply the vertical edge convolution across each image.
+ * 1. When a developer wants to enhance the vertical edges of a landscape PNG photograph to improve visual contrast before publishing on a website.
+ * 2. When an image‑processing pipeline needs to apply a Sobel‑like vertical edge detection filter to PNG files using C# and Aspose.Imaging for automated quality checks.
+ * 3. When a GIS or mapping application must highlight terrain features by emphasizing vertical edges in raster images during data preprocessing.
+ * 4. When a photo‑editing tool integrates a custom convolution kernel to create a stylized edge‑enhanced version of user‑uploaded PNG images in a .NET environment.
+ * 5. When a batch‑processing script has to generate edge‑detected PNG thumbnails for a digital asset management system using Aspose.Imaging’s ConvolutionFilterOptions.
  */

@@ -8,12 +8,11 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input path
+        string inputPath = @"C:\temp\sample.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.bmp";
-            string outputPath = @"C:\temp\output\processed.bmp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,25 +20,27 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare BMP save options (default settings)
-                BmpOptions bmpOptions = new BmpOptions();
+                // Example processing: rotate the image 180 degrees around X axis
+                image.RotateFlip(RotateFlipType.Rotate180FlipX);
 
-                // Save the image to a MemoryStream for in‑memory processing
+                // Prepare BMP save options (default settings)
+                BmpOptions saveOptions = new BmpOptions();
+
+                // Save the processed image into a MemoryStream
                 using (MemoryStream memoryStream = new MemoryStream())
                 {
-                    image.Save(memoryStream, bmpOptions);
-                    Console.WriteLine($"Image saved to memory stream. Length = {memoryStream.Length} bytes.");
-                    // Further in‑memory processing can be performed here
-                }
+                    image.Save(memoryStream, saveOptions);
 
-                // Optionally, also save the image to a file using the same options
-                image.Save(outputPath, bmpOptions);
+                    // The stream now contains the BMP data; it can be used for further in‑memory processing
+                    Console.WriteLine($"Image saved to MemoryStream. Size in bytes: {memoryStream.Length}");
+                    
+                    // Example of resetting the position if further reading is needed
+                    memoryStream.Position = 0;
+                    // ... further processing of memoryStream ...
+                }
             }
         }
         catch (Exception ex)
@@ -48,3 +49,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web service needs to receive a BMP file, rotate it, and return the modified image without writing to disk, a developer can load the BMP with Aspose.Imaging, apply RotateFlip, and save it to a MemoryStream for immediate transmission.
+ * 2. When generating a PDF report that embeds a processed BMP image, a developer can keep the image in a MemoryStream to feed it directly into the PDF library without creating temporary files.
+ * 3. When performing batch image transformations in a background worker and storing the results in a database as BLOBs, a developer can use the MemoryStream to capture the BMP bytes and insert them into the database.
+ * 4. When integrating with a third‑party API that expects image data as a byte array, a developer can convert the rotated BMP to a MemoryStream and then call ToArray() to supply the required payload.
+ * 5. When implementing an in‑memory caching layer for frequently accessed BMP thumbnails, a developer can load, rotate, and save the image to a MemoryStream so the cached byte array can be served quickly without disk I/O.
+ */

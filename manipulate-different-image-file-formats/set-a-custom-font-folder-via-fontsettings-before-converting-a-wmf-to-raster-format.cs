@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Wmf;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -24,21 +24,16 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                WmfImage wmfImage = (WmfImage)image;
-
-                WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
+                var rasterOptions = new WmfRasterizationOptions
                 {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageWidth = wmfImage.Width,
-                    PageHeight = wmfImage.Height
+                    BackgroundColor = Color.White,
+                    PageSize = image.Size,
+                    RenderMode = WmfRenderMode.Auto
                 };
 
-                using (PngOptions pngOptions = new PngOptions
+                using (var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions })
                 {
-                    VectorRasterizationOptions = rasterOptions
-                })
-                {
-                    wmfImage.Save(outputPath, pngOptions);
+                    image.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -51,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy WMF diagrams that use corporate‑specific TrueType fonts stored in a private folder to PNG images for web display, they can set FontSettings to point to that folder before rasterization.
- * 2. When an automated document‑generation pipeline must render WMF charts with custom fonts embedded in a network share into high‑resolution PNG files, the code ensures the correct fonts are loaded via FontSettings.
- * 3. When a Windows desktop application imports user‑provided WMF icons that rely on non‑system fonts and must export them as PNG assets for mobile apps, developers use FontSettings to locate those fonts before conversion.
- * 4. When a batch conversion tool processes thousands of WMF files containing brand‑specific typography stored in a custom fonts directory, setting FontSettings guarantees consistent text appearance in the resulting PNG raster images.
- * 5. When a cloud‑based image service receives WMF files with embedded font references that are not installed on the server, developers configure FontSettings to point to a temporary font folder to correctly rasterize the files to PNG format.
+ * 1. When a legacy WMF file uses proprietary corporate fonts, a developer sets a custom font folder via FontSettings and converts the WMF to PNG to ensure the text renders correctly on web pages.
+ * 2. When generating printable previews of WMF diagrams on a server that lacks the required TrueType fonts, the code points FontSettings to a shared font directory before rasterizing the image to PNG.
+ * 3. When batch‑processing WMF icons that contain brand‑specific fonts, developers configure FontSettings to locate those fonts so the resulting PNG icons preserve the intended typography.
+ * 4. When embedding WMF‑based charts into a C# reporting application running inside a container without system fonts, setting a custom font folder enables accurate PNG rasterization for the reports.
+ * 5. When migrating legacy engineering drawings saved as WMF to modern image formats, developers specify the font folder via FontSettings to prevent missing or corrupted text during the conversion to raster PNG files.
  */

@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.djvu";
-            string outputPath = @"C:\temp\sample.tif";
+            string inputPath = @"C:\Temp\sample.djvu";
+            string outputPath = @"C:\Temp\sample.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,20 +26,21 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load DjVu document from file stream
-            using (FileStream stream = File.OpenRead(inputPath))
+            using (Stream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Prepare TIFF save options
-                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                saveOptions.Compression = TiffCompressions.Deflate;
-                // Convert to 1‑bit B/W if needed
-                saveOptions.BitsPerSample = new ushort[] { 1 };
+                // Configure TIFF save options
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    Compression = TiffCompressions.Deflate,
+                    BitsPerSample = new ushort[] { 1 } // optional: convert to B/W
+                };
 
-                // Specify page range 2‑5 (inclusive)
-                saveOptions.MultiPageOptions = new DjvuMultiPageOptions(new IntRange(2, 5));
+                // Specify page range 2‑5 (zero‑based indexes 1‑4)
+                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions(new int[] { 1, 2, 3, 4 });
 
                 // Save as multipage TIFF
-                djvuImage.Save(outputPath, saveOptions);
+                djvuImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -51,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract pages 2‑5 from a multi‑page DjVu file and archive them as a compressed 1‑bit black‑and‑white multipage TIFF for long‑term storage.
- * 2. When a document‑management system must convert a selected range of DjVu pages into a TIFF format that supports Deflate compression and is compatible with legacy scanning workflows.
- * 3. When a legal‑tech application requires converting specific pages of a DjVu case file into a searchable multipage TIFF while preserving high‑contrast B/W rendering for OCR preprocessing.
- * 4. When an e‑learning platform wants to generate printable handouts by taking pages 2‑5 from a DjVu textbook and saving them as a single TIFF file that can be easily printed or embedded in PDFs.
- * 5. When a batch‑processing script automates the migration of archived DjVu documents to a standardized TIFF archive, needing to process only certain pages and apply 1‑bit compression to meet archival standards.
+ * 1. When a legal firm needs to archive pages 2‑5 of a scanned DjVu case file as a compressed multipage TIFF for long‑term storage and easy viewing in Windows.
+ * 2. When a publishing company wants to extract a subset of pages from a DjVu manuscript and convert them to a single TIFF file to feed into an OCR pipeline that only accepts TIFF input.
+ * 3. When a medical records system must transform specific pages of a DjVu patient scan into a lossless, single‑file TIFF to attach to an EMR that requires TIFF attachments.
+ * 4. When a government agency automates the conversion of particular pages of historic DjVu documents into a multipage TIFF with Deflate compression for inclusion in a searchable digital archive.
+ * 5. When a C# desktop application uses Aspose.Imaging to load a DjVu file, select pages 2‑5, and save them as a black‑and‑white multipage TIFF for printing on low‑resolution printers.
  */

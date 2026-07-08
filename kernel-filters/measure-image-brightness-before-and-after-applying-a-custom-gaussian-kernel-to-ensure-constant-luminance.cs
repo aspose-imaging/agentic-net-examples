@@ -9,53 +9,61 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input\\sample.png";
+            string outputPath = "output\\result.png";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load image and cast to RasterImage
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
-                if (!raster.IsCached)
-                {
-                    raster.CacheData();
-                }
 
-                int[] beforePixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
-                double brightnessBefore = beforePixels.Average(p =>
-                {
-                    int r = (p >> 16) & 0xFF;
-                    int g = (p >> 8) & 0xFF;
-                    int b = p & 0xFF;
-                    return (r + g + b) / 3.0;
-                });
+                // Compute original average luminance
+                int[] originalPixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
+                double originalLuminance = originalPixels
+                    .Select(p =>
+                    {
+                        int r = (p >> 16) & 0xFF;
+                        int g = (p >> 8) & 0xFF;
+                        int b = p & 0xFF;
+                        return 0.299 * r + 0.587 * g + 0.114 * b;
+                    })
+                    .Average();
 
-                int radius = 5;
-                double sigma = 4.0;
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(radius, sigma));
+                // Apply custom Gaussian blur (radius 5, sigma 4.0)
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                int[] afterPixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
-                double brightnessAfter = afterPixels.Average(p =>
-                {
-                    int r = (p >> 16) & 0xFF;
-                    int g = (p >> 8) & 0xFF;
-                    int b = p & 0xFF;
-                    return (r + g + b) / 3.0;
-                });
+                // Compute luminance after blur
+                int[] blurredPixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
+                double blurredLuminance = blurredPixels
+                    .Select(p =>
+                    {
+                        int r = (p >> 16) & 0xFF;
+                        int g = (p >> 8) & 0xFF;
+                        int b = p & 0xFF;
+                        return 0.299 * r + 0.587 * g + 0.114 * b;
+                    })
+                    .Average();
 
-                Console.WriteLine($"Brightness before: {brightnessBefore:F2}, after: {brightnessAfter:F2}");
+                // Adjust brightness to restore original luminance
+                int brightnessAdjustment = (int)Math.Round(originalLuminance - blurredLuminance);
+                raster.AdjustBrightness(brightnessAdjustment);
 
-                PngOptions options = new PngOptions();
-                raster.Save(outputPath, options);
+                // Save the processed image as PNG
+                var pngOptions = new PngOptions();
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -67,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to verify that applying a custom Gaussian blur to a PNG image does not unintentionally darken or brighten the picture, they can use this code to measure average luminance before and after the filter.
- * 2. When building an automated image‑processing pipeline that must maintain consistent brightness across scanned documents, the code can be used to compare the mean RGB value of the original raster and the blurred output.
- * 3. When optimizing visual quality for a web‑gallery and wants to ensure that the Gaussian kernel (radius 5, sigma 4.0) preserves perceived brightness, the snippet provides a quick C# way to calculate and log the change.
- * 4. When creating a photo‑editing application that offers a “soft‑focus” effect and needs to adjust exposure automatically, developers can employ this example to detect any luminance shift caused by the Aspose.Imaging GaussianBlurFilterOptions.
- * 5. When performing quality‑control on batch‑processed images stored as PNG files, the code lets developers programmatically compare brightness levels to guarantee that the custom blur filter does not violate luminance specifications.
+ * 1. When a developer needs to verify that applying a Gaussian blur to PNG assets for a web gallery does not unintentionally darken or brighten the images, they can use this code to compare average luminance before and after the filter.
+ * 2. When preparing medical imaging scans in DICOM format for machine‑learning analysis, a programmer can employ this routine to ensure that the Gaussian smoothing step preserves the overall brightness of each slice.
+ * 3. When building an automated photo‑editing pipeline in C# that applies custom blur effects to JPEG thumbnails, the code helps confirm that the blur maintains consistent luminance across all generated thumbnails.
+ * 4. When integrating Aspose.Imaging into a desktop application that normalizes scanned documents before OCR, developers can measure the luminance change caused by the Gaussian kernel to guarantee legible text contrast.
+ * 5. When creating a game asset workflow that blurs sprite PNGs for motion‑blur effects, this snippet lets artists and developers quickly check that the blur does not alter the perceived brightness, keeping visual consistency across frames.
  */

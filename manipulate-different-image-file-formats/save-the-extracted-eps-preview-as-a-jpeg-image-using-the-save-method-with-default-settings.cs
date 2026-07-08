@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.eps";
-            string outputPath = @"C:\Images\output\preview.jpg";
+            string inputPath = "input.eps";
+            string outputPath = "output.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,7 +22,7 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load EPS image
             using (var epsImage = (EpsImage)Image.Load(inputPath))
@@ -36,7 +36,7 @@ class Program
                         return;
                     }
 
-                    // Save preview as JPEG with default settings
+                    // Save preview as JPEG using default settings
                     preview.Save(outputPath);
                 }
             }
@@ -50,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a thumbnail for an EPS logo to display in a web‑based asset manager, they can extract the EPS preview and save it as a JPEG using Aspose.Imaging for .NET.
- * 2. When a desktop publishing application must generate a low‑resolution preview of a vector illustration for quick preview in a file explorer, the code can load the EPS, get its preview image, and save it as a JPEG.
- * 3. When an e‑commerce platform wants to show a product’s vector artwork as a JPEG preview on product pages without rendering the full EPS, this snippet converts the EPS preview to a JPEG file.
- * 4. When a batch‑processing tool processes a folder of EPS files and needs to store each file’s preview as a JPEG for archival or reporting purposes, the Save method with default settings simplifies the conversion.
- * 5. When a mobile app backend must deliver a JPEG snapshot of an EPS design to devices that cannot render EPS, the code extracts the preview image and saves it as a JPEG for easy consumption.
+ * 1. When a web application needs to generate thumbnail JPEGs from uploaded EPS vector files for quick preview in a product catalog.
+ * 2. When a desktop publishing workflow converts EPS artwork previews to JPEGs to embed in PDF reports without rendering the full vector content.
+ * 3. When an automated batch job extracts the embedded preview from EPS logos and saves them as JPEG images for use in email newsletters.
+ * 4. When a mobile app backend receives EPS files and must provide a low‑resolution JPEG snapshot for display on low‑bandwidth devices.
+ * 5. When a document management system validates EPS files by extracting their preview image and storing it as a JPEG thumbnail for search indexing.
  */

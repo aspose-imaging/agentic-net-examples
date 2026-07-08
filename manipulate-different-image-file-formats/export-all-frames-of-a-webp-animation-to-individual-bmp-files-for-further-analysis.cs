@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -10,9 +9,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input WebP animation path
             string inputPath = @"C:\temp\animation.webp";
-            string outputDirectory = @"C:\temp\frames";
+
+            // Hardcoded output directory for BMP frames
+            string outputDir = @"C:\temp\frames";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,31 +22,37 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // Load the WebP animation
-            using (WebPImage webPImage = new WebPImage(inputPath))
+            // Load the WebP image (could be animated)
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to multipage interface to access frames
-                IMultipageImage multipage = webPImage as IMultipageImage;
-                if (multipage == null || multipage.PageCount == 0)
+                // Try to treat the image as a multipage (animated) image
+                var multipage = image as IMultipageImage;
+
+                if (multipage != null && multipage.PageCount > 0)
                 {
-                    Console.Error.WriteLine("No frames found in the WebP image.");
-                    return;
+                    // Iterate through each frame/page
+                    for (int i = 0; i < multipage.PageCount; i++)
+                    {
+                        // Retrieve the frame
+                        using (Image frame = multipage.Pages[i])
+                        {
+                            // Build output BMP file path
+                            string outputPath = Path.Combine(outputDir, $"frame_{i}.bmp");
+
+                            // Ensure the output directory exists
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                            // Save the frame as BMP
+                            frame.Save(outputPath, new BmpOptions());
+                        }
+                    }
                 }
-
-                // Iterate through each frame and save as BMP
-                for (int i = 0; i < multipage.PageCount; i++)
+                else
                 {
-                    // Build output file path for the current frame
-                    string outputPath = Path.Combine(outputDirectory, $"frame_{i}.bmp");
-
-                    // Ensure the directory for the output file exists
+                    // Fallback for single-frame images
+                    string outputPath = Path.Combine(outputDir, "frame_0.bmp");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the frame as BMP
-                    multipage.Pages[i].Save(outputPath, new BmpOptions());
+                    image.Save(outputPath, new BmpOptions());
                 }
             }
         }
@@ -58,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each frame from a WebP animation to BMP files for pixel‑perfect quality inspection using Aspose.Imaging in a C# application.
- * 2. When a video processing pipeline requires converting animated WebP assets into individual BMP images for compatibility with legacy image analysis tools.
- * 3. When a game developer wants to decompose a WebP sprite sheet animation into separate BMP frames to apply custom per‑frame effects or physics calculations.
- * 4. When a machine‑learning engineer must generate a dataset of BMP frames from a WebP animation to train an image classification model on individual motion steps.
- * 5. When a digital archivist needs to preserve each frame of a WebP animation as lossless BMP files for long‑term storage and metadata extraction.
+ * 1. When a developer needs to extract every frame from an animated WebP file to BMP images for pixel‑level analysis or debugging of animation sequences.
+ * 2. When a QA engineer wants to compare individual frames of a WebP animation against reference BMP screenshots to verify visual fidelity across platforms.
+ * 3. When a machine‑learning pipeline requires converting each frame of a WebP animation into a lossless BMP format before feeding them into a model for image classification.
+ * 4. When a legacy system only supports BMP input, and a developer must decompose a modern WebP animation into separate BMP files for compatibility.
+ * 5. When a developer is building a tool that generates frame‑by‑frame thumbnails from a WebP animation and needs to save them as BMP files for further processing.
  */

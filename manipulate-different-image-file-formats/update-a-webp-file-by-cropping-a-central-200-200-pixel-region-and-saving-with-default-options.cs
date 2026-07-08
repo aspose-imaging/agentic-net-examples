@@ -7,13 +7,13 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output file paths
+        string inputPath = "input/input.webp";
+        string outputPath = "output/output.webp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.webp";
-            string outputPath = "output.webp";
-
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,22 +26,25 @@ class Program
             // Load the WebP image
             using (WebPImage image = new WebPImage(inputPath))
             {
-                // Cache data for better performance
-                if (!image.IsCached)
-                    image.CacheData();
-
-                // Calculate central 200x200 rectangle
+                // Define crop size
                 int cropWidth = 200;
                 int cropHeight = 200;
-                int left = (image.Width - cropWidth) / 2;
-                int top = (image.Height - cropHeight) / 2;
 
-                Rectangle rect = new Rectangle(left, top, cropWidth, cropHeight);
+                // Calculate top-left corner to center the crop rectangle
+                int x = (image.Width - cropWidth) / 2;
+                int y = (image.Height - cropHeight) / 2;
 
-                // Crop the image
-                image.Crop(rect);
+                // Guard against negative coordinates for very small images
+                if (x < 0) x = 0;
+                if (y < 0) y = 0;
 
-                // Save with default options
+                // Create the cropping rectangle (Aspose.Imaging.Rectangle)
+                Rectangle cropRect = new Rectangle(x, y, cropWidth, cropHeight);
+
+                // Perform the crop
+                image.Crop(cropRect);
+
+                // Save the updated image with default options
                 image.Save(outputPath);
             }
         }
@@ -54,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a thumbnail by extracting the central 200 × 200 pixels from a WebP image for use in a responsive web gallery.
- * 2. When an e‑commerce platform must crop product photos to a fixed square size before storing them as WebP files to reduce bandwidth.
- * 3. When a mobile app needs to preprocess user‑uploaded WebP avatars by centering and cropping them to a 200 × 200 region for consistent UI layout.
- * 4. When a content management system automates the creation of preview images by cropping the middle portion of high‑resolution WebP assets.
- * 5. When a digital signage solution prepares WebP graphics by trimming the central area to a 200 × 200 pixel block for display on small screens.
+ * 1. When a developer needs to generate a centered 200 × 200 pixel thumbnail from a WebP image for responsive web design using C# and Aspose.Imaging.
+ * 2. When a mobile app must extract the most important part of a user‑uploaded WebP photo by cropping a fixed‑size region before uploading to a server.
+ * 3. When an e‑commerce platform wants to create uniform product preview images by cropping the central area of high‑resolution WebP files with Aspose.Imaging in a .NET backend.
+ * 4. When a content management system automatically prepares profile picture avatars by trimming the middle 200 × 200 pixels of uploaded WebP files using C# image processing.
+ * 5. When a digital marketing tool needs to batch‑process WebP banners, cropping each to a standard central square for consistent display across ad networks.
  */

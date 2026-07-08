@@ -1,39 +1,38 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
+            // Hardcoded input and output paths
             string inputPath = "templates/input.png";
             string outputPath = "output/blurred.png";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
+            // Load the PNG image and apply a 5x5 blur box filter
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Apply a 5×5 box blur (approximated with a Gaussian blur of radius 5)
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 0));
+                // Convolution filter with a predefined 5x5 blur box kernel
+                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurBox(5));
 
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                raster.Filter(raster.Bounds, blurOptions);
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -45,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating thumbnail previews for a web gallery, a developer can load PNG assets from a templates folder and apply a 5×5 Gaussian blur to create a soft‑focus placeholder before the full‑resolution image loads.
- * 2. When preprocessing scanned documents in a C# batch job, applying a 5×5 box blur to PNG files helps reduce high‑frequency noise before OCR is performed.
- * 3. When building a photo‑editing application that offers a “soft‑focus” filter, the code can load user‑selected PNG images and use Aspose.Imaging’s GaussianBlurFilterOptions with a radius of 5 to achieve the effect.
- * 4. When preparing PNG icons for a mobile app, developers may blur the edges with a 5×5 filter to create a subtle glow that improves visual consistency across different screen densities.
- * 5. When creating anonymized medical images for research, a C# routine can load PNG scans from a templates directory and apply a 5×5 blur to obscure patient details while preserving overall anatomy.
+ * 1. When a C# developer needs to generate a soft‑focused PNG background for a web page, they can load the template image and apply a 5x5 blur box filter using Aspose.Imaging.
+ * 2. When an application must anonymize sensitive details in a PNG screenshot before sharing, the code can rasterize the image and blur it with a predefined 5x5 convolution filter.
+ * 3. When preparing product photos for print, a developer can use this snippet to apply a subtle blur to PNG assets, ensuring consistent visual quality across catalogs.
+ * 4. When creating thumbnail previews with smooth edges for a gallery, the code loads the original PNG and applies the 5x5 blur box filter to reduce sharpness before resizing.
+ * 5. When pre‑processing PNG images for a computer‑vision pipeline, a developer can use the Aspose.Imaging convolution filter to reduce noise by applying a 5x5 blur box to the raster image.
  */

@@ -13,7 +13,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output/output_emboss_interlaced.png";
+            string outputPath = "output/output_interlaced_emboss.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -28,24 +28,19 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
-                // Create emboss filter using predefined kernel
-                var embossKernel = ConvolutionFilter.Emboss3x3;
-                var filterOptions = new ConvolutionFilterOptions(embossKernel);
+                // Apply emboss filter using a predefined convolution kernel
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-                // Apply the emboss filter to the entire image
-                raster.Filter(raster.Bounds, filterOptions);
-
-                // Set PNG save options with interlaced (progressive) encoding
-                var saveOptions = new PngOptions
+                // Configure PNG options for interlaced (progressive) encoding
+                PngOptions options = new PngOptions
                 {
                     Progressive = true
                 };
 
-                // Save the processed image
-                raster.Save(outputPath, saveOptions);
+                // Save the processed image with the specified options
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -57,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add a 3‑x‑3 emboss effect to a PNG file and output it with progressive (interlaced) encoding for quicker incremental loading in browsers, this code provides a ready solution.
- * 2. When building an automated image‑processing pipeline that converts uploaded PNG assets into stylized, interlaced versions for use in responsive web design, the example demonstrates the required C# and Aspose.Imaging steps.
- * 3. When creating a desktop utility that batch‑processes PNG screenshots, applies an emboss filter, and saves them as interlaced PNGs to reduce perceived load time on low‑bandwidth connections, the code shows the essential workflow.
- * 4. When testing the behavior of Aspose.Imaging’s ConvolutionFilter on raster images while preserving PNG interlacing for compatibility with legacy image viewers, this snippet can be used as a reproducible test case.
- * 5. When developing a C# application that generates artistic previews of PNG graphics—applying embossing and saving with the Progressive flag to enable progressive rendering on image galleries—the example illustrates the complete implementation.
+ * 1. When a developer needs to generate a progressive (interlaced) PNG with an emboss effect for faster visual loading on web pages, this code demonstrates how to apply the filter and save the image with progressive encoding.
+ * 2. When testing image processing pipelines, a developer can use this example to verify that the ConvolutionFilter.Emboss3x3 produces the expected visual result on PNG files before integrating it into larger workflows.
+ * 3. When creating stylized product images for an e‑commerce catalog, this snippet shows how to emboss the original PNG and output a progressive PNG that browsers can display incrementally.
+ * 4. When performing automated quality assurance on image filters, the code provides a reproducible way to apply an emboss filter and compare the interlaced PNG output against a baseline.
+ * 5. When optimizing images for low‑bandwidth environments, a developer can employ this example to apply an emboss effect and save the PNG as a progressive file that progressively renders as data arrives.
  */

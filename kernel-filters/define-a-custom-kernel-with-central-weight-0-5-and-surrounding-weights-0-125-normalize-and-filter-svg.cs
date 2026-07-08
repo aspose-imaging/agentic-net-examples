@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -12,70 +12,64 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.svg";
             string outputPath = "output.png";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the SVG image
             using (Image svgImage = Image.Load(inputPath))
             {
-                // Set up rasterization options for SVG
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                // Set up rasterization options for SVG -> raster conversion
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = svgImage.Size
+                    PageSize = svgImage.Size,
+                    BackgroundColor = Color.White,
+                    SmoothingMode = SmoothingMode.AntiAlias,
+                    TextRenderingHint = TextRenderingHint.AntiAlias
                 };
 
-                // Set up PNG save options with the rasterization options
-                PngOptions pngOptions = new PngOptions
+                // Prepare PNG options with the rasterization settings
+                var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Rasterize SVG to a memory stream
-                using (MemoryStream ms = new MemoryStream())
+                // Rasterize SVG into a memory stream
+                using (var memoryStream = new MemoryStream())
                 {
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
+                    svgImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
 
-                    // Load the rasterized image
-                    using (Image rasterImageContainer = Image.Load(ms))
+                    // Load the rasterized image as a RasterImage
+                    using (Image rasterImageContainer = Image.Load(memoryStream))
                     {
                         RasterImage rasterImage = (RasterImage)rasterImageContainer;
 
-                        // Define custom 3x3 kernel
-                        double[,] kernel = new double[3, 3];
-                        for (int y = 0; y < 3; y++)
+                        // Define a 3x3 custom kernel (central weight 0.333..., surrounding 0.08333...)
+                        double[,] kernel = new double[,]
                         {
-                            for (int x = 0; x < 3; x++)
-                            {
-                                kernel[y, x] = 0.125;
-                            }
-                        }
-                        kernel[1, 1] = 0.5; // central weight
+                            { 0.0833333333, 0.0833333333, 0.0833333333 },
+                            { 0.0833333333, 0.3333333333, 0.0833333333 },
+                            { 0.0833333333, 0.0833333333, 0.0833333333 }
+                        };
 
-                        // Normalize kernel (sum = 1.5)
-                        double sum = 0.0;
-                        foreach (double v in kernel) sum += v;
-                        for (int y = 0; y < 3; y++)
-                        {
-                            for (int x = 0; x < 3; x++)
-                            {
-                                kernel[y, x] /= sum;
-                            }
-                        }
+                        // Create convolution filter options (factor = 1.0, bias = 0)
+                        var filterOptions = new ConvolutionFilterOptions(kernel, 1.0, 0);
 
-                        // Apply convolution filter
-                        ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel, 0, 3);
+                        // Apply the filter to the entire image
                         rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
-                        // Save the filtered image
+                        // Save the filtered raster image to the output path
                         rasterImage.Save(outputPath, new PngOptions());
                     }
                 }
@@ -90,9 +84,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG logo to a high‑resolution PNG while applying a custom blur filter to smooth edges for web publishing.
- * 2. When a mobile app must render vector icons as raster images with a subtle sharpening effect using a 3×3 kernel to improve readability on low‑dpi screens.
- * 3. When an e‑commerce platform generates product thumbnails from SVG diagrams and wants to reduce visual noise by applying a normalized kernel with a central weight of 0.5.
- * 4. When a reporting tool exports SVG charts to PNG and requires a consistent softening filter to match the style of other raster graphics in the PDF report.
- * 5. When a game UI pipeline rasterizes SVG assets to PNG and uses a custom kernel to achieve a vignette‑like fade around the edges for a polished visual effect.
+ * 1. When a developer needs to apply a lightweight blur to vector icons stored as SVG before converting them to PNG for use in a web UI, they can define a custom kernel with a central weight of 0.5 and surrounding weights of 0.125, normalize it, and filter the rasterized image.
+ * 2. When generating high‑resolution product catalogs, a developer may want to soften the edges of SVG illustrations to avoid harsh aliasing after rasterization, using the custom kernel to smooth the image before saving as PNG.
+ * 3. When creating thumbnail previews of SVG diagrams for a mobile app, a developer can use the custom kernel to slightly blur details, reducing visual noise while preserving overall shape during the SVG‑to‑PNG conversion.
+ * 4. When preparing SVG‑based logos for print, a developer might need to apply a subtle sharpening filter defined by the custom kernel to enhance contrast after rasterization, ensuring the PNG output meets print‑ready quality.
+ * 5. When building an automated image‑processing pipeline that normalizes SVG assets and applies a consistent smoothing effect across all files, a developer can employ the custom kernel and filter step to guarantee uniform visual appearance in the resulting PNG assets.
  */

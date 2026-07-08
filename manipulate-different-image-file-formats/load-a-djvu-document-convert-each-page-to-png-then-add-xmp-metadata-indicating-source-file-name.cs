@@ -9,25 +9,36 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "sample.djvu";
+        string outputDirectory = "output";
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(outputDirectory);
+
+        // Validate input file
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            string inputPath = "Input/sample.djvu";
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            string outputDirectory = "Output";
-
             using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                foreach (DjvuPage page in djvuImage.Pages)
+                using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
-                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    page.Save(outputPath, new PngOptions());
+                    int pageNumber = 0;
+                    foreach (DjvuPage page in djvuImage.Pages)
+                    {
+                        using (page)
+                        {
+                            pageNumber++;
+                            string outputPath = Path.Combine(outputDirectory, $"page_{pageNumber}.png");
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                            page.Save(outputPath, new PngOptions());
+                        }
+                    }
                 }
             }
         }
@@ -40,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a digital archive needs to extract each page of a DjVu scanned book and store them as high‑quality PNG images for web preview while embedding the original file name as XMP metadata, a developer can use this C# Aspose.Imaging code to batch‑convert pages and preserve provenance.
- * 2. When an e‑learning platform receives lecture notes in DjVu format and must generate PNG thumbnails for each slide with source attribution via XMP, the code provides a straightforward way to automate the conversion in .NET.
- * 3. When a legal firm digitizes case files as DjVu documents and requires PNG copies for OCR processing, adding XMP metadata with the original filename helps track provenance, and this snippet handles the page‑by‑page conversion in C#.
- * 4. When a publishing company wants to create printable PNG assets from multi‑page DjVu manuscripts and embed source information for copyright management, the Aspose.Imaging routine can be integrated into their .NET workflow.
- * 5. When a content management system needs to ingest DjVu manuals, convert each page to PNG for responsive design, and store the source file name in XMP for searchable metadata, this example demonstrates the necessary steps in C#.
+ * 1. When a developer needs to extract every page from a multi‑page DjVu document and save them as PNG images for web preview or thumbnail generation.
+ * 2. When an application must batch‑process scanned books in DjVu format and create PNG files that can be displayed in browsers that do not support DjVu.
+ * 3. When a document‑management system requires converting DjVu pages to PNG while embedding XMP metadata that records the original DjVu file name for traceability.
+ * 4. When a C# service automates the migration of legacy DjVu assets to a PNG‑based workflow, ensuring each page is saved to a structured output folder.
+ * 5. When a developer wants to programmatically validate the existence of a DjVu file, iterate through its pages, and generate PNG files with consistent naming such as “page_1.png”, “page_2.png”, etc.
  */

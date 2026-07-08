@@ -38,17 +38,18 @@ class Program
                     sourceApng.Width,
                     sourceApng.Height))
                 {
-                    int frameCount = sourceApng.PageCount;
+                    resultApng.RemoveAllFrames();
 
-                    for (int i = 0; i < frameCount; i++)
+                    foreach (var page in sourceApng.Pages)
                     {
-                        ApngFrame srcFrame = (ApngFrame)sourceApng.Pages[i];
-                        RasterImage frameImage = (RasterImage)srcFrame;
+                        ApngFrame sourceFrame = (ApngFrame)page;
 
-                        frameImage.Filter(frameImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
+                        sourceFrame.Filter(sourceFrame.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
 
-                        uint frameTime = (uint)srcFrame.FrameTime;
-                        resultApng.AddFrame(frameImage, frameTime);
+                        resultApng.AddFrame(sourceFrame);
+
+                        ApngFrame addedFrame = (ApngFrame)resultApng.Pages[resultApng.PageCount - 1];
+                        addedFrame.FrameTime = sourceFrame.FrameTime;
                     }
 
                     resultApng.Save();
@@ -64,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a stylized animated logo for a website, a developer can use this code to emboss each frame of the APNG while keeping the original animation speed.
- * 2. When generating an animated tutorial that highlights texture, a developer can apply the Emboss5x5 filter to every frame of a PNG animation to give a 3‑D effect without altering frame delays.
- * 3. When converting a series of hand‑drawn sketches into an animated PNG for a mobile app, a developer can emboss the drawings frame‑by‑frame to enhance depth while preserving the timing for smooth playback.
- * 4. When preparing an APNG badge for a game UI that needs a subtle relief effect, a developer can run this C# routine to emboss each frame and retain the original frame‑time values.
- * 5. When processing user‑uploaded animated PNG stickers for a messaging platform, a developer can apply the Emboss5x5 convolution filter to each frame to add visual flair while ensuring the sticker animation speed remains unchanged.
+ * 1. When a developer wants to add a 5×5 emboss filter to every frame of an animated PNG (APNG) while preserving the original frame delays, this code can be used.
+ * 2. When you need to convert a multi‑frame PNG into a stylized animation with consistent color depth (TruecolorWithAlpha) and maintain the animation timing, the example shows how.
+ * 3. When processing user‑uploaded APNG files to give them a raised‑edge visual effect without losing the animation sequence, this C# routine applies the ConvolutionFilter.Emboss5x5 to each frame.
+ * 4. When integrating image processing into a .NET web service that must read an APNG, apply a convolution filter, and output a new APNG with the same frame rate, the code demonstrates the required steps.
+ * 5. When creating a batch job that automatically enhances animated PNG icons with an emboss effect while keeping their original playback speed, this snippet provides the complete workflow.
  */

@@ -2,6 +2,9 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -11,7 +14,7 @@ class Program
         try
         {
             string inputPath = "input.svg";
-            string outputPath = "output/output.tif";
+            string outputPath = "output.tif";
 
             if (!File.Exists(inputPath))
             {
@@ -21,16 +24,47 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            // Load the SVG vector image
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.ResolutionSettings = new ResolutionSetting(300, 300);
-                tiffOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                // Rasterize SVG to PNG in memory
+                using (MemoryStream pngStream = new MemoryStream())
                 {
-                    PageSize = image.Size
-                };
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new SvgRasterizationOptions
+                        {
+                            PageSize = vectorImage.Size
+                        }
+                    };
+                    vectorImage.Save(pngStream, pngOptions);
+                    pngStream.Position = 0;
 
-                image.Save(outputPath, tiffOptions);
+                    // Load the rasterized PNG
+                    using (RasterImage raster = (RasterImage)Image.Load(pngStream))
+                    {
+                        // Prepare TIFF save options with high resolution
+                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                        {
+                            ResolutionSettings = new ResolutionSetting(300, 300)
+                        };
+
+                        // Create a TIFF canvas
+                        using (Image tiffCanvas = Image.Create(tiffOptions, raster.Width, raster.Height))
+                        {
+                            // Apply shear transformation using a matrix
+                            var shearMatrix = new Matrix(1, 0.5f, 0, 1, 0, 0); // shearY = 0.5
+                            var graphics = new Graphics(tiffCanvas);
+                            graphics.Transform = shearMatrix;
+
+                            // Draw the raster image onto the canvas
+                            graphics.DrawImage(raster, new Point(0, 0));
+
+                            // Save the transformed image as TIFF
+                            tiffCanvas.Save(outputPath, tiffOptions);
+                        }
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -42,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG illustration into a 300 dpi TIFF for high‑quality print while applying a shear transformation to correct skewed artwork, this C# code using Aspose.Imaging provides a quick solution.
- * 2. When an e‑commerce platform must generate catalog images from vector product drawings, applying a shear to align the view and saving as a high‑resolution TIFF ensures consistent printing standards.
- * 3. When a GIS application requires rasterizing map symbols stored as SVG, applying a shear to match map projection and exporting to TIFF at 300 dpi enables seamless integration with legacy raster layers.
- * 4. When a medical imaging system needs to archive vector‑based diagrams (e.g., SVG scans) with a shear correction for orientation and store them as lossless TIFF files for regulatory compliance, this snippet handles the process in .NET.
- * 5. When a publishing workflow automates the preparation of SVG logos for magazine layouts, applying a shear to adjust the logo’s angle and saving the result as a high‑resolution TIFF guarantees crisp, print‑ready assets.
+ * 1. When a developer needs to convert an SVG logo into a print‑ready 300 dpi TIFF while applying a shear distortion to simulate a perspective effect for marketing materials.
+ * 2. When an engineering application must transform vector schematics (SVG) with a shear matrix and export them as high‑resolution TIFF files for inclusion in technical documentation.
+ * 3. When a GIS system requires rasterizing and shearing vector map overlays before saving them as TIFF images with precise resolution settings for satellite image analysis.
+ * 4. When an e‑learning platform wants to generate skewed, high‑quality TIFF screenshots from SVG diagrams for use in printable course handouts.
+ * 5. When a digital archiving tool needs to preserve vector artwork by applying a shear transformation and storing the result as a lossless, high‑resolution TIFF for long‑term storage.
  */

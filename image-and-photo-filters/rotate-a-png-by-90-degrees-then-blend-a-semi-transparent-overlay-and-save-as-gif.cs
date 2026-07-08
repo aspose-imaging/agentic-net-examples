@@ -1,10 +1,6 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,52 +8,34 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.gif";
+            string inputPngPath = "input.png";
+            string overlayPath = "overlay.png";
+            string outputGifPath = "output.gif";
 
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            if (!File.Exists(inputPngPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputPngPath}");
+                return;
+            }
+            if (!File.Exists(overlayPath))
+            {
+                Console.Error.WriteLine($"File not found: {overlayPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputGifPath));
 
-            // Load the PNG image
-            using (RasterImage png = (RasterImage)Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage baseImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPngPath))
             {
-                if (!png.IsCached) png.CacheData();
+                baseImage.Rotate(90f, true, Aspose.Imaging.Color.White);
 
-                // Rotate the image by 90 degrees clockwise
-                png.RotateFlip(RotateFlipType.Rotate90FlipNone);
-
-                // Create a semi‑transparent red overlay of the same size
-                using (RasterImage overlay = (RasterImage)Image.Create(
-                    new PngOptions { Source = new StreamSource(new MemoryStream()) },
-                    png.Width, png.Height))
+                using (Aspose.Imaging.RasterImage overlayImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(overlayPath))
                 {
-                    // Prepare ARGB pixel data (alpha 128, red 255)
-                    int pixelCount = png.Width * png.Height;
-                    int[] overlayPixels = new int[pixelCount];
-                    int argb = (128 << 24) | (255 << 16) | (0 << 8) | 0; // 50% transparent red
-                    for (int i = 0; i < pixelCount; i++)
-                    {
-                        overlayPixels[i] = argb;
-                    }
-
-                    // Apply pixels to the overlay
-                    overlay.SaveArgb32Pixels(new Rectangle(0, 0, png.Width, png.Height), overlayPixels);
-
-                    // Blend the overlay onto the rotated image
-                    png.Blend(new Point(0, 0), overlay, 255);
+                    baseImage.Blend(new Aspose.Imaging.Point(0, 0), overlayImage, 128);
                 }
 
-                // Save the result as GIF
-                GifOptions gifOptions = new GifOptions { Source = new FileCreateSource(outputPath, false) };
-                png.Save(outputPath, gifOptions);
+                GifOptions gifOptions = new GifOptions();
+                baseImage.Save(outputGifPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -66,3 +44,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When creating animated web banners that need a rotated base image with a semi‑transparent logo overlay before converting to GIF for browser compatibility.
+ * 2. When generating product thumbnails where the original PNG must be rotated to portrait orientation, blended with a watermark overlay at 50 % opacity, and saved as a lightweight GIF for e‑commerce listings.
+ * 3. When preparing social‑media share images that require a 90‑degree rotation of a screenshot PNG, adding a translucent call‑to‑action overlay, and exporting to GIF to meet platform size limits.
+ * 4. When building a desktop reporting tool that rotates scanned PNG diagrams, applies a semi‑transparent grid overlay for visual reference, and stores the result as a GIF for inclusion in PDF reports.
+ * 5. When developing a game asset pipeline that reorients character sprites (PNG), blends a semi‑transparent effect layer, and outputs GIF frames for animation sequences.
+ */

@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -10,9 +9,8 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
             if (!Directory.Exists(inputDirectory))
             {
@@ -26,39 +24,23 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
+            string[] files = Directory.GetFiles(inputDirectory);
             foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
 
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    RasterImage raster = image as RasterImage;
-                    if (raster != null)
-                    {
-                        raster.CacheData();
-
-                        Graphics graphics = new Graphics(raster);
-                        Font font = new Font("Arial", 24);
-                        SolidBrush brush = new SolidBrush(Color.Black);
-                        string dateText = DateTime.Now.ToString("yyyy-MM-dd");
-                        graphics.DrawString(dateText, font, brush, new PointF(10, raster.Height - 30));
-                    }
-
-                    using (PdfOptions pdfOptions = new PdfOptions())
-                    {
-                        image.Save(outputPath, pdfOptions);
-                    }
+                    image.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -68,3 +50,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate PDF reports from a folder of scanned JPEG or TIFF documents and embed the current date as a watermark to prove the report’s issuance time.
+ * 2. When an e‑commerce platform must automatically convert product photos (PNG, BMP) into PDF catalogs each night while stamping the generation date for version control using Aspose.Imaging for .NET.
+ * 3. When a legal firm wants to archive client‑submitted images as PDF evidence files, adding a date watermark to satisfy chain‑of‑custody requirements.
+ * 4. When a medical imaging system needs to batch export radiology images (converted to PNG) to PDF for patient records, with the service date displayed as a watermark.
+ * 5. When a marketing team creates printable PDFs from campaign graphics and wants the current date watermarked to track the latest design version during iterative reviews.
+ */

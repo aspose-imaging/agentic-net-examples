@@ -7,41 +7,40 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Temp\input.pdf";
+        string outputPath = @"C:\Temp\output.svg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Input\sample.pdf";
-            string outputPath = @"C:\Output\sample.svg";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PDF document
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options (page size matches source)
-                var rasterOptions = new SvgRasterizationOptions
+                // Prepare vector rasterization options with the source page size
+                var vectorOptions = new SvgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
 
-                // Configure SVG save options
-                var saveOptions = new SvgOptions
+                // Configure SVG save options: keep text as selectable (TextAsShapes = false)
+                var svgOptions = new SvgOptions
                 {
-                    VectorRasterizationOptions = rasterOptions,
-                    // Preserve selectable text (do NOT render as shapes)
+                    VectorRasterizationOptions = vectorOptions,
                     TextAsShapes = false
                 };
 
-                // Save as SVG
-                image.Save(outputPath, saveOptions);
+                // Save the PDF as SVG
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer wants to embed a PDF brochure with vector illustrations into a responsive website and needs the text to remain searchable and selectable, they can use this C# code to convert the PDF to SVG while preserving selectable text.
- * 2. When an e‑learning platform needs to transform lecture slides saved as PDF into scalable SVG graphics for interactive HTML5 viewers, this code provides a straightforward way to retain vector quality and editable text.
- * 3. When a marketing automation system generates PDF invoices that must be displayed in email newsletters as lightweight, resolution‑independent graphics, the code can convert them to SVG without turning the text into shapes.
- * 4. When a GIS application exports map data as PDF and requires the maps to be displayed on a web map client with selectable labels, developers can apply this code to produce SVG files that keep the text elements searchable.
- * 5. When a documentation portal wants to publish technical manuals originally authored in PDF as SVG for faster page loads and SEO‑friendly text indexing, this C# snippet enables the conversion while preserving the original vector graphics and selectable text.
+ * 1. When a developer needs to embed a PDF brochure with vector graphics into a responsive web page while keeping the text selectable, they can convert the PDF to SVG using this code.
+ * 2. When an e‑learning platform wants to display high‑resolution diagrams from PDF lecture notes on browsers without losing scalability, the code can rasterize the PDF pages to SVG while preserving selectable text.
+ * 3. When a SaaS application generates printable invoices as PDFs but also requires a web‑friendly version for online viewing, this snippet converts the PDF to SVG so the text stays searchable and the graphics remain crisp.
+ * 4. When a content management system must automatically transform uploaded PDF marketing assets into SEO‑friendly SVG assets for web publishing, the code provides a C# solution that keeps text as text nodes.
+ * 5. When a developer is building an automated workflow that extracts vector graphics from PDF reports and serves them as interactive SVGs in a dashboard, this example shows how to load the PDF and save it as SVG with selectable text.
  */

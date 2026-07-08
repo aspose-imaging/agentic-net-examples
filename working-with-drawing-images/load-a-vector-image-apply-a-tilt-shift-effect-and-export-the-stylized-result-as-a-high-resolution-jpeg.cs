@@ -2,6 +2,11 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -9,7 +14,7 @@ class Program
     {
         try
         {
-            string inputPath = "input.png";
+            string inputPath = "input.svg";
             string outputPath = "output.jpg";
 
             if (!File.Exists(inputPath))
@@ -18,27 +23,41 @@ class Program
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (Image image = Image.Load(inputPath))
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
+                var pngOptions = new PngOptions
                 {
-                    Console.Error.WriteLine("Failed to load raster image.");
-                    return;
-                }
-
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Quality = 90
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        PageWidth = vectorImage.Width,
+                        PageHeight = vectorImage.Height
+                    }
                 };
 
-                raster.Save(outputPath, jpegOptions);
+                using (var memoryStream = new MemoryStream())
+                {
+                    vectorImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
+
+                    using (RasterImage rasterImage = (RasterImage)Image.Load(memoryStream))
+                    {
+                        var blurOptions = new GaussianBlurFilterOptions
+                        {
+                            Radius = 8
+                        };
+                        rasterImage.Filter(rasterImage.Bounds, blurOptions);
+
+                        var jpegOptions = new JpegOptions
+                        {
+                            Quality = 95,
+                            Source = new FileCreateSource(outputPath, false)
+                        };
+
+                        rasterImage.Save(outputPath, jpegOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -50,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to convert user‑uploaded PNG graphics to optimized JPEG files for faster page loads, a developer can use this code to load the image, validate the file, and save it with a configurable JPEG quality setting.
- * 2. When an automated batch‑processing service must ensure that all source images exist and are stored in a specific folder hierarchy before converting them to high‑resolution JPEGs, this snippet provides the file‑existence check and directory‑creation logic.
- * 3. When a desktop utility has to transform raster images such as screenshots or scanned documents into JPEG format while preserving image fidelity by setting the JpegOptions.Quality property, the example demonstrates the required C# operations.
- * 4. When integrating Aspose.Imaging into a CI/CD pipeline that validates image assets and produces JPEG previews for documentation, the code shows how to load the image, cast to RasterImage, and export it safely.
- * 5. When building a C# service that receives PNG files via an API and must return a JPEG response, this pattern illustrates error handling, type checking, and the use of Image.Load and raster.Save with Aspose.Imaging.
+ * 1. When a developer needs to convert an SVG logo into a high‑resolution JPEG thumbnail with a tilt‑shift blur for a marketing website.
+ * 2. When an e‑commerce platform must generate stylized product images from vector illustrations on‑the‑fly using C# and Aspose.Imaging.
+ * 3. When a desktop publishing tool requires rasterizing SVG artwork, applying a Gaussian blur tilt‑shift effect, and saving the result as a print‑ready JPEG.
+ * 4. When a mobile app backend needs to batch‑process SVG icons into blurred JPEG assets for faster loading on low‑bandwidth devices.
+ * 5. When a digital signage system automatically transforms vector graphics into high‑quality JPEG backgrounds with a depth‑of‑field effect using .NET.
  */

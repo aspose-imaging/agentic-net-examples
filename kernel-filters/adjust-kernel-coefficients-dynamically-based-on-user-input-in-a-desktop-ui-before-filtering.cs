@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -9,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.jpg";
-            string outputPath = "output.jpg";
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,34 +23,25 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
+            // Get dynamic filter parameters from the user
+            Console.WriteLine("Enter Gaussian blur radius (integer):");
+            int radius = int.Parse(Console.ReadLine() ?? "5");
+
+            Console.WriteLine("Enter Gaussian blur sigma (decimal):");
+            double sigma = double.Parse(Console.ReadLine() ?? "4.0");
+
+            // Load image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to RasterImage for filtering
-                RasterImage raster = (RasterImage)image;
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Prompt user for kernel size (must be odd)
-                Console.Write("Enter kernel size (odd integer): ");
-                string sizeInput = Console.ReadLine();
-                int kernelSize = int.TryParse(sizeInput, out int parsedSize) && parsedSize > 0 && parsedSize % 2 == 1
-                    ? parsedSize
-                    : 5; // default size
+                // Apply Gaussian blur with user‑defined parameters
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(radius, sigma);
+                rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
-                // Prompt user for sigma value
-                Console.Write("Enter sigma (double): ");
-                string sigmaInput = Console.ReadLine();
-                double sigma = double.TryParse(sigmaInput, out double parsedSigma) && parsedSigma > 0
-                    ? parsedSigma
-                    : 4.0; // default sigma
-
-                // Create sharpen filter options with user-defined parameters
-                var sharpenOptions = new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(kernelSize, sigma);
-
-                // Apply the filter to the whole image
-                raster.Filter(raster.Bounds, sharpenOptions);
-
-                // Save the processed image
-                raster.Save(outputPath);
+                // Save the filtered image as PNG
+                rasterImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -61,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to let users sharpen JPEG photos by adjusting the kernel size and sigma in real time before saving the result.
- * 2. When an image‑editing tool must support custom Gaussian‑based sharpening for PNG screenshots, letting the user specify odd kernel dimensions and sigma via a UI.
- * 3. When a batch‑processing utility requires dynamic filter parameters to enhance scanned PDF page images converted to BMP, using Aspose.Imaging’s SharpenFilterOptions.
- * 4. When a photo‑management software wants to preview sharpened TIFF images with user‑controlled kernel coefficients without hard‑coding filter settings.
- * 5. When a C# WinForms program needs to apply a user‑defined sharpen filter to any raster image loaded from disk, ensuring the output path is created automatically.
+ * 1. When a desktop application needs to let users fine‑tune a Gaussian blur effect on PNG photos by entering radius and sigma values before saving the result.
+ * 2. When an image‑processing tool must validate the existence of an input file, create the output folder, and apply a user‑defined blur to JPEG or PNG files using Aspose.Imaging.
+ * 3. When a photo‑editing software requires real‑time adjustment of blur parameters via a console or UI prompt and then writes the filtered image back to disk in PNG format.
+ * 4. When a batch‑processing script needs to load a raster image, apply a custom Gaussian blur filter based on operator input, and preserve image quality with PngOptions.
+ * 5. When a C# developer wants to expose a simple UI for non‑technical users to control image smoothing for scanned documents, using Aspose.Imaging’s Filter method and dynamic kernel coefficients.
  */

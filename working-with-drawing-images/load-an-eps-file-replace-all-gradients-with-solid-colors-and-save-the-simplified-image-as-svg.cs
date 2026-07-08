@@ -1,15 +1,14 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hard‑coded input and output paths
         string inputPath = "input.eps";
         string outputPath = "output.svg";
 
@@ -25,27 +24,27 @@ class Program
 
         try
         {
-            // Load EPS image with default load options
-            using (EpsImage image = (EpsImage)Image.Load(inputPath, new EpsLoadOptions()))
+            // Load the EPS image
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath, new EpsLoadOptions()))
             {
-                // NOTE: Aspose.Imaging does not provide a direct API to replace gradients with solid colors.
-                // If such processing is required, it would involve parsing the EPS content and modifying
-                // the PostScript commands, which is beyond the scope of this example.
-                // The image is saved directly as SVG, preserving the vector data.
+                // ------------------------------------------------------------
+                // NOTE: Aspose.Imaging does not provide a direct API to replace
+                // gradients with solid colors in vector EPS content. If such
+                // processing is required, it must be implemented by parsing
+                // the EPS/PostScript stream and modifying the drawing commands.
+                // For the purpose of this example we proceed to save the image
+                // as SVG without explicit gradient replacement.
+                // ------------------------------------------------------------
 
                 // Prepare SVG save options
-                var svgOptions = new SvgOptions();
-
-                // Configure vector rasterization options to match the source dimensions
-                var rasterOptions = new EpsRasterizationOptions
+                var svgOptions = new SvgOptions
                 {
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
+                    // Example: render text as shapes to avoid font dependencies
+                    TextAsShapes = true
                 };
-                svgOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the image as SVG
-                image.Save(outputPath, svgOptions);
+                // Save the simplified image as SVG
+                epsImage.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -57,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy EPS artwork into modern SVG files for responsive web design using C# and Aspose.Imaging.
- * 2. When an automated build pipeline must batch‑process EPS logos and output SVG versions to integrate with a company's branding system.
- * 3. When a desktop application has to load an EPS diagram, ensure the output directory exists, and save it as SVG while preserving vector fidelity.
- * 4. When a cloud service receives user‑uploaded EPS files and must transform them into SVG format for preview in browsers without requiring external tools.
- * 5. When a migration script replaces EPS assets in a digital asset management system with SVG equivalents to improve scalability and cross‑platform compatibility.
+ * 1. When a developer needs to convert legacy EPS artwork to a web‑compatible SVG file in a C# application while ensuring text is rendered as shapes to avoid font dependencies.
+ * 2. When an automated workflow must verify the existence of an EPS file, create the target directory, and export the vector image as SVG to simplify assets for faster page loading.
+ * 3. When a .NET service processes incoming EPS files, replaces complex gradient definitions with solid colors (by parsing the PostScript stream) and saves the cleaned‑up vector graphic as SVG for downstream editing.
+ * 4. When a batch job uses Aspose.Imaging to load multiple EPS documents, handle missing files gracefully, and generate SVG outputs with TextAsShapes enabled for consistent rendering across browsers.
+ * 5. When a graphics pipeline requires converting EPS to SVG while stripping advanced gradient features to produce lightweight, gradient‑free SVG files that are compatible with basic SVG editors.
  */

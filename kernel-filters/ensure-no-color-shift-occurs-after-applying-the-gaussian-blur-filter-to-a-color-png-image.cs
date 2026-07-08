@@ -9,9 +9,9 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\temp\sample.png";
-            string outputPath = @"C:\temp\sample.gaussianblur.png";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.png";
+            string outputPath = @"C:\temp\output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,23 +26,21 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to use the Filter method
-                RasterImage rasterImage = (RasterImage)image;
+                // Cast to RasterImage to access filtering
+                RasterImage raster = (RasterImage)image;
 
-                // Configure Gaussian blur options
+                // Configure Gaussian blur (size = 5, sigma = 4.0)
                 var blurOptions = new GaussianBlurFilterOptions(5, 4.0)
                 {
                     // Preserve the alpha channel to avoid color shift
-                    IgnoreAlpha = false,
-                    // Process borders so the image size remains unchanged
-                    BordersProcessing = true
+                    IgnoreAlpha = false
                 };
 
-                // Apply the Gaussian blur to the whole image
-                rasterImage.Filter(rasterImage.Bounds, blurOptions);
+                // Apply the filter to the whole image
+                raster.Filter(raster.Bounds, blurOptions);
 
                 // Save the processed image
-                rasterImage.Save(outputPath);
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -54,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to apply a Gaussian blur to a PNG with transparency in a C# application while preserving the original colors and avoiding any color shift.
- * 2. When an e‑commerce platform wants to generate blurred background thumbnails from product PNG images without altering the alpha channel using Aspose.Imaging for .NET.
- * 3. When a desktop photo‑editing tool must programmatically soften edges of a PNG logo while keeping the image size unchanged and maintaining accurate color fidelity.
- * 4. When an automated image‑processing pipeline processes user‑uploaded PNG avatars and requires a consistent blur effect without introducing color artifacts.
- * 5. When a game developer prepares UI assets by applying a Gaussian blur to PNG sprites in C# while ensuring the transparent regions remain intact and the output file is saved in the same format.
+ * 1. When a developer needs to create a soft‑focused PNG thumbnail for a website without introducing any color shift, they can use Aspose.Imaging’s GaussianBlurFilterOptions with IgnoreAlpha set to false.
+ * 2. When an e‑commerce platform must apply a subtle blur to product photos to protect privacy while keeping the original hue and transparency intact, this C# code ensures the PNG’s colors remain accurate.
+ * 3. When a desktop application generates blurred background images for UI overlays and must preserve the exact color palette of the source PNG, the raster.Filter call with the configured Gaussian blur prevents unwanted tinting.
+ * 4. When a batch‑processing script processes PNG assets for a mobile app and requires consistent visual quality across devices, the code’s preservation of the alpha channel avoids color distortion after blurring.
+ * 5. When a developer integrates image‑processing into an automated reporting tool that adds a Gaussian blur to PNG charts without altering their original colors, the provided Aspose.Imaging workflow guarantees no color shift.
  */

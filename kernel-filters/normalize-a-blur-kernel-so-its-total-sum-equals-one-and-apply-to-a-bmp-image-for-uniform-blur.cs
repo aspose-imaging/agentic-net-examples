@@ -2,62 +2,68 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.bmp";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Obtain a blur kernel (e.g., box blur of size 5)
-                double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurBox(5);
+                // Define kernel size (e.g., 5x5 box blur)
+                int kernelSize = 5;
 
-                // Normalize the kernel so that its sum equals one
+                // Obtain the box blur kernel
+                double[,] kernel = ConvolutionFilter.GetBlurBox(kernelSize);
+
+                // Compute sum of kernel elements
                 double sum = 0;
-                int rows = kernel.GetLength(0);
-                int cols = kernel.GetLength(1);
-                for (int i = 0; i < rows; i++)
+                for (int i = 0; i < kernelSize; i++)
                 {
-                    for (int j = 0; j < cols; j++)
+                    for (int j = 0; j < kernelSize; j++)
                     {
                         sum += kernel[i, j];
                     }
                 }
-                if (sum != 0)
+
+                // Normalize kernel so that its total sum equals one
+                double[,] normalizedKernel = new double[kernelSize, kernelSize];
+                for (int i = 0; i < kernelSize; i++)
                 {
-                    for (int i = 0; i < rows; i++)
+                    for (int j = 0; j < kernelSize; j++)
                     {
-                        for (int j = 0; j < cols; j++)
-                        {
-                            kernel[i, j] /= sum;
-                        }
+                        normalizedKernel[i, j] = kernel[i, j] / sum;
                     }
                 }
 
-                // Apply the normalized convolution filter to the entire image
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                // Create convolution filter options with the normalized kernel
+                var filterOptions = new ConvolutionFilterOptions(normalizedKernel);
+
+                // Apply the filter to the entire image
                 raster.Filter(raster.Bounds, filterOptions);
 
-                // Save the processed image as BMP
+                // Save the result as BMP
                 var bmpOptions = new BmpOptions();
                 raster.Save(outputPath, bmpOptions);
             }
@@ -71,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to apply a uniform blur to a BMP image for pre‑processing before OCR, they can normalize a box blur kernel and use Aspose.Imaging’s convolution filter in C#.
- * 2. When creating a thumbnail generator that must preserve overall brightness while smoothing edges, normalizing the blur kernel ensures the summed pixel values stay constant across BMP files.
- * 3. When building a medical imaging tool that requires consistent intensity after blurring DICOM‑converted BMP scans, the code guarantees the convolution does not alter the image’s average gray level.
- * 4. When implementing a batch image‑enhancement pipeline that reads BMP files from a folder and applies a subtle blur without darkening the picture, the normalized kernel approach in Aspose.Imaging C# simplifies the process.
- * 5. When developing a game asset pipeline where BMP textures need a gentle blur for anti‑aliasing while keeping color balance, normalizing the kernel before applying the filter prevents unintended brightness shifts.
+ * 1. When a developer needs to preprocess a BMP photograph with a consistent blur before performing OCR, they can normalize a box‑blur kernel so its sum equals one and apply it using Aspose.Imaging’s convolution filter.
+ * 2. When a C# application must generate a smooth background effect for a BMP sprite sheet in a game, normalizing the blur kernel ensures the blur intensity remains uniform across all pixels.
+ * 3. When an image‑processing service has to reduce noise in scanned BMP documents while preserving overall brightness, a normalized blur kernel applied via Aspose.Imaging guarantees that the image’s average luminance stays unchanged.
+ * 4. When a batch‑processing tool converts raw BMP scans into a softened version for visual inspection, using a normalized kernel prevents unintended darkening or brightening of the output image.
+ * 5. When a developer integrates a BMP image‑enhancement feature into a .NET desktop app and wants the blur to be mathematically accurate, normalizing the kernel to a sum of one provides a predictable, uniform blur effect.
  */

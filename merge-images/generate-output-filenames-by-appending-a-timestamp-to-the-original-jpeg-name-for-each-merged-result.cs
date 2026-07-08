@@ -13,7 +13,7 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG paths
+            // Hardcoded input JPEG files
             string[] inputPaths = new string[]
             {
                 "input1.jpg",
@@ -21,55 +21,57 @@ class Program
                 "input3.jpg"
             };
 
-            // Validate each input file
-            foreach (string path in inputPaths)
+            // Validate input files
+            foreach (string inputPath in inputPaths)
             {
-                if (!File.Exists(path))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {path}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
             }
 
-            // Collect sizes of all input images
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-            foreach (string path in inputPaths)
+            // Collect image sizes
+            List<Size> sizes = new List<Size>();
+            foreach (string inputPath in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                using (RasterImage img = (RasterImage)Image.Load(inputPath))
                 {
                     sizes.Add(img.Size);
                 }
             }
 
-            // Calculate canvas dimensions for horizontal merge
+            // Calculate canvas dimensions (horizontal merge)
             int newWidth = sizes.Sum(s => s.Width);
             int newHeight = sizes.Max(s => s.Height);
 
             // Generate output filename with timestamp
+            string firstNameWithoutExt = Path.GetFileNameWithoutExtension(inputPaths[0]);
             string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-            string baseName = Path.GetFileNameWithoutExtension(inputPaths[0]);
-            string outputPath = $"{baseName}_{timestamp}.jpg";
+            string outputFileName = $"{firstNameWithoutExt}_{timestamp}.jpg";
+            string outputPath = Path.Combine(Path.GetDirectoryName(inputPaths[0]) ?? "", outputFileName);
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create JPEG canvas
-            Source src = new FileCreateSource(outputPath, false);
-            JpegOptions options = new JpegOptions() { Source = src, Quality = 100 };
-            using (JpegImage canvas = (JpegImage)Image.Create(options, newWidth, newHeight))
+            // Create JPEG canvas bound to the output file
+            Source source = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 90 };
+
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
                 int offsetX = 0;
-                foreach (string path in inputPaths)
+                foreach (string inputPath in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
                     {
-                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
+                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
 
-                // Save the merged image (bound image saves to the source path)
+                // Save the bound image
                 canvas.Save();
             }
         }
@@ -82,9 +84,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically combine product photos into a single horizontal strip for an e‑commerce catalog and keep each version uniquely identified by a timestamped JPEG filename.
- * 2. When a batch‑processing script must merge scanned receipts into one image per day and generate output files with date‑time stamps to avoid overwriting previous results.
- * 3. When a photo‑sharing application creates a side‑by‑side comparison of before‑and‑after images and stores the merged JPEG with a timestamp to track version history.
- * 4. When an automated reporting tool assembles multiple chart images into a single wide JPEG for inclusion in a PDF report and uses a timestamped filename for easy archival.
- * 5. When a digital signage system concatenates several advertisement banners into one horizontal JPEG and names the output with a timestamp to ensure the latest content is displayed without manual renaming.
+ * 1. When a developer needs to create a time‑stamped composite JPEG of product photos for daily inventory reports.
+ * 2. When an automated image‑processing pipeline must merge user‑uploaded screenshots and store each result with a unique filename to avoid overwriting previous builds.
+ * 3. When a web service generates side‑by‑side before‑and‑after medical images and requires the output file name to include the exact processing time for audit trails.
+ * 4. When a desktop application combines multiple scanned documents into a single JPEG and uses a timestamped name to keep a chronological archive of merged files.
+ * 5. When a scheduled batch job concatenates security camera snapshots and saves the merged image with a timestamp to simplify log correlation and retrieval.
  */

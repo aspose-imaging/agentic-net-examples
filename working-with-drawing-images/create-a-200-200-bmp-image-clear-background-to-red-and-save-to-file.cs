@@ -2,10 +2,11 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
@@ -18,11 +19,10 @@ class Program
             // Create a 200x200 BMP image
             using (BmpImage bmpImage = new BmpImage(200, 200))
             {
-                // Obtain a Graphics object for drawing
+                // Fill the entire image with red color
                 Graphics graphics = new Graphics(bmpImage);
-
-                // Clear the entire canvas to red
-                graphics.Clear(Color.Red);
+                SolidBrush redBrush = new SolidBrush(Color.Red);
+                graphics.FillRectangle(redBrush, bmpImage.Bounds);
 
                 // Save the image to the specified file
                 bmpImage.Save(outputPath);
@@ -37,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a simple red placeholder BMP image of a fixed size for testing image upload functionality in a .NET application.
- * 2. When a C# program must create a 200 × 200 bitmap to serve as a background layer for dynamically compositing icons in a Windows desktop utility.
- * 3. When an automated build script has to produce a red BMP file to verify that the Aspose.Imaging library correctly writes BMP headers and pixel data on a CI server.
- * 4. When a developer wants to pre‑render a solid‑color thumbnail in BMP format for use in legacy systems that only accept uncompressed bitmap files.
- * 5. When a reporting tool needs to embed a red square BMP as a visual placeholder in generated PDF or Word documents when the original image is missing.
+ * 1. When a developer needs to generate a simple placeholder image in BMP format for testing UI components that require a 200 × 200 red background.
+ * 2. When an automated report generator must embed a red square BMP image of fixed dimensions into a PDF using C# and Aspose.Imaging.
+ * 3. When a game asset pipeline requires creating a solid‑color BMP texture of 200 × 200 pixels for prototyping level design.
+ * 4. When a Windows desktop application needs to programmatically create a red BMP icon file for dynamic theming or branding.
+ * 5. When a batch image processing script must produce a red background BMP file as a base layer before applying additional graphics operations.
  */

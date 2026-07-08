@@ -22,7 +22,7 @@ class Program
             }
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EPS image
             using (Image image = Image.Load(inputPath))
@@ -46,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a vector EPS logo into a raster TIFF thumbnail of 1024×768 for inclusion in a print‑ready PDF brochure.
- * 2. When an e‑commerce platform must generate high‑resolution TIFF product images from EPS artwork to meet marketplace image specifications.
- * 3. When a document management system automatically resizes uploaded EPS diagrams to 1024×768 and stores them as TIFF files for archival and preview purposes.
- * 4. When a GIS application requires EPS map overlays to be rasterized to a fixed 1024×768 TIFF size for fast rendering on low‑bandwidth devices.
- * 5. When a batch processing script needs to validate the existence of an EPS file, resize it with Mitchell interpolation, and save the result as a TIFF for downstream image‑analysis pipelines.
+ * 1. When a developer needs to generate a high‑resolution preview thumbnail of a vector EPS artwork for a web gallery, they can resize it to 1024×768 pixels and save it as a TIFF using Aspose.Imaging for .NET.
+ * 2. When an e‑commerce platform must convert supplier‑provided EPS logos into TIFF files that match a fixed 1024×768 size for product catalog PDFs, this code automates the resizing and format conversion.
+ * 3. When a document management system requires archival of EPS drawings as lossless TIFF images with a standard 1024×768 dimension for consistent indexing, the sample demonstrates the necessary C# workflow.
+ * 4. When a printing service needs to prepare EPS artwork for raster‑based proofing by scaling it to 1024×768 and exporting to TIFF to preserve color fidelity, the code provides a reliable solution.
+ * 5. When a GIS application must display EPS map overlays as fixed‑size TIFF tiles of 1024×768 pixels for fast rendering in a tiled map viewer, this snippet shows how to perform the resize and save operation.
  */

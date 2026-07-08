@@ -3,60 +3,44 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the indexed PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for pixel manipulation
                 RasterImage raster = (RasterImage)image;
 
-                // Define a 3x3 sharpening kernel
                 double[,] kernel = new double[,]
                 {
-                    { 0, -1,  0 },
+                    { 0, -1, 0 },
                     { -1, 5, -1 },
-                    { 0, -1,  0 }
+                    { 0, -1, 0 }
                 };
 
-                // Apply the convolution kernel
-                raster.Filter(raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
 
-                // Re‑generate a palette that matches the processed image
-                var palette = Aspose.Imaging.ColorPaletteHelper.GetCloseImagePalette(
-                    raster, 256, Aspose.Imaging.PaletteMiningMethod.Histogram);
-
-                // Prepare PNG save options with indexed color and the new palette
-                var saveOptions = new PngOptions
+                PngOptions pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.IndexedColor,
-                    Palette = palette,
-                    CompressionLevel = 9
+                    Palette = Aspose.Imaging.ColorPaletteHelper.GetCloseImagePalette(raster, 256, Aspose.Imaging.PaletteMiningMethod.Histogram)
                 };
 
-                // Save the processed image preserving the palette
-                image.Save(outputPath, saveOptions);
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -68,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to sharpen a legacy 8‑bit PNG sprite sheet for a game while keeping the original 256‑color palette intact.
- * 2. When an e‑commerce platform wants to enhance product thumbnail images stored as indexed PNGs without increasing file size, requiring palette regeneration after convolution.
- * 3. When a medical imaging system processes indexed PNG scans to improve edge definition and must preserve the exact palette for accurate color‑coded annotations.
- * 4. When a content management system batch‑updates archived infographic PNGs with a custom filter and needs to maintain compatibility with older browsers that only support indexed colors.
- * 5. When a printing workflow applies a sharpening filter to indexed PNG artwork before rasterizing, ensuring the final PDF uses the same palette to avoid color shifts.
+ * 1. When a developer needs to sharpen a PNG image that uses an indexed color palette—such as a game sprite sheet—while preserving the original palette to avoid color distortion.
+ * 2. When processing scanned documents saved as indexed PNGs and applying an edge‑enhancement kernel without converting the image to true color, ensuring the file size remains low.
+ * 3. When creating thumbnail previews of icon sets stored in indexed PNG format and applying a convolution filter to improve visual clarity while keeping the palette consistent for UI theming.
+ * 4. When performing batch image processing on web‑optimized PNG graphics that rely on a limited palette, and the developer must apply a custom filter without losing the exact palette mapping.
+ * 5. When integrating Aspose.Imaging into a C# application that modifies legacy PNG assets with indexed colors, applying a sharpening kernel and then saving the result with a regenerated palette to maintain compatibility with older browsers.
  */

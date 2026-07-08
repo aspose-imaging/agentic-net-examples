@@ -2,9 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Shapes;
+using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
@@ -12,56 +11,20 @@ class Program
     {
         try
         {
-            // Define output path
-            string outputPath = @"c:\temp\output.psd";
-
-            // Ensure output directory exists
+            string outputPath = @"C:\temp\indexed_output.psd";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure PSD options for indexed color mode
             PsdOptions psdOptions = new PsdOptions();
             psdOptions.Source = new FileCreateSource(outputPath, false);
             psdOptions.ColorMode = ColorModes.Indexed;
-            psdOptions.ChannelsCount = (short)1;          // Indexed images have 1 channel
-            psdOptions.ChannelBitsCount = (short)8;      // 8 bits per channel
+            psdOptions.ChannelsCount = (short)1;
+            psdOptions.ChannelBitsCount = (short)8;
+            psdOptions.Palette = new ColorPalette(new Color[] { Color.Black, Color.White });
 
-            // Define a simple palette (red, green, blue)
-            psdOptions.Palette = new ColorPalette(new Color[]
-            {
-                Color.Red,
-                Color.Green,
-                Color.Blue
-            });
-
-            // Create the indexed PSD canvas (500x500)
             using (Image image = Image.Create(psdOptions, 500, 500))
             {
-                // Initialize graphics
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
-
-                // Create a GraphicsPath and a Figure
-                GraphicsPath graphicsPath = new GraphicsPath();
-                Figure figure = new Figure();
-
-                // Define polygon points
-                PointF[] polygonPoints = new PointF[]
-                {
-                    new PointF(100f, 100f),
-                    new PointF(400f, 100f),
-                    new PointF(250f, 300f)
-                };
-
-                // Add a closed PolygonShape to the figure
-                figure.AddShape(new PolygonShape(polygonPoints, true));
-
-                // Add the figure to the path
-                graphicsPath.AddFigure(figure);
-
-                // Draw the polygon using a black pen
-                graphics.DrawPath(new Pen(Color.Black, 2), graphicsPath);
-
-                // Save the PSD image
                 image.Save();
             }
         }
@@ -74,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically create a small‑size PSD file in indexed color mode with a custom palette and draw a precise polygon shape using Aspose.Imaging’s GraphicsPath for a web mockup.
- * 2. When an application must generate a Photoshop document for printing proofs that uses a limited color palette and overlays a vector polygon to highlight a specific area.
- * 3. When a batch‑processing tool has to add a colored polygon watermark to multiple PSD files while preserving the indexed color mode to keep the files lightweight.
- * 4. When a game‑asset pipeline requires exporting level‑design outlines as PSD layers with a predefined palette and needs to draw those outlines as polygons via C# and Aspose.Imaging.
- * 5. When a UI‑designer utility creates PSD templates with predefined shape placeholders (such as a triangle) that can later be edited in Photoshop, using the GraphicsPath API.
+ * 1. When a developer needs to generate a lightweight PSD thumbnail with a simple polygon overlay for a web‑based asset manager, using Aspose.Imaging’s indexed color mode to keep the file size minimal.
+ * 2. When creating batch‑processed print‑ready PSD files that employ an indexed palette and require programmatic addition of vector shapes like polygons for cut‑line markings.
+ * 3. When building a C# utility that converts legacy indexed‑color Photoshop files into modern assets while annotating them with a polygonal region to highlight areas of interest.
+ * 4. When automating UI mock‑up production where the background is an indexed PSD and a polygon drawn via GraphicsPath represents button boundaries before saving.
+ * 5. When developing a game asset pipeline that stores sprite outlines as polygons inside an indexed PSD to maintain a small palette and ensure fast loading in the engine.
  */

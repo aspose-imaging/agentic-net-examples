@@ -13,22 +13,22 @@ class Program
         {
             // Hardcoded input and output file paths
             string inputPath = "Sample.eps";
-            string outputPath = "Sample.pdf";
+            string outputPath = "output/Sample.pdf";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
-            Directory.CreateDirectory(outputDir);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image and convert to PDF/A-1b
+            // Load the EPS image
             using (var image = (EpsImage)Image.Load(inputPath))
             {
+                // Configure PDF options with PDF/A‑1b compliance
                 var pdfOptions = new PdfOptions
                 {
                     PdfCoreOptions = new PdfCoreOptions
@@ -37,6 +37,7 @@ class Program
                     }
                 };
 
+                // Save the image as a PDF file
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -49,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must archive vector graphics from legacy design tools by converting EPS files to PDF/A‑1b compliant PDFs for long‑term preservation.
- * 2. When a C# application needs to generate legally compliant PDF documents from EPS logos to meet government or industry standards that require PDF/A‑1b.
- * 3. When an automated build pipeline processes print‑ready EPS assets and must output PDF/A‑1b files to ensure they pass PDF validation before distribution.
- * 4. When a document management system imports EPS illustrations and must store them as PDF/A‑1b PDFs to guarantee consistent rendering across platforms.
- * 5. When a developer creates a batch conversion utility that reads EPS files from a folder and saves them as PDF/A‑1b PDFs using Aspose.Imaging’s PdfOptions and PdfCompliance enumeration.
+ * 1. When a developer needs to convert legacy EPS artwork into PDF/A‑1b compliant PDFs for archival in a document management system.
+ * 2. When a C# application must generate PDF reports from EPS logos while ensuring the output meets PDF/A‑1b standards required by regulatory agencies.
+ * 3. When an automated build pipeline processes design assets and must transform EPS files into PDF/A‑1b PDFs for long‑term preservation.
+ * 4. When a web service receives EPS files from users and must return PDF/A‑1b compliant PDFs for printing on certified printers.
+ * 5. When a desktop utility needs to batch‑convert EPS diagrams to PDF/A‑1b PDFs to satisfy corporate sustainability documentation guidelines.
  */

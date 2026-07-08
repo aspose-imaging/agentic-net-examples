@@ -1,84 +1,96 @@
 using System;
 using System.IO;
-using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded paths (no argument validation)
-        string inputDirectory = @"C:\Input\PsdFrames";
-        string outputPath = @"C:\Output\animated_lossy.gif";
+        // Hard‑coded input directory containing PSD frames and output file path
+        string inputDirectory = @"C:\temp\psd_frames";
+        string outputPath = @"C:\temp\output\animated_lossy.gif";
 
         try
         {
-            // Verify that the input directory exists and contains PSD files
+            // Verify the input directory exists (no explicit rule, but safe to check)
             if (!Directory.Exists(inputDirectory))
             {
                 Console.Error.WriteLine($"Directory not found: {inputDirectory}");
                 return;
             }
 
-            // Get PSD files (sorted for deterministic order)
-            var psdFiles = Directory.GetFiles(inputDirectory, "*.psd")
-                                    .OrderBy(f => f)
-                                    .ToArray();
-
+            // Load all PSD files from the directory
+            string[] psdFiles = Directory.GetFiles(inputDirectory, "*.psd");
             if (psdFiles.Length == 0)
             {
-                Console.Error.WriteLine($"No PSD files found in: {inputDirectory}");
+                Console.Error.WriteLine("No PSD files found in the input directory.");
                 return;
             }
 
-            // Load the first frame and create the GIF image
-            string firstFile = psdFiles[0];
-            if (!File.Exists(firstFile))
+            // Load each PSD as a RasterImage and store in a list
+            List<RasterImage> frames = new List<RasterImage>();
+            foreach (string filePath in psdFiles)
             {
-                Console.Error.WriteLine($"File not found: {firstFile}");
-                return;
+                // Input file existence check (rule 2)
+                if (!File.Exists(filePath))
+                {
+                    Console.Error.WriteLine($"File not found: {filePath}");
+                    return;
+                }
+
+                // Load the PSD image (load rule)
+                Image img = Image.Load(filePath);
+                if (img is RasterImage raster)
+                {
+                    frames.Add(raster);
+                }
+                else
+                {
+                    img.Dispose();
+                    Console.Error.WriteLine($"Unsupported image type: {filePath}");
+                    return;
+                }
             }
 
-            using (RasterImage firstRaster = (RasterImage)Image.Load(firstFile))
-            using (GifFrameBlock firstBlock = new GifFrameBlock(firstRaster))
+            // Create the first GIF frame block from the first raster image
+            using (GifFrameBlock firstBlock = new GifFrameBlock(frames[0]))
             using (GifImage gifImage = new GifImage(firstBlock))
             {
-                // Load remaining frames and add them to the GIF
-                for (int i = 1; i < psdFiles.Length; i++)
+                // Add remaining frames to the GIF animation
+                for (int i = 1; i < frames.Count; i++)
                 {
-                    string filePath = psdFiles[i];
-                    if (!File.Exists(filePath))
-                    {
-                        Console.Error.WriteLine($"File not found: {filePath}");
-                        return;
-                    }
-
-                    using (RasterImage raster = (RasterImage)Image.Load(filePath))
-                    using (GifFrameBlock block = new GifFrameBlock(raster))
-                    {
-                        gifImage.AddBlock(block);
-                    }
+                    gifImage.AddPage(frames[i]);
                 }
 
                 // Prepare lossy GIF options
-                var saveOptions = new GifOptions
+                GifOptions saveOptions = new GifOptions
                 {
-                    // Recommended value for good lossy compression
+                    // Recommended lossy compression level
                     MaxDiff = 80
                 };
 
-                // Ensure output directory exists
+                // Ensure output directory exists (rule 3)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the animated GIF with lossy compression
+                // Save the animated GIF with lossy compression (save rule)
                 gifImage.Save(outputPath, saveOptions);
             }
+
+            // Dispose all loaded frames (they are no longer needed)
+            foreach (var frame in frames)
+            {
+                frame.Dispose();
+            }
+
+            Console.WriteLine("Animated GIF created and compressed successfully.");
         }
         catch (Exception ex)
         {
+            // Global exception handling (rule 4)
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -86,9 +98,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a lightweight animated preview of a multi‑layer Photoshop design for web pages, they can convert PSD frames to a lossy GIF to reduce bandwidth.
- * 2. When an e‑commerce platform wants to display product color‑variation animations without slowing page load, the code can compress the PSD‑derived GIF to a smaller size.
- * 3. When a mobile app must send animated tutorials over limited network connections, developers can use this routine to turn PSD storyboard frames into a compact lossy GIF.
- * 4. When a marketing team requires email‑friendly animated banners created from Photoshop assets, the code helps produce a GIF that fits typical email size limits.
- * 5. When a game developer wants to embed animated UI icons generated from PSD layers into a Unity project, the lossy GIF compression ensures the assets stay under the game's memory budget.
+ * 1. When a C# web developer needs to generate lightweight animated GIFs from layered Photoshop (PSD) assets to improve page load speed.
+ * 2. When an e‑commerce site built with .NET creates product showcase animations from PSD files and must keep the GIF file size small for faster browsing.
+ * 3. When a mobile app written in C# builds promotional GIFs on‑the‑fly from PSD frames and must reduce the output size to satisfy app store size limits.
+ * 4. When a digital marketing team automates the conversion of PSD storyboard frames into a lossy animated GIF for email campaigns that have strict attachment size restrictions.
+ * 5. When a game developer using Aspose.Imaging for .NET exports character animation sequences stored as PSD layers into a compressed GIF for UI tutorials or loading screens.
  */

@@ -9,9 +9,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\HighResPhoto.jpg";
-            string outputPath = @"C:\Images\ExportedCanvas.html";
+            // Hardcoded input and output paths
+            string inputPath = "input/HighResPhoto.jpg";
+            string outputPath = "output/PhotoCanvas.html";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,29 +27,28 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Determine scaling factor to fit within 1920x1080 while preserving aspect ratio
-                const int maxWidth = 1920;
-                const int maxHeight = 1080;
+                const double maxWidth = 1920.0;
+                const double maxHeight = 1080.0;
+                double widthRatio = maxWidth / image.Width;
+                double heightRatio = maxHeight / image.Height;
+                double scale = Math.Min(widthRatio, heightRatio);
 
-                double widthScale = (double)maxWidth / image.Width;
-                double heightScale = (double)maxHeight / image.Height;
-                double scale = Math.Min(1.0, Math.Min(widthScale, heightScale)); // Do not upscale
-
+                // Downscale only if the image is larger than the viewport
                 if (scale < 1.0)
                 {
                     int newWidth = (int)(image.Width * scale);
                     int newHeight = (int)(image.Height * scale);
-                    // Resize using high‑quality resampling
-                    image.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
+                    image.Resize(newWidth, newHeight);
                 }
 
                 // Prepare HTML5 Canvas export options
-                var canvasOptions = new Html5CanvasOptions
+                var options = new Html5CanvasOptions
                 {
-                    FullHtmlPage = true // generate a complete HTML page
+                    FullHtmlPage = true
                 };
 
-                // Save the image as an HTML5 Canvas file
-                image.Save(outputPath, canvasOptions);
+                // Save as HTML5 Canvas file
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -61,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building a web gallery that must display high‑resolution photos on standard 1080p screens without slowing down the browser, a developer can use this code to downscale the image and export it as an HTML5 Canvas page.
- * 2. When creating an online product catalog where each product image needs to be embedded directly into an HTML page for fast rendering, this snippet resizes the original JPEG and saves it as a self‑contained Canvas HTML file.
- * 3. When developing a responsive e‑learning platform that shows large lecture slides on any device, the code ensures the slides are resized to fit a 1920×1080 viewport and delivered via HTML5 Canvas for smooth zoom and pan.
- * 4. When integrating high‑resolution photography into a digital signage system that runs in a browser at 1080p resolution, the routine prepares the image by scaling it down and converting it to a Canvas HTML page to eliminate extra image requests.
- * 5. When automating the generation of printable web‑based reports that embed full‑color photos, this program resizes the source picture to the target viewport and exports it as an HTML5 Canvas document for consistent cross‑browser display.
+ * 1. When a web developer needs to embed a high‑resolution photograph in an HTML5 Canvas page that automatically fits a 1920 × 1080 viewport, this C# code resizes the image and saves it as a full‑HTML canvas file using Aspose.Imaging.
+ * 2. When an e‑learning platform wants to display large classroom photos on student devices without scrolling, the code downscales the JPEG and exports it to HTML5 Canvas for responsive rendering.
+ * 3. When a digital marketing team creates interactive product galleries and must ensure each high‑resolution image loads quickly on standard monitors, they can use this snippet to generate canvas‑based HTML that respects the 1920 × 1080 size limit.
+ * 4. When a desktop application converts archival photos into web‑ready assets, the code leverages Aspose.Imaging’s Html5CanvasOptions to produce a self‑contained HTML page that fits typical screen resolutions.
+ * 5. When a SaaS reporting tool needs to embed detailed charts as images inside a canvas element while preserving aspect ratio on a 1080p dashboard, this C# example provides the necessary resize‑and‑export workflow.
  */

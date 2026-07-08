@@ -3,57 +3,47 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.psd";
+        string outputPath = @"C:\temp\output.psd";
+
         try
         {
-            // Output PSD file path
-            string outputPath = @"C:\temp\output.psd";
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define canvas size
-            int width = 500;
-            int height = 400;
-
-            // Create PSD options for an indexed image
-            PsdOptions psdOptions = new PsdOptions();
-            psdOptions.Source = new FileCreateSource(outputPath, false);
-            psdOptions.ColorMode = ColorModes.Indexed;
-            psdOptions.CompressionMethod = CompressionMethod.RLE;
-            psdOptions.ChannelBitsCount = (short)8;   // 8 bits per channel
-            psdOptions.ChannelsCount = (short)1;      // Indexed images have 1 channel
-            psdOptions.Version = 6;                  // Default PSD version
-
-            // Define a simple palette (must contain at least one color)
-            psdOptions.Palette = new ColorPalette(new Color[]
+            // Load the existing PSD image
+            using (Image image = Image.Load(inputPath))
             {
-                Color.Black,
-                Color.White,
-                Color.Red,
-                Color.Green,
-                Color.Blue
-            });
+                // Create a Graphics object for drawing
+                Graphics graphics = new Graphics(image);
 
-            // Create the PSD canvas
-            using (Image psdImage = Image.Create(psdOptions, width, height))
-            {
-                // Draw a rectangle on the canvas
-                Graphics graphics = new Graphics(psdImage);
-                Pen pen = new Pen(Color.Black, 3);
-                graphics.DrawRectangle(pen, new Rectangle(50, 50, 200, 150));
+                // Define the rectangle to draw (x, y, width, height)
+                Rectangle rect = new Rectangle(50, 50, 200, 150);
 
-                // Save the PSD file (output path already bound via FileCreateSource)
-                psdImage.Save();
+                // Draw the rectangle with a black pen of width 2
+                graphics.DrawRectangle(new Pen(Color.Black, 2), rect);
+
+                // Save the modified image as PSD
+                PsdOptions psdOptions = new PsdOptions();
+                image.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -61,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a thumbnail preview of a design in an indexed PSD file with a limited color palette for quick web display.
- * 2. When an automated asset pipeline must add a bounding box rectangle to an indexed PSD canvas to indicate crop areas for a print‑ready workflow.
- * 3. When a game‑engine tool creates level maps as indexed PSD images and draws rectangular zones to mark collision boundaries.
- * 4. When a reporting system programmatically creates PSD charts using indexed colors and draws rectangles to highlight specific data ranges.
- * 5. When a batch‑processing script adds a watermark rectangle to indexed PSD files before they are uploaded to a digital asset management system.
+ * 1. When a developer needs to add a visual guide or border to a Photoshop (PSD) file, such as marking a region of interest for designers, they can use Aspose.Imaging for .NET to draw a rectangle on the indexed canvas before saving.
+ * 2. When automating the creation of printable mock‑ups, a developer can overlay a black‑bordered rectangle on a PSD template to indicate crop marks or safe‑area boundaries using C# Graphics and Pen objects.
+ * 3. When building a batch‑processing tool that validates image layouts, a developer may draw a rectangle on each PSD file to highlight alignment errors before exporting the modified files.
+ * 4. When generating dynamic PSD assets for a web‑based design editor, a developer can programmatically draw a rectangle to represent a selectable layer or placeholder region using Aspose.Imaging’s PsdOptions.
+ * 5. When integrating watermarking or branding into existing PSD files, a developer can draw a rectangular frame around the logo area to ensure consistent placement across multiple assets.
  */

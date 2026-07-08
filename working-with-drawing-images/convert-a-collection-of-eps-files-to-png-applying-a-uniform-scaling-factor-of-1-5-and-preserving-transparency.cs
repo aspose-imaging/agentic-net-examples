@@ -10,20 +10,15 @@ class Program
     {
         try
         {
-            // Hardcoded collection of EPS input files
-            string[] inputPaths = new string[]
-            {
+            // Hardcoded input EPS files and corresponding output PNG files
+            string[] inputPaths = {
                 @"C:\Images\Input1.eps",
-                @"C:\Images\Input2.eps",
-                @"C:\Images\Input3.eps"
+                @"C:\Images\Input2.eps"
             };
 
-            // Corresponding output PNG files
-            string[] outputPaths = new string[]
-            {
+            string[] outputPaths = {
                 @"C:\Images\Output1.png",
-                @"C:\Images\Output2.png",
-                @"C:\Images\Output3.png"
+                @"C:\Images\Output2.png"
             };
 
             for (int i = 0; i < inputPaths.Length; i++)
@@ -35,7 +30,7 @@ class Program
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
                 // Ensure output directory exists
@@ -44,11 +39,11 @@ class Program
                 // Load EPS image
                 using (var image = (EpsImage)Image.Load(inputPath))
                 {
-                    // Calculate new dimensions with scaling factor 1.5
-                    int newWidth = (int)Math.Round(image.Width * 1.5);
-                    int newHeight = (int)Math.Round(image.Height * 1.5);
+                    // Calculate new dimensions with a scaling factor of 1.5
+                    int newWidth = (int)(image.Width * 1.5);
+                    int newHeight = (int)(image.Height * 1.5);
 
-                    // Resize using default interpolation (NearestNeighbourResample)
+                    // Resize the image (using Lanczos resampling for quality)
                     image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
                     // Save as PNG preserving transparency
@@ -66,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to generate high‑resolution web‑ready PNG thumbnails from a batch of vector EPS logos while enlarging them by 150 % and keeping the transparent background intact.
- * 2. When an e‑commerce platform must automatically convert product illustration EPS files into PNG assets for mobile apps, applying a uniform 1.5 scaling factor to match the device’s pixel density and preserve alpha channel transparency.
- * 3. When a publishing workflow requires bulk conversion of EPS artwork into PNG images for print‑on‑demand PDFs, scaling each image proportionally by 1.5 and ensuring the background remains transparent for overlay use.
- * 4. When a GIS application imports EPS map symbols and needs to export them as scaled PNG icons with preserved transparency for use in interactive web maps.
- * 5. When a marketing automation script processes a collection of EPS banners, resizing them by 150 % and saving them as PNG files so they can be displayed on email newsletters without losing transparent areas.
+ * 1. When a graphic designer needs to generate high‑resolution PNG previews of EPS logos for a web‑based brand guide, scaling them by 1.5 while keeping transparent backgrounds.
+ * 2. When an e‑commerce platform must convert product vector illustrations stored as EPS files into PNG thumbnails that are larger than the original and retain transparency for overlay on product pages.
+ * 3. When a publishing workflow requires batch processing of EPS artwork into PNG assets for digital magazines, applying a uniform 150 % size increase to match the layout grid.
+ * 4. When a mobile app development team wants to pre‑scale EPS icons to PNG format for retina displays, ensuring the images stay crisp and preserve alpha channels.
+ * 5. When an automated CI/CD pipeline needs to validate that EPS assets can be rendered as PNG files at a larger size with transparency before they are deployed to a content delivery network.
  */

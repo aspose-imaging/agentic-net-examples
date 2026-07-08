@@ -3,15 +3,14 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Images\SourceImage.eps";
-        string outputPath = @"C:\Images\Result\HighResImage.png";
+        // Hardcoded input and output file paths
+        string inputPath = "input.eps";
+        string outputPath = "output.png";
 
         try
         {
@@ -23,21 +22,25 @@ class Program
             }
 
             // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the EPS image, resize it, and export to PNG in one chain
+            // Load the EPS image, resize it, and export to high‑resolution PNG
             using (Image image = Image.Load(inputPath))
             {
-                // Resize to a higher resolution (example: 2000x2000) using Mitchell interpolation
-                image.Resize(2000, 2000, ResizeType.Mitchell);
+                // Desired high‑resolution dimensions
+                int targetWidth = 2000;
+                int targetHeight = 2000;
 
-                // Save the resized image as PNG
-                image.Save(outputPath, new PngOptions());
+                // Resize using a high‑quality interpolation method
+                image.Resize(targetWidth, targetHeight, ResizeType.LanczosResample);
+
+                // Save as PNG with default options
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
         {
-            // Any unexpected error is reported without crashing the program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -45,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must convert a vector EPS logo into a high‑resolution PNG for use on a responsive website, they can load the EPS, resize it to the required pixel dimensions, and save it in one chained operation.
- * 2. When an automated build script generates printable marketing assets from EPS source files, the code can resize the artwork to print‑ready dimensions and export it directly as PNG without intermediate files.
- * 3. When a desktop application needs to preview EPS diagrams as raster images at a specific size, the developer can resize the EPS to the preview resolution and save it as PNG for fast rendering.
- * 4. When a batch‑processing tool processes a folder of EPS illustrations and creates high‑quality PNG thumbnails for a digital asset management system, this single‑method chain handles loading, scaling, and saving efficiently.
- * 5. When a C# service receives user‑uploaded EPS files and must deliver a high‑resolution PNG version for downstream image‑analysis APIs, the code resizes the vector image and exports it in the required format in one step.
+ * 1. When a developer needs to convert a vector EPS logo into a high‑resolution PNG thumbnail for a web‑site’s product catalog, they can use this code to resize and export in one step.
+ * 2. When an automated build pipeline must generate print‑ready PNG assets from EPS source files for marketing materials, the method provides a simple C# solution with Aspose.Imaging.
+ * 3. When a desktop application requires on‑the‑fly conversion of user‑uploaded EPS diagrams into 2000×2000 PNG images for preview in a UI, this code handles loading, Lanczos resizing, and saving.
+ * 4. When a batch‑processing script needs to ensure all EPS files in a folder are converted to high‑resolution PNGs with consistent dimensions before uploading to a digital asset management system, the example demonstrates the necessary steps.
+ * 5. When a cloud‑based microservice must accept an EPS file via API, resize it to a specific pixel size, and return a PNG response, the code illustrates the core image‑processing workflow using Aspose.Imaging for .NET.
  */

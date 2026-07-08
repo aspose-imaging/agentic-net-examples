@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -9,13 +8,29 @@ class Program
     {
         try
         {
-            string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
-            string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
             foreach (string inputPath in files)
             {
+                if (!Path.GetExtension(inputPath).Equals(".bmp", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,52 +42,19 @@ class Program
 
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
                 {
-                    // Ensure the image is cached for pixel access
-                    if (image is RasterCachedImage rci && !rci.IsCached)
+                    SvgOptions options = new SvgOptions
                     {
-                        rci.CacheData();
-                    }
-
-                    RasterImage raster = (RasterImage)image;
-                    int width = raster.Width;
-                    int height = raster.Height;
-
-                    // Load pixel data
-                    int[] pixels = raster.LoadArgb32Pixels(new Rectangle(0, 0, width, height));
-
-                    // Invert colors
-                    for (int i = 0; i < pixels.Length; i++)
-                    {
-                        int argb = pixels[i];
-                        byte a = (byte)((argb >> 24) & 0xFF);
-                        byte r = (byte)((argb >> 16) & 0xFF);
-                        byte g = (byte)((argb >> 8) & 0xFF);
-                        byte b = (byte)(argb & 0xFF);
-
-                        r = (byte)(255 - r);
-                        g = (byte)(255 - g);
-                        b = (byte)(255 - b);
-
-                        pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
-                    }
-
-                    // Save modified pixels back to the image
-                    raster.SaveArgb32Pixels(new Rectangle(0, 0, width, height), pixels);
-
-                    // Prepare SVG save options
-                    using (SvgOptions svgOptions = new SvgOptions())
-                    {
-                        var vectorOptions = new SvgRasterizationOptions
+                        VectorRasterizationOptions = new VectorRasterizationOptions
                         {
-                            PageSize = raster.Size
-                        };
-                        svgOptions.VectorRasterizationOptions = vectorOptions;
+                            BackgroundColor = Aspose.Imaging.Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height
+                        }
+                    };
 
-                        // Save as SVG
-                        raster.Save(outputPath, svgOptions);
-                    }
+                    image.Save(outputPath, options);
                 }
             }
         }
@@ -82,3 +64,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert a legacy collection of BMP icons into scalable SVG graphics with inverted colors for a modern web UI, they can use this code to batch process the files.
+ * 2. When an automation script must prepare print‑ready artwork by inverting the colors of scanned BMP drawings and exporting them as SVG vectors for further editing, this example provides the necessary C# workflow.
+ * 3. When a game asset pipeline requires turning monochrome BMP textures into inverted SVG assets for resolution‑independent rendering, the code demonstrates how to load, invert, and save them in bulk.
+ * 4. When a document generation system has to embed high‑contrast SVG diagrams derived from BMP source images, developers can employ this snippet to perform the color inversion and format conversion automatically.
+ * 5. When a batch image‑processing tool needs to replace outdated BMP logos with white‑background SVG versions that have their colors reversed for branding guidelines, this C# example shows the required steps.
+ */

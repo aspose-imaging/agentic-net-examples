@@ -25,27 +25,25 @@ class Program
         try
         {
             // Load the DICOM image
-            using (var dicomImage = Image.Load(inputPath) as DicomImage)
+            using (Image image = Image.Load(inputPath))
             {
+                // Cast to DicomImage to access DICOM‑specific properties
+                DicomImage dicomImage = image as DicomImage;
                 if (dicomImage == null)
                 {
-                    Console.Error.WriteLine("Failed to load DICOM image.");
+                    Console.Error.WriteLine("The loaded file is not a valid DICOM image.");
                     return;
                 }
 
-                // Retrieve XMP metadata from the original DICOM image
-                var xmpMetadata = dicomImage.XmpData;
-
-                // Prepare PNG save options and embed the retrieved metadata
+                // Prepare PNG options and copy metadata from the DICOM image
                 var pngOptions = new PngOptions
                 {
-                    XmpData = xmpMetadata,
-                    KeepMetadata = true
+                    KeepMetadata = true,               // Preserve metadata during export
+                    XmpData = dicomImage.XmpData       // Transfer XMP metadata
                 };
 
-                // Save the first DICOM page as PNG with metadata
-                var firstPage = dicomImage.DicomPages[0];
-                firstPage.Save(outputPath, pngOptions);
+                // Save as PNG with the prepared options
+                dicomImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -54,3 +52,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a radiology PACS system needs to export DICOM scans as PNG thumbnails while preserving patient and study metadata for audit trails.
+ * 2. When a medical research application converts DICOM images to PNG for web display but must retain XMP metadata to link back to the original study.
+ * 3. When a healthcare mobile app generates PNG snapshots from DICOM files for offline viewing and requires embedded metadata for regulatory compliance.
+ * 4. When a hospital's document management workflow transforms DICOM files into PNG format for archival in a non‑DICOM repository while keeping traceability information.
+ * 5. When a diagnostic AI pipeline extracts PNG images from DICOM datasets for model training and needs to carry over metadata to maintain data provenance.
+ */

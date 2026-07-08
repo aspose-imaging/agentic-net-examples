@@ -6,11 +6,11 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input path
-        string inputPath = @"C:\temp\sample.jpg";
-
         try
         {
+            // Hardcoded input path
+            string inputPath = @"C:\temp\sample.jpg";
+
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,13 +21,14 @@ class Program
             // Load the JPEG image using Aspose.Imaging
             using (JpegImage jpegImage = new JpegImage(inputPath))
             {
-                // Output width and height
+                // Output image dimensions
                 Console.WriteLine($"Width: {jpegImage.Width}");
                 Console.WriteLine($"Height: {jpegImage.Height}");
             }
         }
         catch (Exception ex)
         {
+            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -35,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to validate that user‑uploaded JPEG photos meet minimum width and height requirements using Aspose.Imaging in a C# web application.
- * 2. When a batch‑processing script logs the dimensions of JPEG images from a media library to the console for inventory tracking.
- * 3. When an e‑commerce platform extracts JPEG image width and height to ensure product pictures conform to layout specifications before publishing.
- * 4. When a desktop utility reads JPEG files from a folder and outputs their dimensions to the console for quality‑control reporting.
- * 5. When a C# console tool gathers basic image metadata, such as width and height, from JPEG files to populate a database of asset specifications.
+ * 1. When a developer needs to validate that uploaded JPEG files meet size constraints before further processing, they can load the image with Aspose.Imaging and read its Width and Height properties.
+ * 2. When generating a dynamic image gallery, a C# application can use this code to retrieve each JPEG's dimensions to calculate layout grids or thumbnail sizes.
+ * 3. When integrating with a printing service, developers can read the JPEG's pixel dimensions to ensure the image resolution matches the required print size.
+ * 4. When performing batch metadata extraction, the code can quickly enumerate JPEG files on disk and log their width and height for inventory or reporting purposes.
+ * 5. When building a file‑upload validator for a web API, the server can load the incoming JPEG using Aspose.Imaging and reject files that are too large or too small based on their dimensions.
  */

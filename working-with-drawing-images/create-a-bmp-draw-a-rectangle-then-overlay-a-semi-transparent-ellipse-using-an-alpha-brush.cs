@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
@@ -11,40 +12,39 @@ class Program
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"c:\temp\output.bmp";
+            // Output BMP file path
+            string outputPath = @"C:\temp\output.bmp";
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure BMP options
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            // Create source and BMP options
+            Source source = new FileCreateSource(outputPath, false);
+            BmpOptions bmpOptions = new BmpOptions() { Source = source };
 
-            // Create a 500x500 BMP image
-            using (Image image = Image.Create(bmpOptions, 500, 500))
+            // Create a BMP canvas (bound to the file)
+            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, 500, 400))
             {
                 // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
+                Graphics graphics = new Graphics(canvas);
 
-                // Optional: clear background to white
+                // Optional: clear background
                 graphics.Clear(Color.White);
 
-                // Draw a blue rectangle outline
+                // Draw a rectangle
                 Pen rectPen = new Pen(Color.Blue, 3);
-                graphics.DrawRectangle(rectPen, new Rectangle(50, 50, 400, 400));
+                graphics.DrawRectangle(rectPen, new Rectangle(50, 50, 200, 150));
 
-                // Overlay a semi‑transparent red ellipse
+                // Overlay a semi‑transparent ellipse using a brush
                 using (SolidBrush ellipseBrush = new SolidBrush())
                 {
                     ellipseBrush.Color = Color.Red;
-                    ellipseBrush.Opacity = 0.5f; // 50% opacity (0 = fully visible, 1 = fully opaque)
-                    graphics.FillEllipse(ellipseBrush, new Rectangle(100, 100, 300, 300));
+                    ellipseBrush.Opacity = 0.5f; // 50% opacity
+                    graphics.FillEllipse(ellipseBrush, new Rectangle(120, 80, 200, 150));
                 }
 
-                // Save the image (FileCreateSource binds the output file)
-                image.Save();
+                // Save the bound image
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -56,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP thumbnail with a highlighted region, such as drawing a blue border rectangle and a semi‑transparent red ellipse to indicate a focus area in a Windows desktop application.
- * 2. When creating a printable report that includes a 500×500 BMP diagram where a rectangle outlines a section and an overlay ellipse with 50 % opacity is used to illustrate overlapping data zones.
- * 3. When building a custom UI control that dynamically renders BMP assets with vector shapes, using Aspose.Imaging’s Graphics API to draw a rectangle and an alpha‑blended ellipse for visual feedback.
- * 4. When automating the production of watermark‑style graphics for batch‑processed images, employing a blue rectangle frame and a semi‑transparent red ellipse to mark regions of interest before saving as BMP.
- * 5. When developing a diagnostic tool that visualizes sensor coverage on a BMP map by drawing a rectangular boundary and a translucent elliptical range using C# and Aspose.Imaging brushes.
+ * 1. When a developer needs to programmatically generate a BMP file with a blue rectangular border and a semi‑transparent red ellipse overlay for a Windows desktop reporting tool.
+ * 2. When an automated imaging workflow must create a 500×400 BMP canvas and highlight a region of interest using a translucent ellipse drawn with Aspose.Imaging in C#.
+ * 3. When a game asset pipeline requires drawing UI components, such as a rectangle button and a partially transparent ellipse, directly onto a BMP texture via the Aspose.Imaging Graphics API.
+ * 4. When a batch process produces printable BMP graphics for signage and adds a blue frame plus a red semi‑transparent ellipse to emphasize promotional content.
+ * 5. When a data‑visualization service generates BMP charts and uses an alpha‑brush ellipse to shade a specific data area while keeping the underlying image visible.
  */

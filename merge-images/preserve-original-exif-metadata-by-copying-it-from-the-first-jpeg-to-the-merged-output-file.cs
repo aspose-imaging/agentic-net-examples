@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -14,13 +13,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string[] inputPaths = new string[]
-            {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
-            };
-            string outputPath = "merged.jpg";
+            string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
+            string outputPath = "output/merged.jpg";
 
             // Validate input files
             foreach (string path in inputPaths)
@@ -33,62 +27,37 @@ class Program
             }
 
             // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect image sizes and preserve EXIF from the first image
-            List<Size> sizes = new List<Size>();
-            Aspose.Imaging.Exif.ExifData firstExifData = null;
-
-            // Load first image to capture EXIF and size
-            using (RasterImage firstImg = (RasterImage)Image.Load(inputPaths[0]))
+            // Calculate canvas size
+            int totalWidth = 0;
+            int maxHeight = 0;
+            foreach (string path in inputPaths)
             {
-                sizes.Add(firstImg.Size);
-                firstExifData = firstImg.ExifData;
-            }
-
-            // Load remaining images to collect sizes
-            for (int i = 1; i < inputPaths.Length; i++)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(inputPaths[i]))
+                using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    sizes.Add(img.Size);
+                    totalWidth += img.Width;
+                    if (img.Height > maxHeight)
+                        maxHeight = img.Height;
                 }
             }
 
-            // Calculate canvas dimensions for horizontal merge
-            int newWidth = sizes.Sum(s => s.Width);
-            int newHeight = sizes.Max(s => s.Height);
+            // Create output canvas bound to file
+            Source source = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
 
-            // Prepare JPEG options with bound output source
-            JpegOptions jpegOptions = new JpegOptions()
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
             {
-                Source = new FileCreateSource(outputPath, false),
-                Quality = 100
-            };
-
-            // Create JPEG canvas bound to the output file
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
-            {
-                // Copy EXIF metadata from the first image if it is JPEG EXIF
-                if (firstExifData is Aspose.Imaging.Exif.JpegExifData jpegExif)
-                {
-                    canvas.ExifData = jpegExif;
-                }
-
-                // Merge images horizontally
                 int offsetX = 0;
-                foreach (string imgPath in inputPaths)
+                foreach (string path in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(imgPath))
+                    using (RasterImage img = (RasterImage)Image.Load(path))
                     {
                         Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
-
-                // Save the bound canvas (output file already bound via options)
                 canvas.Save();
             }
         }
@@ -101,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer needs to stitch several JPEG photos into a single panoramic image while retaining the original camera settings and GPS coordinates stored in the first photo’s EXIF metadata.
- * 2. When an e‑commerce platform merges product view images into a composite thumbnail and must preserve the original exposure and orientation data for compliance with image‑catalog standards.
- * 3. When a real‑estate agency combines interior room photos into a brochure layout and wants to keep the first image’s EXIF timestamps for accurate property listing timelines.
- * 4. When a social‑media app creates a collage from user‑uploaded JPEGs and needs to retain the first picture’s copyright and author information embedded in EXIF for legal attribution.
- * 5. When a medical imaging system assembles multiple diagnostic JPEG scans into a single report page while preserving the first scan’s patient metadata stored in EXIF tags.
+ * 1. When a photographer creates a panoramic JPEG by stitching multiple shots side‑by‑side and needs to keep the original EXIF camera settings for later editing or cataloging.
+ * 2. When an e‑commerce platform merges product image variations into a single composite JPEG while preserving EXIF metadata to satisfy image provenance and compliance rules.
+ * 3. When a mobile app generates a before‑and‑after comparison JPEG from two photos and must retain the original EXIF timestamps for audit‑trail purposes.
+ * 4. When a digital asset management system combines several high‑resolution JPEG scans into one file and wants to keep the original EXIF data for searchable metadata and licensing information.
+ * 5. When a real‑estate website creates a wide‑angle view by concatenating room photos and needs to preserve the EXIF GPS coordinates so the merged image can still be mapped correctly.
  */

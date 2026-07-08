@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\sample.bmp";
+        string outputPath = @"c:\temp\output.psd";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\sample.jpg";
-            string outputPath = @"C:\Images\output.psd";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -40,6 +40,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -47,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate print‑ready black‑and‑white artwork from a JPEG and must deliver it as a PSD file with a grayscale color mode for accurate monochrome reproduction.
- * 2. When converting scanned documents to PSD format for archival, setting ColorMode to Grayscale reduces file size and ensures the saved file contains only luminance data.
- * 3. When building a web service that creates PSD mockups of product photos in grayscale for marketing campaigns, the code guarantees the output uses the correct PSD color mode.
- * 4. When automating batch processing of color images to create grayscale PSD layers for a digital painting workflow, the developer uses this snippet to enforce the grayscale mode during save.
- * 5. When integrating Aspose.Imaging into a C# desktop application that exports user‑edited photos as PSD files for further editing in Photoshop, setting ColorMode to Grayscale provides a clean monochrome starting point.
+ * 1. When a developer needs to convert a color BMP image to a grayscale Photoshop PSD for printing black‑and‑white brochures using Aspose.Imaging in C#.
+ * 2. When an automated batch‑processing service must generate monochrome PSD assets from scanned documents to reduce file size and simplify downstream editing.
+ * 3. When a web application creates preview PSD files in grayscale for a digital art workflow that requires consistent color mode across all layers.
+ * 4. When a desktop utility transforms product photos into grayscale PSDs to meet a brand’s visual guidelines before handing them off to designers.
+ * 5. When a migration script moves legacy bitmap assets into Photoshop format while enforcing a grayscale color mode to ensure compatibility with older PSD viewers.
  */

@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"input.dcm";
-        string outputPath = @"output\result.png";
+        string inputPath = @"C:\Images\sample.dicom";
+        string outputPath = @"C:\Images\Result\sample_resized.png";
 
         try
         {
@@ -24,19 +24,19 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DICOM image
+            // Load the DICOM image, apply binarization, resize, and save as PNG
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage to access DICOM-specific methods
+                // Cast to DicomImage to access DICOM‑specific methods
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Apply fixed threshold binarization (threshold value 127)
+                // Apply fixed‑threshold binarization (threshold value 127)
                 dicomImage.BinarizeFixed(127);
 
-                // Resize to 500x500 using Bilinear resampling (any ResizeType can be used)
+                // Resize to 500×500 using bilinear resampling
                 dicomImage.Resize(500, 500, ResizeType.BilinearResample);
 
-                // Save as PNG
+                // Save the processed image as PNG
                 dicomImage.Save(outputPath, new PngOptions());
             }
         }
@@ -49,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert a DICOM X‑ray scan into a high‑contrast 500×500 PNG thumbnail for quick preview in a web portal.
- * 2. When a radiology workflow requires batch processing of DICOM images to produce binary masks that can be overlaid on reports, using fixed threshold binarization and resizing for consistent layout.
- * 3. When a machine‑learning pipeline expects PNG input, a developer can load DICOM scans, apply a 127 threshold to create binary images, resize them to 500×500, and save them for model training.
- * 4. When a hospital’s PACS integration must generate low‑resolution PNG snapshots of DICOM studies for mobile devices, the code performs binarization and scaling in C#.
- * 5. When a research tool needs to extract DICOM image data, convert it to a PNG format, and standardize the size for inclusion in publications or presentations.
+ * 1. When a medical imaging application must convert a DICOM X‑ray scan to a high‑contrast black‑and‑white PNG thumbnail of 500×500 pixels for quick preview in a web portal.
+ * 2. When a radiology workflow needs to extract a DICOM image, apply fixed‑threshold binarization at 127 to highlight bone structures, and then downscale it for inclusion in a PDF report.
+ * 3. When a healthcare data‑analysis tool requires batch processing of DICOM files into PNG format with uniform size and binary contrast to feed a machine‑learning model.
+ * 4. When a hospital’s PACS integration script must generate standardized PNG icons from DICOM studies for display on mobile devices, ensuring consistent resolution and binary image quality.
+ * 5. When a developer is building a C# utility that sanitizes patient imaging data by converting DICOM images to binarized PNGs of 500×500 pixels before archiving them in a secure file system.
  */

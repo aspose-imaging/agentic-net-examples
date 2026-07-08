@@ -10,14 +10,14 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded paths
-        string outputPath = @"C:\temp\nested_rectangles.bmp";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded output path
+            string outputPath = @"C:\temp\nested_rectangles.bmp";
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Create BMP options
             BmpOptions bmpOptions = new BmpOptions
             {
@@ -25,47 +25,31 @@ class Program
                 Source = new FileCreateSource(outputPath, false)
             };
 
-            // Image dimensions
-            int imageWidth = 500;
-            int imageHeight = 500;
-
-            // Create the image
-            using (Image image = Image.Create(bmpOptions, imageWidth, imageHeight))
+            // Create a new image of size 500x500
+            using (Image image = Image.Create(bmpOptions, 500, 500))
             {
-                // Initialize graphics
+                // Initialize graphics object
                 Graphics graphics = new Graphics(image);
 
-                // Fill background with white
+                // Clear background to white
                 graphics.Clear(Color.White);
 
-                // Parameters for nested rectangles
-                int rectangleCount = 10;
+                // Draw nested rectangles
+                int rectCount = 5;
                 int offsetStep = 20;
-                float penWidth = 3f;
-
-                // Draw rectangles decreasing in size, alternating colors
-                for (int i = 0; i < rectangleCount; i++)
+                int initialSize = 500;
+                for (int i = 0; i < rectCount; i++)
                 {
                     int offset = i * offsetStep;
-                    int rectWidth = imageWidth - 2 * offset;
-                    int rectHeight = imageHeight - 2 * offset;
-
-                    // Stop if rectangle would have non‑positive size
-                    if (rectWidth <= 0 || rectHeight <= 0)
-                        break;
-
-                    // Define rectangle
-                    Rectangle rect = new Rectangle(offset, offset, rectWidth, rectHeight);
-
-                    // Alternate between Red and Blue
-                    Color rectColor = (i % 2 == 0) ? Color.Red : Color.Blue;
-
-                    // Create pen and draw rectangle
-                    Pen pen = new Pen(rectColor, penWidth);
-                    graphics.DrawRectangle(pen, rect);
+                    int size = initialSize - 2 * offset;
+                    // Alternate colors between Red and Blue
+                    Color penColor = (i % 2 == 0) ? Color.Red : Color.Blue;
+                    Pen pen = new Pen(penColor, 3f);
+                    // Draw rectangle
+                    graphics.DrawRectangle(pen, offset, offset, size, size);
                 }
 
-                // Save the image (already bound to outputPath via FileCreateSource)
+                // Save the image (the file is already created via FileCreateSource)
                 image.Save();
             }
         }
@@ -78,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP thumbnail that visualizes hierarchical data as concentric colored rectangles for a reporting dashboard.
- * 2. When a C# application must create a printable test pattern with alternating red and blue borders to verify printer alignment and color accuracy.
- * 3. When a software tool requires a simple placeholder image showing nested shapes for UI mock‑ups or wireframes using Aspose.Imaging.
- * 4. When an automated script has to produce a series of BMP frames with decreasing rectangles for an animated loading indicator or progress bar.
- * 5. When a developer wants to programmatically generate a decorative background for a game level map by drawing layered rectangles with alternating colors.
+ * 1. When a developer needs to generate a BMP file that visualizes hierarchical data as concentric colored rectangles for a quick UI mock‑up.
+ * 2. When an automated reporting tool must create a 500×500 pixel image with alternating red and blue borders to highlight different sections of a diagram.
+ * 3. When a game asset pipeline requires programmatically drawing nested shapes into a bitmap to use as a placeholder texture during development.
+ * 4. When a testing framework needs to produce a deterministic image file for validating image‑processing algorithms that handle BMP format and color pens.
+ * 5. When a documentation generator wants to embed a simple illustration of scaling and offset calculations by drawing decreasing rectangles with Aspose.Imaging in C#.
  */

@@ -4,17 +4,16 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
         try
         {
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,41 +22,17 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image svgImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                var svgOptions = new SvgRasterizationOptions
+                SvgImage svgImage = image as SvgImage;
+                if (svgImage == null)
                 {
-                    PageWidth = svgImage.Width,
-                    PageHeight = svgImage.Height,
-                    BackgroundColor = Aspose.Imaging.Color.White
-                };
-
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = svgOptions
-                };
-
-                using (var rasterStream = new MemoryStream())
-                {
-                    svgImage.Save(rasterStream, pngOptions);
-                    rasterStream.Position = 0;
-
-                    using (Image rasterImageContainer = Image.Load(rasterStream))
-                    {
-                        RasterImage rasterImage = (RasterImage)rasterImageContainer;
-
-                        double[,] kernel = new double[,]
-                        {
-                            { -1, -1, -1 },
-                            { -1, 8, -1 },
-                            { -1, -1, -1 }
-                        };
-
-                        rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(kernel, 1.0, 0));
-
-                        rasterImage.Save(outputPath, new PngOptions());
-                    }
+                    Console.Error.WriteLine("Input file is not an SVG image.");
+                    return;
                 }
+
+                PngOptions pngOptions = new PngOptions();
+                svgImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -69,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically sharpen or highlight edges of vector‑based logos stored in multi‑layer SVG files before exporting them as high‑resolution PNG thumbnails for a web catalog, they can use this code to rasterize each layer and apply a custom convolution filter.
- * 2. When an e‑commerce platform wants to generate stylized product icons by applying an emboss or edge‑detect kernel to every layer of a complex SVG illustration and save the result as a PNG for fast client‑side rendering, this snippet provides the C# workflow.
- * 3. When a publishing system must preprocess multi‑layer SVG artwork with a custom contrast‑enhancing convolution matrix before converting it to PNG for print‑ready PDFs, the code demonstrates how to rasterize, filter, and save the image using Aspose.Imaging.
- * 4. When a mobile app needs to create visually consistent badge images by applying a uniform blur or sharpen filter to each SVG layer and then delivering the final PNG assets to the device, the example shows the required steps in C#.
- * 5. When a data‑visualization tool requires on‑the‑fly edge detection on layered SVG charts to improve readability in exported PNG reports, this code illustrates how to load, rasterize, filter, and store the processed image with Aspose.Imaging.
+ * 1. When a web application must generate high‑resolution PNG thumbnails from multi‑layer SVG logos on the fly, a developer can use this C# code with Aspose.Imaging to load the SVG and save each rendered layer as a PNG file.
+ * 2. When an e‑commerce platform needs to convert product vector illustrations (SVG) into raster images for PDF invoices, the code provides a reliable way to load the SVG and export it as a PNG using Aspose.Imaging in .NET.
+ * 3. When a mobile game studio wants to pre‑process SVG assets into PNG sprites for faster rendering on devices, this snippet demonstrates how to programmatically load the SVG and rasterize it with Aspose.Imaging.
+ * 4. When an email marketing system must embed SVG icons as PNG attachments to ensure compatibility with all email clients, the developer can employ this code to convert the SVG files to PNG format on the server.
+ * 5. When a reporting tool needs to include vector diagrams (multi‑layer SVG) in generated PNG charts for PDF export, the example shows how to load the SVG and save it as a PNG using C# and Aspose.Imaging.
  */

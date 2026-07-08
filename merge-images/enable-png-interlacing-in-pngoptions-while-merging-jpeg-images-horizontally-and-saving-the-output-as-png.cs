@@ -1,9 +1,10 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -12,12 +13,12 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG files and output PNG file
-            string[] inputPaths = new string[] { "input/image1.jpg", "input/image2.jpg", "input/image3.jpg" };
-            string outputPath = "output/merged.png";
+            // Hardcoded input JPEG files and output PNG path
+            string[] inputPaths = new[] { "image1.jpg", "image2.jpg", "image3.jpg" };
+            string outputPath = "merged.png";
 
             // Validate each input file exists
-            foreach (var path in inputPaths)
+            foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -31,7 +32,7 @@ class Program
 
             // Collect sizes of all input images
             List<Size> sizes = new List<Size>();
-            foreach (var path in inputPaths)
+            foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
@@ -43,15 +44,19 @@ class Program
             int newWidth = sizes.Sum(s => s.Width);
             int newHeight = sizes.Max(s => s.Height);
 
-            // Create PNG options with interlacing (Progressive)
-            Source src = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions() { Source = src, Progressive = true };
+            // Create source and PNG options with interlacing (Progressive)
+            Source source = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions()
+            {
+                Source = source,
+                Progressive = true
+            };
 
-            // Create the output canvas bound to the file
+            // Create bound PNG canvas
             using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, newWidth, newHeight))
             {
                 int offsetX = 0;
-                foreach (var path in inputPaths)
+                foreach (string path in inputPaths)
                 {
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
@@ -61,7 +66,7 @@ class Program
                     }
                 }
 
-                // Save the bound image
+                // Save the bound image (output path already bound in options)
                 canvas.Save();
             }
         }
@@ -74,9 +79,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a web‑ready image gallery that combines multiple JPEG photos into a single progressive PNG for faster incremental loading in browsers.
- * 2. When generating a printable product catalog where product photos (JPEG) are stitched side‑by‑side and saved as an interlaced PNG to preserve quality while reducing file size.
- * 3. When building a desktop application that merges scanned JPEG documents into a single PNG banner with progressive rendering for smoother preview on low‑bandwidth connections.
- * 4. When developing an automated marketing pipeline that concatenates campaign images into a single interlaced PNG to be embedded in email newsletters that support progressive display.
- * 5. When implementing a server‑side image service that assembles user‑uploaded JPEG avatars into a horizontal PNG sprite sheet with interlacing to improve loading performance on mobile devices.
+ * 1. When a web developer needs to combine several JPEG product photos into one progressive PNG sprite for faster incremental loading on e‑commerce sites.
+ * 2. When a desktop application must generate a horizontally merged PNG banner from user‑uploaded JPEG images while preserving interlaced (progressive) display for smoother preview in browsers.
+ * 3. When a reporting tool creates a single PNG chart that stitches together multiple JPEG graphs side‑by‑side and requires interlacing to reduce perceived rendering time on low‑bandwidth connections.
+ * 4. When a digital asset management system exports a composite PNG thumbnail from a series of JPEG assets, using Aspose.Imaging’s PngOptions to enable progressive rendering for quick visual inspection.
+ * 5. When a mobile app prepares a horizontally merged PNG collage from camera‑captured JPEGs and enables PNG interlacing to allow the image to appear progressively as it downloads over cellular networks.
  */

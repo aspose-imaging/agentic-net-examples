@@ -2,22 +2,21 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Watermark;
 using Aspose.Imaging.Watermark.Options;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\scanned_document.png";
-        string outputPath = @"C:\Images\output\cleaned_document.tif";
-
-        // Ensure any runtime exception is reported cleanly
         try
         {
+            // Hard‑coded input and output paths
+            string inputPath = @"C:\Images\scanned_doc.png";
+            string outputPath = @"C:\Images\scanned_doc_clean.tif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,26 +27,31 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the scanned document image
+            // Load the scanned document
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for watermark removal
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage required by WatermarkRemover
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Unsupported image format for watermark removal.");
+                    return;
+                }
 
-                // Define the area of the text watermark to remove (example rectangle)
+                // Define a mask that covers the text watermark area.
+                // Adjust the rectangle coordinates to match the actual watermark location.
                 var mask = new GraphicsPath();
                 var figure = new Figure();
-                // Adjust the rectangle coordinates to match the watermark location
-                figure.AddShape(new RectangleShape(new RectangleF(100f, 200f, 400f, 100f)));
+                figure.AddShape(new RectangleShape(new RectangleF(100, 100, 400, 50)));
                 mask.AddFigure(figure);
 
-                // Configure Telea algorithm options with the mask
+                // Use Telea algorithm for watermark removal
                 var options = new TeleaWatermarkOptions(mask);
 
                 // Remove the watermark
                 RasterImage result = WatermarkRemover.PaintOver(raster, options);
 
-                // Save the cleaned image as high‑resolution TIFF
+                // Save the cleaned image as a high‑resolution TIFF
                 var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 result.Save(outputPath, tiffOptions);
             }
@@ -58,3 +62,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to clean a scanned document saved as PNG by removing a printed text watermark and then archive the result as a high‑resolution TIFF for legal compliance.
+ * 2. When an imaging application must automatically strip confidential header text from batch‑scanned invoices (PNG) before storing them in a TIFF‑based document management system.
+ * 3. When a medical records system requires removal of patient‑identifying watermark text from scanned X‑ray images and conversion to lossless TIFF for long‑term storage.
+ * 4. When a government agency processes digitized forms that contain draft watermarks, using C# and Aspose.Imaging to erase the watermark region and output a high‑resolution TIFF for archival.
+ * 5. When a developer builds a desktop tool that lets users select a rectangular area containing a watermark on a scanned document image, removes it with the Telea algorithm, and saves the cleaned image as a TIFF for printing.
+ */

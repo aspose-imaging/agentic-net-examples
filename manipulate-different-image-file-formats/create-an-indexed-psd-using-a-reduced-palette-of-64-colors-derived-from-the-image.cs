@@ -6,51 +6,42 @@ using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\temp\input.png";
-            string outputPath = @"C:\temp\output.psd";
+            string inputPath = "Input/sample.png";
+            string outputPath = "Output/result.psd";
 
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access pixel data
-                RasterImage raster = (RasterImage)image;
-
-                // Generate a palette with exactly 64 colors from the source image
-                IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette(raster, 64);
-
-                // Configure PSD save options
-                PsdOptions psdOptions = new PsdOptions
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
                 {
-                    // Assign the generated palette (inherited from ImageOptionsBase)
-                    Palette = palette,
+                    Console.Error.WriteLine("Input image is not a raster image.");
+                    return;
+                }
 
-                    // Standard 8‑bit per channel
-                    ChannelBitsCount = 8,
+                var palette = ColorPaletteHelper.GetCloseImagePalette(raster, 64, PaletteMiningMethod.Histogram);
 
-                    // Use RGB color mode; the palette will be applied for indexed data
-                    ColorMode = ColorModes.Rgb,
+                using (PsdOptions psdOptions = new PsdOptions())
+                {
+                    psdOptions.ColorMode = ColorModes.Indexed;
+                    psdOptions.CompressionMethod = CompressionMethod.RLE;
+                    psdOptions.ChannelBitsCount = 8;
+                    psdOptions.ChannelsCount = 1;
+                    psdOptions.Palette = palette;
 
-                    // Use RLE compression (optional)
-                    CompressionMethod = CompressionMethod.RLE
-                };
-
-                // Save the image as an indexed PSD
-                image.Save(outputPath, psdOptions);
+                    image.Save(outputPath, psdOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -62,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert high‑resolution PNG assets into a compact PSD for legacy Photoshop workflows that only support indexed color with a limited palette.
- * 2. When generating web‑ready preview files where the PSD must be small in size, using a 64‑color palette to reduce file weight while preserving the original image’s visual essence.
- * 3. When preparing artwork for printing processes that require indexed PSD files with a fixed palette, such as screen‑printing plates that can handle only 64 colors.
- * 4. When building an automated asset pipeline that extracts color palettes from source images and stores them as indexed PSDs for use in game‑development texture atlases.
- * 5. When creating archival copies of digital illustrations where the PSD format is required but storage constraints demand a reduced 64‑color indexed representation.
+ * 1. When a developer needs to convert a high‑resolution PNG into a Photoshop PSD with an indexed 64‑color palette for faster web preview or legacy software compatibility.
+ * 2. When building an automated asset pipeline that reduces file size by saving images as indexed PSDs with RLE compression for game textures.
+ * 3. When creating print‑ready PSD files from raster images while preserving limited color information to meet spot‑color printing requirements.
+ * 4. When generating PSD mock‑ups from user‑uploaded images and need to enforce a consistent 64‑color palette to maintain brand color guidelines.
+ * 5. When developing a batch conversion tool that processes multiple PNGs and outputs indexed PSDs to support older Photoshop versions that only handle indexed color modes.
  */

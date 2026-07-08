@@ -1,7 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -13,15 +11,13 @@ class Program
     {
         try
         {
-            // Define input and output directories (relative paths)
             string inputDirectory = "Input";
             string outputDirectory = "Output";
 
-            // Ensure input and output directories exist
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add JPEG files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
@@ -30,77 +26,30 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all JPEG files in the input directory
-            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg")
-                .Concat(Directory.GetFiles(inputDirectory, "*.jpeg"))
-                .ToArray();
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            if (jpegFiles.Length == 0)
+            foreach (string inputPath in files)
             {
-                Console.WriteLine("No JPEG files found in the input directory.");
-                return;
-            }
-
-            // Verify each input file exists
-            foreach (string filePath in jpegFiles)
-            {
-                if (!File.Exists(filePath))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
-                    return;
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
                 }
-            }
 
-            // Collect sizes of all images
-            List<Size> imageSizes = new List<Size>();
-            foreach (string filePath in jpegFiles)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(filePath))
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".jpg");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Image image = Image.Load(inputPath))
                 {
-                    imageSizes.Add(img.Size);
-                }
-            }
-
-            // Calculate canvas dimensions for vertical merge
-            int canvasWidth = imageSizes.Max(s => s.Width);
-            int canvasHeight = imageSizes.Sum(s => s.Height);
-
-            // Define output file path
-            string outputPath = Path.Combine(outputDirectory, "merged_cmyk.jpg");
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Prepare JPEG options for CMYK output
-            Source fileSource = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                Source = fileSource,
-                Quality = 100,
-                ColorType = JpegCompressionColorMode.Cmyk
-                // Note: Custom ICC profiles can be set via RgbColorProfile and CmykColorProfile if needed
-            };
-
-            // Create a bound JPEG canvas
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
-            {
-                int offsetY = 0;
-                // Draw each image onto the canvas vertically
-                foreach (string filePath in jpegFiles)
-                {
-                    using (RasterImage src = (RasterImage)Image.Load(filePath))
+                    using (JpegOptions jpegOptions = new JpegOptions())
                     {
-                        Rectangle destRect = new Rectangle(0, offsetY, src.Width, src.Height);
-                        canvas.SaveArgb32Pixels(destRect, src.LoadArgb32Pixels(src.Bounds));
-                        offsetY += src.Height;
+                        jpegOptions.Source = new FileCreateSource(outputPath, false);
+                        image.Save(outputPath, jpegOptions);
                     }
                 }
-
-                // Save the bound image (no need to pass path again)
-                canvas.Save();
             }
-
-            Console.WriteLine($"Merged CMYK JPEG saved to: {outputPath}");
         }
         catch (Exception ex)
         {
@@ -111,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When preparing print‑ready brochures, a developer can use this code to convert individual JPEG images to CMYK, stack them vertically, and output a single JPEG that matches the printer’s color profile.
- * 2. When generating a continuous product catalog page from separate photo shots, the code ensures each JPEG is in CMYK color space before merging them vertically, preserving color consistency for offset printing.
- * 3. When automating the creation of vertical banner ads from multiple JPEG assets, the developer can convert each image to CMYK and combine them into one JPEG to meet the advertising platform’s color requirements.
- * 4. When consolidating scanned receipts or invoices into a single printable PDF page, the code first converts each JPEG to CMYK and then merges them vertically, guaranteeing accurate color reproduction in the final document.
- * 5. When building a batch workflow for a publishing house that needs to combine chapter header images into a single JPEG for e‑book layouts, the code converts each source JPEG to CMYK and stacks them vertically to maintain consistent color across devices.
+ * 1. When a C# application must batch‑process all images in an input folder and guarantee that each file is saved as a JPEG using Aspose.Imaging for consistent web delivery.
+ * 2. When a developer needs to re‑encode mixed‑format photos (PNG, BMP, TIFF) into JPEGs to reduce storage size before uploading to a cloud service.
+ * 3. When an automated build pipeline requires converting user‑uploaded images to JPEG with Aspose.Imaging’s JpegOptions to ensure uniform compression across the project.
+ * 4. When a legacy workflow expects only JPEG files in a specific directory, and a quick C# utility is needed to read any supported image format and write it as JPEG.
+ * 5. When a digital asset management system must normalize incoming images to JPEG before applying further processing such as watermarking or thumbnail creation.
  */

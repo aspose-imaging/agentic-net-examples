@@ -30,13 +30,15 @@ class Program
                 // Cast to GifImage to access GIF‑specific methods
                 GifImage gifImage = (GifImage)image;
 
-                // Apply Floyd‑Steinberg dithering with an 8‑bit palette (high quality)
+                // Apply Floyd‑Steinberg dithering with an 8‑bit palette (256 colors)
                 gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
 
-                // Set lossy compression options
-                GifOptions saveOptions = new GifOptions
+                // Configure GIF saving options for lossy compression
+                var saveOptions = new GifOptions
                 {
-                    // Recommended value for good quality/size trade‑off
+                    // Enable palette correction for better visual quality
+                    DoPaletteCorrection = true,
+                    // Set maximum pixel difference to trigger lossy compression (recommended 80)
                     MaxDiff = 80
                 };
 
@@ -53,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer must reduce the bandwidth of animated GIFs for faster page loads while preserving visual fidelity, they can apply Floyd‑Steinberg dithering and set MaxDiff compression using Aspose.Imaging for .NET.
- * 2. When an email‑marketing system needs to attach lightweight GIF banners that still look sharp on low‑resolution screens, the code can dither the image to an 8‑bit palette and compress it with a configurable MaxDiff value.
- * 3. When a mobile app generates GIF previews from user‑uploaded videos and must keep the file size under a network limit, developers can use this C# snippet to dither and compress the GIF before saving.
- * 4. When a content‑management platform automatically optimizes uploaded GIF assets for CDN distribution, the code provides a repeatable way to apply Floyd‑Steinberg dithering and lossy compression with Aspose.Imaging.
- * 5. When a game developer creates sprite animations stored as GIFs and wants to minimize the game's download size without noticeable quality loss, they can employ this example to dither and compress the files in a .NET build pipeline.
+ * 1. When a developer needs to reduce the file size of an animated GIF for faster web page loading while preserving visual detail, they can apply Floyd‑Steinberg dithering and lossy compression using Aspose.Imaging in C#.
+ * 2. When preparing GIF assets for email newsletters where attachment size limits apply, this code lets you shrink the GIF by dithering to an 8‑bit palette and setting a MaxDiff threshold.
+ * 3. When optimizing GIFs for mobile apps to minimize bandwidth consumption, a developer can use the example to apply palette correction and lossy compression before saving the image.
+ * 4. When converting high‑resolution GIFs from a design tool into lightweight versions for social media sharing, the code demonstrates how to load, dither, and compress the GIF in a .NET environment.
+ * 5. When building an automated image‑processing pipeline that archives GIFs with reduced storage cost, this snippet shows how to programmatically apply Floyd‑Steinberg dithering and configure GifOptions for efficient C# processing.
  */

@@ -8,56 +8,47 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputFolder = @"C:\Images\Input";
-        string outputLogPath = @"C:\Images\Output\exif_log.txt";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputLogPath));
+        // Hardcoded paths
+        string inputDirectory = @"C:\Images";
+        string outputLogPath = @"C:\Logs\exif_log.txt";
 
         try
         {
-            // Open the log file for writing
-            using (var logWriter = new StreamWriter(outputLogPath, false))
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputLogPath));
+
+            // Get all JPEG files in the input directory
+            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg");
+
+            foreach (string inputPath in jpegFiles)
             {
-                // Get all JPEG files in the input folder
-                string[] jpegFiles = Directory.GetFiles(inputFolder, "*.jpg");
-
-                foreach (string inputPath in jpegFiles)
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Verify the input file exists
-                    if (!File.Exists(inputPath))
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                // Load the JPEG image
+                using (JpegImage image = (JpegImage)Image.Load(inputPath))
+                {
+                    // Access EXIF data
+                    JpegExifData jpegExif = image.ExifData as JpegExifData;
+
+                    if (jpegExif != null)
                     {
-                        Console.Error.WriteLine($"File not found: {inputPath}");
-                        return;
+                        string make = jpegExif.Make ?? "Unknown";
+                        string model = jpegExif.Model ?? "Unknown";
+
+                        string logLine = $"File: {Path.GetFileName(inputPath)} | Make: {make} | Model: {model}";
+                        Console.WriteLine(logLine);
+
+                        // Append to log file
+                        File.AppendAllText(outputLogPath, logLine + Environment.NewLine);
                     }
-
-                    // Load the JPEG image
-                    using (JpegImage image = (JpegImage)Image.Load(inputPath))
+                    else
                     {
-                        // Access JPEG-specific EXIF data
-                        JpegExifData jpegExifData = image.ExifData as JpegExifData;
-
-                        if (jpegExifData != null)
-                        {
-                            string make = jpegExifData.Make ?? "Unknown";
-                            string model = jpegExifData.Model ?? "Unknown";
-
-                            // Log to console
-                            Console.WriteLine($"File: {Path.GetFileName(inputPath)} | Make: {make} | Model: {model}");
-
-                            // Write to log file
-                            logWriter.WriteLine($"File: {inputPath}");
-                            logWriter.WriteLine($"  Camera Make : {make}");
-                            logWriter.WriteLine($"  Camera Model: {model}");
-                            logWriter.WriteLine();
-                        }
-                        else
-                        {
-                            Console.WriteLine($"File: {Path.GetFileName(inputPath)} does not contain JPEG EXIF data.");
-                            logWriter.WriteLine($"File: {inputPath} - No JPEG EXIF data.");
-                            logWriter.WriteLine();
-                        }
+                        Console.WriteLine($"No EXIF data found for file: {Path.GetFileName(inputPath)}");
                     }
                 }
             }
@@ -71,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photo‑management system needs to generate a catalog of all JPEG images in a folder and record each picture’s camera make and model for searchable metadata, this Aspose.Imaging C# batch job can read the EXIF data and write it to a log file.
- * 2. When a digital forensics tool must audit a collection of evidence photos to verify the originating devices by extracting camera make and model from JPEG EXIF tags, the code provides a quick way to automate the extraction and logging.
- * 3. When a marketing analytics platform wants to analyze the distribution of camera equipment used by user‑submitted images, it can run this batch process to pull EXIF make/model information from thousands of JPEG files and store the results for reporting.
- * 4. When a cloud‑based image‑processing pipeline needs to tag incoming JPEG uploads with their camera metadata before further transformations, the example demonstrates how to read and log the EXIF make and model using Aspose.Imaging in C#.
- * 5. When a desktop application offers photographers a summary of their shooting gear by scanning a local image library, this code can batch‑process the JPEG files, extract the EXIF camera details, and generate a readable log for the user.
+ * 1. When a photographer needs to generate an inventory of all JPEG images in a folder, extracting the camera make and model from EXIF data for cataloging purposes.
+ * 2. When a digital asset management system must audit incoming image batches to verify that they were captured with approved camera equipment by reading EXIF metadata using Aspose.Imaging in C#.
+ * 3. When a compliance officer wants to log the source devices of JPEG files uploaded to a server, creating a text report of camera make and model for each file.
+ * 4. When a developer builds a batch processing tool that scans a directory of JPEG photos, extracts EXIF information, and writes the results to a central log for later analytics.
+ * 5. When an e‑commerce platform needs to ensure product photos are taken with high‑quality cameras by automatically reading EXIF make/model tags from JPEG images during bulk import.
  */

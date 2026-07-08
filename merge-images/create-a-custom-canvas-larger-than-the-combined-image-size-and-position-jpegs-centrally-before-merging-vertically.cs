@@ -13,10 +13,9 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG file paths
+            // Hardcoded input and output paths
             string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
-            // Hardcoded output JPEG file path
-            string outputPath = "merged_output.jpg";
+            string outputPath = "output/merged.jpg";
 
             // Validate input files
             foreach (string path in inputPaths)
@@ -29,13 +28,9 @@ class Program
             }
 
             // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of all input images
+            // Collect sizes of all images
             List<Size> sizes = new List<Size>();
             foreach (string path in inputPaths)
             {
@@ -49,22 +44,18 @@ class Program
             int padding = 20;
             int maxWidth = sizes.Max(s => s.Width);
             int totalHeight = sizes.Sum(s => s.Height);
-            int canvasWidth = maxWidth + 2 * padding;
-            int canvasHeight = totalHeight + 2 * padding;
+            int canvasWidth = maxWidth + padding * 2;
+            int canvasHeight = totalHeight + padding * 2;
 
-            // Prepare JPEG options with bound output file
+            // Create JPEG canvas with bound output file
             JpegOptions jpegOptions = new JpegOptions
             {
-                Quality = 100,
-                Source = new FileCreateSource(outputPath, false)
+                Source = new FileCreateSource(outputPath, false),
+                Quality = 100
             };
-
-            // Create canvas bound to the output file
             using (JpegImage canvas = new JpegImage(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = padding;
-
-                // Merge each image vertically, centered horizontally
                 foreach (string path in inputPaths)
                 {
                     using (JpegImage img = (JpegImage)Image.Load(path))
@@ -89,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a printable photo collage that adds a uniform border around a set of JPEG pictures stacked vertically.
- * 2. When an e‑commerce application must combine multiple product JPEG images into a single high‑resolution file with consistent padding for display on a product detail page.
- * 3. When a mobile app generates a vertical social‑media story image by centering several JPEG frames on a larger canvas and leaving extra space for captions.
- * 4. When a document‑scanning workflow requires merging several scanned JPEG pages into one file while keeping each page centered and adding a margin for binding.
- * 5. When a digital signage system assembles multiple advertisement banners into one tall JPEG image, ensuring each banner is centered and separated by a fixed padding.
+ * 1. When a web application needs to generate a printable photo collage by stacking user‑uploaded JPEGs vertically on a single page with uniform margins.
+ * 2. When an e‑commerce platform wants to create a product comparison image that places several product photos one below another on a larger JPEG canvas for email newsletters.
+ * 3. When a digital signage system must combine multiple advertisement banners into one high‑resolution JPEG with consistent padding to ensure they appear centered on the screen.
+ * 4. When a document‑generation service prepares a PDF cover page by first merging several portrait‑oriented JPEG scans into a single vertically aligned image with extra white space around the edges.
+ * 5. When a mobile app creates a before‑and‑after visual by stacking two JPEG snapshots on a larger canvas so the images stay centered and the final merged file retains maximum JPEG quality.
  */

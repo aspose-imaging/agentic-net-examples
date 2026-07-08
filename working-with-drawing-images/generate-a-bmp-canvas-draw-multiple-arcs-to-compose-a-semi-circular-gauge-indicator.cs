@@ -9,67 +9,69 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded paths
-        string outputPath = @"C:\Temp\GaugeIndicator.bmp";
-
         try
         {
-            // Ensure output directory exists
+            // Hard‑coded output path
+            string outputPath = @"C:\Temp\gauge.bmp";
+
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create BMP image options
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
-            };
+            // Set BMP creation options
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            int width = 500;
-            int height = 500;
-
-            // Create the image
-            using (Image image = Image.Create(bmpOptions, width, height))
+            // Create a BMP canvas (width: 400, height: 200)
+            using (Image image = Image.Create(bmpOptions, 400, 200))
             {
-                // Initialize graphics object
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                // Outer semi‑circular arc (gauge border)
-                Pen outerPen = new Pen(Color.DarkGray, 8);
-                Rectangle outerRect = new Rectangle(50, 50, 400, 400);
-                graphics.DrawArc(outerPen, outerRect, 180, -180);
+                // Gauge parameters
+                int centerX = 200;
+                int centerY = 200;
+                int radiusOuter = 180;
+                int radiusInner = 150;
 
-                // Inner semi‑circular arc (gauge background)
-                Pen innerPen = new Pen(Color.LightGray, 4);
-                Rectangle innerRect = new Rectangle(80, 80, 340, 340);
-                graphics.DrawArc(innerPen, innerRect, 180, -180);
+                // Outer semi‑circular arc (0° to 180°)
+                Pen outerPen = new Pen(Color.Black, 4);
+                graphics.DrawArc(
+                    outerPen,
+                    new Rectangle(centerX - radiusOuter, centerY - radiusOuter, radiusOuter * 2, radiusOuter * 2),
+                    0,
+                    180);
 
-                // Tick marks (multiple small arcs)
+                // Inner semi‑circular arc
+                Pen innerPen = new Pen(Color.Gray, 2);
+                graphics.DrawArc(
+                    innerPen,
+                    new Rectangle(centerX - radiusInner, centerY - radiusInner, radiusInner * 2, radiusInner * 2),
+                    0,
+                    180);
+
+                // Tick marks every 10 degrees
                 Pen tickPen = new Pen(Color.Black, 2);
-                for (int i = 0; i <= 10; i++)
+                for (int angle = 0; angle <= 180; angle += 10)
                 {
-                    float angle = 180 - i * 18; // 0°, 18°, …, 180°
-                    // Convert angle to radians for position calculation
                     double rad = angle * Math.PI / 180.0;
-                    // Determine radius for tick start and end
-                    int rStart = 210;
-                    int rEnd = 230;
-                    int cx = width / 2;
-                    int cy = height / 2;
-                    int x1 = cx + (int)(rStart * Math.Cos(rad));
-                    int y1 = cy + (int)(rStart * Math.Sin(rad));
-                    int x2 = cx + (int)(rEnd * Math.Cos(rad));
-                    int y2 = cy + (int)(rEnd * Math.Sin(rad));
-                    graphics.DrawLine(tickPen, x1, y1, x2, y2);
+                    int xOuter = centerX + (int)(radiusOuter * Math.Cos(rad));
+                    int yOuter = centerY - (int)(radiusOuter * Math.Sin(rad));
+                    int xInner = centerX + (int)(radiusInner * Math.Cos(rad));
+                    int yInner = centerY - (int)(radiusInner * Math.Sin(rad));
+                    graphics.DrawLine(tickPen, xInner, yInner, xOuter, yOuter);
                 }
 
-                // Needle (a thick arc segment)
-                Pen needlePen = new Pen(Color.Red, 6);
-                Rectangle needleRect = new Rectangle(120, 120, 260, 260);
-                // Example needle from 180° to 135° (pointing to 45% of the gauge)
-                graphics.DrawArc(needlePen, needleRect, 180, -45);
+                // Needle pointing at 75 degrees
+                Pen needlePen = new Pen(Color.Red, 3);
+                int needleLength = radiusInner - 20;
+                double needleRad = 75 * Math.PI / 180.0;
+                int xNeedle = centerX + (int)(needleLength * Math.Cos(needleRad));
+                int yNeedle = centerY - (int)(needleLength * Math.Sin(needleRad));
+                graphics.DrawLine(needlePen, centerX, centerY, xNeedle, yNeedle);
 
-                // Save the image
+                // Save the image (output path already bound to the source)
                 image.Save();
             }
         }
@@ -82,9 +84,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a BMP dashboard widget using Aspose.Imaging in C# that displays a speedometer‑style semi‑circular gauge for a Windows desktop application.
- * 2. When an IoT solution must generate a lightweight bitmap gauge image on the fly with Aspose.Imaging to embed in a web UI without relying on external image assets.
- * 3. When a reporting engine requires a printable, BMP‑based semi‑circular progress indicator that can be merged into PDF invoices via image processing.
- * 4. When a game developer wants to render a health bar as a semi‑circular gauge on a bitmap texture, saving it as a BMP file for reuse across game levels.
- * 5. When a server‑side monitoring service programmatically draws tick‑marked gauge arcs for temperature readings and archives the results as BMP files for audit logs.
+ * 1. When a developer needs to generate a 24‑bit BMP image of a semi‑circular gauge for a Windows desktop dashboard widget using C# and Aspose.Imaging.
+ * 2. When a C# backend service must create a static gauge graphic on the fly to embed in PDF or HTML reports generated with Aspose libraries.
+ * 3. When an IoT monitoring application requires a lightweight BMP gauge indicator that can be rendered programmatically without external image files.
+ * 4. When a legacy SCADA system expects a BMP gauge image with precise arc and tick‑mark geometry that can be refreshed automatically via Aspose.Imaging.
+ * 5. When a developer wants to export a custom semi‑circular gauge illustration as a BMP file for printing on labels, manuals, or other documentation.
  */

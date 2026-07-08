@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,52 +9,41 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
-
-            if (!Directory.Exists(inputDirectory))
+            // Hardcoded list of input EMF and WMF files
+            string[] inputFiles = new[]
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+                "input1.emf",
+                "input2.wmf",
+                "input3.emf"
+            };
 
-            if (!Directory.Exists(outputDirectory))
+            // Output directory
+            string outputFolder = "Output";
+            Directory.CreateDirectory(outputFolder);
+
+            foreach (string inputPath in inputFiles)
             {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf");
-            string[] wmfFiles = Directory.GetFiles(inputDirectory, "*.wmf");
-            string[] allFiles = new string[emfFiles.Length + wmfFiles.Length];
-            emfFiles.CopyTo(allFiles, 0);
-            wmfFiles.CopyTo(allFiles, emfFiles.Length);
-
-            foreach (string inputPath in allFiles)
-            {
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                // Build output PNG path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".png");
+
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+                // Load vector image and save as PNG with uniform DPI
                 using (Image image = Image.Load(inputPath))
                 {
-                    var vectorOptions = new VectorRasterizationOptions
+                    PngOptions pngOptions = new PngOptions
                     {
-                        PageSize = image.Size,
-                        BackgroundColor = Aspose.Imaging.Color.White
+                        ResolutionSettings = new ResolutionSetting(300, 300) // uniform DPI
                     };
-
-                    var pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = vectorOptions,
-                        ResolutionSettings = new Aspose.Imaging.ResolutionSetting(300, 300) // uniform DPI
-                    };
-
                     image.Save(outputPath, pngOptions);
                 }
             }
@@ -69,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a batch of legacy vector graphics (EMF and WMF) into web‑friendly PNG images with a consistent DPI for display on a website.
- * 2. When an automation script must process user‑uploaded EMF/WMF files and generate high‑resolution PNG thumbnails for a document management system.
- * 3. When a reporting tool requires rasterizing mixed vector formats into PNGs to embed them in PDF reports with uniform scaling.
- * 4. When a migration project moves Windows Metafile assets to a cloud storage solution that only supports PNG, ensuring all images retain the same resolution.
- * 5. When a desktop application needs to pre‑render vector icons from EMF and WMF files into PNG sprites for faster UI loading on different screen densities.
+ * 1. When a developer needs to batch convert a mixed collection of EMF and WMF vector graphics into high‑resolution PNG files for web publishing, they can use this code to load each file and save it with a uniform 300 DPI.
+ * 2. When migrating legacy Windows Metafile assets to a modern image format for inclusion in a cross‑platform .NET application, this snippet automates the conversion of EMF and WMF files to PNG while preserving consistent resolution.
+ * 3. When preparing printable marketing materials that require raster images at a specific DPI, a developer can employ this routine to transform vector EMF/WMF logos into 300 DPI PNGs in a single batch.
+ * 4. When building an automated build pipeline that extracts vector icons from a design repository and generates PNG thumbnails for a mobile app, this code provides a simple C# solution for bulk conversion with fixed DPI settings.
+ * 5. When creating a document‑generation service that accepts user‑uploaded EMF or WMF diagrams and needs to embed them as PNG images in PDF reports, this example shows how to convert the files uniformly before insertion.
  */

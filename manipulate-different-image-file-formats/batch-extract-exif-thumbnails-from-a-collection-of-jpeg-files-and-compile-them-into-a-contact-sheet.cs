@@ -14,28 +14,24 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded paths
             string inputDirectory = "Input";
             string outputPath = "Output/contact_sheet.png";
 
-            // Ensure output directory exists
+            // Ensure directories exist
+            Directory.CreateDirectory(inputDirectory);
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Get JPEG files
-            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg")
+            // Collect JPEG files
+            var jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg")
                 .Concat(Directory.GetFiles(inputDirectory, "*.jpeg"))
-                .ToArray();
+                .ToList();
 
-            if (jpegFiles.Length == 0)
-            {
-                Console.WriteLine("No JPEG files found in the input directory.");
-                return;
-            }
+            // List to hold thumbnails
+            List<RasterImage> thumbnails = new List<RasterImage>();
 
-            // First pass: collect thumbnail sizes
-            var thumbSizes = new List<(string FilePath, int Width, int Height)>();
-
-            foreach (string filePath in jpegFiles)
+            // Load each JPEG and extract thumbnail
+            foreach (var filePath in jpegFiles)
             {
                 if (!File.Exists(filePath))
                 {
@@ -43,49 +39,51 @@ class Program
                     return;
                 }
 
-                using (JpegImage jpeg = (JpegImage)Image.Load(filePath))
+                using (JpegImage jpegImage = (JpegImage)Image.Load(filePath))
                 {
-                    var thumb = jpeg.ExifData?.Thumbnail;
+                    var thumb = jpegImage.ExifData?.Thumbnail;
                     if (thumb != null)
                     {
-                        thumbSizes.Add((filePath, thumb.Width, thumb.Height));
+                        thumbnails.Add((RasterImage)thumb);
                     }
                 }
             }
 
-            if (thumbSizes.Count == 0)
+            if (thumbnails.Count == 0)
             {
-                Console.WriteLine("No EXIF thumbnails found in the JPEG files.");
+                Console.WriteLine("No EXIF thumbnails found.");
                 return;
             }
 
-            // Calculate canvas dimensions (horizontal layout)
-            int canvasWidth = thumbSizes.Sum(t => t.Width);
-            int canvasHeight = thumbSizes.Max(t => t.Height);
+            // Calculate canvas size (horizontal layout)
+            int totalWidth = thumbnails.Sum(t => t.Width);
+            int maxHeight = thumbnails.Max(t => t.Height);
 
-            // Create PNG canvas
-            Source outputSource = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions { Source = outputSource };
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
+            // Create PNG canvas bound to output file
+            PngOptions pngOptions = new PngOptions
+            {
+                Source = new FileCreateSource(outputPath, false)
+            };
+
+            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, totalWidth, maxHeight))
             {
                 int offsetX = 0;
-                foreach (var (filePath, width, height) in thumbSizes)
+                foreach (var thumb in thumbnails)
                 {
-                    using (JpegImage jpeg = (JpegImage)Image.Load(filePath))
-                    {
-                        var thumb = jpeg.ExifData?.Thumbnail;
-                        if (thumb != null)
-                        {
-                            // Copy thumbnail pixels onto the canvas
-                            var bounds = new Rectangle(offsetX, 0, thumb.Width, thumb.Height);
-                            canvas.SaveArgb32Pixels(bounds, thumb.LoadArgb32Pixels(thumb.Bounds));
-                            offsetX += thumb.Width;
-                        }
-                    }
+                    int[] pixels = thumb.LoadArgb32Pixels(thumb.Bounds);
+                    var destRect = new Rectangle(offsetX, 0, thumb.Width, thumb.Height);
+                    canvas.SaveArgb32Pixels(destRect, pixels);
+                    offsetX += thumb.Width;
                 }
 
-                // Save the contact sheet
+                // Save bound image
                 canvas.Save();
+            }
+
+            // Dispose thumbnails
+            foreach (var thumb in thumbnails)
+            {
+                thumb.Dispose();
             }
         }
         catch (Exception ex)
@@ -97,9 +95,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer wants to quickly preview the embedded EXIF thumbnails of a batch of JPEG images as a single PNG contact sheet for client review.
- * 2. When a digital asset management system needs to generate a lightweight overview of thousands of uploaded photos without loading full‑resolution images.
- * 3. When a web application must display a collage of product image previews extracted from EXIF data to reduce bandwidth usage.
- * 4. When an e‑commerce platform wants to verify that uploaded JPEG files contain proper EXIF thumbnails and present them in a grid for quality control.
- * 5. When a mobile app developer needs to create a printable contact sheet of camera‑generated thumbnails for archival documentation.
+ * 1. When a photographer wants to quickly generate a preview contact sheet of all EXIF thumbnails embedded in a folder of JPEG images for client review.
+ * 2. When an e‑commerce platform needs to extract low‑resolution thumbnails from product photos stored as JPEGs and combine them into a single PNG catalog page.
+ * 3. When a digital asset management system must batch process uploaded JPEG files to create a visual index using the embedded EXIF thumbnails without loading full‑size images.
+ * 4. When a mobile app backend wants to assemble a lightweight contact sheet of user‑uploaded JPEG thumbnails for faster gallery loading on low‑bandwidth connections.
+ * 5. When a forensic analyst requires an automated way to collect and display EXIF thumbnail data from a collection of suspect JPEG files in a single PNG contact sheet for quick visual inspection.
  */

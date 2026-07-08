@@ -1,42 +1,56 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.tif";
+        string outputDirectory = "output";
+        string outputPattern = Path.Combine(outputDirectory, "page_{0}.webp");
+        string dummyOutputPath = Path.Combine(outputDirectory, "dummy.tif");
+
+        // Ensure any runtime exception is reported cleanly
         try
         {
-            string inputPath = "input.tif";
-            string outputPath = "output\\converted.webp";
-
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Create output directory unconditionally
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPattern));
+            Directory.CreateDirectory(Path.GetDirectoryName(dummyOutputPath));
 
+            // Load the multi‑page TIFF
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Process pages sequentially to avoid loading all at once
+                // Set batch processing action: save each page as a separate WebP file
                 tiffImage.PageExportingAction = delegate (int index, Image page)
                 {
-                    // Example per-page operation
+                    // Force garbage collection to keep memory usage low
                     GC.Collect();
+
+                    // Cast the page to RasterImage for saving
+                    RasterImage rasterPage = (RasterImage)page;
+
+                    // Build the output file name for this page
+                    string pageOutputPath = string.Format(outputPattern, index);
+
+                    // Save the current page as WebP
+                    rasterPage.Save(pageOutputPath, new WebPOptions());
                 };
 
-                WebPOptions webpOptions = new WebPOptions
-                {
-                    Lossless = false,
-                    Quality = 80
-                };
-
-                tiffImage.Save(outputPath, webpOptions);
+                // Trigger the batch export by saving to a dummy TIFF file.
+                // The dummy file is not needed after conversion.
+                tiffImage.Save(dummyOutputPath);
             }
         }
         catch (Exception ex)
@@ -48,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert scanned multi‑page TIFF documents into lightweight WebP images for faster web delivery while keeping memory usage low.
- * 2. When building a C# service that processes large TIFF archives from medical imaging equipment and must export each page as a compressed WebP without loading the entire file into RAM.
- * 3. When creating an automated batch job that transforms multi‑page TIFF invoices into WebP thumbnails for preview in a portal, using Aspose.Imaging’s sequential page exporting to avoid out‑of‑memory errors.
- * 4. When integrating a document management system that receives multi‑page TIFF uploads and needs to store them as WebP files for mobile apps, leveraging the PageExportingAction to handle each page individually.
- * 5. When developing a cloud‑based image pipeline that streams multi‑page TIFF files from storage and converts them to WebP on‑the‑fly, using sequential batch export mode to ensure scalability and low latency.
+ * 1. When a medical imaging system needs to generate lightweight WebP previews of each page in a large multi‑page TIFF without exhausting server memory.
+ * 2. When a publishing workflow must convert scanned book chapters stored as a multi‑page TIFF into separate WebP files for fast web delivery while processing pages one at a time.
+ * 3. When an archival tool has to extract individual frames from a multi‑page TIFF surveillance video and save them as WebP thumbnails on a low‑memory IoT device.
+ * 4. When a GIS application wants to transform each raster layer in a multi‑page TIFF map into compressed WebP tiles for use in a web‑based map viewer without loading the entire dataset.
+ * 5. When an e‑commerce platform needs to batch‑export product catalog pages stored in a multi‑page TIFF into WebP images for responsive web pages while keeping the .NET process memory footprint minimal.
  */

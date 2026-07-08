@@ -10,31 +10,32 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.tif";
-        string outputPath = @"C:\Images\sample.MotionBlur.png";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = @"c:\temp\sample.tif";
+        string outputPath = @"c:\temp\sample.motionblur.png";
 
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to TiffImage to access the Filter method
+                // Cast to TiffImage to access Filter method
                 TiffImage tiffImage = (TiffImage)image;
 
                 // Apply a horizontal motion blur (angle = 0 degrees)
-                // Length = 10, Sigma = 1.0 (adjust as needed)
-                var motionBlurOptions = new MotionWienerFilterOptions(10, 1.0, 0.0);
-                tiffImage.Filter(tiffImage.Bounds, motionBlurOptions);
+                // Parameters: length = 10, sigma = 1.0, angle = 0.0
+                tiffImage.Filter(
+                    tiffImage.Bounds,
+                    new MotionWienerFilterOptions(10, 1.0, 0.0));
 
                 // Save the result as PNG
                 tiffImage.Save(outputPath, new PngOptions());
@@ -49,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a stylized preview of a high‑resolution TIFF scan by adding a horizontal motion blur and saving it as a lightweight PNG for web galleries.
- * 2. When an imaging pipeline must preprocess scanned documents (TIFF) to simulate camera shake in the horizontal axis before converting them to PNG for visual effects testing.
- * 3. When a batch job has to generate motion‑blurred thumbnails from large TIFF files, using Aspose.Imaging for .NET to apply a horizontal blur and output PNGs for faster loading.
- * 4. When a medical imaging application wants to anonymize patient details by obscuring them with a horizontal motion blur on TIFF X‑ray images and then export the result as PNG for reporting.
- * 5. When a developer is building a C# tool that demonstrates image‑filter capabilities, applying a horizontal motion blur to a TIFF and saving the result as PNG to showcase Aspose.Imaging filter options.
+ * 1. When a developer needs to reduce motion artifacts in a scanned document stored as a TIFF and deliver a web‑ready PNG with a horizontal motion blur applied.
+ * 2. When an imaging pipeline must convert high‑resolution TIFF photographs to PNG while applying a 10‑pixel horizontal motion blur to simulate camera shake for visual effects.
+ * 3. When a batch process requires loading a multi‑page TIFF, applying a motion‑blur filter with angle 0° to each page, and saving the result as a single PNG for thumbnail generation.
+ * 4. When a .NET application has to validate that a TIFF file exists, apply a horizontal motion blur using MotionWienerFilterOptions, and export the processed image to PNG for further analysis.
+ * 5. When a developer wants to programmatically ensure the output directory exists, apply a motion blur filter to a TIFF image, and save the filtered image as PNG for inclusion in a PDF report.
  */

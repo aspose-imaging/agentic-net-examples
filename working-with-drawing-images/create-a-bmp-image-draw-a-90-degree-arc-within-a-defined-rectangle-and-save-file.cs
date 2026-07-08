@@ -6,42 +6,40 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded output path
+        string outputPath = @"C:\temp\arc_output.bmp";
+
         try
         {
-            // Output BMP file path
-            string outputPath = @"C:\temp\arc_output.bmp";
-
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure BMP options
+            // Set BMP creation options
             BmpOptions bmpOptions = new BmpOptions
             {
                 BitsPerPixel = 24,
                 Source = new FileCreateSource(outputPath, false)
             };
 
-            // Create a 500x500 BMP image
-            using (Image image = Image.Create(bmpOptions, 500, 500))
+            // Create a BMP image of size 400x400
+            using (Image image = Image.Create(bmpOptions, 400, 400))
             {
-                // Initialize graphics for drawing
+                // Initialize graphics object
                 Graphics graphics = new Graphics(image);
 
-                // Optional: clear background to white
+                // Optional: clear background
                 graphics.Clear(Color.White);
 
-                // Define a pen for the arc
-                Pen pen = new Pen(Color.Black, 2);
-
-                // Define the rectangle that bounds the arc
-                Rectangle rect = new Rectangle(100, 100, 200, 200);
+                // Define pen and rectangle for the arc
+                Pen pen = new Pen(Color.Blue, 2);
+                Rectangle rect = new Rectangle(50, 50, 200, 200);
 
                 // Draw a 90-degree arc (start angle 0, sweep angle 90)
                 graphics.DrawArc(pen, rect, 0, 90);
 
-                // Save the image (bound to the output source)
+                // Save the image (the file is already created by FileCreateSource)
                 image.Save();
             }
         }
@@ -54,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP thumbnail that includes a 90‑degree arc as a visual progress indicator for a Windows desktop application.
- * 2. When an automated reporting tool must create a BMP chart legend with a quarter‑circle arc to represent a sector of a pie diagram in C#.
- * 3. When a game engine requires a simple BMP sprite sheet where a 90‑degree arc defines a collision boundary for a circular object.
- * 4. When a manufacturing system has to produce BMP labels with a quarter‑arc cut‑out shape to align with physical templates on a production line.
- * 5. When a legacy GIS application expects BMP map overlays and the developer must draw a 90‑degree arc to highlight a specific quadrant of a geographic region.
+ * 1. When a developer needs to generate a 24‑bit BMP file containing a simple 90‑degree blue arc for legacy Windows applications that only accept BMP images.
+ * 2. When an automated reporting system must create a thumbnail of a gauge or dial by drawing a quarter‑circle arc onto a 400×400 bitmap and saving it as a BMP.
+ * 3. When a game developer wants to pre‑render a static UI element, such as a blue arc indicator, into a BMP asset for fast loading without using vector graphics.
+ * 4. When a data‑visualization script has to export a basic arc diagram to a BMP file with a white background for inclusion in PDF reports that require raster images.
+ * 5. When a testing framework needs to programmatically produce a known BMP image with a defined arc to validate image‑processing algorithms like edge detection or color quantization.
  */

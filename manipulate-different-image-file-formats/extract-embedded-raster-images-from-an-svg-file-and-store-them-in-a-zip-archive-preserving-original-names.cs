@@ -9,7 +9,7 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input SVG and output ZIP paths
+        // Hardcoded input and output paths
         string inputPath = "input.svg";
         string outputPath = "output.zip";
 
@@ -32,14 +32,14 @@ class Program
                 var vectorImage = (VectorImage)image;
                 EmbeddedImage[] embeddedImages = vectorImage.GetEmbeddedImages();
 
-                // Create the ZIP archive
-                using (FileStream zipStream = new FileStream(outputPath, FileMode.Create))
-                using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Create))
+                // Create ZIP archive for output
+                using (FileStream zipFileStream = new FileStream(outputPath, FileMode.Create))
+                using (ZipArchive archive = new ZipArchive(zipFileStream, ZipArchiveMode.Create))
                 {
                     int index = 0;
                     foreach (var embedded in embeddedImages)
                     {
-                        // Determine a file name for the entry, preserving original name if available
+                        // Determine entry name – try to preserve original name if available
                         string entryName = $"image{index}.png";
                         var nameProp = embedded.GetType().GetProperty("Name");
                         if (nameProp != null)
@@ -47,22 +47,22 @@ class Program
                             string originalName = nameProp.GetValue(embedded) as string;
                             if (!string.IsNullOrEmpty(originalName))
                             {
-                                entryName = originalName;
-                                if (!Path.HasExtension(entryName))
-                                    entryName = $"{entryName}.png";
+                                entryName = Path.GetFileNameWithoutExtension(originalName) + ".png";
                             }
                         }
 
-                        // Create a new entry in the ZIP archive
-                        ZipArchiveEntry zipEntry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
-                        using (Stream entryStream = zipEntry.Open())
+                        // Create entry in the ZIP archive
+                        ZipArchiveEntry entry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
+                        using (Stream entryStream = entry.Open())
+                        using (MemoryStream ms = new MemoryStream())
                         {
-                            // Save the embedded image directly into the ZIP entry as PNG
+                            // Save the embedded raster image as PNG into memory
                             using (embedded)
                             {
-                                var pngOptions = new PngOptions();
-                                embedded.Image.Save(entryStream, pngOptions);
+                                embedded.Image.Save(ms, new PngOptions());
                             }
+                            ms.Position = 0;
+                            ms.CopyTo(entryStream);
                         }
 
                         index++;
@@ -79,9 +79,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate a downloadable package of all raster assets embedded in an SVG logo for offline editing, a developer can use this code to extract the images and zip them with their original filenames.
- * 2. When a digital asset management system imports SVG files and must catalog each embedded PNG or JPEG separately, this code lets the developer pull out the raster images and store them in a ZIP archive while keeping their original names for indexing.
- * 3. When an e‑learning platform receives SVG diagrams containing embedded screenshots and wants to provide instructors with the raw images for reuse in presentations, the code can extract those images and bundle them into a ZIP file.
- * 4. When a CI/CD pipeline validates that all raster resources referenced in an SVG are present and correctly named before publishing a design system, developers can run this code to pull the embedded images into a ZIP for automated checks.
- * 5. When a mobile app needs to cache the raster components of an SVG illustration for faster rendering on low‑power devices, the code can extract the images and archive them, preserving filenames for later lookup.
+ * 1. When a web application needs to separate and archive raster assets embedded in an SVG logo for reuse in other design tools, a developer can use this code to extract the PNG images and zip them while keeping their original filenames.
+ * 2. When an automated build pipeline processes SVG icons that contain embedded images and must deliver those raster files to a CDN, the code can pull out each image and package them into a ZIP archive for deployment.
+ * 3. When a digital asset management system imports SVG files and wants to index each embedded bitmap separately, a developer can run this routine to extract the images and store them in a compressed archive preserving their source names.
+ * 4. When a desktop utility converts legacy SVG documents into a portable package for archival, the code enables extraction of all embedded raster graphics and bundles them into a ZIP file for easy storage.
+ * 5. When a reporting tool generates PDFs from SVG charts that include embedded pictures and must provide the original images as downloadable resources, this code can retrieve the images and zip them with their original filenames for end‑users.
  */

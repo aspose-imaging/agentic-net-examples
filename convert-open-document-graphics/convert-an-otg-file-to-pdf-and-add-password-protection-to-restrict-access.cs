@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample.pdf";
+            string inputPath = @"C:\input\sample.otg";
+            string outputPath = @"C:\output\sample.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,7 +27,7 @@ class Program
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options for PDF conversion
+                // Set up OTG rasterization options
                 OtgRasterizationOptions otgRasterOptions = new OtgRasterizationOptions
                 {
                     PageSize = image.Size
@@ -39,10 +39,10 @@ class Program
                     VectorRasterizationOptions = otgRasterOptions
                 };
 
-                // Embed a digital signature (password protection) into each page
+                // Embed a digital signature using a password to restrict access
                 if (image is RasterCachedMultipageImage multiPageImage)
                 {
-                    multiPageImage.EmbedDigitalSignature("mySecretPassword");
+                    multiPageImage.EmbedDigitalSignature("SecretPassword123");
                 }
 
                 // Save the image as PDF
@@ -55,3 +55,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a healthcare application needs to securely share patient diagrams stored as OTG files by converting them to password‑protected PDF reports using Aspose.Imaging for .NET.
+ * 2. When an engineering firm wants to archive multi‑page OTG schematics as encrypted PDFs to comply with data‑privacy regulations.
+ * 3. When a legal document management system must transform OTG evidence images into PDF files with access restrictions before uploading them to a case‑file repository.
+ * 4. When a construction project portal automatically converts OTG site‑plan images to PDF and applies a password to prevent unauthorized viewing by subcontractors.
+ * 5. When a desktop utility processes batches of OTG drawings, rasterizes them with Aspose.Imaging, and saves them as PDF files that require a password to open, ensuring confidential design data stays protected.
+ */

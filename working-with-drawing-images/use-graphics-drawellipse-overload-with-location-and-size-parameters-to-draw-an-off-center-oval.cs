@@ -3,39 +3,45 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded output path
+        string outputPath = @"C:\temp\offcenter_oval.png";
+
         try
         {
-            // Output file path (hardcoded)
-            string outputPath = @"C:\temp\offcenter_oval.png";
-
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set PNG options with a file create source bound to the output path
+            // Set up PNG options with a file create source
             PngOptions pngOptions = new PngOptions();
             pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a 400x300 image canvas
-            using (Image image = Image.Create(pngOptions, 400, 300))
+            // Create a new image with desired dimensions
+            using (Image image = Image.Create(pngOptions, 500, 400))
             {
-                // Initialize graphics for the image
+                // Initialize graphics object for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Clear the canvas with white background
-                graphics.Clear(Color.White);
+                // Clear background
+                graphics.Clear(Color.Wheat);
 
-                // Define a blue pen with thickness 3
+                // Define a pen for the ellipse
                 Pen pen = new Pen(Color.Blue, 3);
 
                 // Draw an off‑center oval using location and size parameters
-                graphics.DrawEllipse(pen, 50f, 30f, 200f, 100f);
+                // x = 150, y = 80 positions the bounding rectangle away from the image center
+                // width = 250, height = 150 defines the oval size
+                graphics.DrawEllipse(pen, 150f, 80f, 250f, 150f);
 
-                // Save the image (already bound to the output file)
+                // Save changes to the file
                 image.Save();
             }
         }
@@ -48,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a PNG badge with Aspose.Imaging where a blue off‑center oval is drawn behind a logo to create a decorative background.
- * 2. When producing a printable invoice image using C# and Aspose.Imaging and needing a blue oval highlight positioned away from the page center to draw attention to a field.
- * 3. When building a custom chart component in .NET that plots data points as off‑center ellipses on a 400×300 canvas using the Graphics.DrawEllipse overload.
- * 4. When automating UI mock‑up creation and requiring an off‑center oval overlay to indicate a focus area on a screenshot saved as a PNG file.
- * 5. When designing a game asset pipeline that renders off‑center ovals as part of sprite masks with Aspose.Imaging before writing the images to disk.
+ * 1. When generating a custom PNG badge where a blue‑outlined oval must be drawn off‑center to frame a logo using Aspose.Imaging’s Graphics.DrawEllipse method.
+ * 2. When creating a printable PDF form template in C# that requires an off‑center oval field for a signature stamp, drawn with a Pen and saved as a PNG via Aspose.Imaging.
+ * 3. When designing a UI mock‑up image that shows a highlighted off‑center circular progress indicator on a wheat‑colored background, using the Graphics.DrawEllipse overload with location and size parameters.
+ * 4. When producing a set of marketing banners that need an off‑center oval overlay to frame product photos, leveraging Aspose.Imaging’s PNG options and the DrawEllipse method.
+ * 5. When building an automated image‑processing test that validates alignment by programmatically drawing an off‑center oval as a reference shape with C# and Aspose.Imaging.
  */

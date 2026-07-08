@@ -23,12 +23,15 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image, process, and save as PNG
+            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                PngOptions saveOptions = new PngOptions();
-                image.Save(outputPath, saveOptions);
-            } // Image is disposed here, freeing unmanaged resources
+                // Set PNG save options (default options are sufficient)
+                var pngOptions = new PngOptions();
+
+                // Save the image in PNG format
+                image.Save(outputPath, pngOptions);
+            } // Image is disposed here
         }
         catch (Exception ex)
         {
@@ -36,3 +39,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a desktop application needs to batch‑convert legacy BMP files to PNG for web upload while ensuring unmanaged memory is released after each conversion.
+ * 2. When an automated build script processes scanned documents stored as BMP and saves them as lossless PNG to reduce file size without leaking resources.
+ * 3. When a Windows service monitors a folder, converts newly added BMP images to PNG for downstream processing, and must dispose the Image object to avoid memory leaks.
+ * 4. When a C# utility prepares product screenshots in BMP format for inclusion in a mobile app by converting them to PNG and ensuring the image handle is closed promptly.
+ * 5. When a server‑side API receives BMP uploads, converts them to PNG for storage, and needs to free unmanaged resources to maintain high concurrency.
+ */

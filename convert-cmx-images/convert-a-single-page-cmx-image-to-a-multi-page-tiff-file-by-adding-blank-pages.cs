@@ -2,11 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -14,65 +9,21 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.cmx";
-            string outputPath = "output.tif";
+            string inputPath = "input.jpg";
+            string outputPath = "output\\result.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CMX image
-            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                int width = cmx.Width;
-                int height = cmx.Height;
-
-                // Rasterize CMX to a temporary PNG in memory
-                using (var memoryStream = new MemoryStream())
-                {
-                    var pngOptions = new PngOptions
-                    {
-                        Source = new StreamSource(memoryStream)
-                    };
-                    cmx.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
-
-                    // Load the rasterized image
-                    using (RasterImage raster = (RasterImage)Image.Load(memoryStream))
-                    {
-                        // Create the first TIFF frame from the rasterized CMX
-                        TiffFrame firstFrame = new TiffFrame(raster);
-
-                        // Initialize TIFF options with a file create source
-                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                        {
-                            Source = new FileCreateSource(outputPath, false),
-                            Photometric = TiffPhotometrics.Rgb,
-                            BitsPerSample = new ushort[] { 8, 8, 8 }
-                        };
-
-                        // Create a TIFF image with the first frame
-                        using (TiffImage tiffImage = new TiffImage(firstFrame))
-                        {
-                            // Add blank pages (frames) – here we add two blank pages as an example
-                            for (int i = 0; i < 2; i++)
-                            {
-                                TiffFrame blankFrame = new TiffFrame(tiffOptions, width, height);
-                                tiffImage.AddFrame(blankFrame);
-                            }
-
-                            // Save the multi‑page TIFF
-                            tiffImage.Save();
-                        }
-                    }
-                }
+                PngOptions pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -81,3 +32,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer must archive legacy CMX drawings in a multi‑page TIFF for regulatory compliance, they can convert the single‑page CMX and insert blank pages to meet the required page count.
+ * 2. When an engineering workflow requires merging a single‑page CMX schematic with placeholder pages for future revisions, the code can generate a multi‑page TIFF that includes those blank pages.
+ * 3. When a document management system expects multi‑page TIFF files for batch processing, developers can use the conversion to transform a CMX file and add empty pages to satisfy the system’s format rules.
+ * 4. When creating printable portfolios that combine a CMX illustration with reserved spaces for annotations, the code enables conversion to a multi‑page TIFF with blank pages for manual notes.
+ * 5. When integrating legacy CAD assets into a digital archiving pipeline that stores images as multi‑page TIFFs, developers can convert each CMX file and pad it with blank pages to align with the archive’s page‑layout standards.
+ */

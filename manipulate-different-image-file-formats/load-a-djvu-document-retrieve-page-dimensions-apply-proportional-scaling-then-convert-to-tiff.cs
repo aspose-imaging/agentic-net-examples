@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -12,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "input/sample.djvu";
-            string outputPath = "output/scaled.tiff";
+            string inputPath = "input.djvu";
+            string outputPath = "output.tiff";
 
             if (!File.Exists(inputPath))
             {
@@ -23,20 +22,18 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            using (DjvuImage image = (DjvuImage)Image.Load(inputPath))
             {
-                int originalWidth = djvuImage.Width;
-                int originalHeight = djvuImage.Height;
+                int originalWidth = image.Width;
+                int originalHeight = image.Height;
                 Console.WriteLine($"Original size: {originalWidth}x{originalHeight}");
 
-                int newWidth = originalWidth * 2;
-                djvuImage.ResizeWidthProportionally(newWidth, ResizeType.NearestNeighbourResample);
+                int newWidth = originalWidth * 2; // proportional scaling factor of 2
+                image.ResizeWidthProportionally(newWidth, ResizeType.NearestNeighbourResample);
 
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                djvuImage.Save(outputPath, tiffOptions);
+                image.Save(outputPath, tiffOptions);
             }
-
-            Console.WriteLine("Conversion completed successfully.");
         }
         catch (Exception ex)
         {
@@ -47,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a digital archiving system needs to ingest high‑resolution DjVu scans, double their size while preserving aspect ratio, and store the result as a TIFF for compatibility with downstream document management tools.
- * 2. When a publishing workflow requires converting multi‑page DjVu manuscripts into lossless TIFF images for print‑ready PDFs, and the images must be upscaled to meet minimum pixel dimensions.
- * 3. When a legal e‑discovery platform must extract page dimensions from DjVu evidence files, enlarge them proportionally for better readability, and save them as TIFFs for court‑approved submission.
- * 4. When a medical imaging application receives scanned DjVu reports, needs to increase their resolution for detailed analysis, and then converts them to TIFF to integrate with existing PACS systems.
- * 5. When a GIS (geographic information system) processes DjVu map tiles, scales them uniformly to match higher‑resolution basemaps, and outputs TIFF files for use in GIS software that does not support DjVu.
+ * 1. When a developer needs to convert legacy DjVu documents into high‑resolution TIFF files for OCR or archival purposes, they can load the DjVu, double its dimensions proportionally, and save the result as a TIFF.
+ * 2. When a publishing workflow requires enlarging DjVu pages to meet print‑ready specifications before exporting them as lossless TIFF images, this C# code provides the necessary proportional scaling and format conversion.
+ * 3. When an e‑learning platform must generate larger preview images from compact DjVu lecture notes for responsive web display, the developer can retrieve the original size, apply proportional scaling, and output TIFF thumbnails.
+ * 4. When a digital preservation system has to migrate DjVu files to a widely supported TIFF format while preserving aspect ratio, the snippet demonstrates how to resize width proportionally and save with Aspose.Imaging.
+ * 5. When a medical imaging application needs to import DjVu scans, increase their resolution for detailed analysis, and store the result as a TIFF file compatible with downstream processing pipelines, this code handles the loading, scaling, and saving steps.
  */

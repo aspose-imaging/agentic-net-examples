@@ -8,28 +8,30 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\sample.djvu";
-        string outputPath = @"C:\Temp\sample.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load DjVu document from file stream
+            // Hardcoded input and output paths
+            string inputPath = "input.djvu";
+            string outputPath = "output\\result.pdf";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the DjVu document from a file stream
             using (Stream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Save all pages to a single PDF document
+                // Prepare PDF saving options (default exports all pages)
                 PdfOptions pdfOptions = new PdfOptions();
+
+                // Save all pages to a single PDF file
                 djvuImage.Save(outputPath, pdfOptions);
             }
         }
@@ -42,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert scanned archival documents stored as DjVu files into a single searchable PDF for easy distribution to clients.
- * 2. When an application must batch‑process multi‑page DjVu ebooks and produce a consolidated PDF for e‑readers that only support PDF.
- * 3. When a legal‑tech solution has to preserve the original layout of multi‑page DjVu evidence files while exporting them to PDF for court filings.
- * 4. When a document‑management system requires on‑the‑fly conversion of user‑uploaded DjVu files into PDF to enable preview in web browsers.
- * 5. When a C# service automates the migration of legacy DjVu manuals into PDF format to integrate with existing PDF‑based workflows.
+ * 1. When a legal firm needs to convert scanned multi‑page DjVu case files into a single searchable PDF while preserving the original layout for court submissions.
+ * 2. When an e‑learning platform automates the transformation of DjVu textbooks into PDF handouts that can be easily distributed to students.
+ * 3. When a digital archiving system migrates historic DjVu documents to PDF to ensure long‑term accessibility and consistent page ordering.
+ * 4. When a publishing company batch‑processes DjVu artwork portfolios into a single PDF catalog for client review without losing image quality.
+ * 5. When a government agency consolidates multi‑page DjVu forms into a single PDF report for record‑keeping and compliance audits.
  */

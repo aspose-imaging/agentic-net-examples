@@ -8,31 +8,28 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.emf";
-        string outputPath = "output.pdf";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+        string inputPath = @"C:\Temp\input.emf";
+        string outputPath = @"C:\Temp\output.pdf";
 
         try
         {
-            // Load EMF image from a memory stream
-            byte[] emfData = File.ReadAllBytes(inputPath);
-            using (var memoryStream = new MemoryStream(emfData))
-            using (Image emfImage = Image.Load(memoryStream))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Set PDF save options (default options are sufficient for basic conversion)
-                var pdfOptions = new PdfOptions();
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Save the image as PDF
-                emfImage.Save(outputPath, pdfOptions);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load EMF image from a memory stream
+            byte[] emfBytes = File.ReadAllBytes(inputPath);
+            using (MemoryStream ms = new MemoryStream(emfBytes))
+            using (Image emfImage = Image.Load(ms))
+            {
+                // Save as PDF using default PDF options
+                emfImage.Save(outputPath, new PdfOptions());
             }
         }
         catch (Exception ex)
@@ -44,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically convert Windows Metafile (EMF) vector graphics stored in a database or received over a network into a PDF document for reporting or archival purposes.
- * 2. When an application must generate printable PDF invoices that embed EMF logos or diagrams without writing temporary files to disk, using a memory stream for efficient processing.
- * 3. When a document management system imports legacy EMF drawings and needs to provide users with PDF previews that can be viewed directly in web browsers.
- * 4. When a batch job processes a folder of EMF files, converting each to PDF on the fly while ensuring the output directory exists, to support automated workflow pipelines.
- * 5. When a C# web service receives EMF image bytes from an API request and must return a PDF response, leveraging Aspose.Imaging to handle the format conversion securely in memory.
+ * 1. When a developer needs to programmatically convert legacy Windows Metafile (EMF) graphics stored in a file system or database into PDF documents for reporting or archiving.
+ * 2. When an application must generate printable PDFs from vector‑based EMF logos or diagrams that are received as byte arrays over a network stream.
+ * 3. When a batch‑processing service reads EMF files from a shared folder, loads them via a MemoryStream, and saves them as PDF to comply with document‑exchange standards.
+ * 4. When a C# web API accepts uploaded EMF images, validates the file, and returns a PDF version without writing temporary files to disk.
+ * 5. When a developer integrates Aspose.Imaging into a Windows service that monitors a directory, converts any new EMF files to PDF, and stores the results in a separate output folder.
  */

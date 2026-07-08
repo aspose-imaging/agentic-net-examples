@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -10,42 +10,53 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\input.emf";
+        string tempPngPath = @"C:\Images\temp.png";
         string outputPath = @"C:\Images\output.png";
 
-        // Verify that the input file exists
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure the output directory exists
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Load the EMF image
-            using (Image image = Image.Load(inputPath))
+            // Load the EMF image and rasterize it to a temporary PNG
+            using (Image emfImage = Image.Load(inputPath))
             {
-                // Cast to RasterImage to allow filtering
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new GaussianBlurFilterOptions(5, 4.0));
-
-                // Prepare PNG save options with rasterization settings for vector source
                 var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = new EmfRasterizationOptions
                     {
-                        PageSize = rasterImage.Size
+                        PageSize = emfImage.Size,
+                        BackgroundColor = Color.White
                     }
                 };
 
-                // Save the processed image as PNG
-                rasterImage.Save(outputPath, pngOptions);
+                // Save rasterized PNG to a temporary file
+                emfImage.Save(tempPngPath, pngOptions);
+            }
+
+            // Load the temporary PNG as a raster image
+            using (Image rasterImage = Image.Load(tempPngPath))
+            {
+                var raster = (RasterImage)rasterImage;
+
+                // Apply Gaussian blur with radius 5 and sigma 4.0
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                // Save the blurred image as the final PNG
+                raster.Save(outputPath, new PngOptions());
+            }
+
+            // Optionally delete the temporary file
+            if (File.Exists(tempPngPath))
+            {
+                File.Delete(tempPngPath);
             }
         }
         catch (Exception ex)
@@ -57,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to soften the edges of a vector‑based EMF logo before embedding it in a web page, they can apply a Gaussian blur with radius five and save the result as a PNG for fast loading.
- * 2. When converting legacy EMF diagrams to raster PNG thumbnails for a document management system, applying a Gaussian blur helps reduce visual noise and creates a smoother preview.
- * 3. When preparing EMF‑generated charts for inclusion in a PowerPoint slide deck, a developer may blur the chart background to emphasize overlaid text and then export the image as PNG using Aspose.Imaging for .NET.
- * 4. When automating the creation of blurred watermarks from EMF graphics for PDF reports, the code can rasterize the vector, apply a radius‑5 Gaussian blur, and output a PNG that preserves transparency.
- * 5. When building a batch processing tool that normalizes the appearance of EMF icons by smoothing sharp lines before storing them as PNG assets, developers can use this C# snippet to apply the blur and handle file I/O safely.
+ * 1. When a developer needs to convert a vector EMF diagram into a raster PNG for web display while softening edges with a Gaussian blur of radius five.
+ * 2. When an application must generate thumbnail previews of EMF icons and apply a subtle blur to hide proprietary details before saving them as PNG files.
+ * 3. When a reporting tool has to embed EMF charts into PDF or HTML output, rasterize them to PNG, and apply a Gaussian blur to achieve a background‑blur effect for visual emphasis.
+ * 4. When a batch‑processing script processes a folder of EMF logos, rasterizes each to PNG, and adds a Gaussian blur to meet brand‑guideline styling requirements.
+ * 5. When a C# service receives user‑uploaded EMF drawings, needs to sanitize them by rasterizing to PNG and applying a radius‑5 Gaussian blur to reduce sharp vector artifacts before storing the image.
  */

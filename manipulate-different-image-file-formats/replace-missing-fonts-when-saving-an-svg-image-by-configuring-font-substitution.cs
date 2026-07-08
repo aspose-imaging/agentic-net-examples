@@ -1,38 +1,47 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.svg";
-            string outputPath = "output.svg";
+            string inputPath = @"C:\Images\input.svg";
+            string outputPath = @"C:\Images\output.svg";
+            string fontFolderPath = @"C:\Fonts";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure font substitution for missing fonts
-            FontSettings.DefaultFontName = "Arial";          // fallback font
-            FontSettings.GetSystemAlternativeFont = true;   // allow system alternatives
-
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
+            var loadOptions = new LoadOptions();
+            loadOptions.AddCustomFontSource((object[] fArgs) =>
             {
-                // Save the SVG image with the configured font settings
-                var saveOptions = new SvgOptions();
-                image.Save(outputPath, saveOptions);
+                string fontsPath = fArgs.Length > 0 ? fArgs[0]?.ToString() : string.Empty;
+                var customFontData = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
+                if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
+                {
+                    foreach (var fontFile in Directory.GetFiles(fontsPath))
+                    {
+                        customFontData.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(
+                            Path.GetFileNameWithoutExtension(fontFile),
+                            File.ReadAllBytes(fontFile)));
+                    }
+                }
+                return customFontData.ToArray();
+            }, fontFolderPath);
+
+            using (var image = Image.Load(inputPath, loadOptions))
+            {
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -44,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service generates SVG charts on a server that lacks the custom fonts used in the charts, a developer can apply this code to substitute missing fonts with a fallback like Arial before saving the SVG.
- * 2. When migrating legacy SVG assets that reference proprietary fonts to a new environment where those fonts are unavailable, this code ensures the images render correctly by configuring system alternative fonts.
- * 3. When an automated batch job processes thousands of SVG icons for a mobile app and must guarantee consistent text appearance across different build servers, a developer can set FontSettings to use a standard fallback font during the save operation.
- * 4. When exporting SVG diagrams from a C# desktop application to share with clients who may not have the original font files installed, this code replaces missing fonts with a widely supported fallback to prevent broken text.
- * 5. When integrating Aspose.Imaging into a CI/CD pipeline that validates SVG assets, the code can automatically substitute missing fonts so the validation step does not fail due to unavailable typefaces.
+ * 1. When a web application generates SVG reports that reference corporate fonts not installed on the server, a developer can use this code to load the SVG with a custom font folder and ensure the saved file retains the correct typography.
+ * 2. When migrating legacy design assets to a new CI/CD pipeline, developers can employ this approach to substitute missing TrueType or OpenType fonts during SVG processing so the output images render consistently across environments.
+ * 3. When building a batch conversion tool that converts user‑uploaded SVG icons to optimized SVG files on Windows, the code allows the tool to supply a local font directory to replace any unavailable fonts and avoid rendering errors.
+ * 4. When creating an automated documentation generator that embeds SVG diagrams with custom brand fonts, developers can configure font substitution via LoadOptions to guarantee the final SVG files display the brand’s typeface even on machines lacking those fonts.
+ * 5. When integrating Aspose.Imaging into a cloud‑based image service that receives SVG payloads from various clients, this snippet lets the service load the SVG with a predefined font repository, ensuring missing fonts are replaced before the image is saved and returned.
  */

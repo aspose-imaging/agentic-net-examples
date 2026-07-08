@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -24,38 +25,36 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 IMultipageImage multipage = image as IMultipageImage;
-                int pageCount = multipage != null ? multipage.PageCount : 1;
+                if (multipage == null)
+                {
+                    Console.Error.WriteLine("The loaded image is not a multipage image.");
+                    return;
+                }
+
+                int pageCount = multipage.PageCount;
 
                 for (int i = 0; i < pageCount; i++)
                 {
-                    // Prepare PNG options for the current page
-                    var pngOptions = new PngOptions
+                    string tempPath = Path.Combine(outputDir, $"page_{i}.png");
+                    string finalPath = Path.Combine(outputDir, $"page_{i}_blur.png");
+
+                    // Ensure directories exist before saving
+                    Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+                    Directory.CreateDirectory(Path.GetDirectoryName(finalPath));
+
+                    // Export single page to PNG
+                    PngOptions pngOptions = new PngOptions();
+                    pngOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, 1));
+                    image.Save(tempPath, pngOptions);
+
+                    // Load the exported page as raster image
+                    using (RasterImage raster = (RasterImage)Image.Load(tempPath))
                     {
-                        MultiPageOptions = new MultiPageOptions(new IntRange(i, 1))
-                    };
+                        // Apply motion blur filter (size 6, smooth 1.0, angle 75)
+                        raster.Filter(raster.Bounds, new MotionWienerFilterOptions(6, 1.0, 75.0));
 
-                    // Set vector rasterization options
-                    var rasterOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = image.Size
-                    };
-                    pngOptions.VectorRasterizationOptions = rasterOptions;
-
-                    // Rasterize the page to a memory stream
-                    using (var ms = new MemoryStream())
-                    {
-                        image.Save(ms, pngOptions);
-                        ms.Position = 0;
-
-                        // Load rasterized image and apply motion blur filter
-                        using (RasterImage raster = (RasterImage)Image.Load(ms))
-                        {
-                            raster.Filter(raster.Bounds, new MotionWienerFilterOptions(6, 1.0, 75.0));
-
-                            string outputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                            raster.Save(outputPath, new PngOptions());
-                        }
+                        // Save the filtered image
+                        raster.Save(finalPath);
                     }
                 }
             }
@@ -69,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating animated thumbnails for a multi‑page SVG brochure, a developer can rasterize each page to PNG, apply a motion‑blur effect (size 6, angle 75) and save the results for quick preview.
- * 2. When preparing print‑ready assets from a multi‑page vector illustration, a developer may need to convert each SVG page to a raster PNG, add motion blur to simulate motion in a catalog layout, and store the images in an output folder.
- * 3. When building a web service that returns blurred PNG snapshots of each layer in a multi‑page SVG diagram, a developer can loop through the pages, rasterize them, apply a MotionWienerFilterOptions blur, and return the files.
- * 4. When creating a visual effect pipeline for an e‑learning module that uses multi‑page SVG slides, a developer can use Aspose.Imaging to apply a consistent motion blur (size 6, angle 75) to every slide before exporting them as PNGs.
- * 5. When automating quality‑control tests that compare original SVG pages with their blurred PNG counterparts, a developer can iterate over each page, rasterize, apply the motion blur filter, and save the output for side‑by‑side analysis.
+ * 1. A developer can use this C# Aspose.Imaging code to generate PNG thumbnails of each page in a multi‑page SVG and add a 6‑pixel motion blur at a 75° angle to create a dynamic preview for a web gallery.
+ * 2. This snippet is useful when converting vector diagrams from a multi‑page SVG into individual PNG slides and applying a motion‑blur filter to give a stylized transition effect in a presentation application.
+ * 3. Game developers may extract each frame of a multi‑page SVG sprite sheet, save them as PNG raster images, and apply a 6‑size motion blur at 75° to simulate fast movement in the UI.
+ * 4. When preparing print‑ready assets, a designer can run this C# code to rasterize each SVG page to PNG and automatically apply a motion blur, emphasizing motion‑related sections of a brochure.
+ * 5. An automated reporting pipeline can iterate over a multi‑page SVG, export each page as a PNG, and use Aspose.Imaging’s MotionWienerFilterOptions to add a 75° motion blur, delivering visually enhanced charts for dashboards.
  */

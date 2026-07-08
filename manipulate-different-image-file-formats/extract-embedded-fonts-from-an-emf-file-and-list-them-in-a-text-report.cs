@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.emf";
-        string outputPath = @"C:\Images\fonts_report.txt";
+        string inputPath = @"C:\input\sample.emf";
+        string outputPath = @"C:\output\fonts_report.txt";
 
         try
         {
@@ -30,25 +30,26 @@ class Program
                 string[] usedFonts = image.GetUsedFonts();
                 string[] missedFonts = image.GetMissedFonts();
 
-                // Write the report
+                // Write fonts information to the report file
                 using (StreamWriter writer = new StreamWriter(outputPath))
                 {
-                    writer.WriteLine("=== Used Fonts ===");
+                    writer.WriteLine($"Report for EMF file: {Path.GetFileName(inputPath)}");
+                    writer.WriteLine();
+
+                    writer.WriteLine("Used fonts:");
                     foreach (string font in usedFonts)
                     {
-                        writer.WriteLine(font);
+                        writer.WriteLine($"Used font: {font}");
                     }
 
                     writer.WriteLine();
-                    writer.WriteLine("=== Missed (Embedded) Fonts ===");
+                    writer.WriteLine("Missed fonts (fonts not found on the system):");
                     foreach (string font in missedFonts)
                     {
-                        writer.WriteLine(font);
+                        writer.WriteLine($"Missed font: {font}");
                     }
                 }
             }
-
-            Console.WriteLine($"Font report generated at: {outputPath}");
         }
         catch (Exception ex)
         {
@@ -59,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must audit which fonts are actually used versus embedded in a Windows Metafile (EMF) before converting it to PDF, the code can extract the font lists and generate a text report.
- * 2. When a document management system needs to verify licensing compliance by identifying missing (embedded) fonts in EMF graphics, developers can run this Aspose.Imaging routine to list used and missed fonts.
- * 3. When an automated build pipeline processes vector graphics and must log font dependencies for each EMF file to aid troubleshooting of rendering issues, the code provides a straightforward way to create a fonts_report.txt.
- * 4. When a migration tool moves legacy EMF assets to a new design platform and must document which fonts are embedded to recreate the visual fidelity, this C# snippet extracts and records the font information.
- * 5. When a quality‑assurance script checks that all required fonts are present in EMF files supplied by third‑party vendors, the example uses Aspose.Imaging’s GetUsedFonts and GetMissedFonts methods to generate a readable report.
+ * 1. When a developer must verify that all fonts referenced in an EMF vector graphic are installed on a server before batch‑converting the files to PDF, they can extract the used and missed fonts and generate a text report.
+ * 2. When a software solution needs to audit compliance with corporate branding guidelines by listing every font embedded in EMF files stored in a document repository, this code provides a quick searchable report.
+ * 3. When a migration tool moves legacy Windows Metafile assets to a cloud‑based imaging platform, extracting the fonts helps identify missing typefaces that could cause rendering issues.
+ * 4. When an automated build pipeline validates that design assets contain only approved fonts, the code can parse EMF files and output a report for quality‑assurance checks.
+ * 5. When a developer builds a font‑usage analytics dashboard for a graphics editing application, extracting fonts from EMF files and logging them to a text file supplies the raw data needed for statistical analysis.
  */

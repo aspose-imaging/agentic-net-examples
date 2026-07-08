@@ -1,19 +1,21 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using System.Text.Json;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.Exif;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.tif";
-        string outputPath = @"C:\temp\exif.json";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.tif";
+            string outputPath = @"C:\Images\exif.json";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,7 +29,7 @@ class Program
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to TiffImage to access ExifData
+                // Cast to TiffImage to access EXIF data
                 TiffImage tiff = image as TiffImage;
                 if (tiff == null)
                 {
@@ -35,18 +37,42 @@ class Program
                     return;
                 }
 
-                // Retrieve EXIF metadata
-                var exifData = tiff.ExifData;
-                if (exifData == null)
+                // Retrieve EXIF data
+                ExifData exif = tiff.ExifData;
+                if (exif == null)
                 {
-                    Console.Error.WriteLine("No EXIF data found in the TIFF image.");
+                    Console.Error.WriteLine("No EXIF data found.");
                     return;
                 }
 
-                // Serialize EXIF data to JSON
-                string json = JsonSerializer.Serialize(exifData, new JsonSerializerOptions { WriteIndented = true });
+                // Convert EXIF properties to a dictionary for JSON serialization
+                var dict = new Dictionary<string, object>();
+                var props = exif.GetType().GetProperties();
+                foreach (var prop in props)
+                {
+                    try
+                    {
+                        object value = prop.GetValue(exif);
+                        // Encode byte arrays as Base64 strings for readability
+                        if (value is byte[] bytes)
+                        {
+                            dict[prop.Name] = Convert.ToBase64String(bytes);
+                        }
+                        else
+                        {
+                            dict[prop.Name] = value;
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore properties that throw during get
+                    }
+                }
 
-                // Write JSON to output file
+                // Serialize dictionary to formatted JSON
+                string json = JsonSerializer.Serialize(dict, new JsonSerializerOptions { WriteIndented = true });
+
+                // Write JSON to the output file
                 File.WriteAllText(outputPath, json);
             }
         }
@@ -59,9 +85,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to audit camera settings and geolocation data from scanned TIFF photographs by extracting EXIF metadata and storing it in a readable JSON report.
- * 2. When a digital archiving system must catalog TIFF documents and preserve their metadata for search indexing, requiring conversion of EXIF tags to JSON for database ingestion.
- * 3. When a medical imaging application has to validate patient and equipment information embedded in TIFF X‑ray files by reading EXIF fields and exporting them as JSON for compliance logs.
- * 4. When a GIS workflow processes aerial TIFF imagery and must extract sensor orientation and GPS coordinates from EXIF data to feed into mapping software via a JSON file.
- * 5. When a batch processing tool needs to generate metadata inventories of large TIFF asset libraries, using C# to read EXIF data and serialize it into JSON for downstream analytics.
+ * 1. When a developer needs to extract EXIF metadata from a TIFF image using Aspose.Imaging for .NET and serialize it to a JSON file for downstream analytics or API consumption.
+ * 2. When a C# application must verify the presence of camera or scanner information embedded in a TIFF file and export that data in a readable JSON format for audit logging.
+ * 3. When a workflow requires converting byte‑array EXIF tags (such as thumbnails) into Base64 strings and saving the complete metadata set as JSON to support cross‑platform data exchange.
+ * 4. When an image‑processing service has to ensure the input TIFF exists, load it safely, and generate a JSON report of all EXIF properties for quality‑control dashboards.
+ * 5. When a developer wants to automate the extraction of TIFF EXIF fields and store them in a structured JSON document to feed a metadata database or search index.
  */

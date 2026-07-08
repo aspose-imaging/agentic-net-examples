@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
@@ -11,10 +11,10 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input\";
-            string outputDir = @"C:\Images\Output\";
+            string inputDir = @"C:\InputDicom";
+            string outputDir = @"C:\OutputPng";
 
-            // List of DICOM files to process
+            // List of DICOM files to process (hardcoded)
             string[] inputFiles = new string[]
             {
                 Path.Combine(inputDir, "image1.dcm"),
@@ -24,7 +24,7 @@ class Program
 
             foreach (string inputPath in inputFiles)
             {
-                // Verify that the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -36,17 +36,18 @@ class Program
                 {
                     DicomImage dicomImage = (DicomImage)image;
 
-                    // Increase brightness by 10 units
+                    // Adjust brightness by 10 units
                     dicomImage.AdjustBrightness(10);
 
-                    // Build the output PNG file path
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-                    string outputPath = Path.Combine(outputDir, outputFileName);
+                    // Prepare output PNG path
+                    string outputPath = Path.Combine(
+                        outputDir,
+                        Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
-                    // Ensure the output directory exists
+                    // Ensure output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the adjusted image as PNG
+                    // Save as PNG
                     dicomImage.Save(outputPath, new PngOptions());
                 }
             }
@@ -60,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology department needs to convert a series of DICOM scans to PNG for inclusion in a patient report while improving visibility by increasing brightness.
- * 2. When a medical research team wants to preprocess a batch of DICOM images for machine‑learning training, adjusting brightness uniformly before exporting to PNG format.
- * 3. When a healthcare IT developer automates nightly processing of newly acquired DICOM files, applying a brightness boost and storing the results as PNG thumbnails for a web‑based image viewer.
- * 4. When a telemedicine platform must prepare DICOM images for display on low‑resolution devices, increasing brightness by ten units and saving them as PNG to reduce file size and improve compatibility.
- * 5. When a quality‑control engineer needs to quickly verify image contrast across multiple DICOM studies by batch‑adjusting brightness and converting them to PNG for side‑by‑side visual inspection.
+ * 1. When a radiology software needs to convert a batch of DICOM scans to PNG thumbnails while increasing brightness for better visual inspection.
+ * 2. When a medical research project requires automated preprocessing of multiple DICOM images to enhance contrast before feeding them into a machine‑learning model that accepts PNG inputs.
+ * 3. When a hospital IT team wants to generate patient‑friendly PNG snapshots from DICOM files and apply a uniform brightness boost to improve readability on web portals.
+ * 4. When a developer builds a C# utility to archive DICOM studies as lossless PNG files with a consistent brightness offset for consistent archival quality.
+ * 5. When a diagnostic imaging workflow automates the conversion of DICOM images to PNG format with a ten‑unit brightness adjustment to standardize display across different viewing applications.
  */

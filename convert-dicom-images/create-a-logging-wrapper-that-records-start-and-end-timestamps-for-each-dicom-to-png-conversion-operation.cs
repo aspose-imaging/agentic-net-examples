@@ -24,36 +24,41 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(outputDir);
 
+            // Log start timestamp
+            Console.WriteLine($"Conversion started at {DateTime.Now:O}");
+
             // Load the DICOM image from a file stream
             using (FileStream stream = File.OpenRead(inputPath))
             using (DicomImage dicomImage = new DicomImage(stream))
             {
-                // Iterate through each page in the DICOM image
-                foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                // Iterate through each page and save as PNG
+                foreach (DicomPage page in dicomImage.DicomPages)
                 {
-                    // Build output PNG file path for the current page
-                    string outputPath = Path.Combine(outputDir, $"page_{dicomPage.Index}.png");
+                    string outputPath = Path.Combine(outputDir, $"page{page.Index}.png");
 
                     // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Log start timestamp
-                    DateTime start = DateTime.UtcNow;
-                    Console.WriteLine($"[{start:O}] Starting conversion of page {dicomPage.Index}");
-
                     // Save the page as a PNG image
-                    dicomPage.Save(outputPath, new PngOptions());
-
-                    // Log end timestamp
-                    DateTime end = DateTime.UtcNow;
-                    Console.WriteLine($"[{end:O}] Finished conversion of page {dicomPage.Index}");
+                    page.Save(outputPath, new PngOptions());
                 }
             }
+
+            // Log end timestamp
+            Console.WriteLine($"Conversion finished at {DateTime.Now:O}");
         }
         catch (Exception ex)
         {
-            // Log any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a radiology software needs to batch‑convert DICOM scans to PNG thumbnails and record the start and end times for performance monitoring.
+ * 2. When a medical research pipeline processes multi‑frame DICOM images, saves each frame as a PNG file, and logs timestamps to audit processing duration.
+ * 3. When a hospital IT system automates the extraction of DICOM pages to PNG for integration with electronic health records while tracking conversion timestamps for compliance reporting.
+ * 4. When a developer builds a command‑line utility that validates the existence of a DICOM file, creates an output folder, converts each DICOM page to PNG using Aspose.Imaging, and logs the operation timeline for debugging.
+ * 5. When a QA engineer needs to verify that a C# application correctly loads DICOM images from a file stream, saves them as PNG images, and records precise start and finish times to detect performance regressions.
+ */

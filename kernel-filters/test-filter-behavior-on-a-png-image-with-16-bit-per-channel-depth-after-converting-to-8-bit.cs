@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,9 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output folder paths
+            // Hardcoded input and output paths
             string inputPath = @"C:\temp\sample16bit.png";
-            string outputFolder = @"C:\temp\filter_test";
+            string outputDir = @"C:\temp\output";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,42 +22,44 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(outputFolder);
+            Directory.CreateDirectory(outputDir);
+
+            // Define the filter types to test
+            PngFilterType[] filterTypes = new PngFilterType[]
+            {
+                PngFilterType.None,
+                PngFilterType.Up,
+                PngFilterType.Sub,
+                PngFilterType.Paeth,
+                PngFilterType.Avg,
+                PngFilterType.Adaptive
+            };
 
             // Load the 16‑bit PNG image
-            using (PngImage pngImage = new PngImage(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Define the filter types to test
-                PngFilterType[] filterTypes = new PngFilterType[]
-                {
-                    PngFilterType.None,
-                    PngFilterType.Up,
-                    PngFilterType.Sub,
-                    PngFilterType.Paeth,
-                    PngFilterType.Avg,
-                    PngFilterType.Adaptive
-                };
-
                 foreach (PngFilterType filter in filterTypes)
                 {
-                    // Prepare PNG save options: convert to 8‑bit and set the current filter
-                    PngOptions saveOptions = new PngOptions
+                    // Prepare PNG save options: convert to 8‑bit and set filter type
+                    PngOptions options = new PngOptions
                     {
-                        BitDepth = 8,                 // Convert to 8‑bit per channel
-                        FilterType = filter,
-                        // Preserve other defaults (e.g., compression level)
+                        BitDepth = 8,                     // Convert to 8‑bit per channel
+                        FilterType = filter,              // Current filter type
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        CompressionLevel = 9,
+                        Progressive = true
                     };
 
                     // Build output file path
-                    string outputPath = Path.Combine(outputFolder, $"output_{filter}.png");
+                    string outputPath = Path.Combine(outputDir, $"filter_{filter}.png");
 
-                    // Ensure the directory for the output file exists (already created above)
+                    // Ensure the directory for this file exists (covers subfolders if any)
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save the image with the specified options
-                    pngImage.Save(outputPath, saveOptions);
+                    image.Save(outputPath, options);
 
-                    // Report the file size for this filter type
+                    // Report the resulting file size
                     long fileSize = new FileInfo(outputPath).Length;
                     Console.WriteLine($"Filter: {filter}, Output size: {fileSize} bytes");
                 }
@@ -72,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to compare how different PNG filter types affect the visual quality and file size of a 16‑bit image after down‑sampling it to 8‑bit for web delivery.
- * 2. When a developer wants to verify that the Aspose.Imaging PNG encoder correctly applies each filter (None, Up, Sub, Paeth, Avg, Adaptive) while converting high‑dynamic‑range PNGs to standard 8‑bit PNGs for mobile apps.
- * 3. When a developer is troubleshooting compression artifacts in medical imaging scans that must be saved as 8‑bit PNGs and needs to test which filter yields the least data loss.
- * 4. When a developer is building an automated image‑processing pipeline that must generate multiple PNG variants with different filters to determine the optimal setting for archival storage.
- * 5. When a developer is creating a quality‑control script to ensure that legacy 16‑bit PNG assets are correctly down‑converted and that each PNG filter type produces a valid, viewable 8‑bit file before publishing.
+ * 1. When a developer needs to evaluate how each PNG filter type (None, Up, Sub, Paeth, Avg, Adaptive) impacts file size and visual fidelity after converting a 16‑bit PNG to an 8‑bit image for web optimization, they can use this code.
+ * 2. When a developer wants to verify that the Aspose.Imaging library correctly preserves alpha transparency while down‑sampling high‑depth PNGs and applying different filter algorithms for progressive rendering, this example provides a quick test.
+ * 3. When a developer is troubleshooting compression artifacts in medical or scientific images that must be reduced from 16‑bit to 8‑bit before archival, the code helps compare filter effects on image quality.
+ * 4. When a developer is building an automated pipeline that generates multiple PNG variants with different filter settings to select the best trade‑off between compression level and decoding speed on client devices, this snippet demonstrates the required steps.
+ * 5. When a developer needs to confirm that the chosen PNG filter works consistently across various output directories and file‑system permissions while converting high‑depth images, the example offers a practical validation routine.
  */

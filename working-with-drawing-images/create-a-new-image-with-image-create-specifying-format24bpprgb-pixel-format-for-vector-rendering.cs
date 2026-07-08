@@ -8,28 +8,35 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\output.bmp";
-
         try
         {
+            // Hardcoded paths
+            string inputPath = @"C:\temp\input.png";
+            string outputPath = @"C:\temp\output.bmp";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up BMP options with 24 bits per pixel
+            // Configure BMP options for 24bpp format
             BmpOptions bmpOptions = new BmpOptions
             {
                 BitsPerPixel = 24,
-                // Create a non‑temporal file at the specified location
                 Source = new FileCreateSource(outputPath, false)
             };
 
-            // Create a new 500x500 image using the specified options
+            // Create a new 500x500 image
             using (Image image = Image.Create(bmpOptions, 500, 500))
             {
-                // Perform any image processing here if needed
+                // Image processing can be done here
 
-                // Save the image to the file defined in bmpOptions.Source
+                // Save the image to the specified output path
                 image.Save();
             }
         }
@@ -42,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically create a blank 500 × 500 BMP image with a 24‑bit per pixel format using Image.Create and BmpOptions for subsequent vector rendering in a C# application.
- * 2. When an automated reporting system must generate a high‑resolution 24bpp bitmap canvas to draw charts and then save it directly to a file path with Image.Save.
- * 3. When a batch image‑processing workflow requires a temporary 24‑bit BMP surface as a staging area before applying filters, using FileCreateSource to define the output location.
- * 4. When a Windows desktop utility needs to export a screenshot‑style image in BMP format with a known pixel format for compatibility with legacy software, ensuring the output directory exists.
- * 5. When a server‑side service must create and persist a 24bpp BMP file in a specific folder, handling any I/O exceptions while using Aspose.Imaging's Image.Create method.
+ * 1. When a developer needs to generate a blank 24‑bit BMP canvas for drawing vector graphics such as logos or diagrams before saving it to disk.
+ * 2. When an application must programmatically create a high‑color‑depth image to overlay text or shapes on a transparent background and then export it as a BMP file.
+ * 3. When a batch‑processing tool requires a consistent 500 × 500 pixel image in 24bpp format to serve as a template for watermarking multiple input PNG files.
+ * 4. When a server‑side service has to produce a rasterized preview of vector content for legacy systems that only accept 24‑bit BMP images.
+ * 5. When a developer wants to ensure the output directory exists and safely write a newly created BMP image with Aspose.Imaging’s Image.Create method for further image manipulation.
  */

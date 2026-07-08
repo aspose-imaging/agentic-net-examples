@@ -10,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.emf";
-            string outputPath = @"C:\Images\output\sample_cropped.png";
+            string inputPath = @"C:\Images\input.emf";
+            string outputPath = @"C:\Images\output\cropped.emf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,19 +26,18 @@ class Program
             // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to EmfImage to access EMF-specific methods
+                // Cast to EmfImage to access EMF‑specific members
                 EmfImage emfImage = (EmfImage)image;
 
-                // Define border sizes to remove (e.g., 20 pixels from left and top)
-                int leftShift = 20;   // remove 20 pixels from the left
-                int rightShift = 0;   // keep right side unchanged
-                int topShift = 20;    // remove 20 pixels from the top
-                int bottomShift = 0;  // keep bottom side unchanged
+                // Crop: remove 50 pixels from left and top borders, keep right and bottom unchanged
+                int leftShift = 50;   // pixels to remove from the left side
+                int rightShift = 0;   // no removal from the right side
+                int topShift = 50;    // pixels to remove from the top side
+                int bottomShift = 0;  // no removal from the bottom side
 
-                // Crop the image using the shift overload
                 emfImage.Crop(leftShift, rightShift, topShift, bottomShift);
 
-                // Save the cropped image (PNG format inferred from extension)
+                // Save the cropped image
                 emfImage.Save(outputPath);
             }
         }
@@ -51,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to remove unwanted printer margins from a scanned EMF diagram before converting it to a PNG for web display.
- * 2. When an application generates EMF charts with a default 20‑pixel padding and the developer wants to trim the top‑left border to align the chart with other UI elements.
- * 3. When a batch‑processing tool must crop the left and top edges of legacy EMF assets to fit them into a fixed‑size thumbnail grid.
- * 4. When a reporting system exports vector graphics as EMF and then crops the top‑left corner to eliminate extra whitespace before embedding the image in a PDF.
- * 5. When a C# service receives user‑uploaded EMF files and needs to programmatically remove a 20‑pixel border so the resulting PNG matches the layout of a mobile app screen.
+ * 1. When generating printable reports that embed EMF logos, a developer can use EmfImage.Crop to trim a 50‑pixel top‑left margin so the logo aligns perfectly with the page header.
+ * 2. When converting legacy EMF diagrams for a web dashboard, cropping the unwanted top‑left border ensures the vector graphic fits within the responsive container without extra whitespace.
+ * 3. When preprocessing scanned EMF signatures for digital contracts, removing the top‑left border with EmfImage.Crop improves OCR accuracy by eliminating irrelevant background pixels.
+ * 4. When creating a batch script to standardize UI icons stored as EMF files, cropping a consistent left and top offset guarantees uniform icon placement across different screen resolutions.
+ * 5. When integrating EMF charts into a C# WinForms application, cropping the top‑left edge prevents overlap with surrounding controls, delivering a cleaner visual layout.
  */

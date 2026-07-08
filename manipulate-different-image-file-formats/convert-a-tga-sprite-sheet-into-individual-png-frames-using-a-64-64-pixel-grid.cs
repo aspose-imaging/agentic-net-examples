@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,50 +9,48 @@ class Program
     {
         try
         {
+            // Input TGA sprite sheet
             string inputPath = "sprite_sheet.tga";
-            string outputDirectory = "Frames";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
+            // Load the sprite sheet as a raster image
             using (RasterImage spriteSheet = (RasterImage)Image.Load(inputPath))
             {
+                // Cache data for better performance
+                if (!spriteSheet.IsCached) spriteSheet.CacheData();
+
                 int frameWidth = 64;
                 int frameHeight = 64;
                 int columns = spriteSheet.Width / frameWidth;
                 int rows = spriteSheet.Height / frameHeight;
 
+                // Output directory for frames
+                string outputDir = "Frames";
+                Directory.CreateDirectory(outputDir);
+
+                int frameIndex = 0;
                 for (int row = 0; row < rows; row++)
                 {
                     for (int col = 0; col < columns; col++)
                     {
-                        string outputPath = Path.Combine(outputDirectory, $"frame_{row}_{col}.png");
+                        // Define the region for the current frame
+                        Aspose.Imaging.Rectangle region = new Aspose.Imaging.Rectangle(col * frameWidth, row * frameHeight, frameWidth, frameHeight);
+
+                        // Build output file path
+                        string outputPath = Path.Combine(outputDir, $"frame_{frameIndex}.png");
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Define the region to extract
-                        Rectangle sourceRect = new Rectangle(col * frameWidth, row * frameHeight, frameWidth, frameHeight);
-                        // Load pixel data from the sprite sheet
-                        int[] pixels = spriteSheet.LoadArgb32Pixels(sourceRect);
-
-                        // Create a new PNG image bound to the output file
-                        PngOptions options = new PngOptions
+                        // Save the region as a PNG frame
+                        using (PngOptions pngOptions = new PngOptions())
                         {
-                            Source = new FileCreateSource(outputPath, false)
-                        };
-
-                        using (RasterImage frameImage = (RasterImage)Image.Create(options, frameWidth, frameHeight))
-                        {
-                            // Write pixel data to the new image
-                            frameImage.SaveArgb32Pixels(new Rectangle(0, 0, frameWidth, frameHeight), pixels);
-                            // Since the image is bound to a file, call Save()
-                            frameImage.Save();
+                            spriteSheet.Save(outputPath, pngOptions, region);
                         }
+
+                        frameIndex++;
                     }
                 }
             }
@@ -67,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a game developer needs to convert a TGA sprite sheet into individual 64 × 64 PNG frames for use in a Unity or Unreal Engine animation pipeline, this code extracts each cell and saves it as a separate PNG file.
- * 2. When a UI/UX designer provides assets as a large TGA sprite sheet and a web developer must generate separate 64 × 64 PNG icons for responsive web pages, this snippet automates the extraction.
- * 3. When a mobile app team wants to pre‑process a TGA sprite atlas into discrete PNG textures to reduce runtime memory usage on iOS or Android, the code creates the required frames programmatically.
- * 4. When a data‑visualization tool needs to import individual frames from a TGA sprite sheet for frame‑by‑frame playback in a C# WPF application, this example shows how to load, crop, and write PNG images with Aspose.Imaging.
- * 5. When an automated build system must batch‑convert legacy TGA sprite sheets into PNG assets for version control or CI/CD pipelines, the code provides a repeatable C# solution using RasterImage and PngOptions.
+ * 1. When a game developer needs to extract individual 64×64 animation frames from a TGA sprite sheet and save them as PNG files for use in Unity or other game engines.
+ * 2. When a UI designer wants to split a large TGA texture atlas into separate 64×64 PNG icons for a mobile app’s toolbar.
+ * 3. When a video editor requires each 64×64 frame of a TGA sprite sheet to be exported as PNG images for frame‑by‑frame compositing in After Effects.
+ * 4. When a web developer must convert legacy TGA sprite sheets into web‑friendly 64×64 PNG sprites for HTML5 canvas animations.
+ * 5. When an automated build pipeline needs to generate 64×64 PNG thumbnails from a TGA sprite sheet for documentation or asset preview generation.
  */

@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.png";
-
         try
         {
+            // Hard‑coded input and output paths
+            string inputPath = @"C:\Images\input.svg";
+            string outputPath = @"C:\Images\output\output.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,16 +20,13 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Example filter: no modification, just conversion.
-                // Additional processing can be added here (e.g., resizing, color adjustments).
-
-                // Save as PNG
+                // Save the image as PNG
                 var pngOptions = new PngOptions();
                 image.Save(outputPath, pngOptions);
             }
@@ -43,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate thumbnail previews of user‑uploaded SVG icons and store them as PNG files on the server for fast rendering.
- * 2. When an automated build pipeline converts vector graphics from design assets (SVG) into raster PNGs for inclusion in mobile app resource bundles.
- * 3. When a reporting tool extracts SVG charts from a data visualization library and saves them as PNG images to embed in PDF or email reports.
- * 4. When a desktop utility processes SVG logos, applies optional filters such as resizing or color adjustments, and writes the final PNG files to a shared output directory.
- * 5. When a content management system validates the existence of an SVG file, creates the target folder if missing, and uses Aspose.Imaging to convert the vector image to PNG for browser‑compatible delivery.
+ * 1. When a web application needs to convert user‑uploaded SVG icons to PNG thumbnails for display on browsers that do not support SVG.
+ * 2. When an automated build pipeline must generate PNG assets from vector logos stored as SVG files for inclusion in mobile app resources.
+ * 3. When a reporting tool has to embed high‑resolution PNG charts that were originally designed in SVG format into PDF documents.
+ * 4. When a desktop utility processes a batch of SVG diagrams and saves them as PNG images to a shared network folder for non‑technical stakeholders.
+ * 5. When a content management system converts SVG illustrations to PNG format on the fly to ensure compatibility with older email clients.
  */

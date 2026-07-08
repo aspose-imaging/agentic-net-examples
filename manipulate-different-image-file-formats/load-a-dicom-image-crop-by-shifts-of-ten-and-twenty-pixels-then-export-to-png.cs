@@ -1,16 +1,16 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Temp\sample.dicom";
-        string outputPath = @"C:\Temp\sample.Crop.png";
+        string inputPath = @"C:\temp\sample.dicom";
+        string outputPath = @"C:\temp\sample.Crop.png";
 
         try
         {
@@ -27,7 +27,7 @@ class Program
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage to access DICOM-specific methods
+                // Cast to DicomImage for DICOM-specific operations
                 DicomImage dicomImage = (DicomImage)image;
 
                 // Crop the image: left/right shift 10 pixels, top/bottom shift 20 pixels
@@ -46,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to extract a region of interest from a DICOM scan and store it as a PNG for web display.
- * 2. When a radiology workflow requires removing border artifacts by cropping 10‑pixel sides and 20‑pixel top/bottom from DICOM files before archiving them as PNG thumbnails.
- * 3. When a healthcare data integration service converts DICOM images to PNG after applying a fixed pixel offset crop to fit a standardized report template.
- * 4. When a diagnostic software automates batch processing of DICOM scans, cropping each image by 10 px horizontally and 20 px vertically and saving the result as PNG for downstream AI analysis.
- * 5. When a hospital IT system needs to verify that a DICOM file exists, create the output folder, crop the image, and export it to PNG for inclusion in patient electronic health records.
+ * 1. When a medical imaging application needs to extract a region of interest from a DICOM scan and store it as a lightweight PNG for web display.
+ * 2. When a radiology workflow requires removing border artifacts by cropping 10‑pixel sides and 20‑pixel top/bottom from each DICOM file before archiving.
+ * 3. When a healthcare data integration service must convert DICOM images to PNG thumbnails while adjusting the frame size with precise pixel offsets.
+ * 4. When a diagnostic AI model expects uniformly sized PNG inputs, developers can load the original DICOM, crop it by 10 and 20 pixels, and save the result for model ingestion.
+ * 5. When a hospital’s reporting tool needs to embed a cropped snapshot of a DICOM study into a PDF, the code can perform the crop and export to PNG for easy embedding.
  */

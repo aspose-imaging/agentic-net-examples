@@ -1,48 +1,39 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.jp2";
-            string outputPath = "C:\\temp\\output_compressed.jp2";
+            string inputPath = "input.jp2";
+            string outputPath = "output_lossless.jp2";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the original JPEG2000 image
             using (Jpeg2000Image image = new Jpeg2000Image(inputPath))
             {
-                // Configure lossless compression options (default is lossless, set explicitly)
-                Jpeg2000Options options = new Jpeg2000Options
-                {
-                    Irreversible = false // use lossless DWT 5-3
-                };
+                Jpeg2000Options options = new Jpeg2000Options();
+                options.Irreversible = false; // Ensure lossless compression
 
-                // Save the image with lossless compression
                 image.Save(outputPath, options);
             }
 
-            // Compare file sizes
             long originalSize = new FileInfo(inputPath).Length;
             long compressedSize = new FileInfo(outputPath).Length;
 
             Console.WriteLine($"Original size: {originalSize} bytes");
-            Console.WriteLine($"Compressed size: {compressedSize} bytes");
+            Console.WriteLine($"Compressed (lossless) size: {compressedSize} bytes");
         }
         catch (Exception ex)
         {
@@ -53,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive high‑resolution medical scans in JPEG2000 format while ensuring no diagnostic detail is lost, they can use this code to apply lossless compression and verify the reduced file size.
- * 2. When building a satellite‑imagery processing pipeline in C#, the code helps compress raw JP2 files losslessly before storage, allowing the team to compare original and compressed sizes for storage budgeting.
- * 3. When creating a digital asset management system that stores artwork in JPEG2000, developers can employ this snippet to compress images without quality loss and log the size savings for reporting.
- * 4. When implementing a compliance‑driven document‑archiving solution that requires exact pixel fidelity, the code provides a way to re‑save JP2 files losslessly and confirm they meet size constraints.
- * 5. When optimizing bandwidth for a web service that streams high‑definition JP2 images, developers can use this example to compress images losslessly on the server and compare sizes to decide if further optimization is needed.
+ * 1. When a medical imaging application must store DICOM scans as JPEG2000 files without losing diagnostic detail, a developer can use this code to apply lossless compression and verify the reduced file size.
+ * 2. When an archival system for cultural‑heritage photographs needs to preserve original quality while minimizing storage costs, a developer can run this routine to compress JPEG2000 images losslessly and compare the saved space.
+ * 3. When a satellite‑imagery processing pipeline requires transmitting high‑resolution images without quality degradation, a developer can employ this example to create a lossless JPEG2000 payload and measure the bandwidth savings.
+ * 4. When a digital publishing platform wants to embed losslessly compressed JPEG2000 graphics in e‑books and ensure the files meet device size constraints, a developer can use the code to compress and report the size difference.
+ * 5. When a compliance audit demands proof that image assets are stored in a lossless format, a developer can automate the conversion and size comparison with this snippet to demonstrate that the JPEG2000 files retain visual fidelity while being smaller.
  */

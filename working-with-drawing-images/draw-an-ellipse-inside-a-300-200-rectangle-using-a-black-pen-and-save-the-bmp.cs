@@ -8,38 +8,35 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\ellipse.bmp";
+        // Hard‑coded output path
+        string outputPath = @"c:\temp\ellipse.bmp";
 
         try
         {
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure BMP options
+            // Set up BMP options (24‑bit colour) and assign the output source
             var bmpOptions = new BmpOptions
             {
                 BitsPerPixel = 24,
                 Source = new FileCreateSource(outputPath, false)
             };
 
-            // Create a 300 × 200 image
-            using (Image image = Image.Create(bmpOptions, 300, 200))
+            // Create a new image (size large enough to contain the rectangle)
+            using (Image image = Image.Create(bmpOptions, 400, 300))
             {
-                // Initialize graphics object
+                // Initialize graphics for drawing
                 var graphics = new Graphics(image);
 
                 // Optional: clear background to white
                 graphics.Clear(Color.White);
 
-                // Create a black pen with a width of 2 pixels
+                // Define a black pen (2‑pixel width)
                 var pen = new Pen(Color.Black, 2);
 
-                // Define the bounding rectangle (covers the whole image)
-                var rect = new Rectangle(0, 0, 300, 200);
-
-                // Draw the ellipse inside the rectangle
-                graphics.DrawEllipse(pen, rect);
+                // Draw an ellipse inside a 300 × 200 rectangle at position (50,50)
+                graphics.DrawEllipse(pen, new Rectangle(50, 50, 300, 200));
 
                 // Save the image to the specified path
                 image.Save();
@@ -54,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a simple black‑outlined ellipse thumbnail for a legacy Windows application that only accepts BMP files.
- * 2. When an automated reporting tool must embed a scalable vector‑like shape (ellipse) into a 300 × 200 bitmap chart to highlight a data region.
- * 3. When a batch image‑creation script creates placeholder graphics for UI mockups, using Aspose.Imaging for .NET to draw an ellipse inside a fixed‑size rectangle and save it as a 24‑bit BMP.
- * 4. When a server‑side service produces printable forms that require a black ellipse border around a signature area, and the output must be a BMP for compatibility with older printers.
- * 5. When a unit test validates the Aspose.Imaging drawing API by programmatically drawing an ellipse with a black Pen on a 300 × 200 canvas and verifying the resulting BMP file.
+ * 1. When generating a printable report that requires a simple black‑outlined ellipse inside a defined 300 × 200 rectangle and the output must be a 24‑bit BMP for compatibility with legacy imaging systems.
+ * 2. When creating a placeholder graphic for a UI mockup where an ellipse represents a button or icon within a specific rectangle and the design assets are stored as BMP files.
+ * 3. When automating the production of test images for computer‑vision algorithms that need a known geometric shape drawn with a black pen on a white background in BMP format.
+ * 4. When exporting diagram elements from a C# application to a BMP image for inclusion in documentation, and the element is an ellipse constrained to a 300 × 200 rectangle.
+ * 5. When building a batch process that adds a black‑outlined ellipse to existing images by creating a new 400 × 300 BMP canvas, drawing the shape inside a 300 × 200 rectangle, and saving it to a file system path.
  */

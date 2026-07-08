@@ -1,8 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.Watermark;
+using Aspose.Imaging.Watermark.Options;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,10 +11,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hard‑coded input and output locations
             string inputPath = "input.png";
-            string outputPathLow = "output_low.png";
-            string outputPathHigh = "output_high.png";
+            string outputBasePath = "output";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,45 +22,41 @@ class Program
                 return;
             }
 
-            // Ensure output directories exist (null‑safe)
-            string outDirLow = Path.GetDirectoryName(outputPathLow);
-            if (!string.IsNullOrEmpty(outDirLow)) Directory.CreateDirectory(outDirLow);
-            string outDirHigh = Path.GetDirectoryName(outputPathHigh);
-            if (!string.IsNullOrEmpty(outDirHigh)) Directory.CreateDirectory(outDirHigh);
+            // Ensure the base output directory exists
+            Directory.CreateDirectory(outputBasePath);
 
             // Load the source image
             using (var image = Image.Load(inputPath))
             {
-                var pngImage = (PngImage)image;
+                var raster = (RasterImage)image;
 
                 // Define a simple elliptical mask
                 var mask = new GraphicsPath();
                 var figure = new Figure();
-                figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
+                figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 200)));
                 mask.AddFigure(figure);
 
-                // ------------------------------
-                // Low MaxPaintingAttempts (2)
-                // ------------------------------
-                var optionsLow = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
+                // Demonstrate the effect of increasing MaxPaintingAttempts
+                // Higher values let the algorithm try more painting variants,
+                // which usually yields a smoother and more natural fill.
+                for (int attempts = 1; attempts <= 5; attempts++)
                 {
-                    MaxPaintingAttempts = 2 // Fewer attempts may produce visible artifacts
-                };
-                using (var resultLow = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, optionsLow))
-                {
-                    resultLow.Save(outputPathLow);
-                }
+                    var options = new ContentAwareFillWatermarkOptions(mask)
+                    {
+                        MaxPaintingAttempts = attempts
+                    };
 
-                // ------------------------------
-                // High MaxPaintingAttempts (8)
-                // ------------------------------
-                var optionsHigh = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
-                {
-                    MaxPaintingAttempts = 8 // More attempts allow the algorithm to choose a smoother fill
-                };
-                using (var resultHigh = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, optionsHigh))
-                {
-                    resultHigh.Save(outputPathHigh);
+                    // Perform watermark removal / content‑aware fill
+                    using (var result = WatermarkRemover.PaintOver(raster, options))
+                    {
+                        string outputPath = Path.Combine(outputBasePath, $"result_{attempts}.png");
+
+                        // Ensure the directory for this output exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the processed image
+                        result.Save(outputPath);
+                    }
                 }
             }
         }
@@ -70,3 +66,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to remove a watermark from a PNG image and wants to see how raising MaxPaintingAttempts from 1 to 5 produces a smoother, more natural‑looking fill in the erased region.
+ * 2. When a C# application must generate multiple versions of a JPEG thumbnail with varying MaxPaintingAttempts to evaluate the trade‑off between processing time and the visual continuity of the content‑aware fill.
+ * 3. When an automated batch‑processing script uses Aspose.Imaging to clean scanned PDFs saved as PNGs and requires the highest MaxPaintingAttempts to avoid visible seams after the watermark is painted over.
+ * 4. When a UI tool lets users adjust a slider that maps to MaxPaintingAttempts, enabling real‑time comparison of how higher attempts reduce pixelation in the filled ellipse mask on a BMP background.
+ * 5. When performance testing a .NET service that removes watermarks from large TIFF files and needs to demonstrate that increasing MaxPaintingAttempts improves the smoothness of the reconstructed area without introducing artifacts.
+ */

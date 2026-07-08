@@ -1,58 +1,48 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (string.IsNullOrEmpty(outputDir))
-        {
-            outputDir = ".";
-        }
-        Directory.CreateDirectory(outputDir);
-
         try
         {
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
             {
-                RectangleMask mask1 = new RectangleMask(10, 10, 50, 50);
-                RectangleMask mask2 = new RectangleMask(30, 30, 50, 50);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            {
+                RectangleMask mask1 = new RectangleMask(20, 20, 100, 100);
+                RectangleMask mask2 = new RectangleMask(80, 80, 100, 100);
 
                 ImageBitMask unionMask = mask1.Union(mask2);
 
-                bool test1 = unionMask.IsOpaque(15, 15);
-                bool test2 = unionMask.IsOpaque(75, 75);
-                bool test3 = unionMask.IsOpaque(35, 35);
-                bool test4 = unionMask.IsOpaque(0, 0);
+                bool test1 = unionMask.IsOpaque(30, 30);
+                bool test2 = unionMask.IsOpaque(90, 90);
+                bool test3 = unionMask.IsOpaque(150, 150);
 
-                if (!test1 || !test2 || !test3 || test4)
+                if (test1 && test2 && !test3)
                 {
-                    Console.Error.WriteLine("Union mask verification failed.");
-                    return;
+                    Console.WriteLine("Union mask test passed.");
+                }
+                else
+                {
+                    Console.WriteLine("Union mask test failed.");
                 }
 
                 unionMask.ApplyTo(image);
-
-                PngOptions pngOptions = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-                image.Save(outputPath, pngOptions);
+                image.Save(outputPath, new PngOptions { Source = new FileCreateSource(outputPath, false) });
             }
         }
         catch (Exception ex)
@@ -61,3 +51,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to merge overlapping rectangular selections into a single mask for batch PNG image processing using Aspose.Imaging in a C# .NET application.
+ * 2. When a developer wants to verify that the Union operation correctly identifies opaque pixels across combined masks before applying the mask to a raster image.
+ * 3. When a developer must create a composite mask for selective editing, such as applying filters only to the combined area of two overlapping regions in an image file.
+ * 4. When a developer is building automated tests to ensure that ImageBitMask.Union produces the expected mask boundaries for image annotation tools.
+ * 5. When a developer requires a reliable way to apply a merged mask to an image and save the result as a PNG using Aspose.Imaging’s ApplyTo and PngOptions features.
+ */

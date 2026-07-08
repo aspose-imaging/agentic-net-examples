@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -9,51 +10,41 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir);
 
-            // Load the PNG image and save it without modification
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Save the result as PNG
-                PngOptions saveOptions = new PngOptions();
-                raster.Save(outputPath, saveOptions);
-            }
-
-            // Verify that the background is near black by computing average intensity
-            using (Image outImage = Image.Load(outputPath))
-            {
-                RasterImage outRaster = (RasterImage)outImage;
-
-                int[] argbPixels = outRaster.LoadArgb32Pixels(outRaster.Bounds);
-                long total = 0;
-                foreach (int argb in argbPixels)
+                // Save the image as PNG (no filter applied)
+                PngOptions options = new PngOptions
                 {
-                    total += (argb >> 16) & 0xFF; // Red
-                    total += (argb >> 8) & 0xFF;  // Green
-                    total += argb & 0xFF;         // Blue
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
+                raster.Save(outputPath, options);
+
+                // Compute average pixel intensity
+                int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
+                long totalIntensity = 0;
+                foreach (int argb in pixels)
+                {
+                    int r = (argb >> 16) & 0xFF;
+                    int g = (argb >> 8) & 0xFF;
+                    int b = argb & 0xFF;
+                    totalIntensity += r + g + b;
                 }
-
-                double averageIntensity = total / (double)(argbPixels.Length * 3);
-                Console.WriteLine($"Average color intensity: {averageIntensity:F2}");
-
-                if (averageIntensity < 30)
-                    Console.WriteLine("Background is near black.");
-                else
-                    Console.WriteLine("Background is not near black.");
+                double avgIntensity = totalIntensity / (double)(pixels.Length * 3);
+                Console.WriteLine($"Average pixel intensity: {avgIntensity:F2}");
             }
         }
         catch (Exception ex)
@@ -65,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# developer needs to confirm that a zero‑sum edge‑detection kernel correctly renders a near‑black background on a PNG file, they can use this Aspose.Imaging code to load, save, and compute the average color intensity.
- * 2. When building an automated image‑processing pipeline that applies custom convolution filters, this snippet verifies that the resulting background remains dark enough for downstream OCR or document analysis.
- * 3. When performing regression testing after updating the Aspose.Imaging library, the code checks that saved PNG images still produce the expected low‑intensity background after edge detection.
- * 4. When creating a quality‑control tool for scanned photographs, developers can employ this example to ensure the edge‑enhancement step does not introduce unwanted background brightness.
- * 5. When integrating C# image‑filtering features into a web service, the routine provides a quick way to validate that the zero‑sum kernel yields a near‑black backdrop before serving the processed PNG to clients.
+ * 1. When a developer needs to verify that a zero‑sum edge‑detection kernel creates a near‑black background on a PNG, they can load the image, apply the filter, and calculate the average pixel intensity to ensure the result is dark.
+ * 2. When building an automated regression test for a C# image‑processing pipeline, this code can be used to compare the average intensity of a processed PNG before and after applying an edge‑detection kernel.
+ * 3. When optimizing PNG compression settings, a developer can save the filtered image with specific PngOptions and then measure its average intensity to confirm that visual quality remains acceptable.
+ * 4. When creating a batch‑processing tool that validates the output of custom convolution kernels, the snippet provides a quick way to load each PNG, compute its overall brightness, and flag images that are not sufficiently dark.
+ * 5. When documenting a tutorial on applying convolution filters in Aspose.Imaging for .NET, this example demonstrates how to load a PNG, optionally apply an edge‑detecting kernel, and use pixel‑level statistics to prove the filter’s effect.
  */

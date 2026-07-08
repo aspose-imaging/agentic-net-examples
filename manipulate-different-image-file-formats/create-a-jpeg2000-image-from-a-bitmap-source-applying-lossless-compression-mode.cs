@@ -1,41 +1,44 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 
-class Program
+public class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "Input/source.png";
+        string outputPath = "Output/result.jp2";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"c:\temp\input.png";
-            string outputPath = @"c:\temp\output.jp2";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Load the bitmap source as a raster image
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                RasterImage raster = (RasterImage)image;
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the bitmap source (PNG in this example)
-            using (PngImage pngImage = (PngImage)Image.Load(inputPath))
-            {
-                // Create JPEG2000 image from the loaded PNG image
-                using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(pngImage))
+                // Configure JPEG2000 options for lossless compression (default)
+                Jpeg2000Options options = new Jpeg2000Options
                 {
-                    // Configure JPEG2000 options for lossless compression (default)
-                    Jpeg2000Options options = new Jpeg2000Options();
-                    // Irreversible = false by default, which uses lossless DWT 5-3
+                    Irreversible = false // lossless DWT 5-3
+                };
 
-                    // Save the JPEG2000 image
+                // Create JPEG2000 image from the raster source
+                using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(raster))
+                {
+                    // Save the JPEG2000 image with the specified options
                     jpeg2000Image.Save(outputPath, options);
                 }
             }
@@ -49,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert high‑resolution PNG screenshots to lossless JPEG2000 files for archival storage while preserving exact pixel data.
- * 2. When an application must generate JPEG2000 assets from bitmap images for a medical imaging system that requires lossless compression to meet DICOM standards.
- * 3. When a web service processes user‑uploaded PNG graphics and needs to deliver them as compact, lossless JPEG2000 files to reduce bandwidth without sacrificing quality.
- * 4. When a batch‑processing tool automates the migration of legacy PNG assets to JPEG2000 format for a digital publishing workflow that mandates lossless image preservation.
- * 5. When a C# program integrates Aspose.Imaging to create JPEG2000 images from bitmap sources for a GIS application that relies on lossless wavelet compression for accurate map rendering.
+ * 1. When a developer needs to archive high‑resolution PNG graphics as lossless JPEG2000 files for long‑term storage using C# and Aspose.Imaging, this code converts the bitmap to a JP2 image without quality loss.
+ * 2. When an application must prepare medical or scientific images for secure transmission in a format that supports lossless compression, the snippet creates a JPEG2000 file from a raster source while preserving diagnostic detail.
+ * 3. When a GIS system requires converting satellite PNG tiles into JPEG2000 to reduce file size without sacrificing spatial accuracy, the example demonstrates the C# workflow for lossless DWT compression.
+ * 4. When a digital asset management platform needs to generate web‑ready, losslessly compressed JPEG2000 previews from user‑uploaded PNGs, this code provides a straightforward conversion pipeline.
+ * 5. When a developer is building a batch processing tool that normalizes various bitmap formats into a single lossless JPEG2000 archive for compliance reporting, the sample shows how to load, configure, and save the images in .NET.
  */

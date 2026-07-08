@@ -1,10 +1,8 @@
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -13,8 +11,9 @@ class Program
     {
         try
         {
-            string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
-            string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
             if (!Directory.Exists(inputDirectory))
             {
@@ -30,22 +29,30 @@ class Program
 
             string[] files = Directory.GetFiles(inputDirectory, "*.djvu");
 
-            foreach (var inputPath in files.Take(30))
+            int processed = 0;
+            foreach (string inputPath in files)
             {
+                if (processed >= 30)
+                    break;
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".tiff");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".tif");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
                     TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    djvuImage.Save(outputPath, tiffOptions);
+                    image.Save(outputPath, tiffOptions);
                 }
+
+                processed++;
             }
         }
         catch (Exception ex)
@@ -57,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch convert a collection of DjVu documents to TIFF files using C# and Aspose.Imaging for archival or printing purposes.
- * 2. When an automated .NET service must read up to thirty DjVu files from an input directory, loop through them with a foreach construct, and save each as a TIFF to ensure compatibility with legacy imaging pipelines.
- * 3. When a document management application requires converting user‑uploaded DjVu images to TIFF format on the fly, using Aspose.Imaging’s Image.Load and TiffOptions within a foreach loop.
- * 4. When a background job has to process a folder of DjVu scans, skip any missing files, and generate corresponding TIFF files for downstream OCR or indexing workflows.
- * 5. When a developer wants to create a simple console utility that creates an output folder, loads DjVu files, and batch converts the first thirty pages to TIFF while handling exceptions gracefully.
+ * 1. When a developer needs to migrate a large collection of scanned archival documents stored as DjVu files into a widely supported TIFF format for integration with enterprise document management systems.
+ * 2. When an application must automatically process up to thirty DjVu pages at a time, converting each to TIFF for downstream OCR processing in a C# batch workflow.
+ * 3. When a digital publishing pipeline requires converting user‑uploaded DjVu illustrations to TIFF thumbnails in a server‑side .NET service using a foreach loop.
+ * 4. When a legal firm wants to batch convert a folder of DjVu evidence files to TIFF to ensure compatibility with court‑approved imaging software.
+ * 5. When a cloud‑based image processing API needs to limit the number of DjVu files it converts per request, saving each result as a TIFF file in an output directory.
  */

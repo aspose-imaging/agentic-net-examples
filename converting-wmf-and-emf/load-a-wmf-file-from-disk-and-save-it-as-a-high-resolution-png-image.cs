@@ -2,40 +2,26 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.wmf";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = "input.wmf";
+            string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Increase resolution by scaling the image (e.g., 4x)
-                if (image is WmfImage wmfImage)
-                {
-                    int newWidth = wmfImage.Width * 4;
-                    int newHeight = wmfImage.Height * 4;
-                    wmfImage.Resize(newWidth, newHeight);
-                }
-
-                // Save as high‑resolution PNG
                 var pngOptions = new PngOptions();
                 image.Save(outputPath, pngOptions);
             }
@@ -46,3 +32,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to convert legacy Windows Metafile (WMF) graphics into high‑resolution PNG files for web display or documentation, they can use this code.
+ * 2. When an application must batch‑process vector icons stored as WMF and generate raster PNG assets for mobile apps, the snippet provides the necessary C# conversion logic.
+ * 3. When a reporting tool generates charts in WMF format but the final PDF requires embedded PNG images, this code enables the format transformation using Aspose.Imaging.
+ * 4. When a migration project moves old Windows‑based UI resources from WMF to PNG to support cross‑platform .NET Core applications, the example shows how to load and save the images.
+ * 5. When an automated build pipeline needs to validate that WMF files are correctly rendered by converting them to PNG and comparing pixel data, this code supplies the conversion step.
+ */

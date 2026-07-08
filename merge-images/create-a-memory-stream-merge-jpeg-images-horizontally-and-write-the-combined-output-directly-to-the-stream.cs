@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -12,7 +13,7 @@ class Program
     {
         try
         {
-            // Hardcoded input image paths
+            // Hardcoded input JPEG file paths
             string[] inputPaths = new string[]
             {
                 "image1.jpg",
@@ -20,7 +21,7 @@ class Program
                 "image3.jpg"
             };
 
-            // Verify each input file exists
+            // Validate input files
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -30,58 +31,52 @@ class Program
                 }
             }
 
-            // Collect sizes of all images
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-            foreach (string path in inputPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    sizes.Add(img.Size);
-                }
-            }
-
-            // Calculate canvas dimensions for horizontal merge
-            int totalWidth = 0;
-            int maxHeight = 0;
-            foreach (Aspose.Imaging.Size sz in sizes)
-            {
-                totalWidth += sz.Width;
-                if (sz.Height > maxHeight)
-                    maxHeight = sz.Height;
-            }
-
-            // Create a memory stream to hold the merged JPEG
+            // Prepare output memory stream
             using (MemoryStream outputStream = new MemoryStream())
             {
-                // Set JPEG options with the stream as the source
-                JpegOptions jpegOptions = new JpegOptions()
+                // JPEG creation options bound to the memory stream
+                JpegOptions jpegOptions = new JpegOptions
                 {
-                    Quality = 100,
-                    Source = new StreamSource(outputStream, true)
+                    Quality = 90,
+                    Source = new StreamSource(outputStream, false)
                 };
 
-                // Create a JPEG canvas bound to the stream
-                using (JpegImage canvas = new JpegImage(jpegOptions, totalWidth, maxHeight))
+                // Collect sizes of all input images
+                List<Size> sizes = new List<Size>();
+                foreach (string path in inputPaths)
+                {
+                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    {
+                        sizes.Add(img.Size);
+                    }
+                }
+
+                // Calculate canvas dimensions for horizontal merge
+                int newWidth = sizes.Sum(s => s.Width);
+                int newHeight = sizes.Max(s => s.Height);
+
+                // Create JPEG canvas bound to the memory stream
+                using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
                 {
                     int offsetX = 0;
                     foreach (string path in inputPaths)
                     {
                         using (RasterImage img = (RasterImage)Image.Load(path))
                         {
-                            Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
-                            int[] pixels = img.LoadArgb32Pixels(img.Bounds);
-                            canvas.SaveArgb32Pixels(bounds, pixels);
+                            Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                            canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                             offsetX += img.Width;
                         }
                     }
 
-                    // Save the canvas to the bound memory stream
+                    // Save the merged image into the bound stream
                     canvas.Save();
                 }
 
-                // At this point, outputStream contains the merged JPEG data.
-                // Example: write the stream length to console
+                // At this point, outputStream contains the merged JPEG data
+                outputStream.Position = 0;
                 Console.WriteLine($"Merged image size in bytes: {outputStream.Length}");
+                // The stream can be used further as needed
             }
         }
         catch (Exception ex)
@@ -93,9 +88,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to generate a side‑by‑side photo collage from user‑uploaded JPEGs and return the result directly in the HTTP response without creating temporary files.
- * 2. When an email‑marketing application must combine product thumbnail JPEGs into a single banner image on the fly and embed the stream into the email body.
- * 3. When a desktop reporting tool creates a printable PDF page that includes a horizontally merged JPEG strip of chart screenshots, using a memory stream to avoid disk I/O.
- * 4. When a mobile backend assembles multiple camera‑taken JPEG frames into a panoramic preview and streams the combined image to the client app.
- * 5. When a cloud function processes uploaded JPEG assets, stitches them horizontally for a social‑media preview, and stores the resulting stream directly into a blob storage service.
+ * 1. When a web application needs to generate a single panoramic JPEG from multiple product photos on the fly and send it directly to the client without creating temporary files.
+ * 2. When an email service composes a promotional newsletter that combines several banner images into one horizontal JPEG and streams it as an attachment.
+ * 3. When a mobile backend assembles user‑uploaded screenshots into a side‑by‑side comparison image and stores the result in a database as a byte array.
+ * 4. When a reporting tool creates a composite chart by stitching together separate JPEG graphs and writes the merged image to a memory stream for PDF embedding.
+ * 5. When an automated testing framework captures screenshots of different UI states, merges them horizontally, and feeds the combined JPEG into a visual‑diff algorithm without touching the file system.
  */

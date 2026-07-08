@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -26,59 +27,56 @@ class Program
             // Load the multi‑page PNG
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to multipage interface
+                // Attempt to treat the image as a multipage image
                 IMultipageImage multipage = image as IMultipageImage;
-                if (multipage == null)
+                if (multipage != null && multipage.PageCount > 0)
                 {
-                    Console.Error.WriteLine("The loaded image is not a multipage image.");
-                    return;
-                }
-
-                // Define a custom 3x3 kernel (example values)
-                double[,] kernel = new double[,]
-                {
-                    { 1, 2, 1 },
-                    { 2, 4, 2 },
-                    { 1, 2, 1 }
-                };
-
-                // Normalize kernel so that sum equals 1
-                double sum = 0;
-                for (int y = 0; y < kernel.GetLength(0); y++)
-                {
-                    for (int x = 0; x < kernel.GetLength(1); x++)
+                    int pageIndex = 0;
+                    foreach (Image page in multipage.Pages)
                     {
-                        sum += kernel[y, x];
-                    }
-                }
-                if (sum != 0)
-                {
-                    for (int y = 0; y < kernel.GetLength(0); y++)
-                    {
-                        for (int x = 0; x < kernel.GetLength(1); x++)
+                        using (RasterImage raster = (RasterImage)page)
                         {
-                            kernel[y, x] /= sum;
+                            // Custom 3x3 kernel normalized to sum = 1
+                            double[,] kernel = new double[,]
+                            {
+                                { 0.0625, 0.125, 0.0625 },
+                                { 0.125,  0.25,  0.125  },
+                                { 0.0625, 0.125, 0.0625 }
+                            };
+
+                            // Apply convolution filter
+                            raster.Filter(
+                                raster.Bounds,
+                                new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+
+                            // Prepare output path for the current page
+                            string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.png");
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                            // Save the processed page as PNG
+                            raster.Save(outputPath, new PngOptions());
                         }
+                        pageIndex++;
                     }
                 }
-
-                // Process each page
-                for (int i = 0; i < multipage.PageCount; i++)
+                else
                 {
-                    // Retrieve the page as a RasterImage
-                    using (RasterImage raster = (RasterImage)multipage.Pages[i])
+                    // Single‑page handling
+                    using (RasterImage raster = (RasterImage)image)
                     {
-                        // Apply convolution filter with the custom kernel
-                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                        raster.Filter(raster.Bounds, filterOptions);
+                        double[,] kernel = new double[,]
+                        {
+                            { 0.0625, 0.125, 0.0625 },
+                            { 0.125,  0.25,  0.125  },
+                            { 0.0625, 0.125, 0.0625 }
+                        };
 
-                        // Prepare output path for the current page
-                        string outputPath = Path.Combine(outputDirectory, $"page_{i}.png");
+                        raster.Filter(
+                            raster.Bounds,
+                            new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
 
-                        // Ensure the directory for the output file exists
+                        string outputPath = Path.Combine(outputDirectory, "page_0.png");
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the processed page as PNG
                         raster.Save(outputPath, new PngOptions());
                     }
                 }
@@ -93,9 +91,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑process a multi‑page PNG (e.g., a scanned PDF saved as PNG) by applying a custom convolution kernel for uniform noise reduction before exporting each page as a separate image file.
- * 2. When building a C# application that prepares multi‑frame PNG animations for web delivery, using Aspose.Imaging to apply a normalized blur kernel to each frame and save the processed frames individually.
- * 3. When creating a medical imaging workflow that loads multi‑slice PNG scans, applies a custom edge‑enhancement kernel with sum = 1 to improve contrast, and writes each slice to a folder for further analysis.
- * 4. When implementing a satellite‑imagery preprocessing pipeline that reads multi‑band PNG tiles, applies a custom smoothing kernel to each band to eliminate sensor noise, and stores the cleaned tiles as separate files.
- * 5. When developing a document archival tool that extracts each page of a multi‑page PNG invoice, applies a standardized sharpening kernel to improve readability, and saves the sharpened pages to a designated output directory.
+ * 1. When a developer needs to extract each frame from a multi‑page PNG (such as an animated icon), apply a blur convolution kernel normalized to one, and save the processed frames as separate PNG files.
+ * 2. When a medical imaging application must preprocess every slice of a multi‑page PNG scan with a Gaussian‑like kernel to reduce noise before further analysis.
+ * 3. When a web‑based graphics tool wants to generate thumbnail versions of all pages in a multi‑page PNG while preserving overall brightness by using a normalized convolution filter.
+ * 4. When an automated document‑archiving system has to clean each page of a multi‑page PNG invoice with a smoothing kernel and write the results to a folder for OCR processing.
+ * 5. When a game developer needs to batch‑process sprite sheets stored as multi‑page PNGs, applying a custom sharpening kernel that sums to one to maintain color balance before exporting each sprite as an individual file.
  */

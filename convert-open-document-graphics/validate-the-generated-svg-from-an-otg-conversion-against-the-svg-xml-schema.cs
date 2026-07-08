@@ -1,12 +1,8 @@
 using System;
 using System.IO;
-using System.Text;
 using System.Xml;
 using System.Xml.Schema;
-using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -14,8 +10,11 @@ class Program
     {
         try
         {
-            // Hardcoded input SVG path
-            string inputPath = @"C:\temp\input.svg";
+            // Hardcoded input SVG file path
+            string inputPath = "input.svg";
+
+            // Hardcoded output validation result file path
+            string outputPath = "validation_result.txt";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,80 +23,62 @@ class Program
                 return;
             }
 
-            // Load the image using Aspose.Imaging
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG using Aspose.Imaging to ensure it is a supported image
             using (Image image = Image.Load(inputPath))
             {
-                // Ensure the loaded image is an SVG
-                SvgImage svgImage = image as SvgImage;
-                if (svgImage == null)
-                {
-                    Console.Error.WriteLine("The provided file is not a valid SVG image.");
-                    return;
-                }
+                // No additional processing needed; just confirming load succeeded
+            }
 
-                // Export the SVG content to a string (using a memory stream)
-                string svgContent;
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    // Save with default SvgOptions to preserve original XML
-                    svgImage.Save(ms, new SvgOptions());
-                    svgContent = Encoding.UTF8.GetString(ms.ToArray());
-                }
+            // Path to the SVG XML Schema (XSD). Adjust if the schema file is located elsewhere.
+            string schemaPath = "svg.xsd";
 
-                // Prepare XML schema validation
-                XmlSchemaSet schemas = new XmlSchemaSet();
+            // Verify schema file exists
+            if (!File.Exists(schemaPath))
+            {
+                Console.Error.WriteLine($"Schema file not found: {schemaPath}");
+                return;
+            }
 
-                // Minimal SVG 1.1 schema (embedded). For full validation, replace with the complete schema.
-                const string svgSchema = @"
-<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'
-           targetNamespace='http://www.w3.org/2000/svg'
-           xmlns='http://www.w3.org/2000/svg'
-           elementFormDefault='qualified'>
-  <xs:element name='svg' type='svgType'/>
-  <xs:complexType name='svgType'>
-    <xs:sequence>
-      <xs:any minOccurs='0' maxOccurs='unbounded' processContents='lax'/>
-    </xs:sequence>
-    <xs:anyAttribute processContents='lax'/>
-  </xs:complexType>
-</xs:schema>";
-                using (StringReader sr = new StringReader(svgSchema))
-                {
-                    schemas.Add("http://www.w3.org/2000/svg", XmlReader.Create(sr));
-                }
+            // Prepare schema set
+            XmlSchemaSet schemas = new XmlSchemaSet();
+            schemas.Add(null, schemaPath);
 
-                // Set up validation settings
-                XmlReaderSettings settings = new XmlReaderSettings
-                {
-                    ValidationType = ValidationType.Schema,
-                    Schemas = schemas,
-                    DtdProcessing = DtdProcessing.Prohibit
-                };
+            // Collect validation errors
+            var errors = new System.Collections.Generic.List<string>();
+            XmlReaderSettings settings = new XmlReaderSettings
+            {
+                ValidationType = ValidationType.Schema,
+                Schemas = schemas,
+                ValidationFlags = XmlSchemaValidationFlags.ProcessIdentityConstraints |
+                                  XmlSchemaValidationFlags.ReportValidationWarnings
+            };
+            settings.ValidationEventHandler += (sender, e) =>
+            {
+                errors.Add($"{e.Severity}: {e.Message}");
+            };
 
-                List<string> validationErrors = new List<string>();
-                settings.ValidationEventHandler += (sender, args) =>
-                {
-                    validationErrors.Add($"{args.Severity}: {args.Message}");
-                };
+            // Validate the SVG file
+            using (XmlReader reader = XmlReader.Create(inputPath, settings))
+            {
+                while (reader.Read()) { }
+            }
 
-                // Perform validation
-                using (StringReader sr = new StringReader(svgContent))
-                using (XmlReader reader = XmlReader.Create(sr, settings))
+            // Write validation result
+            using (StreamWriter writer = new StreamWriter(outputPath, false))
+            {
+                if (errors.Count == 0)
                 {
-                    while (reader.Read()) { /* reading triggers validation */ }
-                }
-
-                // Report results
-                if (validationErrors.Count == 0)
-                {
-                    Console.WriteLine("SVG validation succeeded: the document conforms to the SVG schema.");
+                    writer.WriteLine("SVG validation succeeded. No errors found.");
                 }
                 else
                 {
-                    Console.WriteLine("SVG validation failed with the following errors:");
-                    foreach (string err in validationErrors)
+                    writer.WriteLine("SVG validation failed with the following errors:");
+                    foreach (var err in errors)
                     {
-                        Console.WriteLine(err);
+                        writer.WriteLine(err);
                     }
                 }
             }
@@ -108,3 +89,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a web application automatically converts user‑uploaded PDFs to SVG and must ensure the resulting SVG complies with the official SVG XSD before storing it in a content management system.
+ * 2. When a CI/CD pipeline generates SVG assets from design files and needs to verify each SVG against the schema to catch malformed markup early in the build.
+ * 3. When a desktop utility processes batch image conversions from raster formats to SVG and validates each output to guarantee compatibility with downstream vector editors.
+ * 4. When an e‑learning platform creates scalable diagrams from SVG templates on the fly and validates them to prevent rendering errors in browsers.
+ * 5. When a SaaS service offers API‑driven SVG generation for marketing materials and uses schema validation to assure clients that the SVG files meet industry standards.
+ */

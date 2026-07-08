@@ -1,16 +1,18 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output/output.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -18,40 +20,34 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Default filter parameters
+            int size = 5;          // must be positive odd
+            double sigma = 4.0;    // must be positive
+
+            // Override with environment variables if present and valid
+            string sizeEnv = Environment.GetEnvironmentVariable("GAUSSIAN_SIZE");
+            string sigmaEnv = Environment.GetEnvironmentVariable("GAUSSIAN_SIGMA");
+
+            if (!string.IsNullOrEmpty(sizeEnv) && int.TryParse(sizeEnv, out int parsedSize) && parsedSize > 0 && parsedSize % 2 == 1)
+                size = parsedSize;
+
+            if (!string.IsNullOrEmpty(sigmaEnv) && double.TryParse(sigmaEnv, out double parsedSigma) && parsedSigma > 0)
+                sigma = parsedSigma;
 
             // Load the image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                // Cast to RasterImage to apply filters
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Retrieve configuration from environment variables
-                string sigmaEnv = Environment.GetEnvironmentVariable("GAUSSIAN_SIGMA");
-                string sizeEnv = Environment.GetEnvironmentVariable("GAUSSIAN_SIZE");
+                // Apply Gaussian blur filter with the configured size and sigma
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(size, sigma));
 
-                // Default values
-                int size = 5;
-                double sigma = 4.0;
-
-                // Parse environment variables if they are valid
-                if (int.TryParse(sizeEnv, out int parsedSize) && parsedSize > 0)
-                {
-                    size = parsedSize;
-                }
-
-                if (double.TryParse(sigmaEnv, out double parsedSigma) && parsedSigma > 0)
-                {
-                    sigma = parsedSigma;
-                }
-
-                // Apply Gaussian blur filter with configured parameters
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(size, sigma);
-                raster.Filter(raster.Bounds, filterOptions);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Save the processed image
-                raster.Save(outputPath);
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -63,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CI/CD pipeline needs to apply a configurable Gaussian blur to PNG assets before publishing, developers can set GAUSSIAN_SIGMA and GAUSSIAN_SIZE as environment variables to adjust the effect without changing code.
- * 2. When a desktop application processes user‑uploaded images and must allow administrators to change blur strength on the fly, using environment variables lets them modify size and sigma without recompiling.
- * 3. When a batch job runs nightly to anonymize faces in JPEG files by blurring them, the script can read GAUSSIAN_SIGMA and GAUSSIAN_SIZE from the server’s environment to meet different privacy regulations.
- * 4. When a cloud‑based microservice receives image URLs and needs to standardize visual quality across varied devices, developers can configure the Gaussian blur parameters via environment variables for each deployment region.
- * 5. When a test suite validates image‑processing algorithms and wants to experiment with different blur intensities, setting GAUSSIAN_SIGMA and GAUSSIAN_SIZE in the test environment provides quick, repeatable configuration.
+ * 1. When a CI/CD pipeline needs to apply a configurable Gaussian blur to PNG assets without changing source code, developers can set GAUSSIAN_SIZE and GAUSSIAN_SIGMA environment variables to control the filter at build time.
+ * 2. When a desktop application processes user‑uploaded images and must allow system administrators to define default blur strength for privacy masking, the code reads GAUSSIAN_SIZE and GAUSSIAN_SIGMA from the environment to apply the Aspose.Imaging GaussianBlurFilterOptions.
+ * 3. When a batch job runs on a Linux server to preprocess a large collection of PNG files for machine‑learning training, using environment variables lets the job dynamically adjust the blur radius and sigma without recompiling the C# program.
+ * 4. When an automated testing framework validates image‑processing quality across different devices, testers can inject different sigma and size values via GAUSSIAN_SIZE and GAUSSIAN_SIGMA to simulate varying blur levels.
+ * 5. When a microservice that serves transformed images needs to honor runtime configuration for blur intensity, reading the environment variables ensures the Aspose.Imaging RasterImage filter uses the correct size and sigma for each request.
  */

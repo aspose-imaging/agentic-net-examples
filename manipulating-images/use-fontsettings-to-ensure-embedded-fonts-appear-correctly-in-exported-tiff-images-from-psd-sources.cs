@@ -1,8 +1,6 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
 
@@ -10,11 +8,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "C:\\Images\\sample.psd";
-        string outputPath = "C:\\Images\\output.tif";
-
         try
         {
+            string inputPath = "Input/sample.psd";
+            string outputPath = "Output/sample.tif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,15 +21,18 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
-            {
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.Source = new FileCreateSource(outputPath, false);
-                tiffOptions.Photometric = TiffPhotometrics.Rgb;
-                tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                tiffOptions.Compression = TiffCompressions.Lzw;
+            Aspose.Imaging.FontSettings.SetFontsFolders(new string[] { "Fonts" }, false);
 
-                image.Save(outputPath, tiffOptions);
+            using (Aspose.Imaging.Image psdImage = Aspose.Imaging.Image.Load(inputPath))
+            {
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    Source = new FileCreateSource(outputPath, false),
+                    Photometric = TiffPhotometrics.Rgb,
+                    BitsPerSample = new ushort[] { 8, 8, 8 }
+                };
+
+                psdImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -43,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop needs to convert client‑provided Photoshop PSD files to high‑resolution TIFFs while preserving the exact appearance of text layers that use custom fonts, a developer can use Aspose.Imaging’s FontSettings with the provided C# code to embed those fonts during export.
- * 2. When an archival system must store layered design assets as lossless TIFFs for long‑term preservation and must guarantee that any embedded typefaces are rendered correctly on any workstation, the code can be integrated to apply FontSettings before saving.
- * 3. When a web‑based proofing tool generates preview TIFFs from uploaded PSDs and must display text exactly as designed even if the viewer’s machine lacks the original fonts, developers can employ this snippet with FontSettings to embed the fonts into the TIFF.
- * 4. When an automated batch‑processing pipeline converts thousands of PSD marketing banners to compressed LZW TIFFs for offline printing, using FontSettings ensures that all brand‑specific fonts remain intact without manual font installation.
- * 5. When a legal e‑discovery platform extracts visual evidence from PSD files and needs to produce TIFF images that faithfully reproduce annotated text for court submission, the code with FontSettings guarantees that embedded fonts are preserved in the exported files.
+ * 1. When a developer needs to convert Photoshop PSD files that contain text layers with custom fonts into high‑resolution TIFF images for print‑ready output, ensuring the embedded fonts are rendered correctly using Aspose.Imaging FontSettings.
+ * 2. When an automated workflow must generate archival TIFF copies of design assets from PSD sources while preserving exact font appearance for legal or compliance documentation.
+ * 3. When a web service processes user‑uploaded PSD files and returns TIFF previews that display the original typography, requiring explicit font folder configuration in C#.
+ * 4. When a desktop application batch‑converts a library of PSD graphics to TIFF for integration into a digital asset management system, and the fonts are stored in a non‑standard directory.
+ * 5. When a CI/CD pipeline validates that PSD files used in marketing campaigns render correctly as TIFFs on downstream systems by loading custom fonts via Aspose.Imaging FontSettings before saving.
  */

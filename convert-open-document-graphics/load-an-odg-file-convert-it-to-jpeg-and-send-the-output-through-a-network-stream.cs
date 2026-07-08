@@ -3,19 +3,19 @@ using System.IO;
 using System.Net.Sockets;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input file and network destination
+        string inputPath = "sample.odg";
+        string host = "127.0.0.1";
+        int port = 9000;
+
         try
         {
-            // Hardcoded paths and network endpoint
-            string inputPath = "input.odg";
-            string outputPath = "output.jpg";
-            string host = "localhost";
-            int port = 9000;
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,36 +23,31 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Load ODG image
-            using (Image odgImage = Image.Load(inputPath))
+            // Load the ODG image
+            using (Image image = Image.Load(inputPath))
             {
+                // Cast to OdgImage for ODG-specific handling
+                OdgImage odgImage = image as OdgImage;
+                if (odgImage == null)
+                {
+                    Console.Error.WriteLine("Failed to load ODG image.");
+                    return;
+                }
+
                 // Prepare JPEG save options
-                var jpegOptions = new JpegOptions();
+                JpegOptions jpegOptions = new JpegOptions();
 
                 // Save JPEG to a memory stream
-                using (var memoryStream = new MemoryStream())
+                using (MemoryStream jpegStream = new MemoryStream())
                 {
-                    odgImage.Save(memoryStream, jpegOptions);
-                    memoryStream.Position = 0;
+                    odgImage.Save(jpegStream, jpegOptions);
+                    jpegStream.Position = 0; // Reset stream position for reading
 
-                    // Send JPEG data over network
-                    using (var client = new TcpClient())
+                    // Send the JPEG data over a TCP network stream
+                    using (TcpClient client = new TcpClient(host, port))
+                    using (NetworkStream networkStream = client.GetStream())
                     {
-                        client.Connect(host, port);
-                        using (NetworkStream networkStream = client.GetStream())
-                        {
-                            memoryStream.CopyTo(networkStream);
-                        }
-                    }
-
-                    // Also write JPEG to file system
-                    using (var fileStream = File.OpenWrite(outputPath))
-                    {
-                        memoryStream.Position = 0;
-                        memoryStream.CopyTo(fileStream);
+                        jpegStream.CopyTo(networkStream);
                     }
                 }
             }
@@ -63,3 +58,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to generate a JPEG preview of an OpenDocument Graphics (ODG) file and stream it in real‑time to a client application over TCP.
+ * 2. When an enterprise document‑management system must convert uploaded ODG diagrams to JPEG and send the compressed image to a remote image‑processing service.
+ * 3. When a web‑based collaboration tool wants to display ODG drawings on browsers that only support JPEG by loading the ODG, converting it, and pushing the result through a network socket.
+ * 4. When a C# backend service processes batch ODG files, creates JPEG thumbnails, and streams each thumbnail to a load‑balancer for further distribution.
+ * 5. When a remote monitoring application receives live ODG chart updates, converts them to JPEG on the server, and transmits the image via a TCP stream to a dashboard client.
+ */

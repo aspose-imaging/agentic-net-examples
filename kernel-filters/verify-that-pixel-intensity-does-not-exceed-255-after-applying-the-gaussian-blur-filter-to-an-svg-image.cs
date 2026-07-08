@@ -1,63 +1,30 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.svg";
-            string outputPath = "output.png";
+            string outputPath = "output\\blurred.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image svgImage = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
-                RasterImage rasterImage = (RasterImage)image;
-
-                // Apply Gaussian blur filter (size 5, sigma 4.0) to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                // Verify that no pixel intensity exceeds 255
-                bool withinRange = true;
-                for (int y = 0; y < rasterImage.Height && withinRange; y++)
-                {
-                    for (int x = 0; x < rasterImage.Width; x++)
-                    {
-                        var color = rasterImage.GetPixel(x, y);
-                        if (color.R > 255 || color.G > 255 || color.B > 255)
-                        {
-                            withinRange = false;
-                            break;
-                        }
-                    }
-                }
-
-                if (withinRange)
-                {
-                    Console.WriteLine("All pixel intensities are within the 0-255 range.");
-                }
-                else
-                {
-                    Console.WriteLine("Warning: Some pixel intensities exceed 255.");
-                }
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                var rasterOptions = new SvgRasterizationOptions { PageSize = svgImage.Size };
+                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
+                svgImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -69,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When converting an SVG logo to a PNG thumbnail with a Gaussian blur, a developer can use this code to ensure the blurred pixels stay within the 0‑255 color range, preventing overflow artifacts in web displays.
- * 2. When preprocessing vector graphics for a mobile app’s background images, the snippet verifies that the Gaussian blur filter does not produce color values above 255, which could cause rendering glitches on low‑end devices.
- * 3. When generating print‑ready PNGs from SVG illustrations with a soft‑focus effect, the code checks pixel intensity limits to avoid color clipping that would degrade print quality.
- * 4. When integrating an automated image‑processing pipeline that applies Gaussian blur to SVG icons before uploading to a CDN, this routine confirms all RGB channels remain within the valid byte range, ensuring consistent visual output across browsers.
- * 5. When performing batch conversion of SVG diagrams to blurred PNGs for a data‑visualization dashboard, the example validates that no pixel exceeds 255, safeguarding against corrupted image files that could break the dashboard UI.
+ * 1. When a web application needs to generate high‑resolution PNG thumbnails from user‑uploaded SVG icons for display on browsers that do not support vector graphics.
+ * 2. When an e‑commerce platform must convert product illustration SVG files to PNG format before embedding them in PDF invoices generated with .NET.
+ * 3. When a desktop publishing tool requires rasterizing SVG logos to PNG so they can be composited with raster images and later processed with filters such as Gaussian blur without exceeding the 255 pixel‑intensity limit.
+ * 4. When an automated build pipeline validates that all SVG assets are correctly rasterized to PNG and saved in the designated output folder, ensuring the file system structure exists beforehand.
+ * 5. When a reporting service reads SVG charts, rasterizes them to PNG, and stores the result in a network share for downstream analytics that expect 8‑bit per channel images.
  */

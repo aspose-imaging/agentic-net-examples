@@ -7,13 +7,13 @@ using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"c:\temp\input.png";
-            string outputPath = @"c:\temp\output.tif";
+            // Hard‑coded input and output paths
+            string inputPath = @"c:\temp\source.png";
+            string outputPath = @"c:\temp\multiframe.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,38 +22,34 @@ class Program
                 return;
             }
 
-            // Load the input image as a raster image
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Options for the first frame (standard RGB photometric)
+            TiffOptions rgbOptions = new TiffOptions(TiffExpectedFormat.Default);
+            rgbOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+            rgbOptions.Compression = TiffCompressions.Lzw;
+            rgbOptions.Photometric = TiffPhotometrics.Rgb;
+            rgbOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+
+            // Create first frame from the source image
+            TiffFrame frame1 = new TiffFrame(inputPath, rgbOptions);
+
+            // Options for the second frame (custom photometric: MinIsBlack)
+            TiffOptions customOptions = new TiffOptions(TiffExpectedFormat.Default);
+            customOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+            customOptions.Compression = TiffCompressions.Lzw;
+            customOptions.Photometric = TiffPhotometrics.MinIsBlack; // custom interpretation
+            customOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+
+            // Create second frame from the same source image but with custom photometric
+            TiffFrame frame2 = new TiffFrame(inputPath, customOptions);
+
+            // Assemble a multi‑frame TIFF image
+            using (TiffImage tiffImage = new TiffImage(new TiffFrame[] { frame1, frame2 }))
             {
-                // Options for the TIFF image (first frame)
-                TiffOptions imageOptions = new TiffOptions(TiffExpectedFormat.Default);
-                imageOptions.Compression = TiffCompressions.Lzw;
-                imageOptions.Photometric = TiffPhotometrics.Rgb;
-                imageOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                imageOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-
-                // Create a multi‑frame TIFF image with a default frame matching the raster size
-                using (TiffImage tiffImage = (TiffImage)Image.Create(imageOptions, raster.Width, raster.Height))
-                {
-                    // Options for the custom frame with a different photometric interpretation
-                    TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    frameOptions.Compression = TiffCompressions.Lzw;
-                    frameOptions.Photometric = TiffPhotometrics.MinIsBlack; // Custom photometric
-                    frameOptions.BitsPerSample = new ushort[] { 1 }; // 1‑bit per pixel
-                    frameOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-
-                    // Create a new TIFF frame from the raster image using the custom options
-                    TiffFrame customFrame = new TiffFrame(raster, frameOptions);
-
-                    // Add the custom frame to the TIFF image
-                    tiffImage.AddFrame(customFrame);
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the multi‑frame TIFF image
-                    tiffImage.Save(outputPath);
-                }
+                // Save the multi‑frame image using LZW compression (already set in options)
+                tiffImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -65,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive scanned documents as a multi‑frame TIFF with lossless LZW compression while storing a binary (black‑and‑white) thumbnail using the MinIsBlack photometric interpretation.
- * 2. When an imaging application must combine a full‑color PNG preview and a 1‑bit mask layer into a single TIFF file for efficient storage and easy retrieval in medical imaging systems.
- * 3. When a GIS tool requires saving satellite imagery alongside a low‑resolution elevation mask in the same TIFF container, using different photometric settings for each frame.
- * 4. When a digital archiving workflow has to generate a multi‑page TIFF where the first page retains the original RGB colors and subsequent pages are stored as monochrome bitmaps to reduce file size.
- * 5. When a document management system needs to create a searchable TIFF bundle that includes a color cover page and a black‑text page, applying LZW compression to keep the file size small while preserving image fidelity.
+ * 1. When a developer needs to generate a multi‑frame TIFF file that combines a standard RGB image with a version using a custom photometric interpretation (e.g., MinIsBlack) for compatibility with legacy imaging software, they can use this C# Aspose.Imaging code with LZW compression.
+ * 2. When building a document scanning solution that stores each scanned page as a separate TIFF frame while applying different photometric settings for color and black‑and‑white pages, this code lets the developer create the multi‑frame TIFF and reduce file size with LZW.
+ * 3. When creating satellite or aerial imagery archives where one frame preserves the original RGB data and another frame provides a grayscale representation using a custom photometric interpretation, the code enables the developer to package both frames into a single compressed TIFF.
+ * 4. When developing a medical imaging application that must embed both a full‑color diagnostic image and a contrast‑enhanced version with a MinIsBlack photometric tag for older DICOM viewers, the developer can use this example to assemble the frames and apply lossless LZW compression.
+ * 5. When exporting CAD or engineering drawings to a multi‑page TIFF where the first page uses standard RGB and subsequent pages use a custom photometric interpretation for line art, this C# snippet shows how to create the frames and save the file efficiently with LZW compression.
  */

@@ -2,10 +2,10 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -13,69 +13,71 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.svg";
             string outputPath = "output.apng";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image vectorImage = Image.Load(inputPath))
+            // Load the SVG vector image
+            using (Image svgImage = Image.Load(inputPath))
             {
-                int width = vectorImage.Width;
-                int height = vectorImage.Height;
+                int width = svgImage.Width;
+                int height = svgImage.Height;
 
-                const int totalFrames = 10;
-                const int frameDurationMs = 100;
-
+                // Prepare APNG creation options
                 ApngOptions apngOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = (uint)frameDurationMs,
-                    ColorType = PngColorType.TruecolorWithAlpha
+                    DefaultFrameTime = 100 // 100 ms per frame
                 };
 
+                // Create the APNG image bound to the output file
                 using (ApngImage apng = (ApngImage)Image.Create(apngOptions, width, height))
                 {
+                    // Remove the default empty frame
                     apng.RemoveAllFrames();
 
-                    for (int i = 0; i < totalFrames; i++)
+                    int frameCount = 10;
+                    for (int i = 0; i < frameCount; i++)
                     {
-                        // Create a temporary raster canvas
-                        string tempFile = Path.GetTempFileName();
-                        PngOptions pngOpts = new PngOptions
+                        // Compute a gradient color (from red to blue)
+                        int red = 255 - (i * 255 / (frameCount - 1));
+                        int blue = i * 255 / (frameCount - 1);
+                        Aspose.Imaging.Color gradientColor = Aspose.Imaging.Color.FromArgb(255, red, 0, blue);
+
+                        // Set up rasterization options with the gradient background
+                        var rasterOptions = new SvgRasterizationOptions
                         {
-                            Source = new FileCreateSource(tempFile, false)
+                            PageWidth = width,
+                            PageHeight = height,
+                            BackgroundColor = gradientColor
                         };
 
-                        using (RasterImage canvas = (RasterImage)Image.Create(pngOpts, width, height))
+                        // Render SVG to a raster image in memory
+                        using (MemoryStream ms = new MemoryStream())
                         {
-                            // Fill background with a color that changes each frame to simulate gradient animation
-                            byte r = (byte)(i * 25);
-                            byte g = (byte)(255 - i * 25);
-                            byte b = (byte)(i * 15);
-                            Color frameColor = Color.FromArgb(255, r, g, b);
-                            SolidBrush brush = new SolidBrush(frameColor);
+                            var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
+                            svgImage.Save(ms, pngOptions);
+                            ms.Position = 0;
 
-                            Graphics graphics = new Graphics(canvas);
-                            graphics.Clear(Color.Transparent);
-                            graphics.FillRectangle(brush, new Rectangle(0, 0, width, height));
-
-                            // Draw the SVG onto the canvas
-                            graphics.DrawImage(vectorImage, new Point(0, 0));
-
-                            // Add the raster frame to the APNG
-                            apng.AddFrame(canvas);
+                            using (RasterImage frame = (RasterImage)Image.Load(ms))
+                            {
+                                // Add the rendered frame to the APNG
+                                apng.AddFrame(frame);
+                            }
                         }
-
-                        // Delete temporary file
-                        try { File.Delete(Path.GetTempFileName()); } catch { }
                     }
 
+                    // Save the APNG file (output is already bound via FileCreateSource)
                     apng.Save();
                 }
             }
@@ -86,3 +88,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer wants to create a lightweight animated logo for a website by transitioning the SVG’s fill color from red to blue and delivering it as an APNG to ensure broad browser compatibility.
+ * 2. When an e‑learning platform needs to generate dynamic illustration sequences where a vector diagram’s color gradient changes over time, using C# and Aspose.Imaging to convert the SVG frames into an animated PNG.
+ * 3. When a mobile app requires a high‑resolution, scalable icon that animates its background gradient without relying on JavaScript, the code can load the SVG, animate the fill, and export an APNG for offline use.
+ * 4. When a marketing automation tool must produce personalized product badges that cycle through brand colors, developers can programmatically adjust the SVG fill gradient and save the result as an APNG for email campaigns.
+ * 5. When a data‑visualization dashboard wants to illustrate trend progression by smoothly shifting a vector chart’s color scheme, the C# snippet can animate the SVG fill and output an APNG for embedding in reports.
+ */

@@ -11,25 +11,26 @@ class Program
         try
         {
             // Hardcoded list of OTG files to convert
-            string[] inputFiles = new string[]
+            string[] inputFiles = new[]
             {
-                @"C:\OTGFiles\Document1.otg",
-                @"C:\OTGFiles\Document2.otg",
-                @"C:\OTGFiles\Document3.otg"
+                @"C:\Images\Sample1.otg",
+                @"C:\Images\Sample2.otg",
+                @"C:\Images\Sample3.otg"
+                // Add more file paths as needed
             };
 
             // Process each file in parallel
             Parallel.ForEach(inputFiles, inputPath =>
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Define output PDF path (same folder, .pdf extension)
-                string outputPath = inputPath + ".pdf";
+                // Determine the output PDF path
+                string outputPath = Path.ChangeExtension(inputPath, ".pdf");
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -60,3 +61,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to batch‑convert a large collection of OTG CAD drawings into searchable PDF documents for a document‑management system, they can use this parallel conversion code to speed up the process.
+ * 2. When an engineering web portal must generate PDF previews of user‑uploaded OTG files on the fly, the code enables concurrent rendering so multiple requests are handled efficiently.
+ * 3. When a company wants to archive legacy OTG schematics as PDF files for long‑term storage and compliance, the parallel conversion reduces the time required to process thousands of files.
+ * 4. When a desktop application provides an “Export All” feature that turns a folder of OTG images into PDF reports for printing, the Task Parallel Library ensures the export completes quickly on multi‑core machines.
+ * 5. When an automated build pipeline needs to validate that OTG assets can be rendered to PDF without errors, the code can run the conversions in parallel to keep the CI job fast.
+ */

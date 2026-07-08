@@ -2,77 +2,49 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
+using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.cdr";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = @"C:\Images\input.cdr";
-            string outputPath = @"C:\Images\output.png";
-            string tempPath = Path.Combine(Path.GetTempPath(), "temp_raster.png");
-
-            if (!File.Exists(inputPath))
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Define the rectangular area for selective background removal
+                var selectionRect = new Rectangle(100, 100, 300, 200);
+                cdrImage.Crop(selectionRect);
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
+                // Remove background from the cropped area
+                cdrImage.RemoveBackground();
 
-            using (var vectorImage = Image.Load(inputPath) as VectorImage)
-            {
-                if (vectorImage == null)
-                {
-                    Console.Error.WriteLine("Failed to load vector image.");
-                    return;
-                }
-
-                vectorImage.RemoveBackground(new RemoveBackgroundSettings());
-
-                var rasterOptions = new PngOptions
+                // Prepare PNG options with transparent background
+                var pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(tempPath, false)
-                };
-                vectorImage.Save(tempPath, rasterOptions);
-            }
-
-            using (RasterImage raster = (RasterImage)Image.Load(tempPath))
-            {
-                var maskingOptions = new AutoMaskingGraphCutOptions
-                {
-                    Method = SegmentationMethod.GraphCut,
-                    Decompose = false,
-                    BackgroundReplacementColor = Color.Transparent,
-                    ExportOptions = new PngOptions
+                    VectorRasterizationOptions = new CdrRasterizationOptions
                     {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new StreamSource(new MemoryStream())
+                        BackgroundColor = Color.Transparent,
+                        PageSize = cdrImage.Size
                     }
                 };
 
-                var masking = new ImageMasking(raster);
-                using (MaskingResult result = masking.Decompose(maskingOptions))
-                using (RasterImage foreground = (RasterImage)result[1].GetImage())
-                {
-                    var finalOptions = new PngOptions
-                    {
-                        ColorType = PngColorType.TruecolorWithAlpha
-                    };
-                    foreground.Save(outputPath, finalOptions);
-                }
+                // Save the rasterized image
+                cdrImage.Save(outputPath, pngOptions);
             }
-
-            if (File.Exists(tempPath))
-                File.Delete(tempPath);
         }
         catch (Exception ex)
         {
@@ -80,3 +52,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a developer needs to extract a specific portion of a CorelDRAW (CDR) illustration, remove its background, and save it as a transparent PNG for web publishing.
+ * 2. When an e‑commerce system must generate product thumbnails by cropping a defined rectangle from a CDR file, stripping the background, and exporting the result as a PNG with an alpha channel.
+ * 3. When a marketing automation tool has to prepare logo assets by selecting a rectangular area in a CDR vector image, making the background transparent, and rasterizing it to a PNG for email campaigns.
+ * 4. When a desktop publishing workflow requires isolating a diagram region inside a CDR file, removing its background, and exporting the cropped area as a high‑quality PNG for inclusion in PDF reports.
+ * 5. When a mobile app needs to dynamically render a portion of a CDR vector graphic with a transparent background, using C# cropping and background removal before saving the rasterized image as PNG.
+ */

@@ -8,51 +8,47 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output.png";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the vector image (SVG)
+            // Load the vector image
             using (Image vectorImage = Image.Load(inputPath))
             {
-                int width = vectorImage.Width;
-                int height = vectorImage.Height;
-
-                // Create a PNG canvas
-                PngOptions pngOptions = new PngOptions();
-                using (Image pngImage = Image.Create(pngOptions, width, height))
+                // Rasterize the vector image to a PNG in memory
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    // Draw the vector image onto the PNG canvas
-                    Graphics graphics = new Graphics(pngImage);
-                    graphics.DrawImage(vectorImage, new Point(0, 0));
-
-                    // Define overlay color (RGBA)
-                    int overlayR = 255;
-                    int overlayG = 0;
-                    int overlayB = 0;
-                    int overlayA = 128; // 0-255
-
-                    Color overlayColor = Color.FromArgb(overlayA, overlayR, overlayG, overlayB);
-
-                    // Apply color overlay
-                    using (SolidBrush overlayBrush = new SolidBrush())
+                    PngOptions rasterOptions = new PngOptions
                     {
-                        overlayBrush.Color = overlayColor;
-                        overlayBrush.Opacity = (int)(overlayA * 100.0 / 255.0); // convert to percentage
-                        graphics.FillRectangle(overlayBrush, new Rectangle(0, 0, width, height));
-                    }
+                        VectorRasterizationOptions = new SvgRasterizationOptions
+                        {
+                            PageSize = vectorImage.Size,
+                            BackgroundColor = Aspose.Imaging.Color.White
+                        }
+                    };
+                    vectorImage.Save(ms, rasterOptions);
+                    ms.Position = 0;
 
-                    // Save the result as PNG
-                    pngImage.Save(outputPath, pngOptions);
+                    // Load the rasterized image
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        // Apply color overlay (e.g., semi‑transparent red)
+                        Graphics graphics = new Graphics(raster);
+                        SolidBrush overlayBrush = new SolidBrush(Aspose.Imaging.Color.FromArgb(128, 255, 0, 0));
+                        graphics.FillRectangle(overlayBrush, raster.Bounds);
+
+                        // Save the final PNG
+                        raster.Save(outputPath, new PngOptions());
+                    }
                 }
             }
         }
@@ -65,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a branded thumbnail by overlaying a semi‑transparent corporate color onto an SVG logo and saving it as a PNG for web use.
- * 2. When an e‑commerce platform wants to apply a promotional red tint to product vector illustrations before exporting them as PNGs for email campaigns.
- * 3. When a mobile app creates custom map markers by loading SVG icons, adding a user‑selected RGBA highlight, and rendering them as PNG assets.
- * 4. When a reporting tool converts SVG charts into PNG images with a colored overlay to indicate status levels such as warning or error.
- * 5. When a UI designer automates the production of theme‑aware icons by applying a theme color overlay to SVG files and exporting the results as PNG files for Windows applications.
+ * 1. When a developer needs to convert an SVG icon to a PNG thumbnail and apply a semi‑transparent red overlay to match a brand color scheme.
+ * 2. When a web application must generate PNG previews of vector diagrams with a uniform color tint for consistent UI theming.
+ * 3. When an e‑commerce platform wants to rasterize product vector illustrations and add a translucent overlay to indicate a sale or discount status.
+ * 4. When a reporting tool has to embed vector charts as PNG images with a colored overlay to highlight a specific data range.
+ * 5. When a mobile app prepares PNG assets from SVG assets and applies a color filter to create a night‑mode version of the graphics.
  */

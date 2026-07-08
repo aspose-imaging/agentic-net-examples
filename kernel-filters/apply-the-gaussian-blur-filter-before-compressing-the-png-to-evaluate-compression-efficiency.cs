@@ -13,7 +13,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "C:\\temp\\sample.png";
-            string outputPath = "C:\\temp\\sample_blur_compressed.png";
+            string outputPath = "C:\\temp\\sample_blurred_compressed.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -28,21 +28,23 @@ class Program
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to use filtering
+                // Cast to RasterImage to apply filters
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur (size = 5, sigma = 4.0)
+                // Apply Gaussian blur (size 5, sigma 4.0) to the whole image
                 rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
                 // Configure PNG compression options
                 PngOptions pngOptions = new PngOptions
                 {
-                    CompressionLevel = 9,                         // Max compression
-                    FilterType = PngFilterType.Adaptive,          // Adaptive filter for better compression
-                    Progressive = true                            // Enable progressive loading
+                    CompressionLevel = 9,                                   // Max compression
+                    FilterType = PngFilterType.Adaptive,                     // Best filter for compression
+                    Progressive = true,                                      // Enable progressive loading
+                    ColorType = PngColorType.TruecolorWithAlpha,             // Preserve alpha channel
+                    BitDepth = 8                                             // Standard bit depth
                 };
 
-                // Save the processed image with compression
+                // Save the processed image with the specified options
                 rasterImage.Save(outputPath, pngOptions);
             }
         }
@@ -55,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce the file size of PNG assets for a web application while preserving visual quality by applying a Gaussian blur before compression.
- * 2. When preparing product catalog images for an e‑commerce site and wants to smooth details to improve PNG compression efficiency using Aspose.Imaging in C#.
- * 3. When generating thumbnails for a mobile app and wants to pre‑process the PNG with a Gaussian blur to achieve higher compression levels without noticeable loss.
- * 4. When archiving scanned documents as PNG files and applying a blur filter to minimize noise before saving with maximum compression and progressive loading.
- * 5. When optimizing PNG graphics for email newsletters and need to programmatically apply a Gaussian blur filter and configure PNGOptions for maximum compression in a .NET environment.
+ * 1. When a developer needs to evaluate how applying a Gaussian blur filter to a PNG image influences the file size after saving with maximum compression (level 9) using Aspose.Imaging in C#.
+ * 2. When creating web‑ready thumbnails that require a smooth blur effect before being saved as progressive, true‑color PNGs with adaptive filtering for optimal bandwidth usage.
+ * 3. When testing the impact of image preprocessing on lossless PNG compression efficiency for a mobile application that must minimize data transfer.
+ * 4. When preparing confidential medical or satellite images for secure transmission by obscuring details with a Gaussian blur while preserving alpha transparency in a true‑color PNG.
+ * 5. When benchmarking Aspose.Imaging’s filter‑and‑save pipeline by applying a 5‑pixel Gaussian blur (sigma 4.0) and measuring the resulting PNG compression ratio in a C# automation script.
  */

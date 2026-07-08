@@ -10,40 +10,40 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.tif";
-        string outputPath = @"C:\temp\output.gif";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = @"c:\temp\input.tif";
+        string outputPath = @"c:\temp\output.gif";
 
         try
         {
-            // Load the multi‑page TIFF image
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the multi‑frame TIFF image
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
                 // Retrieve all frames from the TIFF
-                TiffFrame[] tiffFrames = tiffImage.Frames;
+                TiffFrame[] frames = tiffImage.Frames;
 
-                if (tiffFrames.Length == 0)
+                if (frames.Length == 0)
                 {
                     Console.Error.WriteLine("No frames found in the TIFF image.");
                     return;
                 }
 
-                // Create the GIF image using the first frame as the initial block
-                using (GifImage gifImage = new GifImage(new GifFrameBlock(tiffFrames[0])))
+                // Create the GIF image using the first frame
+                using (GifImage gifImage = new GifImage(new GifFrameBlock(frames[0] as RasterImage)))
                 {
-                    // Add remaining frames to the GIF
-                    for (int i = 1; i < tiffFrames.Length; i++)
+                    // Add remaining frames as pages
+                    for (int i = 1; i < frames.Length; i++)
                     {
-                        gifImage.AddPage(tiffFrames[i]);
+                        gifImage.AddPage(frames[i] as RasterImage);
                     }
 
                     // Save the animated GIF
@@ -60,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a multi‑page TIFF scan of a document into an animated GIF for web preview.
- * 2. When a developer wants to generate a lightweight GIF slideshow from TIFF frames captured by a medical imaging device.
- * 3. When a developer must create an animated GIF banner from a series of TIFF images produced by a satellite imaging pipeline.
- * 4. When a developer needs to programmatically assemble a GIF animation from TIFF frames extracted from a PDF for email newsletters.
- * 5. When a developer is building a C# utility that batch‑processes TIFF files and outputs animated GIFs for mobile apps.
+ * 1. When a developer needs to convert a multi‑page scanned TIFF document into an animated GIF for quick web preview using Aspose.Imaging for .NET.
+ * 2. When a developer wants to create a looping weather animation by turning sequential satellite‑image TIFF frames into a GIF with C# AddPage calls.
+ * 3. When a developer builds an e‑commerce email campaign that displays a product‑photo slideshow by assembling TIFF frames into an animated GIF.
+ * 4. When a developer designs a medical imaging viewer that summarizes a series of TIFF scans as an animated GIF for rapid patient assessment.
+ * 5. When a developer automates the generation of animated GIFs from multi‑page TIFF reports to embed in PowerPoint presentations.
  */

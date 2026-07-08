@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.otg";
-            string outputPath = "output.png";
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\sample_cropped.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,31 +22,26 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to OtgImage to access OTG-specific methods
-                OtgImage otgImage = image as OtgImage;
-                if (otgImage == null)
-                {
-                    Console.Error.WriteLine("Loaded image is not an OTG image.");
-                    return;
-                }
+                // Cast to OtgImage to access cropping functionality
+                OtgImage otgImage = (OtgImage)image;
 
-                // Define the cropping rectangle (example: central half of the image)
-                var cropRect = new Rectangle(
-                    otgImage.Width / 4,
-                    otgImage.Height / 4,
-                    otgImage.Width / 2,
-                    otgImage.Height / 2);
+                // Define the crop rectangle (example: top-left corner 100x100, size 200x200)
+                int cropX = 100;
+                int cropY = 100;
+                int cropWidth = 200;
+                int cropHeight = 200;
+                Rectangle cropArea = new Rectangle(cropX, cropY, cropWidth, cropHeight);
 
-                // Crop the image
-                otgImage.Crop(cropRect);
+                // Perform cropping
+                otgImage.Crop(cropArea);
 
                 // Save the cropped image as PNG
-                var pngOptions = new PngOptions();
+                PngOptions pngOptions = new PngOptions();
                 otgImage.Save(outputPath, pngOptions);
             }
         }
@@ -56,3 +51,12 @@ class Program
         }
     }
 }
+
+/*
+ * Real-World Use Cases:
+ * 1. When a C# application must extract a specific portion of an OpenDocument Graphic (OTG) file to create a thumbnail PNG for a web gallery.
+ * 2. When a document management system needs to programmatically crop a logo from an OTG diagram and store it as a high‑resolution PNG for branding assets.
+ * 3. When a reporting tool generates charts in OTG format and requires cropping the chart area before embedding the result as a PNG image in PDF reports.
+ * 4. When a batch‑processing script has to convert selected regions of multiple OTG files into PNGs for use in mobile app UI components.
+ * 5. When an automated workflow must validate the dimensions of a cropped section of an OTG image and save it as a PNG to be consumed by downstream image‑analysis services.
+ */

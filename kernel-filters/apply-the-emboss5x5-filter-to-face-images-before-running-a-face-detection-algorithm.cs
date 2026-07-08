@@ -1,43 +1,41 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "Input/face.jpg";
+        string outputPath = "Output/face_filtered.jpg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\face_input.png";
-            string outputPath = @"C:\Images\face_embossed.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Apply the 5x5 emboss convolution filter
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
+                // Apply Emboss5x5 convolution filter
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5));
 
-                // Save the processed image
-                raster.Save(outputPath);
+                // Save the filtered image
+                image.Save(outputPath);
             }
 
-            // TODO: Run face detection on the embossed image
-            // FaceDetectionAlgorithm.Detect(outputPath);
+            // Placeholder for face detection algorithm
+            // e.g., FaceDetectionEngine.Detect(outputPath);
         }
         catch (Exception ex)
         {
@@ -48,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to enhance the texture of PNG face photos before feeding them to a face detection algorithm to improve edge contrast.
- * 2. When building a security camera system that preprocesses JPEG snapshots with an Emboss5x5 convolution in C# to highlight facial features for more reliable detection.
- * 3. When creating a mobile app that automatically applies an emboss filter to user‑uploaded selfie images before running a .NET face recognition routine.
- * 4. When testing a machine‑learning face detection model and needs to compare detection accuracy on original versus embossed BMP images using Aspose.Imaging’s ConvolutionFilterOptions.
- * 5. When integrating a batch processing pipeline that loads images from a folder, applies the Emboss5x5 filter via raster.Filter, saves the results, and then passes the embossed files to a downstream face detection service.
+ * 1. When building a security camera system that stores JPEG face snapshots and wants to enhance edge contrast with an Emboss5x5 filter before feeding the images to a C# face detection engine.
+ * 2. When developing a mobile app that receives user‑uploaded PNG selfies, applies Aspose.Imaging’s ConvolutionFilter.Emboss5x5 to highlight facial features, and then runs a .NET face recognition algorithm.
+ * 3. When creating a batch processing pipeline that reads BMP portrait files, uses RasterImage.Filter with the Emboss5x5 convolution to improve detection accuracy of a third‑party face detection library.
+ * 4. When implementing a forensic analysis tool that pre‑processes TIFF portrait scans by embossing them in C# to reduce false positives in subsequent face detection.
+ * 5. When integrating Aspose.Imaging into a cloud‑based C# service that automatically enhances uploaded face images (JPEG/PNG) with an Emboss5x5 filter before invoking a machine‑learning face detection API.
  */

@@ -21,19 +21,17 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load image, apply sharpen filter, and save
+            // Load image and apply sharpen filter (convolution with rounding & clamping handled internally)
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
-
-                // Apply Sharpen filter with kernel size 5 and sigma 4.0
                 raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
 
-                // Save as PNG
-                var saveOptions = new PngOptions();
-                raster.Save(outputPath, saveOptions);
+                // Save result as PNG
+                PngOptions options = new PngOptions();
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -45,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# developer needs to automatically sharpen PNG photos in a batch job, loading the image with Aspose.Imaging, applying a 5×5 sharpen filter with sigma 4.0, rounding the convolution results, clamping pixel values to 0‑255, and saving the result while handling missing files and output directories.
- * 2. When an application processes user‑uploaded images and must improve edge definition before storing them as PNG, using RasterImage.Filter to perform convolution, correctly rounding pixel values, and then clamping them to the valid byte range.
- * 3. When a Windows service generates thumbnails for a gallery and requires a consistent sharpening effect, the code demonstrates how to load any supported raster format, apply a convolution‑based sharpen filter, round the pixel values, and save the enhanced image with PngOptions.
- * 4. When a developer builds a command‑line tool that validates image paths, creates necessary folders, and applies a sharpen filter to ensure the final PNG complies with visual quality standards for web publishing, including proper rounding and clamping of pixel data.
- * 5. When integrating Aspose.Imaging into a .NET Core microservice that receives raw image streams, the example shows how to perform convolution‑based sharpening, correctly round the resulting pixel values, clamp them to 0‑255, and return the processed PNG output.
+ * 1. When a web application needs to automatically enhance user‑uploaded PNG photos before displaying them in a gallery, a developer can use this code to load the image, apply a sharpen filter with proper rounding and clamping, and save the improved version.
+ * 2. When a desktop utility processes batches of scanned documents saved as PNG files and must improve text readability without introducing pixel overflow, this snippet provides a reliable way to sharpen each page while keeping pixel values within 0‑255.
+ * 3. When an e‑commerce platform generates product thumbnails on the fly and wants to make the images appear crisper, the code demonstrates how to load the original PNG, apply a convolution‑based sharpen filter, and store the result for fast delivery.
+ * 4. When a scientific imaging tool needs to preprocess PNG microscopy images by enhancing edge details while ensuring the pixel intensity stays valid, the example shows the correct C# approach using Aspose.Imaging’s FilterOptions.
+ * 5. When a mobile backend service receives PNG screenshots and must automatically improve visual quality before caching them, this program illustrates how to perform rounding‑aware sharpening and safely write the output PNG.
  */

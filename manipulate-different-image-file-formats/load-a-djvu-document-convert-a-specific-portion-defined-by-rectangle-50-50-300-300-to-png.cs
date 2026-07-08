@@ -1,21 +1,20 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "sample.djvu";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.djvu";
-            string outputPath = "Output/output.png";
-
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,16 +26,29 @@ class Program
 
             // Load DjVu document from file stream
             using (Stream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
             {
-                // Access the first page (index 0)
-                using (Image page = djvuImage.Pages[0])
-                {
-                    // Define the rectangle area to extract (x, y, width, height)
-                    Rectangle rect = new Rectangle(50, 50, 300, 300);
+                // Get the first page (index 0)
+                var djvuPage = djvuImage.Pages[0];
 
-                    // Save the specified portion as PNG
-                    page.Save(outputPath, new PngOptions(), rect);
+                // Save the page to a memory stream as PNG
+                using (MemoryStream pngStream = new MemoryStream())
+                {
+                    djvuPage.Save(pngStream, new PngOptions());
+                    pngStream.Position = 0;
+
+                    // Load the PNG image from the memory stream
+                    using (Image pngImage = Image.Load(pngStream))
+                    {
+                        // Define the rectangle to extract (x, y, width, height)
+                        var exportRect = new Rectangle(50, 50, 300, 300);
+
+                        // Crop the image to the specified rectangle
+                        pngImage.Crop(exportRect);
+
+                        // Save the cropped image to the output path
+                        pngImage.Save(outputPath, new PngOptions());
+                    }
                 }
             }
         }
@@ -49,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract a thumbnail of a specific region from a multi‑page DjVu document for a web preview, they can load the DjVu file, crop the rectangle (50,50,300,300) and save it as a PNG.
- * 2. When an application must convert a selected area of a scanned DjVu blueprint into a high‑resolution PNG for inclusion in a PDF report, this C# code provides the required image processing steps.
- * 3. When a digital archive wants to generate preview images of annotated sections within DjVu manuscripts, the code can load the first page, extract the defined rectangle, and output a PNG thumbnail.
- * 4. When a document‑management system needs to create a PNG snapshot of a particular region of a DjVu invoice for OCR processing, the snippet demonstrates how to crop and save that area using Aspose.Imaging for .NET.
- * 5. When a developer is building a UI that lets users select a region of a DjVu map and export it as a PNG file, this example shows how to programmatically load the DjVu page, apply the rectangle coordinates, and save the cropped image.
+ * 1. When a developer needs to extract a thumbnail of a specific region from a multi‑page DjVu document for display in a web gallery, they can load the DjVu page, crop a 300×300 rectangle at (50,50) and save it as a PNG.
+ * 2. When building a document‑preview feature that shows only the relevant portion of a scanned blueprint stored as DjVu, the code can convert the selected rectangle to a high‑quality PNG for fast rendering in a C# application.
+ * 3. When generating printable stickers from a large DjVu map, a developer can isolate the area of interest with a rectangle and export it as a PNG image to preserve transparency and resolution.
+ * 4. When creating a machine‑learning dataset that requires small image patches from DjVu source files, this snippet loads the DjVu page, crops the defined region, and saves it as a PNG for model training.
+ * 5. When developing a digital archiving tool that needs to preview a specific panel of a DjVu comic book page, the code extracts the panel using the rectangle coordinates and converts it to a PNG for UI display.
  */

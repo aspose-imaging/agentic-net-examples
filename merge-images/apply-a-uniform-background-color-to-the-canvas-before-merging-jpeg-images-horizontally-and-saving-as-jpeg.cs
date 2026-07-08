@@ -14,10 +14,10 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
+            string[] inputPaths = new string[] { "input1.jpg", "input2.jpg", "input3.jpg" };
             string outputPath = "output.jpg";
 
-            // Validate each input file
+            // Validate each input file exists
             foreach (var path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -40,26 +40,20 @@ class Program
                 }
             }
 
-            // Determine canvas dimensions for horizontal merge
+            // Calculate canvas dimensions for horizontal merge
             int newWidth = sizes.Sum(s => s.Width);
             int newHeight = sizes.Max(s => s.Height);
 
-            // Create JPEG options with bound output source
-            var src = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions
+            // Create JPEG canvas with options
+            Source src = new FileCreateSource(outputPath, false);
+            JpegOptions options = new JpegOptions { Source = src, Quality = 100 };
+            using (JpegImage canvas = new JpegImage(options, newWidth, newHeight))
             {
-                Source = src,
-                Quality = 100
-            };
+                // Fill canvas with uniform background color
+                Graphics graphics = new Graphics(canvas);
+                graphics.Clear(Color.White);
 
-            // Create the canvas image
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
-            {
-                // Apply uniform background color
-                canvas.HasBackgroundColor = true;
-                canvas.BackgroundColor = Color.White;
-
-                // Merge each image side by side
+                // Merge images side by side
                 int offsetX = 0;
                 foreach (var path in inputPaths)
                 {
@@ -71,7 +65,7 @@ class Program
                     }
                 }
 
-                // Save the bound canvas (output path already bound via options)
+                // Save the bound canvas (source already bound to outputPath)
                 canvas.Save();
             }
         }
@@ -84,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a product catalog thumbnail that combines several product photos side‑by‑side and needs a consistent white background to avoid gaps between images.
- * 2. When generating a social‑media collage of event photos in C# where the original JPEGs have different heights and a uniform background color ensures a clean rectangular output.
- * 3. When building an automated report that merges scanned invoice pages into a single JPEG banner and requires a solid background to hide transparent areas.
- * 4. When developing a web service that stitches user‑uploaded JPEG avatars horizontally for a group chat banner, using Aspose.Imaging to set a background color so the final image looks professional.
- * 5. When preparing a printable banner that combines promotional JPEG banners of varying sizes, and a uniform background color prevents visual artifacts at the edges after merging.
+ * 1. When creating a product catalog PDF, a developer can use this code to stitch multiple product photos into a single high‑quality JPEG with a white background for consistent layout.
+ * 2. When generating a social media collage, the code merges several JPEG snapshots horizontally and fills any empty space with a uniform color, ensuring the final image meets platform size requirements.
+ * 3. When preparing a printable banner, a developer can combine different resolution JPEG images side by side on a canvas, applying a solid background to hide mismatched heights.
+ * 4. When building an e‑commerce thumbnail strip, the snippet concatenates thumbnail JPEGs into one image and sets a consistent background color to avoid transparent gaps.
+ * 5. When automating a report that includes side‑by‑side before‑and‑after photos, the code creates a single JPEG with a uniform background, simplifying file handling and display.
  */
