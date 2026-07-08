@@ -3,9 +3,9 @@
   "platform": "net",
   "framework": "net9.0",
   "package_version": "26.6.0",
-  "total_examples": 2920,
+  "total_examples": 2909,
   "total_categories": 17,
-  "last_updated": "2026-06-29",
+  "last_updated": "2026-07-08",
   "categories": [
     {
       "name": "conversion",
@@ -1073,11 +1073,8 @@
     },
     {
       "name": "convert-raster-image",
-      "file_count": 141,
+      "file_count": 138,
       "all_files": [
-        "28506-load-a-bmp-apply-a-median-filter-and-generate-a-pdf-with-the-filtered-image-centered-on-the-page.cs",
-        "28518-batch-process-bmp-files-applying-a-uniform-border-of-5-pixels-and-convert-each-to-pdf.cs",
-        "28529-batch-process-bmp-files-applying-a-10-brightness-increase-and-convert-each-brightened-image-to-svg.cs",
         "apply-a-gaussian-blur-filter-to-a-raster-image-then-convert-the-filtered-image-to-pdf.cs",
         "batch-convert-a-folder-of-raster-images-to-pdf-preserving-original-filenames-and-using-default-settings.cs",
         "batch-convert-bmp-files-to-pdf-naming-each-output-file-with-a-sequential-numeric-suffix.cs",
@@ -1218,9 +1215,6 @@
         "resize-a-raster-image-using-lanczos-resampling-then-convert-the-high-quality-result-to-pdf.cs"
       ],
       "files": [
-        "28506-load-a-bmp-apply-a-median-filter-and-generate-a-pdf-with-the-filtered-image-centered-on-the-page.cs",
-        "28518-batch-process-bmp-files-applying-a-uniform-border-of-5-pixels-and-convert-each-to-pdf.cs",
-        "28529-batch-process-bmp-files-applying-a-10-brightness-increase-and-convert-each-brightened-image-to-svg.cs",
         "apply-a-gaussian-blur-filter-to-a-raster-image-then-convert-the-filtered-image-to-pdf.cs",
         "batch-convert-a-folder-of-raster-images-to-pdf-preserving-original-filenames-and-using-default-settings.cs",
         "batch-convert-bmp-files-to-pdf-naming-each-output-file-with-a-sequential-numeric-suffix.cs",
@@ -1247,7 +1241,10 @@
         "batch-process-png-images-resizing-each-to-500x500-pixels-before-converting-all-to-individual-pdf-documents.cs",
         "batch-process-raster-images-resize-each-to-1024x1024-apply-a-median-filter-and-save-as-svg-files.cs",
         "batch-process-raster-images-resize-each-to-800x800-apply-a-gaussian-blur-and-save-as-svg.cs",
-        "convert-a-bmp-image-to-pdf-and-write-the-pdf-directly-to-an-http-response-stream.cs"
+        "convert-a-bmp-image-to-pdf-and-write-the-pdf-directly-to-an-http-response-stream.cs",
+        "convert-a-bmp-image-to-pdf-using-image-save-with-exportformats-pdf-enumeration-for-explicit-format-control.cs",
+        "convert-a-png-to-svg-then-use-the-svg-as-a-source-to-generate-a-high-resolution-pdf.cs",
+        "create-an-svgimage-from-a-bmp-set-a-custom-viewbox-and-save-the-vector-output-as-svg.cs"
       ],
       "required_namespaces": [
         "System",
@@ -1297,7 +1294,7 @@
         "VectorRasterizationOptions"
       ],
       "more_files": {
-        "count": 111,
+        "count": 108,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/convert-raster-image"
       }
     },
@@ -1611,10 +1608,8 @@
     },
     {
       "name": "image-and-photo-filters",
-      "file_count": 141,
+      "file_count": 139,
       "all_files": [
-        "28729-remove-watermark-from-a-png-using-telea-algorithm-and-set-removal-attempts-to-five.cs",
-        "28746-create-a-custom-selection-by-combining-magic-wand-union-and-subtraction-then-fill-with-solid-color.cs",
         "add-unit-tests-that-verify-mask-inversion-works-correctly-for-both-fully-white-and-fully-black-initial-masks.cs",
         "adjust-contentawarefillwatermarkoptions-maxpaintingattempts-to-3-to-improve-removal-quality-on-complex-watermark-patterns.cs",
         "adjust-magicwandtool-threshold-to-a-high-value-to-expand-mask-coverage-over-color-gradients-in-a-png-image.cs",
@@ -1756,8 +1751,6 @@
         "write-integration-tests-that-process-an-image-through-both-filters-and-compare-the-output-hashes-to-expected.cs"
       ],
       "files": [
-        "28729-remove-watermark-from-a-png-using-telea-algorithm-and-set-removal-attempts-to-five.cs",
-        "28746-create-a-custom-selection-by-combining-magic-wand-union-and-subtraction-then-fill-with-solid-color.cs",
         "add-unit-tests-that-verify-mask-inversion-works-correctly-for-both-fully-white-and-fully-black-initial-masks.cs",
         "adjust-contentawarefillwatermarkoptions-maxpaintingattempts-to-3-to-improve-removal-quality-on-complex-watermark-patterns.cs",
         "adjust-magicwandtool-threshold-to-a-high-value-to-expand-mask-coverage-over-color-gradients-in-a-png-image.cs",
@@ -1785,7 +1778,9 @@
         "apply-image-and-photo-filters-to-isolate-and-process-a-specific-color-region-within-an-image.cs",
         "apply-image-and-photo-filters-to-remove-watermarks-from-a-given-image-while-preserving-visual-quality.cs",
         "apply-image-and-photo-filters-using-the-magic-wand-filter-to-a-specified-image.cs",
-        "apply-image-and-photo-filters-with-the-magic-wand-tool-to-an-image-file.cs"
+        "apply-image-and-photo-filters-with-the-magic-wand-tool-to-an-image-file.cs",
+        "apply-the-alpha-blending-filter-to-an-apng-image-to-blend-pixel-colors-based-on-their-alpha-values.cs",
+        "apply-the-alpha-blending-filter-to-an-image-to-combine-pixel-values-based-on-specified-opacity-levels.cs"
       ],
       "required_namespaces": [
         "System",
@@ -1839,7 +1834,7 @@
         "VectorRasterizationOptions"
       ],
       "more_files": {
-        "count": 111,
+        "count": 109,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/image-and-photo-filters"
       }
     },
@@ -3191,14 +3186,8 @@
     },
     {
       "name": "manipulating-images",
-      "file_count": 431,
+      "file_count": 425,
       "all_files": [
-        "27872-load-a-png-image-apply-auto-masking-graph-cut-with-default-strokes-and-save-as-png.cs",
-        "27873-create-automaskinggraphcutoptions-with-custom-feathering-radius-apply-to-a-png-then-export-result.cs",
-        "27899-create-a-reusable-method-that-loads-a-raster-image-applies-auto-masking-median-filter-and-returns-processed-bitmap.cs",
-        "27972-create-a-png-image-with-alpha-channel-embed-a-digital-signature-and-verify-signature-confidence-after-saving.cs",
-        "28014-adjust-brightness-of-a-tiff-image-then-apply-gaussian-blur-saving-the-final-picture-as-pdf.cs",
-        "28036-modify-gamma-of-several-cdr-files-and-combine-the-corrected-outputs-into-a-multipage-tiff.cs",
         "add-user-defined-fonts-to-fontsettings-and-export-a-psd-as-png-with-accurate-text-appearance.cs",
         "adjust-brightness-of-a-cdr-document-upward-fifteen-percent-and-save-the-result-as-a-tiff-file.cs",
         "adjust-brightness-of-a-tiff-image-then-apply-gaussian-blur-saving-the-final-picture-as-pdf.cs",
@@ -3626,12 +3615,6 @@
         "verify-transparency-of-a-png-created-from-a-psd-file-before-saving-the-final-image.cs"
       ],
       "files": [
-        "27872-load-a-png-image-apply-auto-masking-graph-cut-with-default-strokes-and-save-as-png.cs",
-        "27873-create-automaskinggraphcutoptions-with-custom-feathering-radius-apply-to-a-png-then-export-result.cs",
-        "27899-create-a-reusable-method-that-loads-a-raster-image-applies-auto-masking-median-filter-and-returns-processed-bitmap.cs",
-        "27972-create-a-png-image-with-alpha-channel-embed-a-digital-signature-and-verify-signature-confidence-after-saving.cs",
-        "28014-adjust-brightness-of-a-tiff-image-then-apply-gaussian-blur-saving-the-final-picture-as-pdf.cs",
-        "28036-modify-gamma-of-several-cdr-files-and-combine-the-corrected-outputs-into-a-multipage-tiff.cs",
         "add-user-defined-fonts-to-fontsettings-and-export-a-psd-as-png-with-accurate-text-appearance.cs",
         "adjust-brightness-of-a-cdr-document-upward-fifteen-percent-and-save-the-result-as-a-tiff-file.cs",
         "adjust-brightness-of-a-tiff-image-then-apply-gaussian-blur-saving-the-final-picture-as-pdf.cs",
@@ -3655,7 +3638,13 @@
         "apply-a-gaussian-blur-filter-to-an-image-to-soften-details-while-maintaining-its-overall-dimensions.cs",
         "apply-a-gaussian-wiener-filter-to-images-and-output-the-processed-results-in-apng-format.cs",
         "apply-a-gaussian-wiener-filter-to-images-to-effectively-reduce-noise-while-preserving-edge-details.cs",
-        "apply-a-median-filter-to-images-and-output-the-results-in-apng-format-ensuring-pixel-level-noise-reduction.cs"
+        "apply-a-median-filter-to-images-and-output-the-results-in-apng-format-ensuring-pixel-level-noise-reduction.cs",
+        "apply-a-median-filter-to-images-to-reduce-noise-while-preserving-edges-and-fine-details.cs",
+        "apply-a-motion-wiener-filter-to-apng-images-to-reduce-motion-blur-while-preserving-animation-integrity.cs",
+        "apply-a-motion-wiener-filter-to-images-to-reduce-noise-while-preserving-motion-details.cs",
+        "apply-a-smoothing-mode-to-image-processing-operations-to-control-rendering-quality-and-reduce-visual-artifacts.cs",
+        "apply-a-smoothing-mode-to-image-processing-operations-when-generating-apng-files-to-improve-visual-quality.cs",
+        "apply-automatic-masking-to-images-and-output-the-result-in-apng-format-preserving-transparency-and-animation.cs"
       ],
       "required_namespaces": [
         "Aspose.Imaging",
@@ -3748,7 +3737,7 @@
         "WmfRasterizationOptions"
       ],
       "more_files": {
-        "count": 401,
+        "count": 395,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/manipulating-images"
       }
     },
