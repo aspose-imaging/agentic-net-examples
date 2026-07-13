@@ -1,7 +1,7 @@
 {
   "name": "Aspose.Imaging for .NET Examples Agent",
-  "description": "AI agent that generates, compiles, and validates C# code examples for Aspose.Imaging for .NET 26.6.0. 2,909 build-verified examples across 17 categories.",
-  "version": "26.6.0",
+  "description": "AI agent that generates, compiles, and validates C# code examples for Aspose.Imaging for .NET 26.7.0. 2,891 build-verified examples across 17 categories.",
+  "version": "26.7.0",
   "url": "https://github.com/aspose-imaging/agentic-net-examples",
   "api_base_url": "http://faisalabad-examples-mcp.dynabic.com:7009",
   "mcp_endpoint": "http://faisalabad-examples-mcp.dynabic.com:7009/mcp/sse",
@@ -87,11 +87,11 @@
     },
     {
       "name": "Kernel Filters",
-      "examples": 477
+      "examples": 465
     },
     {
       "name": "Manipulate Different Image File Formats",
-      "examples": 603
+      "examples": 602
     },
     {
       "name": "Manipulating Images",
@@ -99,7 +99,7 @@
     },
     {
       "name": "Merge Images",
-      "examples": 140
+      "examples": 135
     },
     {
       "name": "Working With Drawing Images",
