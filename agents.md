@@ -24,7 +24,7 @@ When working in this repository:
 This repository contains **4856** working code examples demonstrating Aspose.Imaging for .NET capabilities.
 
 **Statistics** (as of 2026-06-29):
-- Total Examples: 2909
+- Total Examples: 2891
 - Categories: 17
 - Overall Pass Rate: 100.0%
 
@@ -243,10 +243,10 @@ README.md
 | [Convert webp Images](./convert-webp-images/) | 30 | 100.0% | [agents.md](./convert-webp-images/agents.md) |
 | [Converting WMF and EMF](./converting-wmf-and-emf/) | 29 | 100.0% | [agents.md](./converting-wmf-and-emf/agents.md) |
 | [Image and Photo Filters](./image-and-photo-filters/) | 139 | 100.0% | [agents.md](./image-and-photo-filters/agents.md) |
-| [Kernel Filters](./kernel-filters/) | 477 | 100.0% | [agents.md](./kernel-filters/agents.md) |
-| [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 603 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
+| [Kernel Filters](./kernel-filters/) | 465 | 100.0% | [agents.md](./kernel-filters/agents.md) |
+| [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 602 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
 | [Manipulating Images](./manipulating-images/) | 425 | 100.0% | [agents.md](./manipulating-images/agents.md) |
-| [Merge Images](./merge-images/) | 140 | 100.0% | [agents.md](./merge-images/agents.md) |
+| [Merge Images](./merge-images/) | 135 | 100.0% | [agents.md](./merge-images/agents.md) |
 | [Working With Drawing Images](./working-with-drawing-images/) | 401 | 100.0% | [agents.md](./working-with-drawing-images/agents.md) |
 
 ## Command Reference
