@@ -2,10 +2,10 @@
   "product": "Aspose.Imaging",
   "platform": "net",
   "framework": "net9.0",
-  "package_version": "26.6.0",
-  "total_examples": 2909,
+  "package_version": "26.7.0",
+  "total_examples": 2891,
   "total_categories": 17,
-  "last_updated": "2026-07-08",
+  "last_updated": "2026-07-13",
   "categories": [
     {
       "name": "conversion",
@@ -1840,20 +1840,8 @@
     },
     {
       "name": "kernel-filters",
-      "file_count": 477,
+      "file_count": 465,
       "all_files": [
-        "28794-apply-a-zero-sum-edge-detection-kernel-to-a-png-image-and-verify-black-background-with-highlighted-edges.cs",
-        "28810-validate-that-a-custom-kernel-s-dimensions-are-odd-before-applying-a-deconvolution-filter-to-png.cs",
-        "28819-process-each-page-of-a-multipage-tiff-document-with-an-edge-detection-kernel-and-save-results.cs",
-        "28831-generate-a-horizontal-sobel-3-3-kernel-for-edge-detection-operation.cs",
-        "28866-iterate-over-each-page-of-a-multipage-svg-file-and-apply-a-custom-convolution-kernel-to-every-page.cs",
-        "28875-programmatically-generate-a-3x3-edge-detection-kernel-at-runtime-and-apply-it-to-a-png-image.cs",
-        "28881-catch-and-log-convolutionfilter-exceptions-when-applying-an-invalid-custom-kernel-to-an-svg-image.cs",
-        "28882-ensure-the-custom-kernel-matrix-dimensions-match-the-required-size-before-applying-the-filter.cs",
-        "28893-expose-a-restful-service-that-accepts-an-image-url-and-returns-the-image-after-applying-gaussian-blur.cs",
-        "28908-retrieve-and-serve-filtered-images-via-an-http-endpoint-from-azure-blob-storage.cs",
-        "28928-ensure-thread-safety-of-convolutionfilter-instances-when-used-concurrently-in-parallel-loops.cs",
-        "28937-broadcast-filtered-images-to-connected-clients-using-signalr-after-applying-a-kernel-filter.cs",
         "add-a-readme-example-that-walks-through-loading-an-svg-applying-gaussian-blur-and-saving.cs",
         "adjust-kernel-coefficients-dynamically-based-on-user-input-in-a-desktop-ui-before-filtering.cs",
         "adjust-kernel-coefficients-to-increase-brightness-while-applying-a-5x5-blur-to-a-bmp-image.cs",
@@ -2321,18 +2309,6 @@
         "write-a-unit-test-that-confirms-pixel-clamping-works-when-kernel-coefficients-exceed-normal-range.cs"
       ],
       "files": [
-        "28794-apply-a-zero-sum-edge-detection-kernel-to-a-png-image-and-verify-black-background-with-highlighted-edges.cs",
-        "28810-validate-that-a-custom-kernel-s-dimensions-are-odd-before-applying-a-deconvolution-filter-to-png.cs",
-        "28819-process-each-page-of-a-multipage-tiff-document-with-an-edge-detection-kernel-and-save-results.cs",
-        "28831-generate-a-horizontal-sobel-3-3-kernel-for-edge-detection-operation.cs",
-        "28866-iterate-over-each-page-of-a-multipage-svg-file-and-apply-a-custom-convolution-kernel-to-every-page.cs",
-        "28875-programmatically-generate-a-3x3-edge-detection-kernel-at-runtime-and-apply-it-to-a-png-image.cs",
-        "28881-catch-and-log-convolutionfilter-exceptions-when-applying-an-invalid-custom-kernel-to-an-svg-image.cs",
-        "28882-ensure-the-custom-kernel-matrix-dimensions-match-the-required-size-before-applying-the-filter.cs",
-        "28893-expose-a-restful-service-that-accepts-an-image-url-and-returns-the-image-after-applying-gaussian-blur.cs",
-        "28908-retrieve-and-serve-filtered-images-via-an-http-endpoint-from-azure-blob-storage.cs",
-        "28928-ensure-thread-safety-of-convolutionfilter-instances-when-used-concurrently-in-parallel-loops.cs",
-        "28937-broadcast-filtered-images-to-connected-clients-using-signalr-after-applying-a-kernel-filter.cs",
         "add-a-readme-example-that-walks-through-loading-an-svg-applying-gaussian-blur-and-saving.cs",
         "adjust-kernel-coefficients-dynamically-based-on-user-input-in-a-desktop-ui-before-filtering.cs",
         "adjust-kernel-coefficients-to-increase-brightness-while-applying-a-5x5-blur-to-a-bmp-image.cs",
@@ -2350,7 +2326,19 @@
         "apply-a-blur-filter-to-a-djvu-image-and-persist-the-processed-output-to-a-file.cs",
         "apply-a-blur-filter-to-a-dng-image-and-write-the-processed-output-to-a-new-file.cs",
         "apply-a-blur-filter-to-a-gif-image-and-write-the-processed-image-back-to-storage.cs",
-        "apply-a-blur-filter-to-a-jpeg-image-and-save-the-processed-output-file.cs"
+        "apply-a-blur-filter-to-a-jpeg-image-and-save-the-processed-output-file.cs",
+        "apply-a-blur-filter-to-a-jpeg2000-image-and-write-the-processed-output-to-a-new-file.cs",
+        "apply-a-blur-filter-to-a-png-image-and-write-the-processed-output-to-a-new-file.cs",
+        "apply-a-blur-filter-to-a-psd-image-and-write-the-processed-image-back-to-storage.cs",
+        "apply-a-blur-filter-to-a-tga-image-and-export-the-processed-file-preserving-its-original-format.cs",
+        "apply-a-blur-filter-to-a-tiff-image-and-write-the-processed-image-to-storage.cs",
+        "apply-a-blur-filter-to-a-webp-image-and-write-the-processed-image-to-a-new-file.cs",
+        "apply-a-blur-filter-to-a-wmf-image-and-save-the-processed-output-image.cs",
+        "apply-a-blur-filter-to-a-wmz-image-and-save-the-processed-file-to-the-desired-location.cs",
+        "apply-a-blur-filter-to-an-apng-image-then-write-the-processed-output-to-disk.cs",
+        "apply-a-blur-filter-to-an-avif-image-and-write-the-processed-image-back-to-storage.cs",
+        "apply-a-blur-filter-to-an-emf-image-and-persist-the-processed-output-to-a-file.cs",
+        "apply-a-blur-filter-to-an-emz-image-and-store-the-processed-output-file.cs"
       ],
       "required_namespaces": [
         "System",
@@ -2424,15 +2412,14 @@
         "WebPOptions"
       ],
       "more_files": {
-        "count": 447,
+        "count": 435,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/kernel-filters"
       }
     },
     {
       "name": "manipulate-different-image-file-formats",
-      "file_count": 603,
+      "file_count": 602,
       "all_files": [
-        "29289-merge-multiple-cmx-files-into-a-single-composite-drawing-preserving-layer-order.cs",
         "access-clipping-paths-of-a-tiff-frame-via-pathresources-and-export-them-as-svg-files.cs",
         "add-a-custom-thumbnail-to-the-exif-segment-of-a-jpeg-image-and-verify-metadata.cs",
         "add-a-custom-thumbnail-to-the-jfif-segment-of-a-jpeg-image-before-saving.cs",
@@ -3037,7 +3024,6 @@
         "write-custom-exif-gps-latitude-and-longitude-tags-into-a-jpeg-image-for-geotagging.cs"
       ],
       "files": [
-        "29289-merge-multiple-cmx-files-into-a-single-composite-drawing-preserving-layer-order.cs",
         "access-clipping-paths-of-a-tiff-frame-via-pathresources-and-export-them-as-svg-files.cs",
         "add-a-custom-thumbnail-to-the-exif-segment-of-a-jpeg-image-and-verify-metadata.cs",
         "add-a-custom-thumbnail-to-the-jfif-segment-of-a-jpeg-image-before-saving.cs",
@@ -3066,7 +3052,8 @@
         "apply-a-sharpening-filter-with-strength-three-to-a-tga-texture-and-export-as-bmp.cs",
         "apply-a-solid-background-color-to-a-png-image-with-transparency-replacing-its-alpha-channel-uniformly.cs",
         "apply-a-vignette-effect-around-the-edges-of-a-tga-picture-and-save-as-jpeg.cs",
-        "apply-additional-resizing-operations-to-a-dicom-image-while-maintaining-full-dicom-format-compliance.cs"
+        "apply-additional-resizing-operations-to-a-dicom-image-while-maintaining-full-dicom-format-compliance.cs",
+        "apply-coordinate-offsets-to-crop-a-dicom-image-outputting-the-result-as-a-dicom-file.cs"
       ],
       "required_namespaces": [
         "System",
@@ -3180,7 +3167,7 @@
         "WmfRasterizationOptions"
       ],
       "more_files": {
-        "count": 573,
+        "count": 572,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/manipulate-different-image-file-formats"
       }
     },
@@ -3743,13 +3730,8 @@
     },
     {
       "name": "merge-images",
-      "file_count": 140,
+      "file_count": 135,
       "all_files": [
-        "28686-set-the-output-dpi-to-300-when-merging-jpeg-files-horizontally-and-saving-the-result-as-pdf.cs",
-        "28688-use-imageloadoptions-to-limit-memory-usage-while-loading-jpeg-files-for-a-horizontal-merge.cs",
-        "28691-process-a-batch-of-jpeg-folders-merging-each-folder-s-images-horizontally-into-separate-pdf-files.cs",
-        "28693-use-a-cancellation-token-to-abort-a-long-running-horizontal-jpeg-merge-operation-when-requested.cs",
-        "28694-log-progress-percentage-after-each-jpeg-image-is-added-to-the-canvas-during-a-vertical-merge.cs",
         "add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs",
         "add-custom-author-metadata-to-the-merged-pdf-generated-from-a-horizontal-jpeg-merge-operation.cs",
         "align-all-merged-jpeg-images-to-the-top-left-corner-of-the-canvas-for-a-consistent-layout.cs",
@@ -3887,11 +3869,6 @@
         "wrap-image-loading-and-merging-code-in-try-catch-blocks-to-handle-file-access-exceptions-gracefully.cs"
       ],
       "files": [
-        "28686-set-the-output-dpi-to-300-when-merging-jpeg-files-horizontally-and-saving-the-result-as-pdf.cs",
-        "28688-use-imageloadoptions-to-limit-memory-usage-while-loading-jpeg-files-for-a-horizontal-merge.cs",
-        "28691-process-a-batch-of-jpeg-folders-merging-each-folder-s-images-horizontally-into-separate-pdf-files.cs",
-        "28693-use-a-cancellation-token-to-abort-a-long-running-horizontal-jpeg-merge-operation-when-requested.cs",
-        "28694-log-progress-percentage-after-each-jpeg-image-is-added-to-the-canvas-during-a-vertical-merge.cs",
         "add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs",
         "add-custom-author-metadata-to-the-merged-pdf-generated-from-a-horizontal-jpeg-merge-operation.cs",
         "align-all-merged-jpeg-images-to-the-top-left-corner-of-the-canvas-for-a-consistent-layout.cs",
@@ -3916,7 +3893,12 @@
         "combine-jpg-images-into-a-pdf-document-by-first-converting-them-to-apng-format-and-embedding-them-accordingly.cs",
         "combine-jpg-images-into-a-pdf-document-by-first-converting-them-to-psd-format.cs",
         "combine-jpg-images-into-a-pdf-document-converting-each-image-to-png-format-before-merging.cs",
-        "combine-jpg-images-into-a-pdf-document-embedding-an-ico-file-as-the-document-s-icon.cs"
+        "combine-jpg-images-into-a-pdf-document-embedding-an-ico-file-as-the-document-s-icon.cs",
+        "combine-jpg-images-into-a-pdf-document-encoding-the-images-as-avif-format-to-optimize-size.cs",
+        "combine-jpg-images-into-a-pdf-document-using-dicom-formatting-while-maintaining-image-fidelity.cs",
+        "combine-jpg-images-into-a-png-output-while-applying-jpeg-compression-settings-during-the-merge.cs",
+        "combine-jpg-images-into-a-single-pdf-document-employing-the-wmz-format-for-compression-and-packaging.cs",
+        "combine-jpg-images-into-a-single-pdf-document-using-the-cmx-format-to-maintain-color-fidelity.cs"
       ],
       "required_namespaces": [
         "System",
@@ -3978,7 +3960,7 @@
         "WmfRasterizationOptions"
       ],
       "more_files": {
-        "count": 110,
+        "count": 105,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/merge-images"
       }
     },
