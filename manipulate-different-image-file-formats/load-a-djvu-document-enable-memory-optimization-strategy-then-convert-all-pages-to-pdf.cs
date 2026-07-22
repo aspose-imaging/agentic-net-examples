@@ -8,48 +8,51 @@ class Program
 {
     static void Main()
     {
-        // Wrap the whole logic to catch unexpected errors
         try
         {
-            // Hard‑coded input DjVu file path
+            // Hardcoded input DjVu file path
             string inputPath = @"C:\Temp\sample.djvu";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Hard‑coded output directory for the generated PDFs
-            string outputDir = @"C:\Temp\PdfOutput";
+            // Hardcoded output directory for PDF pages
+            string outputDir = @"C:\Temp\PdfPages";
 
-            // Load the DjVu document with a memory‑optimisation hint (1 MB buffer)
+            // Ensure the output directory exists (unconditional)
+            Directory.CreateDirectory(outputDir);
+
+            // Set memory optimization options (limit internal buffers to 1 MB)
             LoadOptions loadOptions = new LoadOptions
             {
-                BufferSizeHint = 1 * 1024 * 1024 // 1 MB
+                BufferSizeHint = 1 * 1024 * 1024 // 1 MB
             };
 
+            // Load the DjVu document with the specified load options
             using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
             {
-                // Iterate through all pages and save each as an individual PDF file
+                // Iterate through each page and save it as a separate PDF file
                 foreach (DjvuPage page in djvuImage.Pages)
                 {
-                    // Build the output file name (e.g., page_1.pdf, page_2.pdf, …)
+                    // Build output file path for the current page
                     string outputPath = Path.Combine(outputDir, $"page_{page.PageNumber}.pdf");
 
-                    // Ensure the output directory exists
+                    // Ensure the directory for the output file exists (unconditional)
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the current page as PDF
-                    page.Save(outputPath, new PdfOptions());
+                    // Save the page as PDF using PdfOptions
+                    PdfOptions pdfOptions = new PdfOptions();
+                    page.Save(outputPath, pdfOptions);
                 }
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime error without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -57,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a multi‑page DjVu archive of scanned documents into individual PDF files while keeping memory usage low.
- * 2. When an application must extract each page of a large DjVu file (e.g., a digitized book) and store them as separate PDF pages for downstream processing or printing.
- * 3. When a server‑side service processes user‑uploaded DjVu files and must generate PDF versions on‑the‑fly without exhausting RAM.
- * 4. When a document‑management system needs to preserve the original page layout of DjVu scans by converting each page to PDF for archival compliance.
- * 5. When a .NET utility has to verify the existence of a DjVu file, create an output folder, and reliably save each page as a PDF using Aspose.Imaging’s memory‑optimised loading.
+ * 1. When a developer needs to batch‑convert a multi‑page DjVu document to individual PDF files while running on a server with limited RAM, they can use Aspose.Imaging for .NET with a 1 MB BufferSizeHint to optimize memory usage.
+ * 2. When an archival system must extract each page of a scanned DjVu file and store it as a separate searchable PDF for compliance reporting, this code provides a straightforward C# solution.
+ * 3. When a desktop application processes large DjVu ebooks on low‑end machines and must prevent out‑of‑memory exceptions, the LoadOptions.BufferSizeHint setting ensures efficient page‑by‑page conversion to PDF.
+ * 4. When an automated workflow needs to transform incoming DjVu submissions into PDF pages for downstream OCR or indexing services, the Aspose.Imaging API can load the document, iterate over DjvuPage objects, and save them as PDFs.
+ * 5. When a cloud‑based microservice receives DjVu uploads and must deliver each page as an individual PDF document without consuming excessive memory, the provided C# code demonstrates the optimal approach using DjvuImage.LoadDocument and PdfOptions.
  */
