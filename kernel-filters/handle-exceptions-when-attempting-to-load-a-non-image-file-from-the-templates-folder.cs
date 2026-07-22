@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"templates/nonimage.txt";
-        string outputPath = @"output/result.png";
+        string inputPath = @"templates\sample.txt";
+        string outputPath = @"output\result.png";
 
         try
         {
@@ -23,38 +23,25 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Check if the file can be loaded as an image
-            if (!Image.CanLoad(inputPath))
-            {
-                Console.Error.WriteLine($"Cannot load image: {inputPath}");
-                return;
-            }
-
-            // Attempt to load the image and handle load exceptions
+            // Attempt to load the file as an image
+            Image image;
             try
             {
-                using (Image image = Image.Load(inputPath))
-                {
-                    // Perform any desired processing here (none in this example)
-
-                    // Save the image to the output path
-                    image.Save(outputPath);
-                }
+                image = Image.Load(inputPath);
             }
             catch (ImageLoadException ile)
             {
-                Console.Error.WriteLine($"Image load error: {ile.Message}");
+                // Handle non‑image file scenario
+                Console.Error.WriteLine($"Unable to load image: {ile.Message}");
                 return;
             }
-            catch (ImageException ie) // Catch other Aspose.Imaging related exceptions
-            {
-                Console.Error.WriteLine($"Aspose.Imaging error: {ie.Message}");
-                return;
-            }
+
+            // Save the loaded image to the output path (as PNG)
+            image.Save(outputPath);
+            image.Dispose();
         }
         catch (Exception ex)
         {
-            // Catch any unexpected exceptions
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -62,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to validate user‑uploaded files in a C# web application and ensure only supported image formats (e.g., JPEG, PNG, BMP) are processed, this code detects non‑image files in the templates folder and logs a clear error.
- * 2. When building an automated batch‑conversion tool that reads files from a templates directory and saves them as PNG, the code prevents runtime crashes by checking Image.CanLoad before attempting to load unsupported text or PDF files.
- * 3. When integrating Aspose.Imaging into a Windows service that monitors a folder for new assets, the example shows how to gracefully handle ImageLoadException if a stray non‑image file appears, keeping the service running.
- * 4. When creating a desktop utility that allows users to select a source file and generate a thumbnail, the code demonstrates how to verify the file exists, confirm it is an image, and catch any Aspose.Imaging‑specific errors before saving the result.
- * 5. When developing a CI/CD pipeline that validates image resources in a repository, this snippet can be used to programmatically reject non‑image files in the templates folder and provide actionable error messages for developers.
+ * 1. When a web application generates thumbnails from user‑uploaded files and must skip or log .txt files placed in the templates folder.
+ * 2. When an automated report generator reads template assets and needs to gracefully handle accidental inclusion of non‑image documents such as PDFs or Word files.
+ * 3. When a desktop utility converts batch images to PNG and must verify that each entry in the templates directory is a supported image format before processing.
+ * 4. When a CI/CD pipeline validates image resources in a project and should capture ImageLoadException for any corrupted or unsupported image files.
+ * 5. When a background service monitors a shared folder for new graphics and must prevent runtime crashes by catching errors when a plain text file is encountered.
  */
