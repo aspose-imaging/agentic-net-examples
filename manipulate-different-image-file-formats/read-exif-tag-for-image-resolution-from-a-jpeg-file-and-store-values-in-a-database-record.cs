@@ -1,3 +1,4 @@
+// HOW-TO: Read JPEG EXIF Resolution and Save to Database in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,13 +8,13 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output\\resolution.txt";
-
         try
         {
-            // Validate input file existence
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.jpg";
+            string outputPath = "Output/resolution.txt";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,22 +24,16 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load JPEG image and read resolution
-            using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
+            // Load JPEG image
+            using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                double horizontalDpi = jpegImage.HorizontalResolution;
-                double verticalDpi = jpegImage.VerticalResolution;
+                // Read resolution from EXIF (or image properties)
+                double horizontalResolution = image.HorizontalResolution;
+                double verticalResolution = image.VerticalResolution;
 
-                // Create a simple record to hold the resolution values
-                var record = new ResolutionRecord
-                {
-                    HorizontalDpi = horizontalDpi,
-                    VerticalDpi = verticalDpi
-                };
-
-                // Store the record in a text file (simulating a database insert)
-                string content = $"HorizontalDpi={record.HorizontalDpi}, VerticalDpi={record.VerticalDpi}";
-                File.WriteAllText(outputPath, content);
+                // Simulate storing in a database by writing to a text file
+                string record = $"HorizontalResolution={horizontalResolution},VerticalResolution={verticalResolution}";
+                File.WriteAllText(outputPath, record);
             }
         }
         catch (Exception ex)
@@ -48,18 +43,11 @@ class Program
     }
 }
 
-// Simple data holder representing a database record for image resolution
-class ResolutionRecord
-{
-    public double HorizontalDpi { get; set; }
-    public double VerticalDpi { get; set; }
-}
-
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract the EXIF DPI values from a JPEG file using Aspose.Imaging for .NET and store the horizontal and vertical resolution in a database record for later reporting.
- * 2. When building a digital asset management system that must read image resolution metadata from uploaded JPEG photos and persist the DPI information alongside other asset metadata.
- * 3. When creating a batch processing tool that validates that all JPEG images meet a required print resolution by reading their EXIF tags with C# and logging the results to a database.
- * 4. When integrating a photo‑upload feature into a web application that records the original image's DPI settings in a SQL table to support resolution‑based workflow decisions.
- * 5. When developing a quality‑control script that scans a folder of JPEG images, extracts their horizontal and vertical DPI using Aspose.Imaging, and writes the values to a data store for analytics.
+ * 1. When you need to extract the DPI settings of uploaded JPEG photos and store them in a product catalog database.
+ * 2. When a web application must validate image resolution before allowing users to publish high‑resolution graphics.
+ * 3. When a digital asset management system records the horizontal and vertical resolution of JPEG files for search and filtering.
+ * 4. When a batch process imports scanned documents and logs their DPI values to ensure compliance with printing standards.
+ * 5. When an e‑commerce platform saves image metadata such as resolution to optimize image rendering on different devices.
  */
