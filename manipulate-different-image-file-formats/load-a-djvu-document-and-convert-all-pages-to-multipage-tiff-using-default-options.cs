@@ -13,7 +13,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.djvu";
-            string outputPath = "output\\result.tif";
+            string outputPath = "output.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,18 +22,20 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DjVu document from file stream
+            // Load the DjVu document from a file stream
             using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Prepare TIFF save options with default settings
+                // Prepare TIFF save options with default format
                 TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                saveOptions.MultiPageOptions = new DjvuMultiPageOptions(); // all pages will be saved
 
-                // Save as multipage TIFF
+                // Use default multi‑page options to include all pages
+                saveOptions.MultiPageOptions = new DjvuMultiPageOptions();
+
+                // Save all pages as a multipage TIFF file
                 djvuImage.Save(outputPath, saveOptions);
             }
         }
@@ -46,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must archive multi‑page DjVu manuals as a single multipage TIFF file for long‑term storage or compliance auditing.
- * 2. When a developer needs to convert scanned DjVu invoices into a TIFF format that can be easily indexed by enterprise document management systems.
- * 3. When an image‑processing pipeline requires transforming DjVu e‑books into multipage TIFFs before applying OCR or printing workflows.
- * 4. When a Windows service automates the migration of legacy DjVu technical drawings to TIFF for compatibility with legacy CAD viewers.
- * 5. When a .NET web service generates downloadable multipage TIFF reports from user‑uploaded DjVu files using default Aspose.Imaging options.
+ * 1. When a developer needs to archive scanned DjVu documents into a single multipage TIFF for compatibility with legacy document management systems.
+ * 2. When an application must batch‑convert a DjVu e‑book into a TIFF so each page can be displayed or printed using standard image viewers.
+ * 3. When a workflow requires extracting all pages from a DjVu technical manual and saving them as a multipage TIFF to embed in a PDF generation pipeline.
+ * 4. When a developer wants to provide a C# service that receives DjVu uploads and returns a consolidated TIFF file using Aspose.Imaging’s default conversion settings.
+ * 5. When a Windows desktop tool must verify the existence of a DjVu file, create the output folder, and convert the entire document to a TIFF without manually handling each page.
  */
