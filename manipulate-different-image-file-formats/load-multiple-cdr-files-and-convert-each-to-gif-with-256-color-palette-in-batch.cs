@@ -3,52 +3,61 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input directory and output directory
-            string inputDirectory = @"C:\Images\Input";
-            string outputDirectory = @"C:\Images\Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Get all CDR files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.cdr");
-
-            foreach (string inputPath in inputFiles)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify that the input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (var inputPath in files)
+            {
+                if (!Path.GetExtension(inputPath).Equals(".cdr", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output file path (same name, .gif extension)
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".gif");
-
-                // Ensure the output directory exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the CDR image
-                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+                using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
                 {
-                    // Configure GIF save options for a 256‑color palette
-                    GifOptions gifOptions = new GifOptions
+                    var options = new PngOptions
                     {
-                        // 8 bits per pixel => 256 colors (ColorResolution is bits‑1)
-                        ColorResolution = 7,
-                        DoPaletteCorrection = true,
-                        // Optional: interlaced can be set if desired
-                        Interlaced = false
+                        Source = new FileCreateSource(outputPath, false)
                     };
 
-                    // Save as GIF using the configured options
-                    cdrImage.Save(outputPath, gifOptions);
+                    using (Image raster = Image.Create(options, cdr.Width, cdr.Height))
+                    {
+                        Graphics graphics = new Graphics(raster);
+                        graphics.Clear(Aspose.Imaging.Color.White);
+                        graphics.DrawImage(cdr, 0, 0);
+                        raster.Save();
+                    }
                 }
 
                 Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
@@ -63,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design studio needs to batch‑convert CorelDRAW (.cdr) artwork into web‑friendly 256‑color GIFs for quick preview thumbnails.
- * 2. When an e‑learning platform automates the creation of animated GIF slides from legacy CDR diagrams to embed in HTML5 courses.
- * 3. When a digital asset management system processes incoming CDR files and stores low‑size GIF copies for mobile device caching.
- * 4. When a marketing automation tool generates email‑ready GIF banners from a folder of CDR designs, ensuring the 256‑color palette meets email client limits.
- * 5. When a print‑to‑screen workflow converts CDR illustrations into GIFs with a fixed palette for use in legacy point‑of‑sale displays.
+ * 1. When a designer needs to automate the conversion of a large collection of CorelDRAW (.cdr) artwork files into web‑friendly 256‑color GIF images for faster page loads.
+ * 2. When a legacy archival system requires batch processing of CDR files to GIF format with a limited palette to meet old printer or display hardware constraints.
+ * 3. When an e‑commerce platform must generate thumbnail previews of product vector graphics stored as CDR files, converting them to 256‑color GIFs for consistent thumbnail size and color depth.
+ * 4. When a marketing team wants to create animated slideshows from multiple CDR source files and needs a script that converts each file to a GIF with a fixed 256‑color palette for compatibility with email clients.
+ * 5. When a CI/CD pipeline includes a step that validates visual assets by converting all CDR source files to GIF with a 256‑color palette to ensure deterministic rendering across environments.
  */
