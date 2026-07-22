@@ -1,6 +1,11 @@
+// HOW-TO: Apply Custom Convolution Kernel from JSON to Multiple SVG Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -8,22 +13,99 @@ class Program
     {
         try
         {
-            string[] inputPaths = { "image1.svg", "image2.svg" };
-            foreach (string inputPath in inputPaths)
+            // Hardcoded paths
+            string configPath = "kernels.json";
+            string[] svgFiles = new[]
             {
-                if (!File.Exists(inputPath))
+                "image1.svg",
+                "image2.svg"
+            };
+            string outputFolder = "output";
+
+            // Validate config file
+            if (!File.Exists(configPath))
+            {
+                Console.Error.WriteLine($"File not found: {configPath}");
+                return;
+            }
+
+            // Load kernel from JSON (expects format: {"kernel": [[a,b,c],[d,e,f],[g,h,i]]})
+            string json = File.ReadAllText(configPath);
+            int firstBracket = json.IndexOf('[');
+            int lastBracket = json.LastIndexOf(']');
+            if (firstBracket < 0 || lastBracket < 0 || lastBracket <= firstBracket)
+            {
+                Console.Error.WriteLine("Invalid kernel JSON format.");
+                return;
+            }
+            string inner = json.Substring(firstBracket, lastBracket - firstBracket + 1);
+            string[] rowStrings = inner.Trim('[', ']').Split(new string[] { "],[" }, StringSplitOptions.RemoveEmptyEntries);
+            int size = rowStrings.Length;
+            double[,] kernel = new double[size, size];
+            for (int i = 0; i < size; i++)
+            {
+                string row = rowStrings[i].Trim('[', ']');
+                string[] values = row.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                for (int j = 0; j < size; j++)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    if (double.TryParse(values[j], out double val))
+                    {
+                        kernel[i, j] = val;
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("Invalid numeric value in kernel.");
+                        return;
+                    }
+                }
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputFolder);
+
+            foreach (string svgPath in svgFiles)
+            {
+                if (!File.Exists(svgPath))
+                {
+                    Console.Error.WriteLine($"File not found: {svgPath}");
                     continue;
                 }
 
-                string outputPath = Path.ChangeExtension(inputPath, ".png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(svgPath);
+                string tempPngPath = Path.Combine(outputFolder, fileNameWithoutExt + "_temp.png");
+                string filteredPngPath = Path.Combine(outputFolder, fileNameWithoutExt + "_filtered.png");
 
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+                // Ensure directories for temp and filtered paths exist
+                Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+                Directory.CreateDirectory(Path.GetDirectoryName(filteredPngPath));
+
+                // Load SVG and rasterize to temporary PNG
+                using (Image svgImage = Image.Load(svgPath))
                 {
                     var pngOptions = new PngOptions();
-                    image.Save(outputPath, pngOptions);
+                    svgImage.Save(tempPngPath, pngOptions);
+                }
+
+                // Load rasterized PNG as RasterImage
+                using (RasterImage rasterImage = (RasterImage)Image.Load(tempPngPath))
+                {
+                    // Apply convolution filter with custom kernel
+                    var filterOptions = new ConvolutionFilterOptions(kernel);
+                    rasterImage.Filter(rasterImage.Bounds, filterOptions);
+
+                    // Save filtered image
+                    var saveOptions = new PngOptions();
+                    rasterImage.Save(filteredPngPath, saveOptions);
+                }
+
+                // Optionally delete temporary PNG
+                try
+                {
+                    File.Delete(tempPngPath);
+                }
+                catch
+                {
+                    // Ignore deletion errors
                 }
             }
         }
@@ -36,9 +118,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a batch of SVG vector graphics to PNG raster images for web display, they can use this code to load each SVG with Aspose.Imaging and save it as PNG.
- * 2. When an automated build process must ensure that all SVG assets are available as PNG thumbnails for a mobile app, this snippet checks file existence, creates output folders, and performs the conversion.
- * 3. When a server‑side C# service has to generate PNG previews of user‑uploaded SVG files while handling missing files gracefully, the example demonstrates the required try‑catch and error logging.
- * 4. When a CI/CD pipeline needs to validate that SVG icons are correctly rendered as PNGs before publishing a design system, the code provides a simple loop to load each SVG with Aspose.Imaging and save it using PngOptions.
- * 5. When a desktop utility must batch‑process vector illustrations into PNGs for printing or documentation, this program shows how to read SVG files, create the destination directory, and convert them using Aspose.Imaging in .NET.
+ * 1. When you need to batch‑process a set of SVG graphics with a custom convolution filter defined in a JSON file, this code lets you load the kernel and apply it to each image.
+ * 2. When a web application must dynamically sharpen or blur vector icons based on user‑provided parameters stored in JSON, the example shows how to read the kernel and process the SVGs in C#.
+ * 3. When automating a CI pipeline that converts SVG assets to raster formats with a specific filter effect, you can use this code to read the kernel configuration and apply it before rendering.
+ * 4. When integrating third‑party design tools that export filter settings as JSON, the snippet demonstrates how to import those settings and apply them to multiple SVG files using Aspose.Imaging.
+ * 5. When creating a desktop utility that updates a library of SVG logos with a consistent emboss or edge‑detect effect defined in a JSON kernel, this example provides the necessary loading and batch‑application logic.
  */
