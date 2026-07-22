@@ -9,30 +9,31 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "sample.djvu";
+        string outputPath = "output/output.tiff";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.djvu";
-            string outputPath = "output.tiff";
-
-            if (!File.Exists(inputPath))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Retrieve original dimensions
+                int originalWidth = djvu.Width;
+                int originalHeight = djvu.Height;
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Proportional scaling: double the width (height adjusts automatically)
+                djvu.ResizeWidthProportionally(originalWidth * 2, ResizeType.NearestNeighbourResample);
 
-            using (DjvuImage image = (DjvuImage)Image.Load(inputPath))
-            {
-                int originalWidth = image.Width;
-                int originalHeight = image.Height;
-                Console.WriteLine($"Original size: {originalWidth}x{originalHeight}");
-
-                int newWidth = originalWidth * 2; // proportional scaling factor of 2
-                image.ResizeWidthProportionally(newWidth, ResizeType.NearestNeighbourResample);
-
+                // Save the resized image as TIFF
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                image.Save(outputPath, tiffOptions);
+                djvu.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -44,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy DjVu documents into high‑resolution TIFF files for OCR or archival purposes, they can load the DjVu, double its dimensions proportionally, and save the result as a TIFF.
- * 2. When a publishing workflow requires enlarging DjVu pages to meet print‑ready specifications before exporting them as lossless TIFF images, this C# code provides the necessary proportional scaling and format conversion.
- * 3. When an e‑learning platform must generate larger preview images from compact DjVu lecture notes for responsive web display, the developer can retrieve the original size, apply proportional scaling, and output TIFF thumbnails.
- * 4. When a digital preservation system has to migrate DjVu files to a widely supported TIFF format while preserving aspect ratio, the snippet demonstrates how to resize width proportionally and save with Aspose.Imaging.
- * 5. When a medical imaging application needs to import DjVu scans, increase their resolution for detailed analysis, and store the result as a TIFF file compatible with downstream processing pipelines, this code handles the loading, scaling, and saving steps.
+ * 1. When a developer needs to import a scanned DjVu document, double its size while preserving aspect ratio, and store it as a high‑resolution TIFF for archival or printing purposes.
+ * 2. When a legal‑tech application must convert multi‑page DjVu case files into TIFF images with proportional scaling to meet court‑required image specifications.
+ * 3. When a digital library system processes DjVu e‑books, enlarges each page for better readability on high‑DPI displays, and saves the result as TIFF for compatibility with legacy viewers.
+ * 4. When an OCR pipeline requires DjVu source pages to be upscaled proportionally before converting them to TIFF, ensuring the text extraction engine receives sufficiently detailed raster images.
+ * 5. When a medical imaging workflow receives DjVu scans of patient records, needs to double the width while maintaining aspect ratio, and output TIFF files for integration with DICOM‑compatible software.
  */
