@@ -17,74 +17,77 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 
 ## Required Namespaces
 
-- `using System;` (231/477 files)
-- `using System.IO;` (231/477 files)
-- `using Aspose.Imaging;` (223/477 files) ← category-specific
-- `using Aspose.Imaging.ImageOptions;` (165/477 files) ← category-specific
-- `using Aspose.Imaging.ImageFilters.FilterOptions;` (135/477 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Png;` (53/477 files) ← category-specific
-- `using Aspose.Imaging.ImageFilters.Convolution;` (42/477 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Svg;` (30/477 files) ← category-specific
-- `using Aspose.Imaging.Sources;` (18/477 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Jpeg;` (7/477 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Tiff;` (7/477 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Apng;` (4/477 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Bmp;` (3/477 files) ← category-specific
-- `using System.Diagnostics;` (3/477 files)
-- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (2/477 files) ← category-specific
-- `using Aspose.Imaging.ImageFilters;` (2/477 files) ← category-specific
-- `using System.Drawing;` (2/477 files)
-- `using System.Threading.Tasks;` (2/477 files)
-- `using Aspose.Imaging.CoreExceptions.ImageFormats;` (2/477 files) ← category-specific
-- `using System.Net.Http;` (2/477 files)
-- `using System.Linq;` (1/477 files)
-- `using Aspose.Imaging.CoreExceptions;` (1/477 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Webp;` (1/477 files) ← category-specific
-- `using System.Threading;` (1/477 files)
-- `using Aspose.Imaging.Multithreading;` (1/477 files) ← category-specific
-- `using Aspose.Imaging.ProgressManagement;` (1/477 files) ← category-specific
-- `using System.Xml;` (1/477 files)
-- `using Aspose.Imaging.FileFormats.Pdf;` (1/477 files) ← category-specific
-- `using System.Collections.Generic;` (1/477 files)
+- `using System;` (231/465 files)
+- `using System.IO;` (231/465 files)
+- `using Aspose.Imaging;` (226/465 files) ← category-specific
+- `using Aspose.Imaging.ImageOptions;` (164/465 files) ← category-specific
+- `using Aspose.Imaging.ImageFilters.FilterOptions;` (136/465 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Png;` (48/465 files) ← category-specific
+- `using Aspose.Imaging.ImageFilters.Convolution;` (45/465 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Svg;` (28/465 files) ← category-specific
+- `using Aspose.Imaging.Sources;` (13/465 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff;` (8/465 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff.Enums;` (4/465 files) ← category-specific
+- `using System.Linq;` (4/465 files)
+- `using Aspose.Imaging.FileFormats.Jpeg;` (3/465 files) ← category-specific
+- `using System.Collections.Generic;` (3/465 files)
+- `using Aspose.Imaging.FileFormats.Bmp;` (2/465 files) ← category-specific
+- `using Aspose.Imaging.ImageFilters;` (2/465 files) ← category-specific
+- `using Aspose.Imaging.CoreExceptions;` (2/465 files) ← category-specific
+- `using System.Threading.Tasks;` (2/465 files)
+- `using System.Diagnostics;` (2/465 files)
+- `using Aspose.Imaging.CoreExceptions.ImageFormats;` (2/465 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Webp;` (2/465 files) ← category-specific
+- `using System.Drawing;` (1/465 files)
+- `using Aspose.Imaging.FileFormats.Svg.Graphics;` (1/465 files) ← category-specific
+- `using System.Threading;` (1/465 files)
+- `using Aspose.Imaging.Multithreading;` (1/465 files) ← category-specific
+- `using System.Text;` (1/465 files)
+- `using Aspose.Imaging.ProgressManagement;` (1/465 files) ← category-specific
+- `using System.Net.Http;` (1/465 files)
+- `using System.Xml;` (1/465 files)
+- `using System.Xml.Schema;` (1/465 files)
+- `using Aspose.Imaging.Brushes;` (1/465 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Tiff.PathResources;` (1/465 files) ← category-specific
 
 ## Files in this folder
 
 | File | Key APIs | Description |
 |------|----------|-------------|
-| [load-a-png-image-from-the-templates-folder-and-apply-a-predefined-5x5-blur-box-filter.cs](./load-a-png-image-from-the-templates-folder-and-apply-a-predefined-5x5-blur-box-filter.cs) | `RasterImage` | load a png image from the templates folder and apply a predefined 5x5 blur box f... |
-| [create-a-custom-3x3-convolution-matrix-and-apply-it-to-a-jpeg-image-loaded-from-disk.cs](./create-a-custom-3x3-convolution-matrix-and-apply-it-to-a-jpeg-image-loaded-from-disk.cs) | `JpegImage`, `RasterImage` | create a custom 3x3 convolution matrix and apply it to a jpeg image loaded from ... |
-| [validate-that-a-custom-7x7-kernel-has-odd-dimensions-before-applying-it-to-a-png-file.cs](./validate-that-a-custom-7x7-kernel-has-odd-dimensions-before-applying-it-to-a-png-file.cs) | `ConvolutionFilterOptions`, `RasterImage` | validate that a custom 7x7 kernel has odd dimensions before applying it to a png... |
-| [normalize-a-custom-kernel-so-its-coefficients-sum-to-one-and-apply-to-a-jpeg-image.cs](./normalize-a-custom-kernel-so-its-coefficients-sum-to-one-and-apply-to-a-jpeg-image.cs) | `JpegOptions`, `RasterImage` | normalize a custom kernel so its coefficients sum to one and apply to a jpeg ima... |
-| [adjust-kernel-coefficients-to-increase-brightness-while-applying-a-5x5-blur-to-a-bmp-image.cs](./adjust-kernel-coefficients-to-increase-brightness-while-applying-a-5x5-blur-to-a-bmp-image.cs) | `GaussianBlurFilterOptions`, `RasterImage` | adjust kernel coefficients to increase brightness while applying a 5x5 blur to a... |
-| [28794-apply-a-zero-sum-edge-detection-kernel-to-a-png-image-and-verify-black-background-with-highlighted-edges.cs](./28794-apply-a-zero-sum-edge-detection-kernel-to-a-png-image-and-verify-black-background-with-highlighted-edges.cs) | `PngOptions`, `RasterImage` | apply a zero sum edge detection kernel to a png image and verify black backgroun... |
-| [generate-an-emboss-effect-using-a-3x3-kernel-on-a-jpeg-image-and-export-to-tiff-format.cs](./generate-an-emboss-effect-using-a-3x3-kernel-on-a-jpeg-image-and-export-to-tiff-format.cs) | `ConvolutionFilterOptions`, `RasterImage`, `TiffOptions` | generate an emboss effect using a 3x3 kernel on a jpeg image and export to tiff ... |
-| [use-a-custom-5x5-kernel-to-compute-average-pixel-values-and-apply-as-a-smoothing-filter-on-png.cs](./use-a-custom-5x5-kernel-to-compute-average-pixel-values-and-apply-as-a-smoothing-filter-on-png.cs) | `PngOptions`, `RasterImage` | use a custom 5x5 kernel to compute average pixel values and apply as a smoothing... |
-| [apply-a-gaussian-blur-filter-with-sigma-1-5-to-a-bmp-image-and-save-as-png.cs](./apply-a-gaussian-blur-filter-with-sigma-1-5-to-a-bmp-image-and-save-as-png.cs) | `GaussianBlurFilterOptions`, `RasterImage` | apply a gaussian blur filter with sigma 1 5 to a bmp image and save as png |
-| [apply-a-motion-blur-filter-with-a-45-degree-angle-on-a-tiff-image-and-export-to-jpeg.cs](./apply-a-motion-blur-filter-with-a-45-degree-angle-on-a-tiff-image-and-export-to-jpeg.cs) | `JpegOptions`, `MotionWienerFilterOptions`, `TiffImage` | apply a motion blur filter with a 45 degree angle on a tiff image and export to ... |
-| [apply-a-motion-blur-filter-with-length-10-pixels-to-a-bmp-image-and-save-as-jpeg.cs](./apply-a-motion-blur-filter-with-length-10-pixels-to-a-bmp-image-and-save-as-jpeg.cs) | `MotionWienerFilterOptions`, `RasterImage` | apply a motion blur filter with length 10 pixels to a bmp image and save as jpeg |
-| [apply-a-motion-blur-filter-with-horizontal-direction-to-a-tiff-image-and-export-to-png.cs](./apply-a-motion-blur-filter-with-horizontal-direction-to-a-tiff-image-and-export-to-png.cs) | `MotionWienerFilterOptions`, `PngOptions`, `TiffImage` | apply a motion blur filter with horizontal direction to a tiff image and export ... |
-| [apply-a-predefined-blur-box-filter-of-size-3x3-to-an-svg-image-and-save-as-png.cs](./apply-a-predefined-blur-box-filter-of-size-3x3-to-an-svg-image-and-save-as-png.cs) | `ConvolutionFilterOptions`, `PngOptions`, `RasterImage` | apply a predefined blur box filter of size 3x3 to an svg image and save as png |
-| [apply-a-predefined-blur-box-filter-to-all-png-files-in-a-folder-and-output-jpegs.cs](./apply-a-predefined-blur-box-filter-to-all-png-files-in-a-folder-and-output-jpegs.cs) | `GaussianBlurFilterOptions`, `JpegOptions`, `RasterImage` | apply a predefined blur box filter to all png files in a folder and output jpegs |
-| [adjust-the-size-of-a-blur-box-kernel-from-3x3-to-7x7-to-increase-smoothing-on-bmp-file.cs](./adjust-the-size-of-a-blur-box-kernel-from-3x3-to-7x7-to-increase-smoothing-on-bmp-file.cs) | `BmpOptions`, `RasterImage` | adjust the size of a blur box kernel from 3x3 to 7x7 to increase smoothing on bm... |
-| [normalize-a-blur-kernel-so-its-total-sum-equals-one-and-apply-to-a-bmp-image-for-uniform-blur.cs](./normalize-a-blur-kernel-so-its-total-sum-equals-one-and-apply-to-a-bmp-image-for-uniform-blur.cs) | `BmpOptions`, `ConvolutionFilterOptions`, `RasterImage` | normalize a blur kernel so its total sum equals one and apply to a bmp image for... |
-| [normalize-a-custom-7x7-kernel-for-neutral-brightness-and-apply-to-a-jpeg-image-for-soft-focus.cs](./normalize-a-custom-7x7-kernel-for-neutral-brightness-and-apply-to-a-jpeg-image-for-soft-focus.cs) | `ConvolutionFilterOptions`, `JpegOptions`, `RasterImage` | normalize a custom 7x7 kernel for neutral brightness and apply to a jpeg image f... |
-| [normalize-a-3x3-sharpening-kernel-to-preserve-overall-image-brightness-before-applying-to-jpeg.cs](./normalize-a-3x3-sharpening-kernel-to-preserve-overall-image-brightness-before-applying-to-jpeg.cs) | `JpegOptions`, `RasterImage` | normalize a 3x3 sharpening kernel to preserve overall image brightness before ap... |
-| [create-a-deconvolution-filter-to-restore-a-previously-blurred-jpeg-image-and-save-as-png.cs](./create-a-deconvolution-filter-to-restore-a-previously-blurred-jpeg-image-and-save-as-png.cs) | `GaussWienerFilterOptions`, `PngOptions`, `RasterImage` | create a deconvolution filter to restore a previously blurred jpeg image and sav... |
-| [use-the-deconvolution-filter-to-reverse-a-motion-blur-effect-on-a-png-image-and-save-as-tiff.cs](./use-the-deconvolution-filter-to-reverse-a-motion-blur-effect-on-a-png-image-and-save-as-tiff.cs) | `MotionWienerFilterOptions`, `RasterImage`, `TiffOptions` | use the deconvolution filter to reverse a motion blur effect on a png image and ... |
-| [validate-that-the-sum-of-coefficients-in-a-custom-kernel-equals-one-to-avoid-brightness-shift.cs](./validate-that-the-sum-of-coefficients-in-a-custom-kernel-equals-one-to-avoid-brightness-shift.cs) | `RasterImage` | validate that the sum of coefficients in a custom kernel equals one to avoid bri... |
-| [28810-validate-that-a-custom-kernel-s-dimensions-are-odd-before-applying-a-deconvolution-filter-to-png.cs](./28810-validate-that-a-custom-kernel-s-dimensions-are-odd-before-applying-a-deconvolution-filter-to-png.cs) | `PngOptions`, `RasterImage` | validate that a custom kernel s dimensions are odd before applying a deconvoluti... |
-| [validate-that-a-custom-sharpening-kernel-s-sum-exceeds-one-to-achieve-brightness-increase-on-png-image.cs](./validate-that-a-custom-sharpening-kernel-s-sum-exceeds-one-to-achieve-brightness-increase-on-png-image.cs) | `PngOptions`, `RasterImage` | validate that a custom sharpening kernel s sum exceeds one to achieve brightness... |
-| [chain-a-sharpen-filter-followed-by-an-emboss-filter-on-a-svg-image-and-save-as-bmp.cs](./chain-a-sharpen-filter-followed-by-an-emboss-filter-on-a-svg-image-and-save-as-bmp.cs) | `BmpOptions`, `ConvolutionFilterOptions`, `PngOptions` | chain a sharpen filter followed by an emboss filter on a svg image and save as b... |
-| [chain-a-gaussian-blur-filter-followed-by-a-sharpen-filter-on-a-tiff-image-and-export-to-png.cs](./chain-a-gaussian-blur-filter-followed-by-a-sharpen-filter-on-a-tiff-image-and-export-to-png.cs) | `GaussianBlurFilterOptions`, `PngOptions`, `SharpenFilterOptions` | chain a gaussian blur filter followed by a sharpen filter on a tiff image and ex... |
-| [chain-three-filters-blur-edge-detection-and-sharpen-on-a-png-image-and-save-as-jpeg.cs](./chain-three-filters-blur-edge-detection-and-sharpen-on-a-png-image-and-save-as-jpeg.cs) | `ConvolutionFilterOptions`, `GaussianBlurFilterOptions`, `JpegOptions` | chain three filters blur edge detection and sharpen on a png image and save as j... |
-| [chain-a-blur-box-filter-then-an-emboss-filter-then-a-sharpen-filter-on-a-jpeg-image-for-complex-styling.cs](./chain-a-blur-box-filter-then-an-emboss-filter-then-a-sharpen-filter-on-a-jpeg-image-for-complex-styling.cs) | `ConvolutionFilterOptions`, `RasterImage`, `SharpenFilterOptions` | chain a blur box filter then an emboss filter then a sharpen filter on a jpeg im... |
-| [batch-process-a-collection-of-bmp-images-with-a-custom-edge-detection-kernel-and-output-jpegs.cs](./batch-process-a-collection-of-bmp-images-with-a-custom-edge-detection-kernel-and-output-jpegs.cs) | `JpegOptions`, `RasterImage` | batch process a collection of bmp images with a custom edge detection kernel and... |
-| [batch-apply-a-predefined-blur-box-filter-to-all-png-files-in-a-folder-and-output-jpegs.cs](./batch-apply-a-predefined-blur-box-filter-to-all-png-files-in-a-folder-and-output-jpegs.cs) | `GaussianBlurFilterOptions`, `JpegOptions`, `RasterImage` | batch apply a predefined blur box filter to all png files in a folder and output... |
-| [batch-apply-a-sharpen-filter-to-all-png-files-in-a-directory-and-overwrite-originals-safely.cs](./batch-apply-a-sharpen-filter-to-all-png-files-in-a-directory-and-overwrite-originals-safely.cs) | `RasterImage`, `SharpenFilterOptions` | batch apply a sharpen filter to all png files in a directory and overwrite origi... |
-| *...and 447 more files* | | [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/kernel-filters) |
+| [load-a-png-image-from-the-templates-folder-and-apply-a-predefined-5x5-blur-box-filter.cs](./load-a-png-image-from-the-templates-folder-and-apply-a-predefined-5x5-blur-box-filter.cs) | `GaussianBlurFilterOptions`, `RasterImage` | Load a PNG image from the templates folder and apply a predefined 5x5 blur box f... |
+| [create-a-custom-3x3-convolution-matrix-and-apply-it-to-a-jpeg-image-loaded-from-disk.cs](./create-a-custom-3x3-convolution-matrix-and-apply-it-to-a-jpeg-image-loaded-from-disk.cs) | `JpegOptions`, `RasterImage` | Create a custom 3x3 convolution matrix and apply it to a JPEG image loaded from ... |
+| [validate-that-a-custom-7x7-kernel-has-odd-dimensions-before-applying-it-to-a-png-file.cs](./validate-that-a-custom-7x7-kernel-has-odd-dimensions-before-applying-it-to-a-png-file.cs) | `ConvolutionFilterOptions`, `RasterImage` | Validate that a custom 7x7 kernel has odd dimensions before applying it to a PNG... |
+| [normalize-a-custom-kernel-so-its-coefficients-sum-to-one-and-apply-to-a-jpeg-image.cs](./normalize-a-custom-kernel-so-its-coefficients-sum-to-one-and-apply-to-a-jpeg-image.cs) | `ConvolutionFilterOptions`, `RasterImage` | Normalize a custom kernel so its coefficients sum to one and apply to a JPEG ima... |
+| [adjust-kernel-coefficients-to-increase-brightness-while-applying-a-5x5-blur-to-a-bmp-image.cs](./adjust-kernel-coefficients-to-increase-brightness-while-applying-a-5x5-blur-to-a-bmp-image.cs) | `GaussianBlurFilterOptions`, `RasterImage` | Adjust kernel coefficients to increase brightness while applying a 5x5 blur to a... |
+| [apply-a-zero-sum-edge-detection-kernel-to-a-png-image-and-verify-black-background-with-highlighted-edges.cs](./apply-a-zero-sum-edge-detection-kernel-to-a-png-image-and-verify-black-background-with-highlighted-edges.cs) | `ConvolutionFilterOptions`, `PngOptions`, `RasterImage` | Apply a zero‑sum edge detection kernel to a PNG image and verify black backgroun... |
+| [generate-an-emboss-effect-using-a-3x3-kernel-on-a-jpeg-image-and-export-to-tiff-format.cs](./generate-an-emboss-effect-using-a-3x3-kernel-on-a-jpeg-image-and-export-to-tiff-format.cs) | `RasterImage`, `TiffOptions` | Generate an emboss effect using a 3x3 kernel on a JPEG image and export to TIFF ... |
+| [use-a-custom-5x5-kernel-to-compute-average-pixel-values-and-apply-as-a-smoothing-filter-on-png.cs](./use-a-custom-5x5-kernel-to-compute-average-pixel-values-and-apply-as-a-smoothing-filter-on-png.cs) | `PngOptions`, `RasterImage` | Use a custom 5x5 kernel to compute average pixel values and apply as a smoothing... |
+| [apply-a-gaussian-blur-filter-with-sigma-1-5-to-a-bmp-image-and-save-as-png.cs](./apply-a-gaussian-blur-filter-with-sigma-1-5-to-a-bmp-image-and-save-as-png.cs) | `GaussianBlurFilterOptions`, `RasterImage` | Apply a Gaussian blur filter with sigma 1.5 to a BMP image and save as PNG. |
+| [apply-a-motion-blur-filter-with-a-45-degree-angle-on-a-tiff-image-and-export-to-jpeg.cs](./apply-a-motion-blur-filter-with-a-45-degree-angle-on-a-tiff-image-and-export-to-jpeg.cs) | `JpegOptions`, `MotionWienerFilterOptions`, `TiffImage` | Apply a motion blur filter with a 45 degree angle on a TIFF image and export to ... |
+| [apply-a-motion-blur-filter-with-length-10-pixels-to-a-bmp-image-and-save-as-jpeg.cs](./apply-a-motion-blur-filter-with-length-10-pixels-to-a-bmp-image-and-save-as-jpeg.cs) | `JpegOptions`, `MotionWienerFilterOptions`, `RasterImage` | Apply a motion blur filter with length 10 pixels to a BMP image and save as JPEG... |
+| [apply-a-motion-blur-filter-with-horizontal-direction-to-a-tiff-image-and-export-to-png.cs](./apply-a-motion-blur-filter-with-horizontal-direction-to-a-tiff-image-and-export-to-png.cs) | `MotionWienerFilterOptions`, `PngOptions`, `TiffImage` | Apply a motion blur filter with horizontal direction to a TIFF image and export ... |
+| [apply-a-predefined-blur-box-filter-of-size-3x3-to-an-svg-image-and-save-as-png.cs](./apply-a-predefined-blur-box-filter-of-size-3x3-to-an-svg-image-and-save-as-png.cs) | `ConvolutionFilterOptions`, `PngOptions`, `RasterImage` | Apply a predefined blur box filter of size 3x3 to an SVG image and save as PNG. |
+| [apply-a-predefined-blur-box-filter-to-all-png-files-in-a-folder-and-output-jpegs.cs](./apply-a-predefined-blur-box-filter-to-all-png-files-in-a-folder-and-output-jpegs.cs) | `GaussianBlurFilterOptions`, `RasterImage` | Apply a predefined blur box filter to all PNG files in a folder and output JPEGs... |
+| [adjust-the-size-of-a-blur-box-kernel-from-3x3-to-7x7-to-increase-smoothing-on-bmp-file.cs](./adjust-the-size-of-a-blur-box-kernel-from-3x3-to-7x7-to-increase-smoothing-on-bmp-file.cs) | `BmpOptions`, `RasterImage` | Adjust the size of a blur box kernel from 3x3 to 7x7 to increase smoothing on BM... |
+| [normalize-a-blur-kernel-so-its-total-sum-equals-one-and-apply-to-a-bmp-image-for-uniform-blur.cs](./normalize-a-blur-kernel-so-its-total-sum-equals-one-and-apply-to-a-bmp-image-for-uniform-blur.cs) | `BmpOptions`, `RasterImage` | Normalize a blur kernel so its total sum equals one and apply to a BMP image for... |
+| [normalize-a-custom-7x7-kernel-for-neutral-brightness-and-apply-to-a-jpeg-image-for-soft-focus.cs](./normalize-a-custom-7x7-kernel-for-neutral-brightness-and-apply-to-a-jpeg-image-for-soft-focus.cs) | `ConvolutionFilterOptions`, `JpegImage`, `RasterImage` | Normalize a custom 7x7 kernel for neutral brightness and apply to a JPEG image f... |
+| [normalize-a-3x3-sharpening-kernel-to-preserve-overall-image-brightness-before-applying-to-jpeg.cs](./normalize-a-3x3-sharpening-kernel-to-preserve-overall-image-brightness-before-applying-to-jpeg.cs) | `JpegOptions`, `RasterImage` | Normalize a 3x3 sharpening kernel to preserve overall image brightness before ap... |
+| [create-a-deconvolution-filter-to-restore-a-previously-blurred-jpeg-image-and-save-as-png.cs](./create-a-deconvolution-filter-to-restore-a-previously-blurred-jpeg-image-and-save-as-png.cs) | `MotionWienerFilterOptions`, `PngOptions`, `RasterImage` | Create a deconvolution filter to restore a previously blurred JPEG image and sav... |
+| [use-the-deconvolution-filter-to-reverse-a-motion-blur-effect-on-a-png-image-and-save-as-tiff.cs](./use-the-deconvolution-filter-to-reverse-a-motion-blur-effect-on-a-png-image-and-save-as-tiff.cs) | `RasterImage`, `TiffOptions` | Use the deconvolution filter to reverse a motion blur effect on a PNG image and ... |
+| [validate-that-the-sum-of-coefficients-in-a-custom-kernel-equals-one-to-avoid-brightness-shift.cs](./validate-that-the-sum-of-coefficients-in-a-custom-kernel-equals-one-to-avoid-brightness-shift.cs) | `ConvolutionFilterOptions`, `PngOptions`, `RasterImage` | Validate that the sum of coefficients in a custom kernel equals one to avoid bri... |
+| [validate-that-a-custom-kernel-s-dimensions-are-odd-before-applying-a-deconvolution-filter-to-png.cs](./validate-that-a-custom-kernel-s-dimensions-are-odd-before-applying-a-deconvolution-filter-to-png.cs) | `DeconvolutionFilterOptions`, `PngOptions`, `RasterImage` | Validate that a custom kernel's dimensions are odd before applying a deconvoluti... |
+| [validate-that-a-custom-sharpening-kernel-s-sum-exceeds-one-to-achieve-brightness-increase-on-png-image.cs](./validate-that-a-custom-sharpening-kernel-s-sum-exceeds-one-to-achieve-brightness-increase-on-png-image.cs) | `RasterImage`, `SharpenFilterOptions` | Validate that a custom sharpening kernel's sum exceeds one to achieve brightness... |
+| [chain-a-sharpen-filter-followed-by-an-emboss-filter-on-a-svg-image-and-save-as-bmp.cs](./chain-a-sharpen-filter-followed-by-an-emboss-filter-on-a-svg-image-and-save-as-bmp.cs) | `BmpOptions`, `ConvolutionFilterOptions`, `PngOptions` | Chain a sharpen filter followed by an emboss filter on a SVG image and save as B... |
+| [chain-a-gaussian-blur-filter-followed-by-a-sharpen-filter-on-a-tiff-image-and-export-to-png.cs](./chain-a-gaussian-blur-filter-followed-by-a-sharpen-filter-on-a-tiff-image-and-export-to-png.cs) | `GaussianBlurFilterOptions`, `PngOptions`, `SharpenFilterOptions` | Chain a Gaussian blur filter followed by a sharpen filter on a TIFF image and ex... |
+| [chain-three-filters-blur-edge-detection-and-sharpen-on-a-png-image-and-save-as-jpeg.cs](./chain-three-filters-blur-edge-detection-and-sharpen-on-a-png-image-and-save-as-jpeg.cs) | `ConvolutionFilterOptions`, `GaussianBlurFilterOptions`, `JpegOptions` | Chain three filters: blur, edge detection, and sharpen on a PNG image and save a... |
+| [chain-a-blur-box-filter-then-an-emboss-filter-then-a-sharpen-filter-on-a-jpeg-image-for-complex-styling.cs](./chain-a-blur-box-filter-then-an-emboss-filter-then-a-sharpen-filter-on-a-jpeg-image-for-complex-styling.cs) | `ConvolutionFilterOptions`, `JpegOptions`, `RasterImage` | Chain a blur box filter, then an emboss filter, then a sharpen filter on a JPEG ... |
+| [batch-process-a-collection-of-bmp-images-with-a-custom-edge-detection-kernel-and-output-jpegs.cs](./batch-process-a-collection-of-bmp-images-with-a-custom-edge-detection-kernel-and-output-jpegs.cs) | `JpegOptions` | Batch process a collection of BMP images with a custom edge detection kernel and... |
+| [batch-apply-a-predefined-blur-box-filter-to-all-png-files-in-a-folder-and-output-jpegs.cs](./batch-apply-a-predefined-blur-box-filter-to-all-png-files-in-a-folder-and-output-jpegs.cs) | `GaussianBlurFilterOptions`, `JpegOptions`, `RasterImage` | Batch apply a predefined blur box filter to all PNG files in a folder and output... |
+| [batch-apply-a-sharpen-filter-to-all-png-files-in-a-directory-and-overwrite-originals-safely.cs](./batch-apply-a-sharpen-filter-to-all-png-files-in-a-directory-and-overwrite-originals-safely.cs) | `RasterImage`, `SharpenFilterOptions` | Batch apply a sharpen filter to all PNG files in a directory and overwrite origi... |
+| *...and 435 more files* | | [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/26.7.0/kernel-filters) |
 
 ## Category Statistics
-- Total examples: 477
+- Total examples: 465
 - Failed: 0
 - Pass rate: 100.0%
 
@@ -145,96 +148,6 @@ All tasks passed ✅
 ## Related Categories  
 The Kernel Filters examples complement the **Color Adjustments** category, where you can combine tone‑mapping with convolution kernels for richer visual effects. They also intersect with the **Image Transformations** group, enabling you to apply kernel‑based sharpening after geometric operations such as rotation or scaling. Additionally, the **File Format Conversions** section often benefits from kernel filtering to preserve quality when converting between raster formats, making it easy to integrate these techniques into broader image‑processing workflows.
 
-
-## Developer Q&A
-
-### Q: How to create a custom 3x3 convolution matrix and apply it to a JPEG image in .NET C#?
-Use **ConvolutionFilterOptions** to define a 3x3 kernel and call **RasterImage.ApplyFilter** on the loaded JPEG.  
-→ See: `create-a-custom-3x3-convolution-matrix-and-apply-it-to-a-jpeg-image-loaded-from-disk.cs`
-
-### Q: How do I normalize a custom kernel so its coefficients sum to one before applying it to a JPEG in C#?
-Create a **ConvolutionFilterOptions** instance, set the kernel values, then divide each coefficient by the total sum (or set `Normalize = true`). Apply the filter with **RasterImage.ApplyFilter**.  
-→ See: `normalize-a-custom-kernel-so-its-coefficients-sum-to-one-and-apply-to-a-jpeg-image.cs`
-
-### Q: How to apply a zero‑sum edge detection kernel to a PNG image using Aspose.Imaging in .NET?
-Define a zero‑sum kernel in **ConvolutionFilterOptions**, then invoke **RasterImage.ApplyFilter** on the PNG image. The resulting image shows black background with highlighted edges.  
-→ See: `apply-a-zero-sum-edge-detection-kernel-to-a-png-image-and-verify-black-background-with-highlighted-edges.cs`
-
-### Q: How do I change the blur box kernel size from 3x3 to 7x7 for more smoothing on a BMP in C#?
-Set **GaussianBlurFilterOptions.KernelSize** (or **ConvolutionFilterOptions**) to a 7x7 size and apply it with **RasterImage.ApplyFilter** on the BMP.  
-→ See: `adjust-the-size-of-a-blur-box-kernel-from-3x3-to-7x7-to-increase-smoothing-on-bmp-file.cs`
-
-### Q: How to apply a Gaussian blur filter with sigma 1.5 to a BMP image and save as PNG in .NET?
-Instantiate **GaussianBlurFilterOptions**, set `Sigma = 1.5`, apply the filter via **RasterImage.ApplyFilter**, then save the result using **Image.Save** with **PngOptions**.  
-→ See: `apply-a-gaussian-blur-filter-with-sigma-1-5-to-a-bmp-image-and-save-as-png.cs`
-
-
-
-### Q: How can I load an SVG, rasterize it, apply a Gaussian blur, and save the result as PNG using Aspose.Imaging in C#?  
-Load the SVG with `Image.Load`, rasterize it, apply `new GaussianBlurFilterOption(radius, sigma)` via `image.Filter`, then save with `PngOptions`. → See: `add-a-readme-example-that-walks-through-loading-an-svg-applying-gaussian-blur-and-saving.cs`
-
-### Q: How do I apply a blur filter to a WebP image and write the processed image as a PNG file with Aspose.Imaging for .NET?  
-Load the WebP using `Image.Load`, call `image.Filter(new BlurFilterOption(radius))`, and save the output with `new PngOptions()`. → See: `apply-a-blur-filter-to-a-webp-image-and-write-the-processed-image-to-a-new-file.cs`
-
-### Q: How can I use a custom convolution kernel with negative coefficients to sharpen a PNG image in C# using Aspose.Imaging?  
-Create a `ConvolutionFilterOption` supplying the kernel array (including negative values) and invoke `image.Filter` on the loaded PNG before saving. → See: `apply-a-custom-kernel-with-negative-coefficients-to-create-a-sharpening-effect-on-a-png.cs`
-
-### Q: How do I perform deconvolution on an EMF file and save the processed raster image using Aspose.Imaging in C#?  
-Load the EMF with `Image.Load`, rasterize it to a bitmap, apply `new DeconvolutionFilterOption()` via `image.Filter`, then save the result with appropriate image options. → See: `apply-a-deconvolution-filter-to-an-emf-image-and-write-the-processed-output-to-disk.cs`
-
-### Q: How can I apply a Gaussian blur to a DNG raw image and export it as PNG using Aspose.Imaging for .NET?  
-Load the DNG using `Image.Load` (optionally with `ImageLoadOptions`), apply `new GaussianBlurFilterOption(radius, sigma)` through `image.Filter`, and save the output with `PngOptions`. → See: `apply-a-gaussian-blur-filter-to-a-dng-image-and-write-the-processed-output-to-a-file.cs`
-
-### Q: How can I apply a motion blur filter to a WMF image and save the result as PNG using Aspose.Imaging for .NET?  
-Use `Image.Load` to open the WMF, then add a `MotionBlurFilterOption` to the image’s `FilterOptions` collection, and finally save with `PngOptions`. → See: `apply-a-motion-blur-filter-to-a-wmf-image-and-write-the-processed-image-to-a-new-file.cs`
-
-### Q: How do I sharpen a DICOM image with Aspose.Imaging in C# and persist the processed file as DICOM?  
-Load the DICOM via `Image.Load`, apply a `SharpenFilterOption` through the image’s `FilterOptions`, and save using `DicomOptions`. → See: `apply-a-sharpen-filter-to-a-dicom-image-and-persist-the-processed-image-to-storage.cs`
-
-### Q: How can I use a built‑in kernel filter (e.g., Emboss) from Aspose.Imaging’s filter set on a PNG image?  
-After loading the PNG with `Image.Load`, add the desired `ConvolutionFilterOption` (such as `EmbossFilterOption`) to the image’s `FilterOptions`, then save the output. → See: `apply-a-kernel-filter-from-the-image-processing-filter-set-to-the-target-image.cs`
-
-### Q: How do I rasterize an EPS file to PNG, apply an edge‑detection filter, and save the processed image using Aspose.Imaging?  
-Load the EPS with `Image.Load`, rasterize it to a temporary PNG, apply an `EdgeDetectionFilterOption` via `FilterOptions`, and save the final PNG. → See: `apply-an-edge-detection-filter-to-an-eps-image-and-save-the-processed-output-to-a-file.cs`
-
-### Q: How can I load a DNG raw image with ImageLoadOptions before applying a Gaussian blur in Aspose.Imaging for C#?  
-Create an `ImageLoadOptions` instance for the DNG, pass it to `Image.Load`, then add a `GaussianBlurFilterOption` to the image’s `FilterOptions` and save as PNG. → See: `apply-a-gaussian-blur-filter-to-a-dng-image-and-write-the-processed-output-to-a-file.cs`
-
-### Q: How can I rasterize an EMF file to PNG before applying a deconvolution filter using Aspose.Imaging in C#?  
-Load the EMF with `Image.Load`, save it to a temporary PNG via `image.Save(tempPath,
-## Operations Covered
-- Load an SVG file  
-- Rasterize SVG to a raster image  
-- Apply Gaussian blur filter  
-- Apply predefined 3×3 box blur filter  
-- Apply motion‑blur effect  
-- Apply deconvolution filter to JPEG2000 image  
-- Apply generic blur filter to EPS image  
-- Apply sharpening filter to APNG image  
-- Save processed image as PNG  
-
-## Supported Formats
-- **SVG** – loaded and rasterized before filtering  
-- **PNG** – used as output format for most examples (and as temporary raster file)  
-- **EPS** – loaded, rasterized, then blurred  
-- **JPEG2000** – loaded and processed with deconvolution filter  
-- **CMX** – loaded and blurred (output saved as PNG)  
-- **WebP** – loaded and processed with motion blur, saved as PNG  
-- **APNG** – loaded and sharpened, saved as APNG  
-
-## API Classes Used
-- `Image` — base class for loading any supported image format.  
-- `Image.Load(string path)` — static method that reads an image file into an `Image` object.  
-- `PngOptions` — specifies PNG‑specific saving options, including rasterization settings.  
-- `SvgRasterizationOptions` — defines how an SVG is rasterized (size, background, etc.).  
-- `GaussianBlurFilterOption` (from `ImageFilters.FilterOptions`) — configures a Gaussian blur to be applied to a raster image.  
-- `BoxBlurFilterOption` — configures a predefined 3×3 box blur filter.  
-- `MotionBlurFilterOption` — configures a motion‑blur effect with direction and distance parameters.  
-- `DeconvolutionFilterOption` — configures a deconvolution filter for sharpening or restoring JPEG2000 images.  
-- `SharpenFilterOption` — configures a sharpening filter for raster images.  
-- `RasterImage` (implied cast) — raster image type that supports filter operations.  
-- `PngImage` / `WebPImage` / `EpsImage` / `Jpeg2000Image` / `CmxImage` / `SvgImage` (from respective `FileFormats` namespaces) — concrete image classes representing specific file formats.
-
 <!-- AUTOGENERATED:START -->
-Updated: 2026-06-27 | Run: `20260627_032626` | Examples: 477
+Updated: 2026-07-22 | Run: `20260722_085233` | Examples: 465
 <!-- AUTOGENERATED:END -->
