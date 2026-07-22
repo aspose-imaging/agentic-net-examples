@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dng;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -10,42 +11,40 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-            if (!Directory.Exists(inputDirectory))
+            if (!Directory.Exists(inputDir))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
                 return;
             }
 
-            if (!Directory.Exists(outputDirectory))
+            if (!Directory.Exists(outputDir))
             {
-                Directory.CreateDirectory(outputDirectory);
+                Directory.CreateDirectory(outputDir);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.dng");
-
-            foreach (string inputPath in files)
+            var dngFiles = Directory.GetFiles(inputDir, "*.dng");
+            foreach (var file in dngFiles)
             {
+                string inputPath = file;
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(file) + ".tif");
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".tif");
-
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                using (DngImage dng = (DngImage)Image.Load(inputPath))
                 {
-                    var dng = (Aspose.Imaging.FileFormats.Dng.DngImage)image;
                     dng.Resize(1024, 768, ResizeType.NearestNeighbourResample);
-                    dng.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    dng.Save(outputPath, tiffOptions);
                 }
             }
         }
@@ -58,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer needs to convert a large collection of raw DNG images into smaller 1024×768 TIFF files for quick preview or web publishing, this C# batch‑resize code using Aspose.Imaging can automate the process.
- * 2. When a digital asset management system must ingest raw camera files and store them as standardized TIFF thumbnails for cataloging, developers can use this example to resize and save each DNG in a single operation.
- * 3. When an e‑commerce platform wants to generate uniform product image previews from raw DNG files supplied by vendors, the code provides a fast way to batch resize and convert them to TIFF with Aspose.Imaging in .NET.
- * 4. When a scientific imaging workflow requires converting high‑resolution DNG microscopy images to lower‑resolution TIFFs for analysis software that only accepts TIFF input, this snippet handles the batch conversion and resizing automatically.
- * 5. When a mobile app backend needs to preprocess uploaded DNG photos by creating 1024×768 TIFF versions for storage efficiency, developers can integrate this C# routine to process all files in a folder using Aspose.Imaging’s Resize and TiffOptions features.
+ * 1. When a photography studio needs to convert a large collection of raw DNG files into web‑ready TIFF images sized to 1024×768 for client previews, they can use this C# batch resize code with Aspose.Imaging.
+ * 2. When an archival system must standardize incoming DNG scans by resizing them and storing them as lossless TIFFs for long‑term preservation, the example provides the required workflow.
+ * 3. When a mobile app backend processes user‑uploaded raw DNG photos and needs to generate smaller TIFF thumbnails for faster download, developers can apply this code to automate the conversion.
+ * 4. When a scientific imaging pipeline receives raw DNG data from microscopes and requires uniformly sized TIFF files for downstream analysis, the snippet shows how to batch resize and save them in .NET.
+ * 5. When an e‑commerce platform wants to bulk convert product raw images in DNG format to 1024×768 TIFF files for catalog publishing, this C# solution using Aspose.Imaging handles the task efficiently.
  */
