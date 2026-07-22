@@ -1,63 +1,50 @@
+// HOW-TO: Create Indexed PSD with Custom Color Palette in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Output file path (hard‑coded)
-            string outputPath = @"C:\Temp\indexed_output.psd";
+            // Hardcoded output path
+            string outputPath = "output.psd";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a custom palette (red, green, blue)
-            Aspose.Imaging.Color[] paletteColors = new Aspose.Imaging.Color[]
+            // Create a custom palette (red, green, blue, white, black)
+            var palette = new Aspose.Imaging.ColorPalette(new Aspose.Imaging.Color[]
             {
                 Aspose.Imaging.Color.Red,
                 Aspose.Imaging.Color.Green,
-                Aspose.Imaging.Color.Blue
-            };
-            IColorPalette customPalette = new Aspose.Imaging.ColorPalette(paletteColors);
+                Aspose.Imaging.Color.Blue,
+                Aspose.Imaging.Color.White,
+                Aspose.Imaging.Color.Black
+            });
 
-            // Configure PSD options for indexed mode
-            PsdOptions psdOptions = new PsdOptions
+            // Configure PSD options for indexed mode with the custom palette
+            PsdOptions options = new PsdOptions
             {
-                // Destination file
                 Source = new FileCreateSource(outputPath, false),
-
-                // 8 bits per pixel (256 possible indices)
-                ChannelBitsCount = 8,
-                ChannelsCount = 1,
-
-                // Assign the custom palette
-                Palette = customPalette,
-
-                // Indexed color mode (fallback to Bitmap if not supported)
-                ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Indexed,
-
-                // No compression
-                CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.Raw,
-
-                // PSD version 6 (default)
-                Version = 6
+                ColorMode = ColorModes.Indexed,
+                CompressionMethod = CompressionMethod.RLE,
+                Version = 5,
+                Palette = palette,
+                ChannelBitsCount = 8,               // 8 bits per channel
+                ChannelsCount = (short)1            // Indexed images use a single channel
             };
 
-            // Create a 100 × 100 indexed PSD image
-            using (Image image = Image.Create(psdOptions, 100, 100))
+            // Create a new PSD image (200x200 pixels) with the specified options
+            using (Aspose.Imaging.Image psdImage = Aspose.Imaging.Image.Create(options, 200, 200))
             {
-                // The image is initially filled with the first palette entry (red)
-                // Save writes the image to the path defined in Source
-                image.Save();
+                // Since the source is bound to a file, simply call Save()
+                psdImage.Save();
             }
-
-            Console.WriteLine($"Indexed PSD image created at: {outputPath}");
         }
         catch (Exception ex)
         {
@@ -68,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PSD file with a limited color set for a web‑based design tool, they can use this code to create a 100 × 100 indexed‑mode image with a custom red‑green‑blue palette.
- * 2. When exporting thumbnail previews from a graphics pipeline that must be compatible with Photoshop’s older version 6 PSD format, this snippet creates an indexed PSD with no compression for fast loading.
- * 3. When building a batch process that programmatically produces color‑indexed Photoshop layers for printing proofs, the code demonstrates how to set ChannelBitsCount, ChannelsCount, and a custom palette in C#.
- * 4. When integrating Aspose.Imaging into a C# application that needs to store image data in a small‑size PSD file for archival, the example shows how to use FileCreateSource and raw compression to keep the file lightweight.
- * 5. When testing image‑processing algorithms that rely on palette‑based color mapping, developers can use this example to create a controlled PSD image where each pixel initially uses the first palette entry (red).
+ * 1. When you need to generate a small‑size PSD file for a web preview using a limited set of colors.
+ * 2. When exporting programmatically created graphics to Photoshop with an indexed color mode to preserve a specific palette.
+ * 3. When automating batch creation of PSD assets for a game UI where only a few colors are required.
+ * 4. When integrating Aspose.Imaging into a C# service that must produce PSD files with RLE compression and a custom palette for consistent branding.
+ * 5. When converting data visualizations into PSD format while controlling file size by using an 8‑bit indexed channel.
  */
