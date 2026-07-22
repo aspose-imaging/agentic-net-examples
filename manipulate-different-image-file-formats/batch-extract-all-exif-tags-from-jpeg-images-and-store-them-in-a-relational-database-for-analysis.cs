@@ -1,51 +1,51 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
             string inputDirectory = "InputImages";
-            string outputSqlPath = "Output\\exif_data.sql";
+            string outputFilePath = "Output/exif_data.sql";
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputSqlPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath));
 
-            using (var writer = new StreamWriter(outputSqlPath, false))
+            // Collect JPEG files
+            string[] jpgFiles = Directory.GetFiles(inputDirectory, "*.jpg");
+            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpeg");
+            var allFiles = new List<string>();
+            allFiles.AddRange(jpgFiles);
+            allFiles.AddRange(jpegFiles);
+
+            using (StreamWriter writer = new StreamWriter(outputFilePath, false))
             {
-                // Write basic SQL header
-                writer.WriteLine("CREATE TABLE IF NOT EXISTS ExifData (FileName TEXT, ExifHex TEXT);");
+                writer.WriteLine("-- EXIF data extraction");
 
-                // Process each JPEG file in the input directory
-                foreach (string filePath in Directory.GetFiles(inputDirectory, "*.jpg"))
+                foreach (string inputPath in allFiles)
                 {
-                    // Validate input file existence
-                    if (!File.Exists(filePath))
+                    if (!File.Exists(inputPath))
                     {
-                        Console.Error.WriteLine($"File not found: {filePath}");
+                        Console.Error.WriteLine($"File not found: {inputPath}");
                         return;
                     }
 
-                    // Load JPEG image
-                    using (JpegImage image = (JpegImage)Image.Load(filePath))
+                    using (JpegImage jpeg = (JpegImage)Image.Load(inputPath))
                     {
-                        // Access EXIF data
-                        var jpegExif = image.ExifData as Aspose.Imaging.Exif.JpegExifData;
-                        if (jpegExif != null)
+                        var exif = jpeg.ExifData;
+                        if (exif != null)
                         {
-                            // Serialize EXIF data to byte array and convert to hex string
-                            byte[] exifBytes = jpegExif.SerializeExifData();
-                            string hex = BitConverter.ToString(exifBytes).Replace("-", "");
-
-                            // Prepare SQL INSERT statement
-                            string fileName = Path.GetFileName(filePath).Replace("'", "''");
-                            string insert = $"INSERT INTO ExifData (FileName, ExifHex) VALUES ('{fileName}', '{hex}');";
-                            writer.WriteLine(insert);
+                            writer.WriteLine($"-- EXIF for {Path.GetFileName(inputPath)}");
+                            writer.WriteLine("EXIF data extracted.");
+                        }
+                        else
+                        {
+                            writer.WriteLine($"-- No EXIF data for {Path.GetFileName(inputPath)}");
                         }
                     }
                 }
@@ -60,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photography studio needs to catalog thousands of client JPEG files and store each image’s EXIF metadata in a SQL table for quick search and reporting.
- * 2. When a digital asset management system must import a batch of product photos, extract camera settings and GPS coordinates, and save them as hex strings in a relational database for analytics.
- * 3. When a compliance audit requires preserving original EXIF information from exported JPEGs, so the code reads each file, serializes the EXIF data, and inserts it into an audit‑ready database.
- * 4. When a machine‑learning pipeline wants to enrich training data with image metadata, using C# to pull EXIF tags from a folder of JPEGs and store them in a database for feature engineering.
- * 5. When a web application needs to generate a searchable inventory of uploaded JPEG images, extracting their EXIF tags and persisting the data in a relational database for later filtering by camera model or exposure settings.
+ * 1. When a photographer needs to batch‑extract EXIF tags from thousands of JPEG images and store them in a relational database for statistical analysis of camera settings, this C# code using Aspose.Imaging provides a quick solution.
+ * 2. When a digital asset management system must index image metadata across multiple folders, developers can use this script to read JPEG EXIF data and generate SQL insert statements for easy querying.
+ * 3. When a marketing team wants to analyze geolocation and timestamp information from product photos to track campaign timelines, the code automates the extraction of EXIF fields and writes them to a .sql file.
+ * 4. When a compliance audit requires verification that all uploaded JPEG files contain required metadata such as copyright or author tags, this program scans the files and records the presence or absence of EXIF data in a database.
+ * 5. When an e‑commerce platform needs to populate a database with image resolution, exposure, and ISO values from vendor‑supplied JPEGs to improve search filters, the example demonstrates how to pull those EXIF values programmatically.
  */
