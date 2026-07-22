@@ -3,77 +3,38 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class LazyImage : IDisposable
-{
-    private readonly string _filePath;
-    private Image _image;
-    private bool _disposed;
-
-    public LazyImage(string filePath)
-    {
-        _filePath = filePath;
-    }
-
-    // Loads the image only when accessed
-    public Image Image
-    {
-        get
-        {
-            if (_image == null)
-            {
-                // Ensure the file can be loaded before attempting
-                if (!Image.CanLoad(_filePath))
-                {
-                    throw new InvalidOperationException($"Cannot load image from path: {_filePath}");
-                }
-                _image = Image.Load(_filePath);
-            }
-            return _image;
-        }
-    }
-
-    public void Dispose()
-    {
-        if (!_disposed)
-        {
-            _image?.Dispose();
-            _disposed = true;
-        }
-    }
-}
-
 class Program
 {
     static void Main()
     {
-        // Hardcoded paths
+        // Hard‑coded input and output paths
         string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output.jpg";
+        string outputPath = @"C:\Images\output.png";
 
         try
         {
-            // Input validation
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Lazy loading of the image
-            using (var lazyImg = new LazyImage(inputPath))
-            {
-                // Access the image to trigger loading
-                using (Image img = lazyImg.Image)
-                {
-                    // Example filter: no-op (placeholder for real processing)
-                    // If you wanted to apply a real filter, do it here.
+            // Lazy‑load the image – it will be loaded only when the filter is applied
+            Lazy<Image> lazyImage = new Lazy<Image>(() => Image.Load(inputPath));
 
-                    // Save the image using default options
-                    img.Save(outputPath);
-                }
+            // Apply a simple processing step (e.g., convert to PNG) after the image is loaded
+            using (Image image = lazyImage.Value)
+            {
+                // Example processing: no modification, just demonstrate lazy loading
+                // Additional processing (e.g., grayscale) could be added here
+
+                // Save the image using PNG options
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -85,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When processing a large batch of high‑resolution JPEG files on a server, a developer can use the LazyImage class to defer loading each image until a specific filter, such as sharpening or color correction, is actually applied, reducing memory consumption.
- * 2. In a desktop C# application that lets users preview PNG thumbnails before editing, lazy loading ensures the full image data is only read when the user selects a filter like Gaussian blur, improving UI responsiveness.
- * 3. For a cloud‑based image conversion service that supports multiple formats (BMP, TIFF, GIF), developers can wrap each incoming file in LazyImage so the image is loaded only when the conversion pipeline reaches the step that requires pixel manipulation.
- * 4. When implementing a custom workflow that conditionally applies watermarks to JPEGs based on metadata, the lazy‑loading pattern prevents unnecessary Image.Load calls for files that do not meet the criteria, saving CPU cycles.
- * 5. In a multi‑threaded C# image analysis tool that processes large satellite TIFF images, using LazyImage allows each thread to instantiate the wrapper without immediately loading the massive raster, loading the data only when the analysis filter (e.g., edge detection) is executed.
+ * 1. When processing large batches of high‑resolution JPEG photos and you want to defer loading each image until you actually apply a conversion to PNG, reducing memory usage.
+ * 2. When building a web service that receives image paths and only needs to load the file if a client requests a transformation such as grayscale or format conversion, using Lazy<Image> to avoid unnecessary I/O.
+ * 3. When implementing a background job that scans a directory for images but should only read each file when it is time to apply a watermark or other filter, leveraging lazy loading to improve throughput.
+ * 4. When creating a desktop application that previews thumbnails of images stored on disk and only loads the full image data when the user selects a file for editing or export to PNG.
+ * 5. When integrating Aspose.Imaging into a CI/CD pipeline that validates image assets and converts them to PNG only if they meet certain criteria, using lazy loading to skip loading files that fail early checks.
  */
