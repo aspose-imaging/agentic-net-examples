@@ -11,41 +11,34 @@ class Program
     {
         try
         {
-            // Input DjVu file path (relative)
-            string inputPath = Path.Combine("Input", "sample.djvu");
-
-            // Verify input file exists
+            // Hardcoded input path
+            string inputPath = "sample.djvu";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Open the DjVu file stream
-            using (Stream stream = File.OpenRead(inputPath))
+            // Output directory
+            string outputDir = "Output";
+            Directory.CreateDirectory(outputDir);
+
+            // Load DjVu document
+            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
             {
-                // Load DjVu image
-                using (DjvuImage djvuImage = new DjvuImage(stream))
+                // Configure PNG options with a custom filter type
+                PngOptions pngOptions = new PngOptions
                 {
-                    // Configure PNG options with a custom filter type
-                    PngOptions pngOptions = new PngOptions
-                    {
-                        FilterType = PngFilterType.Sub // Example filter type
-                    };
+                    FilterType = PngFilterType.Sub
+                };
 
-                    // Iterate through each page and save as PNG
-                    foreach (Image page in djvuImage.Pages)
-                    {
-                        // Cast to DjvuPage to access the page number
-                        DjvuPage djvuPage = (DjvuPage)page;
-                        string outputPath = Path.Combine("Output", $"page_{djvuPage.PageNumber}.png");
-
-                        // Ensure the output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the page as PNG using the custom options
-                        djvuPage.Save(outputPath, pngOptions);
-                    }
+                // Convert each page to PNG
+                for (int i = 0; i < djvuImage.Pages.Length; i++)
+                {
+                    var page = djvuImage.Pages[i];
+                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    page.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -58,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each page of a multi‑page DjVu document and generate high‑quality PNG images with a specific PNG filter (e.g., Sub) for downstream web publishing.
- * 2. When an archival system must convert scanned DjVu files into lossless PNG files while preserving page numbers for indexing and search.
- * 3. When a digital library wants to provide thumbnail previews of DjVu books by converting every page to PNG using Aspose.Imaging in a C# batch process.
- * 4. When a document‑processing pipeline requires converting DjVu pages to PNG with custom compression settings to meet size constraints before uploading to cloud storage.
- * 5. When a developer is building a Windows service that monitors an Input folder, reads DjVu files, and automatically saves each page as PNG with chosen filter types for further image analysis.
+ * 1. When a developer needs to extract every page from a multi‑page DjVu document and save them as PNG files using a custom PNG filter to improve compression and image quality.
+ * 2. When an archival system must convert scanned DjVu files into PNG thumbnails for web preview while specifying the PNG filter type for optimal file size.
+ * 3. When a digital publishing workflow requires batch conversion of DjVu ebooks into PNG assets because the target e‑reader only supports PNG format.
+ * 4. When a document management application programmatically loads a DjVu file, applies a custom PngOptions filter (e.g., Sub) and stores each page as a separate PNG for downstream image analysis.
+ * 5. When a C# service automates the conversion of DjVu invoices into PNG images to feed a third‑party OCR engine that expects PNG input with specific filter settings.
  */
