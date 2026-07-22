@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -11,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = Path.Combine("templates", "sample.svg");
-            string outputPath = Path.Combine("output", "sample.png");
+            string inputPath = "templates/example.svg";
+            string outputPath = "output/example.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,25 +23,22 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image using Image.Load
+            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare rasterization options for PNG output
+                // Set up rasterization options for PNG conversion
                 var rasterizationOptions = new SvgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
-
                 var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterizationOptions
                 };
 
-                // Save the rasterized image to PNG
+                // Save the rasterized image as PNG
                 image.Save(outputPath, pngOptions);
             }
-
-            Console.WriteLine($"SVG image loaded from '{inputPath}' and saved as PNG to '{outputPath}'.");
         }
         catch (Exception ex)
         {
@@ -53,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate thumbnail previews of user‑uploaded SVG logos stored in a “templates” folder, it can load the SVG with Image.Load and rasterize it to PNG for fast display.
- * 2. When an e‑commerce platform wants to convert product vector illustrations (SVG files) into high‑resolution PNG images for email newsletters, this code loads the SVG and saves it as PNG with the correct page size.
- * 3. When a reporting tool must embed company‑branded SVG icons into PDF reports that only support raster images, developers can use Image.Load to read the SVG from the templates directory and export it as PNG.
- * 4. When a desktop publishing software automates batch processing of SVG assets into PNG assets for print‑ready PDFs, the code loads each SVG from the templates folder and saves a rasterized PNG version.
- * 5. When a CI/CD pipeline validates that SVG design assets in the “templates” repository are renderable by converting them to PNG and checking the output, Image.Load is used to read the SVG before saving it as PNG.
+ * 1. When a developer needs to convert an SVG template stored in the project’s “templates” folder into a PNG file for web display or email attachments.
+ * 2. When an application must verify the existence of an SVG asset before rasterizing it to a bitmap format to avoid runtime errors.
+ * 3. When a C# service generates dynamic graphics by loading vector SVG logos and saving them as PNGs with the same dimensions for consistent branding.
+ * 4. When a batch processing tool has to ensure the output directory exists and then rasterize multiple SVG files to PNG using Aspose.Imaging’s SvgRasterizationOptions.
+ * 5. When troubleshooting image conversion, a developer uses a try‑catch block around Image.Load and image.Save to capture and log any exceptions during SVG to PNG transformation.
  */
