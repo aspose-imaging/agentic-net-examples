@@ -1,12 +1,11 @@
+// HOW-TO: Check Magic Wand Low Threshold Mask on Uniform PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
@@ -14,8 +13,8 @@ class Program
     {
         try
         {
-            string inputPath = "uniform_image.png";
-            string outputPath = "mask_output.png";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -27,54 +26,29 @@ class Program
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                var exportOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                // Create a mask with a very low threshold on a uniform image
+                ImageBitMask mask = MagicWandTool.Select(image, new MagicWandSettings(0, 0) { Threshold = 1 });
 
-                var maskingOptions = new AutoMaskingGraphCutOptions
+                bool anyOpaque = false;
+                for (int y = 0; y < mask.Height && !anyOpaque; y++)
                 {
-                    CalculateDefaultStrokes = true,
-                    FeatheringRadius = 1,
-                    Method = SegmentationMethod.GraphCut,
-                    Decompose = false,
-                    ExportOptions = exportOptions,
-                    BackgroundReplacementColor = Color.Transparent
-                };
-
-                var masking = new ImageMasking(image);
-                using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
-                {
-                    using (RasterImage mask = (RasterImage)maskingResult[1].GetMask())
+                    for (int x = 0; x < mask.Width; x++)
                     {
-                        int width = mask.Width;
-                        int height = mask.Height;
-                        var rect = new Rectangle(0, 0, width, height);
-                        int[] pixels = new int[width * height];
-                        mask.SaveArgb32Pixels(rect, pixels);
-
-                        bool hasContent = false;
-                        foreach (int pixel in pixels)
+                        if (mask.IsOpaque(x, y))
                         {
-                            if (pixel != 0)
-                            {
-                                hasContent = true;
-                                break;
-                            }
-                        }
-
-                        if (!hasContent)
-                        {
-                            Console.Error.WriteLine("Mask is empty: low threshold produced no foreground.");
-                        }
-                        else
-                        {
-                            mask.Save(outputPath, exportOptions);
-                            Console.WriteLine($"Mask saved to: {outputPath}");
+                            anyOpaque = true;
+                            break;
                         }
                     }
                 }
+
+                Console.WriteLine(anyOpaque ? "Mask is not empty." : "Mask is empty.");
+
+                // Apply the mask to the image
+                mask.Apply();
+
+                // Save the resulting image
+                image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
             }
         }
         catch (Exception ex)
@@ -86,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to ensure that the AutoMaskingGraphCutOptions with a very low threshold still generates a non‑empty alpha mask for a solid‑color PNG before applying background removal in a batch image‑processing pipeline.
- * 2. When testing a photo‑editing application that uses Aspose.Imaging’s GraphCut segmentation to create transparent cutouts, a developer validates that even a uniform‑color image does not result in an empty mask when the threshold is set near zero.
- * 3. When integrating automated product‑photo cleanup, a developer checks that low‑threshold masking does not mistakenly discard the entire image mask for a single‑color background, preserving the ability to replace it with a custom color.
- * 4. When building a quality‑assurance suite for image‑mask export to PNG with truecolor with alpha, a developer runs this code to confirm that the mask file contains pixel data despite the image being uniformly colored.
- * 5. When optimizing performance for large‑scale image segmentation, a developer uses this example to verify that reducing the threshold does not produce an empty mask on uniform images, ensuring consistent results across diverse input files.
+ * 1. When you need to ensure that a Magic Wand selection with a minimal threshold still selects pixels on a solid‑color PNG, preventing an empty mask.
+ * 2. When you want to programmatically verify that a low‑threshold mask contains at least one opaque pixel before applying it to an image.
+ * 3. When you are processing uniform background images and must avoid losing the alpha channel by accidentally creating an empty mask.
+ * 4. When you need to apply a validated mask to a raster image and save the result as a PNG with truecolor and alpha using Aspose.Imaging.
+ * 5. When you are building automated image‑processing pipelines that must handle error‑free mask creation on images with no color variation.
  */
