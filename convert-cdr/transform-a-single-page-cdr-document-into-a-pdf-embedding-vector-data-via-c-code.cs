@@ -1,20 +1,20 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\sample.cdr";
-            string outputPath = @"C:\temp\sample.page0.pdf";
+            // Hardcoded input and output paths
+            string inputPath = "Input\\sample.cdr";
+            string outputPath = "Output\\sample.pdf";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,25 +24,31 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+            // Load the CDR document
+            using (Image image = Image.Load(inputPath))
             {
-                // Select the first page (index 0)
-                CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
+                // Cast to CdrImage to access pages
+                CdrImage cdrImage = (CdrImage)image;
 
-                // Prepare PDF export options with vector rasterization settings
+                // Get the first (single) page
+                int pageNumber = 0;
+                CdrImagePage imagePage = (CdrImagePage)cdrImage.Pages[pageNumber];
+
+                // Configure PDF options with vector rasterization settings
                 PdfOptions pdfOptions = new PdfOptions();
                 CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
-                    PageWidth = page.Width,
-                    PageHeight = page.Height
+                    SmoothingMode = SmoothingMode.None
                 };
                 pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the selected page as PDF
-                page.Save(outputPath, pdfOptions);
+                // Set page dimensions to match the CDR page size
+                pdfOptions.VectorRasterizationOptions.PageWidth = imagePage.Width;
+                pdfOptions.VectorRasterizationOptions.PageHeight = imagePage.Height;
+
+                // Save the page as PDF
+                imagePage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -54,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to export a single page from a CorelDRAW (CDR) file to a high‑fidelity PDF for client review, they can use this C# code with Aspose.Imaging to preserve vector data.
- * 2. When an automated document‑conversion service must generate PDF previews of individual pages from multi‑page CDR files without losing vector quality, the snippet demonstrates how to load, select, and save a page.
- * 3. When a .NET application integrates with a print‑workflow and requires converting a specific CDR page to PDF while controlling rasterization options such as TextRenderingHint and SmoothingMode, this code provides the exact steps.
- * 4. When a batch‑processing script needs to verify the existence of a CDR source, create the output folder, and reliably convert the first page to PDF using Aspose.Imaging’s CdrRasterizationOptions, the example shows the necessary error handling.
- * 5. When a developer is building a file‑conversion API that accepts CorelDRAW files and returns PDF pages with accurate dimensions and vector fidelity, this C# example illustrates the required Image.Load, page selection, and PdfOptions configuration.
+ * 1. When a developer needs to convert a single‑page CorelDRAW (CDR) design to a PDF for client‑ready documentation while preserving vector quality, they can use this C# code with Aspose.Imaging.
+ * 2. When an ASP.NET application must generate PDF invoices from CDR templates on the fly, this code provides the necessary rasterization options to keep text crisp and layout accurate.
+ * 3. When a batch‑processing service has to create PDF previews of individual CDR logo files for a marketing portal, the example shows how to load each page and save it as a vector‑based PDF.
+ * 4. When a CAD workflow requires PDF output that matches the exact dimensions of a CDR drawing, the code demonstrates setting page width and height via CdrRasterizationOptions.
+ * 5. When a document‑management system needs to validate and display CDR files by converting them to searchable PDFs, this snippet illustrates the straightforward C# conversion process.
  */
