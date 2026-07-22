@@ -2,9 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -24,9 +23,12 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (string.IsNullOrEmpty(outputDir))
+                outputDir = ".";
+            Directory.CreateDirectory(outputDir);
 
-            // Load the PNG image
+            // Load the PNG image as a raster image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
@@ -34,23 +36,20 @@ class Program
                 // Define a custom sharpening kernel with negative coefficients
                 double[,] kernel = new double[,]
                 {
-                    { 0, -1, 0 },
-                    { -1, 5, -1 },
-                    { 0, -1, 0 }
+                    { -1, -1, -1 },
+                    { -1,  9, -1 },
+                    { -1, -1, -1 }
                 };
 
-                // Apply the convolution filter using the custom kernel
+                // Create convolution filter options using the custom kernel
                 var filterOptions = new ConvolutionFilterOptions(kernel);
+
+                // Apply the filter to the entire image
                 raster.Filter(raster.Bounds, filterOptions);
 
-                // Prepare PNG save options with a bound source
-                var pngOptions = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-
-                // Save the processed image as PNG
-                raster.Save(outputPath, pngOptions);
+                // Save the processed image as PNG with default options
+                var saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -62,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to enhance the details of product photos in PNG format before uploading them to an e‑commerce site, they can apply a custom sharpening kernel with negative coefficients using Aspose.Imaging for .NET.
- * 2. When an automated image‑processing pipeline must improve the readability of scanned PNG documents by emphasizing edges, the convolution filter with a negative‑coefficient kernel provides a fast sharpening step in C#.
- * 3. When a photo‑editing desktop application requires a one‑click “sharpen” feature for PNG images, the code demonstrates how to load, filter, and save the image with Aspose’s RasterImage and ConvolutionFilterOptions.
- * 4. When a batch job processes PNG screenshots from a UI test suite and needs to make UI elements crisper for visual verification, the custom kernel sharpens each image without external tools.
- * 5. When a developer integrates image enhancement into a C# web service that returns sharpened PNG thumbnails, the example shows how to perform the convolution filter and stream the result directly to a file.
+ * 1. When a developer needs to enhance the visual clarity of scanned PNG documents before OCR by applying a custom convolution kernel with negative coefficients using Aspose.Imaging in C#.
+ * 2. When a developer wants to sharpen product PNG images for an e‑commerce site while preserving lossless quality by using a custom kernel filter in Aspose.Imaging.
+ * 3. When a developer must improve edge detail in satellite PNG imagery for GIS analysis by applying a negative‑coefficient sharpening kernel via Aspose.Imaging’s ConvolutionFilterOptions.
+ * 4. When a developer needs to restore crisp edges in low‑resolution PNG screenshots for technical documentation using a custom sharpening kernel in C#.
+ * 5. When a developer integrates PNG UI assets into a game and requires a custom sharpening filter to make the graphics appear sharper on high‑DPI displays using Aspose.Imaging.
  */
