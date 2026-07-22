@@ -11,16 +11,14 @@ class Program
         try
         {
             // Hardcoded input CDR files
-            string[] inputPaths = {
+            string[] inputPaths = new[]
+            {
                 @"C:\Images\sample1.cdr",
                 @"C:\Images\sample2.cdr"
             };
 
             // Hardcoded output directory
             string outputDir = @"C:\Images\Converted";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
 
             foreach (var inputPath in inputPaths)
             {
@@ -31,17 +29,18 @@ class Program
                     return;
                 }
 
-                // Build output PNG path
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
-
-                // Ensure output directory exists (rule requirement)
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                 // Load the CDR image
                 using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
                 {
                     // Resize to 800x600 pixels
                     cdrImage.Resize(800, 600);
+
+                    // Determine output PNG path
+                    string outputPath = Path.Combine(outputDir,
+                        Path.GetFileNameWithoutExtension(inputPath) + ".png");
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save as PNG
                     PngOptions pngOptions = new PngOptions();
@@ -58,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a .NET developer needs to batch‑convert a collection of CorelDRAW (CDR) files into web‑friendly PNG images sized to 800 × 600 pixels for faster page loads.
- * 2. When an e‑commerce platform must automatically generate thumbnail PNG previews from designer‑provided CDR assets during product import.
- * 3. When a digital asset management system requires a scheduled job that reads multiple CDR files, resizes them to a standard 800 × 600 resolution, and stores the PNG versions for consistent catalog display.
- * 4. When a marketing automation tool has to transform client‑supplied CDR logos into 800 × 600 PNG files for inclusion in email campaigns and social media posts.
- * 5. When a desktop application needs to validate the existence of CDR source files, resize each to 800 × 600, and save them as PNG using Aspose.Imaging for .NET before archiving them in a shared folder.
+ * 1. When a graphic design studio needs to batch‑convert legacy CorelDRAW (.cdr) artwork into web‑ready PNG thumbnails sized to 800×600 for online portfolios.
+ * 2. When an e‑learning platform must automatically resize and transform multiple CDR lesson diagrams into PNG images for inclusion in HTML course pages.
+ * 3. When a document management system processes incoming CDR files and stores them as standardized 800×600 PNG previews to enable quick visual indexing.
+ * 4. When a marketing automation tool generates PNG banners from a set of CDR templates, ensuring each output matches the required 800×600 pixel dimensions for email campaigns.
+ * 5. When a cloud‑based image processing service receives CDR uploads and needs to resize them to 800×600 before saving them as PNG files for downstream analytics.
  */
