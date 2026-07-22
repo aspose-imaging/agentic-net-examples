@@ -7,39 +7,33 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.emf";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input\\sample.emf";
-            string outputPath = "Output\\sample.png";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure vector rasterization options for EMF to PNG conversion
-                EmfRasterizationOptions vectorOptions = new EmfRasterizationOptions
+                var pngOptions = new PngOptions
                 {
-                    PageSize = image.Size // Preserve original size
+                    ResolutionSettings = new ResolutionSetting(300, 300)
                 };
 
-                // Set PNG export options, including DPI (ResolutionSettings)
-                PngOptions pngOptions = new PngOptions
+                var rasterOptions = new EmfRasterizationOptions
                 {
-                    VectorRasterizationOptions = vectorOptions,
-                    ResolutionSettings = new ResolutionSetting(300, 300) // DPI X and Y
+                    PageSize = image.Size
                 };
 
-                // Save the image as PNG with the specified options
+                pngOptions.VectorRasterizationOptions = rasterOptions;
+
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -52,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a Windows desktop application needs to generate high‑resolution PNG thumbnails from vector‑based EMF icons for display on retina screens, a developer can use this code to rasterize the EMF at 300 DPI and save it as PNG.
- * 2. When a reporting service must embed vector graphics from legacy EMF files into PDF or web reports that only accept raster PNG images with a specific DPI, this snippet converts and resamples the EMF accordingly.
- * 3. When an automated build pipeline processes a batch of EMF logos and must output PNG assets with consistent 300 DPI resolution for print‑ready marketing materials, the code provides the necessary conversion.
- * 4. When a GIS mapping tool stores map symbols as EMF and needs to export them to PNG tiles at a defined DPI for use in web mapping services, this example shows how to perform the rasterization in C#.
- * 5. When a document conversion utility has to replace embedded EMF drawings with PNG images that preserve the original size and meet a required DPI for accessibility compliance, the developer can apply this code.
+ * 1. When a developer needs to convert a vector‑based EMF logo into a high‑resolution PNG for web display, preserving sharpness at 300 DPI.
+ * 2. When an application must generate printable PNG thumbnails from EMF diagrams for inclusion in PDF reports that require a specific DPI setting.
+ * 3. When a Windows desktop tool automates batch processing of EMF icons into PNG assets for mobile apps, ensuring consistent resolution across devices.
+ * 4. When a document management system extracts embedded EMF charts and saves them as PNG images with 300 DPI to meet corporate printing standards.
+ * 5. When a C# service receives user‑uploaded EMF files and needs to rasterize them to PNG with a defined DPI for storage in a cloud image repository.
  */
