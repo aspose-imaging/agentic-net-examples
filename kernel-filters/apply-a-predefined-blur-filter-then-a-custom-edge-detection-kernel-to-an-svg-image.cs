@@ -1,65 +1,60 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        // Check input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the SVG image
-            using (Image svgImage = Image.Load(inputPath))
+            // Hardcoded input and output paths
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Rasterize SVG to PNG in memory
-                using (var memoryStream = new MemoryStream())
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load SVG image from file stream
+            using (FileStream svgStream = File.OpenRead(inputPath))
+            using (SvgImage svgImage = new SvgImage(svgStream))
+            {
+                // Set up rasterization options for SVG to raster conversion
+                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions();
+
+                // Set up PNG save options with the rasterization settings
+                PngOptions pngOptions = new PngOptions
                 {
-                    var pngOptions = new PngOptions();
-                    var rasterOptions = new SvgRasterizationOptions
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Rasterize SVG into a memory stream
+                using (MemoryStream rasterStream = new MemoryStream())
+                {
+                    svgImage.Save(rasterStream, pngOptions);
+                    rasterStream.Position = 0;
+
+                    // Load the rasterized image as a RasterImage
+                    using (RasterImage rasterImage = (RasterImage)Image.Load(rasterStream))
                     {
-                        PageSize = svgImage.Size
-                    };
-                    pngOptions.VectorRasterizationOptions = rasterOptions;
+                        // Apply Gaussian blur filter
+                        rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                    svgImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
+                        // Apply a sharpen filter (used here as a simple edge‑detection kernel)
+                        rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                    // Load the rasterized image
-                    using (Image rasterImageContainer = Image.Load(memoryStream))
-                    {
-                        var rasterImage = (RasterImage)rasterImageContainer;
-
-                        // Apply predefined Gaussian blur filter
-                        rasterImage.Filter(rasterImage.Bounds,
-                            new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-
-                        // Apply custom edge‑detection kernel
-                        double[,] edgeKernel = new double[,]
-                        {
-                            { -1, -1, -1 },
-                            { -1,  8, -1 },
-                            { -1, -1, -1 }
-                        };
-                        rasterImage.Filter(rasterImage.Bounds,
-                            new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(edgeKernel));
-
-                        // Save the final image
-                        rasterImage.Save(outputPath, new PngOptions());
+                        // Save the processed image
+                        rasterImage.Save(outputPath);
                     }
                 }
             }
@@ -73,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a stylized thumbnail of an SVG icon by softening details with a Gaussian blur before highlighting its outlines with an edge‑detection kernel for a web gallery.
- * 2. When a C# application must preprocess vector graphics for OCR by converting SVG to raster PNG, applying blur to reduce noise, and then extracting sharp edges to improve character segmentation.
- * 3. When a reporting tool requires converting scalable diagrams into printable PNGs with a subtle blur effect followed by edge enhancement to make lines stand out on high‑resolution PDFs.
- * 4. When a game asset pipeline automates the creation of sprite sheets from SVG assets, using a blur filter to create a glow effect and an edge‑detection filter to generate a contrasting outline for UI overlays.
- * 5. When a machine‑learning dataset needs labeled edge maps from vector illustrations, developers can rasterize the SVG, blur to smooth gradients, and apply a custom kernel to produce clear edge images for training segmentation models.
+ * 1. When a web developer wants to generate a blurred background thumbnail from an SVG logo and then highlight its edges for a hover effect in a responsive UI.
+ * 2. When an e‑learning platform needs to preprocess SVG diagrams by softening details with Gaussian blur and then extracting outlines to create printable PNG worksheets.
+ * 3. When a GIS application must convert vector map symbols to raster PNG tiles, applying blur to reduce visual clutter and edge detection to emphasize boundaries for better map readability.
+ * 4. When a marketing automation tool automatically creates stylized product icons by blurring the original SVG artwork and then applying a custom edge‑detection kernel to produce a sharp, high‑contrast PNG for email campaigns.
+ * 5. When a medical imaging system imports SVG anatomical illustrations, applies blur to simulate depth of field and edge detection to accentuate structures before embedding the result in a patient report PDF.
  */
