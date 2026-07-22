@@ -9,36 +9,38 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = @"C:\Temp\sample.cmx";
-        string outputPath = @"C:\Temp\sample.png";
-
-        // Path safety checks as required
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Images\sample.cmx";
+            string outputPath = @"C:\Images\sample.png";
+
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the CMX image
             using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
             {
-                // Set background to fully transparent
+                // Set the background color to fully transparent
                 cmxImage.BackgroundColor = Aspose.Imaging.Color.Transparent;
-                cmxImage.HasBackgroundColor = true; // indicate that a background color is defined
+                // Indicate that the image does not have a background color
+                cmxImage.HasBackgroundColor = false;
 
                 // Prepare PNG save options with alpha channel support
                 PngOptions pngOptions = new PngOptions
                 {
+                    // Truecolor with alpha preserves transparency
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                // Save as PNG preserving transparency
+                // Save the image as PNG with the specified options
                 cmxImage.Save(outputPath, pngOptions);
             }
         }
@@ -51,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy CorelDRAW CMX vector drawings into web‑ready PNG images with a transparent background for use on responsive websites.
- * 2. When an automated batch process must replace the solid background of CMX files with full alpha transparency before embedding the graphics in a mobile app UI.
- * 3. When a document‑generation system has to preserve the original CMX artwork while exporting it as a PNG with an alpha channel for inclusion in PDF reports.
- * 4. When a graphics pipeline requires programmatic control over the CMX background color to make it transparent and then save the result as a PNG for printing on transparent media.
- * 5. When a C# application integrates Aspose.Imaging to dynamically render CMX drawings with no background so they can be layered over other images in a photo‑editing tool.
+ * 1. When converting legacy CorelDRAW CMX vector drawings to web‑ready PNG images that need a transparent background for overlay on HTML pages.
+ * 2. When extracting graphics from a CMX file for use in a mobile app and the developer must preserve transparency by saving as PNG with an alpha channel.
+ * 3. When automating a batch process that removes the default CMX background color and generates PNG assets for a UI design system.
+ * 4. When integrating Aspose.Imaging in a C# service that receives CMX uploads and returns PNG thumbnails with no background for email newsletters.
+ * 5. When preparing print‑ready artwork from CMX files but need a PNG version with transparent background for compositing in Photoshop or other raster editors.
  */
