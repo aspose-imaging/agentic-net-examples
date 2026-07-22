@@ -8,34 +8,26 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.bmp";
-            string outputPath = @"C:\temp\output.txt";
+            // Hardcoded input path
+            string inputPath = @"C:\Images\sample.bmp";
 
-            // Verify input file exists
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load BMP image
-            using (BmpImage bmpImage = new BmpImage(inputPath))
+            // Load the BMP image
+            using (BmpImage bmp = new BmpImage(inputPath))
             {
                 // Retrieve pixel dimensions
-                int width = bmpImage.Width;
-                int height = bmpImage.Height;
+                int width = bmp.Width;
+                int height = bmp.Height;
 
                 // Output dimensions
                 Console.WriteLine($"Width: {width} px");
                 Console.WriteLine($"Height: {height} px");
-
-                // Example of using the output path (optional save or write)
-                // Here we simply write the dimensions to a text file
-                File.WriteAllText(outputPath, $"Width: {width} px{Environment.NewLine}Height: {height} px");
             }
         }
         catch (Exception ex)
@@ -47,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to validate that an uploaded BMP file meets required width and height constraints before further processing in a C# web application.
- * 2. When a desktop utility must generate a report of image sizes for a batch of BMP files stored on a local drive using Aspose.Imaging for .NET.
- * 3. When a game engine loads texture assets in BMP format and must retrieve their pixel dimensions to allocate appropriate GPU memory.
- * 4. When an automated script extracts BMP image dimensions to create thumbnails with correct aspect ratios in a C# image processing pipeline.
- * 5. When a document conversion service reads BMP files to embed their size metadata into a generated PDF using Aspose.Imaging.
+ * 1. When a developer needs to validate that a BMP file uploaded to a .NET web application meets specific size requirements before further processing.
+ * 2. When a desktop C# utility must read the width and height of a BMP image from the local file system to generate a thumbnail of the correct aspect ratio.
+ * 3. When an automated batch script processes a folder of BMP images and logs their pixel dimensions for quality‑control reporting.
+ * 4. When a game engine imports BMP textures and requires the exact pixel dimensions to allocate appropriate graphics buffers.
+ * 5. When a document conversion service reads BMP images to determine scaling factors for embedding them into PDF pages.
  */
