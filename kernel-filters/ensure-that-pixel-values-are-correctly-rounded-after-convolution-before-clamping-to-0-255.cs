@@ -7,29 +7,23 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output\\output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Load image and apply sharpen filter (convolution with rounding & clamping handled internally)
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
-
-                // Save result as PNG
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
                 PngOptions options = new PngOptions();
                 raster.Save(outputPath, options);
             }
@@ -43,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to automatically enhance user‑uploaded PNG photos before displaying them in a gallery, a developer can use this code to load the image, apply a sharpen filter with proper rounding and clamping, and save the improved version.
- * 2. When a desktop utility processes batches of scanned documents saved as PNG files and must improve text readability without introducing pixel overflow, this snippet provides a reliable way to sharpen each page while keeping pixel values within 0‑255.
- * 3. When an e‑commerce platform generates product thumbnails on the fly and wants to make the images appear crisper, the code demonstrates how to load the original PNG, apply a convolution‑based sharpen filter, and store the result for fast delivery.
- * 4. When a scientific imaging tool needs to preprocess PNG microscopy images by enhancing edge details while ensuring the pixel intensity stays valid, the example shows the correct C# approach using Aspose.Imaging’s FilterOptions.
- * 5. When a mobile backend service receives PNG screenshots and must automatically improve visual quality before caching them, this program illustrates how to perform rounding‑aware sharpening and safely write the output PNG.
+ * 1. When a developer needs to soften the edges of a PNG logo before embedding it in a web page, they can use this code to apply a Gaussian blur while preserving correct pixel rounding and clamping.
+ * 2. When preprocessing scanned documents in a C# application to reduce high‑frequency noise before OCR, the Gaussian blur filter ensures smoother grayscale values without overflow.
+ * 3. When generating thumbnail previews of user‑uploaded PNG images for a gallery, applying the blur can create a subtle background effect while guaranteeing pixel values stay within the 0‑255 range.
+ * 4. When creating a batch image processing tool that standardizes visual style across PNG assets for a mobile game, the code provides a repeatable way to blur textures with proper rounding of convolution results.
+ * 5. When integrating image enhancement into a .NET service that receives PNG files via API, the Gaussian blur filter prepares the images for further analysis by ensuring accurate pixel rounding before saving.
  */
