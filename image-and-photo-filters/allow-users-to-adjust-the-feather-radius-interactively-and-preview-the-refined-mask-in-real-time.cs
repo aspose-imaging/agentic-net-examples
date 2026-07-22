@@ -12,41 +12,37 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.jpg";
-            string outputPath = "output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             while (true)
             {
-                Console.Write("Enter feather radius (empty to quit): ");
+                Console.Write("Enter feather radius (0 to exit): ");
                 string line = Console.ReadLine();
-                if (string.IsNullOrWhiteSpace(line))
-                    break;
-
                 if (!int.TryParse(line, out int radius) || radius < 0)
                 {
-                    Console.WriteLine("Invalid radius. Please enter a non‑negative integer.");
+                    Console.WriteLine("Invalid input. Please enter a non‑negative integer.");
                     continue;
                 }
 
-                // Load source image
+                if (radius == 0)
+                    break;
+
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
-                    // Configure masking options with user‑specified feather radius
-                    var options = new GraphCutMaskingOptions
+                    var options = new AutoMaskingGraphCutOptions
                     {
+                        CalculateDefaultStrokes = true,
                         FeatheringRadius = radius,
                         Method = SegmentationMethod.GraphCut,
                         Decompose = false,
@@ -58,19 +54,15 @@ class Program
                         BackgroundReplacementColor = Color.Transparent
                     };
 
-                    // Perform masking
-                    using (MaskingResult results = new ImageMasking(image).Decompose(options))
+                    var results = new ImageMasking(image).Decompose(options);
+
                     using (RasterImage resultImage = (RasterImage)results[1].GetImage())
                     {
-                        // Save preview image with radius in filename
-                        string previewPath = Path.Combine(
-                            Path.GetDirectoryName(outputPath) ?? "",
-                            $"preview_{radius}.png");
-
-                        resultImage.Save(previewPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-                        Console.WriteLine($"Preview saved to: {previewPath}");
+                        resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                     }
                 }
+
+                Console.WriteLine($"Mask saved to {outputPath} with feather radius {radius}.");
             }
         }
         catch (Exception ex)
@@ -82,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to let users fine‑tune the softness of a background‑removal mask for e‑commerce product photos, they can use this interactive feather‑radius loop to generate PNGs with transparent edges.
- * 2. When building a desktop tool that lets designers preview how a soft‑edge mask will look on a portrait before exporting to PNG with an alpha channel, the code provides real‑time adjustment of the GraphCut feathering radius.
- * 3. When preparing images for print layouts where the transition between subject and background must be smooth, developers can employ this C# snippet to experiment with different FeatheringRadius values and instantly see the refined mask.
- * 4. When creating medical imaging applications that require precise segmentation of tissues with adjustable edge smoothing, the interactive console allows radiologists to set the GraphCutMaskingOptions feather radius and view the resulting mask in real time.
- * 5. When generating game assets that need feathered transparency for sprites or UI icons, developers can use this code to iteratively adjust the feather radius and export the result as a TruecolorWithAlpha PNG.
+ * 1. When a developer needs to let a user fine‑tune the edge softness of a cut‑out in a JPEG photo and instantly see the transparent PNG result for product photography.
+ * 2. When building a desktop tool that lets designers experiment with different feather radii to create smooth masks for images that will be layered in a UI mockup.
+ * 3. When implementing an automated batch‑processing UI where operators can adjust the GraphCut feathering radius before exporting each image as a PNG with an alpha channel.
+ * 4. When creating a C# console utility for e‑commerce sellers to remove backgrounds from product images and preview how varying feather radius affects the final transparent PNG.
+ * 5. When developing a proof‑of‑concept for an image‑editing plugin that requires real‑time feedback on mask refinement using Aspose.Imaging’s AutoMaskingGraphCutOptions.
  */

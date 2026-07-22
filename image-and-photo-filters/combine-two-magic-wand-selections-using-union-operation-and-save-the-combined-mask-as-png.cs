@@ -2,37 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
         string inputPath = "input.png";
-        string outputPath = "output.png";
+        string outputPath = "output_mask.png";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
         try
         {
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+            // Load the source image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                MagicWandTool
-                    .Select(image, new MagicWandSettings(120, 100))
-                    .Union(new MagicWandSettings(200, 150))
-                    .Apply();
+                // First magic wand selection at pixel (120, 100)
+                ImageBitMask mask1 = MagicWandTool.Select(image, new MagicWandSettings(120, 100));
 
-                image.Save(outputPath, new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha
-                });
+                // Second magic wand selection at pixel (300, 200)
+                ImageBitMask mask2 = MagicWandTool.Select(image, new MagicWandSettings(300, 200));
+
+                // Union of the two masks
+                ImageBitMask combinedMask = mask1.Union(mask2);
+
+                // Apply the combined mask to the image
+                combinedMask.Apply();
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                // Save the resulting image (mask applied) as PNG
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -44,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract and merge two separate regions of a PNG image—such as foreground objects selected by different color tolerances—using Aspose.Imaging’s Magic Wand tool and save the combined mask as a PNG with an alpha channel.
- * 2. When building an automated image‑masking pipeline that must combine selections from two coordinates (e.g., 120,100 and 200,150) into a single transparent overlay for further compositing in C#.
- * 3. When creating a batch process that validates the existence of input files, applies a union of Magic Wand selections, and outputs a true‑color‑with‑alpha PNG for use in web graphics or UI assets.
- * 4. When implementing a feature in a .NET application that lets users click two points on a raster image to select areas, merges those selections, and stores the result as a lossless PNG for later editing.
- * 5. When needing to programmatically generate a combined selection mask for scientific imaging or medical scans, using Aspose.Imaging’s MagicWandSettings to define tolerance and saving the mask in a PNG format that preserves transparency.
+ * 1. When a developer needs to isolate and merge two separate background regions in a PNG photograph for further editing, they can use the Magic Wand union to create a combined mask.
+ * 2. When generating a composite mask for a medical imaging scan where two distinct tissue areas must be highlighted together, the code merges the selections and saves the result as a PNG mask.
+ * 3. When preparing assets for a game, a programmer may want to combine two non‑contiguous sprite outlines into a single mask file to simplify collision detection.
+ * 4. When automating the removal of multiple logo watermarks from a scanned document, the union of two Magic Wand selections creates one mask that can be applied and exported as a PNG.
+ * 5. When building a batch‑processing tool that extracts and saves combined foreground objects from product photos, the union operation merges the selections and outputs a clean PNG mask for downstream workflows.
  */

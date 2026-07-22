@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Watermark;
 using Aspose.Imaging.Watermark.Options;
@@ -10,41 +11,43 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
+
+        // Validate input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.jpg";
-            string outputPath = "output/output.jpg";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the JPEG image
-            using (var image = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                var jpegImage = (JpegImage)image;
+                // Cast to JpegImage
+                JpegImage jpegImage = (JpegImage)image;
 
                 // Define the mask region (example ellipse)
-                var mask = new GraphicsPath();
-                var figure = new Figure();
+                GraphicsPath mask = new GraphicsPath();
+                Figure figure = new Figure();
+                // Example coordinates: x=100, y=100, width=200, height=150
                 figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 150)));
                 mask.AddFigure(figure);
 
-                // Configure Content-Aware Fill options with three attempts
+                // Configure Content Aware Fill options with three attempts
                 var options = new ContentAwareFillWatermarkOptions(mask)
                 {
                     MaxPaintingAttempts = 3
                 };
 
-                // Perform watermark removal
-                using (var result = WatermarkRemover.PaintOver(jpegImage, options))
+                // Remove watermark
+                using (RasterImage result = WatermarkRemover.PaintOver(jpegImage, options))
                 {
                     // Save the processed image
                     result.Save(outputPath);
@@ -60,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically erase a semi‑transparent logo or text watermark from a JPEG image before uploading it to a corporate website, they can use this C# Aspose.Imaging content‑aware fill routine with three painting attempts.
- * 2. When a photo‑editing application must clean up scanned receipts that contain a printed watermark, the code demonstrates how to define an elliptical mask and apply Aspose.Imaging’s ContentAwareFillWatermarkOptions to restore the original background.
- * 3. When a digital asset management system has to batch‑process product photos that include a branding watermark, this example shows how to load JPEG files, create a mask shape, and remove the watermark using WatermarkRemover.PaintOver in C#.
- * 4. When a developer is building a mobile‑friendly image‑optimization service that needs to remove watermarks from user‑uploaded JPEGs while preserving quality, the three‑attempt content‑aware fill algorithm ensures a more accurate fill of the masked area.
- * 5. When an e‑learning platform wants to strip out publisher watermarks from instructional JPEG screenshots before re‑hosting them, the snippet provides a straightforward way to programmatically mask the region and apply Aspose.Imaging’s content‑aware fill in .NET.
+ * 1. When a developer needs to automatically clean up scanned product photos that contain a semi‑transparent logo watermark in a JPEG file, they can use this C# Aspose.Imaging code with an elliptical mask and three content‑aware fill attempts to restore the original background.
+ * 2. When a web‑app processes user‑uploaded JPEG images and must remove a promotional watermark before displaying them in a gallery, the code provides a repeatable content‑aware fill algorithm that tries up to three painting passes for better results.
+ * 3. When a digital‑archiving system migrates legacy JPEG documents that have embedded watermarks and requires a reliable C# solution to erase them without manual editing, the ContentAwareFillWatermarkOptions with MaxPaintingAttempts = 3 ensures consistent cleanup.
+ * 4. When a batch‑processing tool needs to strip watermarks from a collection of marketing JPEG banners while preserving image quality, developers can employ the Aspose.Imaging WatermarkRemover with a custom ellipse mask and multiple fill attempts.
+ * 5. When an AI‑driven image‑analysis pipeline must feed clean JPEG frames into a model and the source images contain watermarks, this C# snippet removes the watermark using content‑aware fill and three attempts to minimize artifacts.
  */
