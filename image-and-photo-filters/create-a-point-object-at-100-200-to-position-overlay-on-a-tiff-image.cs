@@ -1,18 +1,21 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.tif";
+            string outputPath = "output.tif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,19 +27,28 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TIFF image
-            using (TiffImage image = (TiffImage)Image.Load(inputPath))
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Create a Point at (100, 200) for overlay positioning
+                // Create a Graphics instance for drawing
+                Graphics graphics = new Graphics(tiffImage);
+
+                // Create the overlay point at (100, 200)
                 Point overlayPoint = new Point(100, 200);
 
-                // Example overlay: draw a red rectangle at the point
-                Graphics graphics = new Graphics(image);
-                Pen pen = new Pen(Color.Red, 3);
-                Rectangle rect = new Rectangle(overlayPoint.X, overlayPoint.Y, 50, 50);
-                graphics.DrawRectangle(pen, rect);
+                // Example overlay: draw a red ellipse centered at the point
+                int ellipseRadius = 20;
+                Rectangle ellipseBounds = new Rectangle(
+                    overlayPoint.X - ellipseRadius,
+                    overlayPoint.Y - ellipseRadius,
+                    ellipseRadius * 2,
+                    ellipseRadius * 2);
 
-                // Save the modified image
-                image.Save(outputPath);
+                Pen redPen = new Pen(Color.Red, 5);
+                graphics.DrawEllipse(redPen, ellipseBounds);
+
+                // Save the modified image with TIFF options
+                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffImage.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to place a branding watermark or logo at the fixed coordinates (100,200) on a TIFF image using Aspose.Imaging for .NET.
- * 2. When generating printable forms that require a red rectangle to highlight a specific field on a scanned TIFF document at pixel position (100,200).
- * 3. When adding a GIS marker or annotation to a raster TIFF map by creating a Point overlay at (100,200) with C# graphics drawing.
- * 4. When building a document management workflow that stamps a verification box onto each TIFF page at the exact location (100,200).
- * 5. When automating quality‑control reports that draw a red bounding box around a defect region on a TIFF scan positioned at (100,200).
+ * 1. When a developer uses Aspose.Imaging for .NET to add a watermark or logo at a specific (100,200) coordinate on a TIFF document before printing or archiving.
+ * 2. When a GIS application built with C# and Aspose.Imaging for .NET must mark an exact location on a scanned map stored as a TIFF by drawing a red ellipse at point (100,200).
+ * 3. When an e‑commerce platform needs to highlight a product defect area on a high‑resolution TIFF photograph by overlaying a red shape at the (100,200) pixel position using Aspose.Imaging.
+ * 4. When a medical imaging system automates annotation of a radiology TIFF image with a visual cue at a calibrated point (100,200) via Aspose.Imaging's Graphics API.
+ * 5. When a document management workflow programmatically places a signature stamp at a fixed offset (100,200) on scanned TIFF contracts using Aspose.Imaging for .NET before saving the final file.
  */
