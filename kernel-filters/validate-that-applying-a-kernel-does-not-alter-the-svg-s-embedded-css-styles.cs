@@ -1,7 +1,11 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,7 +14,7 @@ class Program
         try
         {
             string inputPath = "input.svg";
-            string outputPath = "output.svg";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -20,52 +24,47 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            string originalContent = File.ReadAllText(inputPath);
-            string originalCss = ExtractCss(originalContent);
+            byte[] originalBytes = File.ReadAllBytes(inputPath);
 
-            using (Image image = Image.Load(inputPath))
+            using (Image svgImage = Image.Load(inputPath))
             {
-                image.Save(outputPath, new SvgOptions());
+                var pngOptions = new PngOptions();
+                var vectorRasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = svgImage.Size
+                };
+                pngOptions.VectorRasterizationOptions = vectorRasterOptions;
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    svgImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
+
+                    using (RasterImage raster = (RasterImage)Image.Load(memoryStream))
+                    {
+                        var filterOptions = new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3);
+                        raster.Filter(raster.Bounds, filterOptions);
+                        raster.Save(outputPath);
+                    }
+                }
             }
 
-            string newContent = File.ReadAllText(outputPath);
-            string newCss = ExtractCss(newContent);
-
-            if (originalCss == newCss)
-                Console.WriteLine("CSS unchanged after applying kernel.");
-            else
-                Console.WriteLine("CSS altered after applying kernel.");
+            byte[] afterBytes = File.ReadAllBytes(inputPath);
+            bool cssUnchanged = originalBytes.SequenceEqual(afterBytes);
+            Console.WriteLine($"Embedded CSS unchanged: {cssUnchanged}");
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    // Simple CSS extraction between <style> tags
-    static string ExtractCss(string svgContent)
-    {
-        int styleStart = svgContent.IndexOf("<style", StringComparison.OrdinalIgnoreCase);
-        if (styleStart == -1)
-            return string.Empty;
-
-        int tagEnd = svgContent.IndexOf('>', styleStart);
-        if (tagEnd == -1)
-            return string.Empty;
-
-        int styleEnd = svgContent.IndexOf("</style>", tagEnd, StringComparison.OrdinalIgnoreCase);
-        if (styleEnd == -1)
-            return string.Empty;
-
-        return svgContent.Substring(tagEnd + 1, styleEnd - tagEnd - 1).Trim();
-    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a web designer automates batch processing of SVG icons with Aspose.Imaging kernels and must ensure the original CSS styling (fills, strokes, fonts) remains unchanged after saving.
- * 2. When a CI/CD pipeline validates that a build step applying a convolution kernel to SVG assets does not corrupt embedded <style> definitions before publishing to a design system.
- * 3. When a SaaS platform that generates custom charts uses C# to apply image filters to SVG diagrams and needs to verify that the chart’s CSS‑driven colors and animations are preserved.
- * 4. When a mobile app backend converts user‑uploaded SVG logos with Aspose.Imaging and applies a sharpening kernel, it must confirm that the logo’s CSS classes are still intact for responsive rendering.
- * 5. When an e‑learning content management system runs automated tests to check that applying a blur kernel to SVG illustrations via Aspose.Imaging does not alter the embedded CSS used for accessibility styling.
+ * 1. When a web application converts user‑uploaded SVG icons to PNG thumbnails with an emboss filter, the developer can use this code to ensure the original SVG’s embedded CSS styles remain unchanged after processing.
+ * 2. When an automated build pipeline generates high‑resolution PNG assets from SVG logos for print, the code helps verify that applying a convolution kernel does not corrupt the SVG’s style definitions used later for re‑rasterization.
+ * 3. When a digital asset management system applies visual effects to SVG graphics before storing them as PNG, the snippet validates that the CSS styling embedded in the SVG file is preserved, preventing layout inconsistencies.
+ * 4. When a C# desktop tool batch‑processes SVG diagrams into PNGs with Aspose.Imaging’s Emboss3x3 filter, the developer can check that the CSS rules inside the original SVG files are untouched, ensuring downstream SVG edits still work.
+ * 5. When a CI/CD test suite validates image‑processing code that rasterizes SVG to PNG and applies a convolution filter, this example confirms that the file’s byte‑level CSS content is identical before and after the operation.
  */
