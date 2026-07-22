@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -20,20 +21,20 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set WebP options: quality 75, enable alpha channel (preserved if present)
+                // Configure WebP options: lossy compression with quality 75
                 var webpOptions = new WebPOptions
                 {
-                    Lossless = false,   // lossy compression
-                    Quality = 75f       // quality level
+                    Lossless = false,   // enable lossy (alpha channel is preserved if present)
+                    Quality = 75f
                 };
 
-                // Save the image as WebP with the specified options
+                // Save as WebP
                 image.Save(outputPath, webpOptions);
             }
         }
@@ -46,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer wants to reduce page load times by converting high‑resolution JPEG photos to smaller WebP files with a quality setting of 75 while preserving any existing transparency.
- * 2. When a mobile app needs to generate optimized WebP thumbnails from user‑uploaded JPEG images on the server using C# and Aspose.Imaging to balance visual quality and bandwidth usage.
- * 3. When an e‑commerce platform must batch‑process product photos stored as JPEGs into WebP format with lossy compression at 75 % quality to improve SEO‑friendly image delivery.
- * 4. When a digital asset management system requires on‑the‑fly conversion of JPEG assets to WebP with a specific quality level and optional alpha channel support for downstream editing tools.
- * 5. When a content management system automates image optimization by saving uploaded JPEGs as WebP using Aspose.Imaging’s WebPOptions to achieve consistent compression across browsers.
+ * 1. When a developer needs to reduce page load times by converting high‑resolution JPEG photos to smaller WebP files with lossy compression at quality 75 while preserving any existing alpha channel, they can use this C# Aspose.Imaging code.
+ * 2. When building a .NET web service that receives user‑uploaded JPEG images and must store them as WebP for efficient bandwidth usage, this snippet shows how to load the JPEG, set WebPOptions, and save with the desired quality.
+ * 3. When creating automated batch processing to prepare product catalog images for responsive design, a developer can employ this code to convert each JPEG to a WebP image with a consistent quality level of 75 and retain transparency where needed.
+ * 4. When integrating image optimization into a Windows desktop application that generates thumbnails, the example demonstrates how to use Aspose.Imaging in C# to read a JPEG, apply lossy WebP compression, and output a WebP file with an alpha channel for overlay effects.
+ * 5. When developing a mobile app backend that serves images in WebP format to Android devices, this code provides a straightforward way to convert source JPEG assets to WebP with a 75‑percent quality setting and optional alpha channel support.
  */
