@@ -2,17 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.bmp";
+        string outputPath = "output.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.bmp";
-            string outputPath = "output\\result.jpg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,19 +22,19 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering functionality
+                // Cast to RasterImage to access filtering
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply a motion blur filter with length 10, smooth factor 1.0, angle 0 degrees
+                // Apply a motion blur filter with length 10 pixels, smooth factor 1.0, angle 0 degrees
                 rasterImage.Filter(rasterImage.Bounds, new MotionWienerFilterOptions(10, 1.0, 0.0));
 
                 // Save the result as JPEG
-                rasterImage.Save(outputPath);
+                rasterImage.Save(outputPath, new JpegOptions());
             }
         }
         catch (Exception ex)
@@ -45,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy BMP screenshots to compressed JPEGs while adding a subtle 10‑pixel motion blur to simulate camera movement for a web gallery.
- * 2. When an automated image‑processing pipeline must prepare product photos by applying a 10‑pixel motion blur to reduce sharp edges before saving them as JPEGs for faster page loads.
- * 3. When a desktop application generates thumbnail previews from BMP assets and wants to apply a 10‑pixel motion blur effect to give a stylized look before exporting to JPEG format.
- * 4. When a batch script processes scanned documents in BMP format, adds a motion blur of length 10 to mask scanning artifacts, and saves the cleaned images as JPEGs for archival.
- * 5. When a game developer exports in‑game BMP textures, applies a 10‑pixel motion blur to create motion‑blurred UI elements, and stores the result as JPEG for use in the UI overlay.
+ * 1. When a developer needs to convert legacy BMP scans of documents into compressed JPEGs while adding a subtle 10‑pixel motion blur to hide scanning artifacts.
+ * 2. When an e‑commerce platform wants to generate product thumbnails from high‑resolution BMP assets and apply a 10‑pixel motion blur to simulate motion before saving as JPEG.
+ * 3. When a game developer processes sprite sheets stored as BMP files, applying a 10‑pixel motion blur to create a speed‑effect and then exporting the result as JPEG for web preview.
+ * 4. When a medical imaging application must anonymize patient BMP images by blurring background details with a 10‑pixel motion blur and store the output in JPEG format for faster transmission.
+ * 5. When an automated batch job needs to read BMP files, apply a consistent 10‑pixel motion blur using Aspose.Imaging’s MotionWienerFilterOptions, and save the processed images as JPEGs for archival.
  */
