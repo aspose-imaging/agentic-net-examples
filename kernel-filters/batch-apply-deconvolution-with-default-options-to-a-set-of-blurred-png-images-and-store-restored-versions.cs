@@ -2,25 +2,24 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputDirectory = @"C:\Images\Input";
+        string outputDirectory = @"C:\Images\Output";
+
         try
         {
-            // Hard‑coded input PNG files
-            string[] inputPaths = {
-                @"C:\Images\blur1.png",
-                @"C:\Images\blur2.png"
-            };
+            // Get all PNG files in the input directory
+            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.png");
 
-            // Hard‑coded output directory
-            string outputDirectory = @"C:\Images\Restored";
-
-            foreach (string inputPath in inputPaths)
+            foreach (string inputPath in inputFiles)
             {
-                // Verify the input file exists
+                // Verify that the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,22 +27,27 @@ class Program
                 }
 
                 // Build the output file path
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + "_restored.png");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + "_restored.png");
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the PNG image, apply deconvolution, and save the result
+                // Load the PNG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    RasterImage raster = (RasterImage)image;
+                    // Cast to RasterImage to apply filters
+                    RasterImage rasterImage = (RasterImage)image;
 
-                    // Use MotionWienerFilterOptions with typical default parameters
-                    var deconvOptions = new MotionWienerFilterOptions(5, 1.0, 0.0);
+                    // Apply a motion Wiener deconvolution filter with default parameters
+                    // Length = 5, Sigma = 1.0, Angle = 0.0 (these are reasonable defaults)
+                    var deconvolutionOptions = new MotionWienerFilterOptions(5, 1.0, 0.0);
 
-                    raster.Filter(raster.Bounds, deconvOptions);
-                    raster.Save(outputPath);
+                    // Apply the filter to the whole image bounds
+                    rasterImage.Filter(rasterImage.Bounds, deconvolutionOptions);
+
+                    // Save the restored image
+                    rasterImage.Save(outputPath);
                 }
             }
         }
@@ -56,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically sharpen a collection of motion‑blurred PNG photographs taken by a security camera, they can use this C# code with Aspose.Imaging to batch apply deconvolution and save restored images.
- * 2. When a web application must preprocess user‑uploaded PNG scans of old documents that appear blurry, the code can run server‑side to deconvolve each file and store clearer versions for OCR.
- * 3. When a digital asset management system requires periodic enhancement of archived PNG graphics that suffered from lens shake, the batch deconvolution routine provides a quick C# solution to improve visual quality.
- * 4. When a scientific imaging workflow needs to correct motion blur in PNG microscopy images before analysis, developers can integrate this Aspose.Imaging filter loop to produce restored files automatically.
- * 5. When an e‑commerce platform wants to improve product PNG images that were unintentionally blurred during batch export, the code can deconvolve and overwrite them in a designated folder with higher‑definition copies.
+ * 1. When a developer needs to automatically restore a batch of motion‑blurred PNG photos taken from a security camera by applying a Wiener deconvolution filter with default settings.
+ * 2. When an image‑processing pipeline must clean up scanned document PNGs that suffer from slight motion blur before they are archived or OCR‑processed.
+ * 3. When a photo‑editing application wants to offer a one‑click “Restore All” feature that deblurs all PNG files in a folder and saves the results with a “_restored” suffix.
+ * 4. When a data‑science workflow requires preprocessing of a large set of PNG microscopy images to improve visual clarity using C# and Aspose.Imaging’s raster filter API.
+ * 5. When a web service needs to batch‑process uploaded PNG avatars that appear blurry due to compression artifacts, applying default motion Wiener deconvolution and storing the corrected images on the server.
  */
