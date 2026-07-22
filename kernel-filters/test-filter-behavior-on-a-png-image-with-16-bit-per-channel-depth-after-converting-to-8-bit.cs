@@ -11,7 +11,7 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample16bit.png";
+            string inputPath = @"C:\temp\input16bit.png";
             string outputDir = @"C:\temp\output";
 
             // Verify input file exists
@@ -24,7 +24,7 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(outputDir);
 
-            // Define the filter types to test
+            // Define filter types to test
             PngFilterType[] filterTypes = new PngFilterType[]
             {
                 PngFilterType.None,
@@ -40,28 +40,34 @@ class Program
             {
                 foreach (PngFilterType filter in filterTypes)
                 {
-                    // Prepare PNG save options: convert to 8‑bit and set filter type
+                    // Configure PNG save options: convert to 8‑bit and set filter type
                     PngOptions options = new PngOptions
                     {
-                        BitDepth = 8,                     // Convert to 8‑bit per channel
-                        FilterType = filter,              // Current filter type
+                        BitDepth = 8,
+                        FilterType = filter,
+                        // Preserve color type (Truecolor with alpha works for 16‑bit source)
                         ColorType = PngColorType.TruecolorWithAlpha,
-                        CompressionLevel = 9,
+                        // Optional: enable progressive loading
                         Progressive = true
                     };
 
-                    // Build output file path
-                    string outputPath = Path.Combine(outputDir, $"filter_{filter}.png");
+                    // Save to a memory stream to obtain the output size
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        image.Save(ms, options);
+                        long size = ms.Length;
 
-                    // Ensure the directory for this file exists (covers subfolders if any)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Build output file path
+                        string outputPath = Path.Combine(outputDir, $"output_{filter}.png");
 
-                    // Save the image with the specified options
-                    image.Save(outputPath, options);
+                        // Ensure the directory for the output file exists (already created above)
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Report the resulting file size
-                    long fileSize = new FileInfo(outputPath).Length;
-                    Console.WriteLine($"Filter: {filter}, Output size: {fileSize} bytes");
+                        // Write the stream contents to the file
+                        File.WriteAllBytes(outputPath, ms.ToArray());
+
+                        Console.WriteLine($"Filter: {filter}, Output size: {size} bytes, Saved to: {outputPath}");
+                    }
                 }
             }
         }
@@ -74,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to evaluate how each PNG filter type (None, Up, Sub, Paeth, Avg, Adaptive) impacts file size and visual fidelity after converting a 16‑bit PNG to an 8‑bit image for web optimization, they can use this code.
- * 2. When a developer wants to verify that the Aspose.Imaging library correctly preserves alpha transparency while down‑sampling high‑depth PNGs and applying different filter algorithms for progressive rendering, this example provides a quick test.
- * 3. When a developer is troubleshooting compression artifacts in medical or scientific images that must be reduced from 16‑bit to 8‑bit before archival, the code helps compare filter effects on image quality.
- * 4. When a developer is building an automated pipeline that generates multiple PNG variants with different filter settings to select the best trade‑off between compression level and decoding speed on client devices, this snippet demonstrates the required steps.
- * 5. When a developer needs to confirm that the chosen PNG filter works consistently across various output directories and file‑system permissions while converting high‑depth images, the example offers a practical validation routine.
+ * 1. When a developer needs to compare how different PNG filter types affect the file size after down‑sampling a 16‑bit per channel image to 8‑bit for web delivery, they can use this code.
+ * 2. When optimizing a high‑dynamic‑range PNG for mobile apps, the code lets you test each PngFilterType to choose the smallest 8‑bit output while preserving transparency.
+ * 3. When troubleshooting visual artifacts that appear after converting 16‑bit medical scans to 8‑bit PNG, the sample shows how to apply each filter and inspect the resulting stream size.
+ * 4. When building an automated image‑processing pipeline in C# that must generate progressive PNGs from 16‑bit sources, this snippet demonstrates setting the Progressive flag and evaluating filter impact.
+ * 5. When creating a quality‑control tool that validates that 16‑bit PNG assets are correctly reduced to 8‑bit with the appropriate filter before uploading to a CDN, the example provides the necessary Aspose.Imaging operations.
  */
