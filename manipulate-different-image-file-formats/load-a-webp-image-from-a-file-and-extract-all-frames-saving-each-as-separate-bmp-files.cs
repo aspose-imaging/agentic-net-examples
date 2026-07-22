@@ -4,52 +4,49 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
 
-class Program
+public class Program
 {
     static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.webp";
             string outputDir = "frames";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(outputDir);
 
-            // Load the WebP image
             using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Cast to multipage interface to access frames
                 IMultipageImage multipage = webPImage as IMultipageImage;
-                if (multipage == null)
-                {
-                    Console.Error.WriteLine("The loaded image is not a multipage WebP.");
-                    return;
-                }
+                int frameCount = multipage != null ? multipage.PageCount : 1;
 
-                int pageCount = multipage.PageCount;
-                for (int i = 0; i < pageCount; i++)
+                for (int i = 0; i < frameCount; i++)
                 {
-                    // Retrieve the frame and cast to RasterImage
-                    var frame = multipage.Pages[i];
-                    using (RasterImage raster = (RasterImage)frame)
+                    string outputPath = Path.Combine(outputDir, $"frame_{i}.bmp");
+                    // Ensure the directory for this output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    RasterImage frameImage;
+                    if (multipage != null)
                     {
-                        // Build output path for the current frame
-                        string outputPath = Path.Combine(outputDir, $"frame_{i}.bmp");
+                        frameImage = multipage.Pages[i] as RasterImage;
+                    }
+                    else
+                    {
+                        frameImage = webPImage as RasterImage;
+                    }
 
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the frame as BMP
-                        raster.Save(outputPath, new BmpOptions());
+                    if (frameImage != null)
+                    {
+                        BmpOptions bmpOptions = new BmpOptions();
+                        frameImage.Save(outputPath, bmpOptions);
                     }
                 }
             }
@@ -63,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an animated WebP advertisement into separate BMP frames for legacy Windows applications that only support BMP format.
- * 2. When a developer wants to extract each page of a multi‑page WebP document to generate thumbnail previews in a C# desktop tool.
- * 3. When a developer must preprocess animated WebP assets for a machine‑learning pipeline that requires BMP input images.
- * 4. When a developer is building a batch‑processing script that archives every frame of a WebP animation as individual BMP files for compliance auditing.
- * 5. When a developer needs to isolate and save individual frames from a WebP sprite sheet to edit them in a graphics editor that only reads BMP format.
+ * 1. When a developer needs to extract each frame from an animated WebP file and convert them to BMP for legacy Windows applications.
+ * 2. When a batch image processing pipeline must decompose a multi‑page WebP into separate bitmap files for further analysis or OCR.
+ * 3. When a game asset pipeline requires converting WebP sprite animations into individual BMP frames to be used by a legacy engine that only supports BMP.
+ * 4. When a digital archiving system must preserve each frame of a WebP animation as lossless BMP files for long‑term storage and compliance.
+ * 5. When a developer is troubleshooting visual artifacts by saving each WebP frame as a BMP to compare pixel data with other image processing tools.
  */
