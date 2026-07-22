@@ -1,131 +1,124 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.bmp";
-            string outputPath = @"C:\Images\output.bmp";
+            string inputPath = "input.bmp";
+            string outputPath = "output/output.bmp";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to BmpImage for pixel access
-                BmpImage bmp = (BmpImage)image;
+                Color borderColor = image.GetPixel(0, 0);
 
-                // Determine the border color (assume top-left pixel)
-                var borderColor = bmp.GetPixel(0, 0);
+                int left = 0, right = 0, top = 0, bottom = 0;
+                int width = image.Width;
+                int height = image.Height;
 
-                int left = 0, right = bmp.Width - 1;
-                int top = 0, bottom = bmp.Height - 1;
-
-                // Find left border
-                for (int x = 0; x < bmp.Width; x++)
+                for (int x = 0; x < width; x++)
                 {
-                    bool columnIsBorder = true;
-                    for (int y = 0; y < bmp.Height; y++)
+                    bool columnHasDifferent = false;
+                    for (int y = 0; y < height; y++)
                     {
-                        if (bmp.GetPixel(x, y) != borderColor)
+                        if (image.GetPixel(x, y) != borderColor)
                         {
-                            columnIsBorder = false;
+                            columnHasDifferent = true;
                             break;
                         }
                     }
-                    if (!columnIsBorder)
+                    if (columnHasDifferent)
                     {
                         left = x;
                         break;
                     }
                 }
 
-                // Find right border
-                for (int x = bmp.Width - 1; x >= 0; x--)
+                for (int x = width - 1; x >= 0; x--)
                 {
-                    bool columnIsBorder = true;
-                    for (int y = 0; y < bmp.Height; y++)
+                    bool columnHasDifferent = false;
+                    for (int y = 0; y < height; y++)
                     {
-                        if (bmp.GetPixel(x, y) != borderColor)
+                        if (image.GetPixel(x, y) != borderColor)
                         {
-                            columnIsBorder = false;
+                            columnHasDifferent = true;
                             break;
                         }
                     }
-                    if (!columnIsBorder)
+                    if (columnHasDifferent)
                     {
-                        right = x;
+                        right = width - 1 - x;
                         break;
                     }
                 }
 
-                // Find top border
-                for (int y = 0; y < bmp.Height; y++)
+                for (int y = 0; y < height; y++)
                 {
-                    bool rowIsBorder = true;
-                    for (int x = left; x <= right; x++)
+                    bool rowHasDifferent = false;
+                    for (int x = 0; x < width; x++)
                     {
-                        if (bmp.GetPixel(x, y) != borderColor)
+                        if (image.GetPixel(x, y) != borderColor)
                         {
-                            rowIsBorder = false;
+                            rowHasDifferent = true;
                             break;
                         }
                     }
-                    if (!rowIsBorder)
+                    if (rowHasDifferent)
                     {
                         top = y;
                         break;
                     }
                 }
 
-                // Find bottom border
-                for (int y = bmp.Height - 1; y >= 0; y--)
+                for (int y = height - 1; y >= 0; y--)
                 {
-                    bool rowIsBorder = true;
-                    for (int x = left; x <= right; x++)
+                    bool rowHasDifferent = false;
+                    for (int x = 0; x < width; x++)
                     {
-                        if (bmp.GetPixel(x, y) != borderColor)
+                        if (image.GetPixel(x, y) != borderColor)
                         {
-                            rowIsBorder = false;
+                            rowHasDifferent = true;
                             break;
                         }
                     }
-                    if (!rowIsBorder)
+                    if (rowHasDifferent)
                     {
-                        bottom = y;
+                        bottom = height - 1 - y;
                         break;
                     }
                 }
 
-                // Compute the cropping rectangle
-                int cropWidth = right - left + 1;
-                int cropHeight = bottom - top + 1;
-                var cropRect = new Rectangle(left, top, cropWidth, cropHeight);
+                int newWidth = width - left - right;
+                int newHeight = height - top - bottom;
 
-                // Crop the image if needed
-                if (cropRect.X > 0 || cropRect.Y > 0 || cropRect.Width < bmp.Width || cropRect.Height < bmp.Height)
+                if (newWidth <= 0 || newHeight <= 0)
                 {
-                    bmp.Crop(cropRect);
+                    Console.Error.WriteLine("Unable to detect non‑border area.");
+                    return;
                 }
 
-                // Save the processed image
-                bmp.Save(outputPath, new BmpOptions());
+                var cropArea = new Rectangle(left, top, newWidth, newHeight);
+                image.Crop(cropArea);
+
+                var bmpOptions = new BmpOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -137,9 +130,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application needs to preprocess scanned BMP documents that contain uniform white margins before applying OCR, the code can automatically detect and trim those solid color borders using Aspose.Imaging.
- * 2. When a game development tool imports BMP sprite sheets with a constant background color around each sprite, this snippet removes the surrounding border so the sprites can be packed tightly without extra padding.
- * 3. When a batch image conversion utility must convert legacy BMP files to PNG but first eliminate unwanted black frames that were added during scanning, the border‑removal logic ensures only the actual image content is retained.
- * 4. When a medical imaging system receives BMP scans with a fixed gray border added by the acquisition device, the code strips the border to improve downstream analysis such as segmentation or measurement.
- * 5. When an automated reporting service generates BMP charts that include a solid color margin for layout purposes, this routine trims the margin before embedding the chart into PDF or HTML reports.
+ * 1. When a developer receives scanned BMP documents that contain a uniform white margin, this code can automatically detect and trim the border before performing OCR or archival processing.
+ * 2. When an image processing pipeline generates thumbnails from BMP screenshots with a solid black frame, the routine can remove the frame so the thumbnail displays only the relevant content.
+ * 3. When a game asset pipeline imports BMP sprite sheets that include a consistent background color border, the code can strip the border to ensure sprites align correctly in the engine.
+ * 4. When a batch conversion tool transforms BMP images to PNG for web delivery, removing any solid color border first prevents extra whitespace and reduces the final file size.
+ * 5. When a machine‑learning model for visual inspection receives BMP images padded with a colored border added by a camera, this code can crop out the padding so the model trains on the actual subject.
  */
