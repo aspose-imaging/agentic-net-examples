@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -24,26 +26,23 @@ class Program
             {
                 RasterImage raster = (RasterImage)image;
 
-                double[,] baseKernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3;
-
+                double[,] baseKernel = ConvolutionFilter.Emboss3x3;
+                double factor = 2.0;
                 int rows = baseKernel.GetLength(0);
                 int cols = baseKernel.GetLength(1);
                 double[,] enhancedKernel = new double[rows, cols];
-                double strengthFactor = 2.0;
-
                 for (int i = 0; i < rows; i++)
                 {
                     for (int j = 0; j < cols; j++)
                     {
-                        enhancedKernel[i, j] = baseKernel[i, j] * strengthFactor;
+                        enhancedKernel[i, j] = baseKernel[i, j] * factor;
                     }
                 }
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(enhancedKernel);
-                raster.Filter(raster.Bounds, filterOptions);
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(enhancedKernel));
 
-                var pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                PngOptions saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -55,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to boost the edge‑enhancement of a PNG graphic for a web UI, they can multiply the Aspose.Imaging Emboss3x3 kernel coefficients to create a stronger emboss effect before saving the image.
- * 2. When preparing product photos for an e‑commerce catalog, a developer may apply a heightened emboss filter using C# and Aspose.Imaging to make product outlines more pronounced in the final PNG files.
- * 3. When generating stylized map tiles, a GIS programmer can increase the strength of the Emboss3x3 convolution kernel to accentuate terrain edges in PNG tiles for better visual contrast.
- * 4. When creating printable marketing materials, a designer‑developer can use the code to intensify the emboss filter on PNG logos, ensuring the edges stand out after high‑resolution printing.
- * 5. When building an image‑processing pipeline that detects structural details, a developer may adjust the Emboss3x3 kernel coefficients in C# with Aspose.Imaging to amplify edge detection before further analysis of PNG images.
+ * 1. When a developer wants to sharpen the details of product photos in PNG format before uploading them to an e‑commerce site, they can increase the emboss kernel coefficients to boost edge enhancement using Aspose.Imaging’s ConvolutionFilter in C#.
+ * 2. When preparing PNG assets for a mobile game’s UI, a developer may apply a stronger emboss filter to highlight textures and make UI elements stand out on high‑resolution screens.
+ * 3. When converting scanned engineering drawings stored as PNG files into clearer visualizations, a developer can amplify the emboss 3x3 kernel to emphasize line edges and improve readability.
+ * 4. When generating stylized thumbnails for a photo‑gallery website, a developer can use the enhanced emboss kernel to add a pronounced edge‑detect effect that makes the thumbnails more eye‑catching.
+ * 5. When processing PNG screenshots for a documentation pipeline, a developer may apply a boosted emboss convolution filter to accentuate UI borders and improve contrast for printed manuals.
  */
