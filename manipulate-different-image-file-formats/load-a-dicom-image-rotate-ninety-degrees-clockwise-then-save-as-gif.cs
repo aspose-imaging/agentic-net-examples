@@ -3,35 +3,34 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = "input.dcm";
         string outputPath = "output.gif";
 
         try
         {
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the DICOM image
             using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
             {
-                // Rotate 90 degrees clockwise without flipping
+                // Rotate 90 degrees clockwise
                 dicomImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-                // Save the rotated image as GIF
+                // Save as GIF
                 dicomImage.Save(outputPath, new GifOptions());
             }
         }
@@ -44,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to display DICOM scans in a web browser that only supports GIF, a developer can load the DICOM, rotate it for correct orientation, and save it as a GIF file.
- * 2. When integrating radiology data into a patient portal, a developer may convert DICOM images to GIF after rotating them to match the viewer’s layout.
- * 3. When preparing DICOM screenshots for inclusion in a PowerPoint presentation, a developer can programmatically rotate the image and export it as a GIF.
- * 4. When building an automated pipeline that extracts DICOM frames, corrects orientation, and stores them as lightweight GIFs for archival or transmission, this code handles the transformation.
- * 5. When a hospital’s reporting tool must generate animated GIFs from a series of DICOM slices and ensure each slice is oriented correctly, a developer can use this code to rotate and save each slice.
+ * 1. When a medical imaging application needs to display a DICOM X‑ray on a web page, it can load the DICOM file, rotate it to the correct orientation, and convert it to a lightweight GIF for browser compatibility.
+ * 2. When a radiology reporting tool must embed a rotated DICOM scan into a PDF report, the code can rotate the image and save it as a GIF that the PDF generator can easily embed.
+ * 3. When a hospital’s PACS integration script has to generate thumbnail previews of DICOM studies for a mobile app, it can rotate the image and output a GIF thumbnail.
+ * 4. When a research project requires batch processing of DICOM brain scans to standardize orientation before statistical analysis, the code can rotate each image and save it as GIF for quick visual inspection.
+ * 5. When a telemedicine platform needs to stream patient DICOM images to a low‑bandwidth client, it can rotate the image to the proper view and convert it to a GIF to reduce file size and simplify rendering.
  */
