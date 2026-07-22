@@ -1,42 +1,53 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.svg";
-            string outputPath = "output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Set up rasterization options for SVG to PNG conversion
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+                rasterOptions.PageSize = vectorImage.Size;
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                PngOptions pngOptions = new PngOptions();
+                pngOptions.VectorRasterizationOptions = rasterOptions;
 
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Cast to RasterImage to enable filtering
-                RasterImage rasterImage = (RasterImage)image;
+                // Rasterize SVG into a memory stream
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    vectorImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                // Create Gaussian blur filter options with kernel size 5 and sigma 2.8
-                var gaussianOptions = new GaussianBlurFilterOptions(5, 2.8);
+                    // Load the rasterized image
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        int size = 7;          // odd kernel size
+                        double sigma = 2.8;    // desired sigma
 
-                // Apply the Gaussian blur to the entire image
-                rasterImage.Filter(rasterImage.Bounds, gaussianOptions);
+                        // Apply Gaussian blur with the specified kernel size and sigma
+                        raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(size, sigma));
 
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                        // Save the blurred raster image
+                        raster.Save(outputPath, new PngOptions());
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -48,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to soften the edges of an SVG logo before converting it to a PNG for use on a website, they can generate a Gaussian kernel with sigma 2.8 and apply it using Aspose.Imaging.
- * 2. When an e‑commerce platform wants to create a blurred background thumbnail from vector product illustrations, this code can load the SVG, apply a Gaussian blur, and save the result as a raster image.
- * 3. When a mobile app requires a smooth, anti‑aliased preview of vector icons with a subtle glow effect, the developer can use the GaussianBlurFilterOptions with sigma 2.8 to achieve the effect before exporting to PNG.
- * 4. When a reporting tool needs to embed a softened version of a company’s SVG diagram into PDF reports, the code programmatically applies the Gaussian kernel and outputs a raster image compatible with PDF rendering.
- * 5. When a content management system automatically generates low‑resolution, blurred placeholders for SVG artwork to improve perceived loading speed, this snippet creates the Gaussian kernel and processes the image in C#.
+ * 1. When a web application needs to generate a soft‑focused thumbnail of an SVG logo by rasterizing it to PNG and applying a Gaussian blur with sigma 2.8 for consistent visual branding.
+ * 2. When an e‑learning platform converts vector diagrams (SVG) to raster images and adds a subtle blur to reduce sharp edges before embedding them in PDF lesson slides.
+ * 3. When a mobile game engine imports SVG assets, rasterizes them to PNG, and uses a Gaussian kernel (size 7, sigma 2.8) to create a depth‑of‑field effect for background elements.
+ * 4. When a reporting tool automatically produces PNG charts from SVG templates and applies a Gaussian blur to smooth out anti‑aliasing artifacts for print‑ready output.
+ * 5. When a document processing service needs to preprocess SVG illustrations by rasterizing them to PNG and applying a Gaussian blur with sigma 2.8 to improve OCR accuracy on subsequent text extraction.
  */
