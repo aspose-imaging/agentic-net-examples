@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.tif";
-        string outputDirectory = @"C:\Images\Frames";
+        string inputPath = "input.tif";
+        string outputDirectory = "output";
 
         try
         {
@@ -21,34 +21,29 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(outputDirectory);
 
             // Load the TIFF image
-            using (Image image = Image.Load(inputPath))
+            using (TiffImage tiffImage = Image.Load(inputPath) as TiffImage)
             {
-                // Cast to TiffImage to access frames
-                TiffImage tiffImage = image as TiffImage;
                 if (tiffImage == null)
                 {
-                    Console.Error.WriteLine("The loaded file is not a TIFF image.");
+                    Console.Error.WriteLine("Failed to load TIFF image.");
                     return;
                 }
 
-                // Options for BMP export
-                BmpOptions bmpOptions = new BmpOptions();
-
-                // Export each frame to a separate BMP file
-                for (int i = 0; i < tiffImage.Frames.Length; i++)
+                // Iterate through each frame and save as BMP
+                TiffFrame[] frames = tiffImage.Frames;
+                for (int i = 0; i < frames.Length; i++)
                 {
-                    TiffFrame frame = tiffImage.Frames[i];
-                    string outputPath = Path.Combine(outputDirectory, $"frame_{i + 1}.bmp");
+                    string outputPath = Path.Combine(outputDirectory, $"frame_{i}.bmp");
 
                     // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the frame as BMP
-                    frame.Save(outputPath, bmpOptions);
+                    // Save the current frame as BMP using BmpOptions
+                    frames[i].Save(outputPath, new BmpOptions());
                 }
             }
         }
@@ -61,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system receives multi‑page TIFF scans and needs to convert each page to BMP for display in a legacy viewer.
- * 2. When a document management workflow extracts individual pages from a multi‑frame TIFF invoice and saves them as BMP files for OCR processing.
- * 3. When a printing service separates each frame of a high‑resolution TIFF artwork into BMP images to apply per‑page color corrections before rasterization.
- * 4. When a GIS application converts each layer stored as a frame in a geospatial TIFF file into BMP tiles for use in a web‑based map viewer.
- * 5. When an archival tool migrates old multi‑page TIFF archives to BMP format to ensure compatibility with Windows thumbnail generators.
+ * 1. When a developer needs to extract individual pages from a multi‑page TIFF document and save them as separate BMP files for legacy Windows applications.
+ * 2. When an imaging pipeline requires converting high‑resolution scanned TIFF images into BMP format to ensure compatibility with a third‑party OCR engine that only accepts BMP input.
+ * 3. When a batch‑processing tool must archive each frame of a TIFF satellite image as BMP thumbnails for quick preview in a web gallery.
+ * 4. When a medical imaging system has to transform each slice of a DICOM‑exported TIFF stack into BMP files for integration with older diagnostic software.
+ * 5. When a developer is building a document‑conversion service that separates TIFF layers into BMP images to allow downstream editing in graphics editors that do not support TIFF.
  */
