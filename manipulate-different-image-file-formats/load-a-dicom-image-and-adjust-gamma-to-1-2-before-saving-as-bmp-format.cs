@@ -9,19 +9,19 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.dicom";
-        string outputPath = @"C:\Images\sample_adjusted.bmp";
+        string inputPath = @"C:\Temp\sample.dicom";
+        string outputPath = @"C:\Temp\output.bmp";
 
         try
         {
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the DICOM image
@@ -30,7 +30,7 @@ class Program
                 // Cast to DicomImage to access DICOM-specific methods
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Adjust gamma for all channels (value 1.2)
+                // Adjust gamma to 1.2 for all channels
                 dicomImage.AdjustGamma(1.2f);
 
                 // Save the result as BMP
@@ -46,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology software needs to export DICOM X‑ray images to BMP format for integration with legacy Windows viewers and wants to boost image brightness by applying a gamma of 1.2.
- * 2. When a healthcare data pipeline must preprocess DICOM CT scans by adjusting gamma before saving them as BMP files for use in machine‑learning models that expect standard bitmap inputs.
- * 3. When a hospital’s PACS system requires converting DICOM ultrasound images to BMP thumbnails with consistent gamma correction to ensure uniform visual quality across different monitors.
- * 4. When a C# desktop application needs to load a DICOM MRI slice, enhance its contrast with a 1.2 gamma adjustment, and store the result as a BMP for inclusion in patient reports.
- * 5. When a developer is building a cross‑platform imaging tool that reads DICOM files, applies gamma correction to improve visibility, and saves the output as BMP to be displayed in non‑medical image viewers.
+ * 1. When a medical imaging application needs to convert a DICOM radiology scan to a BMP file for display on a Windows workstation while applying a gamma correction of 1.2 to improve visual contrast.
+ * 2. When a healthcare data pipeline must preprocess DICOM images by adjusting gamma before exporting them as BMPs for integration with legacy reporting tools that only accept BMP format.
+ * 3. When a developer is building a C# utility to batch‑process DICOM files, applying a uniform gamma boost of 1.2 and saving the results as BMPs for use in training machine‑learning models that require standard image formats.
+ * 4. When a radiology research project requires extracting DICOM images, enhancing their brightness via gamma adjustment, and storing them as BMPs to embed in PDF documents or presentations.
+ * 5. When an electronic health record (EHR) system needs to generate thumbnail BMP previews of DICOM studies with a gamma of 1.2 to ensure consistent appearance across different browsers and devices.
  */
