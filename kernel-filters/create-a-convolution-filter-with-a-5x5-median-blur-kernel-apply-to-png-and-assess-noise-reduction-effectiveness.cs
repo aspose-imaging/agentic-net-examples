@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\noisy.png";
-            string outputPath = @"C:\Images\noisy_median5x5.png";
+            string inputPath = "input.png";
+            string outputPath = "output_median5.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,28 +24,49 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            // Load original image for metric calculation
+            using (Image originalImage = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering
-                RasterImage rasterImage = (RasterImage)image;
+                // Load image to be filtered (a separate instance)
+                using (Image image = Image.Load(inputPath))
+                {
+                    RasterImage rasterImage = (RasterImage)image;
 
-                // Compute average intensity before filtering
-                double avgBefore = ComputeAverageIntensity(rasterImage);
+                    // Apply a 5x5 median filter
+                    rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
-                // Apply a 5x5 median filter (median blur kernel)
-                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+                    // Save the filtered image
+                    rasterImage.Save(outputPath);
+                }
 
-                // Compute average intensity after filtering
-                double avgAfter = ComputeAverageIntensity(rasterImage);
+                // Assess noise reduction effectiveness
+                // Compute average absolute per‑channel difference between original and filtered image
+                using (Image filteredImage = Image.Load(outputPath))
+                {
+                    RasterImage origRaster = (RasterImage)originalImage;
+                    RasterImage filtRaster = (RasterImage)filteredImage;
 
-                // Save the filtered image
-                rasterImage.Save(outputPath);
+                    long totalDiff = 0;
+                    long pixelCount = 0;
 
-                // Output simple noise‑reduction assessment
-                Console.WriteLine($"Average intensity before filter: {avgBefore:F2}");
-                Console.WriteLine($"Average intensity after filter:  {avgAfter:F2}");
-                Console.WriteLine("A reduction in intensity variance typically indicates noise reduction.");
+                    for (int y = 0; y < origRaster.Height; y++)
+                    {
+                        for (int x = 0; x < origRaster.Width; x++)
+                        {
+                            var origColor = origRaster.GetPixel(x, y);
+                            var filtColor = filtRaster.GetPixel(x, y);
+
+                            totalDiff += Math.Abs(origColor.R - filtColor.R);
+                            totalDiff += Math.Abs(origColor.G - filtColor.G);
+                            totalDiff += Math.Abs(origColor.B - filtColor.B);
+                            totalDiff += Math.Abs(origColor.A - filtColor.A);
+                            pixelCount++;
+                        }
+                    }
+
+                    double avgDiff = (double)totalDiff / (pixelCount * 4);
+                    Console.WriteLine($"Average per‑channel absolute difference: {avgDiff:F2}");
+                }
             }
         }
         catch (Exception ex)
@@ -52,34 +74,13 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    // Helper method to compute average pixel intensity (simple metric)
-    private static double ComputeAverageIntensity(RasterImage raster)
-    {
-        long sum = 0;
-        int width = raster.Width;
-        int height = raster.Height;
-
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                // GetPixel returns a Color structure with R, G, B components
-                var color = raster.GetPixel(x, y);
-                int intensity = (color.R + color.G + color.B) / 3;
-                sum += intensity;
-            }
-        }
-
-        return (double)sum / (width * height);
-    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce salt‑and‑pepper noise in scanned PNG documents before performing OCR, they can apply a 5×5 median blur filter using Aspose.Imaging for .NET.
- * 2. When a C# application must clean up noisy screenshots captured from remote desktops while preserving the PNG format, the code shows how to load, filter with MedianFilterOptions(5), and save the image.
- * 3. When a photo‑editing tool requires an automated step to smooth grainy product images yet retain edge detail, the median filter implementation provides a simple way to assess noise reduction by comparing average pixel intensity.
- * 4. When a batch‑processing service handles medical imaging PNG files and needs to evaluate the effectiveness of noise removal, the example demonstrates computing average intensity before and after applying the 5×5 median kernel.
- * 5. When a developer is building a quality‑control pipeline that validates image preprocessing by measuring intensity variance, this snippet illustrates using Aspose.Imaging to load, filter, and report intensity changes on PNG assets.
+ * 1. When a developer needs to reduce salt‑and‑pepper noise in a PNG photograph using a 5×5 median blur filter with Aspose.Imaging for .NET.
+ * 2. When a C# application must preprocess scanned documents before OCR by applying a median filter to smooth pixel variations while preserving edges.
+ * 3. When an image‑processing pipeline requires evaluating the effectiveness of a noise‑reduction algorithm by comparing per‑channel differences between the original and filtered PNG images.
+ * 4. When a software solution has to batch‑process PNG assets and automatically create denoised versions for web delivery using Aspose.Imaging’s MedianFilterOptions.
+ * 5. When a developer wants to validate that a custom image filter improves visual quality by measuring average absolute pixel differences after applying a 5×5 median blur in a .NET environment.
  */
