@@ -8,23 +8,23 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input24.bmp";
-        string outputPath = @"C:\temp\output8.bmp";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the source BMP image (24‑bit)
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input24bit.bmp";
+            string outputPath = @"C:\Images\output8bit.bmp";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the 24‑bit BMP image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to RasterImage to access dithering
@@ -37,12 +37,12 @@ class Program
                 BmpOptions saveOptions = new BmpOptions
                 {
                     BitsPerPixel = 8,
-                    // Generate a palette that best matches the image colors
+                    // Generate a palette that best matches the source image
                     Palette = ColorPaletteHelper.GetCloseImagePalette(rasterImage, 256),
-                    Compression = BitmapCompression.Rgb
+                    // Keep default compression (RGB) and resolution
                 };
 
-                // Save the dithered image as an 8‑bit BMP
+                // Save the palettized image
                 image.Save(outputPath, saveOptions);
             }
         }
@@ -55,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce the file size of a high‑resolution 24‑bit BMP for legacy Windows applications that only support 8‑bit indexed images, they can use this code to apply Floyd‑Steinberg dithering and save an 8‑bit BMP with an optimized palette.
- * 2. When preparing graphics for embedded systems or low‑memory devices that require BMP files with a maximum of 256 colors, this snippet converts a 24‑bit source to an 8‑bit indexed image while preserving visual quality through dithering.
- * 3. When converting scanned photographs stored as 24‑bit BMPs into a format suitable for printing on monochrome or limited‑color printers, the code generates an 8‑bit BMP with a close‑match palette and Floyd‑Steinberg dithering to maintain detail.
- * 4. When migrating legacy game assets that originally used 8‑bit BMP sprites, developers can use this example to downgrade modern 24‑bit BMP artwork to the required 8‑bit indexed format with proper dithering to avoid banding.
- * 5. When automating a batch process that prepares BMP images for archival in a space‑constrained database, this code programmatically reduces each image to 8‑bit indexed color using Aspose.Imaging’s RasterImage dithering and BmpOptions.
+ * 1. When a developer needs to shrink a 24‑bit BMP file for a legacy Windows application that only accepts 8‑bit indexed images, this code applies Floyd‑Steinberg dithering and creates an optimal palette.
+ * 2. When preparing graphics for an embedded device or handheld that requires BMPs limited to 256 colors, the snippet converts the high‑color source to an 8‑bit indexed BMP while preserving visual fidelity.
+ * 3. When exporting screenshots from a .NET tool to a game engine that only supports 8‑bit BMP textures, this example automates the palette generation and dithering needed for compatibility.
+ * 4. When optimizing BMP assets for web delivery under bandwidth constraints, a developer can use the code to downgrade 24‑bit images to 8‑bit indexed BMPs with Floyd‑Steinberg dithering to retain detail and reduce file size.
+ * 5. When archiving scanned documents as BMPs but must stay within a strict storage quota, the code enables conversion from 24‑bit to 8‑bit indexed BMP with a custom palette, ensuring the files remain readable and compact.
  */
