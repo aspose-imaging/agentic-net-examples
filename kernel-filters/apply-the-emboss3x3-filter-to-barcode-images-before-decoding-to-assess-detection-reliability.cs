@@ -1,66 +1,69 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\barcode.png";
+        string outputPath = @"C:\Images\barcode_embossed.png";
+
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Images\barcode.png";
-            string outputPath = @"C:\Images\barcode_embossed.png";
-
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the barcode image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
+                // Cast to RasterImage to apply filters
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply the 3x3 Emboss convolution filter
-                var embossOptions = new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3);
+                // Create convolution filter options using the 3x3 emboss kernel
+                var embossOptions = new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3, 3);
+
+                // Apply the emboss filter to the entire image
                 rasterImage.Filter(rasterImage.Bounds, embossOptions);
 
                 // Save the filtered image
                 rasterImage.Save(outputPath);
             }
 
-            // Placeholder: decode the barcode from the filtered image
-            // var decodedValue = DecodeBarcode(outputPath);
-            // Console.WriteLine($"Decoded barcode: {decodedValue}");
+            // Placeholder: Decode the barcode from the embossed image
+            // Example (requires Aspose.BarCode library):
+            // var barcodeReader = new Aspose.BarCode.BarCodeReader(outputPath, DecodeType.AllSupportedTypes);
+            // if (barcodeReader.Read())
+            // {
+            //     Console.WriteLine($"Decoded barcode: {barcodeReader.GetCodeText()}");
+            // }
+            // else
+            // {
+            //     Console.WriteLine("No barcode detected.");
+            // }
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    // Stub for barcode decoding – replace with actual implementation if needed
-    // static string DecodeBarcode(string imagePath)
-    // {
-    //     // Implement barcode decoding logic here
-    //     return string.Empty;
-    // }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to preprocess scanned PNG barcodes with an emboss filter to evaluate how edge‑enhancement affects detection reliability before feeding them to a barcode decoder.
- * 2. When a C# application must automatically verify that embossing a barcode image does not degrade readability across different file formats such as PNG, JPEG, or BMP using Aspose.Imaging.
- * 3. When a quality‑control system for printed labels applies a 3x3 Emboss convolution to each captured barcode frame to simulate wear and test the robustness of the decoding algorithm.
- * 4. When an image‑processing pipeline needs to load a raster image, apply a convolution filter, and save the result to a specific folder while ensuring the output directory exists.
- * 5. When a developer wants to benchmark the impact of the Emboss3x3 filter on barcode detection speed and accuracy by comparing decoded values before and after applying the filter.
+ * 1. When a developer is building an automated quality‑control system for a warehouse and wants to test how well the barcode scanner handles embossed (high‑contrast) images, they can use this code to apply the Emboss3x3 filter to PNG barcode files before decoding.
+ * 2. When a software team needs to benchmark the robustness of their Aspose.BarCode reader against variations in edge enhancement, they can preprocess sample barcode images with the 3×3 emboss convolution filter in C# and compare detection rates.
+ * 3. When an e‑commerce platform integrates barcode scanning for product returns and wants to simulate worst‑case lighting conditions, they can run this script to emboss JPEG or PNG barcodes and verify that the decoder still extracts the correct code text.
+ * 4. When a developer is creating a test suite for a mobile app that captures barcodes from camera frames, they can generate embossed versions of the captured PNG images using Aspose.Imaging to ensure the app’s barcode detection algorithm remains reliable after image sharpening.
+ * 5. When a manufacturing line uses C# to process scanned barcodes and must validate that image preprocessing steps such as embossing do not corrupt the data, this example shows how to load, filter, and save the image before passing it to the Aspose.BarCode reader.
  */
