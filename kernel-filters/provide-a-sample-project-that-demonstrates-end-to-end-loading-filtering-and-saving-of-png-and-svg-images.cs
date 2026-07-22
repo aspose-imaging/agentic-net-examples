@@ -1,67 +1,64 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output file paths
+        string pngInputPath = @"C:\temp\sample.png";
+        string pngOutputPath = @"C:\temp\sample.grayscale.png";
+
+        string svgInputPath = @"C:\temp\sample.svg";
+        string svgOutputPath = @"C:\temp\sample_converted.png";
+
         try
         {
-            // Hard‑coded input and output file paths
-            string pngInputPath = @"C:\temp\input.png";
-            string pngOutputPath = @"C:\temp\output_grayscale.png";
-
-            string svgInputPath = @"C:\temp\input.svg";
-            string svgOutputPath = @"C:\temp\output_from_svg.png";
-
             // ---------- PNG processing ----------
-            // Verify input file exists
             if (!File.Exists(pngInputPath))
             {
                 Console.Error.WriteLine($"File not found: {pngInputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
 
-            // Load PNG, convert to grayscale, and save
+            // Load PNG, apply grayscale filter, and save
             using (PngImage pngImage = new PngImage(pngInputPath))
             {
-                pngImage.Grayscale();                     // Apply grayscale filter
-                pngImage.Save(pngOutputPath);             // Save result
+                pngImage.Grayscale();
+                pngImage.Save(pngOutputPath);
             }
 
             // ---------- SVG processing ----------
-            // Verify SVG input exists
             if (!File.Exists(svgInputPath))
             {
                 Console.Error.WriteLine($"File not found: {svgInputPath}");
                 return;
             }
 
-            // Ensure SVG output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(svgOutputPath));
 
-            // Load SVG vector image
+            // Load SVG (vector image) and rasterize to PNG
             using (Image svgImage = Image.Load(svgInputPath))
             {
-                // Prepare PNG save options (you can customize as needed)
-                PngOptions pngOptions = new PngOptions
+                // Configure PNG save options (optional customizations)
+                var pngOptions = new PngOptions
                 {
-                    // Example: enable progressive loading and set compression
+                    // Example: enable progressive loading
                     Progressive = true,
+                    // Example: set maximum compression
                     CompressionLevel = 9,
-                    FilterType = Aspose.Imaging.FileFormats.Png.PngFilterType.Adaptive,
-                    ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.TruecolorWithAlpha,
-                    BitDepth = 8
+                    // Example: use adaptive filter
+                    FilterType = Aspose.Imaging.FileFormats.Png.PngFilterType.Adaptive
                 };
 
-                // Rasterize SVG to PNG using the options
+                // Save the rasterized image as PNG
                 svgImage.Save(svgOutputPath, pngOptions);
             }
         }
@@ -74,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert uploaded PNG photos to grayscale before storing them in a content‑management system.
- * 2. When a web service must generate thumbnail PNGs from user‑provided SVG logos for display on a responsive website.
- * 3. When an automated batch job processes a folder of PNG assets, applying a grayscale filter to meet a brand‑guideline requirement.
- * 4. When an e‑commerce platform converts scalable SVG product illustrations into raster PNG images for email newsletters.
- * 5. When a desktop utility validates the existence of image files, creates missing output directories, and saves processed PNGs to a temporary cache.
+ * 1. When a developer needs to convert a color PNG file to a grayscale PNG for reduced file size or printing consistency, they can use Aspose.Imaging to load the PNG, apply the Grayscale filter, and save the result.
+ * 2. When a web application must display user‑uploaded SVG graphics as raster PNG thumbnails, the code can load the SVG, rasterize it with PngOptions, and output a PNG file.
+ * 3. When an automated batch job processes a folder of mixed PNG and SVG assets and must ensure all images are stored in a uniform PNG format with specific compression settings, this sample shows how to load, filter, and save each image type.
+ * 4. When a desktop utility needs to guarantee that output directories exist before writing processed images, the example demonstrates using Directory.CreateDirectory together with Aspose.Imaging image loading and saving.
+ * 5. When a developer wants to enable progressive PNG loading and maximum compression while converting vector SVGs to raster PNGs, the code illustrates configuring PngOptions such as Progressive, CompressionLevel, and FilterType.
  */
