@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.dicom";
+        string outputPath = @"C:\Images\resized.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.dicom";
-            string outputPath = @"C:\Images\resized.bmp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -53,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a hospital IT system needs to convert high‑resolution DICOM scans into smaller BMP files for quick preview in a web portal, this code can load the DICOM image, shrink it by a calculated factor, and save the result as BMP.
- * 2. When a research lab wants to batch‑process radiology images to reduce storage costs while preserving basic visual information, they can use this snippet to read each DICOM file, apply a 50 % scaling, and store the downsized bitmap.
- * 3. When a medical device manufacturer must generate thumbnail BMP icons from DICOM files for inclusion in a device’s UI, the code demonstrates how to retrieve the original dimensions, compute a scaling factor, resize with nearest‑neighbour resampling, and export the thumbnail.
- * 4. When a compliance audit requires exporting DICOM images to a non‑proprietary format for long‑term archival, developers can employ this example to load the DICOM, resize it to a manageable size, and save it as a BMP using Aspose.Imaging for .NET.
- * 5. When a telemedicine application needs to send reduced‑size BMP snapshots of patient scans over low‑bandwidth connections, this program shows how to programmatically load the DICOM, calculate new width and height, resize the image, and write the BMP to disk.
+ * 1. When a medical imaging application must convert DICOM scans to BMP thumbnails for fast preview in a C# .NET user interface.
+ * 2. When a healthcare data pipeline needs to downscale large DICOM images by 50 % before storing them as BMP files to reduce storage costs.
+ * 3. When a diagnostic tool requires extracting the original width and height of a DICOM image to calculate a scaling factor for consistent image resizing.
+ * 4. When a .NET service processes incoming DICOM files, resizes them using nearest‑neighbour resampling, and saves the result as BMP for compatibility with legacy Windows viewers.
+ * 5. When a batch‑processing script validates the existence of a DICOM file, creates the output directory, and safely resizes and converts the image to BMP while handling runtime exceptions.
  */
