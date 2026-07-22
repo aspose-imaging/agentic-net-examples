@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
@@ -9,59 +10,53 @@ class Program
     static void Main()
     {
         // Hardcoded paths
-        string inputImagePath = @"input.svg";
+        string inputPath = @"Sample.svg";
         string templatePath = @"template.html";
-        string outputPath = @"output.html";
-        string tempCanvasPath = @"canvas_temp.html";
+        string outputPath = @"Result.html";
 
         try
         {
             // Verify input image exists
-            if (!File.Exists(inputImagePath))
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputImagePath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Verify template exists
+            // Verify HTML template exists
             if (!File.Exists(templatePath))
             {
                 Console.Error.WriteLine($"File not found: {templatePath}");
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(tempCanvasPath));
+            // Read template content
+            string templateContent = File.ReadAllText(templatePath);
 
-            // Load the source vector image
-            using (Image image = Image.Load(inputImagePath))
+            // Export image to HTML5 Canvas (only the canvas tag)
+            string canvasHtml;
+            using (Image image = Image.Load(inputPath))
             {
-                // Export only the canvas tag (no full HTML page)
-                var canvasOptions = new Html5CanvasOptions
+                using (var ms = new MemoryStream())
                 {
-                    VectorRasterizationOptions = new SvgRasterizationOptions(),
-                    FullHtmlPage = false
-                };
-
-                // Save canvas HTML to a temporary file
-                image.Save(tempCanvasPath, canvasOptions);
+                    var options = new Html5CanvasOptions
+                    {
+                        FullHtmlPage = false, // generate only the canvas tag
+                        VectorRasterizationOptions = new SvgRasterizationOptions()
+                    };
+                    image.Save(ms, options);
+                    canvasHtml = Encoding.UTF8.GetString(ms.ToArray());
+                }
             }
 
-            // Read generated canvas HTML
-            string canvasHtml = File.ReadAllText(tempCanvasPath);
+            // Embed canvas HTML into the template (replace placeholder {{CANVAS}})
+            string resultHtml = templateContent.Replace("{{CANVAS}}", canvasHtml);
 
-            // Read the existing HTML template
-            string templateHtml = File.ReadAllText(templatePath);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Placeholder in the template where the canvas should be inserted
-            const string placeholder = "{{CANVAS}}";
-
-            // Replace placeholder with the canvas HTML
-            string finalHtml = templateHtml.Replace(placeholder, canvasHtml);
-
-            // Write the final HTML to the output file
-            File.WriteAllText(outputPath, finalHtml);
+            // Write the final HTML file
+            File.WriteAllText(outputPath, resultHtml, Encoding.UTF8);
         }
         catch (Exception ex)
         {
@@ -72,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG illustration into an HTML5 canvas script and insert it into a custom HTML email template for consistent rendering across email clients.
- * 2. When a web application must display vector graphics on a responsive page by generating a canvas element from a source SVG and embedding it into a pre‑designed HTML layout at runtime.
- * 3. When an e‑learning platform wants to programmatically replace a placeholder in a lesson HTML page with a canvas‑based rendering of a diagram stored as an SVG file using C# and Aspose.Imaging.
- * 4. When a reporting tool generates PDF‑like dashboards and requires the vector chart to be exported as a canvas snippet that can be merged into an existing HTML report template.
- * 5. When a content management system automates the publishing workflow by converting uploaded SVG assets into canvas code and injecting them into a static HTML page template before publishing.
+ * 1. When a developer wants to convert an SVG illustration into an HTML5 canvas element and embed it into a custom web page template for dynamic rendering in browsers.
+ * 2. When a C# application needs to generate a lightweight HTML snippet from a vector image (SVG) without the surrounding HTML boilerplate, to insert into an existing HTML email or dashboard.
+ * 3. When a software solution must programmatically replace a placeholder in an HTML template with a rasterized canvas representation of a logo stored as SVG, ensuring consistent branding across web pages.
+ * 4. When an ASP.NET project requires on‑the‑fly conversion of user‑uploaded SVG files to canvas code that can be saved as a single HTML file using Aspose.Imaging’s Html5CanvasOptions.
+ * 5. When a developer is building a reporting tool that merges chart images (SVG) into pre‑designed HTML report templates by exporting the charts to canvas tags and writing the final HTML output.
  */
