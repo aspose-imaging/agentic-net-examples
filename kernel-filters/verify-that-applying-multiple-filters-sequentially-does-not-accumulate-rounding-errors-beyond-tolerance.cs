@@ -2,25 +2,21 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded paths
+        // Hardcoded paths
         string inputPath = @"c:\temp\sample.png";
-        string outputPath = @"c:\temp\output_sequential.png";
-        string referencePath = @"c:\temp\reference.png";
+        string outputPath = @"c:\temp\output.png";
 
-        // Verify input files exist
+        // Path safety checks
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-        if (!File.Exists(referencePath))
-        {
-            Console.Error.WriteLine($"File not found: {referencePath}");
             return;
         }
 
@@ -29,51 +25,34 @@ class Program
 
         try
         {
-            // Load the source image
+            // Load original image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Apply filters sequentially
+                // Apply a sequence of filters
                 raster.Filter(raster.Bounds, new MedianFilterOptions(5));
                 raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
                 raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                // Save the processed image
+                // Save the filtered image
                 raster.Save(outputPath);
             }
 
-            // Load the processed image and the reference image
-            using (Image resultImg = Image.Load(outputPath))
-            using (Image referenceImg = Image.Load(referencePath))
+            // Reload original and filtered images for comparison
+            using (Image originalImg = Image.Load(inputPath))
+            using (Image filteredImg = Image.Load(outputPath))
             {
-                RasterImage result = (RasterImage)resultImg;
-                RasterImage reference = (RasterImage)referenceImg;
+                RasterImage original = (RasterImage)originalImg;
+                RasterImage filtered = (RasterImage)filteredImg;
 
-                const double tolerance = 1.0; // acceptable per‑channel difference
-                bool withinTolerance = true;
+                double totalDifference = ComputeTotalDifference(original, filtered);
+                double tolerance = 1.0; // acceptable cumulative rounding error
 
-                // Compare each pixel
-                for (int y = 0; y < result.Height && withinTolerance; y++)
-                {
-                    for (int x = 0; x < result.Width && withinTolerance; x++)
-                    {
-                        var pResult = result.GetPixel(x, y);
-                        var pRef = reference.GetPixel(x, y);
-
-                        if (Math.Abs(pResult.R - pRef.R) > tolerance ||
-                            Math.Abs(pResult.G - pRef.G) > tolerance ||
-                            Math.Abs(pResult.B - pRef.B) > tolerance ||
-                            Math.Abs(pResult.A - pRef.A) > tolerance)
-                        {
-                            withinTolerance = false;
-                        }
-                    }
-                }
-
-                Console.WriteLine(withinTolerance
-                    ? "Sequential filters are within tolerance."
-                    : "Sequential filters exceed tolerance.");
+                Console.WriteLine($"Total pixel difference: {totalDifference}");
+                Console.WriteLine(totalDifference <= tolerance
+                    ? "Rounding error is within tolerance."
+                    : "Rounding error exceeds tolerance.");
             }
         }
         catch (Exception ex)
@@ -81,13 +60,36 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
+
+    // Computes the sum of absolute differences for each channel across all pixels
+    static double ComputeTotalDifference(RasterImage img1, RasterImage img2)
+    {
+        if (img1.Width != img2.Width || img1.Height != img2.Height)
+            throw new InvalidOperationException("Images must have the same dimensions.");
+
+        double diff = 0.0;
+        for (int y = 0; y < img1.Height; y++)
+        {
+            for (int x = 0; x < img1.Width; x++)
+            {
+                var c1 = img1.GetPixel(x, y);
+                var c2 = img2.GetPixel(x, y);
+
+                diff += Math.Abs(c1.R - c2.R);
+                diff += Math.Abs(c1.G - c2.G);
+                diff += Math.Abs(c1.B - c2.B);
+                diff += Math.Abs(c1.A - c2.A);
+            }
+        }
+        return diff;
+    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to ensure that applying a median filter, Gaussian blur, and sharpen filter to PNG assets for a web‑gallery does not introduce noticeable color drift, they can use this code to compare the result against a reference image within a 1‑unit per‑channel tolerance.
- * 2. When building a medical‑imaging workflow that sequentially denoises, smooths, and sharpens DICOM‑converted PNG scans, the code verifies that cumulative rounding errors stay below the acceptable diagnostic threshold.
- * 3. When creating an automated CI pipeline for a satellite‑image processing service, the code can validate that chaining filters on GeoTIFF‑converted PNG tiles produces output identical to a golden reference, preventing drift over successive releases.
- * 4. When developing a desktop photo‑editing application that lets users apply multiple filters in one operation, this snippet can be used in unit tests to confirm that the sequential filter pipeline preserves pixel fidelity across BMP, JPEG, and PNG formats.
- * 5. When performing batch image preprocessing for machine‑learning training data, the code helps ensure that applying a series of filters does not alter pixel values beyond the defined tolerance, guaranteeing consistent model input quality.
+ * 1. When building a C# desktop application that enhances PNG photographs by applying median, Gaussian blur, and sharpen filters, a developer can use this code to ensure the combined operations do not introduce perceptible rounding errors.
+ * 2. When implementing an automated image‑processing pipeline for e‑commerce product photos, the code helps verify that sequential filters applied with Aspose.Imaging preserve pixel fidelity within a defined tolerance before the images are uploaded.
+ * 3. When performing quality‑assurance tests on a medical‑imaging viewer that processes raster images, developers can run this example to confirm that successive filters do not accumulate rounding errors that could affect diagnostic accuracy.
+ * 4. When creating a batch job that normalizes satellite PNG tiles using multiple filters, the snippet provides a quick way to compare the original and filtered tiles and guarantee that cumulative rounding stays below the acceptable threshold.
+ * 5. When developing a CI/CD build step that validates image‑processing libraries, this code can be used to programmatically compute total pixel difference after applying several filters and fail the build if the error exceeds the tolerance.
  */
