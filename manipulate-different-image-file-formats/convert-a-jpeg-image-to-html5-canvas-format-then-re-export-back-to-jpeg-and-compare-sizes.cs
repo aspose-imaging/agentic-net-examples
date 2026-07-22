@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,11 +10,11 @@ class Program
         try
         {
             // Hardcoded paths
-            string inputPath = @"C:\temp\input.jpg";
-            string htmlPath = @"C:\temp\output.html";
-            string outputJpegPath = @"C:\temp\reoutput.jpg";
+            string inputPath = "input.jpg";
+            string canvasPath = "canvas.html";
+            string outputPath = "output.jpg";
 
-            // Input validation
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,40 +22,40 @@ class Program
             }
 
             // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(htmlPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputJpegPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(canvasPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the original JPEG image
-            using (Image image = Image.Load(inputPath))
+            // Load the JPEG image
+            using (Image jpegImage = Image.Load(inputPath))
             {
                 // Save as HTML5 Canvas
-                var htmlOptions = new Html5CanvasOptions
+                jpegImage.Save(canvasPath, new Html5CanvasOptions
                 {
-                    // Generate a full HTML page
+                    // Export full HTML page (default)
                     FullHtmlPage = true,
-                    // Required for vector rasterization when loading from vector sources
-                    VectorRasterizationOptions = new SvgRasterizationOptions()
-                };
-                image.Save(htmlPath, htmlOptions);
+                    // No special vector rasterization needed for raster source
+                });
             }
 
             // Load the generated HTML5 Canvas file
-            using (Image canvasImage = Image.Load(htmlPath))
+            using (Image canvasImage = Image.Load(canvasPath))
             {
                 // Save back to JPEG
                 var jpegOptions = new JpegOptions
                 {
-                    Quality = 100 // Preserve maximum quality
+                    Quality = 100 // Preserve quality for size comparison
                 };
-                canvasImage.Save(outputJpegPath, jpegOptions);
+                canvasImage.Save(outputPath, jpegOptions);
             }
 
             // Compare file sizes
             long originalSize = new FileInfo(inputPath).Length;
-            long reexportedSize = new FileInfo(outputJpegPath).Length;
+            long canvasSize = new FileInfo(canvasPath).Length;
+            long finalSize = new FileInfo(outputPath).Length;
 
             Console.WriteLine($"Original JPEG size: {originalSize} bytes");
-            Console.WriteLine($"Re‑exported JPEG size: {reexportedSize} bytes");
+            Console.WriteLine($"HTML5 Canvas file size: {canvasSize} bytes");
+            Console.WriteLine($"Re‑exported JPEG size: {finalSize} bytes");
         }
         catch (Exception ex)
         {
@@ -67,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed a JPEG photo into a web page as an HTML5 Canvas element for dynamic manipulation while preserving the original quality.
- * 2. When a developer wants to create a reversible workflow that converts a JPEG to an HTML5 Canvas file and back to JPEG to verify that no significant size increase occurs after processing.
- * 3. When a developer is building an automated image pipeline that validates that converting images to HTML5 Canvas for client‑side rendering does not inflate storage requirements.
- * 4. When a developer must generate a self‑contained HTML page from a JPEG for offline viewing and later re‑export it to JPEG for archival purposes.
- * 5. When a developer is testing Aspose.Imaging’s support for loading and saving HTML5 Canvas files in a C# application by comparing the byte size of the original and re‑exported JPEG images.
+ * 1. When a developer wants to generate an interactive web preview of a JPEG photo by converting it to an HTML5 Canvas page and then verify that re‑exporting it back to JPEG does not increase the file size.
+ * 2. When a C# application needs to embed raster images in a self‑contained HTML5 Canvas document for email newsletters and must ensure the final JPEG remains within the original bandwidth budget.
+ * 3. When performing automated image‑pipeline testing, a developer can use this code to compare the size of the original JPEG with the size after a round‑trip through HTML5 Canvas to detect any unwanted bloat.
+ * 4. When building a web‑based photo editor that saves edits as HTML5 Canvas files, the code helps confirm that exporting the canvas back to JPEG preserves quality while keeping the file size comparable to the source.
+ * 5. When creating a documentation generator that shows sample images as HTML5 Canvas snippets, the developer can use this routine to validate that the generated canvas HTML does not cause the JPEG output to exceed storage limits.
  */
