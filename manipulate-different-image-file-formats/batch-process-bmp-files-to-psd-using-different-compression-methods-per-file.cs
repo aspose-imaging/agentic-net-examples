@@ -8,33 +8,44 @@ class Program
 {
     static void Main()
     {
+        // Wrap the whole logic in a try/catch to handle unexpected errors gracefully
         try
         {
-            // Hard‑coded list of BMP files to process
-            string[] inputFiles = {
-                @"C:\Images\image1.bmp",
-                @"C:\Images\image2.bmp"
-            };
+            // Hard‑coded input and output directories
+            string inputDir = @"C:\temp\input\";
+            string outputDir = @"C:\temp\output\";
 
-            // Corresponding compression methods for each file
-            CompressionMethod[] compressionMethods = {
-                CompressionMethod.RLE,   // Use RLE for the first file
-                CompressionMethod.Raw    // Use no compression for the second file
-            };
-
-            for (int i = 0; i < inputFiles.Length; i++)
+            // List of BMP files to process
+            string[] bmpFiles = new string[]
             {
-                string inputPath = inputFiles[i];
+                "image1.bmp",
+                "image2.bmp",
+                "image3.bmp"
+            };
 
-                // Verify that the input file exists
+            // Corresponding PSD compression methods for each file
+            CompressionMethod[] compressionMethods = new CompressionMethod[]
+            {
+                CompressionMethod.RLE,   // image1.bmp -> RLE compression
+                CompressionMethod.Raw,   // image2.bmp -> No compression
+                CompressionMethod.RLE    // image3.bmp -> RLE compression
+            };
+
+            // Process each file
+            for (int i = 0; i < bmpFiles.Length; i++)
+            {
+                // Build full input path
+                string inputPath = Path.Combine(inputDir, bmpFiles[i]);
+
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output PSD path (same folder, same name, .psd extension)
-                string outputPath = Path.ChangeExtension(inputPath, ".psd");
+                // Build full output path (same name with .psd extension)
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(bmpFiles[i]) + ".psd");
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -46,18 +57,20 @@ class Program
                     var psdOptions = new PsdOptions
                     {
                         CompressionMethod = compressionMethods[i],
-                        // Set a common color mode; adjust as needed
+                        // Optional: set a common color mode (e.g., RGB)
                         ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb
                     };
 
-                    // Save as PSD with the specified options
+                    // Save as PSD using the specified compression method
                     image.Save(outputPath, psdOptions);
                 }
+
+                Console.WriteLine($"Converted '{inputPath}' to '{outputPath}' with {compressionMethods[i]} compression.");
             }
         }
         catch (Exception ex)
         {
-            // Any unexpected error is reported without crashing
+            // Output any unexpected error without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -65,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design studio needs to convert a folder of legacy BMP assets into editable Photoshop PSD files while applying RLE compression to large, repetitive‑pattern images and leaving high‑detail images uncompressed for maximum quality.
- * 2. When an e‑learning platform automates the preparation of course graphics by batch‑processing BMP screenshots into PSD layers, selecting raw compression for color‑critical diagrams and RLE for simple icons to reduce file size.
- * 3. When a printing company migrates client‑provided BMP proofs to PSD format, using different compression methods per file to balance storage costs and preserve resolution for print‑ready artwork.
- * 4. When a game development team exports BMP texture maps to PSD for artists to edit, applying RLE compression to repetitive background textures and raw compression to character sprites that require lossless detail.
- * 5. When a digital archiving system ingests scanned BMP documents and stores them as PSD files, choosing RLE compression for text‑heavy pages and raw compression for high‑resolution photographic pages to optimize retrieval speed and fidelity.
+ * 1. When a graphics pipeline needs to convert a batch of legacy BMP assets into Photoshop‑compatible PSD files while applying specific compression methods per image.
+ * 2. When an automated build script must generate layered PSD mockups from BMP screenshots, using RLE compression for smaller files and raw compression for loss‑less preservation.
+ * 3. When a digital asset management system requires nightly conversion of newly uploaded BMP textures to PSD format with per‑file compression settings to optimize storage.
+ * 4. When a Windows desktop application processes user‑selected BMP images and saves them as PSD files with different compression algorithms to meet varying quality and file‑size requirements.
+ * 5. When a cloud‑based image processing service needs to read BMP files from a directory, convert them to PSD using Aspose.Imaging for .NET, and apply distinct compression methods before uploading the results.
  */
