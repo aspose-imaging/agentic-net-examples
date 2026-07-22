@@ -27,14 +27,14 @@ class Program
             // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply filters
+                // Cast to RasterImage for filtering
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur filter (size = 5, sigma = 4.0)
+                // Apply Gaussian blur filter (size 5, sigma 4.0)
                 rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Apply Emboss 3x3 convolution filter
-                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                // Apply Emboss filter using the 3x3 kernel
+                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3, 3));
 
                 // Save the processed image
                 rasterImage.Save(outputPath);
@@ -49,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a stylized web icon, a developer can blur the SVG background with a Gaussian blur and then apply an Emboss3x3 filter to add a subtle 3‑D relief before exporting it as a PNG.
- * 2. When generating printable marketing materials, a designer may use this code to soften vector graphics with a Gaussian blur and then emboss the edges to give the logo a tactile appearance in the final raster image.
- * 3. When developing a photo‑editing app that supports vector assets, the code can be used to apply a smooth blur followed by an emboss effect to SVG illustrations, producing a polished, artistic look for user‑generated content.
- * 4. When preparing SVG diagrams for inclusion in a PowerPoint presentation, a developer can chain a Gaussian blur and an Emboss3x3 filter to reduce visual noise and add depth, then save the result as a high‑resolution PNG.
- * 5. When building an automated batch‑processing pipeline for e‑commerce product images, this snippet can be employed to uniformly blur product SVG overlays and emboss them, creating consistent, eye‑catching thumbnails across the catalog.
+ * 1. When a developer needs to convert an SVG logo to a PNG thumbnail with a soft blur and a subtle emboss effect for a web UI.
+ * 2. When a C# application must preprocess vector graphics before printing by applying Gaussian blur to reduce aliasing and then embossing to enhance edge definition.
+ * 3. When an ASP.NET site generates stylized product icons by loading SVG files, applying a blur for depth and an emboss filter for a 3‑D look, and saving them as PNG.
+ * 4. When a desktop tool automates batch processing of SVG diagrams, adding a blur to smooth details and an emboss filter to highlight contours before archiving them as raster images.
+ * 5. When a mobile backend service needs to prepare SVG illustrations for display on low‑resolution screens by rasterizing them, applying Gaussian blur for visual softness, and embossing for texture, then delivering PNG files.
  */
