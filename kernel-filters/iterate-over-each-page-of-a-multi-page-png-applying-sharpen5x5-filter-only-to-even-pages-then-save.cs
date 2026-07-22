@@ -1,53 +1,43 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
-            // Load the multi‑page PNG (APNG) image
-            using (Image img = Image.Load(inputPath))
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
             {
-                // Cast to ApngImage to access pages
-                if (img is ApngImage apngImage && apngImage.Pages != null)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                if (image is IMultipageImage multipage && multipage.PageCount > 0)
                 {
-                    // Iterate over each page
-                    for (int i = 0; i < apngImage.Pages.Length; i++)
+                    for (int i = 0; i < multipage.PageCount; i++)
                     {
-                        // Even page numbers (2,4,…) – using 1‑based indexing
-                        if ((i + 1) % 2 == 0)
+                        if (i % 2 == 0) // even pages (0‑based index)
                         {
-                            // Each page is a RasterImage
-                            if (apngImage.Pages[i] is RasterImage rasterPage)
+                            Image page = multipage.Pages[i];
+                            if (page is RasterImage raster)
                             {
-                                // Apply Sharpen filter with a 5×5 kernel
-                                rasterPage.Filter(rasterPage.Bounds, new SharpenFilterOptions(5, 4.0));
+                                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
                             }
                         }
                     }
                 }
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the modified image
-                img.Save(outputPath);
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -59,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating an animated product showcase where every second frame needs enhanced edge definition, a developer can use this code to sharpen only the even pages of an APNG before publishing.
- * 2. When processing a multi‑page medical scan stored as an APNG and the analyst wants to highlight details on alternate slices, the code can apply a 5×5 sharpen filter to those even‑indexed pages.
- * 3. When generating a slideshow of UI mockups in an APNG and the designer wants the transition frames (every second page) to appear crisper, the developer can iterate and sharpen those pages with this snippet.
- * 4. When automating quality‑control for a batch of animated icons and the requirement is to boost contrast on even frames to meet branding guidelines, this C# example provides the exact steps.
- * 5. When building a game asset pipeline that stores character animation frames in an APNG and the developer needs to sharpen only the keyframes located on even pages, the code demonstrates how to filter and save the result.
+ * 1. When a developer needs to enhance the visual clarity of every second frame in a multi‑page PNG animation by applying a Sharpen5x5 filter before publishing it online.
+ * 2. When processing scanned document bundles saved as a multi‑page PNG and the even‑numbered pages contain low‑contrast diagrams that must be sharpened using Aspose.Imaging in a C# application.
+ * 3. When generating a printable PDF from a multi‑page PNG where the even pages are product photos that require a 5×5 sharpening kernel to meet print quality standards.
+ * 4. When building a C# batch‑processing tool that automatically improves the sharpness of even pages in multi‑page PNG spritesheets for a game asset pipeline.
+ * 5. When creating a server‑side image service that receives multi‑page PNGs and must selectively sharpen only the even pages to reduce file size while preserving detail for downstream AI analysis.
  */
