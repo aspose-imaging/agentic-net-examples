@@ -8,27 +8,30 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input directory containing JPEG files
+        string inputDirectory = @"C:\Images\Input";
+
         try
         {
-            // Hardcoded input directory containing JPEG files
-            string inputDirectory = @"C:\Images\Input";
-
-            // Retrieve all JPEG files in the directory
+            // Get all JPEG files in the directory
             string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg");
 
             foreach (string inputPath in jpegFiles)
             {
-                // Verify the file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
+                // Ensure the output directory exists (same as input directory for in‑place save)
+                Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
+
                 // Load the JPEG image
                 using (JpegImage image = (JpegImage)Image.Load(inputPath))
                 {
-                    // Access JPEG-specific EXIF data
+                    // Access JPEG EXIF data
                     JpegExifData jpegExif = image.ExifData as JpegExifData;
                     if (jpegExif != null)
                     {
@@ -36,14 +39,8 @@ class Program
                         jpegExif.Artist = "New Artist";
                     }
 
-                    // Output path is the same as input (in‑place modification)
-                    string outputPath = inputPath;
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save changes back to the original file
-                    image.Save(outputPath);
+                    // Save changes back to the same file (in‑place)
+                    image.Save(inputPath);
                 }
             }
         }
@@ -56,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer needs to batch‑update the Artist EXIF tag of thousands of JPEG images stored in a folder, this C# Aspose.Imaging code can read each file, set the Artist field, and save the changes in place.
- * 2. When a digital asset management system must ensure that all uploaded JPEG photos carry a consistent author name, developers can use this snippet to iterate over a directory, modify the JPEG ExifData.Artist property, and overwrite the original files.
- * 3. When a media workflow requires embedding copyright information by setting the Artist tag across a collection of JPEG pictures before publishing, the code provides a simple C# solution that reads, updates, and saves the metadata without creating new files.
- * 4. When an e‑commerce platform wants to standardize photographer credits on product images by programmatically editing the EXIF Artist tag of JPEG files on the server, this Aspose.Imaging example performs the batch modification and in‑place save.
- * 5. When a backup script needs to verify and correct the Artist metadata of archived JPEG images to improve searchability, developers can employ this C# loop to scan a directory, adjust the EXIF Artist field, and write the updates directly back to each image.
+ * 1. When a photographer uses Aspose.Imaging for .NET to embed or update the Artist EXIF tag across a folder of JPEG images before publishing them online.
+ * 2. When a digital asset management system processes a batch of JPEG files in C# and standardizes the Artist metadata to enable consistent search and filtering.
+ * 3. When a web application automatically adds the photographer’s name to existing JPEG files during a bulk upload, using Aspose.Imaging to modify the EXIF Artist tag in place.
+ * 4. When a company migrates legacy product images and must replace outdated Artist information with the current brand name across thousands of JPEG files using C# batch processing.
+ * 5. When a photo‑editing workflow requires batch correction of the Artist EXIF tag after renaming files, ensuring the metadata matches the new organization without creating new files.
  */
