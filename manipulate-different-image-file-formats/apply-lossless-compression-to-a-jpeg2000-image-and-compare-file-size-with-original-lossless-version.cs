@@ -10,8 +10,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.jp2";
-            string outputPath = "output_lossless.jp2";
+            string inputPath = "Input\\sample.jp2";
+            string outputPath = "Output\\sample_lossless.jp2";
 
             if (!File.Exists(inputPath))
             {
@@ -21,19 +21,22 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Jpeg2000Image image = new Jpeg2000Image(inputPath))
+            using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(inputPath))
             {
-                Jpeg2000Options options = new Jpeg2000Options();
-                options.Irreversible = false; // Ensure lossless compression
-
-                image.Save(outputPath, options);
+                Jpeg2000Options options = new Jpeg2000Options(); // default is lossless (Irreversible = false)
+                jpeg2000Image.Save(outputPath, options);
             }
 
             long originalSize = new FileInfo(inputPath).Length;
             long compressedSize = new FileInfo(outputPath).Length;
 
             Console.WriteLine($"Original size: {originalSize} bytes");
-            Console.WriteLine($"Compressed (lossless) size: {compressedSize} bytes");
+            Console.WriteLine($"Compressed size: {compressedSize} bytes");
+            if (originalSize > 0)
+            {
+                double ratio = (double)compressedSize / originalSize * 100;
+                Console.WriteLine($"Size after compression: {ratio:F2}% of original");
+            }
         }
         catch (Exception ex)
         {
@@ -44,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application must store DICOM scans as JPEG2000 files without losing diagnostic detail, a developer can use this code to apply lossless compression and verify the reduced file size.
- * 2. When an archival system for cultural‑heritage photographs needs to preserve original quality while minimizing storage costs, a developer can run this routine to compress JPEG2000 images losslessly and compare the saved space.
- * 3. When a satellite‑imagery processing pipeline requires transmitting high‑resolution images without quality degradation, a developer can employ this example to create a lossless JPEG2000 payload and measure the bandwidth savings.
- * 4. When a digital publishing platform wants to embed losslessly compressed JPEG2000 graphics in e‑books and ensure the files meet device size constraints, a developer can use the code to compress and report the size difference.
- * 5. When a compliance audit demands proof that image assets are stored in a lossless format, a developer can automate the conversion and size comparison with this snippet to demonstrate that the JPEG2000 files retain visual fidelity while being smaller.
+ * 1. When a developer needs to archive high‑resolution medical scans in JPEG2000 format with lossless compression and verify how much storage space the compression saves.
+ * 2. When a GIS application must store satellite imagery as lossless JPEG2000 files and compare the compressed size to the original to optimize bandwidth usage.
+ * 3. When a digital asset management system requires converting existing JPEG2000 assets to a smaller lossless version using C# and Aspose.Imaging and log the percentage of size reduction.
+ * 4. When an e‑learning platform wants to serve large textbook diagrams in lossless JPEG2000 to preserve detail, and the developer must measure the file‑size impact before deployment.
+ * 5. When a printing workflow automates the preparation of artwork files in JPEG2000, applying lossless compression via Aspose.Imaging and checking the resulting file size to meet printer specifications.
  */
