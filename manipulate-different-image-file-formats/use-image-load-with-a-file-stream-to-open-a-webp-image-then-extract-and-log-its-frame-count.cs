@@ -1,44 +1,31 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.webp";
-            string outputPath = "C:\\temp\\framecount.txt";
+            // Hardcoded input path
+            string inputPath = "input.webp";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Open a file stream for the WebP image
-            using (FileStream stream = File.OpenRead(inputPath))
+            // Open a read-only file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            // Load the WebP image from the stream
+            using (WebPImage webPImage = new WebPImage(stream))
             {
-                // Load the image from the stream
-                using (Image image = Image.Load(stream))
-                {
-                    // Cast to WebPImage to access PageCount (frame count)
-                    WebPImage webPImage = image as WebPImage;
-                    int frameCount = webPImage != null ? webPImage.PageCount : 0;
-
-                    // Log the frame count to console
-                    Console.WriteLine($"Frame count: {frameCount}");
-
-                    // Write the frame count to the output file
-                    File.WriteAllText(outputPath, $"Frame count: {frameCount}");
-                }
+                // Get the number of frames (pages) in the WebP image
+                int frameCount = webPImage.PageCount;
+                Console.WriteLine($"WebP frame count: {frameCount}");
             }
         }
         catch (Exception ex)
@@ -50,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to verify the number of animation frames in a WebP image before processing it for a web carousel, they can use Image.Load with a FileStream to read the file and log the frame count.
- * 2. When building a server‑side image‑validation service that rejects multi‑frame WebP files exceeding a certain limit, the code can load the image from a stream and extract the PageCount for comparison.
- * 3. When generating a report of assets in a digital‑asset‑management system, a developer can read each WebP file via a stream, obtain its frame count, and write the result to a log file for inventory purposes.
- * 4. When creating a batch‑processing tool that converts animated WebP files to GIFs only if they contain more than one frame, the code demonstrates how to load the image, read the frame count, and decide the next step.
- * 5. When troubleshooting rendering issues in a C# application that displays WebP animations, a developer can use this snippet to load the image from a stream, output the frame count to the console, and confirm the source file’s structure.
+ * 1. When building a C# web service that validates uploaded animated WebP files, a developer can use a file stream to load the image with Aspose.Imaging and log its frame count to ensure it meets the required animation length.
+ * 2. When creating a desktop application that generates thumbnails for multi‑frame WebP assets, a developer needs to open the file via a stream, extract the PageCount, and decide how many preview images to produce.
+ * 3. When implementing a batch processing script that archives only single‑frame WebP pictures, a developer can load each file from a stream, read the frame count, and skip files with more than one page.
+ * 4. When developing a content‑management system that reports metadata for uploaded graphics, a developer can use Aspose.Imaging to load the WebP image from a stream and log its frame count as part of the image’s descriptive data.
+ * 5. When troubleshooting animation glitches in an ASP.NET MVC app, a developer can read the WebP file through a stream, retrieve the number of frames, and compare it against expected values to diagnose rendering issues.
  */
