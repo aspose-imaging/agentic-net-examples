@@ -2,45 +2,43 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.bmp";
+        string outputPath = @"C:\Images\output.jpg";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\sample.bmp";
-            string outputPath = @"C:\Images\sample_converted.jpg";
-
-            // Desired JPEG quality (1-100)
-            int jpegQuality = 85;
-
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
+            // Load BMP image
             using (Image image = Image.Load(inputPath))
             {
                 // Configure JPEG save options
-                var jpegOptions = new JpegOptions
+                JpegOptions jpegOptions = new JpegOptions
                 {
-                    Quality = jpegQuality,
-                    BitsPerChannel = 8,
-                    CompressionType = JpegCompressionMode.Progressive,
+                    // Set desired quality (1-100)
+                    Quality = 85,
+                    // Optional: set progressive compression
+                    CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
+                    // Preserve resolution from source
                     ResolutionSettings = new ResolutionSetting(96.0, 96.0),
                     ResolutionUnit = ResolutionUnit.Inch
                 };
 
-                // Save the image as JPEG with the specified options
+                // Save as JPEG with the specified options
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -53,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to batch‑convert legacy BMP screenshots to smaller JPEG files for faster web upload while controlling the compression quality.
- * 2. When an e‑commerce platform generates product thumbnails from high‑resolution BMP assets and must save them as progressive JPEGs with a specific quality setting to balance visual fidelity and page load speed.
- * 3. When a document‑management system receives scanned BMP images and must store them as JPEGs with 96 dpi resolution and 8‑bit channels to reduce storage costs without losing readability.
- * 4. When a Windows service processes user‑uploaded BMP logos and needs to output JPEG files with configurable quality for email newsletters that support only JPEG image format.
- * 5. When a photo‑editing tool offers a “Save As JPEG” feature that lets developers specify the compression level, resolution unit, and progressive encoding for BMP files using the Aspose.Imaging .NET API.
+ * 1. When a desktop application needs to reduce the file size of user‑uploaded BMP screenshots before storing them in a database, it can use this code to convert them to JPEG with a specified quality.
+ * 2. When a batch‑processing service must generate web‑ready thumbnails from legacy BMP assets, the code enables conversion to progressive JPEG while preserving the original resolution.
+ * 3. When an automated report generator creates high‑resolution BMP charts but must embed them in PDF files that only support JPEG, this snippet converts the charts with controllable compression.
+ * 4. When a migration tool moves image files from a Windows file server to a cloud storage bucket that enforces size limits, the code compresses BMP images to JPEG using the desired quality level.
+ * 5. When a mobile backend receives BMP images from IoT devices and needs to serve them to browsers efficiently, the code transforms the BMPs into JPEGs with configurable quality and progressive encoding.
  */
