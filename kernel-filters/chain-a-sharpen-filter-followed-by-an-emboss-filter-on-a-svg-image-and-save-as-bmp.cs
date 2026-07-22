@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
@@ -14,8 +13,8 @@ class Program
     {
         try
         {
-            string inputPath = @"C:\Images\input.svg";
-            string outputPath = @"C:\Images\output.bmp";
+            string inputPath = "input.svg";
+            string outputPath = "output.bmp";
 
             if (!File.Exists(inputPath))
             {
@@ -27,25 +26,37 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                var svgRasterOptions = new SvgRasterizationOptions
+                SvgImage svgImage = (SvgImage)image;
+
+                // Set up rasterization options for SVG
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    BackgroundColor = Aspose.Imaging.Color.White
+                    PageSize = svgImage.Size
                 };
-                var pngOptions = new PngOptions { VectorRasterizationOptions = svgRasterOptions };
 
-                using (var memoryStream = new MemoryStream())
+                // Rasterize SVG to a memory stream as PNG
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    image.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
-
-                    using (RasterImage raster = (RasterImage)Image.Load(memoryStream))
+                    PngOptions pngOptions = new PngOptions
                     {
+                        VectorRasterizationOptions = rasterOptions
+                    };
+                    image.Save(ms, pngOptions);
+                    ms.Position = 0;
+
+                    // Load rasterized image
+                    using (Image rasterImg = Image.Load(ms))
+                    {
+                        RasterImage raster = (RasterImage)rasterImg;
+
+                        // Apply sharpen filter
                         raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
+
+                        // Apply emboss filter using predefined kernel
                         raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-                        var bmpOptions = new BmpOptions();
+                        // Save as BMP
+                        BmpOptions bmpOptions = new BmpOptions();
                         raster.Save(outputPath, bmpOptions);
                     }
                 }
@@ -60,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a vector SVG logo into a high‑contrast BMP thumbnail for a Windows desktop application, applying a sharpen filter followed by an emboss filter to enhance edge definition.
- * 2. When an e‑commerce platform wants to generate printable BMP product images from SVG artwork while adding visual depth through sharpening and embossing for better catalog presentation.
- * 3. When a GIS system requires rasterizing map SVG layers into BMP tiles with enhanced detail, using Aspose.Imaging C# API to apply sharpening and emboss filters before saving.
- * 4. When a game developer prepares BMP textures from SVG UI icons, chaining a sharpen filter and an emboss filter to create crisp, stylized graphics for in‑game menus.
- * 5. When an automated reporting tool transforms SVG charts into BMP images for inclusion in legacy PDF reports, adding sharpening and emboss effects to improve readability on low‑resolution printers.
+ * 1. When a developer needs to enhance the visual detail of a logo stored as SVG for inclusion in a Windows desktop application that only supports BMP assets, they can rasterize, sharpen, emboss, and save it as BMP.
+ * 2. When preparing high‑contrast icons for a legacy embedded system that requires BMP files, chaining a sharpen filter followed by an emboss filter on the original SVG ensures the icons remain crisp after rasterization.
+ * 3. When generating printable schematics where edge definition is critical, a developer can sharpen and emboss a vector diagram (SVG) before converting it to BMP for use in a reporting tool that only accepts bitmap images.
+ * 4. When creating stylized thumbnails for a product catalog that must be displayed on older browsers supporting BMP, applying a sharpen filter then an emboss filter to the SVG provides a distinctive, tactile look.
+ * 5. When converting SVG artwork into BMP format for a game engine that does not support vector graphics, chaining these filters in C# adds depth and clarity to the rasterized textures.
  */
