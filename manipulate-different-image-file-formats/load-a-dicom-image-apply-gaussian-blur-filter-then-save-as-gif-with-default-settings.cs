@@ -27,8 +27,8 @@ class Program
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage to apply filters
+                var raster = (RasterImage)image;
 
                 // Apply Gaussian blur filter to the whole image
                 raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
@@ -39,7 +39,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -47,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to anonymize patient scans by blurring sensitive details before sharing the images as lightweight GIF files for web review.
- * 2. When a radiology workflow requires converting DICOM X‑ray images to animated GIFs with a soft focus effect for inclusion in presentation slides or reports.
- * 3. When a telehealth platform wants to reduce bandwidth by applying a Gaussian blur to DICOM images and saving them as GIFs for fast preview on mobile devices.
- * 4. When a research tool processes large batches of DICOM scans, applying a blur filter to highlight overall anatomy and exporting the results as GIFs for quick visual inspection.
- * 5. When a diagnostic software integrates Aspose.Imaging to load DICOM files, apply a Gaussian blur for noise reduction, and output GIFs with default settings for compatibility with legacy image viewers.
+ * 1. When a medical imaging application needs to anonymize patient scans by blurring sensitive details in a DICOM file before sharing it as a lightweight GIF for quick review.
+ * 2. When a radiology workflow requires converting high‑resolution DICOM images to GIFs with a Gaussian blur effect to reduce file size for web‑based case studies.
+ * 3. When a healthcare data pipeline processes DICOM X‑ray images, applies a 5‑pixel radius Gaussian blur to smooth noise, and saves the result as a GIF for inclusion in electronic health records.
+ * 4. When a C# developer builds a diagnostic reporting tool that loads DICOM scans, softens edges using a Gaussian blur filter, and exports the visual as a GIF for easy embedding in PDFs.
+ * 5. When a telemedicine platform needs to automatically load DICOM images, apply a blur to protect patient privacy, and deliver the processed image as a GIF to remote clinicians using Aspose.Imaging for .NET.
  */
