@@ -24,31 +24,30 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CDR image
-            using (Image image = Image.Load(inputPath))
+            using (Image cdrImage = Image.Load(inputPath))
             {
-                // Set JPEG save options (default quality)
+                // Prepare JPEG save options
                 var jpegOptions = new JpegOptions();
 
                 // Save as JPEG
-                image.Save(outputPath, jpegOptions);
+                cdrImage.Save(outputPath, jpegOptions);
             }
 
             // Verify the JPEG file was created and has non‑zero size
-            if (File.Exists(outputPath))
+            if (!File.Exists(outputPath))
             {
-                FileInfo info = new FileInfo(outputPath);
-                if (info.Length > 0)
-                {
-                    Console.WriteLine($"Conversion succeeded. File size: {info.Length} bytes.");
-                }
-                else
-                {
-                    Console.Error.WriteLine("Conversion failed: output file has zero size.");
-                }
+                Console.Error.WriteLine($"Output file not created: {outputPath}");
+                return;
+            }
+
+            var info = new FileInfo(outputPath);
+            if (info.Length == 0)
+            {
+                Console.Error.WriteLine($"Output file is empty: {outputPath}");
             }
             else
             {
-                Console.Error.WriteLine("Conversion failed: output file not found.");
+                Console.WriteLine($"JPG file created successfully: {outputPath}, size: {info.Length} bytes");
             }
         }
         catch (Exception ex)
@@ -60,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When integrating CorelDRAW (CDR) files into a web application that only supports JPEG images, a developer can use this code to convert the CDR to JPEG and confirm the output file exists and is not empty before serving it to users.
- * 2. In an automated document processing pipeline that extracts graphics from legacy design files, this snippet ensures each converted JPEG is successfully created and has a non‑zero size, preventing downstream errors.
- * 3. When building a desktop utility that allows users to batch‑convert CDR drawings to JPEG for printing or archiving, the code validates each conversion result so the UI can report success or failure accurately.
- * 4. For a cloud‑based image service that receives CorelDRAW files via API, the developer can employ this routine to save the image as JPEG with Aspose.Imaging and verify the file size before uploading it to storage.
- * 5. During continuous integration testing of a C# image conversion module, this example checks that the generated JPEG from a sample CDR file is present and contains data, ensuring the build does not regress.
+ * 1. When a desktop application needs to batch‑convert CorelDRAW (.cdr) files to JPEG for web publishing and must confirm each output file was created and is not empty.
+ * 2. When an automated build pipeline generates product catalog images from source CDR assets and requires a C# verification step that the resulting JPG files exist and have a non‑zero byte size before proceeding to the next stage.
+ * 3. When a document management system imports legacy CDR graphics and stores them as JPEG thumbnails, the code ensures the conversion succeeded by checking file existence and size in .NET.
+ * 4. When a Windows service monitors a folder for new CDR designs, converts them to JPEG using Aspose.Imaging, and needs to log an error if the saved JPG file is missing or zero bytes.
+ * 5. When a QA test script validates that a third‑party plugin correctly exports CDR drawings to JPEG, using C# to load the source, save with JpegOptions, and assert the output file is present and contains data.
  */

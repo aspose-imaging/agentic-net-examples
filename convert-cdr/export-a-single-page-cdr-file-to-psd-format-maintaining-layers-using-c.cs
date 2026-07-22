@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
@@ -11,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\input\sample.cdr";
-            string outputPath = @"C:\output\sample.psd";
+            string inputPath = "C:\\temp\\sample.cdr";
+            string outputPath = "C:\\temp\\sample.psd";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,18 +25,21 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR file
+            // Load the CDR image
             using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Get the first (and only) page
-                CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
+                // Cache the whole image data
+                cdrImage.CacheData();
 
-                // Prepare PSD save options
+                // Get the first (single) page
+                CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
+                page.CacheData();
+
+                // Configure PSD export options
                 PsdOptions psdOptions = new PsdOptions
                 {
-                    // Example settings (optional)
-                    // CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
-                    // ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb
+                    CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
+                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Rgb
                 };
 
                 // Save the page as PSD, preserving layers
@@ -51,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to convert a CorelDRAW (CDR) single‑page illustration to an Adobe Photoshop (PSD) file while preserving editable layers for further editing in Photoshop using C# and Aspose.Imaging.
- * 2. When an automated build pipeline must batch‑process CDR assets and generate PSD files for a marketing team, ensuring layer information is retained through Aspose.Imaging’s C# API.
- * 3. When a web service receives user‑uploaded CDR files and must deliver downloadable PSD versions with intact layers for collaborative design workflows, implemented with C# and Aspose.Imaging.
- * 4. When a legacy desktop application that only supports PSD files needs to import CDR drawings without flattening them, using C# code to load the CDR page and save it as a layered PSD.
- * 5. When a digital asset management system requires programmatic conversion of single‑page CorelDRAW files to PSD format to maintain layer structure for archival and future editing, leveraging Aspose.Imaging for .NET in C#.
+ * 1. When a graphic design workflow requires converting a CorelDRAW (CDR) illustration to an Adobe Photoshop (PSD) file while keeping the original layers intact for further editing in Photoshop.
+ * 2. When an automated batch‑processing service needs to read single‑page CDR files from a directory and export them as layered PSD files using C# and Aspose.Imaging for downstream compositing.
+ * 3. When a web application allows users to upload CDR artwork and instantly provides a downloadable PSD version with RLE compression and RGB color mode for seamless integration with Photoshop plugins.
+ * 4. When a digital asset management system must preserve layer information while migrating legacy CorelDRAW assets to PSD format to maintain editability across design teams.
+ * 5. When a CI/CD pipeline for a publishing platform includes a step that validates CDR files and converts them to layered PSD files using Aspose.Imaging to ensure compatibility with Photoshop‑based proofing tools.
  */

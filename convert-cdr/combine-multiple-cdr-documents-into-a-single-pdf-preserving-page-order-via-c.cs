@@ -1,3 +1,4 @@
+// HOW-TO: Combine Multiple CDR Files Into a Single PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,44 +10,48 @@ class Program
     {
         try
         {
-            // Input CDR files (hardcoded paths)
-            string inputPath1 = @"C:\input\doc1.cdr";
-            string inputPath2 = @"C:\input\doc2.cdr";
-
-            // Validate input files
-            if (!File.Exists(inputPath1))
+            // Input CDR files (hard‑coded)
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {inputPath1}");
-                return;
-            }
-            if (!File.Exists(inputPath2))
+                "input1.cdr",
+                "input2.cdr",
+                "input3.cdr"
+            };
+
+            // Verify each input file exists
+            foreach (var path in inputPaths)
             {
-                Console.Error.WriteLine($"File not found: {inputPath2}");
-                return;
+                if (!File.Exists(path))
+                {
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
+                }
             }
 
-            // Output PDF file (hardcoded path)
-            string outputPath = @"C:\output\combined.pdf";
+            // Output PDF file (hard‑coded)
+            string outputPath = "output.pdf";
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
 
             // Create a multipage image from the CDR files
-            string[] cdrFiles = new[] { inputPath1, inputPath2 };
-            using (Image multipageImage = Image.Create(cdrFiles))
+            using (Image multipageImage = Image.Create(inputPaths))
             {
-                // Configure PDF options with vector rasterization for CDR pages
+                // Configure PDF options with CDR rasterization settings
                 PdfOptions pdfOptions = new PdfOptions
                 {
                     VectorRasterizationOptions = new CdrRasterizationOptions
                     {
-                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = Aspose.Imaging.SmoothingMode.None,
-                        Positioning = Aspose.Imaging.ImageOptions.PositioningTypes.DefinedByDocument
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
                     }
                 };
 
-                // Save combined PDF
+                // Save the combined PDF
                 multipageImage.Save(outputPath, pdfOptions);
             }
         }
@@ -59,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design studio needs to merge several CorelDRAW (CDR) artwork files into a single PDF portfolio for client review, preserving the original page order.
- * 2. When an automated document processing pipeline must convert multiple CDR drawings into a combined PDF report for archiving or compliance purposes.
- * 3. When a web application offers users the ability to upload multiple CDR files and receive a single downloadable PDF that retains vector quality through Aspose.Imaging rasterization options.
- * 4. When a batch job runs nightly to consolidate daily CDR design drafts into one PDF booklet for distribution to the production team.
- * 5. When a Windows service integrates Aspose.Imaging to programmatically combine CDR pages into a PDF for printing workflows that require consistent page sequencing.
+ * 1. When you need to merge several CorelDRAW (CDR) drawings into one PDF for client delivery while preserving the original page order.
+ * 2. When automating a batch conversion that turns a series of CDR pages into a multi‑page PDF report using C#.
+ * 3. When integrating Aspose.Imaging into a C# application to rasterize CDR files and create a combined PDF without manual editing.
+ * 4. When generating printable PDFs from CDR assets on a server, eliminating the need to open each file in CorelDRAW.
+ * 5. When building a web service that accepts multiple CDR uploads and returns a single combined PDF for archiving or distribution.
  */

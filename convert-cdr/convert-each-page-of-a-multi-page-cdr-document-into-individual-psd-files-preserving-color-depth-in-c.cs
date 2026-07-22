@@ -1,37 +1,54 @@
+// HOW-TO: Convert Each Page Of A Multi‑Page CDR To Separate PSD Files In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input CDR file and output directory
+        string inputPath = @"C:\temp\sample.cdr";
+        string outputDir = @"C:\temp\output";
+
         try
         {
-            string inputPath = "input.cdr";
-            string outputDirectory = "output";
-            string outputPath = Path.Combine(outputDirectory, "output.png");
-
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
 
-            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            // Load the CDR image
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                cdr.Save(outputPath, new PngOptions
+                // Cache the whole document to avoid repeated I/O
+                cdrImage.CacheData();
+
+                // Iterate through each page
+                foreach (CdrImagePage page in cdrImage.Pages)
                 {
-                    VectorRasterizationOptions = new CdrRasterizationOptions
-                    {
-                        PageWidth = cdr.Width,
-                        PageHeight = cdr.Height
-                    }
-                });
+                    // Cache individual page data
+                    page.CacheData();
+
+                    // Build output file path for this page
+                    string outputPath = Path.Combine(outputDir, $"page_{page.PageNumber}.psd");
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Prepare PSD save options (default preserves original color depth)
+                    PsdOptions psdOptions = new PsdOptions();
+
+                    // Save the page as a PSD file
+                    page.Save(outputPath, psdOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -43,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design agency needs to automate the conversion of multi‑page CorelDRAW (CDR) files into high‑color‑depth PNG previews for quick client review, this C# code provides a reliable solution.
- * 2. When a print shop wants to extract each page of a multi‑page CDR document and generate separate PSD‑compatible raster images for further editing in Adobe Photoshop, the code can be adapted to preserve the original color depth.
- * 3. When a digital asset management system must ingest legacy CDR artwork and store each page as an individual PNG file while maintaining accurate color representation, developers can use this snippet to streamline the process.
- * 4. When a batch‑processing tool is required to convert a large collection of multi‑page CDR files into separate high‑resolution PNGs for archival or web publishing, this C# routine handles page‑by‑page rasterization efficiently.
- * 5. When a continuous‑integration pipeline needs to generate visual regression snapshots from CorelDRAW source files by converting each page to a color‑accurate PNG, the provided code can be integrated into automated build scripts.
+ * 1. When a designer needs to extract individual pages from a multi‑page CorelDRAW file for editing in Photoshop.
+ * 2. When an automated batch process must convert archived CDR documents into PSD format while preserving the original color depth.
+ * 3. When a web service receives CDR uploads and must provide each page as a separate PSD for downstream graphics pipelines.
+ * 4. When a migration tool moves legacy CDR assets to a Photoshop‑based workflow without losing color fidelity.
+ * 5. When a CI/CD pipeline validates that each page of a CDR file can be rendered correctly as a PSD for quality assurance.
  */

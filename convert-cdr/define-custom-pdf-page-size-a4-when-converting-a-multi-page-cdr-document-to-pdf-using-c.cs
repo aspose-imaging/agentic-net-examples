@@ -2,20 +2,19 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.cdr";
+        string outputPath = @"C:\Images\output.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input\\sample.cdr";
-            string outputPath = "Output\\sample.pdf";
-
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -31,22 +30,21 @@ class Program
                 // Configure PDF options with custom A4 page size (595x842 points)
                 PdfOptions pdfOptions = new PdfOptions
                 {
-                    PageSize = new SizeF(595f, 842f)
+                    PageSize = new SizeF(595f, 842f) // A4 size
                 };
 
-                // Set vector rasterization options for CDR
+                // Configure rasterization options for vector conversion
                 CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                     SmoothingMode = SmoothingMode.None,
                     Positioning = PositioningTypes.DefinedByDocument,
-                    PageWidth = 595,
-                    PageHeight = 842
+                    PageSize = new SizeF(595f, 842f) // Ensure vector pages match A4
                 };
 
                 pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save all pages to a single PDF file
+                // Save the document as PDF with the specified options
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -59,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design studio needs to batch‑convert multi‑page CorelDRAW (CDR) artwork into A4‑sized PDFs for client review, this code ensures each page matches the standard print dimensions.
- * 2. When an automated document‑generation system must produce printable PDFs from CDR templates while preserving exact A4 layout for corporate branding compliance, the snippet provides the required page‑size configuration.
- * 3. When a cloud‑based conversion service has to transform user‑uploaded multi‑page CDR files into PDFs that fit standard A4 paper for downstream printing or archiving, this example guarantees the correct page dimensions.
- * 4. When a Windows desktop application integrates Aspose.Imaging to export engineering schematics stored in CDR format to A4 PDFs for inclusion in technical manuals, the code handles rasterization and page‑size settings automatically.
- * 5. When a batch‑processing script needs to generate A4‑formatted PDF catalogs from a collection of multi‑page CDR product brochures, this code shows how to set the PDF page size and rasterization options in C#.
+ * 1. When a graphic designer must export a multi‑page CorelDRAW (.cdr) file to a PDF that conforms to the standard A4 dimensions for printing, this C# code ensures each PDF page is set to 595 × 842 points.
+ * 2. When a document‑management system needs to automatically convert uploaded CDR assets to searchable PDF files with a fixed A4 layout, the code provides the required page‑size configuration using Aspose.Imaging.
+ * 3. When a batch‑processing service processes large numbers of vector illustrations and must preserve their layout on A4‑sized PDF pages for archival compliance, the example demonstrates the proper rasterization and page‑size settings.
+ * 4. When a web application offers users the ability to download their CorelDRAW projects as PDF brochures sized for A4 paper, this snippet shows how to programmatically set the PDF page size in C#.
+ * 5. When a quality‑control tool validates that exported PDFs from CDR sources match a predefined A4 page format before distribution, the code supplies the exact PageSize and VectorRasterizationOptions needed for consistent results.
  */

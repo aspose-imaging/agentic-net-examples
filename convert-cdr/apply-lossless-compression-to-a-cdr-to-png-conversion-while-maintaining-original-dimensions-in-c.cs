@@ -4,15 +4,15 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
 
-class Program
+public class Program
 {
     static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.cdr";
-            string outputPath = "output.png";
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/sample.png";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -24,25 +24,23 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR vector image
+            // Load CDR image and convert to PNG with lossless compression
             using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                // Configure PNG options for lossless compression
-                PngOptions pngOptions = new PngOptions
+                // Optional: cache data for performance
+                cdr.CacheData();
+
+                var pngOptions = new PngOptions
                 {
-                    // Maximum compression (still lossless)
-                    CompressionLevel = 9,
-                    // Preserve original metadata
-                    KeepMetadata = true,
-                    // Rasterize using original dimensions
+                    CompressionLevel = 9, // Maximum lossless compression
                     VectorRasterizationOptions = new CdrRasterizationOptions
                     {
+                        BackgroundColor = Color.White,
                         PageWidth = cdr.Width,
                         PageHeight = cdr.Height
                     }
                 };
 
-                // Save the rasterized PNG
                 cdr.Save(outputPath, pngOptions);
             }
         }
@@ -55,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to archive CorelDRAW (.cdr) artwork as losslessly compressed PNG files for web publishing without altering the original size, they can use this C# Aspose.Imaging code.
- * 2. When a print shop must convert client‑provided CDR logos to PNG thumbnails for proofing while preserving exact dimensions and metadata, the example demonstrates the required steps.
- * 3. When a document management system automatically processes incoming CDR files and stores them as high‑quality PNG images for searchable archives, this code provides the lossless conversion routine.
- * 4. When a software vendor integrates batch image conversion into a .NET application to generate PNG assets from CDR source files without quality loss, the snippet shows how to configure compression level and rasterization options.
- * 5. When a developer builds a CI/CD pipeline that validates visual assets by converting CDR designs to PNG and comparing pixel‑perfect results, the example ensures the PNG output matches the original dimensions and retains metadata.
+ * 1. When a graphic designer needs to archive CorelDRAW (CDR) artwork as PNG files for web publishing while keeping the original size and using lossless compression to avoid quality loss.
+ * 2. When an e‑learning platform automatically converts user‑uploaded CDR illustrations to PNG thumbnails for course material without altering dimensions and with maximum PNG compression to reduce storage costs.
+ * 3. When a print‑to‑digital workflow requires batch processing of CDR pages into PNG images that retain exact page width and height for accurate layout reproduction in a .NET application.
+ * 4. When a document management system must store vector‑based CDR drawings as PNG assets for quick preview, ensuring the conversion uses Aspose.Imaging’s CdrRasterizationOptions to preserve background color and dimensions.
+ * 5. When a mobile app backend needs to serve high‑resolution PNG versions of CDR logos on demand, employing C# code that applies lossless compression level 9 to minimize bandwidth while keeping the original image size.
  */
