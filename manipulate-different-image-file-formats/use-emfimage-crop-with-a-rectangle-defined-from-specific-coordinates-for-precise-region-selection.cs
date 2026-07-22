@@ -5,14 +5,14 @@ using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.emf";
-        string outputPath = @"C:\Images\output\cropped.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.emf";
+            string outputPath = "output\\output_cropped.emf";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,24 +20,16 @@ class Program
                 return;
             }
 
-            // Load the EMF image
-            using (Image image = Image.Load(inputPath))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EMF image, crop, and save
+            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
             {
-                // Cast to EmfImage to access EMF-specific members
-                EmfImage emfImage = (EmfImage)image;
-
-                // Define the cropping rectangle (left, top, width, height)
-                // Adjust these values as needed for the desired region
-                var cropArea = new Aspose.Imaging.Rectangle(50, 50, 200, 150);
-
-                // Perform the crop operation
-                emfImage.Crop(cropArea);
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the cropped image as PNG
-                emfImage.Save(outputPath, new Aspose.Imaging.ImageOptions.PngOptions());
+                // Define the cropping rectangle (x, y, width, height)
+                Rectangle cropRect = new Rectangle(50, 50, 200, 150);
+                emfImage.Crop(cropRect);
+                emfImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -49,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract a specific portion of a vector‑based EMF diagram (such as a logo or chart) and save it as a raster PNG for web display, they can use EmfImage.Crop with a rectangle defined by exact coordinates.
- * 2. When generating printable PDFs that require only a selected area of an existing EMF illustration, the code can crop the region and convert it to PNG before embedding.
- * 3. When automating the creation of thumbnails for a large collection of EMF files, a developer can define a cropping rectangle to focus on the most important part of each image and output consistent PNG thumbnails.
- * 4. When integrating legacy Windows Metafile graphics into a modern C# application that only supports raster formats, cropping the needed region from the EMF and saving it as PNG ensures compatibility.
- * 5. When building a reporting tool that extracts a specific chart area from an EMF chart file to include in a dashboard, the code provides precise region selection via a rectangle and outputs a PNG for the UI.
+ * 1. When a developer needs to extract a specific portion of a vector‑based EMF diagram, such as a logo or chart, they can load the EMF with Aspose.Imaging for .NET, define a Rectangle with exact coordinates, and use Crop to isolate that region.
+ * 2. When generating printable reports that contain large EMF graphics, a developer can crop out only the relevant area to reduce file size and improve rendering performance.
+ * 3. When integrating legacy Windows Metafile (EMF) assets into a modern web application, a developer can programmatically select a region using a Rectangle and save the cropped result for display as a smaller image.
+ * 4. When automating the preparation of EMF icons for a UI toolkit, a developer can use EmfImage.Crop with precise coordinates to isolate each icon from a composite EMF file.
+ * 5. When performing batch processing of scanned engineering drawings stored as EMF files, a developer can crop out individual sections, such as a specific component view, by specifying the region in C# and saving the output for further analysis.
  */
