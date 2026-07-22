@@ -4,32 +4,40 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Dng;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input\\sample.dng";
-        string outputPath = "Output\\sample.tif";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            string inputPath = "input.dng";
+            string outputPath = "output.tif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                var dngImage = (Aspose.Imaging.FileFormats.Dng.DngImage)image;
-                // Adjust contrast by 30 (range -100 to 100)
-                dngImage.AdjustContrast(30f);
-                // Save as TIFF
-                dngImage.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
+                DngImage dngImage = (DngImage)image;
+                RasterImage raster = (RasterImage)dngImage;
+
+                // Increase contrast by 30%
+                raster.AdjustContrast(30f);
+
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                raster.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -41,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer needs to increase the contrast of raw DNG files by 30 % before archiving them as lossless TIFFs for long‑term storage using C# and Aspose.Imaging.
- * 2. When a digital asset management system must automatically enhance raw camera images (DNG) and convert them to TIFF format for compatibility with legacy editing software.
- * 3. When a scientific imaging application requires preprocessing of DNG microscopy images by adjusting contrast and saving the results as TIFF for downstream analysis pipelines.
- * 4. When a printing workflow needs to boost the visual impact of raw DNG scans by 30 % contrast and export them as TIFF files that preserve full color depth for high‑resolution print production.
- * 5. When a batch processing tool written in C# uses Aspose.Imaging to standardize contrast across a collection of DNG files and generate TIFF outputs for web galleries or archival catalogs.
+ * 1. When a photographer needs to batch‑process raw DNG files, increase their contrast by 30 % using C# and Aspose.Imaging, and save the enhanced images as lossless TIFFs for high‑quality print production.
+ * 2. When a scientific imaging application must improve the visual contrast of raw sensor data stored in DNG format before converting it to TIFF for analysis in GIS or medical software.
+ * 3. When a mobile‑app backend receives raw DNG uploads, applies a 30 % contrast boost with Aspose.Imaging in .NET, and archives the resulting TIFF files for regulatory compliance.
+ * 4. When a digital asset management system automates the conversion of high‑dynamic‑range DNG images to TIFF while adjusting contrast to meet publishing standards using C# image processing code.
+ * 5. When a developer integrates Aspose.Imaging into a C# workflow to normalize contrast of raw camera files and generate TIFFs for downstream machine‑learning pipelines.
  */
