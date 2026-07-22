@@ -1,8 +1,8 @@
+// HOW-TO: How To Register A Filter Service And Sharpen Images In .NET Core (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -10,23 +10,26 @@ class Program
     {
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output\\output.png";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.png";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Simple manual DI container
+            var services = new System.Collections.Generic.Dictionary<Type, object>();
+            services[typeof(IFilterService)] = new FilterService();
 
-            using (Image image = Image.Load(inputPath))
-            {
-                RasterImage rasterImage = (RasterImage)image;
-                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions());
-                rasterImage.Save(outputPath, new PngOptions());
-            }
+            // Resolve the filter service
+            var filterService = (IFilterService)services[typeof(IFilterService)];
+
+            // Apply sharpen filter using the service
+            filterService.ApplySharpen(inputPath, outputPath);
         }
         catch (Exception ex)
         {
@@ -35,11 +38,43 @@ class Program
     }
 }
 
+// Service contract for applying filters
+interface IFilterService
+{
+    void ApplySharpen(string inputPath, string outputPath);
+}
+
+// Implementation of the filter service
+class FilterService : IFilterService
+{
+    public void ApplySharpen(string inputPath, string outputPath)
+    {
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the image
+        using (Image image = Image.Load(inputPath))
+        {
+            // Cast to RasterImage for filtering
+            RasterImage rasterImage = (RasterImage)image;
+
+            // Apply sharpen filter with kernel size 5 and sigma 4.0
+            rasterImage.Filter(
+                rasterImage.Bounds,
+                new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+
+            // Save the result as PNG
+            var saveOptions = new PngOptions();
+            rasterImage.Save(outputPath, saveOptions);
+        }
+    }
+}
+
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically enhance the clarity of uploaded PNG thumbnails before storing them in a web gallery, they can load the image, apply a Sharpen filter, and save the result using Aspose.Imaging in a .NET Core service.
- * 2. When building a batch processing tool that prepares product photos for an e‑commerce catalog, the code can iterate over PNG files, sharpen each raster image, and write the improved files to an output folder.
- * 3. When integrating image preprocessing into an ASP.NET Core API that receives user‑submitted screenshots, the developer can use this snippet to sharpen the image and return a PNG response.
- * 4. When creating a desktop utility that cleans up scanned documents saved as PNG by increasing edge definition, the program loads the raster image, applies the SharpenFilterOptions, and saves the enhanced version.
- * 5. When implementing a CI/CD pipeline step that validates visual assets by applying a sharpen filter to detect loss of detail in PNG files, the code provides a quick way to process each file and verify the output.
+ * 1. When you need to apply a sharpen filter to PNG files in a .NET Core app using a DI‑registered service.
+ * 2. When you want to ensure your image‑processing logic is loosely coupled and testable by injecting an IFilterService implementation.
+ * 3. When you must automatically create the output directory before saving the processed image to avoid runtime errors.
+ * 4. When you are building a console utility that validates input file existence and handles errors while applying Aspose.Imaging filters.
+ * 5. When you require a simple manual DI container for quick prototyping without adding a full‑featured IoC framework.
  */

@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,7 +13,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output.png";
+            string outputPath = "output.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,43 +25,51 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Retry logic for transient I/O errors during loading
-            const int maxRetries = 3;
+            // Retry mechanism for loading the image
+            const int maxAttempts = 3;
             int attempt = 0;
-            Image loadedImage = null;
-
-            while (true)
+            RasterImage rasterImage = null;
+            while (attempt < maxAttempts)
             {
                 try
                 {
-                    loadedImage = Image.Load(inputPath);
+                    // Load the image as RasterImage
+                    rasterImage = (RasterImage)Image.Load(inputPath);
                     break; // Success
                 }
                 catch (IOException)
                 {
                     attempt++;
-                    if (attempt >= maxRetries)
+                    if (attempt >= maxAttempts)
                     {
-                        Console.Error.WriteLine($"Failed to load image after {maxRetries} attempts.");
+                        Console.Error.WriteLine($"Failed to load image after {maxAttempts} attempts.");
                         return;
                     }
-                    // Optionally, could log retry attempt here
+                    // Optionally wait before retrying
+                    System.Threading.Thread.Sleep(500);
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Error loading image: {ex.Message}");
+                    return;
                 }
             }
 
-            // Use using block for proper disposal
-            using (loadedImage)
+            using (rasterImage)
             {
-                // Cast to RasterImage for filtering
-                RasterImage rasterImage = (RasterImage)loadedImage;
-
                 // Apply a Gaussian blur filter to the entire image
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Save the filtered image as PNG
-                rasterImage.Save(outputPath, new PngOptions());
+                // Prepare JPEG options with a bound file source
+                Source outputSource = new FileCreateSource(outputPath, false);
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    Source = outputSource,
+                    Quality = 90
+                };
+
+                // Save the filtered image
+                rasterImage.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -71,9 +81,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application processes PNG files from a removable USB drive that may experience temporary read errors, this code retries loading the image before applying a Gaussian blur filter.
- * 2. When a server‑side batch job reads images stored on a network file share and must handle intermittent I/O timeouts, the retry logic ensures the image is loaded before filtering and saving as PNG.
- * 3. When an automated image‑processing pipeline ingests user‑uploaded photos from a cloud‑synced folder that can momentarily be unavailable, the code retries the load to avoid aborting the Gaussian blur operation.
- * 4. When a Windows service monitors a directory for new images and needs to gracefully handle occasional file‑locking issues caused by other processes, the retry mechanism loads the image safely before applying the filter.
- * 5. When a C# utility converts scanned PNG documents to blurred versions for privacy compliance and must tolerate sporadic disk read glitches, this code retries the load and then saves the filtered result.
+ * 1. When a web application needs to load user‑uploaded PNG files from a temporary folder and apply a Gaussian blur before saving them as JPEGs, the retry logic protects against occasional file‑lock or network glitches.
+ * 2. When a Windows service processes a nightly batch of images stored on a network share, the code ensures transient I/O errors do not abort the entire conversion pipeline.
+ * 3. When an automated image‑processing pipeline in a CI/CD workflow reads PNG assets from a shared repository and outputs blurred JPEG previews, the retry mechanism handles intermittent disk latency.
+ * 4. When a desktop utility converts scanned PNG documents to compressed JPEGs and applies a blur filter for privacy, the retry loop safeguards against temporary read failures caused by scanner driver delays.
+ * 5. When a cloud‑based microservice streams PNG images from a mounted blob storage, applies a Gaussian blur, and writes JPEG results, the retry pattern helps recover from brief connectivity interruptions.
  */

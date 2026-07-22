@@ -1,21 +1,21 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hard‑coded input and output paths
             string inputPath = "input.jpg";
             string outputPath = "output.jpg";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,32 +26,19 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the JPEG image
-            using (Image image = Image.Load(inputPath))
+            using (JpegImage jpegImage = new JpegImage(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
+                // Cast to RasterImage to access filtering methods
+                RasterImage rasterImage = (RasterImage)jpegImage;
 
-                // Create a 7x7 kernel with equal weights (neutral brightness)
-                double[,] kernel = new double[7, 7];
-                double weight = 1.0 / 49.0; // 7*7 = 49
-                for (int y = 0; y < 7; y++)
-                {
-                    for (int x = 0; x < 7; x++)
-                    {
-                        kernel[y, x] = weight;
-                    }
-                }
+                // Obtain a 7x7 box blur kernel (already normalized for neutral brightness)
+                double[,] kernel = ConvolutionFilter.GetBlurBox(7);
 
-                // Apply the custom convolution filter for soft focus
+                // Apply the custom convolution filter to the whole image
                 rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(kernel));
 
-                // Prepare JPEG save options
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-
                 // Save the processed image
-                rasterImage.Save(outputPath, jpegOptions);
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -63,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to add a subtle soft‑focus effect to user‑uploaded JPEG photos without changing overall brightness, they can use this Aspose.Imaging C# code to apply a normalized 7×7 convolution kernel.
- * 2. When building a .NET web service that automatically enhances product images by smoothing edges while preserving color balance, the example shows how to load a JPEG, apply a neutral‑weight kernel, and save the result.
- * 3. When creating a desktop photo‑editing tool that offers a “gentle blur” filter, the code demonstrates how to generate a 7×7 kernel, normalize it, and apply it with ConvolutionFilterOptions to a raster image.
- * 4. When integrating image preprocessing into a machine‑learning pipeline that requires uniformly bright, softly focused JPEG inputs, this snippet illustrates loading, filtering, and saving the image using Aspose.Imaging.
- * 5. When developing an automated batch‑processing script to improve the visual appeal of a catalog by applying a consistent soft‑focus across many JPEG files, the example provides the necessary C# steps for kernel creation, convolution, and JPEG output.
+ * 1. When a developer wants to add a subtle soft‑focus effect to user‑uploaded JPEG photos in a C# web application, they can use this code to apply a normalized 7×7 blur kernel with Aspose.Imaging.
+ * 2. When an e‑commerce platform needs to automatically smooth product images without changing overall brightness, the example shows how to load a JPEG, apply a neutral‑brightness 7×7 convolution filter, and save the result.
+ * 3. When a desktop photo‑editing tool requires a fast, repeatable way to create a gentle box‑blur for portrait pictures, this snippet demonstrates the C# operations for loading, filtering, and saving JPEG files using Aspose.Imaging.
+ * 4. When a batch‑processing script must prepare a set of JPEG thumbnails with a consistent soft‑focus look while preserving color balance, the code provides the exact steps to normalize the kernel and apply it to each image.
+ * 5. When a mobile app backend processes incoming JPEG images and needs to reduce harsh edges before applying further AI analysis, the example shows how to use a 7×7 convolution filter in C# to achieve a neutral‑brightness blur.
  */

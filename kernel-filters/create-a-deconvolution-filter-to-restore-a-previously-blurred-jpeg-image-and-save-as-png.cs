@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "blurred.jpg";
+        string outputPath = "restored.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\blurred.jpg";
-            string outputPath = @"C:\Images\restored.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,24 +21,29 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the blurred JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to enable filtering
+                // Cast to RasterImage to access filtering capabilities
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Create a Gauss-Wiener deconvolution filter (radius=5, sigma=4.0)
-                var deconvOptions = new GaussWienerFilterOptions(5, 4.0);
+                // Create a motion Wiener deconvolution filter
+                // Parameters: length = 10, sigma = 1.0, angle = 90 degrees
+                var deconvolutionFilter = new MotionWienerFilterOptions(10, 1.0, 90.0)
+                {
+                    // Optional: adjust brightness and SNR if needed
+                    Brightness = 1.15,
+                    Snr = 0.007
+                };
 
                 // Apply the filter to the whole image
-                rasterImage.Filter(rasterImage.Bounds, deconvOptions);
+                rasterImage.Filter(rasterImage.Bounds, deconvolutionFilter);
 
                 // Save the restored image as PNG
-                var pngOptions = new PngOptions();
-                rasterImage.Save(outputPath, pngOptions);
+                rasterImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -50,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to restore a JPEG photo that was unintentionally blurred during capture or transmission, they can use this deconvolution filter to sharpen the image and save the result as a lossless PNG.
- * 2. When building an automated image‑processing pipeline that ingests scanned JPEG documents and must improve readability before archiving, the code can deblur each page and output PNG files for higher quality storage.
- * 3. When creating a web service that accepts user‑uploaded blurred pictures and returns a cleaned‑up version, the Gauss‑Wiener filter in C# can be applied to the image and the restored PNG can be sent back to the client.
- * 4. When integrating Aspose.Imaging into a desktop application that repairs old family photos saved as JPEGs, developers can apply the deconvolution filter to remove blur and export the corrected image as PNG for printing.
- * 5. When performing batch processing of product catalog images that suffered motion blur during photography, the code can loop through JPEG files, apply the Gauss‑Wiener deconvolution, and save the sharpened results as PNG for e‑commerce platforms.
+ * 1. When a web application needs to automatically improve the quality of user‑uploaded blurred JPEG photos before displaying them, a developer can use this C# Aspose.Imaging deconvolution filter to restore the image and save it as a PNG for web‑friendly delivery.
+ * 2. When a digital forensics tool must recover details from a motion‑blurred surveillance JPEG frame, a developer can apply the MotionWienerFilterOptions in C# to deblur the image and export the result as a lossless PNG for analysis.
+ * 3. When an e‑commerce platform wants to enhance product images that were unintentionally blurred during batch processing, a developer can run this Aspose.Imaging code to perform deconvolution on the JPEG files and store the sharpened versions as PNG thumbnails.
+ * 4. When a medical imaging system receives scanned JPEG slides with slight motion blur, a developer can employ the motion Wiener deconvolution filter in C# to restore diagnostic details and save the cleaned image as a PNG for archival purposes.
+ * 5. When an automated photo‑restoration service processes large collections of legacy JPEG photographs, a developer can integrate this Aspose.Imaging C# routine to deblur each picture using deconvolution and output high‑quality PNG files for client download.
  */

@@ -1,43 +1,46 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.png";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering methods
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Apply a sharpen filter (kernel size 5, sigma 4.0)
-                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+                // Apply predefined sharpen filter
+                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                // Apply a custom edge‑detection kernel (Emboss 3x3)
-                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                // Apply custom edge‑detection kernel
+                double[,] kernel = new double[,]
+                {
+                    { -1, -1, -1 },
+                    { -1,  8, -1 },
+                    { -1, -1, -1 }
+                };
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
 
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                // Save the result as PNG
+                PngOptions saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to enhance the details of a PNG screenshot before embedding it in a technical report, they can use this code to apply a sharpen filter followed by an emboss edge‑detection kernel.
- * 2. When an e‑commerce platform wants to automatically improve product photo clarity and add a subtle texture for visual appeal, the code can process each PNG image with sharpening and custom convolution.
- * 3. When a medical imaging application must highlight subtle structures in PNG scans while preserving overall contrast, the developer can chain a sharpen filter and an emboss convolution to emphasize edges.
- * 4. When a game asset pipeline requires batch processing of PNG textures to make them appear crisper and give a stylized edge effect, this C# snippet provides a straightforward solution.
- * 5. When a document‑generation service needs to prepare PNG diagrams for print by sharpening fine lines and adding a defined edge outline, the code demonstrates how to achieve it with Aspose.Imaging.
+ * 1. When a developer needs to enhance the details of a PNG screenshot by sharpening it and then highlighting edges for a technical documentation illustration.
+ * 2. When an e‑commerce platform automatically processes product photos in C# to make features stand out by applying a sharpen filter followed by a custom edge‑detection convolution before saving them as PNG files.
+ * 3. When a medical imaging application preprocesses scanned PNG slides to improve contrast and detect tissue boundaries using Aspose.Imaging’s SharpenFilterOptions and a 3×3 edge‑detection kernel.
+ * 4. When a game developer prepares UI assets by programmatically sharpening PNG icons and extracting their outlines to create crisp hover‑state graphics.
+ * 5. When a content‑management system batch‑processes uploaded PNG images to improve visual clarity and generate edge‑enhanced thumbnails using C# and Aspose.Imaging filters.
  */

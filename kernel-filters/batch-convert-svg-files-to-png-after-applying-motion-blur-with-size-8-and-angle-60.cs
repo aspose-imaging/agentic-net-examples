@@ -12,8 +12,8 @@ class Program
     {
         try
         {
-            string inputDirectory = "InputSvgs";
-            string outputDirectory = "OutputPngs";
+            string inputDirectory = "InputSvg";
+            string outputDirectory = "OutputPng";
 
             if (!Directory.Exists(inputDirectory))
             {
@@ -28,44 +28,47 @@ class Program
             }
 
             string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+
             foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image vectorImage = Image.Load(inputPath))
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    var rasterizationOptions = new PngOptions
+                    using (Image svgImage = Image.Load(inputPath))
                     {
-                        VectorRasterizationOptions = new SvgRasterizationOptions
+                        var rasterOptions = new SvgRasterizationOptions
                         {
-                            PageWidth = vectorImage.Width,
-                            PageHeight = vectorImage.Height,
-                            BackgroundColor = Aspose.Imaging.Color.White
-                        }
-                    };
+                            PageWidth = svgImage.Width,
+                            PageHeight = svgImage.Height,
+                            BackgroundColor = Color.White
+                        };
 
-                    using (MemoryStream ms = new MemoryStream())
+                        var pngOptions = new PngOptions
+                        {
+                            VectorRasterizationOptions = rasterOptions
+                        };
+
+                        svgImage.Save(ms, pngOptions);
+                    }
+
+                    ms.Position = 0;
+
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        vectorImage.Save(ms, rasterizationOptions);
-                        ms.Position = 0;
-
-                        using (RasterImage raster = (RasterImage)Image.Load(ms))
-                        {
-                            raster.Filter(raster.Bounds, new MotionWienerFilterOptions(8, 1.0, 60.0));
-                            var saveOptions = new PngOptions();
-                            raster.Save(outputPath, saveOptions);
-                        }
+                        raster.Filter(raster.Bounds, new MotionWienerFilterOptions(8, 1.0, 60.0));
+                        raster.Save(outputPath, new PngOptions());
                     }
                 }
-
-                Console.WriteLine($"Processed: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -77,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to generate blurred PNG thumbnails from a library of SVG icons using C# and Aspose.Imaging for faster page loading.
- * 2. When a marketing team wants to batch convert SVG artwork to PNG files with a consistent motion blur (size 8, angle 60) for eye‑catching social media graphics.
- * 3. When an e‑learning platform automatically rasterizes SVG diagrams into PNG slides and applies a motion blur effect to highlight directional flow in instructional content.
- * 4. When a desktop publishing application processes a collection of SVG logos and outputs PNG images with a motion blur filter to simulate movement in promotional materials.
- * 5. When a CI/CD pipeline uses C# and Aspose.Imaging to convert SVG assets to PNG with a predefined motion blur (size 8, angle 60) to ensure uniform branding across all generated assets.
+ * 1. When a web developer needs to batch convert a library of SVG icons to PNG thumbnails with a 60‑degree motion blur (size 8) using Aspose.Imaging for .NET to improve page load speed.
+ * 2. When a UI/UX designer wants to generate motion‑blurred PNG previews of vector assets from an SVG folder for inclusion in design system documentation.
+ * 3. When an e‑commerce platform must automatically transform product SVG illustrations into blurred PNG images for promotional banners and email campaigns.
+ * 4. When a game developer requires a script that rasterizes SVG sprites, applies a size‑8 motion blur at a 60° angle, and saves them as PNG files for background effects in a 2D game.
+ * 5. When an automation tool processes a directory of corporate SVG logos, applies a 60° motion blur (size 8) and outputs PNG versions for printing or marketing collateral.
  */

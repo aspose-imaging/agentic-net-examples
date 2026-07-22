@@ -3,71 +3,83 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.svg";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the original SVG image
-            using (Image svgImage = Image.Load(inputPath))
+            // Hardcoded paths
+            string inputPath = "input.svg";
+            string outputPath = "output.svg";
+            string tempPngPath = "temp.png";
+            string filteredPngPath = "filtered.png";
+
+            // Input file existence check
+            if (!File.Exists(inputPath))
             {
-                // Rasterize SVG to PNG using default rasterization options
-                var rasterOptions = new SvgRasterizationOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load SVG
+            using (Image img = Image.Load(inputPath))
+            {
+                SvgImage svgImage = (SvgImage)img;
+
+                // Rasterize SVG to PNG
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = ((SvgImage)svgImage).Size,
-                    BackgroundColor = Color.White
+                    PageSize = svgImage.Size
                 };
-                var pngOptions = new PngOptions
+                PngOptions pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
+                svgImage.Save(tempPngPath, pngOptions);
+            }
 
-                string tempPngPath = Path.Combine(Path.GetTempPath(), "temp_raster.png");
-                Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-                ((SvgImage)svgImage).Save(tempPngPath, pngOptions);
-
-                // Load the rasterized PNG as a RasterImage
-                using (RasterImage rasterImage = (RasterImage)Image.Load(tempPngPath))
+            // Load rasterized PNG
+            using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
+            {
+                // Define custom kernel (sharpen)
+                double[,] kernel = new double[,]
                 {
-                    // Apply a custom convolution kernel (sharpen example)
-                    double[,] kernel = new double[,]
-                    {
-                        { 0, -1, 0 },
-                        { -1, 5, -1 },
-                        { 0, -1, 0 }
-                    };
-                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                    rasterImage.Filter(rasterImage.Bounds, filterOptions);
+                    { 0, -1, 0 },
+                    { -1, 5, -1 },
+                    { 0, -1, 0 }
+                };
+                ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel);
 
-                    // Create a new SVG canvas and draw the filtered raster image onto it
-                    var graphics = new Aspose.Imaging.FileFormats.Svg.Graphics.SvgGraphics2D(rasterImage.Width, rasterImage.Height, 96);
-                    graphics.DrawImage(rasterImage, new Point(0, 0));
+                // Apply convolution filter
+                raster.Filter(raster.Bounds, filterOptions);
+                raster.Save(filteredPngPath, new PngOptions());
+            }
 
-                    // Finalize SVG and save
-                    using (SvgImage finalSvg = graphics.EndRecording())
-                    {
-                        finalSvg.Save(outputPath);
-                    }
-                }
+            // Load filtered raster image
+            using (RasterImage filtered = (RasterImage)Image.Load(filteredPngPath))
+            {
+                // Create new SVG canvas
+                int width = filtered.Width;
+                int height = filtered.Height;
+                int dpi = 96;
+                SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-                // Clean up temporary PNG file
-                if (File.Exists(tempPngPath))
+                // Draw filtered raster onto SVG
+                graphics.DrawImage(filtered, new Point(0, 0));
+
+                // Finalize SVG and save
+                using (SvgImage finalSvg = graphics.EndRecording())
                 {
-                    File.Delete(tempPngPath);
+                    finalSvg.Save(outputPath, new SvgOptions());
                 }
             }
         }
@@ -80,9 +92,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to enhance the visual sharpness of user‑uploaded SVG logos before embedding them in responsive HTML emails, a developer can rasterize the SVG, apply a custom convolution kernel, and re‑export it as SVG to keep the file size low while preserving vector editability.
- * 2. When generating printable PDFs from SVG diagrams that require a subtle edge‑enhancement filter, a developer can use this code to rasterize the SVG, apply the filter, and save the result back to SVG so downstream tools can still manipulate the vector layers.
- * 3. When an e‑learning platform wants to apply a brand‑specific watermark effect to SVG illustrations without losing their scalability, a developer can rasterize the image, run a custom kernel to embed the watermark, and export the modified content as SVG.
- * 4. When a GIS system needs to preprocess map SVG tiles with a noise‑reduction filter before tiling them for fast client‑side rendering, a developer can employ this code to rasterize each tile, filter it, and save it back as SVG to retain vector metadata.
- * 5. When an automated CI pipeline validates SVG assets by applying a sharpening filter to detect rendering issues, a developer can use this snippet to rasterize the SVG, apply the convolution filter, and re‑export it as SVG for further automated quality checks.
+ * 1. When a web application must generate a high‑resolution PNG preview of an SVG logo, apply a sharpening filter, and then embed the edited image back into an SVG file for further vector editing.
+ * 2. When an e‑commerce platform needs to automatically enhance product SVG icons by rasterizing them, applying a custom convolution kernel to improve edge definition, and re‑exporting them as SVG to keep the file size small.
+ * 3. When a reporting tool converts complex SVG charts into raster images, sharpens the details with a convolution filter, and then saves the result as SVG so that the final report remains fully scalable.
+ * 4. When a desktop publishing software wants to batch‑process SVG illustrations, apply a user‑defined filter such as emboss or blur via a kernel, and preserve the vector structure by saving the output as SVG.
+ * 5. When a mobile app prepares SVG assets for different screen densities by rasterizing, applying a custom image filter for visual consistency, and then re‑embedding the filtered raster back into an SVG container for responsive rendering.
  */

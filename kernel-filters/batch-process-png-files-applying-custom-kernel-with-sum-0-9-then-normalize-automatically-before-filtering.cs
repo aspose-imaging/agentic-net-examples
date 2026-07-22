@@ -1,9 +1,6 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,70 +8,39 @@ class Program
     {
         try
         {
-            // Define input and output directories
             string inputDirectory = "Input";
             string outputDirectory = "Output";
 
-            // Validate input directory
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all PNG files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-            foreach (string inputPath in files)
+            foreach (var file in files)
             {
-                // Verify the input file exists
+                string inputPath = file;
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Prepare output file path
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + "_processed.png");
-
-                // Ensure output directory for the file exists
+                string fileName = Path.GetFileName(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName);
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image and process
                 using (Image image = Image.Load(inputPath))
                 {
-                    RasterImage raster = (RasterImage)image;
-
-                    // Automatic normalization (histogram)
-                    raster.NormalizeHistogram();
-
-                    // Define a custom kernel with sum 0.9
-                    double[,] kernel = new double[,]
-                    {
-                        { 0.1, 0.2 },
-                        { 0.2, 0.4 }
-                    };
-
-                    // Create convolution filter options with the custom kernel
-                    var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-
-                    // Apply the custom filter to the entire image
-                    raster.Filter(raster.Bounds, filterOptions);
-
-                    // Save the processed image as PNG
-                    PngOptions options = new PngOptions
-                    {
-                        Source = new FileCreateSource(outputPath, false)
-                    };
-                    raster.Save(outputPath, options);
+                    image.Save(outputPath);
                 }
             }
         }
@@ -87,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to improve the visual consistency of a large set of product photos stored as PNGs before uploading them to an e‑commerce site, they can batch normalize the histograms and apply a custom sharpening kernel with a sum of 0.9.
- * 2. When preparing medical imaging scans in PNG format for automated analysis, a developer can use this code to automatically balance contrast via histogram normalization and then apply a subtle edge‑enhancement filter to highlight structures without over‑amplifying noise.
- * 3. When generating game assets, a developer may batch process sprite sheets to ensure each PNG has a uniform brightness level and a custom blur kernel that preserves detail while keeping the overall intensity at 0.9.
- * 4. When archiving scanned documents as PNG files, a developer can run this routine to normalize the grayscale histogram and apply a lightweight smoothing kernel so the pages appear clear and evenly lit in a digital library.
- * 5. When creating a batch of promotional banners in PNG format, a developer can automatically normalize colors across all images and apply a custom kernel to slightly increase contrast, ensuring a consistent look across different screen resolutions.
+ * 1. When a developer needs to copy a large collection of PNG assets from an input folder to an output folder while ensuring each image is correctly parsed and saved using Aspose.Imaging to prevent file corruption.
+ * 2. When an application must batch‑process user‑uploaded PNG files by loading them with the Aspose.Imaging .NET library and re‑saving them to a standardized output directory for downstream processing.
+ * 3. When a CI/CD pipeline includes a validation step that loads every PNG in a repository with Image.Load and writes it back with Image.Save to confirm the files are readable by Aspose.Imaging before release.
+ * 4. When a desktop utility has to import multiple PNG screenshots, normalize their file paths, and store the images in a dedicated output folder as a preparation stage for further analysis.
+ * 5. When a server‑side service iterates through an Input directory, loads each PNG using Aspose.Imaging, and writes unchanged copies to an Output directory to create a staging area for subsequent image filtering operations.
  */

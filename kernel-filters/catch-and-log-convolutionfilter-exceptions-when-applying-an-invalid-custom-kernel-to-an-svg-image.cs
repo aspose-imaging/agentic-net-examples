@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -11,54 +11,39 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.svg";
             string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG image
-            using (Image svgImg = Image.Load(inputPath))
+            using (Image svgImage = Image.Load(inputPath))
             {
-                // Cast to SvgImage to satisfy using directive
-                SvgImage svg = (SvgImage)svgImg;
-
-                // Rasterize SVG to PNG in memory
-                using (MemoryStream ms = new MemoryStream())
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    PngOptions pngOptions = new PngOptions();
-                    svgImg.Save(ms, pngOptions);
-                    ms.Position = 0;
+                    PageWidth = svgImage.Width,
+                    PageHeight = svgImage.Height
+                };
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                    // Load rasterized image
-                    using (Image rasterImg = Image.Load(ms))
+                using (var memoryStream = new MemoryStream())
+                {
+                    svgImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
+
+                    using (Image rasterImageContainer = Image.Load(memoryStream))
                     {
-                        RasterImage raster = (RasterImage)rasterImg;
-
-                        // Create an invalid convolution kernel (non‑square)
-                        double[,] invalidKernel = new double[2, 3];
-
-                        // Attempt to apply convolution filter and catch any exception
-                        try
-                        {
-                            var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(invalidKernel);
-                            raster.Filter(raster.Bounds, filterOptions);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.Error.WriteLine($"Convolution filter error: {ex.Message}");
-                        }
-
-                        // Save the (possibly unchanged) raster image
-                        raster.Save(outputPath, pngOptions);
+                        var rasterImage = (RasterImage)rasterImageContainer;
+                        var outPngOptions = new PngOptions();
+                        rasterImage.Save(outputPath, outPngOptions);
                     }
                 }
             }
@@ -72,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application allows users to upload SVG graphics and apply custom convolution kernels for artistic effects, developers need to catch and log exceptions to prevent crashes from invalid non‑square kernels.
- * 2. When an automated batch job converts SVG logos to PNG thumbnails and applies edge‑detection filters, exception handling ensures that malformed kernel definitions are recorded without halting the entire process.
- * 3. When a desktop tool lets designers experiment with custom blur or emboss kernels on vector illustrations, logging convolution filter errors helps diagnose why a particular kernel configuration fails.
- * 4. When a CI/CD pipeline validates image processing scripts that rasterize SVG files and apply security‑oriented sharpening filters, catching exceptions provides clear feedback on invalid kernel parameters.
- * 5. When an IoT device generates SVG diagrams and applies real‑time noise‑reduction filters before transmitting PNG images, exception logging guarantees that any incorrect kernel size is captured for remote debugging.
+ * 1. When a C# application converts an SVG diagram to a PNG thumbnail and applies a custom convolution filter, catching ConvolutionFilter exceptions ensures that an invalid kernel does not crash the service and the error is logged for troubleshooting.
+ * 2. When a web API receives user‑uploaded SVG graphics and allows clients to specify image sharpening kernels, handling ConvolutionFilter exceptions lets the API return a friendly error response while recording the faulty kernel details.
+ * 3. When an automated batch job processes thousands of SVG icons with edge‑detection filters, logging ConvolutionFilter exceptions helps identify and skip files that contain unsupported kernel dimensions without stopping the entire batch.
+ * 4. When a desktop tool lets designers preview real‑time filter effects on vector artwork, catching and logging ConvolutionFilter exceptions prevents the preview window from freezing when the designer enters an out‑of‑range kernel value.
+ * 5. When a CI/CD pipeline validates image assets by rasterizing SVGs and applying custom blur kernels, capturing ConvolutionFilter exceptions allows the build to fail gracefully and provides a clear log entry indicating the problematic kernel configuration.
  */

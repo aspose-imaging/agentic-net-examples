@@ -5,46 +5,31 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output.jpg";
+        string inputPath = "input\\sample.png";
+        string outputPath = "output\\filtered.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            Image image = null;
+            Image image = Image.Load(inputPath);
             try
             {
-                // Load the image
-                image = Image.Load(inputPath);
-
-                // ----- Begin filter application -----
-                // Example: convert to grayscale (placeholder for actual filter logic)
-                // The actual filter code would depend on the specific Aspose.Imaging API.
-                // For demonstration, we simply leave the image unchanged.
-                // ----- End filter application -----
-
-                // Save the processed image
-                image.Save(outputPath);
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                raster.Save(outputPath, new PngOptions());
             }
             finally
             {
-                // Guarantee disposal of the image object
-                if (image != null)
-                {
-                    image.Dispose();
-                }
+                image.Dispose();
             }
         }
         catch (Exception ex)
@@ -56,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to apply a grayscale filter to a JPEG file and guarantee that the image object is released even if an error occurs, they can wrap Image.Load and Image.Save in a try‑finally block as shown.
- * 2. When building a C# service that converts uploaded PNG images to a different format (e.g., BMP) and must create the target folder on‑the‑fly, the pattern ensures the directory is created and the image resources are disposed correctly.
- * 3. When processing a large batch of high‑resolution TIFF files and want to avoid memory leaks, using the nested try‑finally structure guarantees each Image instance is disposed after the filter operation before moving to the next file.
- * 4. When implementing error‑resilient image watermarking in an ASP.NET application, the code checks for the source file, creates the output path, and uses finally to clean up the Image object regardless of exceptions.
- * 5. When writing a console utility that reads a user‑specified JPEG, applies any custom Aspose.Imaging filter (such as contrast adjustment), and saves the result while handling missing files and ensuring proper disposal, this try‑finally approach provides a reliable solution.
+ * 1. When a developer needs to blur sensitive areas in user‑uploaded PNG images before saving them to a server, they can load the file, apply a Gaussian blur filter with Aspose.Imaging, and use a try‑finally block to guarantee the image is disposed.
+ * 2. When building a batch processor that reduces noise in scanned PNG documents prior to OCR, the code loads each raster image, applies a Gaussian blur (radius 5, sigma 4.0), saves the result, and ensures proper disposal with try‑finally.
+ * 3. When generating blurred background thumbnails for a photo‑gallery application, a developer can use this pattern to load the original PNG, apply the blur filter, save the thumbnail, and automatically release resources.
+ * 4. When creating a server‑side image‑filter API that receives PNG files, applies a configurable Gaussian blur, and returns the filtered image, the try‑finally construct guarantees that the Image object is always disposed after processing.
+ * 5. When writing an automated test that verifies the visual impact of a Gaussian blur on PNG assets, the script can load the image, apply the filter, save the output, and rely on try‑finally to prevent memory leaks.
  */

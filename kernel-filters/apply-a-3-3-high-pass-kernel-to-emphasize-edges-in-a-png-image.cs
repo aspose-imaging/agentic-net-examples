@@ -1,20 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,23 +26,15 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
+                // Cast to RasterImage to access filtering capabilities
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Define a 3×3 high‑pass kernel
-                double[,] kernel = new double[,]
-                {
-                    { -1, -1, -1 },
-                    { -1,  8, -1 },
-                    { -1, -1, -1 }
-                };
+                // Apply a 3x3 high‑pass (sharpen) kernel to emphasize edges
+                // SharpenFilterOptions with size 3 and sigma 1.0 uses the built‑in Sharpen3x3 kernel
+                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(3, 1.0));
 
-                // Apply the convolution filter with the custom kernel
-                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(kernel));
-
-                // Save the processed image as PNG
-                PngOptions saveOptions = new PngOptions();
-                rasterImage.Save(outputPath, saveOptions);
+                // Save the processed image
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -55,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to enhance the outlines of objects in a PNG screenshot for a visual inspection tool, they can apply a 3×3 high‑pass kernel with Aspose.Imaging to emphasize edges.
- * 2. When preparing product photos for an e‑commerce site and wanting to highlight product contours without changing the file format, the code can be used to apply edge‑enhancement to PNG images.
- * 3. When building a document‑generation pipeline that adds a subtle edge‑sharpening effect to embedded PNG diagrams to improve readability in printed PDFs, this filter can be applied.
- * 4. When creating a custom thumbnail generator that accentuates edges in PNG icons to make them stand out in a UI gallery, the high‑pass convolution filter provides the needed processing.
- * 5. When developing an automated quality‑control system that detects missing or blurred edges in PNG scans of printed circuit boards, the code can be used to emphasize edges before further analysis.
+ * 1. When a developer needs to enhance the outlines of UI icons stored as PNG files before embedding them in a Windows desktop application, they can apply a 3×3 high‑pass kernel to sharpen the edges.
+ * 2. When preprocessing scanned documents in PNG format for OCR, a developer may use the SharpenFilterOptions to emphasize text edges and improve character recognition accuracy.
+ * 3. When generating thumbnail previews of product photos for an e‑commerce site, a developer can sharpen the PNG thumbnails with a 3×3 high‑pass filter to make details more visible on small screens.
+ * 4. When creating visual effects for a game’s sprite sheet stored as PNG, a developer can apply the built‑in Sharpen3x3 kernel in C# to highlight edges and give a crisp, stylized look.
+ * 5. When preparing PNG images for a machine‑learning pipeline that relies on edge features, a developer can use Aspose.Imaging’s raster filter to accentuate edges before feeding the data to the model.
  */

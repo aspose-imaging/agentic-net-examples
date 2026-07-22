@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
 
@@ -12,7 +13,6 @@ class Program
         try
         {
             string inputPath = "input.svg";
-            string tempPath = "temp.png";
             string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
@@ -21,25 +21,38 @@ class Program
                 return;
             }
 
-            // Ensure directories exist for temporary and final output files
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Rasterize SVG to a temporary PNG
             using (Image svgImage = Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions();
-                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
-                svgImage.Save(tempPath, pngOptions);
-            }
+                var vectorOptions = new SvgRasterizationOptions
+                {
+                    PageWidth = svgImage.Width,
+                    PageHeight = svgImage.Height,
+                    BackgroundColor = Color.White
+                };
 
-            // Load the rasterized PNG, apply blur box filter, and save final PNG
-            using (Image img = Image.Load(tempPath))
-            {
-                RasterImage raster = (RasterImage)img;
-                var blurOptions = new ConvolutionFilterOptions(ConvolutionFilter.GetBlurBox(3));
-                raster.Filter(raster.Bounds, blurOptions);
-                raster.Save(outputPath, new PngOptions());
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = vectorOptions
+                };
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    svgImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
+
+                    using (Image rasterImageContainer = Image.Load(memoryStream))
+                    {
+                        var rasterImage = (RasterImage)rasterImageContainer;
+
+                        var blurKernel = ConvolutionFilter.GetBlurBox(3);
+                        var blurOptions = new ConvolutionFilterOptions(blurKernel);
+                        rasterImage.Filter(rasterImage.Bounds, blurOptions);
+
+                        rasterImage.Save(outputPath, new PngOptions());
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -51,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to generate a low‑resolution preview PNG of a complex SVG logo with a subtle 3×3 blur to improve loading speed on mobile devices.
- * 2. When a desktop application must convert user‑uploaded SVG diagrams to PNG thumbnails and apply a uniform blur box filter to hide proprietary details before sharing.
- * 3. When an e‑learning platform automatically rasterizes SVG illustrations to PNG assets and adds a 3×3 blur to create a consistent background effect across all course materials.
- * 4. When a reporting tool processes SVG charts, rasterizes them to PNG, and applies a convolution blur to soften sharp edges for better visual integration in PDF reports.
- * 5. When a batch‑processing script in C# uses Aspose.Imaging to convert a folder of SVG icons to blurred PNG icons for use as placeholders during asynchronous UI loading.
+ * 1. When generating thumbnail previews of vector icons for a web gallery, a developer can use this C# code to rasterize the SVG, apply a 3×3 blur box filter, and save the result as a PNG to reduce aliasing.
+ * 2. When converting user‑uploaded SVG diagrams to PNG for email attachments, the code enables applying a subtle blur via Aspose.Imaging convolution to smooth edges before saving.
+ * 3. When preparing SVG logos for print layouts that require a soft blur effect, a developer can rasterize the SVG, apply the predefined blur box, and output a PNG with the desired visual style.
+ * 4. When building a C# batch‑processing tool that rasterizes multiple SVG assets to PNG, this code adds a uniform 3×3 blur to each image, creating consistent background placeholders.
+ * 5. When implementing an automated CI pipeline that validates SVG assets, the code renders each SVG to PNG, applies a blur filter to highlight rendering artifacts, and saves the processed images for review.
  */

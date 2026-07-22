@@ -29,7 +29,7 @@ class Program
                 // Cast to RasterImage to access filtering methods
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur with kernel size 5 and sigma 4.0
+                // Apply Gaussian blur with kernel size 5 and sigma 4.0 to the whole image
                 rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
                 // Save the processed image
@@ -45,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application needs to soften the edges of a PNG logo before embedding it in a web page, a developer can use Aspose.Imaging’s GaussianBlurFilterOptions to apply a 5‑pixel kernel blur.
- * 2. When preprocessing scanned PNG receipts for OCR, a developer can reduce high‑frequency noise by applying a Gaussian blur with sigma 4.0 using the RasterImage.Filter method.
- * 3. When generating thumbnail previews of product photos, a developer may blur the background of the original PNG to create a depth‑of‑field effect with Aspose.Imaging’s convolution filter.
- * 4. When preparing PNG assets for a mobile game, a developer can apply a Gaussian blur to create a soft glow around sprites, improving visual consistency across devices.
- * 5. When building a C# image‑analysis pipeline that later performs edge detection, a developer can first smooth the PNG input with a Gaussian blur kernel to minimize false edges.
+ * 1. When a developer needs to soften the edges of a PNG logo before embedding it in a web page to reduce visual harshness, they can use Aspose.Imaging's GaussianBlurFilterOptions with a 5‑pixel kernel and sigma 4.0.
+ * 2. When preparing product photos in a C# application for a catalog and wants to create a subtle background blur effect to highlight the foreground, the code can apply a Gaussian blur to the entire PNG image.
+ * 3. When building an automated image‑processing pipeline that removes noise from scanned PNG documents by smoothing pixel variations, developers can invoke the rasterImage.Filter method with GaussianBlurFilterOptions.
+ * 4. When generating thumbnail previews of PNG screenshots where a gentle blur helps mask pixelation after downscaling, the Gaussian blur filter provides a quick C# solution using Aspose.Imaging.
+ * 5. When implementing a privacy feature that obscures sensitive details in a PNG image before sharing, applying a Gaussian blur with a defined kernel size and sigma ensures consistent smoothing across the image.
  */

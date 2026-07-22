@@ -13,7 +13,7 @@ class Program
         string inputPath = @"C:\Images\input.tif";
         string outputPath = @"C:\Images\output.jpg";
 
-        // Path safety checks
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -48,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to preprocess high‑resolution scanned documents (TIFF) by adding a 45° motion blur to simulate camera movement before converting them to web‑friendly JPEGs for online viewing.
- * 2. When a medical imaging application must anonymize patient scans stored as TIFF by applying a directional motion blur and then export the result as JPEG for inclusion in reports.
- * 3. When a GIS system requires generating thumbnail previews of large TIFF satellite images with a subtle 45° motion blur effect to reduce visual noise before saving them as JPEG tiles.
- * 4. When an e‑commerce platform wants to create stylized product photos by applying a diagonal motion blur to original TIFF assets and delivering the final images in JPEG format for faster page loads.
- * 5. When a digital archiving workflow automates the conversion of archival TIFF photographs, adding a 45‑degree motion blur to mask imperfections and then storing the processed files as JPEGs for easy distribution.
+ * 1. When a developer needs to convert high‑resolution TIFF scans of documents into smaller JPEG files while adding a 45‑degree motion blur to simulate a scanning artifact.
+ * 2. When an image‑processing pipeline must prepare satellite TIFF imagery for web preview by applying a directional motion blur and exporting to JPEG for faster loading.
+ * 3. When a photo‑editing application wants to offer a “streak” effect on TIFF photos, using C# and Aspose.Imaging to blur at a 45° angle before saving as JPEG for sharing.
+ * 4. When a batch job processes archival TIFF files, applying a motion‑wiener filter to reduce noise and then converting them to JPEG for inclusion in a digital catalog.
+ * 5. When a developer integrates Aspose.Imaging into a .NET service that receives TIFF uploads, applies a 45° motion blur for artistic styling, and returns the result as a JPEG image.
  */

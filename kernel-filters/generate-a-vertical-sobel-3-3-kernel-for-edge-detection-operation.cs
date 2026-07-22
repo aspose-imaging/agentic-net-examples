@@ -7,23 +7,29 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input/input.png";
-        string outputPath = "output/output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
+            Directory.CreateDirectory(outputDir);
 
+            // Load image as RasterImage
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                RasterImage rasterImage = (RasterImage)image;
 
+                // Define vertical Sobel 3x3 kernel
                 double[,] sobelKernel = new double[,]
                 {
                     { -1, -2, -1 },
@@ -31,9 +37,13 @@ class Program
                     {  1,  2,  1 }
                 };
 
-                var options = new ConvolutionFilterOptions(sobelKernel, 1.0, 0);
-                raster.Filter(raster.Bounds, options);
-                raster.Save(outputPath);
+                // Apply convolution filter
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new ConvolutionFilterOptions(sobelKernel, 1.0, 0));
+
+                // Save the processed image
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -45,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to detect vertical edges in a PNG image—such as enhancing scanned documents before OCR—they can apply the Sobel 3×3 kernel using Aspose.Imaging’s ConvolutionFilterOptions in C#.
- * 2. When building a traffic‑analysis system, a developer can highlight vertical lane markings in camera‑captured PNG frames by applying the vertical Sobel filter with Aspose.Imaging.
- * 3. When creating GIS maps, a developer may extract building outlines from aerial PNG imagery by detecting vertical edges using the Sobel convolution kernel provided by Aspose.Imaging.
- * 4. When preparing product photos for e‑commerce, a developer can emphasize product contours by applying the vertical Sobel filter to PNG files before background removal.
- * 5. When processing medical X‑ray images, a developer can isolate bone structures by detecting vertical gradients using the Sobel 3×3 kernel in a C# Aspose.Imaging workflow.
+ * 1. When a developer uses Aspose.Imaging for .NET to apply a vertical Sobel 3×3 convolution filter on a PNG image to highlight building edges in architectural visualizations.
+ * 2. When an OCR preprocessing pipeline needs to enhance vertical text boundaries in JPEG scans by running a C# convolution filter with a Sobel kernel via Aspose.Imaging.
+ * 3. When a security application processes BMP frames from a surveillance camera in C# and uses Aspose.Imaging’s ConvolutionFilterOptions to detect vertical motion edges for intrusion alerts.
+ * 4. When a medical imaging software analyzes grayscale X‑ray PNG files in .NET and applies a vertical Sobel filter with Aspose.Imaging to emphasize bone structures for diagnosis.
+ * 5. When a game developer generates stylized edge‑enhanced textures from PNG assets by applying a vertical Sobel kernel using Aspose.Imaging’s raster image filtering in C#.
  */

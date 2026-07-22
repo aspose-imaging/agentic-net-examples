@@ -7,12 +7,12 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output/output.png";
+
             // Validate input file existence
             if (!File.Exists(inputPath))
             {
@@ -23,32 +23,30 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define a custom 7x7 kernel (example: simple averaging kernel)
-            double[,] kernel = new double[7, 7];
-            for (int i = 0; i < 7; i++)
+            // Define kernel size and validate it is odd
+            int kernelSize = 7;
+            if (kernelSize % 2 == 0)
             {
-                for (int j = 0; j < 7; j++)
-                {
-                    kernel[i, j] = 1.0 / 49.0;
-                }
-            }
-
-            // Validate that kernel dimensions are odd
-            if (kernel.GetLength(0) % 2 == 0 || kernel.GetLength(1) % 2 == 0)
-            {
-                Console.Error.WriteLine("Kernel dimensions must be odd.");
+                Console.Error.WriteLine("Kernel size must be an odd number.");
                 return;
             }
 
-            // Load the PNG image as a raster image
+            // Create a 7x7 averaging kernel
+            double[,] kernel = new double[kernelSize, kernelSize];
+            double value = 1.0 / (kernelSize * kernelSize);
+            for (int i = 0; i < kernelSize; i++)
+            {
+                for (int j = 0; j < kernelSize; j++)
+                {
+                    kernel[i, j] = value;
+                }
+            }
+
+            // Load the PNG image, apply the custom kernel, and save the result
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
-
-                // Apply the custom convolution filter to the entire image
                 raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
-
-                // Save the processed image
                 raster.Save(outputPath);
             }
         }
@@ -61,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to apply a custom 7x7 averaging convolution filter to a PNG image while ensuring the kernel has odd dimensions to avoid runtime errors.
- * 2. When building an image preprocessing pipeline in C# that validates input files, creates output directories, and applies an odd‑sized convolution kernel for smoothing before further analysis.
- * 3. When implementing a desktop application that performs real‑time noise reduction on user‑uploaded PNGs using a custom 7x7 kernel and must check kernel dimensions to comply with Aspose.Imaging’s filter requirements.
- * 4. When creating an automated batch process that loads PNG files, validates the existence of each file, applies a custom convolution filter with an odd‑sized kernel, and saves the results to a specified output folder.
- * 5. When developing a C# utility that verifies a custom kernel’s odd width and height before invoking Aspose.Imaging’s ConvolutionFilterOptions to ensure correct edge handling on PNG raster images.
+ * 1. When a developer wants to apply a custom 7×7 averaging convolution filter to a PNG image and must ensure the kernel dimensions are odd to avoid runtime errors in Aspose.Imaging for .NET.
+ * 2. When building an automated image‑enhancement pipeline that smooths PNG files using a user‑defined kernel, the code validates the kernel size before invoking the ConvolutionFilterOptions.
+ * 3. When creating a desktop C# application that lets users upload PNG pictures and apply custom blur effects, the odd‑size check guarantees the filter works correctly with Aspose’s raster image processing.
+ * 4. When integrating image preprocessing into a machine‑learning workflow that requires consistent padding, the developer uses this snippet to confirm the kernel’s odd dimensions before filtering PNG inputs.
+ * 5. When troubleshooting a batch job that processes thousands of PNG assets with a 7×7 kernel, the validation step helps quickly detect mis‑configured kernel sizes and prevents exceptions during the raster filter operation.
  */

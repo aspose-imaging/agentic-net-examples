@@ -8,19 +8,21 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.svg";
-        string outputPath3x3 = @"C:\Images\Result\sample_emboss3x3.png";
-        string outputPath5x5 = @"C:\Images\Result\sample_emboss5x5.png";
-
         try
         {
-            // Verify input file exists
+            // Hard‑coded input SVG path
+            string inputPath = @"C:\Temp\input.svg";
+
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
+
+            // Output paths for the two filtered images
+            string outputPath3x3 = @"C:\Temp\output_emboss3x3.png";
+            string outputPath5x5 = @"C:\Temp\output_emboss5x5.png";
 
             // Ensure output directories exist
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath3x3));
@@ -29,33 +31,37 @@ class Program
             // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Rasterize the SVG to a raster image
+                // Rasterize the SVG to a raster image (default size)
                 using (RasterImage rasterImage = (RasterImage)image)
                 {
-                    // Apply 3x3 emboss filter
+                    // Apply 3x3 Emboss filter
                     rasterImage.Filter(
                         rasterImage.Bounds,
                         new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-                    // Save result of 3x3 emboss
+                    // Save the result of the 3x3 filter
                     rasterImage.Save(outputPath3x3);
                 }
             }
 
-            // Reload the original SVG for the second filter to avoid cumulative effects
+            // Reload the original SVG for the second filter (to avoid cumulative effects)
             using (Image image = Image.Load(inputPath))
             {
                 using (RasterImage rasterImage = (RasterImage)image)
                 {
-                    // Apply 5x5 emboss filter
+                    // Apply 5x5 Emboss filter
                     rasterImage.Filter(
                         rasterImage.Bounds,
                         new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
 
-                    // Save result of 5x5 emboss
+                    // Save the result of the 5x5 filter
                     rasterImage.Save(outputPath5x5);
                 }
             }
+
+            Console.WriteLine("Filtering completed. Results saved to:");
+            Console.WriteLine(outputPath3x3);
+            Console.WriteLine(outputPath5x5);
         }
         catch (Exception ex)
         {
@@ -66,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web designer wants to preview how different emboss filters affect the visual depth of SVG icons before publishing them on a responsive website.
- * 2. When a GIS analyst needs to generate side‑by‑side rasterized PNG maps from SVG layers to evaluate which convolution filter (Emboss3x3 vs Emboss5x5) best highlights terrain edges for printed reports.
- * 3. When a mobile app developer is creating an asset pipeline that converts SVG assets to PNG textures and must compare edge‑enhancement quality to choose the optimal filter for low‑resolution game graphics.
- * 4. When a branding team requires automated batch processing of SVG logos to produce embossed PNG versions and wants to test whether the 3×3 or 5×5 kernel preserves fine line details for marketing materials.
- * 5. When a machine‑learning engineer prepares training data by applying different convolution filters to identical SVG drawings and needs to assess which filter yields clearer edge features for image classification models.
+ * 1. When a developer needs to evaluate which emboss filter (Emboss3x3 or Emboss5x5) preserves fine line details better for converting SVG icons to high‑contrast PNG thumbnails using Aspose.Imaging for .NET.
+ * 2. When a UI designer wants to compare edge‑enhancement results on vector‑based logos after rasterizing them to PNG to decide the optimal filter for a web‑ready asset pipeline.
+ * 3. When a GIS application processes SVG map overlays and must choose the most suitable convolution filter to highlight terrain contours without introducing artifacts.
+ * 4. When an e‑learning platform generates embossed diagrams from SVG illustrations and needs to test both 3×3 and 5×5 kernels to ensure readability on low‑resolution screens.
+ * 5. When a quality‑assurance engineer automates regression testing of Aspose.Imaging’s ConvolutionFilterOptions to verify that the Emboss5x5 filter produces smoother shading than Emboss3x3 on identical SVG inputs.
  */
