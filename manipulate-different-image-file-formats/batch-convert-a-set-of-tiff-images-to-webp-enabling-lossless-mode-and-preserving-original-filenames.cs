@@ -10,11 +10,11 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\input\";
-            string outputDir = @"C:\output\";
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
 
             // Get all TIFF files in the input directory
-            string[] tiffFiles = Directory.GetFiles(inputDir, "*.tif");
+            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
 
             foreach (string inputPath in tiffFiles)
             {
@@ -25,9 +25,9 @@ class Program
                     return;
                 }
 
-                // Build output path preserving original filename
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".webp";
-                string outputPath = Path.Combine(outputDir, outputFileName);
+                // Build output path preserving original filename with .webp extension
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".webp");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -53,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy archive of high‑resolution TIFF scans to a modern, web‑friendly format without losing image quality, they can use this code to batch convert the files to lossless WebP while keeping the original filenames.
- * 2. When an e‑commerce platform wants to reduce page load times by serving smaller images, a developer can run this script to convert product‑catalog TIFF images to lossless WebP in bulk, preserving the naming scheme for seamless integration.
- * 3. When a medical imaging system stores diagnostic scans as TIFF and must share them with web portals that only accept WebP, a developer can employ this code to automate the conversion while maintaining lossless fidelity and original file identifiers.
- * 4. When a digital asset management (DAM) tool requires periodic optimization of stored TIFF assets for cloud storage cost savings, a developer can schedule this batch conversion to lossless WebP, ensuring filenames stay consistent for indexing.
- * 5. When a GIS application exports map layers as TIFF and needs to deliver them to web‑based viewers that support WebP, a developer can use this script to batch process the layers, keeping the original layer names for easy reference.
+ * 1. When a developer needs to migrate a legacy archive of high‑resolution TIFF scans to modern, lossless WebP files for faster web delivery while keeping the original filenames.
+ * 2. When an e‑commerce platform wants to convert product catalog TIFF images to WebP in bulk to reduce page load times without sacrificing image quality.
+ * 3. When a medical imaging system requires batch transformation of diagnostic TIFF files to lossless WebP for storage optimization while preserving file naming conventions.
+ * 4. When a digital asset management tool must automate the conversion of scanned documents from TIFF to WebP using C# to integrate with downstream web services.
+ * 5. When a photographer’s workflow script needs to process a folder of TIFF photos, saving each as a lossless WebP image with the same base name for archival and web publishing.
  */
