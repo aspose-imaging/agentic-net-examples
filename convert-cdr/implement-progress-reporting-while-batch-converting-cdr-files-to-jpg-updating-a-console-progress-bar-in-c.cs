@@ -2,9 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.ProgressManagement;
 
 class Program
 {
@@ -12,30 +10,25 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string inputFolder = "InputCdr";
+            string outputFolder = "OutputJpg";
 
-            // Ensure input directory exists
-            if (!Directory.Exists(inputDirectory))
+            if (!Directory.Exists(inputFolder))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Directory.CreateDirectory(inputFolder);
+                Console.WriteLine($"Input directory created at: {inputFolder}. Add files and rerun.");
                 return;
             }
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
+            if (!Directory.Exists(outputFolder))
             {
-                Directory.CreateDirectory(outputDirectory);
+                Directory.CreateDirectory(outputFolder);
             }
 
-            // Get all CDR files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.cdr");
+            string[] inputFiles = Directory.GetFiles(inputFolder, "*.cdr");
 
-            foreach (var inputPath in files)
+            foreach (string inputPath in inputFiles)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -43,24 +36,22 @@ class Program
                 }
 
                 string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".jpg");
+                string outputPath = Path.Combine(outputFolder, fileName + ".jpg");
 
-                // Ensure output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (var image = Image.Load(inputPath, new LoadOptions
+                using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
                 {
-                    ProgressEventHandler = info => Console.WriteLine($"{info.EventType} : {info.Value}/{info.MaxValue}")
-                }))
-                {
-                    using (var jpegOptions = new JpegOptions
+                    var jpegOptions = new JpegOptions
                     {
-                        Quality = 90,
-                        ProgressEventHandler = info => Console.WriteLine($"{info.EventType} : {info.Value}/{info.MaxValue}")
-                    })
-                    {
-                        image.Save(outputPath, jpegOptions);
-                    }
+                        VectorRasterizationOptions = new CdrRasterizationOptions
+                        {
+                            PageWidth = cdr.Width,
+                            PageHeight = cdr.Height
+                        }
+                    };
+
+                    cdr.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -73,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design studio needs to convert a large collection of CorelDRAW (.cdr) assets to web‑ready JPEGs while showing users the conversion progress in a console application.
- * 2. When an automated build pipeline must generate thumbnail previews of CDR files for a digital asset management system and requires real‑time progress feedback to monitor batch processing.
- * 3. When a Windows service processes incoming CDR submissions from clients, converts them to JPEG for archival, and logs the conversion status using Aspose.Imaging’s progress events.
- * 4. When a data migration script moves legacy CDR illustrations to a cloud storage bucket in JPEG format and needs a console progress bar to estimate remaining time for thousands of files.
- * 5. When a QA engineer validates the integrity of batch‑converted images by tracking each file’s load and save progress during CDR‑to‑JPG conversion in a C# test harness.
+ * 1. When a developer needs to convert a large collection of CorelDRAW (CDR) files to JPEG images for web publishing, they can use this batch conversion with a console progress bar.
+ * 2. When automating the migration of legacy CDR assets to a modern image format for a digital asset management system, this code provides a C# solution that reports progress.
+ * 3. When building a command‑line tool that processes design files in a CI/CD pipeline and needs to show conversion status for each CDR to JPG conversion, the example fits.
+ * 4. When creating a desktop utility that prepares print‑ready JPEG previews from multiple CDR drawings and wants users to see real‑time progress, this implementation is ideal.
+ * 5. When integrating Aspose.Imaging into a batch processing service that converts CDR diagrams to compressed JPEGs while monitoring throughput via a console progress bar, developers can apply this code.
  */
