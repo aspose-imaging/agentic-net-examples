@@ -4,8 +4,6 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Watermark;
-using Aspose.Imaging.Watermark.Options;
 
 class Program
 {
@@ -13,55 +11,47 @@ class Program
     {
         try
         {
-            string inputPath = "input/watermark.png";
-            string outputPathTelea = "output/telea_result.png";
-            string outputPathContent = "output/contentaware_result.png";
-
+            // Hardcoded input and output paths
+            string inputPath = "watermark.png";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathTelea));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathContent));
+            string outputTelea = "output_telea.png";
+            string outputCaf = "output_caf.png";
 
-            // Telea algorithm
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(outputTelea));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputCaf));
+
+            // Load the source image
             using (var image = Image.Load(inputPath))
             {
                 var pngImage = (PngImage)image;
 
+                // Define the mask region (example ellipse)
                 var mask = new GraphicsPath();
                 var figure = new Figure();
                 figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
                 mask.AddFigure(figure);
 
-                var options = new TeleaWatermarkOptions(mask);
-
-                using (var result = WatermarkRemover.PaintOver(pngImage, options))
+                // ----- Telea algorithm -----
+                var teleaOptions = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
+                using (var resultTelea = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, teleaOptions))
                 {
-                    result.Save(outputPathTelea);
+                    resultTelea.Save(outputTelea);
                 }
-            }
 
-            // Content Aware Fill algorithm (default)
-            using (var image = Image.Load(inputPath))
-            {
-                var pngImage = (PngImage)image;
-
-                var mask = new GraphicsPath();
-                var figure = new Figure();
-                figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
-                mask.AddFigure(figure);
-
-                var options = new ContentAwareFillWatermarkOptions(mask)
+                // ----- Content Aware Fill algorithm -----
+                var cafOptions = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
                 {
                     MaxPaintingAttempts = 4
                 };
-
-                using (var result = WatermarkRemover.PaintOver(pngImage, options))
+                using (var resultCaf = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, cafOptions))
                 {
-                    result.Save(outputPathContent);
+                    resultCaf.Save(outputCaf);
                 }
             }
         }
@@ -74,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to evaluate which inpainting algorithm—Telea or the default ContentAwareFill—produces higher visual fidelity for removing watermarks from PNG photographs before publishing online.
- * 2. When an image‑processing pipeline must automatically select the best algorithm for cleaning scanned documents by comparing the results of Telea and ContentAwareFill on the same watermark region.
- * 3. When a software product offers users a preview of watermark removal options, using this code to generate side‑by‑side Telea and ContentAwareFill outputs for PNG assets.
- * 4. When performance testing requires measuring the quality trade‑off between Telea’s fast inpainting and ContentAwareFill’s multi‑attempt approach on high‑resolution PNG logos.
- * 5. When a developer is building a batch‑processing tool that decides dynamically whether to apply Telea or ContentAwareFill based on which method yields fewer visual artifacts on a given watermark shape.
+ * 1. When a developer needs to evaluate which in‑painting algorithm (Telea vs Content‑Aware Fill) produces the most natural result for removing a logo from a PNG watermark using an elliptical mask.
+ * 2. When a C# application must automatically compare the visual quality of Telea and default ContentAwareFill after processing the same watermark image to choose the optimal algorithm for batch image cleanup.
+ * 3. When a software engineer wants to benchmark Aspose.Imaging’s TeleaWatermarkOptions against ContentAwareFillWatermarkOptions on a PNG file to decide which method preserves background texture better.
+ * 4. When an image‑processing pipeline requires side‑by‑side output files (output_telea.png and output_caf.png) to demonstrate to non‑technical stakeholders the difference between the two algorithms.
+ * 5. When a developer is integrating Aspose.Imaging’s WatermarkRemover into a .NET project and needs to verify that the MaxPaintingAttempts setting in ContentAwareFill does not degrade quality compared with the Telea algorithm.
  */
