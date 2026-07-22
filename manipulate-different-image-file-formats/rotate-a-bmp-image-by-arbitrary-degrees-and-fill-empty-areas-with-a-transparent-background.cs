@@ -8,38 +8,32 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.bmp";
+        string outputPath = "output.bmp";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "input.bmp";
-            string outputPath = "output.bmp";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image as a raster image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Rotate the image by an arbitrary angle (e.g., 45 degrees)
-                // Resize proportionally to fit the rotated content
-                // Fill empty areas with a transparent background
-                float angle = 45f;
-                bool resizeProportionally = true;
-                Color transparent = Color.FromArgb(0, 0, 0, 0);
-                image.Rotate(angle, resizeProportionally, transparent);
+                if (!image.IsCached)
+                    image.CacheData();
 
-                // Save the rotated image preserving alpha channel
+                // Rotate 45 degrees, resize canvas proportionally, fill background with transparent color
+                image.Rotate(45f, true, Color.FromArgb(0, 0, 0, 0));
+
                 BmpOptions options = new BmpOptions
                 {
                     Compression = BitmapCompression.Bitfields
                 };
+
                 image.Save(outputPath, options);
             }
         }
@@ -52,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate rotated thumbnails of legacy BMP assets for a Windows desktop application while preserving transparency for overlay UI elements.
- * 2. When an image processing pipeline must align scanned BMP diagrams at arbitrary angles before performing OCR, using Aspose.Imaging’s Rotate method with a transparent background to avoid unwanted white corners.
- * 3. When a game developer wants to rotate sprite sheets stored as BMP files at runtime in C# and keep the empty space transparent so the sprites blend correctly with the game scene.
- * 4. When a reporting tool has to re‑orient BMP charts that were exported in landscape mode to portrait orientation, requiring proportional resizing and a transparent fill to maintain layout consistency.
- * 5. When a batch conversion utility must correct the orientation of user‑uploaded BMP logos by rotating them by a custom angle and saving the result with an alpha channel so the logos can be placed on any background without visible borders.
+ * 1. When a C# developer needs to rotate a BMP file by an arbitrary angle, such as 45°, while preserving the original dimensions and filling the newly created empty corners with a transparent background for later compositing.
+ * 2. When an application must programmatically adjust the orientation of legacy BMP assets in a Windows desktop UI and ensure the rotated image remains compatible with BMP compression settings like Bitfields.
+ * 3. When a game engine imports BMP textures that require precise angular alignment and the developer wants to use Aspose.Imaging to rotate them and keep the transparent padding for seamless tiling.
+ * 4. When a batch‑processing tool processes scanned BMP diagrams, rotates each page to correct skew, and needs the background to be transparent so the diagrams can be overlaid on other graphics without visible borders.
+ * 5. When a document‑generation service creates custom BMP icons, rotates them to match user‑specified angles, and saves the result with transparent fill to maintain visual consistency across different output formats.
  */
