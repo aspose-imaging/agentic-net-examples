@@ -10,30 +10,37 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = @"C:\Images\input.jpg";
             string outputPath = @"C:\Images\output_grayscale.jpg";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
+            // Load the source JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare JPEG save options with grayscale color type
+                // Prepare JPEG save options with grayscale color mode
                 JpegOptions saveOptions = new JpegOptions
                 {
-                    ColorType = JpegCompressionColorMode.Grayscale
+                    ColorType = JpegCompressionColorMode.Grayscale,
+                    // Optional: set other typical options
+                    BitsPerChannel = 8,
+                    Quality = 100,
+                    CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
+                    ResolutionSettings = new ResolutionSetting(96.0, 96.0),
+                    ResolutionUnit = ResolutionUnit.Inch,
+                    Palette = Aspose.Imaging.ColorPaletteHelper.Create8BitGrayscale(false)
                 };
 
-                // Save the image as a grayscale JPEG
+                // Save the image as grayscale JPEG
                 image.Save(outputPath, saveOptions);
             }
         }
@@ -46,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photo‑sharing website wants to create low‑bandwidth preview thumbnails by converting user‑uploaded color JPEGs to grayscale, a developer can load the image with Aspose.Imaging and save it using JpegOptions.ColorType = Grayscale.
- * 2. When an archival system requires all scanned documents to be stored as grayscale JPEGs to preserve text clarity while minimizing file size, this C# code can read the original image and re‑save it with the grayscale color mode.
- * 3. When a medical imaging application needs to standardize input X‑ray images to a single channel before analysis, a developer can use Aspose.Imaging to load the JPEG and output a grayscale version with the specified JpegCompressionColorMode.
- * 4. When an e‑commerce platform generates product catalog PDFs and wants the background images in grayscale to reduce printing costs, the code demonstrates how to convert each JPEG to grayscale using C# and Aspose.Imaging.
- * 5. When a desktop utility offers batch conversion of color photographs to grayscale for artistic effect, this snippet shows how to verify file paths, load each JPEG, set JpegOptions.ColorType to Grayscale, and save the result.
+ * 1. When a developer needs to convert color JPEG photos to grayscale for printing or archival purposes while preserving JPEG compression settings.
+ * 2. When building a web service that receives user‑uploaded color images and must store them as smaller, grayscale JPEGs to reduce bandwidth.
+ * 3. When generating thumbnails for a medical imaging application where grayscale representation is required for consistency with DICOM standards.
+ * 4. When creating batch processing scripts that automatically convert product catalog images to grayscale to meet a brand’s visual guidelines.
+ * 5. When implementing a C# desktop utility that prepares images for OCR engines that perform better on single‑channel (grayscale) JPEG files.
  */

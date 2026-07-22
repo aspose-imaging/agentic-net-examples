@@ -5,41 +5,34 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.wmf";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.wmf";
-            string outputPath = @"C:\Images\output.png";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization to preserve transparency
                 var rasterOptions = new WmfRasterizationOptions
                 {
-                    PageSize = image.Size,
-                    BackgroundColor = Color.Transparent
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
                 };
 
-                // Set PNG save options with the rasterization settings
                 var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save the image as PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -52,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed legacy WMF vector graphics into a modern web page that only supports PNG with transparent backgrounds.
- * 2. When an automated report generator must convert WMF logos into PNG thumbnails while keeping the transparent background for seamless overlay.
- * 3. When a desktop application imports user‑supplied WMF icons and saves them as PNG files for use in high‑DPI UI elements that require alpha channel support.
- * 4. When a batch processing script migrates a library of WMF assets to PNG format for compatibility with mobile apps that cannot render WMF but need transparent images.
- * 5. When a C# service creates PNG previews of WMF diagrams for email attachments, ensuring the background stays transparent to match the email template.
+ * 1. When a developer needs to display legacy WMF vector graphics on a modern website that only supports PNG with an alpha channel, this code converts the WMF to a transparent PNG.
+ * 2. When a desktop application must generate thumbnail previews of WMF files for a file explorer UI, the code rasterizes the vector image to a PNG while keeping its transparent background.
+ * 3. When an automated reporting tool creates PDF or HTML reports and must embed WMF logos as PNG assets with preserved transparency, this snippet performs the required format conversion.
+ * 4. When a batch processing script migrates a legacy document repository from WMF icons to PNG assets for cross‑platform compatibility, the code ensures each image retains its transparent background.
+ * 5. When a C# service integrates with a third‑party API that accepts only PNG images with alpha transparency, this example converts incoming WMF files to the required format without losing transparency.
  */

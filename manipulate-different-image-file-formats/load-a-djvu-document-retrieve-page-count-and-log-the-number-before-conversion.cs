@@ -1,19 +1,18 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.djvu";
+        string outputDirectory = "output";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.djvu";
-            string outputDirectory = "output";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,27 +20,23 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
             // Load the DjVu document from a file stream
-            using (Stream stream = File.OpenRead(inputPath))
+            using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Retrieve and log the total number of pages
-                int pageCount = djvuImage.PageCount;
-                Console.WriteLine($"Total pages: {pageCount}");
+                // Log the total number of pages before any conversion
+                Console.WriteLine($"Total pages: {djvuImage.PageCount}");
 
                 // Convert each page to PNG
-                foreach (DjvuPage page in djvuImage.Pages)
+                foreach (DjvuPage djvuPage in djvuImage.Pages)
                 {
-                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
+                    string outputPath = Path.Combine(outputDirectory, $"page_{djvuPage.PageNumber}.png");
 
-                    // Ensure the directory for the output file exists
+                    // Ensure the output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save the page as PNG
-                    page.Save(outputPath, new PngOptions());
+                    djvuPage.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -54,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a document management system needs to ingest multi‑page DjVu files, count the pages for metadata, and then convert each page to PNG for web preview.
- * 2. When a batch‑processing tool must verify the number of pages in scanned DjVu archives before exporting them as individual PNG images for OCR pipelines.
- * 3. When an e‑learning platform wants to display the total slide count of a DjVu lecture and generate PNG thumbnails for each slide using C# and Aspose.Imaging.
- * 4. When a digital archiving solution requires logging the page count of incoming DjVu submissions to track storage usage and then convert pages to PNG for compatibility with downstream image editors.
- * 5. When a desktop application needs to read a DjVu file from a stream, report its page count in the UI, and save each page as a high‑quality PNG for printing or further processing.
+ * 1. When a developer needs to extract the total number of pages from a DjVu document before converting each page to PNG for further processing or display.
+ * 2. When an application must verify the existence of a DjVu file, load it via a FileStream, and log its page count to ensure the document is complete before batch conversion.
+ * 3. When a document management system requires converting multi‑page DjVu files into individual PNG images while preserving page order and reporting the page count for indexing.
+ * 4. When a C# service automates image preprocessing by reading DjVu archives, logging the page count for monitoring, and saving each page as a high‑resolution PNG in a structured output folder.
+ * 5. When a developer builds a workflow that needs to read DjVu files, determine how many pages they contain, and then generate separate PNG files for each page for use in web galleries or OCR pipelines.
  */

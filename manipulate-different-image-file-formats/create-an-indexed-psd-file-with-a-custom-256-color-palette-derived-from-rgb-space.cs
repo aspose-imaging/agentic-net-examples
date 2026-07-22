@@ -3,58 +3,48 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.bmp";
+        string outputPath = @"c:\temp\output.psd";
+
         try
         {
-            // Output PSD file path (hardcoded)
-            string outputPath = @"C:\Temp\indexed_output.psd";
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define image dimensions
-            int width = 256;
-            int height = 256;
-
-            // Create a custom 256‑color palette derived from RGB space
-            Aspose.Imaging.Color[] paletteColors = new Aspose.Imaging.Color[256];
-            for (int i = 0; i < 256; i++)
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
-                // Simple RGB generation using modulo arithmetic
-                byte r = (byte)((i * 5) % 256);
-                byte g = (byte)((i * 7) % 256);
-                byte b = (byte)((i * 11) % 256);
-                paletteColors[i] = Aspose.Imaging.Color.FromArgb(r, g, b);
-            }
-            var customPalette = new ColorPalette(paletteColors);
+                // Cast to RasterImage for palette generation
+                RasterImage raster = (RasterImage)image;
 
-            // Configure PSD options for indexed color mode
-            PsdOptions psdOptions = new PsdOptions
-            {
-                Source = new FileCreateSource(outputPath, false),
-                ColorMode = ColorModes.Indexed,
-                CompressionMethod = CompressionMethod.RLE,
-                ChannelBitsCount = (short)8,
-                ChannelsCount = (short)1,
-                Palette = customPalette,
-                Version = 6
-            };
+                // Create PSD save options
+                PsdOptions psdOptions = new PsdOptions
+                {
+                    // Use RGB color mode
+                    ColorMode = ColorModes.Rgb,
 
-            // Create the PSD image with the specified options
-            using (Image psdImage = Image.Create(psdOptions, width, height))
-            {
-                // Fill the image with a solid color (white) – the palette will be used for indexing
-                Graphics graphics = new Graphics(psdImage);
-                graphics.Clear(Aspose.Imaging.Color.White);
+                    // Generate a uniform 256‑color palette from the RGB space
+                    Palette = ColorPaletteHelper.GetUniformColorPalette(raster),
 
-                // Save the image (already bound to the output file via FileCreateSource)
-                psdImage.Save();
+                    // Set channel bits count to 8 (standard for 8‑bit per channel)
+                    ChannelBitsCount = 8
+                };
+
+                // Save the image as an indexed PSD file
+                image.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)
@@ -66,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a PSD file for a web‑based color picker that requires an indexed 256‑color palette derived from the RGB space.
- * 2. When exporting a thumbnail sprite sheet from a game asset pipeline where the PSD must use a custom palette to reduce file size.
- * 3. When generating a sample PSD for testing Photoshop plug‑ins that need to handle indexed color mode with RLE compression.
- * 4. When preparing a print‑ready PSD mock‑up that must conform to legacy Photoshop version 6 specifications using an 8‑bit indexed palette.
- * 5. When building an automated batch process that converts raw image data into indexed PSD files for archival storage with a deterministic color palette.
+ * 1. When a developer needs to convert high‑resolution BMP assets into a compact indexed PSD for use in legacy Photoshop workflows that require an 8‑bit per channel palette.
+ * 2. When a graphics pipeline must generate web‑ready PSD files with a uniform 256‑color palette to reduce file size while preserving the original RGB color distribution.
+ * 3. When an automation script has to batch‑process scanned documents, converting them from BMP to indexed PSD to enable faster layer‑based editing in Photoshop.
+ * 4. When a game‑development toolchain requires exporting sprite sheets as indexed PSD files with a custom 256‑color palette for efficient texture memory usage.
+ * 5. When a digital‑printing application needs to create PSD files with a fixed 256‑color palette to ensure consistent color output across different printers and RIP software.
  */

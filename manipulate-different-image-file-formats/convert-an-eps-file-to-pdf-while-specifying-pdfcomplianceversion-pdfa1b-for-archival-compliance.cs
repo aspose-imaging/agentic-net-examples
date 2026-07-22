@@ -23,7 +23,7 @@ class Program
             }
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
 
             // Load the EPS image
             using (var image = (EpsImage)Image.Load(inputPath))
@@ -50,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer uses Aspose.Imaging for .NET to convert legacy EPS files into PDF/A‑1b compliant PDFs for long‑term archival in a document management system.
- * 2. When an automated batch process written in C# needs to transform a collection of EPS artwork into searchable PDF/A‑1b documents to satisfy regulatory filing requirements.
- * 3. When a web API receives EPS uploads and must return PDF files that meet PDF/A‑1b archival standards using Aspose.Imaging’s PdfOptions.
- * 4. When a Windows desktop application processes design assets and must save them as PDF/A‑1b PDFs to ensure consistent rendering across PDF viewers, leveraging Aspose.Imaging’s image conversion.
- * 5. When a migration script moves print‑ready EPS files into a PDF/A‑1b archive to support electronic records retention policies, employing Aspose.Imaging for .NET.
+ * 1. When a publishing workflow requires converting legacy EPS artwork to PDF/A‑1b files for long‑term archival, a developer can use this C# code with Aspose.Imaging to ensure compliance.
+ * 2. When a legal department needs to preserve vector graphics from EPS contracts as PDF/A‑1b documents for regulatory record‑keeping, the code provides a reliable conversion in .NET.
+ * 3. When an e‑learning platform must transform EPS diagrams into searchable PDF/A‑1b files for accessibility and future proofing, this snippet automates the process.
+ * 4. When a print‑to‑digital service needs to batch‑convert customer‑submitted EPS logos into PDF/A‑1b PDFs for secure online distribution, the example shows how to handle file validation and saving.
+ * 5. When a document management system integrates C# code to ingest EPS files and store them as PDF/A‑1b compliant PDFs for metadata indexing, this approach ensures proper image loading and compliance settings.
  */

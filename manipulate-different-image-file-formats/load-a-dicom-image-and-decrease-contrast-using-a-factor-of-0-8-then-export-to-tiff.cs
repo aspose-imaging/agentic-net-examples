@@ -12,29 +12,29 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.dcm";
-        string outputPath = "output.tif";
+        string outputPath = "output\\output.tif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
                 DicomImage dicomImage = (DicomImage)image;
 
                 // Decrease contrast (negative value reduces contrast)
-                dicomImage.AdjustContrast(-20f); // approx. 0.8 factor
+                dicomImage.AdjustContrast(-20f);
 
-                // Prepare TIFF save options
+                // Set up TIFF save options
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
                 // Save the adjusted image as TIFF
@@ -50,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology application must convert a DICOM scan to a TIFF file with reduced contrast for clearer visualization on standard monitors.
- * 2. When a healthcare data pipeline needs to preprocess DICOM images by lowering contrast before storing them as TIFFs for integration with legacy PACS systems.
- * 3. When a research project requires batch conversion of DICOM MRI slices to TIFF format while applying a 0.8 contrast factor to enhance tissue differentiation for analysis.
- * 4. When a medical imaging web service uses C# and Aspose.Imaging to adjust the contrast of uploaded DICOM files and deliver the results as TIFFs to non‑DICOM‑aware viewers.
- * 5. When an archival system needs to preserve diagnostic images by converting DICOM files to lossless TIFFs with a consistent contrast reduction to ensure uniform appearance across different viewing platforms.
+ * 1. When a medical imaging application needs to convert DICOM scans to TIFF for archival while reducing contrast to improve visual clarity for radiologists.
+ * 2. When a healthcare data pipeline processes DICOM files and must export them as TIFF images with lowered contrast to meet a hospital’s image‑display standards.
+ * 3. When a research project requires batch conversion of DICOM MRI images to TIFF format and needs to uniformly decrease contrast to enhance feature detection in downstream analysis.
+ * 4. When a PACS integration tool must transform incoming DICOM files into TIFF for compatibility with third‑party viewers, applying a contrast reduction to match the viewer’s default settings.
+ * 5. When a diagnostic software component needs to load a DICOM image, adjust its contrast by a factor of 0.8, and save the result as a TIFF file for inclusion in patient reports.
  */

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -10,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = "C:\\WebPInput\\";
-            string outputDir = "C:\\WebPOutput\\";
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
             // Get all WebP files in the input directory
             string[] inputFiles = Directory.GetFiles(inputDir, "*.webp");
@@ -25,17 +26,21 @@ class Program
                     return;
                 }
 
-                // Determine the corresponding output PNG path
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                // Build the corresponding output file path (PNG format)
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + ".png");
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the WebP image with a memory usage limit (BufferSizeHint in MB)
-                using (Image image = Image.Load(inputPath, new LoadOptions { BufferSizeHint = 50 }))
+                // Set a memory usage limit (buffer size hint) for loading the image
+                var loadOptions = new LoadOptions { BufferSizeHint = 100 }; // limit to 100 MB
+
+                // Load the WebP image with the specified memory limit
+                using (WebPImage webPImage = new WebPImage(inputPath, loadOptions))
                 {
                     // Save the image as PNG
-                    image.Save(outputPath, new PngOptions());
+                    webPImage.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -48,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a large batch of WebP images to PNG format on a Windows server while preventing excessive memory consumption.
- * 2. When an e‑commerce platform must generate high‑quality PNG thumbnails from user‑uploaded WebP product photos without exhausting the application pool memory.
- * 3. When a desktop utility processes thousands of WebP assets for a game and must limit the buffer size to keep the process within a 50 MB memory budget.
- * 4. When a cloud‑based image pipeline migrates legacy WebP files to PNG for compatibility with older browsers and wants to enforce a memory usage cap during the conversion.
- * 5. When an automated build script prepares image resources for a mobile app, converting WebP to PNG while ensuring the conversion runs reliably on machines with limited RAM.
+ * 1. When a developer needs to batch‑convert a large collection of WebP images to PNG for broader compatibility while enforcing a memory‑usage limit to prevent out‑of‑memory crashes.
+ * 2. When an automated C# image‑processing pipeline must load high‑resolution WebP files on a server with limited RAM, using Aspose.Imaging’s LoadOptions.BufferSizeHint to cap memory consumption.
+ * 3. When a desktop application processes thousands of user‑uploaded WebP assets for a game and must ensure each image is loaded and saved as PNG without exceeding a 100 MB memory budget.
+ * 4. When a cloud‑based microservice receives WebP images from a CDN and needs to batch‑convert them to PNG before storing them in Azure Blob Storage, applying a memory‑usage limit to keep the service stable.
+ * 5. When a scheduled maintenance script on a Windows file server archives legacy WebP graphics into PNG format and must enforce a memory limit to avoid impacting other shared resources.
  */

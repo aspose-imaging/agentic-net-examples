@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -9,15 +10,16 @@ class Program
     {
         try
         {
-            // Hardcoded list of JPEG2000 input files
-            string[] inputFiles = new string[]
-            {
-                @"C:\Images\Input\image1.jp2",
-                @"C:\Images\Input\image2.jp2",
-                @"C:\Images\Input\image3.jp2"
-            };
+            // Hardcoded input and output directories
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-            // Process each file
+            // Ensure the base output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Get all JPEG2000 files in the input directory
+            string[] inputFiles = Directory.GetFiles(inputDir, "*.jp2");
+
             foreach (string inputPath in inputFiles)
             {
                 // Verify input file exists
@@ -27,26 +29,22 @@ class Program
                     return;
                 }
 
-                // Determine output path (same folder, .jpg extension)
-                string outputPath = Path.ChangeExtension(inputPath, ".jpg");
+                // Build corresponding output path with .jpg extension
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + ".jpg");
 
-                // Ensure output directory exists
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the JPEG2000 image
-                using (Image image = Image.Load(inputPath))
+                // Load JPEG2000 image and save as JPEG with quality 80
+                using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(inputPath))
                 {
-                    // Set JPEG save options with quality 80%
                     JpegOptions jpegOptions = new JpegOptions
                     {
                         Quality = 80
                     };
-
-                    // Save as JPEG
-                    image.Save(outputPath, jpegOptions);
+                    jpeg2000Image.Save(outputPath, jpegOptions);
                 }
-
-                Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
             }
         }
         catch (Exception ex)
@@ -58,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy archive of high‑resolution JPEG2000 photographs to standard JPEG files for web publishing, they can use this C# Aspose.Imaging batch conversion with a uniform 80 % quality setting.
- * 2. When an automated image‑processing pipeline must down‑sample a collection of JP2 medical scans to smaller JPEGs for faster preview loading in a C# desktop application, this code provides the required format conversion and compression control.
- * 3. When a content‑management system needs to ingest user‑uploaded JPEG2000 assets and store them as JPEGs to ensure compatibility with browsers, the sample demonstrates how to loop through files, verify existence, and save with Aspose.Imaging’s JpegOptions.
- * 4. When a batch‑export tool for a digital asset management (DAM) solution has to convert selected JP2 files to JPEG with a consistent 80 % quality to meet client‑specified size limits, the code shows the necessary file‑system handling and image‑saving steps in C#.
- * 5. When a scheduled Windows service must regularly convert newly added JPEG2000 images in a folder to JPEG for downstream analytics, this example illustrates how to programmatically load each image, apply a fixed compression ratio, and write the output using Aspose.Imaging.
+ * 1. When a developer needs to batch convert a collection of JPEG2000 (.jp2) medical or satellite images to standard JPEG files for web display while maintaining a consistent 80% compression quality.
+ * 2. When an image‑processing pipeline must automatically transform high‑resolution JPEG2000 assets stored in a folder into smaller JPEG files for faster loading in a mobile app.
+ * 3. When a migration script is required to replace legacy JPEG2000 assets with JPEG equivalents in a content‑management system, preserving directory structure and applying uniform quality settings.
+ * 4. When a C# utility is needed to generate JPEG thumbnails from a batch of JPEG2000 source images for e‑commerce product catalogs, ensuring each thumbnail uses the same 80% quality level.
+ * 5. When a developer wants to integrate a scheduled job that scans an input directory, converts all JPEG2000 files to JPEG with a fixed compression ratio, and saves them to an output folder for archival purposes.
  */

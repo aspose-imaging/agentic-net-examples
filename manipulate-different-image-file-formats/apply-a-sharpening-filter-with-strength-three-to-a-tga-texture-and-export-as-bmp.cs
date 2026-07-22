@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -11,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.tga";
-            string outputPath = "output.bmp";
+            string inputPath = @"C:\Images\texture.tga";
+            string outputPath = @"C:\Images\texture_sharpened.bmp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,19 +21,19 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TGA image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering functionality
+                // Cast to RasterImage to access filtering capabilities
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply a sharpen filter with strength three (kernel size 3, sigma 1.0)
+                // Apply a sharpen filter with size 3 and sigma 1.0 (strength three)
                 rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(3, 1.0));
 
-                // Save the result as BMP
-                rasterImage.Save(outputPath, new BmpOptions());
+                // Save the processed image as BMP
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -46,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a game developer needs to enhance the details of a TGA texture before converting it to BMP for use in a Windows desktop application.
- * 2. When a graphics pipeline requires sharpening of high‑resolution TGA assets with a strength‑three filter before exporting them to BMP for legacy hardware compatibility.
- * 3. When an e‑learning platform processes uploaded TGA screenshots, applies a moderate sharpen filter, and saves them as BMP files for consistent rendering across browsers.
- * 4. When a CAD software plugin converts TGA renderings into BMP format while improving edge definition using a three‑level sharpen filter.
- * 5. When an automated build script prepares game assets by loading TGA files, applying a strength‑three sharpen filter, and outputting BMP files for texture atlases.
+ * 1. When a game developer needs to enhance the visual clarity of a TGA texture before converting it to BMP for use in a legacy engine that only supports BMP assets.
+ * 2. When a UI designer wants to programmatically sharpen a high‑resolution TGA sprite by applying a strength‑three filter and save it as BMP for inclusion in a Windows desktop application.
+ * 3. When an automated build pipeline processes texture assets, applying a SharpenFilterOptions(3,1.0) to each TGA file and exporting the result as BMP to meet the quality standards of a publishing workflow.
+ * 4. When a digital artist exports a TGA map from a 3D modeling tool, then uses C# and Aspose.Imaging to sharpen the map and convert it to BMP for compatibility with a GIS system that requires BMP input.
+ * 5. When a software tool needs to batch‑process game textures, loading TGA images, applying a size‑3 sharpen filter to improve edge definition, and saving the output as BMP for legacy hardware rendering.
  */

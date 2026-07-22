@@ -2,43 +2,42 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
+        // Wrap the whole logic in a try-catch to handle unexpected errors gracefully
         try
         {
             // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\source.eps";
-            string outputPath = @"C:\Images\result.png";
+            string inputPath = @"C:\Temp\input.eps";
+            string outputPath = @"C:\Temp\output.png";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EPS image
-            using (Image image = Image.Load(inputPath))
+            using (var image = Image.Load(inputPath))
             {
-                // Calculate new height to maintain aspect ratio for width = 2000
-                int targetWidth = 2000;
+                // Calculate the new height to maintain aspect ratio for a width of 2000 pixels
+                int newWidth = 2000;
                 int originalWidth = image.Width;
                 int originalHeight = image.Height;
-                int targetHeight = (int)Math.Round((double)originalHeight * targetWidth / originalWidth);
+                int newHeight = (int)Math.Round((double)originalHeight * newWidth / originalWidth);
 
-                // Resize using Mitchell interpolation (you can choose another ResizeType if desired)
-                image.Resize(targetWidth, targetHeight, ResizeType.Mitchell);
+                // Resize the image using a high‑quality interpolation method
+                image.Resize(newWidth, newHeight, ResizeType.Mitchell);
 
-                // Save as PNG
-                var pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                // Save the resized image as PNG
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -50,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate high‑resolution web‑ready PNG thumbnails from vector EPS logos for a corporate website.
- * 2. When an e‑commerce platform must convert product EPS artwork to a fixed 2000‑pixel width PNG for print‑ready catalogs while preserving aspect ratio.
- * 3. When a desktop publishing tool automates the preparation of EPS illustrations for inclusion in a PDF report by resizing them to a consistent width and saving as PNG.
- * 4. When a batch‑processing script resizes EPS diagrams to 2000 pixels wide for faster loading in a mobile app, then exports them as PNG files.
- * 5. When a CI/CD pipeline validates and standardizes incoming EPS assets by resizing them to a 2000‑pixel width PNG before they are stored in a digital asset management system.
+ * 1. When a developer needs to convert a vector EPS logo to a high‑resolution PNG thumbnail of exactly 2000 px width for a web storefront while preserving the original aspect ratio.
+ * 2. When an automated build pipeline must generate printable PNG assets from EPS artwork, resizing them to a fixed width to meet a publisher’s layout specifications.
+ * 3. When a desktop application imports user‑supplied EPS diagrams and must display them as raster PNG previews at a consistent width for faster UI rendering.
+ * 4. When a batch‑processing script has to downscale large EPS files to a manageable size before uploading them to a cloud storage service that only accepts PNG images.
+ * 5. When a reporting tool needs to embed EPS charts into PDF reports by first converting them to 2000‑pixel‑wide PNG images to ensure consistent visual quality across devices.
  */

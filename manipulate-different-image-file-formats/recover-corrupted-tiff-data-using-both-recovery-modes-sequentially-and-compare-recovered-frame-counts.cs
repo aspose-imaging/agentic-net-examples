@@ -1,9 +1,8 @@
+// HOW-TO: Recover Corrupted TIFF Files Using Consistent and Default Modes in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,47 +10,58 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "corrupted.tif";
-            string outputPathConsistent = "output\\recovered_consistent.tif";
-            string outputPathFull = "output\\recovered_full.tif";
+            string outputDir = "output";
+            string outputPathConsistent = Path.Combine(outputDir, "recovered_consistent.tif");
+            string outputPathInconsistent = Path.Combine(outputDir, "recovered_inconsistent.tif");
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathConsistent));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathFull));
-
             int consistentFrames = 0;
-            var consistentLoadOptions = new LoadOptions
+            int inconsistentFrames = 0;
+
+            // First recovery: ConsistentRecover mode
+            using (var imageConsistent = Image.Load(inputPath, new LoadOptions
             {
                 DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
                 DataBackgroundColor = Color.White
-            };
-            using (Image img = Image.Load(inputPath, consistentLoadOptions))
+            }))
             {
-                var tiff = (TiffImage)img;
-                consistentFrames = tiff.Frames.Length;
-                tiff.Save(outputPathConsistent);
+                if (imageConsistent is TiffImage tiffConsistent)
+                {
+                    consistentFrames = tiffConsistent.Frames?.Length ?? 0;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPathConsistent));
+                imageConsistent.Save(outputPathConsistent);
+                Console.WriteLine($"Consistent recovery frame count: {consistentFrames}");
             }
 
-            int fullFrames = 0;
-            var fullLoadOptions = new LoadOptions
+            // Second recovery: default recovery mode (no explicit DataRecoveryMode)
+            using (var imageInconsistent = Image.Load(inputPath, new LoadOptions
             {
-                DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
                 DataBackgroundColor = Color.White
-            };
-            using (Image img = Image.Load(inputPath, fullLoadOptions))
+            }))
             {
-                var tiff = (TiffImage)img;
-                fullFrames = tiff.Frames.Length;
-                tiff.Save(outputPathFull);
+                if (imageInconsistent is TiffImage tiffInconsistent)
+                {
+                    inconsistentFrames = tiffInconsistent.Frames?.Length ?? 0;
+                }
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPathInconsistent));
+                imageInconsistent.Save(outputPathInconsistent);
+                Console.WriteLine($"Inconsistent recovery frame count: {inconsistentFrames}");
             }
 
-            Console.WriteLine($"Consistent recovery frame count: {consistentFrames}");
-            Console.WriteLine($"Full recovery frame count: {fullFrames}");
+            // Compare frame counts
+            int difference = Math.Abs(consistentFrames - inconsistentFrames);
+            Console.WriteLine($"Difference in frame counts: {difference}");
         }
         catch (Exception ex)
         {
@@ -62,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system receives a partially corrupted multi‑page TIFF scan from an MRI device, a developer can use this code to attempt a consistent recovery first, then a full recovery, and compare frame counts to decide which version is usable.
- * 2. When a digital archiving workflow encounters damaged TIFF documents from legacy scanners, the code helps restore as many pages as possible by applying both DataRecoveryMode options and verifying which mode retained more frames.
- * 3. When a GIS application processes large satellite TIFF mosaics that may be truncated during transfer, developers can run the sequential recovery to ensure the maximum number of image tiles are recovered before further analysis.
- * 4. When an e‑commerce platform imports product catalogs supplied as multi‑page TIFF files that sometimes get corrupted, this snippet allows the backend to automatically recover the images and log the difference in frame counts for quality monitoring.
- * 5. When a printing service receives client‑submitted TIFF files with missing or damaged pages, the code enables the service to recover the document using consistent and full recovery modes and compare the recovered page counts to decide whether to request a new file from the client.
+ * 1. When a batch of scanned documents saved as TIFF becomes partially corrupted, you can use this code to attempt recovery and determine how many pages were successfully restored.
+ * 2. When integrating a legacy imaging system that supplies damaged multi‑frame TIFFs, the code helps you recover the images and compare the results of strict versus lenient recovery strategies.
+ * 3. When building a diagnostic tool to evaluate the effectiveness of Aspose.Imaging’s DataRecoveryMode settings on real‑world TIFF corruption cases.
+ * 4. When you need to automatically process incoming TIFF uploads, recover any usable frames, and log the frame count differences for quality monitoring.
+ * 5. When troubleshooting a printing pipeline that fails on corrupted TIFFs, you can recover the file, save both recovery versions, and compare frame counts to decide which mode to use in production.
  */

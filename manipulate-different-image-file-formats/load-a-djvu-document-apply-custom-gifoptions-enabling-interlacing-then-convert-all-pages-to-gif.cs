@@ -8,11 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.djvu";
+        string outputDirectory = "output";
+
         try
         {
-            // Hardcoded input DjVu file path
-            string inputPath = @"C:\Temp\sample.djvu";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,35 +21,32 @@ class Program
                 return;
             }
 
-            // Hardcoded output directory for GIF files
-            string outputDir = @"C:\Temp\GifOutput";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
             // Open the DjVu file as a stream
             using (FileStream inputStream = File.OpenRead(inputPath))
             {
-                // Load the DjVu document
+                // Load DjVu image from the stream
                 using (DjvuImage djvuImage = new DjvuImage(inputStream))
                 {
-                    // Iterate through each page in the DjVu document
-                    foreach (DjvuPage djvuPage in djvuImage.Pages)
+                    // Prepare GIF save options with interlacing enabled
+                    GifOptions gifOptions = new GifOptions
                     {
-                        // Build the output file path for the current page
-                        string outputPath = Path.Combine(outputDir, $"page_{djvuPage.PageNumber}.gif");
+                        Interlaced = true
+                    };
+
+                    // Iterate through each page and save as GIF
+                    foreach (DjvuPage page in djvuImage.Pages)
+                    {
+                        // Build output file path for the current page
+                        string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.gif");
 
                         // Ensure the directory for the output file exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Configure GIF options with interlacing enabled
-                        GifOptions gifOptions = new GifOptions
-                        {
-                            Interlaced = true
-                        };
-
-                        // Save the current page as a GIF using the specified options
-                        djvuPage.Save(outputPath, gifOptions);
+                        // Save the page as GIF using the specified options
+                        page.Save(outputPath, gifOptions);
                     }
                 }
             }
@@ -62,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each page of a multi‑page DjVu document and create web‑friendly interlaced GIFs for faster progressive loading on browsers.
- * 2. When an archival system must convert scanned DjVu files into animated‑compatible GIFs while preserving page order for downstream processing.
- * 3. When a document‑management application wants to generate thumbnail previews of DjVu pages as interlaced GIFs to reduce bandwidth on mobile devices.
- * 4. When a batch‑processing script has to automate the transformation of legacy DjVu manuals into GIF images that support interlacing for smoother display in legacy software.
- * 5. When a digital publishing workflow requires converting DjVu e‑books into individual GIF pages with interlaced encoding to improve visual quality during incremental download.
+ * 1. When a developer needs to extract each page of a multi‑page DjVu document and generate web‑friendly interlaced GIF images for progressive loading.
+ * 2. When an archival system must batch‑convert scanned DjVu files into separate GIF files while preserving page order for downstream processing.
+ * 3. When a digital publishing workflow requires converting DjVu chapters into individual GIFs with interlacing enabled so they can be embedded in HTML emails.
+ * 4. When a document‑management application wants to create thumbnail previews of DjVu pages as interlaced GIFs for quick visual indexing.
+ * 5. When a C# utility must read a DjVu stream, apply custom GifOptions, and save each page as a GIF in a specified output folder for offline viewing on devices that only support GIF.
  */

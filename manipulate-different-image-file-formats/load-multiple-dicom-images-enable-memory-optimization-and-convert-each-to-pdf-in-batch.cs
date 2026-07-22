@@ -9,49 +9,45 @@ class Program
     {
         try
         {
-            // Hardcoded list of DICOM files to process
+            // Hardcoded input DICOM files
             string[] inputPaths = new string[]
             {
-                @"C:\Images\dicom1.dcm",
-                @"C:\Images\dicom2.dcm",
-                @"C:\Images\dicom3.dcm"
+                @"C:\Images\input1.dcm",
+                @"C:\Images\input2.dcm",
+                @"C:\Images\input3.dcm"
             };
 
-            // Hardcoded output directory for PDF files
-            string outputDir = @"C:\Images\PdfOutput";
-
+            // Process each file
             foreach (string inputPath in inputPaths)
             {
-                // Verify that the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output PDF file path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".pdf");
+                // Determine output PDF path (same name, .pdf extension, placed in an output folder)
+                string outputDirectory = @"C:\Images\Output";
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the DICOM image with a buffer size hint to limit memory usage
-                LoadOptions loadOptions = new LoadOptions
+                // Load DICOM image with memory optimization (buffer size hint)
+                var loadOptions = new LoadOptions
                 {
                     BufferSizeHint = 256 * 1024 // 256 KB
                 };
 
-                using (Image image = Image.Load(inputPath, loadOptions))
+                using (Image dicomImage = Image.Load(inputPath, loadOptions))
                 {
-                    // Configure PDF options (also applying a buffer size hint)
-                    PdfOptions pdfOptions = new PdfOptions
-                    {
-                        BufferSizeHint = 256 * 1024 // 256 KB
-                    };
+                    // Prepare PDF export options
+                    var pdfOptions = new PdfOptions();
 
-                    // Save the image as a PDF document
-                    image.Save(outputPath, pdfOptions);
+                    // Save as PDF
+                    dicomImage.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -64,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a hospital IT system needs to batch‑convert DICOM radiology scans into PDF reports while keeping memory usage low.
- * 2. When a medical research lab wants to archive a collection of DICOM images as searchable PDF files without loading the entire image into RAM.
- * 3. When a telemedicine platform must generate PDF summaries of patient imaging studies on the fly for email attachment, using C# and Aspose.Imaging with buffer size hints.
- * 4. When a health‑care compliance tool automates the conversion of multiple DICOM files to PDF for long‑term storage and audit trails, requiring efficient memory management.
- * 5. When a radiology workflow application processes a list of DICOM files from a folder and saves each as a PDF document in a separate output directory using .NET.
+ * 1. When a hospital IT system must archive a series of DICOM radiology scans as searchable PDF reports while minimizing memory usage during batch processing.
+ * 2. When a medical research lab needs to convert dozens of DICOM images from a scanner into PDF files for inclusion in a publication pipeline without loading the entire image into memory.
+ * 3. When a telemedicine platform wants to generate patient‑friendly PDF summaries from uploaded DICOM files on the server, ensuring the conversion runs efficiently in a background job.
+ * 4. When a health‑care compliance tool must batch‑convert DICOM files to PDF for secure storage in an electronic health record (EHR) system while controlling RAM consumption.
+ * 5. When a C# desktop application automates the export of DICOM images to PDF for printing or sharing, using Aspose.Imaging’s BufferSizeHint to handle large image sets on limited‑resource machines.
  */

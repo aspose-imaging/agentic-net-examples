@@ -1,75 +1,77 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.CustomFontHandler;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Wrap the whole logic to catch unexpected errors
         try
         {
-            // Hardcoded input, output, and custom font directory paths
-            string inputPath = "input.wmf";
-            string outputPath = "output/output.jpg";
-            string fontFolder = "fonts";
+            // Hard‑coded input WMF, output JPEG and custom font folder paths
+            string inputPath = @"C:\Images\sample.wmf";
+            string outputPath = @"C:\Images\sample.jpg";
+            string fontFolder = @"C:\CustomFonts";
 
-            // Validate input file existence
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure custom font source via a lambda delegate
+            // Prepare load options with a custom font source
             var loadOptions = new LoadOptions();
-            loadOptions.AddCustomFontSource(
-                (args) =>
-                {
-                    var fonts = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-                    if (args.Length > 0)
-                    {
-                        string fontsPath = args[0]?.ToString();
-                        if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
-                        {
-                            foreach (var file in Directory.GetFiles(fontsPath))
-                            {
-                                byte[] data = File.ReadAllBytes(file);
-                                string name = Path.GetFileNameWithoutExtension(file);
-                                fonts.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(name, data));
-                            }
-                        }
-                    }
-                    return fonts.ToArray();
-                },
-                fontFolder);
+            loadOptions.AddCustomFontSource(GetFontSource, fontFolder);
 
-            // Load WMF image with custom fonts
+            // Load the WMF image using the custom font settings
             using (Image image = Image.Load(inputPath, loadOptions))
             {
-                // Set up JPEG export options
+                // Set JPEG specific options (defaults are sufficient here)
                 var jpegOptions = new JpegOptions();
 
-                // Save as JPEG
+                // Save the image as JPEG
                 image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
+    }
+
+    // Custom font provider – reads all font files from the supplied folder
+    private static CustomFontData[] GetFontSource(params object[] args)
+    {
+        string fontsPath = string.Empty;
+        if (args.Length > 0)
+        {
+            fontsPath = args[0].ToString();
+        }
+
+        var fonts = new System.Collections.Generic.List<CustomFontData>();
+        foreach (var file in Directory.GetFiles(fontsPath))
+        {
+            fonts.Add(new CustomFontData(
+                Path.GetFileNameWithoutExtension(file),
+                File.ReadAllBytes(file)));
+        }
+        return fonts.ToArray();
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a legacy Windows Metafile (WMF) diagram that uses proprietary fonts must be displayed on a web page, a developer can convert it to a JPEG while pointing Aspose.Imaging to a custom font folder to preserve the original text appearance.
- * 2. When an automated reporting system generates charts in WMF format with corporate brand fonts, the code enables batch conversion to JPEG for inclusion in PDF reports, ensuring the brand fonts are loaded from a specified directory.
- * 3. When a document management workflow receives WMF files from external partners who embed custom TrueType fonts, the developer can render those files as JPEG thumbnails by supplying the partner’s font folder to maintain visual fidelity.
- * 4. When a desktop application needs to archive WMF icons that rely on non‑system fonts, this snippet converts each icon to a JPEG image while loading the required fonts from a configurable “fonts” directory.
- * 5. When a migration tool extracts legacy WMF graphics from an old database and must store them as JPEGs for a modern CMS, the code guarantees that any custom fonts referenced in the WMF are correctly applied during conversion.
+ * 1. When a desktop publishing system needs to render legacy WMF vector graphics that use proprietary fonts into web‑friendly JPEG thumbnails, developers can use this code to load the WMF with a custom font directory and save it as JPEG.
+ * 2. When an automated report generator must embed WMF charts that rely on corporate typefaces into email attachments, the snippet lets the application locate the required fonts and convert the charts to JPEG for universal viewing.
+ * 3. When a migration tool processes a batch of old Windows Metafile files stored on a file server and must produce JPEG previews while preserving the exact appearance of text using fonts stored in a separate network folder, this code provides the necessary conversion logic.
+ * 4. When a document management system receives user‑uploaded WMF logos that reference custom brand fonts, developers can employ this example to load the WMF with those fonts from a designated folder and output a JPEG version for indexing and preview.
+ * 5. When a C# batch job needs to generate low‑resolution JPEG snapshots of WMF diagrams for mobile devices, and the diagrams use fonts not installed on the server, the code shows how to point Aspose.Imaging to a custom font path and perform the conversion.
  */

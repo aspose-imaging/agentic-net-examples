@@ -1,6 +1,9 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -8,12 +11,13 @@ class Program
     {
         try
         {
-            // Hardcoded input TIFF file paths
-            string inputPath1 = @"C:\Images\part1.tif";
-            string inputPath2 = @"C:\Images\part2.tif";
-            string inputPath3 = @"C:\Images\part3.tif";
+            // Hardcoded input and output paths
+            string inputPath1 = "input1.tif";
+            string inputPath2 = "input2.tif";
+            string inputPath3 = "input3.tif";
+            string outputPath = "output.tif";
 
-            // Verify each input file exists
+            // Verify input files exist
             if (!File.Exists(inputPath1))
             {
                 Console.Error.WriteLine($"File not found: {inputPath1}");
@@ -30,22 +34,30 @@ class Program
                 return;
             }
 
-            // Load each TIFF as a frame
-            TiffFrame frame1 = new TiffFrame(inputPath1);
-            TiffFrame frame2 = new TiffFrame(inputPath2);
-            TiffFrame frame3 = new TiffFrame(inputPath3);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Create a multi‑frame TIFF image from the loaded frames
-            using (TiffImage multiFrameTiff = new TiffImage(new TiffFrame[] { frame1, frame2, frame3 }))
+            // Load the first TIFF image and use its frames to create the result image
+            using (TiffImage firstImage = (TiffImage)Image.Load(inputPath1))
             {
-                // Hardcoded output path
-                string outputPath = @"C:\Images\combined.tif";
+                // Create a new multi‑frame TIFF using the frames from the first image
+                TiffImage resultImage = new TiffImage(firstImage.Frames);
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Load and add frames from the second image
+                using (TiffImage secondImage = (TiffImage)Image.Load(inputPath2))
+                {
+                    resultImage.Add(secondImage);
+                }
 
-                // Save the combined TIFF
-                multiFrameTiff.Save(outputPath);
+                // Load and add frames from the third image
+                using (TiffImage thirdImage = (TiffImage)Image.Load(inputPath3))
+                {
+                    resultImage.Add(thirdImage);
+                }
+
+                // Save the concatenated multi‑frame TIFF
+                resultImage.Save(outputPath);
+                resultImage.Dispose();
             }
         }
         catch (Exception ex)
@@ -57,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to merge scanned document pages stored as separate TIFF files into a single multi‑frame TIFF for easier archival and viewing.
- * 2. When an application must combine individual satellite image tiles saved as TIFFs into one multi‑page TIFF for batch analysis.
- * 3. When a medical imaging system has separate DICOM‑exported TIFF slices that must be concatenated into a single TIFF series for radiology review.
- * 4. When a printing workflow requires assembling separate high‑resolution TIFF graphics into one multi‑frame TIFF to send to a printer that only accepts multi‑page TIFFs.
- * 5. When a digital asset management tool needs to create a combined TIFF portfolio from individual artwork scans for quick preview and download.
+ * 1. When a developer needs to combine scanned document pages stored as separate TIFF files into a single multi‑frame TIFF for easy archiving or electronic filing.
+ * 2. When a medical imaging application must merge individual DICOM‑exported TIFF slices into one multi‑frame TIFF for streamlined patient record storage.
+ * 3. When a GIS system requires concatenating separate georeferenced TIFF tiles into a single multi‑frame TIFF to simplify batch processing of satellite imagery.
+ * 4. When a digital publishing workflow needs to assemble separate high‑resolution TIFF artwork layers into one multi‑frame TIFF for efficient PDF conversion.
+ * 5. When an automated quality‑control tool must read, merge, and save multiple TIFF inspection images as a single multi‑frame TIFF for downstream analysis in C# using Aspose.Imaging.
  */

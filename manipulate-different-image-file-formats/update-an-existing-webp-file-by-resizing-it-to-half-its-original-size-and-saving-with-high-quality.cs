@@ -9,12 +9,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.webp";
+        string outputPath = @"c:\temp\output_resized.webp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.webp";
-            string outputPath = @"C:\Images\output_resized.webp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,20 +28,16 @@ class Program
             // Load the WebP image
             using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Calculate half size
+                // Resize to half the original dimensions using bilinear resampling
                 int newWidth = webPImage.Width / 2;
                 int newHeight = webPImage.Height / 2;
-
-                // Resize using high-quality resampling (Bilinear)
                 webPImage.Resize(newWidth, newHeight, ResizeType.BilinearResample);
 
-                // Save with high quality settings
+                // Save with high quality (lossy) WebP options
                 var saveOptions = new WebPOptions
                 {
-                    Lossless = false,          // lossy compression
-                    Quality = 100f             // maximum quality
+                    Quality = 100f // maximum quality
                 };
-
                 webPImage.Save(outputPath, saveOptions);
             }
         }
@@ -54,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to generate thumbnail previews of high‑resolution WebP photos for a responsive gallery, they can use this C# code to resize the images to half their original dimensions while preserving maximum visual quality.
- * 2. When an e‑commerce platform wants to reduce bandwidth by delivering smaller WebP product images on mobile devices, the code resizes each image to 50 % of its size and saves it with a quality setting of 100 % using Aspose.Imaging for .NET.
- * 3. When a content management system automatically creates optimized WebP assets for social media sharing, the snippet resizes the source file and applies lossless‑false, high‑quality compression to meet platform requirements.
- * 4. When a desktop application processes user‑uploaded WebP screenshots and needs to store a compact version for archival, the example demonstrates loading the WebPImage, halving its width and height, and saving it with high‑quality settings via WebPOptions.
- * 5. When a batch‑processing script must prepare WebP images for email newsletters by shrinking them to half size without noticeable degradation, this C# routine performs the resize with bilinear resampling and saves the result at maximum quality.
+ * 1. When a web developer needs to generate smaller thumbnail versions of high‑resolution WebP images for faster page loads while preserving maximum visual quality.
+ * 2. When an e‑commerce platform must automatically downscale product photos in WebP format to half size before uploading them to a CDN to reduce bandwidth usage.
+ * 3. When a mobile app backend processes user‑uploaded WebP avatars, resizing them to half the original dimensions and saving them with 100 % quality for consistent display across devices.
+ * 4. When a digital asset management system needs to create backup copies of existing WebP files at reduced dimensions without losing lossy compression quality.
+ * 5. When a content management system batch‑processes WebP graphics, applying bilinear resampling to shrink images by 50 % and storing the results with high‑quality WebP options for archival purposes.
  */

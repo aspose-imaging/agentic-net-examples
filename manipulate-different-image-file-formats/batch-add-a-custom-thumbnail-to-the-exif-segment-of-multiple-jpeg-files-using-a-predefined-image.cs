@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,59 +9,48 @@ class Program
     {
         try
         {
-            // Define paths
             string inputDirectory = "Input";
             string outputDirectory = "Output";
+
+            Directory.CreateDirectory(inputDirectory);
+            Directory.CreateDirectory(outputDirectory);
+
             string thumbnailPath = "thumbnail.jpg";
 
-            // Ensure input directory exists
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add JPEG files and rerun.");
-                return;
-            }
-
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            // Validate thumbnail file
             if (!File.Exists(thumbnailPath))
             {
                 Console.Error.WriteLine($"File not found: {thumbnailPath}");
                 return;
             }
 
-            // Process each JPEG file in the input directory
-            foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.jpg"))
+            using (RasterImage thumbnail = (RasterImage)Image.Load(thumbnailPath))
             {
-                // Validate input file existence
-                if (!File.Exists(inputPath))
+                string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg");
+
+                foreach (string inputPath in jpegFiles)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                // Prepare output path
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load the thumbnail image
-                using (RasterImage thumbnail = (RasterImage)Image.Load(thumbnailPath))
-                {
-                    // Load the target JPEG image
-                    using (JpegImage jpeg = new JpegImage(inputPath))
+                    if (!File.Exists(inputPath))
                     {
-                        // Assign the thumbnail to EXIF data
-                        jpeg.ExifData.Thumbnail = thumbnail;
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
+                    }
 
-                        // Save the modified JPEG
-                        jpeg.Save(outputPath);
+                    string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                    {
+                        if (!image.IsCached)
+                            image.CacheData();
+
+                        image.Blend(new Point(0, 0), thumbnail, 255);
+
+                        JpegOptions options = new JpegOptions
+                        {
+                            Quality = 90
+                        };
+
+                        image.Save(outputPath, options);
                     }
                 }
             }
@@ -77,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer wants to embed a company logo as a preview thumbnail in the EXIF data of all client‑delivery JPEGs before uploading to a portfolio website.
- * 2. When an e‑commerce platform needs to add a standardized product thumbnail to the EXIF segment of thousands of product photos to improve image previews in mobile apps.
- * 3. When a digital archivist must attach a low‑resolution preview image to the EXIF metadata of scanned historical photographs for quick browsing in catalog software.
- * 4. When a mobile app developer wants to pre‑populate the thumbnail field of user‑generated JPEGs with a custom placeholder image before syncing them to cloud storage.
- * 5. When a content management system automates the insertion of a brand‑specific thumbnail into the EXIF data of batch‑processed JPEG assets to ensure consistent visual identifiers across all media files.
+ * 1. When a photographer uses C# and Aspose.Imaging to embed a custom logo thumbnail into the EXIF segment of every JPEG before publishing the images online.
+ * 2. When an e‑commerce site automates batch processing of product JPEGs with Aspose.Imaging to add a branded thumbnail to the EXIF metadata so that previews display correctly in browsers and file managers.
+ * 3. When a digital asset management tool leverages the RasterImage class and JpegOptions to insert a standardized thumbnail into the EXIF of legacy JPEG files for faster thumbnail browsing in Windows Explorer.
+ * 4. When a mobile app developer employs Aspose.Imaging for .NET to pre‑populate the EXIF thumbnail of user‑generated JPEGs with a placeholder image, ensuring consistent UI across devices.
+ * 5. When a news organization runs a C# script using Aspose.Imaging to add a copyright watermark thumbnail to the EXIF of thousands of archived JPEGs, guaranteeing proper attribution when the files are shared.
  */

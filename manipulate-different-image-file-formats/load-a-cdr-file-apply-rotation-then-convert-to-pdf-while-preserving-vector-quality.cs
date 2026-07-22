@@ -8,42 +8,40 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.cdr";
+        string outputPath = @"C:\Images\sample_rotated.pdf";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\sample.cdr";
-            string outputPath = @"C:\Images\sample_rotated.pdf";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists (creates it if necessary)
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir ?? ".");
-
             // Load the CDR file
-            using (Image image = Image.Load(inputPath))
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Apply a rotation (e.g., 90 degrees clockwise)
-                image.Rotate(90f);
+                // Apply rotation (e.g., 90 degrees)
+                cdrImage.Rotate(90f);
 
-                // Prepare PDF save options with vector rasterization settings
-                var pdfOptions = new PdfOptions
+                // Set up PDF save options with vector rasterization to preserve vector quality
+                PdfOptions pdfOptions = new PdfOptions();
+                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
-                    VectorRasterizationOptions = new CdrRasterizationOptions
-                    {
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None,
-                        Positioning = PositioningTypes.DefinedByDocument
-                    }
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
+                    Positioning = PositioningTypes.DefinedByDocument
                 };
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the rotated image as PDF while preserving vector quality
-                image.Save(outputPath, pdfOptions);
+                // Save the rotated image as PDF
+                cdrImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -55,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to automatically rotate a CorelDRAW (.cdr) illustration and generate a print‑ready PDF without losing vector sharpness.
- * 2. When a document management system must batch‑process archived CDR files, apply a 90° orientation correction, and store them as searchable PDFs for compliance.
- * 3. When a web service converts user‑uploaded CDR logos into correctly oriented PDFs for use in marketing collateral while keeping the vector data intact.
- * 4. When an automated publishing workflow reorients technical diagrams from CorelDRAW and outputs high‑resolution PDFs for inclusion in e‑books.
- * 5. When a CAD‑to‑PDF conversion tool needs to preserve exact line art and text rendering while rotating the original CDR drawing for proper page layout.
+ * 1. When a graphic designer needs to automatically rotate a CorelDRAW (CDR) illustration by 90 degrees and export it as a high‑quality PDF for client review.
+ * 2. When a document management system must batch‑process CDR files, apply a fixed orientation, and store them as searchable PDFs without losing vector fidelity.
+ * 3. When an e‑learning platform converts rotated CDR diagrams into PDF handouts that retain crisp lines for printing at any size.
+ * 4. When a print shop receives CDR artwork that must be re‑oriented before generating PDF proofs that preserve vector details for accurate color separation.
+ * 5. When a web service offers on‑the‑fly rotation of uploaded CDR logos and returns PDF files that keep the original vector quality for branding assets.
  */

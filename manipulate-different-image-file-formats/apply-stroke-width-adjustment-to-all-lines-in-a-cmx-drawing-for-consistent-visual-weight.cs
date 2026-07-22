@@ -1,8 +1,9 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -24,29 +25,12 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CMX image
-            using (CmxImage cmx = (CmxImage)Aspose.Imaging.Image.Load(inputPath))
+            // Load CMX image
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
             {
-                int width = cmx.Width;
-                int height = cmx.Height;
-
-                // Create a PNG canvas with the same dimensions as the CMX image
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new FileCreateSource(outputPath, false);
-                using (Aspose.Imaging.Image png = Aspose.Imaging.Image.Create(pngOptions, width, height))
-                {
-                    // Obtain a Graphics object for drawing
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(png);
-                    // Clear the canvas
-                    graphics.Clear(Aspose.Imaging.Color.White);
-
-                    // Example: draw a diagonal line with uniform stroke width
-                    Aspose.Imaging.Pen uniformPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
-                    graphics.DrawLine(uniformPen, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Point(width, height));
-
-                    // Save the resulting PNG image
-                    png.Save();
-                }
+                // Stroke width adjustment for vector lines is not directly supported via Aspose.Imaging API.
+                // Throwing NotSupportedException to indicate the operation cannot be performed.
+                throw new NotSupportedException("Adjusting stroke width of vector lines in a CMX drawing is not supported by the Aspose.Imaging API.");
             }
         }
         catch (Exception ex)
@@ -58,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD system exports engineering schematics as CMX files and the developer must standardize line thickness before converting them to PNG for web preview.
- * 2. When an automated reporting tool needs to generate high‑resolution PNG thumbnails from legacy CMX drawings while ensuring all lines have a uniform stroke width for consistent visual weight.
- * 3. When a document management workflow requires batch processing of CMX vector drawings to PNG images with a fixed pen width to meet corporate branding guidelines.
- * 4. When a GIS application imports CMX map overlays and the developer must normalize line thickness before rasterizing them to PNG for overlay on satellite imagery.
- * 5. When a print‑to‑PDF service converts CMX drawings to PNG assets and needs to enforce a minimum stroke width to avoid faint lines disappearing in the final PDF.
+ * 1. When a developer needs to convert legacy CorelDRAW CMX drawings to PNG while ensuring all vector lines have a uniform visual weight, they can use this code to load the CMX file and detect that stroke width adjustment is not supported, prompting a fallback strategy.
+ * 2. When building an automated batch processor that validates input CMX files before conversion, this snippet checks file existence, creates the output directory, and throws a clear NotSupportedException for unsupported stroke width modifications.
+ * 3. When integrating Aspose.Imaging into a C# application that must report unsupported vector editing features, the example demonstrates proper exception handling for stroke width adjustments in CMX drawings.
+ * 4. When preparing a migration tool that extracts CMX images for further processing, developers can use this code to load the image, verify paths, and gracefully handle the limitation of adjusting line thickness before proceeding to alternative rendering methods.
+ * 5. When troubleshooting image processing pipelines that involve CMX to PNG conversion, this sample helps identify the exact point where stroke width manipulation fails, allowing developers to log the error and inform users about the API limitation.
  */

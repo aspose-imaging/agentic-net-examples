@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -12,7 +11,7 @@ class Program
         try
         {
             // Hardcoded input DjVu file path
-            string inputPath = "input.djvu";
+            string inputPath = "sample.djvu";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,43 +20,39 @@ class Program
                 return;
             }
 
-            // Output directory for BMP files
-            string outputDir = "output";
-            Directory.CreateDirectory(outputDir);
+            // Cropping rectangle parameters (example values)
+            int cropX = 10;
+            int cropY = 10;
+            int cropWidth = 200;
+            int cropHeight = 200;
 
-            // Open the DjVu file as a stream
+            // Load DjVu document from file stream
             using (Stream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Load DjVu image from the stream
-                using (DjvuImage djvuImage = new DjvuImage(stream))
+                // Iterate through each page
+                for (int i = 0; i < djvuImage.PageCount; i++)
                 {
-                    // Iterate through each page in the DjVu document
-                    foreach (DjvuPage page in djvuImage.Pages)
+                    // Access page as DjvuPage
+                    using (DjvuPage page = (DjvuPage)djvuImage.Pages[i])
                     {
-                        // Ensure each page is disposed after processing
-                        using (page)
-                        {
-                            // Define cropping rectangle (example values)
-                            Rectangle cropRect = new Rectangle(50, 50, 200, 200);
-                            page.Crop(cropRect);
+                        // Apply cropping
+                        page.Crop(new Rectangle(cropX, cropY, cropWidth, cropHeight));
 
-                            // Build output BMP file path for the current page
-                            string outputPath = Path.Combine(outputDir, $"page_{page.PageNumber}.bmp");
+                        // Prepare output BMP file path
+                        string outputPath = Path.Combine("output", $"page_{i + 1}.bmp");
 
-                            // Ensure the output directory exists
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        // Ensure output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                            // Save the cropped page as BMP
-                            BmpOptions bmpOptions = new BmpOptions();
-                            page.Save(outputPath, bmpOptions);
-                        }
+                        // Save cropped page as BMP
+                        page.Save(outputPath, new BmpOptions());
                     }
                 }
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -65,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each page from a multi‑page DjVu document, crop a specific region, and save the result as BMP files for legacy Windows applications.
- * 2. When an archival system must convert scanned DjVu files into BMP thumbnails with a fixed viewport to display in a .NET web portal.
- * 3. When a document‑processing pipeline requires batch processing of DjVu reports, removing margins via a cropping rectangle before converting them to BMP for OCR engines that only accept BMP input.
- * 4. When a desktop utility has to read a DjVu file from a stream, isolate a region of interest on every page, and output BMP images for further editing in graphic design tools.
- * 5. When a C# application automates the preparation of DjVu e‑books for printing by cropping each page to the printable area and exporting the result as BMP files for a print‑ready workflow.
+ * 1. When a developer needs to extract specific regions from each page of a multi‑page DjVu file and save them as BMP images for further analysis or printing.
+ * 2. When an application must generate thumbnail previews of scanned documents stored in DjVu format by cropping a central area and converting each page to BMP.
+ * 3. When a workflow requires batch processing of DjVu archives to isolate a logo or watermark area on every page before archiving the cropped pages as BMP files.
+ * 4. When a document‑management system needs to convert selected portions of DjVu pages into BMP for compatibility with legacy Windows imaging tools.
+ * 5. When a developer wants to automate the preparation of image assets from DjVu e‑books by cropping each page to a fixed rectangle and exporting them as BMP for use in a game engine.
  */

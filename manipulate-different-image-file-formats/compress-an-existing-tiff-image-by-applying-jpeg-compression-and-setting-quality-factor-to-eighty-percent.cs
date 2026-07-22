@@ -9,12 +9,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\source.tif";
+        string outputPath = @"C:\Images\compressed.tif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.tif";
-            string outputPath = @"C:\Images\output_compressed.tif";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -29,13 +29,15 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Configure TIFF options for JPEG compression with 80% quality
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.Compression = TiffCompressions.Jpeg;
-                tiffOptions.CompressedQuality = 80;
-                tiffOptions.Photometric = TiffPhotometrics.Rgb;
-                tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    Compression = TiffCompressions.Jpeg,
+                    CompressedQuality = 80,
+                    Photometric = TiffPhotometrics.Rgb,
+                    BitsPerSample = new ushort[] { 8, 8, 8 }
+                };
 
-                // Save the compressed image
+                // Save the image with the specified options
                 image.Save(outputPath, tiffOptions);
             }
         }
@@ -48,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce the file size of high‑resolution TIFF scans for faster web delivery by applying JPEG compression with an 80 % quality setting.
- * 2. When integrating a document management system that stores scanned PDFs as TIFFs and wants to save storage space by recompressing each image using C# and Aspose.Imaging.
- * 3. When building a batch‑processing tool that converts legacy multi‑page TIFF archives into smaller, JPEG‑compressed TIFF files for archival while preserving RGB color.
- * 4. When creating a medical imaging workflow that must compress DICOM‑derived TIFF images before transmitting them over a network, using .NET to set compression and quality parameters.
- * 5. When developing a desktop application that allows users to upload large TIFF photos and automatically compresses them to meet email attachment size limits using Aspose.Imaging’s TiffOptions.
+ * 1. When a medical imaging system needs to archive high‑resolution scans as TIFF files while reducing storage costs, a developer can use this code to apply JPEG compression at 80 % quality.
+ * 2. When a publishing workflow must generate web‑ready preview images from large TIFF master files, the code enables conversion to a smaller TIFF with JPEG compression to speed up page loads.
+ * 3. When an e‑commerce platform stores product photographs in TIFF for lossless editing but wants to send compressed versions to a CDN, the developer can compress the TIFF to 80 % JPEG quality before upload.
+ * 4. When a document management solution imports scanned documents as TIFF and must keep file size under a limit for email attachment, this code provides a way to compress each image while preserving RGB color.
+ * 5. When a GIS application exports satellite imagery as TIFF and needs to balance visual fidelity with disk usage, the developer can use the snippet to apply JPEG compression with a configurable quality factor of 80 %.
  */

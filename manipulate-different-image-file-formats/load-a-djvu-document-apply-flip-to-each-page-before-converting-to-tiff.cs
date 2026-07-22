@@ -8,33 +8,39 @@ using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "Input/sample.djvu";
+        string outputPath = "Output/output.tiff";
+
         try
         {
-            string inputPath = "Input/sample.djvu";
-            string outputDirectory = "Output";
-
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(outputDirectory);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            // Load the DjVu document
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                foreach (Image page in djvuImage.Pages)
+                // Flip each page horizontally
+                foreach (Image pageImage in djvu.Pages)
                 {
-                    page.RotateFlip(RotateFlipType.RotateNoneFlipX);
-
-                    string outputPath = Path.Combine(outputDirectory, $"page_{((DjvuPage)page).PageNumber}.tiff");
-
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    page.Save(outputPath, new TiffOptions(TiffExpectedFormat.TiffDeflateBw));
+                    if (pageImage is DjvuPage djvuPage)
+                    {
+                        djvuPage.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                    }
                 }
+
+                // Save the modified document as a multi-page TIFF
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                djvu.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each page of a scanned DjVu document and create horizontally flipped black‑and‑white TIFF files for archival storage.
- * 2. When a document‑management system must preprocess DjVu pages by applying a left‑right flip before converting them to compressed TIFF for OCR processing.
- * 3. When a printing workflow requires converting multi‑page DjVu files into individual TIFF images with a horizontal flip to match printer orientation.
- * 4. When a digital library wants to generate searchable TIFF thumbnails from DjVu books while correcting page orientation using a flip operation.
- * 5. When a batch‑processing tool has to load a DjVu file, apply RotateFlipType.RotateNoneFlipX to every page, and save the results as deflated BW TIFF files for downstream image analysis.
+ * 1. When a developer needs to convert scanned DjVu documents into multi‑page TIFF files while horizontally flipping each page for correct orientation in archival systems.
+ * 2. When an application must batch‑process DjVu files from a legacy scanning workflow, apply a mirror flip to every page, and output a single TIFF for compatibility with document management software.
+ * 3. When a .NET service is required to validate the existence of a DjVu source, ensure the output folder exists, and transform the pages into a flipped TIFF for printing on devices that expect mirrored images.
+ * 4. When integrating Aspose.Imaging into a C# project to programmatically rotate‑flip DjVu pages before saving them as a TIFF to meet regulatory standards for document presentation.
+ * 5. When automating the conversion of DjVu e‑books into flipped multi‑page TIFFs for use in OCR pipelines that only accept TIFF input.
  */

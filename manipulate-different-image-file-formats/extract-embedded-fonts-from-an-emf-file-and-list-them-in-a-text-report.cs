@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\input\sample.emf";
-        string outputPath = @"C:\output\fonts_report.txt";
+        string inputPath = @"C:\Images\sample.emf";
+        string outputPath = @"C:\Images\fonts_report.txt";
 
         try
         {
@@ -30,26 +30,25 @@ class Program
                 string[] usedFonts = image.GetUsedFonts();
                 string[] missedFonts = image.GetMissedFonts();
 
-                // Write fonts information to the report file
-                using (StreamWriter writer = new StreamWriter(outputPath))
+                // Write report
+                using (StreamWriter writer = new StreamWriter(outputPath, false))
                 {
-                    writer.WriteLine($"Report for EMF file: {Path.GetFileName(inputPath)}");
-                    writer.WriteLine();
-
-                    writer.WriteLine("Used fonts:");
+                    writer.WriteLine("=== Used Fonts ===");
                     foreach (string font in usedFonts)
                     {
-                        writer.WriteLine($"Used font: {font}");
+                        writer.WriteLine(font);
                     }
 
                     writer.WriteLine();
-                    writer.WriteLine("Missed fonts (fonts not found on the system):");
+                    writer.WriteLine("=== Missed Fonts (not found) ===");
                     foreach (string font in missedFonts)
                     {
-                        writer.WriteLine($"Missed font: {font}");
+                        writer.WriteLine(font);
                     }
                 }
             }
+
+            Console.WriteLine($"Font report generated at: {outputPath}");
         }
         catch (Exception ex)
         {
@@ -60,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must verify that all fonts referenced in an EMF vector graphic are installed on a server before batch‑converting the files to PDF, they can extract the used and missed fonts and generate a text report.
- * 2. When a software solution needs to audit compliance with corporate branding guidelines by listing every font embedded in EMF files stored in a document repository, this code provides a quick searchable report.
- * 3. When a migration tool moves legacy Windows Metafile assets to a cloud‑based imaging platform, extracting the fonts helps identify missing typefaces that could cause rendering issues.
- * 4. When an automated build pipeline validates that design assets contain only approved fonts, the code can parse EMF files and output a report for quality‑assurance checks.
- * 5. When a developer builds a font‑usage analytics dashboard for a graphics editing application, extracting fonts from EMF files and logging them to a text file supplies the raw data needed for statistical analysis.
+ * 1. When a developer needs to audit which fonts are embedded in a Windows Metafile (EMF) before converting it to PDF to ensure proper font rendering.
+ * 2. When a software system must generate a compliance report listing all fonts used and missing in EMF graphics for corporate branding guidelines.
+ * 3. When an automated build pipeline validates that all required fonts are present in EMF assets to prevent missing‑font errors in downstream image processing.
+ * 4. When a legacy application migrates EMF drawings to a new platform and requires a text inventory of used and unavailable fonts for licensing verification.
+ * 5. When a document management solution extracts font information from uploaded EMF files to populate metadata fields for search and indexing.
  */

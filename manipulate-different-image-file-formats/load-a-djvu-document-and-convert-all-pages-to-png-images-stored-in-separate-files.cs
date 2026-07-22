@@ -53,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a document management system needs to display individual pages of a multi‑page DjVu archive as PNG thumbnails for web preview, a developer can use this code to extract and save each page as a separate PNG file.
- * 2. When an archival workflow requires converting scanned DjVu files into lossless PNG images for long‑term preservation or further processing in image‑editing tools, this snippet provides the necessary page‑by‑page conversion.
- * 3. When a batch‑processing service must generate printable PNG assets from DjVu manuals so that downstream printing pipelines that only accept PNG can consume them, the code can be integrated to automate the conversion.
- * 4. When a mobile app backend has to serve DjVu content as PNG images to devices that lack DjVu rendering support, developers can employ this routine to pre‑render each page into PNG files.
- * 5. When a data‑extraction pipeline needs to run OCR on each page of a DjVu document, the developer can first convert every page to PNG using this code, then feed the PNGs into an OCR engine.
+ * 1. When a developer needs to extract each page of a multi‑page DjVu document and store them as separate PNG files for web preview or thumbnail generation.
+ * 2. When an archival system must convert scanned DjVu files into lossless PNG images to preserve visual fidelity while enabling downstream image processing.
+ * 3. When a document‑management application requires batch conversion of DjVu reports into PNG format so that non‑DjVu‑aware clients can view individual pages.
+ * 4. When a C# service automates the creation of printable PNG assets from DjVu manuals, ensuring each page is saved to a designated output folder.
+ * 5. When a migration tool needs to read DjVu streams, iterate through pages, and export them as PNG images for integration with other image‑processing pipelines.
  */

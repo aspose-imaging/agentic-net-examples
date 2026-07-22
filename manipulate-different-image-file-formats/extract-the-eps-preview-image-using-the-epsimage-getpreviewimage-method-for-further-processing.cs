@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.eps";
+        string outputPath = "preview.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.eps";
-            string outputPath = "preview.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,22 +22,23 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load EPS image
+            // Load the EPS image
             using (var epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Retrieve the default preview image
-                Image preview = epsImage.GetPreviewImage(EpsPreviewFormat.Default);
-
-                if (preview == null)
+                // Retrieve the preview image (default format)
+                using (var preview = epsImage.GetPreviewImage())
                 {
-                    Console.Error.WriteLine("No preview image found in the EPS file.");
-                    return;
-                }
+                    if (preview == null)
+                    {
+                        Console.Error.WriteLine("No preview image found in the EPS file.");
+                        return;
+                    }
 
-                // Save the preview image as PNG
-                preview.Save(outputPath, new PngOptions());
+                    // Save the preview image as PNG
+                    preview.Save(outputPath, new PngOptions());
+                }
             }
         }
         catch (Exception ex)
@@ -49,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to display a quick thumbnail of an uploaded EPS logo, a developer can use this code to extract the default preview and save it as a PNG for fast rendering in browsers.
- * 2. When a document management system must generate preview images for EPS files stored in a repository, the code can be run to create PNG previews that can be indexed and shown in search results.
- * 3. When a print‑to‑PDF workflow requires a rasterized version of an EPS artwork for preview before final printing, the developer can extract the preview image and embed the PNG in the preview pane.
- * 4. When an email client wants to attach a lightweight visual representation of an EPS attachment, the code can produce a PNG preview that can be displayed inline without loading the full vector file.
- * 5. When a batch processing script needs to validate that EPS files contain a preview image and convert it to a standard format for downstream image analysis, this code provides the extraction and conversion step.
+ * 1. When a C# web application needs to show a thumbnail of an uploaded EPS logo, it can use Aspose.Imaging’s EpsImage.GetPreviewImage to extract the preview and save it as a PNG for fast display.
+ * 2. When a document conversion service must embed a low‑resolution representation of an EPS illustration into generated PDFs, it extracts the preview image with GetPreviewImage and saves it in a raster format.
+ * 3. When a desktop publishing tool wants to display quick previews of EPS assets in a file‑browser pane, it calls GetPreviewImage to obtain the embedded preview and renders it as a PNG thumbnail.
+ * 4. When an e‑commerce platform processes EPS product images, it extracts the preview image via GetPreviewImage to create lightweight PNG previews that improve page‑load performance.
+ * 5. When an automated testing suite validates that EPS files contain a preview, it uses GetPreviewImage to retrieve the image and verify its existence and correctness.
  */

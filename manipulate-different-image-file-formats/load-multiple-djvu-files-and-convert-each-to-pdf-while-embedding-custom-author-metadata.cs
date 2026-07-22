@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
@@ -15,54 +14,42 @@ class Program
             string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
             string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
 
-            // Validate input directory
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
             // Get all DjVu files in the input directory
             string[] inputFiles = Directory.GetFiles(inputDirectory, "*.djvu");
 
             foreach (string inputPath in inputFiles)
             {
-                // Validate each input file
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     continue;
                 }
 
-                // Prepare output PDF path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                // Build the output PDF path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
 
                 // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load DjVu image from file stream and convert to PDF with author metadata
-                using (FileStream stream = File.OpenRead(inputPath))
-                using (DjvuImage djvuImage = new DjvuImage(stream))
+                // Load the DjVu image
+                using (Image image = Image.Load(inputPath))
                 {
-                    PdfOptions pdfOptions = new PdfOptions
+                    // Prepare PDF options with custom author metadata
+                    var pdfOptions = new PdfOptions
                     {
-                        PdfDocumentInfo = new Aspose.Imaging.FileFormats.Pdf.PdfDocumentInfo
+                        PdfDocumentInfo = new PdfDocumentInfo
                         {
                             Author = "Custom Author"
-                        },
-                        // Export all pages
-                        MultiPageOptions = new DjvuMultiPageOptions()
+                        }
                     };
 
-                    djvuImage.Save(outputPath, pdfOptions);
+                    // Save the image as PDF
+                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -75,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a collection of scanned DjVu documents into PDF files while embedding the author’s name as metadata for compliance reporting.
- * 2. When an application must automate the migration of legacy DjVu e‑books to PDF format and add custom author information to preserve copyright details.
- * 3. When a document management system requires a C# routine that reads multiple DjVu files from a folder, converts each to PDF, and stores the PDFs with author metadata for indexing.
- * 4. When a legal firm wants to programmatically transform archived DjVu case files into PDFs and tag each file with the responsible attorney’s name using Aspose.Imaging.
- * 5. When a cloud‑based service processes user‑uploaded DjVu images in bulk, converts them to PDF, and includes custom author metadata to support personalized document generation.
+ * 1. When a developer needs to batch‑convert a collection of scanned DjVu documents into PDF files while embedding a custom author name for compliance reporting.
+ * 2. When an archival system requires automated migration of legacy DjVu e‑books to PDF format with author metadata to preserve attribution.
+ * 3. When a document‑management workflow must process multiple DjVu images from a folder and generate PDFs that include a specific author tag for indexing in a content repository.
+ * 4. When a C# application has to read DjVu files, convert each to PDF using Aspose.Imaging, and set the PdfDocumentInfo.Author property for digital rights tracking.
+ * 5. When a batch‑processing script is needed to transform DjVu graphics into PDFs while automatically creating the output directory structure and consistently applying author metadata.
  */

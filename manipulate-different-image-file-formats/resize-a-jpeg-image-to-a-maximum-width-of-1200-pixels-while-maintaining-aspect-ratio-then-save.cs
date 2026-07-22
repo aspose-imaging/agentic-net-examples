@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output_resized.jpg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.jpg";
+            string outputPath = @"C:\Images\output_resized.jpg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,14 +28,19 @@ class Program
             {
                 const int maxWidth = 1200;
 
-                // Determine if resizing is needed
+                // Determine new dimensions while preserving aspect ratio
+                int newWidth = jpegImage.Width;
+                int newHeight = jpegImage.Height;
+
                 if (jpegImage.Width > maxWidth)
                 {
-                    // Calculate new height to maintain aspect ratio
-                    int newWidth = maxWidth;
-                    int newHeight = (int)Math.Round((double)jpegImage.Height * newWidth / jpegImage.Width);
+                    newWidth = maxWidth;
+                    newHeight = (int)Math.Round((double)jpegImage.Height * maxWidth / jpegImage.Width);
+                }
 
-                    // Resize the image
+                // Resize if needed
+                if (newWidth != jpegImage.Width || newHeight != jpegImage.Height)
+                {
                     jpegImage.Resize(newWidth, newHeight);
                 }
 
@@ -52,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate thumbnail previews of user‑uploaded JPEG photos while keeping the original aspect ratio, this C# Aspose.Imaging code can resize images to a maximum width of 1200 px before saving.
- * 2. When an e‑commerce platform must optimize product images for faster page loads by limiting JPEG width to 1200 pixels without distortion, developers can use this snippet to resize and preserve quality.
- * 3. When a digital asset management system processes batch uploads and has to ensure all JPEG files conform to a maximum width of 1200 px for consistent display across devices, the code provides a reliable C# solution.
- * 4. When a mobile‑first website requires server‑side image scaling of high‑resolution JPEGs to fit responsive layouts while maintaining aspect ratio, this Aspose.Imaging example handles the resizing automatically.
- * 5. When a content management workflow needs to validate and downsize large JPEG images before publishing to avoid storage bloat, the provided C# program resizes any image wider than 1200 pixels and saves the result.
+ * 1. When a web application needs to generate thumbnail previews of user‑uploaded JPEG photos so that the images never exceed 1200 px in width, preserving the original aspect ratio.
+ * 2. When an e‑commerce platform must automatically downsize product photos stored as JPEG files before publishing them to a CDN to reduce bandwidth while keeping the images proportional.
+ * 3. When a desktop utility written in C# has to batch‑process high‑resolution JPEG scans, resizing each to a maximum width of 1200 px to fit within email attachment limits.
+ * 4. When a content management system integrates Aspose.Imaging to ensure that editorial JPEG images are resized on upload, maintaining aspect ratio to avoid distortion in responsive layouts.
+ * 5. When a mobile backend service uses C# to resize incoming JPEG uploads to a standard width of 1200 px, guaranteeing consistent display across devices without stretching the image.
  */

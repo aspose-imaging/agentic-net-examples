@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
@@ -11,21 +9,28 @@ class Program
     {
         try
         {
-            string outputPath = @"C:\temp\indexed_output.psd";
+            string inputPath = "input.jpg";
+            string outputPath = "output\\output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            PsdOptions psdOptions = new PsdOptions();
-            psdOptions.Source = new FileCreateSource(outputPath, false);
-            psdOptions.ColorMode = ColorModes.Indexed;
-            psdOptions.ChannelsCount = (short)1;
-            psdOptions.ChannelBitsCount = (short)8;
-            psdOptions.Palette = new ColorPalette(new Color[] { Color.Black, Color.White });
-
-            using (Image image = Image.Create(psdOptions, 500, 500))
+            using (Image image = Image.Load(inputPath))
             {
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
-                image.Save();
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
+
+                PngOptions options = new PngOptions();
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -37,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a lightweight PSD thumbnail with a simple polygon overlay for a web‑based asset manager, using Aspose.Imaging’s indexed color mode to keep the file size minimal.
- * 2. When creating batch‑processed print‑ready PSD files that employ an indexed palette and require programmatic addition of vector shapes like polygons for cut‑line markings.
- * 3. When building a C# utility that converts legacy indexed‑color Photoshop files into modern assets while annotating them with a polygonal region to highlight areas of interest.
- * 4. When automating UI mock‑up production where the background is an indexed PSD and a polygon drawn via GraphicsPath represents button boundaries before saving.
- * 5. When developing a game asset pipeline that stores sprite outlines as polygons inside an indexed PSD to maintain a small palette and ensure fast loading in the engine.
+ * 1. When a developer needs to convert user‑uploaded JPEG photos to lossless PNG files for web display while ensuring the output folder exists.
+ * 2. When an automated batch job must verify that a source image file exists before loading it as a RasterImage in C# using Aspose.Imaging.
+ * 3. When a .NET application has to catch and log image‑processing errors such as unsupported formats or I/O failures during conversion.
+ * 4. When a service has to create a PNG thumbnail from a JPEG source by loading the image, casting to RasterImage, and saving with PngOptions.
+ * 5. When a build script must programmatically create the target directory structure before writing the converted PNG to avoid runtime exceptions.
  */

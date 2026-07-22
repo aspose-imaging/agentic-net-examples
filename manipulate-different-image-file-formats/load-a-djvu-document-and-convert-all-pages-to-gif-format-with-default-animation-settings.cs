@@ -4,66 +4,56 @@ using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
 
-namespace DjvuToGifConverter
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main()
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.djvu";
+        string outputDirectory = @"C:\temp\output";
+
+        try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.djvu";
-            string outputDirectory = "output";
-
-            try
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Verify input file exists
-                if (!File.Exists(inputPath))
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists (CreateDirectory works even if the directory already exists)
+            Directory.CreateDirectory(outputDirectory);
+
+            // Load the DjVu document from the file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+            {
+                // Iterate through each page and save as GIF
+                foreach (DjvuPage page in djvuImage.Pages)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                    // Build output file path for the current page
+                    string outputPath = Path.Combine(outputDirectory, $"sample.{page.PageNumber}.gif");
 
-                // Ensure output directory exists (creates if missing)
-                Directory.CreateDirectory(outputDirectory);
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Open the DjVu file stream
-                using (Stream stream = File.OpenRead(inputPath))
-                {
-                    // Load DjVu document
-                    using (DjvuImage djvuImage = new DjvuImage(stream))
-                    {
-                        // Iterate through each page
-                        foreach (Image page in djvuImage.Pages)
-                        {
-                            // Cast to DjvuPage to access PageNumber
-                            DjvuPage djvuPage = (DjvuPage)page;
-
-                            // Build output file path for this page
-                            string outputPath = Path.Combine(outputDirectory,
-                                $"page_{djvuPage.PageNumber}.gif");
-
-                            // Ensure the directory for the output file exists
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                            // Save the page as GIF with default options
-                            djvuPage.Save(outputPath, new GifOptions());
-                        }
-                    }
+                    // Save the page using default GIF options
+                    page.Save(outputPath, new GifOptions());
                 }
             }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each page of a multi‑page DjVu document and provide them as animated GIF files for web preview.
- * 2. When an archival system must convert scanned DjVu books into GIF sequences to support legacy browsers that only display GIF images.
- * 3. When a digital publishing workflow requires batch conversion of DjVu pages to GIF format with default animation settings for inclusion in e‑learning modules.
- * 4. When a document management application needs to generate thumbnail‑style GIF previews of every page in a DjVu file for quick visual indexing.
- * 5. When a C# service automates the transformation of DjVu slide decks into GIF animations to embed in PowerPoint presentations or online slideshows.
+ * 1. When a developer needs to extract each page of a multi‑page DjVu document and generate lightweight GIF images for web preview or thumbnail galleries.
+ * 2. When an application must batch‑process scanned archival DjVu files and produce animated GIFs that can be displayed in browsers without requiring DjVu plugins.
+ * 3. When a document management system requires converting DjVu pages to GIF format to embed them in email newsletters or social media posts.
+ * 4. When a digital publishing workflow needs to create GIF assets from DjVu source files for inclusion in e‑learning modules that only support GIF images.
+ * 5. When a developer wants to automate the conversion of DjVu pages to GIFs on a server using C# streams and default GifOptions for consistent image quality.
  */

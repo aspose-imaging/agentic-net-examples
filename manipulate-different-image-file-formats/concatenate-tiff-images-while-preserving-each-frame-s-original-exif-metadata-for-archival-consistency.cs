@@ -9,14 +9,16 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
+            // Hardcoded input TIFF file paths
             string[] inputPaths = new string[]
             {
                 @"C:\Images\input1.tif",
                 @"C:\Images\input2.tif",
                 @"C:\Images\input3.tif"
             };
-            string outputPath = @"C:\Images\output.tif";
+
+            // Hardcoded output TIFF file path
+            string outputPath = @"C:\Images\output_combined.tif";
 
             // Verify each input file exists
             foreach (var inputPath in inputPaths)
@@ -31,21 +33,20 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the first TIFF image – it will become the base of the concatenated file
-            using (TiffImage resultImage = (TiffImage)Image.Load(inputPaths[0]))
+            // Load the first TIFF as the base image
+            using (TiffImage result = (TiffImage)Image.Load(inputPaths[0]))
             {
-                // Append frames from the remaining TIFF images
+                // Append frames from remaining TIFF files
                 for (int i = 1; i < inputPaths.Length; i++)
                 {
-                    using (TiffImage srcImage = (TiffImage)Image.Load(inputPaths[i]))
+                    using (TiffImage src = (TiffImage)Image.Load(inputPaths[i]))
                     {
-                        // Add all frames (and their associated EXIF data) from srcImage to resultImage
-                        resultImage.Add(srcImage);
+                        result.Add(src); // Preserves each frame's EXIF metadata
                     }
                 }
 
                 // Save the combined multi‑page TIFF
-                resultImage.Save(outputPath);
+                result.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -57,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system needs to combine multiple DICOM‑exported TIFF scans into a single multi‑page TIFF archive while keeping each scan’s EXIF tags for patient and acquisition data.
- * 2. When a legal firm digitizes a multi‑page contract as separate TIFF pages and wants to merge them into one searchable file without losing the original metadata that records scan dates and operator information.
- * 3. When a publishing workflow assembles scanned book chapters stored as individual TIFF files into a single multi‑page TIFF for print‑ready proofing, preserving EXIF metadata for version control.
- * 4. When a GIS application consolidates aerial photograph tiles saved as TIFF images into a single file for archival, ensuring each tile’s geolocation EXIF data remains intact.
- * 5. When an archival system merges scanned historical documents, each saved as a separate TIFF with provenance metadata, into one multi‑page TIFF to maintain the original EXIF information for future reference.
+ * 1. When a medical imaging system must merge separate DICOM‑exported TIFF scans into a single multi‑page TIFF while keeping each frame’s original EXIF tags for regulatory compliance.
+ * 2. When a digital archiving workflow needs to combine scanned historical documents stored as individual TIFF files into one searchable archive file without losing the capture date and camera settings stored in EXIF metadata.
+ * 3. When a publishing platform assembles multiple high‑resolution TIFF illustrations into a single multi‑page TIFF for print proofs, preserving each illustration’s color profile and metadata for consistent reproduction.
+ * 4. When a construction project management tool consolidates site‑photography TIFF images taken at different times into one file, retaining GPS coordinates and timestamps in EXIF for later geospatial analysis.
+ * 5. When a legal e‑discovery process concatenates TIFF evidence pages while maintaining each page’s original metadata to ensure chain‑of‑custody integrity in court filings.
  */

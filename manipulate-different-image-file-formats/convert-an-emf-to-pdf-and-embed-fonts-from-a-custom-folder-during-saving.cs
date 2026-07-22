@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
@@ -10,12 +10,12 @@ class Program
     {
         try
         {
-            // Hard‑coded input EMF file, output PDF file and custom fonts folder
+            // Hardcoded input, output and custom fonts folder paths
             string inputPath = @"C:\Images\sample.emf";
             string outputPath = @"C:\Images\sample.pdf";
-            string customFontsFolder = @"C:\CustomFonts";
+            string fontsFolder = @"C:\CustomFonts";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,21 +25,30 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Register the custom fonts folder for the current operation
-            FontSettings.SetFontsFolder(customFontsFolder);
+            // Preserve the original font folders to restore later
+            string[] originalFontFolders = FontSettings.GetFontsFolders();
+
+            // Set the custom fonts folder for this operation
+            FontSettings.SetFontsFolders(new string[] { fontsFolder }, true);
 
             // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PDF save options
-                var pdfOptions = new PdfOptions();
+                // Configure PDF save options with vector rasterization based on EMF
+                var pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = new EmfRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    }
+                };
 
-                // If the library version supports it, enable font embedding
-                // pdfOptions.EmbedAllFonts = true; // Uncomment if the property exists
-
-                // Save the image as PDF, fonts from the custom folder will be used/embedded
+                // Save the image as PDF, embedding fonts from the custom folder
                 image.Save(outputPath, pdfOptions);
             }
+
+            // Restore the original font folders
+            FontSettings.SetFontsFolders(originalFontFolders, true);
         }
         catch (Exception ex)
         {
@@ -50,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must generate printable PDF reports from vector‑based EMF diagrams while ensuring that corporate typefaces stored in a custom fonts directory are embedded for consistent rendering.
- * 2. When a document‑conversion service needs to transform user‑uploaded EMF logos into PDF assets and must include brand‑specific fonts located outside the system fonts folder.
- * 3. When an automated batch job processes a library of EMF technical drawings and saves them as PDFs, embedding the engineering fonts from a designated custom folder to meet compliance standards.
- * 4. When a Windows desktop tool creates PDF invoices that contain EMF graphics with text styled in a proprietary font, requiring the font to be embedded from a custom path to avoid missing‑font warnings.
- * 5. When a cloud‑based API receives EMF files and returns PDF files, and the API must register a custom fonts folder at runtime so that all text in the PDF uses the correct embedded font family.
+ * 1. When a developer must convert EMF vector graphics into PDF documents for client‑facing reports while embedding corporate fonts located in a custom directory to preserve branding.
+ * 2. When an application generates printable invoices that include EMF logos and needs to embed specific typefaces from a non‑system fonts folder to ensure consistent rendering on any device.
+ * 3. When a batch‑processing service transforms a library of EMF schematics into searchable PDFs and must use a custom fonts folder to comply with licensing restrictions on font usage.
+ * 4. When a desktop tool creates PDF manuals from EMF illustrations and requires embedding fonts from a designated folder to avoid missing‑font warnings in PDF viewers.
+ * 5. When a CI/CD pipeline automates the conversion of EMF assets to PDF for documentation builds and needs to temporarily override system font paths with a custom fonts folder during the save operation.
  */

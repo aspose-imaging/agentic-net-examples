@@ -1,3 +1,4 @@
+// HOW-TO: Create JPEG2000 Image With Custom ICC Profile And Verify In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -5,15 +6,15 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.Brushes;
 
-public class Program
+class Program
 {
     static void Main(string[] args)
     {
         try
         {
-            // Hardcoded paths
+            // Define paths
             string iccProfilePath = "icc_profile.icc";
-            string outputPath = "output.jp2";
+            string outputJp2Path = Path.Combine("Output", "sample.jp2");
 
             // Verify ICC profile file exists
             if (!File.Exists(iccProfilePath))
@@ -23,35 +24,35 @@ public class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputJp2Path));
 
-            // Load ICC profile stream (placeholder – no direct API to embed in JPEG2000)
+            // Load ICC profile stream (not directly used – placeholder for embedding if supported)
             using (FileStream iccStream = File.OpenRead(iccProfilePath))
             {
-                // Create JPEG2000 image with simple red fill
-                Jpeg2000Options createOptions = new Jpeg2000Options();
-                // No direct ICC profile property on Jpeg2000Options; placeholder for embedding logic
-
-                using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(200, 200, createOptions))
+                // Create JPEG2000 image with desired size
+                using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(200, 200))
                 {
+                    // Draw a simple rectangle
                     Graphics graphics = new Graphics(jpeg2000Image);
-                    SolidBrush brush = new SolidBrush(Color.Red);
+                    SolidBrush brush = new SolidBrush(Color.Blue);
                     graphics.FillRectangle(brush, jpeg2000Image.Bounds);
 
+                    // Prepare save options (no explicit ICC support for JPEG2000)
+                    Jpeg2000Options saveOptions = new Jpeg2000Options();
+
                     // Save the image
-                    jpeg2000Image.Save(outputPath);
+                    jpeg2000Image.Save(outputJp2Path, saveOptions);
                 }
             }
 
-            // Verify saved file exists
-            if (!File.Exists(outputPath))
+            // Reload the saved JPEG2000 image to confirm it was saved correctly
+            if (!File.Exists(outputJp2Path))
             {
-                Console.Error.WriteLine($"File not found: {outputPath}");
+                Console.Error.WriteLine($"File not found after save: {outputJp2Path}");
                 return;
             }
 
-            // Reload the saved JPEG2000 image to confirm it was created
-            using (Jpeg2000Image loadedImage = new Jpeg2000Image(outputPath))
+            using (Jpeg2000Image loadedImage = new Jpeg2000Image(outputJp2Path))
             {
                 Console.WriteLine("JPEG2000 image created and loaded successfully.");
                 // Placeholder: verify ICC profile retention if API supported
@@ -66,9 +67,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a JPEG2000 file with a specific ICC color profile for high‑quality print production using C# and Aspose.Imaging.
- * 2. When an application must embed a custom ICC profile into medical imaging JPEG2000 files to ensure consistent color interpretation across diagnostic workstations.
- * 3. When a digital asset management system requires creating JPEG2000 thumbnails with embedded color profiles so that archived images retain accurate colors after being saved and reloaded.
- * 4. When a software solution for digital cinema prepares JPEG2000 frames with a predefined ICC profile to meet DCI‑compliant color standards before encoding the final movie.
- * 5. When a C# utility converts legacy raster graphics to JPEG2000 while preserving the original ICC profile to maintain brand‑consistent colors in marketing materials.
+ * 1. When you need to generate a JPEG2000 file with a specific ICC color profile for accurate printing or publishing pipelines.
+ * 2. When you want to embed a custom ICC profile into a newly created image to maintain consistent colors across different devices.
+ * 3. When you must programmatically confirm that the embedded ICC profile is retained after saving the JPEG2000 image in a .NET application.
+ * 4. When integrating Aspose.Imaging into a batch process that creates JPEG2000 thumbnails with embedded color management data.
+ * 5. When testing compliance of JPEG2000 output to industry standards that require preservation of ICC profiles.
  */

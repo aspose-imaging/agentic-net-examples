@@ -11,19 +11,24 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\InputDicom";
-            string outputDir = @"C:\OutputPng";
+            string inputDir = @"C:\InputDicom\";
+            string outputDir = @"C:\OutputPng\";
 
-            // List of DICOM files to process (hardcoded)
-            string[] inputFiles = new string[]
+            // List of DICOM files to process
+            string[] dicomFiles = new[]
             {
-                Path.Combine(inputDir, "image1.dcm"),
-                Path.Combine(inputDir, "image2.dcm"),
-                Path.Combine(inputDir, "image3.dcm")
+                "image1.dcm",
+                "image2.dcm",
+                "image3.dcm"
             };
 
-            foreach (string inputPath in inputFiles)
+            foreach (string fileName in dicomFiles)
             {
+                // Build full paths
+                string inputPath = Path.Combine(inputDir, fileName);
+                string outputFileName = Path.ChangeExtension(fileName, ".png");
+                string outputPath = Path.Combine(outputDir, outputFileName);
+
                 // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
@@ -31,23 +36,14 @@ class Program
                     return;
                 }
 
-                // Load the DICOM image
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load DICOM image, adjust brightness, and save as PNG
                 using (Image image = Image.Load(inputPath))
                 {
                     DicomImage dicomImage = (DicomImage)image;
-
-                    // Adjust brightness by 10 units
-                    dicomImage.AdjustBrightness(10);
-
-                    // Prepare output PNG path
-                    string outputPath = Path.Combine(
-                        outputDir,
-                        Path.GetFileNameWithoutExtension(inputPath) + ".png");
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save as PNG
+                    dicomImage.AdjustBrightness(10); // increase brightness by ten units
                     dicomImage.Save(outputPath, new PngOptions());
                 }
             }
@@ -61,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology software needs to convert a batch of DICOM scans to PNG thumbnails while increasing brightness for better visual inspection.
- * 2. When a medical research project requires automated preprocessing of multiple DICOM images to enhance contrast before feeding them into a machine‑learning model that accepts PNG inputs.
- * 3. When a hospital IT team wants to generate patient‑friendly PNG snapshots from DICOM files and apply a uniform brightness boost to improve readability on web portals.
- * 4. When a developer builds a C# utility to archive DICOM studies as lossless PNG files with a consistent brightness offset for consistent archival quality.
- * 5. When a diagnostic imaging workflow automates the conversion of DICOM images to PNG format with a ten‑unit brightness adjustment to standardize display across different viewing applications.
+ * 1. When a radiology department needs to convert a set of DICOM scans to PNG thumbnails with increased brightness for quick visual review in a web portal.
+ * 2. When a medical imaging software vendor wants to preprocess patient CT images by batch‑adjusting brightness before exporting them to PNG for inclusion in printed reports.
+ * 3. When a research lab automates the preparation of DICOM MRI datasets for machine‑learning pipelines that require PNG inputs with standardized brightness levels.
+ * 4. When a hospital’s IT team creates a nightly job that loads multiple DICOM files, brightens them by ten units, and stores the results as PNG files for archival in a PACS‑compatible format.
+ * 5. When a developer builds a C# utility that reads DICOM images from a folder, applies a uniform brightness boost, and saves them as PNGs to be used in a mobile health‑care application.
  */

@@ -1,40 +1,41 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\source.tif";
-        string outputPath = @"C:\Images\result.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = "input.tif";
+        string outputPath = "output.tif";
 
         try
         {
-            // Load the existing multi‑page TIFF
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
-                // Create a new frame to insert (could be any supported image)
-                // Here we load it from another TIFF file; adjust the path as needed
-                TiffFrame newFrame = new TiffFrame(@"C:\Images\newframe.tif");
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Insert the new frame at index 2 (third position, zero‑based)
-                tiffImage.InsertFrame(2, newFrame);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the modified TIFF to the output path
-                tiffImage.Save(outputPath);
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
+            {
+                // Create a new blank frame with the same dimensions as the first frame
+                int width = tiff.Frames[0].Width;
+                int height = tiff.Frames[0].Height;
+                TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
+                TiffFrame newFrame = new TiffFrame(frameOptions, width, height);
+
+                // Insert the new frame at position two (index 1)
+                tiff.InsertFrame(1, newFrame);
+
+                // Save the modified TIFF
+                tiff.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -46,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a multi‑page scanned document and need to add a cover page after the title page, a developer can use InsertFrame to place the new TIFF frame at index 2.
- * 2. When creating a medical imaging report that combines a new X‑ray image with existing patient scans, InsertFrame lets the developer insert the additional TIFF frame into the middle of the multi‑page file.
- * 3. When building a digital archive of historical photographs and want to insert a newly digitized image between two existing pages, the code can insert the frame at position two without rewriting the whole TIFF.
- * 4. When automating generation of a multi‑page invoice converted to TIFF and need to add a terms‑and‑conditions page after the item list, InsertFrame provides a simple C# way to add the extra frame at the correct index.
- * 5. When developing a document management system that merges scanned forms and must insert a signature page into an existing multi‑page TIFF, the InsertFrame method allows precise placement of the new frame at the third page.
+ * 1. When converting a multi‑page PDF to TIFF and need to insert a blank cover page as the second frame of the resulting TIFF using Aspose.Imaging for .NET.
+ * 2. When processing scanned document batches and must add a separator page between existing pages to meet archival or workflow requirements in a C# TIFF image manipulation routine.
+ * 3. When generating a multi‑page TIFF for a printing pipeline and need to insert a color‑calibration frame after the first page to ensure consistent output across printers.
+ * 4. When assembling digital invoices as multi‑page TIFF files and require inserting a logo or title page as the second frame before saving the document with Aspose.Imaging.
+ * 5. When developing a medical imaging application that extracts DICOM series to TIFF and must add a patient‑information frame at position two to comply with reporting standards.
  */

@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
@@ -8,30 +8,29 @@ class Program
     {
         try
         {
-            // Input BMP file
             string inputPath = "input.bmp";
+            string outputHorizontalPath = "output\\output_horizontal.bmp";
+            string outputVerticalPath = "output\\output_vertical.bmp";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Horizontal flip output
-            string outputPathHorizontal = "output\\horizontal.bmp";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathHorizontal));
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputHorizontalPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputVerticalPath));
+
+            using (Image horiz = Image.Load(inputPath))
             {
-                image.RotateFlip(Aspose.Imaging.RotateFlipType.RotateNoneFlipX);
-                image.Save(outputPathHorizontal, new BmpOptions());
+                horiz.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                horiz.Save(outputHorizontalPath);
             }
 
-            // Vertical flip output
-            string outputPathVertical = "output\\vertical.bmp";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathVertical));
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image vert = Image.Load(inputPath))
             {
-                image.RotateFlip(Aspose.Imaging.RotateFlipType.RotateNoneFlipY);
-                image.Save(outputPathVertical, new BmpOptions());
+                vert.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                vert.Save(outputVerticalPath);
             }
         }
         catch (Exception ex)
@@ -43,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating mirrored UI icons for a Windows desktop application, a developer can use this code to generate horizontal and vertical BMP versions automatically.
- * 2. When preparing game sprites that need left‑right or top‑bottom reflections for character animation, the code flips the original BMP and saves the mirrored assets.
- * 3. When building a responsive web interface that swaps images based on layout direction (e.g., RTL languages), the developer can produce flipped BMP files with Aspose.Imaging in C#.
- * 4. When generating printable labels that require a reversed image for embossing or laser engraving, the code provides a quick way to create vertically mirrored BMP files.
- * 5. When maintaining a legacy asset pipeline that stores UI graphics as BMP files, a developer can use this snippet to batch‑process and create flipped copies without manual editing.
+ * 1. When creating mirrored button icons for a Windows desktop application, a developer can use this code to flip a BMP image horizontally or vertically and save the results as separate UI assets.
+ * 2. When generating left‑to‑right and right‑to‑left language versions of a game sprite sheet, the code can produce horizontal and vertical BMP mirrors without manually editing the graphics.
+ * 3. When preparing thumbnail previews that need to show both original and flipped orientations for a photo‑management tool, the RotateFlip operations let the developer output mirrored BMP files automatically.
+ * 4. When building a responsive UI that swaps image direction based on layout direction (LTR vs RTL), this snippet quickly creates the required horizontal BMP mirror for the alternate layout.
+ * 5. When testing image‑processing pipelines that must handle BMP files with different orientations, a developer can use the code to produce controlled horizontal and vertical flips for validation purposes.
  */

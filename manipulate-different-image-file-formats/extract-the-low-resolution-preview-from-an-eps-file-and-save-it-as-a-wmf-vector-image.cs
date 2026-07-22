@@ -8,35 +8,35 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.eps";
+        string outputPath = @"C:\Images\Output\sample.wmf";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.eps";
-            string outputPath = @"C:\Images\sample_preview.wmf";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load EPS image
             using (var epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Retrieve WMF preview (low‑resolution vector preview)
-                Image preview = epsImage.GetPreviewImage(EpsPreviewFormat.WMF);
+                // Retrieve WMF preview
+                var preview = epsImage.GetPreviewImage(EpsPreviewFormat.WMF);
                 if (preview == null)
                 {
-                    Console.Error.WriteLine("No WMF preview found in the EPS file.");
+                    Console.Error.WriteLine("WMF preview not available in the EPS file.");
                     return;
                 }
 
-                // Save the preview as WMF
-                preview.Save(outputPath);
+                // Save preview as WMF vector image
+                preview.Save(outputPath, new WmfOptions());
             }
         }
         catch (Exception ex)
@@ -48,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a quick thumbnail of an EPS artwork for display in a Windows Forms UI, they can extract the WMF preview and save it as a lightweight vector image.
- * 2. When integrating EPS files into a legacy reporting system that only supports WMF graphics, extracting the low‑resolution preview enables seamless inclusion of the artwork without full EPS rendering.
- * 3. When creating a batch process that indexes graphic assets and stores preview images for fast search results, the code can pull the WMF preview from each EPS and save it for quick retrieval.
- * 4. When a document conversion pipeline must embed EPS illustrations into a Microsoft Word document that accepts WMF, extracting the preview provides a compatible vector representation.
- * 5. When a web application needs to show a low‑resolution preview of an EPS file in a browser that cannot render EPS directly, converting the preview to WMF allows the image to be displayed via a server‑side conversion step.
+ * 1. When a developer needs to generate a low‑resolution WMF preview of an EPS artwork for quick display in a Windows Forms UI without loading the full vector data.
+ * 2. When a document‑conversion service must extract the embedded WMF thumbnail from EPS files to embed into PDF/A metadata for faster indexing.
+ * 3. When an automated publishing pipeline has to create lightweight WMF icons from EPS logos for use in legacy reporting tools that only accept WMF graphics.
+ * 4. When a batch‑processing script has to verify that EPS files contain a preview image and save it as a separate WMF file for quality‑control reviewers.
+ * 5. When a web application needs to serve a small vector preview of uploaded EPS files to browsers that support WMF via an ActiveX control, reducing bandwidth compared to the full EPS.
  */

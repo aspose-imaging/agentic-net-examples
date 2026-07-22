@@ -2,38 +2,40 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.eps";
-        string outputPath = "output.tiff";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the EPS image
-            using (EpsImage image = (EpsImage)Image.Load(inputPath))
-            {
-                // Resize width to 2000 pixels while preserving aspect ratio
-                image.ResizeWidthProportionally(2000);
+            // Hardcoded input and output paths
+            string inputPath = "Input/input.eps";
+            string outputPath = "Output/output.tiff";
 
-                // Prepare TIFF save options
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EPS image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Calculate proportional height for the target width of 2000 pixels
+                int newWidth = 2000;
+                int newHeight = (int)Math.Round((double)image.Height * newWidth / image.Width);
+
+                // Resize using high‑quality Lanczos resampling
+                image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
                 // Save the resized image as TIFF
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 image.Save(outputPath, tiffOptions);
             }
         }
@@ -46,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop needs to convert high‑resolution EPS artwork to a 2000‑pixel‑wide TIFF for raster‑based pre‑press workflows while preserving the original aspect ratio.
- * 2. When a web application must generate thumbnail‑size TIFF previews of vector EPS logos for archival or catalog display without distorting the image.
- * 3. When an automated document processing pipeline has to downscale EPS diagrams to a fixed width of 2000 pixels before embedding them into PDF reports that only support TIFF images.
- * 4. When a GIS system requires EPS map layers to be resized proportionally and saved as TIFF files for compatibility with raster‑only analysis tools.
- * 5. When a digital asset management system needs to batch‑process incoming EPS files, resizing them to a standard 2000‑pixel width and converting them to TIFF for consistent storage and fast rendering.
+ * 1. When a print shop needs to convert large vector EPS artwork to a high‑resolution TIFF for raster‑based pre‑press workflows while keeping the original proportions.
+ * 2. When a web service must generate thumbnail‑size TIFF previews of submitted EPS files for archival storage without distorting the image.
+ * 3. When a desktop application automates the preparation of EPS logos for inclusion in PDF reports by resizing them to a fixed width of 2000 px and saving as TIFF.
+ * 4. When a batch‑processing script needs to ensure that EPS diagrams fit within a specific pixel width for e‑learning platforms, preserving aspect ratio and using Lanczos resampling for quality.
+ * 5. When a document management system imports EPS drawings and requires them to be stored as TIFF images with a consistent width for fast rendering and searchable metadata extraction.
  */

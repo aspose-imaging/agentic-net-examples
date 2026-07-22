@@ -2,17 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg2000;
-using Aspose.Imaging.ImageLoadOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input path
-        string inputPath = @"C:\temp\sample.jp2";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "sample.jp2";
+            string outputPath = "output.txt";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,26 +20,29 @@ class Program
                 return;
             }
 
-            // Set limited memory buffer (e.g., 1 MB)
-            var loadOptions = new Jpeg2000LoadOptions
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load JPEG2000 image with limited memory buffer (10 MB hint)
+            var loadOptions = new Aspose.Imaging.ImageLoadOptions.Jpeg2000LoadOptions
             {
-                BufferSizeHint = 1024 * 1024
+                BufferSizeHint = 10
             };
 
-            // Load the JPEG2000 image with the specified options
             using (Image image = Image.Load(inputPath, loadOptions))
             {
-                // Cast to Jpeg2000Image to access resolution properties
                 var jpeg2000Image = image as Jpeg2000Image;
-                if (jpeg2000Image == null)
+                if (jpeg2000Image != null)
                 {
-                    Console.Error.WriteLine("Loaded image is not a JPEG2000 image.");
-                    return;
+                    Console.WriteLine($"Width: {jpeg2000Image.Width}");
+                    Console.WriteLine($"Height: {jpeg2000Image.Height}");
+                    Console.WriteLine($"Horizontal Resolution: {jpeg2000Image.HorizontalResolution}");
+                    Console.WriteLine($"Vertical Resolution: {jpeg2000Image.VerticalResolution}");
                 }
-
-                // Display horizontal and vertical resolution (DPI)
-                Console.WriteLine($"Horizontal resolution: {jpeg2000Image.HorizontalResolution} DPI");
-                Console.WriteLine($"Vertical resolution: {jpeg2000Image.VerticalResolution} DPI");
+                else
+                {
+                    Console.Error.WriteLine("Failed to cast loaded image to Jpeg2000Image.");
+                }
             }
         }
         catch (Exception ex)
@@ -51,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must read large JPEG2000 medical images on a low‑memory server and verify their DPI before processing them further.
- * 2. When a desktop utility needs to quickly show the horizontal and vertical resolution of a JP2 file without loading the entire image into memory.
- * 3. When a batch‑processing script validates that scanned engineering drawings stored as JPEG2000 meet the required resolution standards while operating under a 1 MB buffer limit.
- * 4. When a cloud‑based image‑conversion service reads JPEG2000 assets with a memory‑size hint to avoid out‑of‑memory errors and logs their DPI for quality‑control reports.
- * 5. When a GIS tool imports JP2 satellite tiles, reads their resolution metadata, and ensures they match the map’s scale while using limited RAM.
+ * 1. When a medical imaging application needs to quickly read a large JPEG2000 radiology scan on a low‑memory server and log its pixel dimensions and DPI for downstream analysis.
+ * 2. When a GIS tool processes satellite JPEG2000 tiles on a mobile device and must limit RAM usage while extracting image resolution to correctly overlay map layers.
+ * 3. When an e‑commerce platform imports high‑resolution product photos stored as JPEG2000 and wants to verify their width, height, and resolution before generating thumbnails in a constrained Azure Function.
+ * 4. When a digital archiving system validates scanned documents saved in JPEG2000 format by loading them with a 10 MB buffer and recording their resolution to ensure compliance with archival standards.
+ * 5. When a printing workflow software reads a JPEG2000 artwork file on a thin client, uses a limited memory buffer to avoid crashes, and displays the image’s horizontal and vertical resolution to confirm print quality settings.
  */

@@ -11,55 +11,49 @@ class Program
         try
         {
             // Hard‑coded input DICOM files
-            string[] inputPaths = new string[]
-            {
-                @"C:\Images\dicom1.dcm",
-                @"C:\Images\dicom2.dcm"
+            string[] inputPaths = {
+                @"C:\Images\input1.dcm",
+                @"C:\Images\input2.dcm"
             };
 
-            // Hard‑coded output directory
-            string outputDir = @"C:\Images\Output";
+            // Hard‑coded output directory for PNG files
+            string outputDirectory = @"C:\Images\Output";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
-
+            // Process each DICOM file
             foreach (string inputPath in inputPaths)
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Open the DICOM file as a stream
-                using (FileStream stream = File.OpenRead(inputPath))
+                // Set a buffer size hint for high‑performance memory usage
+                var loadOptions = new LoadOptions
                 {
-                    // Enable high‑performance memory strategy via LoadOptions
-                    LoadOptions loadOptions = new LoadOptions
+                    BufferSizeHint = 256 * 1024 // 256 KB
+                };
+
+                // Load the DICOM image from a file stream using the load options
+                using (Stream stream = File.OpenRead(inputPath))
+                using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
+                {
+                    // Apply gamma correction (example value)
+                    dicomImage.AdjustGamma(2.2f);
+
+                    // Save each page as an individual PNG file
+                    foreach (DicomPage page in dicomImage.DicomPages)
                     {
-                        BufferSizeHint = 256 * 1024 // 256 KB buffer size hint
-                    };
+                        // Build the output file name
+                        string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{page.Index}.png";
+                        string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                    // Load the DICOM image with the specified load options
-                    using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
-                    {
-                        // Adjust gamma for the whole image
-                        dicomImage.AdjustGamma(2.2f);
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save each page as an individual PNG file
-                        foreach (DicomPage page in dicomImage.DicomPages)
-                        {
-                            string outputPath = Path.Combine(
-                                outputDir,
-                                $"{Path.GetFileNameWithoutExtension(inputPath)}_page{page.Index}.png");
-
-                            // Ensure the directory for the output file exists
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                            // Save the page as PNG
-                            page.Save(outputPath, new PngOptions());
-                        }
+                        // Save the page as PNG
+                        page.Save(outputPath, new PngOptions());
                     }
                 }
             }
@@ -73,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application must convert a batch of DICOM scans to PNG for web viewing while applying gamma correction to improve brightness.
- * 2. When a radiology research tool needs to load large DICOM files efficiently using a custom buffer size and then export each slice as a separate PNG for analysis in image‑processing pipelines.
- * 3. When a hospital PACS integration requires automated conversion of multi‑frame DICOM studies to PNG thumbnails with adjusted gamma for consistent display on mobile devices.
- * 4. When a diagnostic software vendor wants to preprocess DICOM images by adjusting gamma and then save them as PNG to embed in PDF reports without loading the entire file into memory.
- * 5. When a cloud‑based health‑tech service processes incoming DICOM files, uses high‑performance memory strategy to handle high‑resolution scans, and outputs gamma‑corrected PNGs for machine‑learning model training.
+ * 1. When a medical imaging application must convert a series of DICOM scans to PNG for web viewing while minimizing memory usage, a developer can use this code to load each DICOM file with a buffer hint, apply gamma correction, and save each frame as a PNG.
+ * 2. When a radiology research pipeline needs to preprocess large DICOM datasets by normalizing brightness (gamma) and exporting individual slices as PNG for machine‑learning models, this code provides a fast, stream‑based conversion.
+ * 3. When a hospital PACS integration requires batch exporting of multi‑page DICOM studies to portable PNG files for patient reports, the code demonstrates how to iterate through DICOM pages, adjust contrast, and write PNGs to a designated folder.
+ * 4. When a desktop utility must quickly transform multiple DICOM files stored on disk into high‑quality PNG thumbnails for a picture‑gallery UI, the buffer‑size hint and gamma adjustment ensure responsive performance.
+ * 5. When a developer builds an automated backup script that archives DICOM images as lossless PNGs with consistent gamma levels, this example shows how to verify file existence, create output directories, and process each file in a loop.
  */

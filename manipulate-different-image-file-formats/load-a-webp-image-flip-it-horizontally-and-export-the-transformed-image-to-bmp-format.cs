@@ -1,19 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.webp";
-        string outputPath = @"c:\temp\output.bmp";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\input.webp";
+            string outputPath = "C:\\temp\\output.bmp";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,16 +21,16 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load WebP image, flip horizontally, and save as BMP
+            // Load the WebP image
             using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Horizontal flip (no rotation)
+                // Flip the image horizontally
                 webPImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
 
-                // Save to BMP format
+                // Save the transformed image as BMP
                 webPImage.Save(outputPath, new BmpOptions());
             }
         }
@@ -43,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must convert a WebP logo uploaded by a client into a BMP file while mirroring it horizontally for use in a legacy Windows desktop application.
- * 2. When an e‑commerce platform needs to generate BMP product images from WebP assets and display them flipped to match a right‑to‑left language layout.
- * 3. When a photo‑editing tool requires loading a WebP picture, applying a horizontal flip, and saving the result as BMP to maintain compatibility with older image viewers.
- * 4. When an automated batch process has to read WebP screenshots, reverse their orientation, and export them as BMP files for archival in a corporate document management system.
- * 5. When a game development pipeline needs to import WebP textures, flip them horizontally, and output BMP files for use with a legacy rendering engine that only supports BMP format.
+ * 1. When a developer needs to convert a WebP image to BMP format and flip it horizontally for a legacy Windows application that only accepts BMP files.
+ * 2. When a developer must generate a mirrored thumbnail of a WebP photo for a web gallery that stores thumbnails as BMP for faster rendering on older browsers.
+ * 3. When a developer wants to preprocess user‑uploaded WebP graphics by horizontally flipping them and saving as BMP to meet a printing service’s file‑format requirements.
+ * 4. When a developer is building an automated batch job that normalizes image orientation by flipping WebP assets and converts them to BMP for compatibility with a third‑party image analysis tool.
+ * 5. When a developer needs to integrate image transformation in a C# utility that reads WebP files, applies a horizontal flip, and outputs BMP files for use in a Windows‑only reporting system.
  */

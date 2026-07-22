@@ -10,8 +10,8 @@ class Program
     {
         try
         {
-            // Hard‑coded input path
-            string inputPath = "C:\\temp\\sample.djvu";
+            // Hardcoded input path
+            string inputPath = "input\\sample.djvu";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -25,29 +25,27 @@ class Program
             {
                 DjvuImage djvuImage = (DjvuImage)image;
 
-                // Iterate over all pages and process pages 1‑3
-                foreach (var page in djvuImage.Pages)
+                // Process pages 1‑3 (indices 0‑2)
+                for (int i = 0; i < 3 && i < djvuImage.PageCount; i++)
                 {
-                    if (page is DjvuPage djvuPage && djvuPage.PageNumber >= 1 && djvuPage.PageNumber <= 3)
-                    {
-                        // Apply Floyd‑Steinberg dithering with a 1‑bit palette
-                        djvuPage.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 1, null);
+                    DjvuPage page = (DjvuPage)djvuImage.Pages[i];
 
-                        // Construct output path for the BMP file
-                        string outputPath = $"C:\\temp\\output_page{djvuPage.PageNumber}.bmp";
+                    // Apply Floyd‑Steinberg dithering with a 1‑bit palette
+                    page.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 1);
 
-                        // Ensure the output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Define output BMP path
+                    string outputPath = $"output\\page{i + 1}.bmp";
 
-                        // Save the processed page as BMP
-                        djvuPage.Save(outputPath, new BmpOptions());
-                    }
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the page as BMP
+                    page.Save(outputPath, new BmpOptions());
                 }
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -55,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract the first three pages of a multi‑page DjVu document and generate high‑contrast 1‑bit BMP images for a legacy printing workflow.
- * 2. When an application must convert scanned DjVu files to BMP format while applying Floyd‑Steinberg dithering to preserve visual detail on monochrome displays.
- * 3. When a digital archiving system requires batch processing of DjVu files to produce BMP thumbnails of the initial pages for quick preview in a web portal.
- * 4. When a developer is building a document‑to‑e‑ink pipeline that needs 1‑bit BMP output with error‑diffusion dithering from DjVu source pages.
- * 5. When a Windows desktop utility must verify the existence of a DjVu file, extract pages 1‑3, and save them as BMP files with Floyd‑Steinberg dithering for downstream OCR processing.
+ * 1. When a document management system needs to extract the first three pages of a DjVu file and store them as high‑contrast BMP images for archival or OCR processing, this code can automate the conversion and apply Floyd‑Steinberg dithering to preserve detail.
+ * 2. When a web application must generate thumbnail previews of DjVu pages in a 1‑bit bitmap format for fast loading on low‑bandwidth devices, the snippet loads the DjVu, dithers each page, and saves them as BMP files.
+ * 3. When a printing workflow requires converting selected DjVu pages to BMP with binary color depth to meet legacy printer specifications, the code performs the page extraction, Floyd‑Steinberg dithering, and BMP output in C#.
+ * 4. When a digital forensics tool needs to create exact visual replicas of the first three pages of a DjVu document while reducing file size using 1‑bit dithering, this example demonstrates the necessary Aspose.Imaging operations.
+ * 5. When a batch‑processing script must programmatically read a DjVu file, apply Floyd‑Steinberg dithering to enhance edge definition, and save the result as BMP images for further analysis, the provided code fulfills that requirement.
  */
