@@ -1,42 +1,43 @@
+// HOW-TO: Convert Multi‑Page SVG To Multi‑Page TIFF In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.pdf";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (!string.IsNullOrWhiteSpace(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
-
         try
         {
-            using (Image vectorImage = Image.Load(inputPath))
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.svg";
+            string outputPath = @"C:\temp\output.tif";
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
             {
-                var pdfOptions = new PdfOptions
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the SVG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare TIFF output options
+                Source outputSource = new FileCreateSource(outputPath, false);
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = vectorImage.Size,
-                        BackgroundColor = Color.White
-                    }
+                    Source = outputSource
                 };
-                vectorImage.Save(outputPath, pdfOptions);
+
+                // Save as TIFF
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert multi‑page SVG diagrams into a single PDF for archival or distribution, this C# snippet with Aspose.Imaging rasterizes each SVG page while preserving its original dimensions.
- * 2. When an e‑learning platform must generate printable handouts from vector‑based SVG assets and ensure a consistent white background, the code shows how to load the SVG, set the background color, and save it as a PDF.
- * 3. When a web service receives user‑uploaded SVG logos and must return a PDF version that matches the logo’s exact size for inclusion in corporate reports, this example demonstrates the necessary file‑existence checks and directory creation in C#.
- * 4. When an automated build pipeline needs to transform design mockups stored as SVG files into PDF documentation without manual intervention, the snippet illustrates the use of Aspose.Imaging’s PdfOptions and SvgRasterizationOptions in .NET.
- * 5. When a desktop application must programmatically combine several SVG pages into one PDF file while handling potential I/O errors gracefully, this code provides a concise pattern for loading, rasterizing, and saving the combined document.
+ * 1. When you need to archive vector graphics from an SVG file as a lossless, multi‑page TIFF for long‑term storage or compliance.
+ * 2. When a reporting system generates charts as SVG and you must convert them to TIFF to embed in PDF reports that only accept raster images.
+ * 3. When a batch process must transform user‑uploaded SVG diagrams into TIFF files for printing on high‑resolution printers that require TIFF input.
+ * 4. When integrating Aspose.Imaging in a C# application to programmatically convert multi‑page SVG assets into a single TIFF document for easy viewing in standard image viewers.
+ * 5. When automating a workflow that consolidates several SVG pages into one TIFF file to simplify distribution to stakeholders who cannot open SVG files.
  */
