@@ -5,7 +5,6 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -14,11 +13,11 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = Path.Combine("Input", "sample.djvu");
-            string bmpOutputDir = Path.Combine("Output", "BmpPages");
-            string pdfOutputPath = Path.Combine("Output", "Combined.pdf");
+            string inputPath = "input.djvu";
+            string outputBmpDir = "bmp_pages";
+            string outputPdfPath = "combined.pdf";
 
-            // Validate input file existence
+            // Validate input file
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,32 +25,56 @@ class Program
             }
 
             // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(bmpOutputDir));
-            Directory.CreateDirectory(Path.GetDirectoryName(pdfOutputPath));
+            Directory.CreateDirectory(outputBmpDir);
+            string pdfDir = Path.GetDirectoryName(outputPdfPath);
+            if (!string.IsNullOrWhiteSpace(pdfDir))
+            {
+                Directory.CreateDirectory(pdfDir);
+            }
 
             // Load DjVu document
             using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Pages to process (4‑6 => zero‑based indexes 3,4,5)
-                int[] pageIndexes = new int[] { 3, 4, 5 };
+                // Pages 4‑6 (zero‑based indexes 3,4,5)
+                int[] pageIndexes = { 3, 4, 5 };
+                string[] bmpPaths = new string[pageIndexes.Length];
 
-                // Save each selected page as BMP
-                foreach (int idx in pageIndexes)
+                for (int i = 0; i < pageIndexes.Length; i++)
                 {
+                    int idx = pageIndexes[i];
                     if (idx < 0 || idx >= djvuImage.PageCount)
-                        continue; // skip invalid indexes
+                    {
+                        Console.Error.WriteLine($"Page index out of range: {idx + 1}");
+                        return;
+                    }
 
-                    var page = djvuImage.Pages[idx];
-                    string bmpPath = Path.Combine(bmpOutputDir, $"page{idx + 1}.bmp");
-                    Directory.CreateDirectory(Path.GetDirectoryName(bmpPath));
-                    page.Save(bmpPath, new BmpOptions());
+                    string bmpPath = Path.Combine(outputBmpDir, $"page_{idx + 1}.bmp");
+                    bmpPaths[i] = bmpPath;
+
+                    // Save each selected page as BMP
+                    djvuImage.Pages[idx].Save(bmpPath, new BmpOptions());
                 }
 
-                // Combine selected pages into a single PDF
-                var pdfOptions = new PdfOptions();
-                pdfOptions.MultiPageOptions = new DjvuMultiPageOptions(pageIndexes);
-                djvuImage.Save(pdfOutputPath, pdfOptions);
+                // Load BMP images into memory
+                Image[] bmpImages = new Image[bmpPaths.Length];
+                for (int i = 0; i < bmpPaths.Length; i++)
+                {
+                    bmpImages[i] = Image.Load(bmpPaths[i]);
+                }
+
+                // Combine BMPs into a single multi‑page image
+                using (Image combined = Image.Create(bmpImages, true))
+                {
+                    // Save combined image as PDF
+                    combined.Save(outputPdfPath, new PdfOptions());
+                }
+
+                // Dispose loaded BMP images
+                foreach (var img in bmpImages)
+                {
+                    img.Dispose();
+                }
             }
         }
         catch (Exception ex)
@@ -63,9 +86,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a legal firm needs to extract pages 4‑6 from a multi‑page DjVu case file, convert them to high‑resolution BMP images for forensic analysis, and then bundle those images into a single PDF for client delivery.
- * 2. When an e‑learning platform wants to reuse specific illustration pages from a DjVu textbook, generate BMP files for image‑editing tools, and create a combined PDF handout for students.
- * 3. When a publishing house must isolate selected pages of a DjVu manuscript, convert them to BMP to apply watermarking or color correction, and then produce a consolidated PDF proof for reviewers.
- * 4. When a government archive digitizes historical documents stored as DjVu, extracts pages 4‑6 as BMP for OCR preprocessing, and merges them into a searchable PDF for public access.
- * 5. When a medical imaging system receives scanned reports in DjVu format, extracts the diagnostic image pages, saves them as BMP for integration with analysis software, and compiles them into a single PDF report for clinicians.
+ * 1. When a developer needs to extract specific pages (4‑6) from a multi‑page DjVu file and provide them as high‑resolution BMP images for further image‑processing or OCR workflows.
+ * 2. When an application must convert selected DjVu pages into BMP format to preserve lossless pixel data before merging them into a single PDF for easy distribution to users who cannot view DjVu.
+ * 3. When a legal or archival system requires converting scanned DjVu documents into BMP thumbnails and then bundling those pages into a PDF report for compliance review.
+ * 4. When a publishing tool automates the creation of a PDF booklet that contains only certain DjVu pages, using Aspose.Imaging for .NET to render those pages as BMP before PDF assembly.
+ * 5. When a developer builds a batch‑processing service that extracts pages 4‑6 from many DjVu files, saves them as BMP files for quality control, and then combines the BMPs into one PDF for archival storage.
  */
