@@ -1,18 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,17 +27,15 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering
-                RasterImage rasterImage = (RasterImage)image;
+                // Cast to RasterImage for filtering
+                RasterImage raster = (RasterImage)image;
 
-                // Create Gaussian blur filter options with size 5 (odd) and sigma 1.2
-                var gaussianOptions = new GaussianBlurFilterOptions(5, 1.2);
+                // Apply Gaussian blur with kernel size 5 and sigma 1.2
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 1.2));
 
-                // Apply the filter to the entire image bounds
-                rasterImage.Filter(rasterImage.Bounds, gaussianOptions);
-
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                // Save the processed image as PNG
+                PngOptions saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce noise in a PNG screenshot before performing OCR, they can programmatically generate a Gaussian kernel with sigma 1.2 and apply it using Aspose.Imaging in C#.
- * 2. When preparing product photos for an e‑commerce website, a developer can use this code to apply a subtle Gaussian blur (sigma 1.2) to PNG images to create a consistent soft‑focus effect.
- * 3. When building an automated image‑processing pipeline that normalizes visual quality of user‑uploaded PNG avatars, a developer can invoke the GaussianBlurFilterOptions with sigma 1.2 to smooth edges without losing detail.
- * 4. When creating a desktop application that previews filtered images, a developer can load a PNG, apply a 5×5 Gaussian kernel with sigma 1.2 via Aspose.Imaging, and save the result for quick visual feedback.
- * 5. When integrating image preprocessing into a machine‑learning workflow, a developer can use this C# snippet to blur PNG training data with a sigma of 1.2, helping to reduce high‑frequency noise before feature extraction.
+ * 1. When a developer needs to reduce noise in a PNG screenshot before OCR by applying a Gaussian blur with sigma 1.2 using Aspose.Imaging in C#.
+ * 2. When a web application must automatically soften product photos stored as PNG files to improve visual appeal, the code can generate a Gaussian kernel and filter the images programmatically.
+ * 3. When a desktop utility processes scanned documents in PNG format and requires a consistent blur effect for background smoothing, the GaussianBlurFilterOptions with sigma 1.2 provides a repeatable solution.
+ * 4. When an automated build pipeline generates thumbnail PNGs and wants to apply a subtle blur to hide sensitive details, the C# raster filter applies the Gaussian kernel efficiently.
+ * 5. When a game developer prepares sprite sheets in PNG format and needs to pre‑blur edges to prevent aliasing during scaling, the code creates the Gaussian kernel and saves the filtered image.
  */
