@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -11,7 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output\\output.png";
+            string outputPath = "output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,27 +22,40 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Define a 3x3 sharpening kernel
-            double[,] kernel = new double[,]
+            // Parse kernel coefficients from command‑line arguments
+            // Expecting a square matrix (odd size). If invalid, fall back to a 3x3 identity kernel.
+            int coeffCount = args.Length;
+            int size = (int)Math.Sqrt(coeffCount);
+            if (size * size != coeffCount || size % 2 == 0)
             {
-                { 0, -1, 0 },
-                { -1, 5, -1 },
-                { 0, -1, 0 }
-            };
-            double factor = 1.0;
-            int bias = 0;
+                size = 3;
+                coeffCount = 9;
+                args = new string[9]; // reset args to default identity values
+                for (int i = 0; i < 9; i++) args[i] = (i == 4) ? "1" : "0"; // center = 1, others = 0
+            }
 
-            // Load image and apply custom convolution filter
+            double[,] kernel = new double[size, size];
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    double value = 0;
+                    double.TryParse(args[i * size + j], out value);
+                    kernel[i, j] = value;
+                }
+            }
+
+            // Create convolution filter options with the custom kernel
+            var filterOptions = new ConvolutionFilterOptions(kernel);
+
+            // Load image, apply filter, and save result
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
-
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, factor, bias);
-                rasterImage.Filter(rasterImage.Bounds, filterOptions);
-
-                rasterImage.Save(outputPath);
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, filterOptions);
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -53,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically sharpen a batch of PNG screenshots before uploading them to a documentation portal, they can use this utility to apply a 3x3 sharpening kernel to each image.
- * 2. When an image processing pipeline requires custom edge‑enhancement on scanned PDF pages saved as PNG, the command‑line tool can receive the convolution matrix as arguments and process the files without manual editing.
- * 3. When a CI/CD build script must validate visual quality of generated UI assets by applying a specific filter and comparing the result, the utility provides a C#‑based, scriptable way to run the convolution filter on the PNG output.
- * 4. When a developer is creating a lightweight image preprocessing step for a machine‑learning model that expects sharpened input, they can invoke the program with custom kernel coefficients to prepare the raster images on the fly.
- * 5. When a Windows service needs to periodically improve the contrast of security camera snapshots stored as PNG files, the command‑line application can be scheduled to run with different bias and factor values supplied at runtime.
+ * 1. When a developer needs to apply a custom sharpening or edge‑detection filter to PNG or JPEG images from a script or CI pipeline, they can pass the kernel values to this utility to process the files automatically.
+ * 2. When building a batch‑processing tool that prepares product photos for an e‑commerce site, the code can be invoked with a blur or noise‑reduction kernel to uniformly soften images before upload.
+ * 3. When creating a scientific imaging workflow that requires a specific convolution matrix (e.g., a Sobel operator) to extract gradients from microscopy PNG files, the command‑line program lets researchers supply the coefficients without modifying source code.
+ * 4. When integrating image preprocessing into a machine‑learning data pipeline, developers can use the utility to apply a custom high‑pass filter to training images, ensuring consistent pixel transformations across large datasets.
+ * 5. When troubleshooting or fine‑tuning visual effects in a game asset pipeline, artists can experiment with different kernel values by running the tool from the terminal to instantly see the impact on PNG textures.
  */
