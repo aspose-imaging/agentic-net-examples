@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -13,8 +13,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputDir = "output";
-            string outputPath = Path.Combine(outputDir, "output_emboss.png");
+            string outputPath = "output_emboss.png";
 
             if (!File.Exists(inputPath))
             {
@@ -24,31 +23,21 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load original PNG
-            using (PngImage png = (PngImage)Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                long originalSize = new FileInfo(inputPath).Length;
+                var embossKernel = ConvolutionFilter.Emboss3x3;
+                var filterOptions = new ConvolutionFilterOptions(embossKernel);
+                raster.Filter(raster.Bounds, filterOptions);
 
-                // Apply emboss filter
-                png.Filter(png.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
-
-                // Save filtered image
-                png.Save(outputPath, new PngOptions());
-
-                long filteredSize = new FileInfo(outputPath).Length;
-
-                Console.WriteLine($"Original size: {originalSize} bytes");
-                Console.WriteLine($"Filtered size: {filteredSize} bytes");
-
-                if (filteredSize > originalSize * 1.5)
-                {
-                    Console.WriteLine("Warning: The filtered PNG size increased dramatically.");
-                }
-                else
-                {
-                    Console.WriteLine("The filtered PNG size is within acceptable range.");
-                }
+                var saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
+
+            long originalSize = new FileInfo(inputPath).Length;
+            long filteredSize = new FileInfo(outputPath).Length;
+
+            Console.WriteLine($"Original size: {originalSize} bytes");
+            Console.WriteLine($"Filtered size: {filteredSize} bytes");
         }
         catch (Exception ex)
         {
@@ -59,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to verify that applying an emboss filter to a PNG image does not cause the file size to grow beyond an acceptable limit for web delivery.
- * 2. When a C# application must compare the original and filtered PNG sizes to prevent excessive bandwidth usage after image enhancement.
- * 3. When an image‑processing pipeline requires a safety check to ensure that convolution‑based embossing does not inflate PNG storage requirements beyond a set percentage.
- * 4. When a software solution must log and warn users if the filtered PNG exceeds 150 % of the original file size, helping maintain performance standards.
- * 5. When integrating Aspose.Imaging into a .NET project, developers need to programmatically assess the impact of emboss filtering on PNG compression efficiency before saving the output.
+ * 1. When a developer wants to apply an emboss effect to a PNG image and verify that the resulting file size does not grow excessively for web delivery.
+ * 2. When a developer needs to automate quality checks on batch‑processed PNG assets to ensure that applying a convolution emboss filter does not cause storage bloat.
+ * 3. When a developer integrates Aspose.Imaging into a C# application to compare original and filtered PNG sizes before uploading them to a content‑delivery network.
+ * 4. When a developer builds a CI pipeline that runs image processing tests, using the code to confirm that emboss filtering keeps PNG file size within acceptable limits.
+ * 5. When a developer creates a desktop tool that lets users preview an emboss effect on PNGs while monitoring the size difference to maintain performance constraints.
  */
