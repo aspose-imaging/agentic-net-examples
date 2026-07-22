@@ -11,26 +11,25 @@ class Program
         string inputPath = @"C:\Images\sample.cmx";
         string outputPath = @"C:\Images\sample_scaled.cmx";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+        // Ensure any runtime exception is reported cleanly
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the CMX image
             using (CmxImage image = (CmxImage)Image.Load(inputPath))
             {
-                // Calculate new dimensions (uniform scale factor of 2)
+                // Scale uniformly by a factor of 2
                 int newWidth = image.Width * 2;
                 int newHeight = image.Height * 2;
-
-                // Resize the image; this scales drawing and line thickness proportionally
                 image.Resize(newWidth, newHeight);
 
                 // Save the scaled image
@@ -46,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD engineer needs to double the size of a legacy CMX vector drawing for printing on a larger format plotter while preserving line weight, they can use this code.
- * 2. When a publishing workflow requires converting a CMX illustration to a higher‑resolution version for inclusion in a magazine layout, the uniform scaling ensures the artwork remains crisp and line thickness stays proportional.
- * 3. When a software that generates technical schematics must upscale a CMX file to match a new screen DPI setting, the C# Resize method keeps the diagram’s proportions accurate.
- * 4. When an archival system needs to create a scaled backup of CMX drawings for future reference without manually adjusting line styles, the Aspose.Imaging Resize operation automates the process.
- * 5. When a developer integrates CMX support into a .NET application that offers “zoom‑to‑fit” functionality, scaling the image by a factor of two provides a quick way to preview larger versions while maintaining visual fidelity.
+ * 1. When a CAD system needs to double the size of a CMX drawing for printing on larger paper while keeping line thickness proportional, a developer can use this code to resize the image uniformly.
+ * 2. When an engineering workflow requires generating high‑resolution previews of legacy CorelDRAW CMX files for a web portal, the code scales the drawing by a factor of two without distorting line weights.
+ * 3. When a batch‑processing tool must prepare CMX drawings for laser‑cutting machines that operate at a larger scale, developers can apply this C# snippet to enlarge the artwork while preserving stroke thickness.
+ * 4. When a documentation generator needs to embed enlarged CMX schematics into PDF reports, the code provides a simple way to double the dimensions and maintain visual fidelity.
+ * 5. When a legacy design archive is being migrated to a modern system that expects larger rasterized assets, this example shows how to programmatically resize CMX files in .NET while keeping line thickness consistent.
  */
