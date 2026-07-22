@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
 
@@ -24,38 +23,43 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
 
             // Get all PNG files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
             foreach (string inputPath in files)
             {
-                // Verify the input file exists
+                // Check if the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     continue;
                 }
 
-                // Prepare output file path
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + "_embossed.png");
+                // Determine output path
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
 
-                // Ensure the output directory for this file exists
+                // Ensure output directory for the file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image, apply Emboss5x5 filter, and save
+                // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Cast to RasterImage
                     RasterImage rasterImage = (RasterImage)image;
 
-                    // Apply Emboss5x5 convolution filter to the entire image
+                    // Apply Emboss5x5 convolution filter
                     rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
 
-                    // Save the processed image as PNG
-                    rasterImage.Save(outputPath, new PngOptions());
+                    // Save the processed image
+                    rasterImage.Save(outputPath);
                 }
+
+                Console.WriteLine($"Processed: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -67,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically add a stylized emboss effect to a large collection of PNG assets for a game’s UI, they can use this script to batch‑process the images with Aspose.Imaging’s Emboss5x5 convolution filter.
- * 2. When a web application must generate embossed thumbnails for user‑uploaded PNG photos before publishing them to a gallery, the code provides a fast C# solution to apply the filter to every file in a folder.
- * 3. When a marketing team wants to create a consistent embossed look for product PNG images across a catalog without manually editing each file, a developer can run this batch filter to transform all images in one step.
- * 4. When an automated build pipeline needs to preprocess PNG textures by applying a 5×5 emboss convolution for visual consistency in a simulation, the script can be integrated to process the directory during the CI process.
- * 5. When a developer is building a desktop utility that enhances PNG screenshots with a subtle 3‑D emboss effect for documentation purposes, this code demonstrates how to load, filter, and save each image programmatically.
+ * 1. When a developer needs to automatically add an embossed visual effect to a large set of product PNG images before uploading them to an e‑commerce site.
+ * 2. When a designer wants to generate stylized PNG thumbnails with a 5×5 emboss filter for a photo‑gallery web application.
+ * 3. When a game studio must batch‑process terrain texture PNG files to create a consistent embossed look for in‑game environments.
+ * 4. When a marketing team requires quick conversion of promotional PNG graphics into an embossed style for social‑media campaigns.
+ * 5. When a document‑management system needs to apply a subtle emboss effect to scanned PNG pages to improve visual distinction in printed reports.
  */
