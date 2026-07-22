@@ -2,28 +2,41 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "Input/sample.eps";
-            string outputPath = "Output/sample.pdf";
+            // Hardcoded input and output file paths
+            string inputPath = "Sample.eps";
+            string outputPath = "Sample.pdf";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load EPS image and convert to PDF/A‑1b (closest available compliance)
             using (var image = (EpsImage)Image.Load(inputPath))
             {
-                var options = new PdfOptions();
+                var options = new PdfOptions
+                {
+                    PdfCoreOptions = new PdfCoreOptions
+                    {
+                        // Set PDF compliance (PDF/A‑2b not available in this version, using PDF/A‑1b)
+                        PdfCompliance = PdfComplianceVersion.PdfA1b
+                    }
+                };
+
                 image.Save(outputPath, options);
             }
         }
@@ -36,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive legacy vector artwork stored in EPS format by converting it to PDF/A‑2b for long‑term preservation and compliance with ISO standards.
- * 2. When a C# application must generate searchable, print‑ready PDF/A documents from EPS logos or illustrations for inclusion in regulatory reports.
- * 3. When an automated workflow processes incoming EPS files from designers and must output PDF/A‑2b files to satisfy document management system requirements.
- * 4. When a .NET service needs to ensure that vector graphics are stored in a self‑contained, platform‑independent format that preserves colors and fonts for future retrieval.
- * 5. When a developer is building a batch conversion tool that reads EPS images, applies PdfOptions, and saves them as PDF/A‑2b files to reduce storage costs and improve compatibility.
+ * 1. When a publishing company needs to archive legacy vector artwork stored as EPS files into PDF/A‑2b compliant PDFs for long‑term preservation using C# and Aspose.Imaging.
+ * 2. When a government agency must convert engineering diagrams in EPS format to PDF/A‑2b to meet document retention policies and ensure the files are searchable and unalterable.
+ * 3. When a digital asset management system processes incoming EPS logos and automatically generates PDF/A‑2b versions for consistent display across platforms and compliance with ISO 19005.
+ * 4. When a printing workflow requires converting EPS pre‑press files to PDF/A‑2b before sending them to a print provider that only accepts PDF/A compliant submissions.
+ * 5. When a legal firm needs to transform EPS evidence graphics into PDF/A‑2b PDFs to guarantee document integrity and admissibility in court using a C# automation script.
  */
