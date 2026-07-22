@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
@@ -10,6 +12,7 @@ class Program
     {
         try
         {
+            // Set up input and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
@@ -17,7 +20,7 @@ class Program
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add SVG files and rerun.");
                 return;
             }
 
@@ -26,69 +29,70 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (string inputPath in files)
+            foreach (var file in files)
             {
+                // Process only SVG files
+                if (!file.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                string inputPath = file;
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                // Prepare output path for the edge map
+                string outputFileName = Path.GetFileNameWithoutExtension(file) + "_edge.png";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image vectorImage = Image.Load(inputPath))
+                // Load SVG and rasterize to PNG in memory
+                using (Image svgImage = Image.Load(inputPath))
                 {
                     var rasterOptions = new SvgRasterizationOptions
                     {
-                        BackgroundColor = Color.White,
-                        PageSize = vectorImage.Size
+                        PageSize = svgImage.Size,
+                        BackgroundColor = Color.White
                     };
-                    var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
 
-                    using (var ms = new MemoryStream())
+                    var pngOptions = new PngOptions
                     {
-                        vectorImage.Save(ms, pngOptions);
-                        ms.Position = 0;
+                        VectorRasterizationOptions = rasterOptions
+                    };
 
-                        using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        // Rasterize SVG to PNG stream
+                        svgImage.Save(memoryStream, pngOptions);
+                        memoryStream.Position = 0;
+
+                        // Load rasterized image
+                        using (Image rasterImageContainer = Image.Load(memoryStream))
                         {
-                            var kernels = new (string name, double[,] kernel)[]
+                            var rasterImage = (RasterImage)rasterImageContainer;
+
+                            // Define a custom Sobel horizontal edge detection kernel
+                            double[,] kernel = new double[,]
                             {
-                                ("Horizontal", new double[,] {
-                                    { -1, 0, 1 },
-                                    { -2, 0, 2 },
-                                    { -1, 0, 1 }
-                                }),
-                                ("Vertical", new double[,] {
-                                    { -1, -2, -1 },
-                                    {  0,  0,  0 },
-                                    {  1,  2,  1 }
-                                }),
-                                ("Diagonal1", new double[,] {
-                                    { -2, -1, 0 },
-                                    { -1,  0, 1 },
-                                    {  0,  1, 2 }
-                                }),
-                                ("Diagonal2", new double[,] {
-                                    { 0,  1,  2 },
-                                    { -1, 0,  1 },
-                                    { -2, -1, 0 }
-                                })
+                                { -1, 0, 1 },
+                                { -2, 0, 2 },
+                                { -1, 0, 1 }
                             };
 
-                            foreach (var (orientation, kernel) in kernels)
-                            {
-                                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                            // Apply convolution filter using the custom kernel
+                            var convOptions = new ConvolutionFilterOptions(kernel);
+                            rasterImage.Filter(rasterImage.Bounds, convOptions);
 
-                                string outputPath = Path.Combine(outputDirectory, $"{fileName}_{orientation}.png");
-                                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                                raster.Save(outputPath);
-                            }
+                            // Save the edge map
+                            rasterImage.Save(outputPath, new PngOptions());
                         }
                     }
                 }
+
+                Console.WriteLine($"Processed edge map saved to: {outputPath}");
             }
         }
         catch (Exception ex)
@@ -100,9 +104,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically convert a collection of SVG icons into PNG edge‑map images for use in a web UI that highlights vector shapes.
- * 2. When a GIS application must generate orientation‑specific edge maps from SVG map layers to improve feature detection in downstream analysis.
- * 3. When an e‑learning platform wants to batch process SVG diagrams into high‑contrast edge images for printable worksheets without manual rasterization.
- * 4. When a computer‑vision pipeline requires pre‑rasterized SVG assets with custom Sobel‑like kernels applied to detect vertical, horizontal, and diagonal edges before model training.
- * 5. When a branding team needs to create stylized outline versions of SVG logos in PNG format by applying multiple directional edge‑detection filters in a single automated run.
+ * 1. When a developer needs to convert a collection of vector icons (SVG) into raster edge‑maps (PNG) for use in a web UI that highlights icon outlines.
+ * 2. When a GIS application must extract directional edge information from SVG map layers to feed into a routing algorithm.
+ * 3. When an e‑learning platform wants to generate high‑contrast edge images of SVG diagrams for printable worksheets.
+ * 4. When a computer‑vision pipeline requires pre‑processing of SVG assets with custom orientation kernels to improve feature detection in downstream ML models.
+ * 5. When a branding team automates the creation of stylized edge‑only logos from SVG files for embossing or laser‑cutting workflows.
  */
