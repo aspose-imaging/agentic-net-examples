@@ -8,12 +8,12 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = "sample.eps";
-        string outputPath = "output/sample.psd";
+        string inputPath = @"C:\Temp\sample.eps";
+        string outputPath = @"C:\Temp\sample_converted.psd";
 
         try
         {
-            // Verify that the input file exists
+            // Verify that the input EPS file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -42,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to convert vector EPS artwork into a layered Photoshop PSD file for further editing, a developer can use this C# code with Aspose.Imaging to load the EPS and save it as PSD.
- * 2. When an automated build pipeline must batch‑process EPS assets and generate PSD versions for a digital asset management system, the code provides a simple way to read each EPS file and export it directly to PSD in .NET.
- * 3. When a web application allows users to upload EPS logos and then download them as PSD files for brand‑consistent editing, the developer can employ this snippet to perform the conversion on the server side.
- * 4. When migrating legacy print‑ready EPS files to a modern Photoshop workflow, a developer can use the example to programmatically load the EPS and create PSD files with default options in C#.
- * 5. When a content‑creation tool needs to preview EPS illustrations as PSD layers without manual conversion, this code enables the tool to load the EPS and instantly save it as a PSD for quick viewing.
+ * 1. When a developer needs to integrate a workflow that converts vector EPS artwork into layered Photoshop PSD files for further editing in a C# application using Aspose.Imaging.
+ * 2. When an automated batch process must read EPS logos from a file system and export them as PSD files to preserve editability for a design team's pipeline.
+ * 3. When a web service written in .NET has to accept uploaded EPS files and return PSD versions on the fly without requiring external tools.
+ * 4. When a desktop utility must verify the existence of an EPS source, create the output directory, and save the image as a PSD using default PsdOptions for compatibility with Adobe Photoshop.
+ * 5. When a migration script needs to programmatically load legacy EPS assets and convert them to PSD format to standardize assets in a company's digital asset management system.
  */
