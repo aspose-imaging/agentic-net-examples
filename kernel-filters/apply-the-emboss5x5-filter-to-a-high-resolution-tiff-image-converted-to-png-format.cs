@@ -2,18 +2,20 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputPath = "output.png";
-
         try
         {
+            string inputPath = "input.tif";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,18 +27,8 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 TiffImage tiffImage = (TiffImage)image;
-
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5);
-
-                tiffImage.Filter(tiffImage.Bounds, filterOptions);
-
-                var pngOptions = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false)
-                };
-
-                tiffImage.Save(outputPath, pngOptions);
+                tiffImage.Filter(tiffImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
+                tiffImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -48,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add a 3‑D embossed effect to a high‑resolution TIFF scan of architectural drawings before publishing them as lightweight PNG files for web viewers.
- * 2. When a developer wants to preprocess large medical TIFF images with an emboss filter to enhance edge details and then convert them to PNG for integration into a diagnostic reporting system.
- * 3. When a developer must transform archival TIFF photographs into PNG format while applying the Emboss5x5 convolution to create stylized thumbnails for a digital museum catalog.
- * 4. When a developer is building an automated pipeline that receives high‑resolution TIFF satellite imagery, applies an emboss filter to highlight terrain features, and outputs PNG tiles for a GIS web application.
- * 5. When a developer needs to generate PNG assets with an embossed look from TIFF source files for a game’s texture atlas, ensuring the filter is applied during the format conversion step.
+ * 1. When a developer needs to add a stylized emboss effect to a high‑resolution TIFF scan of a blueprint and then deliver the result as a lightweight PNG for web viewing.
+ * 2. When an imaging pipeline must convert archival TIFF photographs to PNG while applying a 5×5 emboss convolution to enhance texture for a digital museum exhibit.
+ * 3. When a document management system processes large TIFF invoices, applies an emboss filter to highlight watermarks, and saves the output as PNG for quick preview thumbnails.
+ * 4. When a GIS application requires transforming detailed TIFF satellite imagery into PNG tiles with an emboss filter to accentuate terrain relief for visual analysis.
+ * 5. When a batch job automates the conversion of TIFF medical scans to PNG format and uses the Emboss5x5 filter to improve edge definition for diagnostic reporting.
  */
