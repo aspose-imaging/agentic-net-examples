@@ -8,29 +8,29 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Input\sample.cdr";
-        string outputPath = @"C:\Output\sample.cdr.pdf";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the CorelDRAW (CDR) file
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Data\sample.cdr";
+            string outputPath = @"C:\Data\sample.cdr.pdf";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CorelDRAW file
             using (Image image = Image.Load(inputPath))
             {
                 // Prepare PDF export options
                 var pdfOptions = new PdfOptions();
 
-                // Configure rasterization options specific for CDR
+                // Configure rasterization options for CDR vector content
                 var rasterOptions = new CdrRasterizationOptions
                 {
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
@@ -40,7 +40,7 @@ class Program
 
                 pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the image as PDF preserving the original layout
+                // Save as PDF preserving original layout
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -53,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design studio needs to automatically convert client‑supplied CorelDRAW (CDR) artwork into print‑ready PDF files while preserving the original layout, this C# code with Aspose.Imaging provides a seamless solution.
- * 2. When a web application must generate downloadable PDF previews of CDR logos or brochures on the fly without installing CorelDRAW, developers can use this snippet to perform server‑side conversion.
- * 3. When an enterprise document‑management system has to archive legacy CDR drawings as searchable PDFs, the code enables rasterization of vector content while maintaining exact positioning.
- * 4. When a batch‑processing tool needs to convert a folder of CorelDRAW files to PDFs for mass mailing or e‑catalog generation, this example supplies the core conversion logic in .NET.
- * 5. When a quality‑control workflow requires comparing the visual fidelity of original CDR designs against their PDF exports, developers can programmatically render the CDR file and save it as a PDF with layout preservation.
+ * 1. When a design studio needs to automatically convert client‑supplied CorelDRAW (.cdr) artwork into PDF files for review while keeping the original layout intact.
+ * 2. When a document management system must ingest CDR files and store them as searchable PDFs without manually opening each file in CorelDRAW.
+ * 3. When a batch‑processing service generates printable PDFs from a folder of CorelDRAW drawings for a print‑on‑demand workflow.
+ * 4. When a web application allows users to upload .cdr files and instantly provides a PDF preview that matches the vector layout of the source file.
+ * 5. When an archival tool needs to preserve legacy CorelDRAW graphics by rasterizing them with specific rendering hints and saving them as PDF for long‑term storage.
  */
