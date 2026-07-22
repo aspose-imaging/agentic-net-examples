@@ -1,5 +1,7 @@
+// HOW-TO: How To Invert A Grayscale Mask And Test It In C# (Aspose.Imaging for .NET)
 using System;
-using Aspose.Imaging.MagicWand;
+using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
@@ -8,60 +10,74 @@ class Program
     {
         try
         {
-            const int width = 10;
-            const int height = 10;
-            bool allPassed = true;
+            string inputPath = "input.png";
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Test 1: Invert a fully white mask (all opaque) -> should become fully black (all transparent)
+            string outputPath = "output.png";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            int width = 10;
+            int height = 10;
+
+            // Test inversion of a fully white mask (all opaque)
             var whiteMask = new ImageGrayscaleMask(width, height);
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    whiteMask[x, y] = 255;
+                    whiteMask[x, y] = 255; // opaque
                 }
             }
 
             var invertedWhite = whiteMask.Invert();
-            for (int y = 0; y < height; y++)
+            bool allTransparent = true;
+            for (int y = 0; y < height && allTransparent; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    if (invertedWhite.GetByteOpacity(x, y) != 0)
+                    if (!invertedWhite.IsTransparent(x, y))
                     {
-                        allPassed = false;
-                        Console.Error.WriteLine($"Test 1 failed at ({x},{y}): expected 0, got {invertedWhite.GetByteOpacity(x, y)}");
+                        allTransparent = false;
+                        break;
                     }
                 }
             }
 
-            // Test 2: Invert a fully black mask (all transparent) -> should become fully white (all opaque)
+            Console.WriteLine(allTransparent
+                ? "White mask inversion passed"
+                : "White mask inversion failed");
+
+            // Test inversion of a fully black mask (all transparent)
             var blackMask = new ImageGrayscaleMask(width, height);
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    blackMask[x, y] = 0;
+                    blackMask[x, y] = 0; // transparent
                 }
             }
 
             var invertedBlack = blackMask.Invert();
-            for (int y = 0; y < height; y++)
+            bool allOpaque = true;
+            for (int y = 0; y < height && allOpaque; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    if (invertedBlack.GetByteOpacity(x, y) != 255)
+                    if (!invertedBlack.IsOpaque(x, y))
                     {
-                        allPassed = false;
-                        Console.Error.WriteLine($"Test 2 failed at ({x},{y}): expected 255, got {invertedBlack.GetByteOpacity(x, y)}");
+                        allOpaque = false;
+                        break;
                     }
                 }
             }
 
-            if (allPassed)
-            {
-                Console.WriteLine("All mask inversion tests passed.");
-            }
+            Console.WriteLine(allOpaque
+                ? "Black mask inversion passed"
+                : "Black mask inversion failed");
         }
         catch (Exception ex)
         {
@@ -72,9 +88,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to verify that inverting a fully opaque (white) ImageGrayscaleMask correctly produces a fully transparent (black) mask for PNG images with an alpha channel.
- * 2. When a developer wants to ensure that the ImageGrayscaleMask.Invert method reliably turns a completely transparent (black) mask into a fully opaque (white) mask before applying watermarks or overlays.
- * 3. When a developer is writing automated unit tests for an image‑processing pipeline that depends on correct mask inversion to generate proper cut‑out effects in JPEG‑2000 or TIFF files.
- * 4. When a developer must confirm that mask inversion works across different image dimensions in C# code that manipulates masks for medical imaging DICOM overlays.
- * 5. When a developer is debugging a custom magic‑wand selection tool and needs to validate that the inversion of extreme mask values behaves as expected in the Aspose.Imaging for .NET library.
+ * 1. When you need to verify that a fully opaque (white) mask becomes completely transparent after inversion for accurate image compositing.
+ * 2. When you want to confirm that a fully transparent (black) mask turns fully opaque after inversion as part of automated unit testing.
+ * 3. When building a photo‑editing application that toggles region visibility by inverting grayscale masks at runtime.
+ * 4. When creating a batch image‑processing pipeline that must ensure mask inversion works for both white and black masks before applying further filters.
+ * 5. When debugging custom Magic Wand selection logic that relies on grayscale masks and requires reliable inversion behavior.
  */
