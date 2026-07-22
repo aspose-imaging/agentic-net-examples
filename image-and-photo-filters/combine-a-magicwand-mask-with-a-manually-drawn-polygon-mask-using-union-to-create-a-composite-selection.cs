@@ -1,3 +1,4 @@
+// HOW-TO: Combine Magic Wand and Polygon Masks Using Union in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,11 +12,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,8 +28,8 @@ class Program
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
                 MagicWandTool
-                    .Select(image, new MagicWandSettings(100, 100))
-                    .Union(new RectangleMask(200, 200, 150, 100))
+                    .Select(image, new MagicWandSettings(120, 80))
+                    .Union(new RectangleMask(200, 150, 300, 200))
                     .Apply();
 
                 var pngOptions = new PngOptions
@@ -48,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically select a region of similar color in a PNG image using a Magic Wand tool and then expand the selection with a custom rectangular polygon to create a composite mask for further editing.
- * 2. When an application must combine a content‑aware selection (Magic Wand) with a manually defined rectangle to isolate both irregular and precise areas before exporting the result as a true‑color PNG with alpha channel.
- * 3. When a photo‑processing workflow requires merging a dynamic, tolerance‑based selection with a fixed geometric shape to generate a single mask that can be saved as a PNG file for downstream compositing.
- * 4. When a developer wants to programmatically create a combined selection in C# by uniting a Magic Wand mask with a rectangle mask to protect or modify specific parts of an image while preserving transparency.
- * 5. When building an image‑annotation tool that needs to let users select complex regions using Magic Wand and then add a rectangular region, merging them via Union before saving the final selection as a PNG with alpha support.
+ * 1. When you need to automatically select a region based on color similarity and then add a manually defined rectangular area to the selection for precise cropping of a PNG image in C#.
+ * 2. When you want to create a composite mask that combines a Magic Wand selection with a custom polygon (or rectangle) mask to isolate complex objects before applying further image edits.
+ * 3. When you are building a photo‑editing tool that lets users refine an auto‑selected area by drawing additional shapes and then save the result with transparency using Aspose.Imaging.
+ * 4. When you must generate a selection that includes both a tolerance‑based region and a specific rectangular region to export a cut‑out of a PNG with alpha channel preserved.
+ * 5. When you are processing batch images and need to programmatically merge auto‑detected and user‑drawn masks into a single selection before saving the output as a true‑color PNG in .NET.
  */
