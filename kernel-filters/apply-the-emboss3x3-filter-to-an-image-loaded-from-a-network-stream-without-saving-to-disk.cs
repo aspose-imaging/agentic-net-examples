@@ -1,7 +1,10 @@
+// HOW-TO: Apply Emboss 3x3 Filter to PNG Image and Save with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Net.Http;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -9,17 +12,26 @@ class Program
     {
         try
         {
-            string imageUrl = "https://example.com/sample.png";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-            using (HttpClient client = new HttpClient())
-            using (Stream stream = client.GetStreamAsync(imageUrl).Result)
-            using (Image image = Image.Load(stream))
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
-                Console.WriteLine("Emboss filter applied successfully.");
+
+                double[,] kernel = ConvolutionFilter.Emboss3x3;
+                var options = new ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, options);
+
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -31,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to display a stylized, embossed version of a PNG image fetched from a remote API directly in a web application without writing temporary files to disk.
- * 2. When an image‑processing service needs to apply a 3×3 emboss convolution filter to JPEG or BMP images streamed from cloud storage for real‑time preview generation.
- * 3. When a desktop C# utility must download product photos from an e‑commerce endpoint, apply an emboss effect, and send the modified stream to another service without persisting the original file.
- * 4. When a mobile backend processes user‑uploaded avatars hosted on a CDN, applying the Emboss3x3 filter on‑the‑fly to create artistic thumbnails while keeping memory usage low.
- * 5. When a batch job reads a series of TIFF images over HTTP, applies the built‑in Aspose.Imaging ConvolutionFilter.Emboss3x3 to each raster image, and streams the results directly to a reporting system.
+ * 1. When you need to programmatically add a 3‑x‑3 emboss effect to PNG files before displaying them in a .NET desktop application.
+ * 2. When you want to process user‑uploaded images on a server, apply a convolution filter, and store the result as a compressed PNG without manual editing.
+ * 3. When you are building an automated image‑processing pipeline that must enhance texture details using the Emboss3x3 kernel in C#.
+ * 4. When you need to integrate Aspose.Imaging’s convolution filter into a batch job that reads images, applies the emboss effect, and writes the output to a specific folder.
+ * 5. When you are creating a photo‑editing feature that programmatically modifies raster images with a 3×3 emboss matrix and saves the edited version in PNG format.
  */
