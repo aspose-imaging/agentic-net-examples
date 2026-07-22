@@ -11,38 +11,34 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.jpg";
-            string outputPath = "output/output.jpg";
+            string outputPath = "output.jpg";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the JPEG image
             using (JpegImage jpegImage = new JpegImage(inputPath))
             {
-                // Create a thumbnail raster image (100x100 pixels)
-                PngOptions thumbOptions = new PngOptions();
-                using (RasterImage thumb = (RasterImage)Image.Create(thumbOptions, 100, 100))
-                {
-                    // Fill the thumbnail with a solid red color
-                    Graphics graphics = new Graphics(thumb);
-                    using (SolidBrush brush = new SolidBrush(Color.Red))
-                    {
-                        graphics.FillRectangle(brush, thumb.Bounds);
-                    }
+                // Create a thumbnail raster image (100x100)
+                int thumbWidth = 100;
+                int thumbHeight = 100;
+                JpegOptions thumbOptions = new JpegOptions();
 
-                    // Prepare JFIF data and assign the thumbnail
-                    JFIFData jfif = new JFIFData();
-                    jfif.Thumbnail = thumb;
-                    jpegImage.Jfif = jfif;
+                using (RasterImage thumb = (RasterImage)Image.Create(thumbOptions, thumbWidth, thumbHeight))
+                {
+                    // Fill thumbnail with solid red color
+                    Graphics graphics = new Graphics(thumb);
+                    SolidBrush brush = new SolidBrush(Color.Red);
+                    graphics.FillRectangle(brush, thumb.Bounds);
+
+                    // Assign thumbnail to JFIF segment
+                    jpegImage.Jfif = new JFIFData();
+                    jpegImage.Jfif.Thumbnail = thumb;
 
                     // Save the modified JPEG image
                     jpegImage.Save(outputPath);
@@ -58,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed a branded preview image (e.g., a red logo thumbnail) directly into the JFIF segment of a JPEG file for faster preview in file explorers or digital asset management systems.
- * 2. When an e‑commerce platform wants to generate lightweight thumbnail previews for product photos without creating separate thumbnail files, by inserting a 100 × 100 pixel JPEG thumbnail using Aspose.Imaging in C#.
- * 3. When a photo‑sharing application must preserve a custom thumbnail in the JPEG metadata so that mobile devices display a consistent preview before the full image is downloaded.
- * 4. When a document‑generation workflow requires adding a color‑coded thumbnail to scanned JPEG pages to indicate processing status (e.g., red for pending) directly in the image file.
- * 5. When a developer is building a batch image‑processing tool that adds a solid‑color thumbnail to legacy JPEGs to improve compatibility with older image viewers that rely on the JFIF thumbnail field.
+ * 1. When generating product catalog JPEGs, a developer can embed a 100×100 red thumbnail in the JFIF segment to provide fast preview images for file explorers and e‑commerce platforms.
+ * 2. When building a digital asset management system, adding a custom thumbnail to the JPEG’s JFIF data ensures consistent thumbnail previews across browsers and legacy image viewers.
+ * 3. When converting raw camera files to JPEG, a developer may create and assign a small JFIF thumbnail so that older photo applications can display a quick preview without decoding the full image.
+ * 4. When delivering JPEG images through a web API, embedding a solid‑color thumbnail in the JFIF segment allows client applications to show a lightweight visual cue before downloading the high‑resolution picture.
+ * 5. When preparing JPEG attachments for email, inserting a custom 100×100 thumbnail into the JFIF segment enables email clients to render a thumbnail preview while keeping the attachment size low.
  */
