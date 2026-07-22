@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\blurred.png";
+        string outputPath = @"C:\Images\restored.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\blurred.png";
-            string outputPath = @"C:\Images\restored.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,7 +20,7 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
@@ -29,16 +29,12 @@ class Program
                 // Cast to RasterImage to access filtering capabilities
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Create Gauss-Wiener deconvolution filter options (radius, sigma)
-                var deconvOptions = new GaussWienerFilterOptions(5, 4.0);
-                // Optional: adjust additional properties if needed
-                // deconvOptions.Brightness = 1.15;
-                // deconvOptions.Snr = 0.007;
+                // Apply a Gauss-Wiener deconvolution filter to restore details
+                // Parameters: radius = 5, sigma = 4.0 (adjust as needed for the blur)
+                var filterOptions = new GaussWienerFilterOptions(5, 4.0);
+                rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
-                // Apply the filter to the whole image
-                rasterImage.Filter(rasterImage.Bounds, deconvOptions);
-
-                // Save the restored image
+                // Save the processed image
                 rasterImage.Save(outputPath);
             }
         }
@@ -51,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to improve the readability of scanned documents saved as PNG that suffer from motion blur, this code can deblur and enhance the text.
- * 2. When an e‑commerce platform wants to automatically sharpen out‑of‑focus product photos uploaded as PNG files, the deconvolution filter restores visual details before publishing.
- * 3. When a medical imaging application receives blurred PNG scans of tissue samples, the code can recover fine structures for better diagnostic analysis.
- * 4. When a security system processes low‑light PNG footage blurred by camera shake, applying the Gauss‑Wiener filter helps reveal facial features for identification.
- * 5. When a digital archivist restores old PNG artwork that has become hazy over time, this routine can recover original colors and edges for preservation.
+ * 1. When a developer needs to restore sharpness in a blurred PNG photograph taken with a low‑quality camera by applying a Gauss‑Wiener deconvolution filter using Aspose.Imaging for .NET.
+ * 2. When an image‑processing pipeline must automatically clean up scanned PNG documents that appear out of focus before archiving them in a document management system.
+ * 3. When a C# application has to enhance details in PNG screenshots captured from a remote desktop session that suffered motion blur during transmission.
+ * 4. When a batch job processes a folder of PNG assets for a game and requires deconvolution to recover texture details lost during compression.
+ * 5. When a web service receives user‑uploaded PNG images with camera shake and needs to programmatically improve visual quality before storing them in cloud storage.
  */
