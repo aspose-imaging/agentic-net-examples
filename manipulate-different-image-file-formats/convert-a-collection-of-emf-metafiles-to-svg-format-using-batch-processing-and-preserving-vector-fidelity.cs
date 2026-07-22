@@ -10,59 +10,48 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\EmfInput";
-            string outputDir = @"C:\SvgOutput";
-
-            // Ensure the base output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Collection of EMF file names to process
-            string[] emfFiles = new string[]
+            // Hardcoded input folder and file list
+            string inputFolder = @"C:\EmfFiles";
+            string[] files = new string[]
             {
-                "sample1.emf",
-                "sample2.emf",
-                "sample3.emf"
+                "image1.emf",
+                "image2.emf",
+                "image3.emf"
             };
 
-            foreach (var fileName in emfFiles)
+            foreach (var fileName in files)
             {
-                // Build full input path and verify existence
-                string inputPath = Path.Combine(inputDir, fileName);
+                string inputPath = Path.Combine(inputFolder, fileName);
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build full output path (same name with .svg extension)
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".svg");
-
-                // Ensure the directory for the output file exists
+                string outputPath = Path.ChangeExtension(inputPath, ".svg");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EMF image
                 using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
                 {
-                    // Prepare SVG save options
+                    // Set up SVG save options
                     SvgOptions saveOptions = new SvgOptions
                     {
-                        TextAsShapes = true // Convert text to shapes for fidelity
+                        TextAsShapes = true
                     };
 
-                    // Configure rasterization options specific to EMF
+                    // Configure rasterization options for EMF
                     EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
                     {
-                        PageSize = emfImage.Size,
                         BackgroundColor = Color.WhiteSmoke,
-                        RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
+                        PageSize = emfImage.Size,
+                        RenderMode = EmfRenderMode.Auto,
                         BorderX = 0,
                         BorderY = 0
                     };
 
                     saveOptions.VectorRasterizationOptions = rasterOptions;
 
-                    // Save the image as SVG
+                    // Save as SVG
                     emfImage.Save(outputPath, saveOptions);
                 }
             }
@@ -76,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy Windows drawing library that stores graphics as EMF metafiles into modern web‑friendly SVG files for responsive UI rendering.
- * 2. When an automation script must generate scalable vector icons from a batch of EMF assets for inclusion in a cross‑platform mobile app.
- * 3. When a document conversion service has to preserve vector fidelity while converting engineering diagrams saved as EMF into SVG for PDF generation.
- * 4. When a CI/CD pipeline requires bulk conversion of EMF logo files to SVG to ensure crisp printing and scaling in marketing materials.
- * 5. When a data‑visualization tool needs to import multiple EMF charts and export them as SVG to enable interactive web visualizations without loss of detail.
+ * 1. When a developer needs to migrate a legacy collection of Windows Metafile (EMF) graphics to web‑friendly Scalable Vector Graphics (SVG) for responsive UI rendering.
+ * 2. When an automated build pipeline must convert multiple EMF icons into SVG files while preserving vector fidelity for high‑resolution displays.
+ * 3. When a document management system requires batch processing of EMF diagrams into SVG to enable searchable, scalable vector content in browsers.
+ * 4. When a reporting tool generates charts as EMF files and the developer wants to export them as SVG for inclusion in HTML reports without loss of quality.
+ * 5. When a GIS application stores map symbols as EMF and needs to bulk convert them to SVG for cross‑platform visualization in web maps.
  */
