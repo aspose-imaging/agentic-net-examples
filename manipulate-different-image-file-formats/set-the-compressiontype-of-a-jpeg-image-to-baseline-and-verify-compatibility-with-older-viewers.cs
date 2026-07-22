@@ -10,9 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\sample.bmp";
-            string outputPath = @"C:\Images\sample_baseline.jpg";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\sample.bmp";
+            string outputPath = @"C:\temp\sample_baseline.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,24 +21,21 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG save options with Baseline compression
-                JpegOptions saveOptions = new JpegOptions
+                // Set JPEG options with Baseline compression
+                JpegOptions jpegOptions = new JpegOptions
                 {
-                    // Set baseline compression for compatibility with older viewers
                     CompressionType = JpegCompressionMode.Baseline,
-                    // Optional: set quality (1-100). Here we use high quality.
-                    Quality = 100,
-                    // Preserve other defaults (bits per channel, resolution, etc.)
+                    Quality = 90 // typical quality setting
                 };
 
-                // Save the image as JPEG using the configured options
-                image.Save(outputPath, saveOptions);
+                // Save the image as JPEG using Baseline compression
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -50,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy BMP assets to JPEG files that can be opened by older web browsers or email clients that only support baseline JPEG.
- * 2. When a developer is preparing product catalog images for an e‑commerce platform that requires maximum compatibility with mobile devices running older operating systems.
- * 3. When a developer must generate thumbnail previews for a digital asset management system and ensure the thumbnails are viewable in any standard image viewer.
- * 4. When a developer is exporting scanned documents from a Windows desktop application to JPEG while preserving high quality and guaranteeing that the files can be printed from legacy office software.
- * 5. When a developer is automating batch processing of high‑resolution photographs for archival storage and needs to enforce baseline JPEG compression to avoid compatibility issues with third‑party archival tools.
+ * 1. When a developer needs to convert legacy BMP assets to JPEG files that can be opened by older web browsers or email clients that only support Baseline JPEG compression.
+ * 2. When an application must generate thumbnail previews for a digital asset management system while ensuring the JPEG output complies with the Baseline standard for maximum compatibility across Windows Photo Viewer and older mobile devices.
+ * 3. When a batch‑processing service prepares product images for an e‑commerce catalog and must guarantee that the saved JPEGs with a quality setting of 90 use Baseline compression so they render correctly in all shopper browsers.
+ * 4. When a document‑generation tool embeds images into PDF/A‑1b files and needs to store the source pictures as Baseline JPEGs to satisfy the archival format’s strict image‑format requirements.
+ * 5. When a migration script moves scanned documents from a legacy file server to a cloud storage solution and must re‑encode the BMP scans as Baseline JPEGs to maintain compatibility with legacy document‑viewing software.
  */
