@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.dcm";
-            string outputPath = @"C:\Images\output_16bit.png";
+            string inputPath = "input.dcm";
+            string outputPath = "output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,19 +27,19 @@ class Program
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage to access DICOM‑specific methods
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Apply window‑level adjustment (example using brightness and contrast)
-                // AdjustBrightness: range [-255,255]; AdjustContrast: range [-100,100]
-                dicomImage.AdjustBrightness(40);   // example window centre offset
-                dicomImage.AdjustContrast(30f);    // example window width scaling
+                // Apply window level adjustment (example using brightness and contrast)
+                dicomImage.AdjustBrightness(40);      // Adjust brightness as needed
+                dicomImage.AdjustContrast(30f);       // Adjust contrast as needed
 
-                // Save as 16‑bit PNG
+                // Set PNG options for 16‑bit output
                 var pngOptions = new PngOptions
                 {
                     BitDepth = 16
                 };
+
+                // Save as 16‑bit PNG
                 dicomImage.Save(outputPath, pngOptions);
             }
         }
@@ -52,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology software needs to convert a DICOM CT scan to a high‑precision 16‑bit PNG for integration with a third‑party image analysis tool, the code can load the DICOM, apply window‑level adjustments, and save the result.
- * 2. When a research lab wants to batch‑process DICOM MRI images to enhance contrast using brightness and contrast settings before feeding them into a machine‑learning pipeline that requires PNG input, this snippet provides the necessary C# workflow.
- * 3. When a hospital’s PACS system must generate printable 16‑bit PNG snapshots of DICOM X‑ray images with custom window centre and width for diagnostic reporting, developers can use this example to read, adjust, and export the images.
- * 4. When a medical imaging startup needs to create web‑friendly 16‑bit PNG previews of DICOM ultrasound files while preserving diagnostic detail through window level tuning, the code demonstrates the required steps in .NET.
- * 5. When a quality‑control application must verify DICOM image integrity by converting the files to 16‑bit PNG after applying specific brightness and contrast corrections for visual inspection, this program offers a straightforward solution.
+ * 1. When a radiology application must convert DICOM CT scans to high‑precision 16‑bit PNG files for visual inspection after applying custom window‑level adjustments.
+ * 2. When a medical research pipeline needs to extract pixel data from DICOM MR images, tweak brightness and contrast, and save the result as a lossless 16‑bit PNG for quantitative analysis.
+ * 3. When a healthcare integration service has to transform DICOM X‑ray images into web‑friendly 16‑bit PNGs while preserving diagnostic detail through window level correction.
+ * 4. When a machine‑learning preprocessing step requires standardizing DICOM ultrasound frames by adjusting brightness/contrast and exporting them as 16‑bit PNGs for model training.
+ * 5. When a hospital’s PACS archiving tool automates the creation of 16‑bit PNG thumbnails from DICOM studies, using window level adjustment to highlight relevant anatomy.
  */
