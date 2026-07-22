@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dng;
 
 class Program
 {
@@ -10,10 +11,10 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.dng";
-            string outputPath = "output.jpg";
+            string inputPath = "input\\sample.dng";
+            string outputPath = "output\\result.jpg";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,20 +24,15 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DNG image
-            using (Aspose.Imaging.FileFormats.Dng.DngImage dngImage = (Aspose.Imaging.FileFormats.Dng.DngImage)Image.Load(inputPath))
+            // Load DNG image, adjust brightness, and save as JPEG
+            using (DngImage dng = (DngImage)Image.Load(inputPath))
             {
-                // Increase brightness by ~20% (51 out of 255)
-                dngImage.AdjustBrightness(51);
+                // Increase brightness by approximately 20% (value 51 out of 255)
+                dng.AdjustBrightness(51);
 
-                // Prepare JPEG save options
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Quality = 90 // optional quality setting
-                };
-
-                // Save as JPEG
-                dngImage.Save(outputPath, jpegOptions);
+                // Save with default JPEG options
+                JpegOptions jpegOptions = new JpegOptions();
+                dng.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer needs to batch‑process raw DNG files from a shoot, increase exposure by about 20 % and generate web‑ready JPEGs for online galleries.
- * 2. When an e‑commerce platform receives product photos in DNG format, it can brighten the images slightly and convert them to JPEG to improve visual appeal on product pages.
- * 3. When a mobile app backend receives raw camera uploads, it can use this code to adjust brightness and create compressed JPEG thumbnails for faster preview loading.
- * 4. When a digital archivist wants to preserve original DNG files but also provide lower‑resolution, brighter JPEG copies for quick reference in a catalog system.
- * 5. When a scientific imaging workflow requires enhancing raw DNG microscope images and exporting them as JPEGs for inclusion in research reports or presentations.
+ * 1. When a photographer wants to batch‑process raw DNG files from a shoot, increase their exposure by about 20 % and generate web‑ready JPEG previews using C# and Aspose.Imaging.
+ * 2. When an e‑commerce platform receives product photos in DNG format and needs to brighten them slightly before converting them to JPEG for faster page loads.
+ * 3. When a scientific imaging application must improve the visibility of raw microscope images stored as DNG and export them as JPEGs for inclusion in reports.
+ * 4. When a mobile app backend processes user‑uploaded raw DNG images, applies a brightness boost and stores the result as a JPEG thumbnail for quick display.
+ * 5. When a digital archivist automates the conversion of legacy DNG scans, adjusts brightness to compensate for underexposed originals, and saves them as JPEG files for archival distribution.
  */
