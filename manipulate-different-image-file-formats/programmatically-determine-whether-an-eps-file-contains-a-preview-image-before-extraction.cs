@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -24,7 +24,7 @@ class Program
 
         try
         {
-            // Load EPS image
+            // Load the EPS image
             using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
                 // Determine if a raster preview is present
@@ -38,13 +38,13 @@ class Program
                     {
                         if (preview != null)
                         {
-                            // Save the preview image as PNG
+                            // Save the preview image to the output path as PNG
                             preview.Save(outputPath, new PngOptions());
                             Console.WriteLine($"Preview image saved to: {outputPath}");
                         }
                         else
                         {
-                            Console.WriteLine("Preview image property reported true, but GetPreviewImage returned null.");
+                            Console.WriteLine("Preview image retrieval returned null.");
                         }
                     }
                 }
@@ -63,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a document management system imports EPS files and needs to display a thumbnail, a developer can use this code to check for a raster preview before extracting and saving it as a PNG.
- * 2. When an e‑commerce platform generates product catalogs from EPS artwork, the code helps verify the presence of an embedded preview image to create fast‑loading preview thumbnails for web pages.
- * 3. When a print‑shop workflow validates incoming EPS submissions, the developer can programmatically detect whether a preview exists to decide if a low‑resolution preview should be shown to the client before printing.
- * 4. When a digital asset management (DAM) tool indexes EPS assets, this snippet allows the system to determine if a raster preview is available so it can store or skip generating a separate preview image.
- * 5. When a batch conversion utility processes large numbers of EPS files, the code enables the utility to skip files without raster previews, avoiding unnecessary GetPreviewImage calls and saving processing time.
+ * 1. When a graphic designer’s workflow requires automatically checking EPS files for embedded raster previews before converting them to PNG thumbnails for a web gallery.
+ * 2. When a print‑prepress automation script needs to verify that incoming EPS assets contain a low‑resolution preview so it can extract and embed the preview into a PDF preview pane.
+ * 3. When a document management system processes uploaded EPS files and must decide whether to generate a preview image or flag the file for manual review if no raster preview exists.
+ * 4. When a batch conversion tool for a digital asset pipeline wants to skip EPS files without previews to avoid unnecessary processing and only save existing previews as PNG files.
+ * 5. When a C# application integrates Aspose.Imaging to validate EPS files received from third‑party vendors, ensuring they include a raster preview before storing them in a media library.
  */
