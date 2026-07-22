@@ -4,18 +4,17 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
 using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,13 +26,13 @@ class Program
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
                 MagicWandTool
-                    .Select(image, new MagicWandSettings(120, 100) { Threshold = 150 })
-                    .Union(new MagicWandSettings(300, 200))
-                    .Subtract(new MagicWandSettings(250, 150) { Threshold = 80 })
+                    .Select(image, new MagicWandSettings(100, 100))
+                    .Union(new MagicWandSettings(200, 200))
+                    .Subtract(new MagicWandSettings(150, 150) { Threshold = 30 })
                     .Apply();
 
                 Graphics graphics = new Graphics(image);
-                using (SolidBrush brush = new SolidBrush(Color.FromArgb(128, 255, 0, 0)))
+                using (SolidBrush brush = new SolidBrush(Color.Red))
                 {
                     graphics.FillRectangle(brush, new Rectangle(0, 0, image.Width, image.Height));
                 }
@@ -50,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically isolate a complex region in a PNG image—combining multiple Magic Wand selections with union and subtraction—and then apply a semi‑transparent red overlay for highlighting or watermarking.
- * 2. When an automated image‑processing pipeline must remove a specific foreground object from a photograph and fill the resulting area with a solid color while preserving the PNG alpha channel using Aspose.Imaging for .NET.
- * 3. When creating custom masks for batch editing of scanned documents, such as selecting multiple text blocks, excluding a logo, and filling the selected area with a colored background to improve readability.
- * 4. When building a C# application that dynamically generates visual cues on map tiles by selecting irregular terrain features with Magic Wand tools, subtracting roads, and overlaying a translucent color to indicate zones.
- * 5. When implementing a photo‑editing feature that lets users programmatically replace skin tones in portrait PNGs by selecting skin regions, excluding eyes with subtraction, and applying a solid brush with adjustable opacity.
+ * 1. When a developer needs to isolate a complex region in a PNG photograph—combining two similar color areas and removing a smaller overlapping part—so they can recolor the entire image with a solid red overlay.
+ * 2. When building an automated batch process that highlights specific objects in scanned PNG documents by creating a custom selection with Magic Wand union and subtraction before applying a uniform fill.
+ * 3. When creating a C# tool that prepares graphics for UI themes by selecting multiple background zones in a raster image, excluding logo areas, and then filling the remaining canvas with a single color.
+ * 4. When implementing a photo‑editing feature that lets users click to select adjacent color regions, merge them, cut out unwanted spots, and instantly repaint the whole picture using a SolidBrush in Aspose.Imaging.
+ * 5. When generating marketing assets where a designer wants to replace the original colors of a PNG logo with a brand‑specific red by programmatically selecting combined regions and applying a solid fill.
  */
