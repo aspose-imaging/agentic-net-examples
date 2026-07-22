@@ -12,9 +12,9 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath1 = @"C:\temp\input1.tif";
-            string inputPath2 = @"C:\temp\input2.tif";
-            string outputPath = @"C:\temp\output.tif";
+            string inputPath1 = @"c:\temp\source1.tif";
+            string inputPath2 = @"c:\temp\source2.tif";
+            string outputPath = @"c:\temp\combined.tif";
 
             // Verify input files exist
             if (!File.Exists(inputPath1))
@@ -32,47 +32,50 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load first source image
-            using (RasterImage srcImage1 = (RasterImage)Image.Load(inputPath1))
+            using (Image srcImg1 = Image.Load(inputPath1))
             {
-                // Create TiffOptions for the first frame (LZW compression)
+                // Define compression for first frame (LZW)
                 TiffOptions options1 = new TiffOptions(TiffExpectedFormat.Default)
                 {
-                    BitsPerSample = new ushort[] { 8, 8, 8 },
-                    ByteOrder = TiffByteOrder.BigEndian,
                     Compression = TiffCompressions.Lzw,
+                    BitsPerSample = new ushort[] { 8, 8, 8 },
                     Photometric = TiffPhotometrics.Rgb,
-                    PlanarConfiguration = TiffPlanarConfigs.Contiguous
+                    PlanarConfiguration = TiffPlanarConfigs.Contiguous,
+                    ByteOrder = TiffByteOrder.BigEndian
                 };
 
-                // Create a TiffFrame from the first source image with its options
-                TiffFrame frame1 = new TiffFrame(srcImage1, options1);
+                // Create first frame from the loaded image with its options
+                TiffFrame frame1 = new TiffFrame(srcImg1 as RasterImage, options1);
 
                 // Load second source image
-                using (RasterImage srcImage2 = (RasterImage)Image.Load(inputPath2))
+                using (Image srcImg2 = Image.Load(inputPath2))
                 {
-                    // Create TiffOptions for the second frame (CCITT Group 3 Fax compression)
+                    // Define compression for second frame (CCITT Group 3 Fax)
                     TiffOptions options2 = new TiffOptions(TiffExpectedFormat.Default)
                     {
-                        BitsPerSample = new ushort[] { 1 },
-                        ByteOrder = TiffByteOrder.LittleEndian,
                         Compression = TiffCompressions.CcittFax3,
+                        BitsPerSample = new ushort[] { 1 },
                         Photometric = TiffPhotometrics.MinIsBlack,
-                        PlanarConfiguration = TiffPlanarConfigs.Contiguous
+                        PlanarConfiguration = TiffPlanarConfigs.Contiguous,
+                        ByteOrder = TiffByteOrder.LittleEndian
                     };
 
-                    // Create a TiffFrame from the second source image with its options
-                    TiffFrame frame2 = new TiffFrame(srcImage2, options2);
+                    // Create second frame from the loaded image with its options
+                    TiffFrame frame2 = new TiffFrame(srcImg2 as RasterImage, options2);
 
-                    // Create a new multi‑frame TIFF image using the first frame
-                    using (TiffImage tiffImage = new TiffImage(frame1))
+                    // Create a multi-frame TIFF image using the two frames
+                    using (TiffImage tiffImage = new TiffImage(new TiffFrame[] { frame1, frame2 }))
                     {
-                        // Add the second frame with its distinct compression
-                        tiffImage.AddFrame(frame2);
-
                         // Save the combined TIFF
                         tiffImage.Save(outputPath);
                     }
+
+                    // Dispose second frame (optional, handled by TiffImage disposal)
+                    frame2.Dispose();
                 }
+
+                // Dispose first frame (optional, handled by TiffImage disposal)
+                frame1.Dispose();
             }
         }
         catch (Exception ex)
@@ -84,9 +87,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to combine scanned documents from two different scanners into a single multi‑page TIFF where the first pages use LZW compression for color images and the later pages use CCITT Group 3 compression for black‑and‑white fax pages.
- * 2. When building a medical imaging archive that merges patient X‑ray TIFF files with accompanying color photographs, applying LZW to the photos and CCITT Group 3 to the X‑rays to minimize storage while preserving quality.
- * 3. When creating a legal e‑discovery bundle that merges high‑resolution TIFF evidence with low‑resolution faxed copies, using different compression settings per frame to meet court‑mandated file size limits.
- * 4. When developing a document management system that assembles multi‑page TIFF reports from separate source files, assigning LZW compression to the first color chart pages and CCITT Group 3 to the subsequent text‑only pages for optimal file size.
- * 5. When automating the generation of archival TIFF files that combine satellite imagery (color) and scanned map overlays (black‑and‑white), applying distinct compression types per frame to balance image fidelity and archival storage constraints.
+ * 1. When a developer needs to merge scanned black‑and‑white documents and color photographs into a single multi‑page TIFF for archival, applying LZW compression to the color frames and CCITT Group 3 compression to the monochrome frames.
+ * 2. When building a medical imaging pipeline that combines DICOM‑derived TIFF slices with patient report pages, using distinct TIFF compression types per frame to optimize quality and storage.
+ * 3. When creating a printable catalog that mixes high‑resolution product images with low‑resolution barcode pages, and wants each page stored with the most suitable TIFF compression (LZW for images, CCITT Group 3 for barcodes).
+ * 4. When automating the assembly of legal case bundles that contain typed text pages and attached color evidence photos, preserving the original compression (CCITT Group 3 for text, LZW for photos) in a single combined TIFF file.
+ * 5. When developing a document management system that ingests TIFF files from multiple scanners, each using its own default compression, and needs to concatenate them into one multi‑frame TIFF while retaining the appropriate compression for each source frame.
  */
