@@ -12,7 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "sample.djvu";
-            string outputDirectory = "output";
+            string outputDir = "output";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -22,29 +22,22 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(outputDir);
 
             // Load DjVu document
-            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
             {
                 int pageIndex = 0;
-                foreach (DjvuPage page in djvu.Pages)
+                foreach (DjvuPage page in djvuImage.Pages)
                 {
-                    using (page)
-                    {
-                        // Apply Floyd‑Steinberg dithering with 1‑bit palette
-                        page.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
+                    // Apply dithering to the page
+                    page.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
 
-                        // Prepare output path for this page
-                        string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.gif");
+                    // Prepare output path for the GIF page
+                    string outputPath = Path.Combine(outputDir, $"page{pageIndex}.gif");
 
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the dithered page as GIF
-                        GifOptions gifOptions = new GifOptions();
-                        page.Save(outputPath, gifOptions);
-                    }
+                    // Save the dithered page as GIF
+                    page.Save(outputPath, new GifOptions());
 
                     pageIndex++;
                 }
@@ -59,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must extract each page of a multi‑page DjVu file and create high‑contrast 1‑bit GIF images using Floyd‑Steinberg dithering for web‑ready preview thumbnails.
- * 2. When a C# application needs to batch‑process scanned DjVu archives, apply binary dithering to improve readability, and save the results as GIF files for legacy systems that only support GIF.
- * 3. When an image‑processing pipeline requires converting DjVu pages to GIF format while reducing color depth to a single bit to minimize file size for email attachments.
- * 4. When a document‑management solution has to generate GIF previews of DjVu pages with consistent dithering to ensure uniform visual quality across all pages.
- * 5. When a developer wants to automate the conversion of DjVu e‑books into GIF slideshows, applying Floyd‑Steinberg dithering to each page to preserve detail in monochrome displays.
+ * 1. When a developer needs to convert multi‑page DjVu documents into GIF images while preserving visual quality by applying Floyd‑Steinberg dithering to each page.
+ * 2. When a document‑management system must generate low‑size preview GIFs from scanned DjVu files for web thumbnails, using Aspose.Imaging’s DitheringMethod to maintain contrast.
+ * 3. When an e‑learning platform wants to transform DjVu lecture notes into page‑by‑page GIF slides with consistent dithering to ensure readability on devices that only support GIF.
+ * 4. When a batch‑processing tool has to automate the extraction of each DjVu page, apply dithering, and save them as separate GIF files for archival or distribution.
+ * 5. When a legacy application requires converting DjVu archives to GIF format for compatibility with older browsers, and needs to improve the monochrome rendering by using Floyd‑Steinberg dithering on every page.
  */
