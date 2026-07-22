@@ -8,54 +8,44 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string tempPngPath = "temp.png";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-        Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-
         try
         {
-            // Load SVG and rasterize to PNG (temporary file)
-            using (Image svgImage = Image.Load(inputPath))
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Color.White
-                };
-
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                svgImage.Save(tempPngPath, pngOptions);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Load rasterized PNG and apply vertical Sobel filter
-            using (Image rasterImage = Image.Load(tempPngPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
             {
-                var raster = (RasterImage)rasterImage;
-
-                double[,] sobelKernel = new double[,]
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    { -1, -2, -1 },
-                    {  0,  0,  0 },
-                    {  1,  2,  1 }
-                };
+                    var rasterOptions = new SvgRasterizationOptions { PageSize = image.Size };
+                    var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
+                    image.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(sobelKernel));
+                    using (Image rasterImg = Image.Load(ms))
+                    {
+                        RasterImage rasterImage = (RasterImage)rasterImg;
 
-                var saveOptions = new PngOptions();
-                raster.Save(outputPath, saveOptions);
+                        double[,] kernel = new double[,]
+                        {
+                            { -1, 0, 1 },
+                            { -2, 0, 2 },
+                            { -1, 0, 1 }
+                        };
+                        var convOptions = new ConvolutionFilterOptions(kernel);
+                        rasterImage.Filter(rasterImage.Bounds, convOptions);
+
+                        rasterImage.Save(outputPath, new PngOptions());
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -67,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to detect vertical edges in a vector logo stored as an SVG and produce a raster PNG highlighting those edges for quality inspection.
- * 2. When an automated build pipeline must convert SVG UI icons to PNG thumbnails and apply a Sobel filter to generate edge‑enhanced previews for documentation.
- * 3. When a web service processes uploaded SVG diagrams, rasterizes them, and runs vertical Sobel edge analysis to identify structural lines before storing the result as a PNG.
- * 4. When a desktop application wants to compare the original SVG artwork with its edge map to verify that scaling or transformations have not introduced artifacts.
- * 5. When a machine‑learning preprocessing step requires extracting vertical edge features from vector graphics by rasterizing SVG files and applying a convolution filter using Aspose.Imaging in C#.
+ * 1. When a developer wants to detect vertical edges in an SVG logo and export the result as a PNG for quality inspection.
+ * 2. When an automated pipeline needs to convert vector graphics to raster format and apply a Sobel filter to highlight structural outlines before OCR.
+ * 3. When a web service generates thumbnails of user‑uploaded SVG diagrams and uses vertical Sobel convolution to emphasize borders for better visual contrast.
+ * 4. When a desktop application analyzes engineering schematics stored as SVG files to identify vertical lines and save the processed image for reporting.
+ * 5. When a machine‑learning preprocessing step requires edge detection on vector icons, converting them to raster PNGs and applying the vertical Sobel kernel to create feature maps.
  */
