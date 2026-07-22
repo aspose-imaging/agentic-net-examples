@@ -7,11 +7,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.bmp";
-        string outputPath = "output.bmp";
-
         try
         {
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,13 +24,13 @@ class Program
             {
                 RasterImage raster = (RasterImage)image;
 
-                var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions();
-                blurOptions.Size = 7;
-                blurOptions.Sigma = 2.0;
+                double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurBox(7);
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
 
-                raster.Filter(raster.Bounds, blurOptions);
+                raster.Filter(raster.Bounds, filterOptions);
 
-                raster.Save(outputPath, new BmpOptions());
+                var bmpOptions = new BmpOptions();
+                raster.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -42,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When preparing scanned BMP documents for OCR, a developer may increase the Gaussian blur kernel to 7x7 to reduce noise and improve text recognition.
- * 2. When generating thumbnail previews of BMP screenshots, a developer can apply a larger 7x7 blur kernel to smooth edges and create a consistent visual style.
- * 3. When preprocessing BMP images for a machine‑learning pipeline that requires low‑frequency features, a developer may use a 7x7 Gaussian blur to suppress fine details.
- * 4. When creating background textures from BMP photos for a game UI, a developer might enlarge the blur kernel to 7x7 to produce a softer, less distracting backdrop.
- * 5. When sanitizing user‑uploaded BMP files to obscure sensitive details, a developer can apply a 7x7 Gaussian blur to ensure stronger smoothing before storage.
+ * 1. When a developer needs to reduce noise in scanned BMP documents before OCR by applying a 7x7 blur box kernel for stronger smoothing.
+ * 2. When a C# application must prepare BMP textures for a video game by softening harsh edges using Aspose.Imaging’s 7x7 convolution blur filter.
+ * 3. When an image‑processing pipeline requires consistent background smoothing of BMP screenshots for UI testing, increasing the kernel size from 3x3 to 7x7 to eliminate pixel‑level artifacts.
+ * 4. When a medical imaging tool stores BMP slices and wants to apply a gentle blur to hide patient identifiers, using a 7x7 blur box kernel via Aspose.Imaging in .NET.
+ * 5. When a batch‑processing script needs to generate visually pleasing thumbnail BMPs by applying a larger 7x7 blur to create a smoother preview without changing file format.
  */
