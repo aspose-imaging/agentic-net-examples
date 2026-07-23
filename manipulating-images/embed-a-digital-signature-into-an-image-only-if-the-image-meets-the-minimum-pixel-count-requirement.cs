@@ -1,20 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output_signed.jpg";
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
+        string password = "mySecretPassword";
 
-        // Password for the digital signature
-        string password = "SecretPassword";
-
-        // Minimum pixel count required to embed a signature
-        const long MinPixelCount = 200_000; // example threshold
+        // Minimum pixel count requirement (example: 800x600)
+        int minPixelCount = 800 * 600;
 
         try
         {
@@ -25,36 +24,32 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the image
-            using (Image image = Image.Load(inputPath))
+            // Load the image (as RasterImage)
+            using (RasterImage image = Image.Load(inputPath) as RasterImage)
             {
-                // Work only with raster images
-                if (image is RasterImage rasterImage)
+                if (image == null)
                 {
-                    long pixelCount = (long)rasterImage.Width * rasterImage.Height;
+                    Console.Error.WriteLine("Unsupported image format.");
+                    return;
+                }
 
-                    if (pixelCount >= MinPixelCount)
-                    {
-                        // Embed the digital signature using the provided password
-                        rasterImage.EmbedDigitalSignature(password);
-                        // Save the signed image
-                        rasterImage.Save(outputPath);
-                        Console.WriteLine("Digital signature embedded and image saved.");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Image pixel count ({pixelCount}) is below the minimum required ({MinPixelCount}). No signature applied.");
-                        // Optionally save the original image to the output location
-                        rasterImage.Save(outputPath);
-                    }
+                // Check if image meets the minimum pixel count
+                long pixelCount = (long)image.Width * image.Height;
+                if (pixelCount >= minPixelCount)
+                {
+                    // Embed digital signature using the provided password
+                    image.EmbedDigitalSignature(password);
                 }
                 else
                 {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    Console.WriteLine($"Image pixel count ({pixelCount}) is below the required minimum ({minPixelCount}). Skipping signature.");
                 }
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the modified image
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -66,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a company needs to embed a tamper‑proof digital signature into high‑resolution product photos (e.g., JPEG or PNG) before uploading them to an e‑commerce platform, but only if the image meets a minimum pixel count to ensure the signature is not lost.
- * 2. When a medical imaging system must sign large DICOM‑converted raster images to guarantee authenticity, while skipping smaller thumbnail images that fall below the required pixel threshold.
- * 3. When a government agency archives scanned documents as TIFF files and wants to embed a password‑protected signature only on scans that are large enough to retain the signature’s integrity.
- * 4. When a digital asset management tool processes user‑uploaded JPEG images and automatically adds a secure signature to images larger than 200,000 pixels, saving the signed version to a designated folder.
- * 5. When a security‑focused mobile app generates high‑definition screenshots and needs to embed a password‑protected signature using Aspose.Imaging, but avoids signing low‑resolution screenshots that do not meet the pixel count requirement.
+ * 1. When a C# web service needs to embed a digital signature into high‑resolution JPEG or PNG product images, but only if the image size is at least 800 × 600 pixels.
+ * 2. When an automated document‑management workflow must verify that scanned documents meet a minimum pixel count before signing them with a password‑protected digital signature.
+ * 3. When a desktop application processes user‑uploaded photos and wants to add a tamper‑evident signature only to images that are large enough to retain visual quality after embedding.
+ * 4. When a batch‑processing script validates camera‑raw images for a marketing campaign, ensuring each image exceeds the required pixel threshold before applying a secure digital signature.
+ * 5. When a secure archiving tool saves images to a protected repository and needs to skip signature embedding for thumbnails or low‑resolution previews that fall below the defined pixel count.
  */
