@@ -1,10 +1,9 @@
 using System;
-using System.Diagnostics;
 using System.IO;
+using System.Diagnostics;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
@@ -12,18 +11,17 @@ class Program
     {
         try
         {
-            // Hardcoded list of EMF input files
+            // Hardcoded input EMF files
             string[] inputFiles = new[]
             {
-                @"C:\Images\Input1.emf",
-                @"C:\Images\Input2.emf",
-                @"C:\Images\Input3.emf"
+                @"C:\Images\sample1.emf",
+                @"C:\Images\sample2.emf"
             };
 
-            // Desired background color to remove (e.g., white)
-            Color backgroundColor = Color.White;
+            // Desired background color for rasterization
+            var backgroundColor = Aspose.Imaging.Color.White;
 
-            foreach (string inputPath in inputFiles)
+            foreach (var inputPath in inputFiles)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -32,34 +30,33 @@ class Program
                     return;
                 }
 
-                // Determine output PNG path (same folder, same name with .png)
+                // Determine output PNG path (same folder, same name with .png extension)
                 string outputPath = Path.ChangeExtension(inputPath, ".png");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Measure processing time
-                Stopwatch sw = Stopwatch.StartNew();
+                var stopwatch = Stopwatch.StartNew();
 
                 // Load EMF image
-                using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Set background color information
-                    emfImage.HasBackgroundColor = true;
-                    emfImage.BackgroundColor = backgroundColor;
+                    // Cast to EmfImage for specific operations
+                    var emfImage = (EmfImage)image;
 
-                    // Remove background
-                    emfImage.RemoveBackground();
+                    // Optional: remove existing background (if needed)
+                    // emfImage.RemoveBackground();
 
-                    // Prepare rasterization options for PNG output
-                    EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
+                    // Set up rasterization options with background color
+                    var rasterOptions = new EmfRasterizationOptions
                     {
-                        PageSize = emfImage.Size,
-                        BackgroundColor = Color.Transparent // ensure transparent background in PNG
+                        BackgroundColor = backgroundColor,
+                        PageSize = emfImage.Size
                     };
 
-                    // PNG save options with vector rasterization
-                    PngOptions pngOptions = new PngOptions
+                    // Set up PNG save options
+                    var pngOptions = new PngOptions
                     {
                         VectorRasterizationOptions = rasterOptions
                     };
@@ -68,8 +65,8 @@ class Program
                     emfImage.Save(outputPath, pngOptions);
                 }
 
-                sw.Stop();
-                Console.WriteLine($"Processed '{Path.GetFileName(inputPath)}' in {sw.ElapsedMilliseconds} ms, saved to '{outputPath}'.");
+                stopwatch.Stop();
+                Console.WriteLine($"Processed '{inputPath}' to '{outputPath}' in {stopwatch.ElapsedMilliseconds} ms.");
             }
         }
         catch (Exception ex)
@@ -81,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert legacy EMF vector graphics from a design repository into web‑ready PNG files with transparent backgrounds for inclusion in HTML pages.
- * 2. When an automated reporting tool must strip white paper backgrounds from EMF charts before embedding them as PNG images in PDF invoices.
- * 3. When a Windows desktop application generates EMF icons that must be exported as PNG thumbnails with no background for display in a mobile app gallery.
- * 4. When a migration script processes multiple EMF logos stored on a file server, removes their background color, and logs the processing time to monitor performance.
- * 5. When a CI/CD pipeline validates that EMF assets are correctly rasterized to PNG with transparent backgrounds and records the elapsed time for each conversion to detect regressions.
+ * 1. When a .NET application must convert a batch of vector EMF logos to raster PNG thumbnails while ensuring a white background and measuring conversion speed.
+ * 2. When an automated reporting tool needs to replace transparent backgrounds in EMF charts with a solid color before exporting them as PNG images for web publishing.
+ * 3. When a document‑generation service processes multiple EMF diagrams, removes any existing background, rasterizes them to PNG, and logs the time taken for performance monitoring.
+ * 4. When a Windows desktop utility validates the existence of EMF files, converts them to PNG with a specified background color, and stores the results in the same folder for downstream image processing.
+ * 5. When a CI/CD pipeline for a graphics‑intensive project benchmarks the rasterization of EMF assets to PNG using Aspose.Imaging and records the elapsed time for each file.
  */
