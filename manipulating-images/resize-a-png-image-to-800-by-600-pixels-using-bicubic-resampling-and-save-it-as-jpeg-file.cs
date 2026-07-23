@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.jpg";
-
         try
         {
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.jpg";
+
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,16 +27,11 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Resize using Bicubic (CubicConvolution) resampling to 800x600
+                // Resize to 800x600 using Bicubic (CubicConvolution) resampling
                 image.Resize(800, 600, ResizeType.CubicConvolution);
 
-                // Prepare JPEG save options (optional: set quality)
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Quality = 100
-                };
-
-                // Save the resized image as JPEG
+                // Save as JPEG with default options
+                var jpegOptions = new JpegOptions(); // default quality etc.
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -49,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate thumbnail previews of user‑uploaded PNG photos at a fixed 800×600 size with high‑quality bicubic resampling before storing them as JPEGs for faster delivery.
- * 2. When an e‑commerce platform must convert product images from PNG to JPEG while resizing them to 800×600 pixels to meet the site’s image guidelines and reduce bandwidth.
- * 3. When a desktop utility processes a batch of PNG screenshots, resizes each to 800×600 using CubicConvolution interpolation, and saves them as high‑quality JPEG files for inclusion in a PDF report.
- * 4. When a mobile backend service receives PNG assets, needs to downscale them to 800×600 with bicubic filtering for consistent display on tablets, and stores the result as JPEG to optimize storage.
- * 5. When a content management system automatically prepares PNG graphics for email newsletters by resizing them to 800×600 pixels with bicubic resampling and converting them to JPEG to ensure compatibility with most email clients.
+ * 1. When a web application needs to generate thumbnail previews of user‑uploaded PNG graphics by resizing them to a standard 800 × 600 resolution with high‑quality bicubic resampling and then storing the result as a JPEG for faster delivery.
+ * 2. When an e‑commerce platform must convert product images originally supplied as PNG files into optimized JPEG files of 800 × 600 pixels to meet the size requirements of a third‑party marketplace.
+ * 3. When a desktop C# utility processes a batch of high‑resolution PNG screenshots, resizes each to 800 × 600 using the CubicConvolution algorithm, and saves them as JPEGs for inclusion in a PDF report.
+ * 4. When a mobile backend service receives PNG icons from clients, needs to downscale them to 800 × 600 with bicubic interpolation to preserve visual quality, and stores the output as JPEG to reduce storage costs.
+ * 5. When an automated build script for a digital signage system must convert source PNG assets to 800 × 600 JPEG images using Aspose.Imaging’s Resize method with bicubic resampling to ensure consistent display dimensions across all screens.
  */

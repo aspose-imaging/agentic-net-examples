@@ -5,44 +5,38 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
+        // Hard‑coded paths
         string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+        string outputPath = "output/signed.jpg";
+        string password = "mySecretPassword";
 
         try
         {
-            // Load image from a memory stream
-            byte[] imageData = File.ReadAllBytes(inputPath);
-            using (var stream = new MemoryStream(imageData))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                using (var image = Image.Load(stream))
-                {
-                    // Cast to RasterImage to access digital signature methods
-                    var raster = (RasterImage)image;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                    // Embed digital signature with a valid password
-                    string password = "secure123";
-                    raster.EmbedDigitalSignature(password);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Load JPEG from a file stream
+            using (FileStream fs = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+            using (RasterImage image = (RasterImage)Image.Load(fs))
+            {
+                // Embed digital signature using the provided password
+                image.EmbedDigitalSignature(password);
 
-                    // Save the signed image
-                    image.Save(outputPath);
+                // Save the signed image
+                image.Save(outputPath);
 
-                    // Verify the signature
-                    bool isSigned = raster.IsDigitalSigned(password);
-                    Console.WriteLine($"Digital signature verification: {(isSigned ? "Success" : "Failure")}");
-                }
+                // Verify that the image is digitally signed
+                bool isSigned = image.IsDigitalSigned(password);
+                Console.WriteLine($"Is image digitally signed? {isSigned}");
             }
         }
         catch (Exception ex)
@@ -54,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# web service receives a JPEG upload via a memory stream and must embed a password‑protected digital signature before storing the file for compliance auditing.
- * 2. When an enterprise document management system needs to programmatically sign scanned JPEG invoices with a secure password and verify the signature to prevent tampering.
- * 3. When a desktop application processes user‑selected JPEG photos, adds a digital signature for copyright protection, saves the signed image, and confirms the signature integrity in one workflow.
- * 4. When a batch processing script reads JPEG images from a network share, embeds a digital signature using a shared secret, writes the signed files to an output folder, and logs verification results for quality control.
- * 5. When a secure messaging platform encrypts JPEG attachments, applies a password‑protected digital signature to ensure authenticity, and validates the signature before delivering the image to the recipient.
+ * 1. When a web application needs to securely embed a password‑protected digital signature into user‑uploaded JPEG photos before storing them in a cloud repository.
+ * 2. When a desktop utility must read a JPEG from a file stream, sign it with a secret key, and verify the signature to ensure image integrity for legal documentation.
+ * 3. When an automated batch process has to add a tamper‑evident digital signature to marketing JPEG assets and confirm the signature before publishing them to a CDN.
+ * 4. When a mobile backend service processes incoming JPEG images, embeds a password‑protected signature for copyright protection, and validates the signature before sending the image to clients.
+ * 5. When a compliance‑focused system needs to load a JPEG via a stream, apply a digital signature using Aspose.Imaging, save the signed file, and programmatically check that the signature matches the provided password.
  */

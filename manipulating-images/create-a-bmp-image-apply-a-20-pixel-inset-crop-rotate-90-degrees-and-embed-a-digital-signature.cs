@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
@@ -11,34 +9,54 @@ class Program
     {
         try
         {
-            // Output BMP file path
-            string outputPath = "output.bmp";
+            // Hardcoded paths
+            string inputPath = "input\\source.bmp";
+            string outputPath = "output\\result.bmp";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a file source bound to the output path
-            Source source = new FileCreateSource(outputPath, false);
-            BmpOptions options = new BmpOptions() { Source = source };
-
-            // Define canvas size (minimum 200x200 for digital signature)
-            int width = 200;
-            int height = 200;
-
-            // Create BMP canvas
-            using (BmpImage canvas = (BmpImage)Image.Create(options, width, height))
+            // Create a BMP image if it does not exist
+            if (!File.Exists(inputPath))
             {
-                // Inset crop of 20 pixels on each side
-                canvas.Crop(20, 20, 20, 20);
+                Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
+                using (BmpImage bmp = new BmpImage(200, 200))
+                {
+                    // Fill with white background
+                    for (int y = 0; y < bmp.Height; y++)
+                    {
+                        for (int x = 0; x < bmp.Width; x++)
+                        {
+                            bmp.SetPixel(x, y, Color.White);
+                        }
+                    }
+                    bmp.Save(inputPath);
+                }
+            }
 
-                // Rotate 90 degrees clockwise
-                canvas.Rotate(90f, true, Color.White);
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Load, process, and save the image
+            using (BmpImage image = (BmpImage)Image.Load(inputPath))
+            {
+                if (!image.IsCached) image.CacheData();
+
+                // Apply a 20-pixel inset crop
+                image.Crop(20, 20, 20, 20);
+
+                // Rotate 90 degrees
+                image.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
                 // Embed digital signature with a valid password
-                canvas.EmbedDigitalSignature("secure123");
+                image.EmbedDigitalSignature("secure123");
 
-                // Save the image (bound source, so just call Save)
-                canvas.Save();
+                // Save the final image
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -50,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a printable ID badge in a Windows desktop app that must be saved as a BMP, trimmed to remove margins, rotated for landscape layout, and digitally signed for authenticity.
- * 2. When preparing a scanned engineering drawing for archival, cropping a 20‑pixel border, rotating it to match the standard orientation, and embedding a password‑protected digital signature to meet compliance regulations.
- * 3. When building a C# utility that creates thumbnail previews of legacy BMP assets, applying an inset crop to remove unwanted edges, rotating the image for UI display, and signing it to prevent tampering.
- * 4. When automating the production of secure QR‑code stickers where the BMP background is cropped, rotated to align with printing equipment, and digitally signed to verify the source before distribution.
- * 5. When developing a medical imaging workflow that outputs BMP scans, needs to remove a uniform border, rotate the image to the correct anatomical orientation, and embed a digital signature to ensure patient data integrity.
+ * 1. When a desktop application needs to generate a blank BMP canvas, trim a uniform 20‑pixel border, rotate the artwork for portrait layout, and protect the file with a password‑based digital signature before saving it to a user‑specified folder.
+ * 2. When an automated reporting tool creates BMP charts, removes a 20‑pixel margin to align the visual with a template, rotates the image to match page orientation, and embeds a secure signature to verify the report’s authenticity.
+ * 3. When a document management system processes scanned BMP documents, crops out scanner edges, rotates the pages to the correct reading direction, and adds a digital signature so that downstream auditors can confirm the file has not been altered.
+ * 4. When a game asset pipeline needs to produce BMP textures, automatically trim excess padding, rotate the texture for engine‑specific coordinate systems, and embed a signature to prevent tampering of the asset files.
+ * 5. When a batch script prepares BMP icons for a Windows installer, crops a consistent inset, rotates the icons to meet UI guidelines, and embeds a password‑protected digital signature to ensure the installer distributes only verified images.
  */

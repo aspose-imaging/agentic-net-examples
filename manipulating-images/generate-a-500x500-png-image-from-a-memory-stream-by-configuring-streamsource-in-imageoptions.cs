@@ -10,34 +10,29 @@ class Program
     {
         try
         {
-            // Output file path
-            string outputPath = "output.png";
+            // Output file path (relative)
+            string outputPath = "Output/output.png";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a memory stream to hold the PNG data
-            using (MemoryStream memoryStream = new MemoryStream())
+            // Create a file stream that the image will write to
+            using (FileStream fileStream = new FileStream(outputPath, FileMode.Create))
             {
-                // Configure PNG options with a StreamSource bound to the memory stream
-                PngOptions pngOptions = new PngOptions
-                {
-                    Source = new StreamSource(memoryStream)
-                };
+                // Configure PNG options to use the stream as the source
+                PngOptions pngOptions = new PngOptions();
+                pngOptions.Source = new StreamSource(fileStream);
 
                 // Create a 500x500 PNG image bound to the stream
                 using (Image image = Image.Create(pngOptions, 500, 500))
                 {
-                    // Draw on the image
+                    // Optional: clear the canvas with a background color
                     Graphics graphics = new Graphics(image);
-                    graphics.Clear(Color.LightGray);
+                    graphics.Clear(Color.Wheat);
 
-                    // Save the image to the bound stream
+                    // Save the image (writes to the stream)
                     image.Save();
                 }
-
-                // Write the PNG data from the memory stream to the output file
-                File.WriteAllBytes(outputPath, memoryStream.ToArray());
             }
         }
         catch (Exception ex)
@@ -49,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# web API must create a 500×500 PNG thumbnail in memory using Aspose.Imaging and stream it directly to the client without creating temporary files on disk.
- * 2. When a desktop application needs to generate a square placeholder image, draw graphics on it, and store the PNG bytes in a database by using a MemoryStream and StreamSource.
- * 3. When an automated report generator has to embed a dynamically drawn PNG chart into an email attachment, building the image in memory before saving it to a file or sending it.
- * 4. When a cloud function processes user‑uploaded data, creates a 500×500 PNG preview with Aspose.Imaging, and returns the byte array from a MemoryStream for further processing.
- * 5. When a unit test validates image‑processing logic by creating a PNG image entirely in memory, drawing on it, and verifying the output without relying on the file system.
+ * 1. When a developer needs to generate a 500x500 PNG thumbnail on the fly and write it directly to a file stream using Aspose.Imaging’s StreamSource to avoid intermediate bitmap objects.
+ * 2. When an ASP.NET web application must create a placeholder PNG image in memory and stream it to the client as part of an HTTP response without first saving to disk.
+ * 3. When a background service processes batch jobs that require creating blank PNG canvases for later overlay of graphics, using StreamSource to manage I/O efficiently.
+ * 4. When a unit test validates image creation logic by writing a PNG image to a memory‑backed stream and then checking the resulting file for correctness.
+ * 5. When integrating with a third‑party API that expects a PNG image supplied via a stream, and the developer needs to produce the image programmatically with Aspose.Imaging.
  */

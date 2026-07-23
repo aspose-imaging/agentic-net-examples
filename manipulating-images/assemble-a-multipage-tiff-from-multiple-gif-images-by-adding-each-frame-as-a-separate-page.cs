@@ -1,10 +1,9 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -13,73 +12,63 @@ class Program
     {
         try
         {
-            // Hardcoded input directory containing GIF files and output TIFF path
-            string inputDirectory = @"C:\temp\gifs";
-            string outputPath = @"C:\temp\output\multipage.tif";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Get all GIF files in the input directory
-            string[] gifFiles = Directory.GetFiles(inputDirectory, "*.gif");
-
-            if (gifFiles.Length == 0)
+            // Hardcoded input GIF files and output TIFF file
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine("No GIF files found in the input directory.");
-                return;
-            }
+                "input1.gif",
+                "input2.gif",
+                "input3.gif"
+            };
+            string outputPath = "output.tif";
 
-            // Load each GIF file, checking existence
-            List<RasterImage> gifImages = new List<RasterImage>();
-            foreach (string gifPath in gifFiles)
+            // Verify each input file exists
+            foreach (var inputPath in inputPaths)
             {
-                if (!File.Exists(gifPath))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {gifPath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
-
-                // Load the GIF image as a RasterImage
-                RasterImage img = (RasterImage)Image.Load(gifPath);
-                gifImages.Add(img);
             }
 
-            // Use dimensions of the first image for the TIFF canvas
-            int width = gifImages[0].Width;
-            int height = gifImages[0].Height;
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Prepare TIFF creation options
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+            TiffOptions tiffOptions = new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default)
             {
                 Source = new FileCreateSource(outputPath, false),
-                Photometric = TiffPhotometrics.Rgb,
+                Photometric = Aspose.Imaging.FileFormats.Tiff.Enums.TiffPhotometrics.Rgb,
                 BitsPerSample = new ushort[] { 8, 8, 8 }
             };
 
-            // Create a TIFF image with a default frame (will be removed later)
-            using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, width, height))
+            // Create an empty TIFF image (size will be adjusted by added frames)
+            using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, 1, 1))
             {
                 // Add each GIF image as a separate TIFF frame
-                foreach (RasterImage gifImg in gifImages)
+                foreach (var inputPath in inputPaths)
                 {
-                    TiffFrame frame = new TiffFrame(gifImg);
+                    // Load GIF (or any raster image) from file
+                    RasterImage raster = (RasterImage)Image.Load(inputPath);
+
+                    // Create a TIFF frame from the loaded raster image
+                    TiffFrame frame = new TiffFrame(raster);
+
+                    // Add the frame to the TIFF image
                     tiffImage.AddFrame(frame);
                 }
 
-                // Remove the initially created default frame
+                // Remove the initial default frame created by Image.Create
                 TiffFrame activeFrame = tiffImage.ActiveFrame;
-                tiffImage.ActiveFrame = tiffImage.Frames[1];
-                tiffImage.RemoveFrame(0);
+                if (tiffImage.Frames.Length > 1)
+                {
+                    tiffImage.ActiveFrame = tiffImage.Frames[1];
+                    tiffImage.RemoveFrame(0);
+                }
                 activeFrame.Dispose();
 
                 // Save the multipage TIFF
                 tiffImage.Save();
-            }
-
-            // Dispose loaded GIF images (frames already own them, but disposing is safe)
-            foreach (var img in gifImages)
-            {
-                img.Dispose();
             }
         }
         catch (Exception ex)
@@ -91,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive a collection of animated GIF screenshots as a single multipage TIFF using Aspose.Imaging for .NET for long‑term storage or printing.
- * 2. When an application must convert individual GIF frames of a scanned document into a multipage TIFF to create a searchable PDF later in the workflow.
- * 3. When a medical imaging solution stores each slice of a GIF‑based scan as a separate page in a TIFF file to ensure compatibility with DICOM viewers.
- * 4. When a web service aggregates user‑uploaded GIF icons into one multipage TIFF so that a legacy reporting tool that only accepts TIFF files can display them.
- * 5. When a scheduled C# batch job consolidates daily GIF charts into a single multipage TIFF for easy email distribution to stakeholders.
+ * 1. When a developer needs to combine several animated GIF screenshots into a single multipage TIFF for archival or printing purposes.
+ * 2. When an application must generate a multi‑page document from individual GIF icons to embed in a PDF or Word report.
+ * 3. When a medical imaging system converts a series of GIF‑based scan slices into a single TIFF stack for compatibility with DICOM viewers.
+ * 4. When a web service creates a downloadable TIFF portfolio from user‑uploaded GIF artwork for high‑resolution printing.
+ * 5. When a batch processing tool consolidates daily GIF charts into one multipage TIFF for automated email distribution.
  */

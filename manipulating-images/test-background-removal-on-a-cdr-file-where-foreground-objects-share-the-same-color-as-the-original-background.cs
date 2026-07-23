@@ -1,49 +1,41 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.cdr";
+        string outputPath = @"C:\Images\sample_no_bg.cdr";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input\\sample.cdr";
-            string outputPath = "output\\result.png";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load CDR vector image
-            using (var image = (CdrImage)Image.Load(inputPath))
+            // Load the CDR file as a vector image
+            using (VectorImage vectorImage = Image.Load(inputPath) as VectorImage)
             {
-                // Configure PNG options with transparent background
-                var pngOptions = new PngOptions
+                if (vectorImage == null)
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.Transparent,
-                        PageSize = image.Size
-                    }
-                };
+                    Console.Error.WriteLine("Failed to load the CDR file as a vector image.");
+                    return;
+                }
 
-                // Remove background using default settings
-                image.RemoveBackground(new RemoveBackgroundSettings());
+                // Remove the background (default settings)
+                vectorImage.RemoveBackground();
 
-                // Save the result as PNG
-                image.Save(outputPath, pngOptions);
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the result
+                vectorImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -55,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to extract logo graphics from a CorelDRAW (CDR) file that uses the same color for the logo and the page background, this code can remove the background and save the logo as a transparent PNG.
- * 2. When an e‑commerce platform wants to display product illustrations from CDR files on a white website without the original background interfering, the code strips the background and outputs a PNG with an alpha channel.
- * 3. When a marketing automation script processes batch CDR assets and must generate web‑ready images with transparent backgrounds for social media ads, this snippet automates background removal and rasterization.
- * 4. When a document conversion service needs to preserve vector quality while converting CDR artwork to PNG while eliminating a matching background color, the code uses Aspose.Imaging’s RemoveBackgroundSettings and VectorRasterizationOptions.
- * 5. When a mobile app imports user‑provided CDR icons and requires them as transparent PNG assets for UI overlays, this example demonstrates loading the CDR, removing the background, and saving the result with truecolor with alpha.
+ * 1. When a designer needs to automatically strip the solid background from a CorelDRAW (CDR) illustration so the remaining foreground objects can be placed on a different canvas without manual editing.
+ * 2. When an e‑commerce platform wants to generate product thumbnails from CDR files where the product color matches the original background, requiring programmatic background removal using Aspose.Imaging for .NET.
+ * 3. When a marketing automation script must batch‑process client‑provided CDR logos that share the same color as the page background, and save them as background‑free files for use in promotional materials.
+ * 4. When a document conversion service needs to prepare CDR artwork for PDF or PNG export by first removing the background layer to avoid unwanted color artifacts.
+ * 5. When a desktop application integrates C# image processing to clean up scanned vector graphics stored as CDR files, ensuring that foreground elements remain intact even when they are the same hue as the background.
  */

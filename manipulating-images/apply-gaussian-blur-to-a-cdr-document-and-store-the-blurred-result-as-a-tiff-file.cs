@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -11,7 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.cdr";
-            string outputPath = "output\\result.tif";
+            string outputPath = "output.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,19 +27,34 @@ class Program
             // Load the CDR document
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply filters
+                // Attempt to treat the loaded image as a raster image
                 RasterImage raster = image as RasterImage;
-                if (raster == null)
+
+                if (raster != null)
                 {
-                    Console.Error.WriteLine("Loaded image is not a raster image; cannot apply Gaussian blur.");
-                    return;
+                    // Apply Gaussian blur directly
+                    raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                    raster.Save(outputPath);
                 }
+                else
+                {
+                    // If not raster, rasterize via an intermediate format (PNG) in memory
+                    using (var tempStream = new MemoryStream())
+                    {
+                        // Save to PNG to force rasterization
+                        image.Save(tempStream, new PngOptions());
+                        tempStream.Position = 0;
 
-                // Apply Gaussian blur (radius 5, sigma 4.0) to the whole image
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                // Save the blurred image as TIFF
-                raster.Save(outputPath);
+                        // Load the rasterized image
+                        using (RasterImage tempRaster = (RasterImage)Image.Load(tempStream))
+                        {
+                            // Apply Gaussian blur
+                            tempRaster.Filter(tempRaster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                            // Save the final TIFF
+                            tempRaster.Save(outputPath);
+                        }
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -50,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically soften the graphics of a CorelDRAW (CDR) illustration before archiving it as a high‑resolution TIFF for print‑ready proofs.
- * 2. When a web service must preprocess user‑uploaded CDR files by applying a Gaussian blur to protect sensitive details and then store the result in TIFF format for downstream processing.
- * 3. When a batch conversion tool is required to convert a collection of CDR logos into blurred TIFF images to create watermark‑style assets for marketing collateral.
- * 4. When an automated workflow needs to apply a consistent blur radius to CDR diagrams before embedding them in PDF reports, saving the intermediate blurred output as TIFF.
- * 5. When a desktop application must validate that a CDR file can be rasterized, apply a Gaussian blur filter, and export the blurred version as a TIFF for archival compliance.
+ * 1. When a designer wants to create a soft‑focus preview of a CorelDRAW (CDR) illustration for a marketing mock‑up, they can use this code to blur the vector artwork and export it as a high‑resolution TIFF.
+ * 2. When an automated publishing pipeline needs to generate print‑ready TIFF files with a subtle blur effect from legacy CDR files, the snippet provides a C# solution that rasterizes the drawing and applies Gaussian blur.
+ * 3. When a document management system must store confidential CDR drawings with reduced detail for external reviewers, developers can blur the content and save it as a TIFF using Aspose.Imaging.
+ * 4. When a batch‑processing tool has to convert a collection of CDR logos into blurred TIFF watermarks for use in PDF reports, this code demonstrates the necessary steps in .NET.
+ * 5. When a quality‑control script must compare the visual similarity of original CDR files to their blurred TIFF versions, the example shows how to apply a Gaussian blur filter and produce the TIFF output programmatically.
  */

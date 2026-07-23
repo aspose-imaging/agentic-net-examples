@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -17,7 +17,7 @@ class Program
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
@@ -30,7 +30,7 @@ class Program
             // Get all PNG files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-            foreach (string inputPath in files)
+            foreach (var inputPath in files)
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -40,23 +40,23 @@ class Program
                 }
 
                 // Prepare output file path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_resized.png";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + "_resized.png");
 
-                // Load the image as a RasterImage
-                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                // Ensure the output directory exists (unconditional as per rules)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the PNG image, resize, embed signature, and save
+                using (PngImage image = (PngImage)Image.Load(inputPath))
                 {
-                    // Resize to 256x256 using default NearestNeighbour resample
+                    // Resize to 256x256 using default NearestNeighbourResample
                     image.Resize(256, 256);
 
-                    // Embed digital signature with a secure password
+                    // Embed digital signature with a secure password (>=4 characters)
                     image.EmbedDigitalSignature("secure123");
 
-                    // Ensure the output directory exists before saving
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the processed image as PNG
-                    image.Save(outputPath, new PngOptions());
+                    // Save the processed image
+                    image.Save(outputPath);
                 }
             }
         }
@@ -69,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑process user‑uploaded PNG avatars for a web portal, resizing them to a uniform 256 × 256 pixel size with NearestNeighbor interpolation and protecting each file with a password‑protected digital signature using Aspose.Imaging for .NET.
- * 2. When an e‑commerce platform must generate thumbnail previews of product PNG images for mobile catalogs while ensuring the thumbnails cannot be tampered with, the code can resize the images to 256 × 256 and embed a secure digital signature.
- * 3. When a medical imaging system stores PNG scans that must be standardized to 256 × 256 pixels for machine‑learning models and also requires cryptographic verification of each image’s integrity, developers can use this routine to resize and sign the files.
- * 4. When a game developer prepares sprite sheets composed of PNG assets that need consistent dimensions and wants to embed a password‑protected signature to prevent unauthorized modification, the example provides a quick C# solution.
- * 5. When a government agency archives PNG documents and must both compress them to a fixed 256 × 256 resolution for storage efficiency and embed a digital signature with a secure password for audit trails, this code handles the batch operation automatically.
+ * 1. When a developer needs to batch‑process product thumbnail PNGs for an e‑commerce site, resizing each image to a uniform 256 × 256 pixels with NearestNeighbor interpolation and embedding a password‑protected digital signature to prevent unauthorized reuse.
+ * 2. When building a mobile app that displays user‑generated avatars, the code can quickly shrink uploaded PNG files to 256 × 256 while adding a secure signature to verify the image’s integrity during sync.
+ * 3. When preparing PNG assets for a machine‑learning dataset, a data engineer can use the snippet to standardize image dimensions and embed a password‑protected signature that later scripts can validate before training.
+ * 4. When creating a secure digital catalog of artwork, a developer can resize each high‑resolution PNG to a web‑friendly 256 × 256 size and embed a digital signature with a strong password to ensure provenance.
+ * 5. When automating the generation of QR‑code overlays for marketing materials, the routine can resize the PNG overlays to 256 × 256 and embed a password‑protected signature so the printed version can be authenticated programmatically.
  */

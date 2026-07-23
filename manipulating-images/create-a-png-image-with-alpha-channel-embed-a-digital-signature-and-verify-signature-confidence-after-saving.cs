@@ -9,38 +9,26 @@ class Program
     {
         try
         {
-            // Define output path (ensure it contains a directory)
             string outputPath = "Output/output.png";
 
-            // Create output directory unconditionally
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a new PNG image with alpha channel (200x200)
-            using (var png = new PngImage(200, 200, PngColorType.TruecolorWithAlpha))
+            // Create a PNG image with alpha channel (200x200)
+            using (PngImage png = new PngImage(200, 200, PngColorType.TruecolorWithAlpha))
             {
-                // Embed a digital signature using a valid password
-                ((RasterImage)png).EmbedDigitalSignature("secure123");
+                // Embed digital signature with a valid password
+                png.EmbedDigitalSignature("secure123");
 
-                // Save the image to the specified path
+                // Save the image
                 png.Save(outputPath);
             }
 
-            // Verify the digital signature after saving
-            string inputPath = outputPath;
-
-            // Check that the file exists
-            if (!File.Exists(inputPath))
+            // Load the saved image and verify the digital signature
+            using (PngImage loaded = (PngImage)Image.Load(outputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Load the saved image and check signature
-            using (var loadedImage = Image.Load(inputPath))
-            {
-                var raster = (RasterImage)loadedImage;
-                bool isSigned = raster.IsDigitalSigned("secure123");
-                Console.WriteLine($"Is digitally signed: {isSigned}");
+                bool isSigned = loaded.IsDigitalSigned("secure123");
+                Console.WriteLine($"Signature verified: {isSigned}");
             }
         }
         catch (Exception ex)
@@ -52,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PNG with transparency for a web UI and protect it from tampering by embedding a digital signature.
- * 2. When a C# application must create a true‑color PNG with an alpha channel for overlay graphics and later verify its integrity after saving.
- * 3. When a software solution stores confidential diagrams as PNG files and wants to ensure only authorized users can confirm the image’s authenticity using a password.
- * 4. When an automated reporting tool produces PNG charts, embeds a signature for compliance auditing, and checks the signature confidence before distribution.
- * 5. When a digital asset management system programmatically creates PNG thumbnails, signs them to prevent unauthorized modifications, and validates the signature during import.
+ * 1. When a developer needs to generate a transparent PNG logo for a web application and ensure its authenticity by embedding a digital signature that can be verified later.
+ * 2. When an e‑commerce platform wants to create product images with alpha channels and protect them from tampering by signing the PNG files with a password.
+ * 3. When a document management system must store confidential diagrams as PNGs and later confirm their integrity by checking the embedded digital signature confidence.
+ * 4. When a mobile app generates user‑customized stickers with transparency and requires a secure way to validate that the stickers have not been altered after download.
+ * 5. When a compliance‑focused reporting tool exports charts as PNG images with alpha transparency and embeds a password‑protected digital signature to meet audit trail requirements.
  */

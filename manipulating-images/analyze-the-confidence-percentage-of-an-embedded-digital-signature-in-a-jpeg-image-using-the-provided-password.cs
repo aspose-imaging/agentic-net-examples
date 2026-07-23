@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -8,7 +9,8 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "input.jpg";
-        string outputPath = "output.txt";
+        string outputPath = "output/result.txt";
+        string password = "myPassword";
 
         try
         {
@@ -19,33 +21,28 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure output directory exists (unconditional)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the JPEG image
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Password used for the digital signature
-                string password = "yourPassword";
-
-                // Fast check if the image is digitally signed
-                bool isSigned = image.IsDigitalSigned(password);
-
-                // Analyze confidence percentage if signed
-                int confidence = 0;
-                if (isSigned)
+                // Cast to RasterImage to access digital signature methods
+                RasterImage rasterImage = image as RasterImage;
+                if (rasterImage == null)
                 {
-                    confidence = image.AnalyzePercentageDigitalSignature(password);
+                    Console.Error.WriteLine("The loaded image is not a raster image.");
+                    return;
                 }
 
-                // Prepare result string
-                string result = $"Signed: {isSigned}, Confidence: {confidence}%";
+                // Analyze the confidence percentage of the embedded digital signature
+                int confidence = rasterImage.AnalyzePercentageDigitalSignature(password);
 
-                // Write result to output file
-                File.WriteAllText(outputPath, result);
+                // Output the result to console
+                Console.WriteLine($"Digital signature confidence: {confidence}%");
 
-                // Also display on console
-                Console.WriteLine(result);
+                // Also write the result to the output file
+                File.WriteAllText(outputPath, $"Digital signature confidence: {confidence}%");
             }
         }
         catch (Exception ex)
@@ -57,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a financial institution processes scanned checks in JPEG format, it can use this code to verify the embedded digital signature and determine the confidence level before approving the transaction.
- * 2. A legal document management system can employ the snippet to confirm that JPEG evidence photos are digitally signed and assess signature confidence to ensure admissibility in court.
- * 3. In a secure media publishing workflow, developers can run this routine to check that uploaded JPEG images carry a valid digital signature and report the confidence percentage for quality‑control audits.
- * 4. For a forensic analysis tool, the code enables investigators to quickly detect whether a suspect’s JPEG files are signed and gauge the signature’s reliability using the provided password.
- * 5. An enterprise archiving solution can integrate this example to automatically validate the authenticity of archived JPEG assets by reading the digital signature and logging its confidence score.
+ * 1. When a legal document management system stores signed contracts as JPEG scans, a developer can use this code to verify the confidence level of the embedded digital signature before archiving the file.
+ * 2. When a photo‑sharing platform needs to ensure that uploaded images contain a trusted watermark signature, the code can read the JPEG, apply the password, and report the signature confidence percentage.
+ * 3. When a compliance audit tool processes marketing assets saved as JPEGs, it can call AnalyzePercentageDigitalSignature to confirm that each image meets the required signature integrity threshold.
+ * 4. When an e‑commerce site generates product images with embedded digital signatures for anti‑counterfeit protection, the developer can run this snippet to programmatically assess the signature’s confidence score.
+ * 5. When a forensic analysis application examines suspect JPEG files, it can load the image with Aspose.Imaging, supply the known password, and retrieve the digital signature confidence to aid in authenticity verification.
  */

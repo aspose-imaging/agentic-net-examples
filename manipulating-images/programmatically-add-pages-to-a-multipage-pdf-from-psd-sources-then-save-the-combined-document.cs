@@ -1,50 +1,60 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Input PSD files
-            string psdPath1 = "Input1.psd";
-            string psdPath2 = "Input2.psd";
-
-            // Output PDF file
-            string outputPath = "Output/Combined.pdf";
-
-            // Validate input files
-            if (!File.Exists(psdPath1))
+            // Hardcoded input PSD files
+            string[] inputPaths = new string[]
             {
-                Console.Error.WriteLine($"File not found: {psdPath1}");
-                return;
-            }
-            if (!File.Exists(psdPath2))
-            {
-                Console.Error.WriteLine($"File not found: {psdPath2}");
-                return;
-            }
+                @"C:\Images\page1.psd",
+                @"C:\Images\page2.psd",
+                @"C:\Images\page3.psd"
+            };
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir);
-
-            // Load PSD images
-            using (Image img1 = Image.Load(psdPath1))
-            using (Image img2 = Image.Load(psdPath2))
+            // Verify each input file exists
+            foreach (string inputPath in inputPaths)
             {
-                // Create a multipage image from the loaded PSDs
-                Image[] pages = new Image[] { img1, img2 };
-                using (Image pdf = Image.Create(pages))
+                if (!File.Exists(inputPath))
                 {
-                    // Save as PDF
-                    var pdfOptions = new PdfOptions();
-                    pdf.Save(outputPath, pdfOptions);
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
             }
+
+            // Load each PSD as a RasterImage
+            List<RasterImage> rasterImages = new List<RasterImage>();
+            foreach (string inputPath in inputPaths)
+            {
+                // Load the PSD image
+                RasterImage img = (RasterImage)Image.Load(inputPath);
+                rasterImages.Add(img);
+            }
+
+            // Create a multipage image from the loaded pages.
+            // The overload with disposeImages = true will dispose the source images after creation.
+            Image multipageImage = Image.Create(rasterImages.ToArray(), true);
+
+            // Hardcoded output PDF path
+            string outputPath = @"C:\Output\CombinedDocument.pdf";
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Prepare PDF save options
+            PdfOptions pdfOptions = new PdfOptions();
+
+            // Save the multipage image as a PDF document
+            multipageImage.Save(outputPath, pdfOptions);
+
+            // Dispose the multipage image
+            multipageImage.Dispose();
         }
         catch (Exception ex)
         {
@@ -55,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design team needs to combine several Photoshop PSD files into a single multi‑page PDF portfolio for client approval, a developer can use this C# code with Aspose.Imaging to load each PSD, create a multipage image, and save it as a combined PDF.
- * 2. When an automated publishing workflow must convert layered PSD assets into a paginated PDF brochure, this snippet programmatically loads the PSDs, assembles them as pages, and outputs a ready‑to‑print PDF document.
- * 3. When a web service offers on‑the‑fly PDF generation from uploaded PSD designs, the code demonstrates how to validate file paths, load the PSDs, merge them into a multi‑page PDF, and return the result to the caller.
- * 4. When a batch‑processing tool needs to archive multiple PSD project files as a single searchable PDF file, the example shows how to create a multipage image from the PSD sources and save it efficiently using Aspose.Imaging in .NET.
- * 5. When a digital asset management system must provide a preview PDF that stitches together several PSD mockups into one document, this C# example illustrates the steps to load each PSD, combine them into a PDF, and store the combined file in a designated output folder.
+ * 1. When a graphic design studio needs to merge multiple Photoshop PSD files into a single PDF portfolio for client review.
+ * 2. When an e‑learning platform converts layered PSD slides into a multipage PDF handbook for offline distribution.
+ * 3. When a marketing team automates the creation of a print‑ready PDF brochure from separate PSD page assets using C# and Aspose.Imaging.
+ * 4. When a document management system batches PSD artwork into a searchable PDF archive to simplify storage and retrieval.
+ * 5. When a web service generates a combined PDF invoice that includes PSD‑based product images as individual pages.
  */
