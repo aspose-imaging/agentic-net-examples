@@ -4,16 +4,16 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
+
             // Validate input file existence
             if (!File.Exists(inputPath))
             {
@@ -27,15 +27,14 @@ class Program
             // Load the vector image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to VectorImage and remove background if possible
-                VectorImage vectorImage = image as VectorImage;
-                if (vectorImage != null)
+                // Remove background if the image is a vector type
+                if (image is VectorImage vectorImage)
                 {
                     vectorImage.RemoveBackground(new RemoveBackgroundSettings());
                 }
 
-                // Configure PNG options with default compression and transparent background
-                PngOptions pngOptions = new PngOptions
+                // Configure PNG options with default compression and transparency
+                var pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
                     VectorRasterizationOptions = new VectorRasterizationOptions
@@ -58,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert SVG logos with unwanted white backgrounds into transparent PNG icons for responsive web design.
- * 2. When an e‑commerce platform must generate product thumbnails by stripping the background from vector illustrations and rasterizing them to PNG with default compression for fast page loads.
- * 3. When a mobile app creates custom stickers by removing the background from user‑uploaded SVG drawings and saving them as PNG files with alpha channel support.
- * 4. When a reporting tool automatically prepares high‑resolution charts by eliminating the vector background and exporting them as PNG images for inclusion in PDF documents.
- * 5. When a game engine pipeline processes vector UI assets, removes their backgrounds, and rasterizes them to PNG using Aspose.Imaging for seamless integration into the texture atlas.
+ * 1. When a web application needs to generate transparent PNG thumbnails from user‑uploaded SVG logos after removing any unwanted background.
+ * 2. When an e‑commerce platform wants to convert product vector illustrations into high‑quality PNG images for display on mobile devices while preserving alpha transparency.
+ * 3. When a desktop publishing tool automates the preparation of print‑ready assets by stripping backgrounds from SVG icons and rasterizing them to PNG with default compression.
+ * 4. When a marketing automation script batch‑processes brand assets, converting SVG graphics to PNG format after background removal for use in email campaigns.
+ * 5. When a game development pipeline requires converting vector UI elements into PNG sprites with transparent backgrounds to integrate them into the game engine.
  */
