@@ -2,44 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.gif";
+        string outputPath = "output.gif";
+
+        // Validate input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and dummy output paths
-            string inputPath = "input.jpg";
-            string outputPath = "output/output.gif";
-
-            // Input file existence check
-            if (!File.Exists(inputPath))
+            // MemoryStream to hold the GIF data
+            using (MemoryStream stream = new MemoryStream())
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Options for saving as GIF
+                GifOptions gifOptions = new GifOptions();
+                gifOptions.Source = new StreamSource(stream);
 
-            // Ensure output directory exists (even though we save to a stream)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the raster image
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
-            {
-                // Rotate 30 degrees with black background, resizing proportionally
-                image.Rotate(30f, true, Aspose.Imaging.Color.Black);
-
-                // Prepare GIF save options
-                using (GifOptions options = new GifOptions())
+                // Load the GIF image, rotate, and save to the stream
+                using (GifImage gif = (GifImage)Image.Load(inputPath))
                 {
-                    options.BackgroundColor = Aspose.Imaging.Color.Black;
+                    // Rotate 30 degrees, resize proportionally, black background
+                    gif.Rotate(30f, true, Color.Black);
+                    gif.Save(stream, gifOptions);
+                }
 
-                    // Save to a memory stream in GIF format
-                    using (MemoryStream stream = new MemoryStream())
-                    {
-                        image.Save(stream, options);
-                        Console.WriteLine($"Image saved to memory stream. Length: {stream.Length} bytes.");
-                    }
+                // Reset stream position before writing to file
+                stream.Position = 0;
+
+                // Write the MemoryStream content to the output file
+                using (FileStream fileStream = new FileStream(outputPath, FileMode.Create))
+                {
+                    stream.WriteTo(fileStream);
                 }
             }
         }
@@ -52,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to generate a thumbnail preview of a user‑uploaded JPEG, rotate it 30° for a stylized effect, and return the result as a GIF stream without writing to disk.
- * 2. When an email‑marketing platform creates animated GIF banners on the fly, applying a 30‑degree rotation with a black background to fit a design template and sending the image as a memory stream attachment.
- * 3. When a desktop application converts scanned photos to GIF for legacy printer compatibility, rotating each image 30° to correct orientation and using a MemoryStream to avoid temporary files.
- * 4. When a cloud function processes images for a mobile app, applying a 30° rotation with black padding, encoding the output as GIF, and streaming it directly to a CDN endpoint.
- * 5. When a reporting tool embeds rotated product images into PDF reports, saving the rotated JPEG as a GIF in a MemoryStream to embed without persisting intermediate files.
+ * 1. When a web application needs to generate a rotated thumbnail of a user‑uploaded GIF for preview without writing intermediate files to disk.
+ * 2. When an email service must embed a 30‑degree rotated animated GIF into the message body while keeping the image in memory for fast attachment.
+ * 3. When a desktop utility creates a GIF‑based watermark overlay that requires rotating the source image and storing it in a MemoryStream before saving to a user‑specified folder.
+ * 4. When a cloud function processes uploaded GIFs, applies a 30° rotation with a black background, and streams the result directly to a storage API without temporary files.
+ * 5. When a game engine loads a sprite sheet GIF, rotates each frame, and writes the transformed GIF to a MemoryStream for immediate use in texture streaming.
  */
