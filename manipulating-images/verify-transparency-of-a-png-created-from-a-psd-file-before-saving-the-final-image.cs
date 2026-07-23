@@ -8,47 +8,49 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.psd";
-        string outputPath = @"C:\temp\output.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.psd";
+            string outputPath = @"C:\temp\output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the PSD image
             using (Image psdImage = Image.Load(inputPath))
             {
-                // Prepare PNG options with alpha support
-                PngOptions pngOptions = new PngOptions
+                // Set PNG options to preserve alpha channel
+                var pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                // Save PSD to a memory stream as PNG to inspect transparency
-                using (MemoryStream ms = new MemoryStream())
+                // Save PSD as PNG into a memory stream first
+                using (var memoryStream = new MemoryStream())
                 {
-                    psdImage.Save(ms, pngOptions);
-                    ms.Position = 0; // Reset stream position for reading
+                    psdImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
 
-                    // Load the PNG from the memory stream
-                    using (Image pngImage = Image.Load(ms))
+                    // Load the PNG from the memory stream to check transparency
+                    using (PngImage pngImage = (PngImage)Image.Load(memoryStream))
                     {
-                        // Cast to PngImage to access HasAlpha property
-                        PngImage png = (PngImage)pngImage;
-                        bool hasAlpha = png.HasAlpha;
+                        bool hasAlpha = pngImage.HasAlpha;
                         Console.WriteLine($"PNG has alpha channel: {hasAlpha}");
+                    }
 
-                        // Ensure output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the final PNG to disk
-                        pngImage.Save(outputPath, pngOptions);
+                    // Reset stream position and write final PNG to disk
+                    memoryStream.Position = 0;
+                    using (FileStream fileStream = File.Create(outputPath))
+                    {
+                        memoryStream.CopyTo(fileStream);
                     }
                 }
             }
@@ -62,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a Photoshop PSD file to a PNG while confirming that the resulting image retains its transparent background before saving it to disk.
- * 2. When an automated image pipeline must validate that a generated PNG contains an alpha channel after conversion from a layered PSD to avoid visual artifacts in a web UI.
- * 3. When a batch processing tool has to ensure that exported PNG assets from PSD sources preserve transparency for use in mobile apps or game sprites.
- * 4. When a quality‑control script must load a PSD, save it to a memory stream as PNG, check the HasAlpha property, and only then write the final file to a shared folder.
- * 5. When integrating Aspose.Imaging in a C# application that needs to detect and log the presence of an alpha channel in a PNG derived from a PSD before publishing it to a content management system.
+ * 1. When a web application uses Aspose.Imaging for .NET to convert user‑uploaded Photoshop PSD files to PNG and must verify that the resulting PNG retains its alpha channel for transparent backgrounds.
+ * 2. When an e‑commerce platform employs Aspose.Imaging to generate product thumbnails from layered PSD assets and needs to confirm the PNG output preserves transparency before displaying on the storefront.
+ * 3. When a game development pipeline utilizes Aspose.Imaging for .NET to export sprite sheets from PSD files and checks the PNG’s HasAlpha property to ensure proper alpha blending in the engine.
+ * 4. When an automated image processing service batch‑processes PSD logos with Aspose.Imaging, converting them to PNG and validating the presence of an alpha channel to prevent white backgrounds in printed collateral.
+ * 5. When a digital publishing tool creates PNG previews of PSD artwork using Aspose.Imaging for .NET and must confirm transparency to keep layout consistency in email newsletters.
  */
