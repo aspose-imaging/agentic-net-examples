@@ -9,42 +9,48 @@ class Program
     {
         try
         {
-            // Hardcoded input folder containing PNGs generated from CDR files
-            string inputFolder = @"C:\Temp\CdrPngs";
+            // Hardcoded input directory containing PNGs generated from CDR files
+            string inputDir = @"C:\Images\CDR_PNGs";
             // Hardcoded output report file path
-            string outputReport = @"C:\Temp\AlphaReport.txt";
+            string outputReport = @"C:\Images\AlphaReport.txt";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputReport));
 
-            using (StreamWriter writer = new StreamWriter(outputReport, false))
+            // Create or overwrite the report file
+            using (var writer = new StreamWriter(outputReport, false))
             {
                 writer.WriteLine("FileName,HasAlpha");
 
                 // Retrieve all PNG files recursively
-                string[] pngFiles = Directory.GetFiles(inputFolder, "*.png", SearchOption.AllDirectories);
-                foreach (string pngPath in pngFiles)
+                string[] pngFiles = Directory.GetFiles(inputDir, "*.png", SearchOption.AllDirectories);
+                foreach (var filePath in pngFiles)
                 {
                     // Verify the input file exists
-                    if (!File.Exists(pngPath))
+                    if (!File.Exists(filePath))
                     {
-                        Console.Error.WriteLine($"File not found: {pngPath}");
-                        continue;
+                        Console.Error.WriteLine($"File not found: {filePath}");
+                        return;
                     }
 
                     bool hasAlpha = false;
-                    // Load the image and check the alpha channel
-                    using (Image img = Image.Load(pngPath))
+
+                    // Load the image and check for an alpha channel
+                    using (Image image = Image.Load(filePath))
                     {
-                        // All raster images (including PNG) expose HasAlpha
-                        if (img is RasterImage rasterImg)
+                        // RasterImage provides HasAlpha for all raster formats
+                        if (image is RasterImage raster)
                         {
-                            hasAlpha = rasterImg.HasAlpha;
+                            hasAlpha = raster.HasAlpha;
+                        }
+                        else if (image is PngImage png)
+                        {
+                            hasAlpha = png.HasAlpha;
                         }
                     }
 
-                    string fileName = Path.GetFileName(pngPath);
-                    writer.WriteLine($"{fileName},{hasAlpha}");
+                    // Write the result to the report
+                    writer.WriteLine($"{Path.GetFileName(filePath)},{hasAlpha}");
                 }
             }
 
@@ -59,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphics pipeline converts CorelDRAW (CDR) files to PNGs and needs to ensure every exported image contains an alpha channel for proper transparency handling, this batch verification code can automatically check each file and produce a CSV‑style report.
- * 2. When a QA team validates a large set of marketing assets generated from CDR sources to confirm they meet web‑ready PNG specifications, they can run this C# script to flag images lacking an alpha channel before publishing.
- * 3. When a CI/CD build process includes image asset generation from CDR files, developers can integrate this code to automatically audit the output PNGs for alpha transparency and log the results for build verification.
- * 4. When a digital signage system imports PNGs derived from CDR designs and requires transparent backgrounds, the script helps identify which files need re‑exporting by summarizing the presence of alpha channels.
- * 5. When a freelance designer exports multiple CDR illustrations to PNG and wants a quick summary of which files preserve transparency, they can use this Aspose.Imaging‑based utility to generate an easy‑to‑read report.
+ * 1. When a developer needs to ensure that all PNG images exported from CorelDRAW (CDR) files retain their transparency before publishing them on a website, they can use this code to batch‑verify the alpha channel and create a concise report.
+ * 2. When a CI/CD pipeline must automatically validate that newly generated PNG assets contain an alpha channel so that downstream graphics tools work correctly, the script can scan the output folder and log the results.
+ * 3. When a quality‑assurance team wants to audit a large collection of PNGs produced by a design workflow for missing transparency, this C# example quickly identifies files without an alpha channel and records them in a text file.
+ * 4. When a migration project moves graphics from legacy CDR sources to a modern asset library and needs to flag images that lost their alpha information during conversion, the code provides a fast batch check and summary.
+ * 5. When a developer is building a custom image‑processing utility that must report which PNGs generated from CDR files contain an alpha channel for further processing steps, this snippet offers a ready‑to‑use solution in Aspose.Imaging for .NET.
  */
