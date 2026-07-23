@@ -2,9 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
@@ -25,14 +24,14 @@ class Program
         {
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Deskew the image without resizing the canvas and with a white background.
+                // Deskew the image without resizing canvas and with white background
                 tiffImage.NormalizeAngle(false, Color.White);
 
-                // Apply smoothing mode for better rendering quality.
+                // Apply smoothing mode
                 Graphics graphics = new Graphics(tiffImage);
                 graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-                // Save the processed image as PDF.
+                // Save as PDF
                 PdfOptions pdfOptions = new PdfOptions();
                 tiffImage.Save(outputPath, pdfOptions);
             }
@@ -46,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a scanning application uses Aspose.Imaging for .NET to correct the tilt of incoming TIFF files, apply anti‑alias smoothing, and output the results as PDF archives.
- * 2. When an invoicing system processes scanned receipt TIFF images, deskews them with Aspose.Imaging, sets the graphics smoothing mode, and saves them as PDF for record‑keeping.
- * 3. When a medical imaging workflow needs to straighten rotated TIFF X‑ray images, improve visual quality with smoothing, and generate PDF reports using C# and Aspose.Imaging.
- * 4. When a legal document platform automates the preparation of TIFF contracts by normalizing the angle, applying anti‑aliasing, and converting them to PDF via Aspose.Imaging for electronic signatures.
- * 5. When a batch conversion utility processes large TIFF map collections, deskews each image, applies smoothing mode for clearer rendering, and saves them as PDF files using Aspose.Imaging for .NET.
+ * 1. When a developer needs to correct the orientation of scanned TIFF documents, deskew them, apply anti‑alias smoothing, and produce a clean PDF for archiving.
+ * 2. When an application must convert multi‑page TIFF invoices that are slightly rotated into high‑quality PDF reports while preserving a white background and smooth edges.
+ * 3. When a document management system requires automated preprocessing of uploaded TIFF scans—removing skew, applying smoothing mode, and outputting a PDF for downstream workflows.
+ * 4. When a legal firm wants to transform skewed TIFF evidence images into readable PDF files with anti‑aliasing to ensure clarity in court filings.
+ * 5. When a batch processing tool handles scanned forms in TIFF format, normalizes their angle, enhances visual quality with smoothing, and saves them as PDFs for electronic distribution.
  */
