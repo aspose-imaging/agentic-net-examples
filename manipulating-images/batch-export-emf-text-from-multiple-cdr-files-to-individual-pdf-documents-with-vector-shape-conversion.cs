@@ -10,12 +10,12 @@ class Program
     {
         try
         {
-            // Hardcoded list of input CDR files
+            // Hardcoded input CDR files
             string[] inputFiles = new[]
             {
-                @"C:\Input\Design1.cdr",
-                @"C:\Input\Design2.cdr",
-                @"C:\Input\Design3.cdr"
+                @"C:\Images\sample1.cdr",
+                @"C:\Images\sample2.cdr",
+                @"C:\Images\sample3.cdr"
             };
 
             foreach (string inputPath in inputFiles)
@@ -27,32 +27,27 @@ class Program
                     return;
                 }
 
-                // Determine output PDF path (same folder, same name with .pdf extension)
+                // Build output PDF path (same folder, .pdf extension)
                 string outputPath = Path.ChangeExtension(inputPath, ".pdf");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the CDR image
+                // Load CDR image
                 using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
                 {
-                    // Prepare PDF export options
-                    PdfOptions pdfOptions = new PdfOptions
+                    // Prepare PDF options with CDR rasterization settings
+                    PdfOptions pdfOptions = new PdfOptions();
+                    CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                     {
-                        VectorRasterizationOptions = new CdrRasterizationOptions
-                        {
-                            TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = Aspose.Imaging.SmoothingMode.None
-                        }
+                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = Aspose.Imaging.SmoothingMode.None,
+                        Positioning = Aspose.Imaging.ImageOptions.PositioningTypes.DefinedByDocument
                     };
 
-                    // Export all pages (PDF supports multipage)
-                    if (cdrImage is IMultipageImage multipage && multipage.PageCount > 0)
-                    {
-                        pdfOptions.MultiPageOptions = null; // export all pages
-                    }
+                    pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                    // Save as PDF
+                    // Export the CDR (all pages) to PDF
                     cdrImage.Save(outputPath, pdfOptions);
                 }
             }
@@ -66,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design studio needs to convert a collection of CorelDRAW (CDR) files into searchable PDF portfolios while preserving vector text and shapes, they can use this code to batch export each file to an individual PDF.
- * 2. When an automated build pipeline must generate PDF documentation from multiple CDR source assets without rasterizing the artwork, this snippet provides a C# solution that retains vector fidelity.
- * 3. When a marketing department wants to archive campaign graphics by converting several CDR files into PDF format for easy viewing on any device, the code enables batch processing with Aspose.Imaging’s vector rasterization options.
- * 4. When a content management system imports CDR designs and needs to create PDF previews that keep text as editable vectors, developers can employ this example to loop through files and save each as a PDF.
- * 5. When a QA team validates that all pages of multi‑page CDR drawings are correctly rendered in PDF, this program iterates through the files, checks page counts, and exports each document while preserving vector shapes.
+ * 1. When a design studio needs to automatically convert a collection of CorelDRAW (.cdr) artwork files containing EMF text into separate PDF portfolios while preserving vector shapes for high‑resolution printing.
+ * 2. When a document management system must ingest multiple CDR source files and generate searchable PDF versions with exact text rendering for archival and compliance purposes.
+ * 3. When a marketing automation pipeline has to batch‑process product mock‑ups stored as CDR files and output individual PDF assets that retain scalable vector graphics for web and print distribution.
+ * 4. When a software vendor wants to provide a C# utility that transforms client‑supplied CDR drawings into PDF invoices, ensuring the EMF text is rendered with single‑bit per pixel accuracy and no smoothing.
+ * 5. When an enterprise workflow needs to convert daily batches of CorelDRAW designs into PDF files for downstream OCR and data extraction while keeping the original vector geometry intact.
  */
