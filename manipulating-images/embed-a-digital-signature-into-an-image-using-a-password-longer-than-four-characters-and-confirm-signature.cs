@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -8,11 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input and output file paths
             string inputPath = "input.jpg";
             string outputPath = "output_signed.jpg";
-            // Password longer than four characters
-            string password = "secure123";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,14 +24,26 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load image, embed signature, save, and verify
-            using (var image = Image.Load(inputPath))
+            // Load the image
+            using (Image image = Image.Load(inputPath))
             {
-                var raster = (RasterImage)image;
-                raster.EmbedDigitalSignature(password);
-                raster.Save(outputPath);
-                bool isSigned = raster.IsDigitalSigned(password);
-                Console.WriteLine($"Signature valid: {isSigned}");
+                // Cast to RasterImage for digital signature operations
+                RasterImage raster = (RasterImage)image;
+
+                // Embed a digital signature using a password longer than four characters
+                string validPassword = "secure123";
+                raster.EmbedDigitalSignature(validPassword);
+
+                // Confirm that the signature was embedded successfully
+                bool isSigned = raster.IsDigitalSigned(validPassword);
+                Console.WriteLine($"Signature embedded: {isSigned}");
+
+                // Prepare save options with a bound file source
+                Source source = new FileCreateSource(outputPath, false);
+                JpegOptions options = new JpegOptions { Source = source, Quality = 100 };
+
+                // Save the signed image
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -43,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to protect a JPEG photograph from unauthorized modifications by embedding a password‑protected digital signature using Aspose.Imaging for .NET.
- * 2. When an e‑commerce platform wants to ensure that product images uploaded by sellers remain authentic, they can embed and later verify a digital signature with a strong password.
- * 3. When a legal document management system stores scanned images as TIFF files and must confirm their integrity before archival, the code can embed a password‑based signature and validate it.
- * 4. When a mobile app generates user‑created PNG graphics and must guarantee that the images have not been tampered with during transmission, developers can use this routine to sign and verify them.
- * 5. When a healthcare application needs to comply with data‑integrity regulations for patient scan images (e.g., DICOM converted to JPEG), embedding a digital signature with a secure password provides a verifiable audit trail.
+ * 1. When a developer needs to embed a tamper‑detectable digital signature into a JPEG photo before sending it to a client, ensuring the signature is protected with a password longer than four characters.
+ * 2. When an e‑commerce platform wants to sign product images to verify authenticity during download, using Aspose.Imaging’s RasterImage.EmbedDigitalSignature method with a secure password.
+ * 3. When a medical imaging system must attach a password‑protected digital signature to scanned patient images (e.g., JPEG) to comply with data integrity regulations.
+ * 4. When a document management workflow requires programmatically signing and later validating image attachments in C# before archiving them in a secure repository.
+ * 5. When a mobile app backend processes user‑uploaded pictures and needs to embed and confirm a digital signature using a strong password to prevent unauthorized modifications.
  */
