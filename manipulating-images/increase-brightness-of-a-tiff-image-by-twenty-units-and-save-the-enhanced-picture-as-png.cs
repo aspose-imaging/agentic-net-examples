@@ -12,29 +12,30 @@ class Program
         string inputPath = @"c:\temp\sample.tif";
         string outputPath = @"c:\temp\sample.adjusted.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to TiffImage to access AdjustBrightness
                 TiffImage tiffImage = (TiffImage)image;
 
-                // Increase brightness by 20 units
+                // Increase brightness by 20 units (range -255 to 255)
                 tiffImage.AdjustBrightness(20);
 
-                // Save the result as PNG
-                tiffImage.Save(outputPath, new PngOptions());
+                // Save the adjusted image as PNG
+                PngOptions pngOptions = new PngOptions();
+                tiffImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer uses Aspose.Imaging for .NET to preprocess scanned TIFF documents, increase their brightness by 20 units, and save the clearer result as a PNG for web display.
- * 2. When an imaging application built with C# and Aspose.Imaging needs to automatically brighten low‑contrast satellite TIFF images and export them as PNG files for downstream analysis.
- * 3. When a medical imaging workflow employs Aspose.Imaging to adjust the brightness of TIFF scans derived from DICOM data and generate PNG thumbnails for quick review.
- * 4. When a batch‑processing script written in C# leverages Aspose.Imaging to enhance archival TIFF photographs by 20 brightness units and convert them to PNG for a digital archive.
- * 5. When a UI developer uses Aspose.Imaging for .NET to convert legacy TIFF graphics with poor lighting into brighter PNG assets suitable for modern application interfaces.
+ * 1. When a developer needs to preprocess scanned TIFF documents that are too dark before converting them to PNG for web display, they can use this code to boost brightness by 20 units and save the result.
+ * 2. When an automated batch job must normalize the lighting of archival TIFF photographs and output them as PNG thumbnails, the AdjustBrightness method with a +20 offset provides a quick fix.
+ * 3. When integrating a C# application that ingests medical imaging TIFF files and presents them in a PNG viewer, increasing brightness ensures better visibility for clinicians.
+ * 4. When a document management system requires converting user‑uploaded TIFF scans to PNG while correcting underexposed images, this snippet adjusts brightness and performs the format conversion in one step.
+ * 5. When building a .NET service that extracts TIFF images from PDFs, enhances their contrast by raising brightness, and stores the enhanced images as PNG for downstream AI analysis, this code fulfills the requirement.
  */
