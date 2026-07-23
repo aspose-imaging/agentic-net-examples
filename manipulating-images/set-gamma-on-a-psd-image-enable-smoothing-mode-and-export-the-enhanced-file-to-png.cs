@@ -9,31 +9,40 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.psd";
             string outputPath = "output.png";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir);
 
+            // Load the PSD image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                if (!raster.IsCached)
+                // Adjust gamma on the raster image
+                if (image is RasterImage raster)
                 {
-                    raster.CacheData();
+                    raster.AdjustGamma(2.2f); // Example gamma value
                 }
 
-                raster.AdjustGamma(2.2f);
+                // Prepare PNG export options with smoothing mode enabled
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias
+                    }
+                };
 
-                Graphics graphics = new Graphics(image);
-                graphics.SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias;
-
-                PngOptions pngOptions = new PngOptions();
+                // Save the enhanced image as PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -46,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a high‑resolution Photoshop PSD file to a web‑ready PNG while correcting the image’s brightness using gamma adjustment and ensuring smooth edges with anti‑aliasing.
+ * 1. When a web developer needs to convert a high‑resolution Photoshop PSD file to a web‑friendly PNG while correcting the image’s brightness with gamma adjustment and ensuring smooth edges via anti‑aliasing.
  * 2. When an e‑commerce platform must generate product thumbnails from PSD assets, applying a 2.2 gamma curve and smoothing mode to maintain visual consistency across browsers.
- * 3. When a digital publishing workflow requires batch processing of PSD illustrations to PNG with standardized gamma for print‑to‑screen color matching and anti‑aliased rendering for crisp text.
- * 4. When a mobile app prepares user‑uploaded PSD designs for display on high‑DPI screens, adjusting gamma for proper contrast and enabling smoothing to reduce jagged lines before saving as PNG.
- * 5. When a graphic‑design automation script needs to ensure that exported PNGs from PSD files have consistent gamma correction and anti‑aliasing to meet brand guidelines for marketing materials.
+ * 3. When a digital publishing system automates the preparation of print‑ready PSD artwork for online preview, adjusting gamma for accurate color representation and using anti‑aliasing before saving as PNG.
+ * 4. When a mobile app backend processes user‑uploaded PSD designs, normalizes their gamma levels, enables vector rasterization smoothing, and outputs optimized PNGs for faster download.
+ * 5. When a batch‑processing tool needs to standardize a library of PSD graphics by applying gamma correction, activating smoothing mode, and exporting them as PNG files for archival or distribution.
  */
