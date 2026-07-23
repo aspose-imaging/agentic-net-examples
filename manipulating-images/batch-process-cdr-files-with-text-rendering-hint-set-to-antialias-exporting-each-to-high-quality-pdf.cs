@@ -11,14 +11,11 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputCdrFiles";
-            string outputDirectory = @"C:\OutputPdfFiles";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            string inputDir = @"C:\InputCdr";
+            string outputDir = @"C:\OutputPdf";
 
             // Get all CDR files in the input directory
-            string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
+            string[] cdrFiles = Directory.GetFiles(inputDir, "*.cdr");
 
             foreach (string inputPath in cdrFiles)
             {
@@ -31,27 +28,27 @@ class Program
 
                 // Determine output PDF path
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".pdf");
 
-                // Ensure the directory for the output file exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the CDR image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Prepare PDF export options
+                    // Configure PDF export options
                     PdfOptions pdfOptions = new PdfOptions();
-
-                    // Configure rasterization options with AntiAlias rendering
-                    CdrRasterizationOptions rasterizationOptions = new CdrRasterizationOptions
+                    CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                     {
                         TextRenderingHint = TextRenderingHint.AntiAlias,
-                        SmoothingMode = SmoothingMode.AntiAlias
+                        SmoothingMode = SmoothingMode.AntiAlias,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
                     };
 
-                    pdfOptions.VectorRasterizationOptions = rasterizationOptions;
+                    pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                    // Save the image as PDF
+                    // Save as high‑quality PDF
                     image.Save(outputPath, pdfOptions);
                 }
             }
@@ -65,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design studio needs to convert a large collection of CorelDRAW (.cdr) artwork into high‑quality PDF portfolios while preserving smooth text edges using AntiAlias rendering in a C# .NET batch job.
- * 2. When an automated document‑generation pipeline must transform daily exported CDR diagrams into searchable PDFs for archiving, ensuring text is rasterized with anti‑aliasing for readability.
- * 3. When a print‑shop workflow requires mass conversion of client‑submitted CDR files to PDF with consistent anti‑aliased text rendering to meet print‑ready specifications using Aspose.Imaging for .NET.
- * 4. When a cloud‑based conversion service processes user‑uploaded CDR files in bulk, applying TextRenderingHint.AntiAlias to produce crisp PDF outputs that retain the original design fidelity.
- * 5. When a quality‑control script validates that all CDR assets in a repository are correctly exported to PDF with anti‑aliased text, enabling downstream review tools to display clean vector graphics without jagged edges.
+ * 1. When a graphic design studio needs to convert an entire folder of CorelDRAW (.cdr) artwork into high‑quality PDF documents with anti‑aliased text for client review, they can use this C# Aspose.Imaging batch conversion code.
+ * 2. When an automated publishing pipeline must generate print‑ready PDFs from legacy CDR files while preserving crisp text rendering, developers can employ the code to rasterize each page with TextRenderingHint.AntiAlias.
+ * 3. When a document management system needs to archive multiple CDR drawings as searchable PDFs without manual intervention, the snippet provides a way to loop through files, set smoothing options, and save them in .pdf format.
+ * 4. When a Windows service is tasked with nightly conversion of newly uploaded CDR assets to PDF for web preview, the example shows how to load each image, configure CdrRasterizationOptions, and output anti‑aliased PDFs using Aspose.Imaging for .NET.
+ * 5. When a QA engineer wants to verify that text in converted PDFs retains visual fidelity across different screen resolutions, they can run this batch process to produce PDFs with anti‑aliasing and compare the results programmatically.
  */

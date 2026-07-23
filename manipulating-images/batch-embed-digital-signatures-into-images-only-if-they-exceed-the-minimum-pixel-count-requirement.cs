@@ -1,66 +1,63 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = @"C:\Images\Input";
-        string outputDirectory = @"C:\Images\Output";
+        // Hard‑coded input and output file paths
+        string[] inputPaths = new[]
+        {
+            @"C:\Images\Input1.jpg",
+            @"C:\Images\Input2.jpg",
+            @"C:\Images\Input3.jpg"
+        };
 
-        // Minimum pixel count requirement (e.g., 800x600)
-        const long MinPixelCount = 800 * 600;
-
-        // Password used for digital signature
-        const string Password = "mySecretPassword";
+        string outputDirectory = @"C:\Images\Signed";
+        string password = "MySecretPassword";
+        const int MinPixelCount = 500_000; // minimum number of pixels required
 
         try
         {
-            // Ensure the output directory exists
+            // Ensure the output directory exists once
             Directory.CreateDirectory(outputDirectory);
 
-            // Get all files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDirectory);
-
-            foreach (string inputPath in inputFiles)
+            foreach (string inputPath in inputPaths)
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Determine output path (same file name in output directory)
+                // Determine output file path
                 string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
 
-                // Ensure the output directory for this file exists
+                // Ensure the output directory for this file exists (redundant but follows rule)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the image
-                using (Image img = Image.Load(inputPath))
+                using (RasterImage image = Image.Load(inputPath) as RasterImage)
                 {
-                    // Cast to RasterImage to access Width/Height and signature methods
-                    if (img is RasterImage rasterImg)
+                    if (image == null)
                     {
-                        long pixelCount = (long)rasterImg.Width * rasterImg.Height;
-
-                        // Embed signature only if pixel count meets the minimum requirement
-                        if (pixelCount >= MinPixelCount)
-                        {
-                            rasterImg.EmbedDigitalSignature(Password);
-                        }
-
-                        // Save the (potentially modified) image
-                        rasterImg.Save(outputPath);
+                        Console.Error.WriteLine($"Unsupported image format: {inputPath}");
+                        continue;
                     }
-                    else
+
+                    // Check pixel count
+                    long pixelCount = (long)image.Width * image.Height;
+                    if (pixelCount >= MinPixelCount)
                     {
-                        Console.Error.WriteLine($"Unsupported image type: {inputPath}");
+                        // Embed digital signature
+                        image.EmbedDigitalSignature(password);
                     }
+
+                    // Save the (possibly signed) image
+                    image.Save(outputPath);
                 }
             }
         }
@@ -73,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer wants to automatically add a password‑protected digital signature to all high‑resolution JPEG or PNG files in a folder before publishing them online.
- * 2. When a medical imaging system must embed a secure signature into DICOM images that are at least 800×600 pixels to ensure compliance with audit regulations.
- * 3. When an e‑commerce platform needs to batch‑process product photos, signing only those images that meet a minimum pixel count to prevent tampering of catalog images.
- * 4. When a government agency archives scanned documents and wants to embed a digital signature into TIFF files larger than a specified size to guarantee authenticity.
- * 5. When a content management workflow requires adding a password‑protected signature to large PNG assets while leaving smaller icons unchanged.
+ * 1. When a C# application must automatically add a password‑protected digital signature to high‑resolution JPEG photos (e.g., product catalog images) before publishing them to a web server.
+ * 2. When a batch processing tool needs to embed a cryptographic signature into only those images that meet a minimum pixel count, ensuring low‑resolution thumbnails are left unchanged.
+ * 3. When a document management system integrates Aspose.Imaging to verify image authenticity by signing large‑size PNG or BMP files during nightly import jobs.
+ * 4. When a digital asset pipeline for a marketing campaign requires conditional signing of JPEG files larger than 500,000 pixels to comply with brand‑security policies.
+ * 5. When a Windows service processes incoming image uploads, checks each image’s width × height, and embeds a secret password signature into qualifying images before storing them in a secure folder.
  */

@@ -2,16 +2,16 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input\\sample.tif";
-        string outputPath = "Output\\result.pdf";
+        string inputPath = "Input/sample.tif";
+        string outputPath = "Output/result.pdf";
 
         try
         {
@@ -47,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to preprocess scanned TIFF documents by softening noise with a Gaussian blur, brightening the image, and delivering the result as a searchable PDF for archival.
- * 2. When an imaging application must convert high‑resolution medical TIFF scans into PDF reports while enhancing visibility through blur and brightness adjustments.
- * 3. When a document management system requires automated preparation of TIFF blueprints, applying blur to reduce fine detail, increasing brightness for readability, and exporting to PDF for client distribution.
- * 4. When a batch‑processing tool needs to improve the legibility of old TIFF photographs by smoothing edges, boosting brightness, and packaging them as PDF portfolios.
- * 5. When a web service generates printable PDFs from user‑uploaded TIFF invoices, using Gaussian blur to mask sensitive details, adjusting brightness for consistent appearance, and saving the final document as PDF.
+ * 1. When a developer needs to convert scanned multi‑page TIFF documents into PDF files while applying a Gaussian blur to reduce noise and then increasing brightness for better readability.
+ * 2. When an application must preprocess legacy medical imaging TIFF files by smoothing them with a Gaussian blur filter and enhancing brightness before archiving them as PDF reports.
+ * 3. When a batch‑processing service automates the preparation of TIFF‑based product catalogs, applying blur to hide sensitive details and adjusting brightness before delivering the final PDF to clients.
+ * 4. When a document management system requires on‑the‑fly conversion of uploaded TIFF images to PDF with built‑in image‑processing steps such as Gaussian blur and brightness correction using Aspose.Imaging for .NET.
+ * 5. When a developer builds a C# utility that cleans up low‑quality scanned invoices (TIFF) by smoothing edges and brightening the image, then saves the polished result as a PDF for downstream accounting workflows.
  */

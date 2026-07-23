@@ -2,8 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
@@ -22,20 +21,16 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
+            using (Image tiffImage = Image.Load(inputPath))
             {
-                PngOptions pngOptions = new PngOptions();
-
-                EmfRasterizationOptions vectorOptions = new EmfRasterizationOptions
+                using (EmfImage emfImage = new EmfImage(tiffImage.Width, tiffImage.Height))
                 {
-                    PageSize = tiff.Size,
-                    BackgroundColor = Color.White,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel
-                };
+                    Graphics graphics = new Graphics(emfImage);
+                    graphics.DrawImage(tiffImage, new Rectangle(0, 0, emfImage.Width, emfImage.Height));
 
-                pngOptions.VectorRasterizationOptions = vectorOptions;
-
-                tiff.Save(outputPath, pngOptions);
+                    PngOptions pngOptions = new PngOptions();
+                    emfImage.Save(outputPath, pngOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -47,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert multi‑page TIFF documents that contain EMF‑encoded text into high‑resolution PNG images while preserving the text as vector shapes for crisp rendering.
- * 2. When an application must generate web‑ready PNG thumbnails from scanned TIFF files that include embedded EMF captions, ensuring the text remains sharp at any zoom level.
- * 3. When a reporting tool has to export printed TIFF reports with vector‑based annotations to PNG format for inclusion in PDFs without losing text quality.
- * 4. When a migration script has to batch‑process legacy TIFF assets containing EMF graphics and produce PNG assets that can be displayed on modern browsers.
- * 5. When a GIS or CAD system requires converting TIFF maps with embedded EMF labels into PNG tiles while keeping the label text rendered as vectors for accurate scaling.
+ * 1. When a developer needs to convert scanned TIFF documents that contain embedded EMF text into high‑resolution PNG images for web preview without losing vector quality.
+ * 2. When an application must generate thumbnail PNGs from multi‑page TIFF files while preserving the original EMF‑based annotations as scalable graphics.
+ * 3. When a reporting tool has to embed TIFF‑based charts with EMF labels into PNG charts for inclusion in PDF or email attachments.
+ * 4. When a legacy system stores printable forms as TIFF files with EMF text and the new system requires PNG assets for mobile display.
+ * 5. When a batch‑processing service automates the conversion of TIFF images containing vector‑based watermarks (EMF) into PNG files for archival storage.
  */

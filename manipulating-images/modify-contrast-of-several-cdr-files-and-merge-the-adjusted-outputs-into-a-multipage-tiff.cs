@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Cdr;
@@ -12,19 +13,19 @@ class Program
     {
         try
         {
-            // Hardcoded input CDR files
+            // Hard‑coded input CDR files
             string[] inputPaths = new string[]
             {
-                @"C:\input\file1.cdr",
-                @"C:\input\file2.cdr"
-                // add more input files as needed
+                @"C:\Input\file1.cdr",
+                @"C:\Input\file2.cdr"
+                // add more paths as needed
             };
 
-            // Hardcoded output multipage TIFF file
-            string outputPath = @"C:\output\merged.tif";
+            // Hard‑coded output multipage TIFF
+            string outputPath = @"C:\Output\merged.tif";
 
             // Verify each input file exists
-            foreach (string inputPath in inputPaths)
+            foreach (var inputPath in inputPaths)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -33,58 +34,55 @@ class Program
                 }
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            TiffImage finalTiff = null;
+            // Collect all adjusted TIFF frames
+            List<TiffFrame> allFrames = new List<TiffFrame>();
 
-            foreach (string inputPath in inputPaths)
+            // Process each CDR file
+            foreach (var inputPath in inputPaths)
             {
-                // Load CDR image
+                // Load the CDR image
                 using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
                 {
-                    // Iterate through all pages of the CDR file
+                    // Iterate through each page of the CDR document
                     foreach (CdrImagePage page in cdrImage.Pages)
                     {
-                        // Export the page to a memory stream as a TIFF image
-                        using (var ms = new MemoryStream())
+                        // Rasterize the page to a TIFF image in memory
+                        using (MemoryStream ms = new MemoryStream())
                         {
-                            var tiffExportOptions = new TiffOptions(TiffExpectedFormat.Default);
-                            page.Save(ms, tiffExportOptions);
+                            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                            page.Save(ms, tiffOptions);
                             ms.Position = 0;
 
-                            // Load the exported TIFF, adjust contrast, and collect the frame
-                            using (TiffImage tiffPage = (TiffImage)Image.Load(ms))
+                            // Load the rasterized TIFF so we can adjust contrast
+                            using (TiffImage tiffImage = (TiffImage)Image.Load(ms))
                             {
                                 // Adjust contrast (example value: 50)
-                                tiffPage.AdjustContrast(50f);
+                                tiffImage.AdjustContrast(50f);
 
-                                if (finalTiff == null)
-                                {
-                                    // Initialize final multipage TIFF with the first frame
-                                    finalTiff = new TiffImage(tiffPage.ActiveFrame);
-                                }
-                                else
-                                {
-                                    // Append subsequent frames
-                                    finalTiff.AddFrame(tiffPage.ActiveFrame);
-                                }
+                                // Clone the active frame to keep it after disposing tiffImage
+                                TiffFrame adjustedFrame = new TiffFrame(tiffImage.ActiveFrame);
+                                allFrames.Add(adjustedFrame);
                             }
                         }
                     }
                 }
             }
 
-            // If at least one frame was processed, save the multipage TIFF
-            if (finalTiff != null)
+            if (allFrames.Count == 0)
             {
-                var saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                finalTiff.Save(outputPath, saveOptions);
-                finalTiff.Dispose();
+                Console.Error.WriteLine("No frames were processed.");
+                return;
             }
-            else
+
+            // Create a multipage TIFF from the collected frames
+            using (TiffImage multiPageTiff = new TiffImage(allFrames.ToArray()))
             {
-                Console.Error.WriteLine("No frames were processed; output TIFF not created.");
+                // Save the final multipage TIFF
+                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                multiPageTiff.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -96,9 +94,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design studio needs to batch‑process CorelDRAW (CDR) artwork, increase the contrast for better print quality, and combine the pages into a single multipage TIFF for archival or client review.
- * 2. When an e‑learning platform converts lecture slides saved as CDR files, adjusts their contrast to improve readability on screens, and merges them into a multipage TIFF to embed in PDFs or LMS modules.
- * 3. When a legal firm receives scanned documents in CDR format, wants to enhance contrast for OCR accuracy, and bundles the enhanced pages into one TIFF file for easy storage and retrieval.
- * 4. When a publishing house prepares color‑corrected illustrations from multiple CDR sources and needs a single multipage TIFF to send to a pre‑press workflow that only accepts TIFF images.
- * 5. When an automation script processes product catalog pages stored as CDR files, applies contrast adjustments to match brand guidelines, and outputs a combined multipage TIFF for bulk printing.
+ * 1. When a developer needs to batch‑process a collection of CorelDRAW (.cdr) drawings, increase their contrast for better visual clarity, and archive the results as a single multipage TIFF for easy distribution.
+ * 2. When an automated document‑management system must convert scanned CDR design files to high‑contrast TIFF pages and combine them into one file for long‑term storage or compliance reporting.
+ * 3. When a print‑shop workflow requires adjusting the contrast of multiple CDR artwork pages before merging them into a multipage TIFF that can be sent directly to a RIP or printer.
+ * 4. When a web application built with C# and Aspose.Imaging for .NET needs to generate a searchable PDF‑like preview by enhancing contrast of each CDR page and bundling them into a single TIFF for downstream conversion.
+ * 5. When a digital asset‑management tool must programmatically improve the contrast of several CDR assets and create a consolidated multipage TIFF for quick thumbnail generation or preview in a gallery view.
  */

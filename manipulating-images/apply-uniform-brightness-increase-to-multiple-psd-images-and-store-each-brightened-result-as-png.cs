@@ -10,22 +10,17 @@ class Program
         try
         {
             // Hardcoded input PSD files
-            string[] inputPaths = new string[]
-            {
-                @"C:\Images\Input1.psd",
-                @"C:\Images\Input2.psd",
-                @"C:\Images\Input3.psd"
+            string[] inputPaths = {
+                @"C:\Images\image1.psd",
+                @"C:\Images\image2.psd"
             };
 
             // Corresponding output PNG files
-            string[] outputPaths = new string[]
-            {
-                @"C:\Images\Output\Brightened1.png",
-                @"C:\Images\Output\Brightened2.png",
-                @"C:\Images\Output\Brightened3.png"
+            string[] outputPaths = {
+                @"C:\Output\image1.png",
+                @"C:\Output\image2.png"
             };
 
-            // Process each file
             for (int i = 0; i < inputPaths.Length; i++)
             {
                 string inputPath = inputPaths[i];
@@ -44,22 +39,15 @@ class Program
                 // Load the PSD image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to adjust brightness
-                    RasterImage raster = image as RasterImage;
-                    if (raster != null)
+                    // Adjust brightness if the image supports raster operations
+                    if (image is RasterImage rasterImage)
                     {
-                        // Increase brightness uniformly (e.g., +50)
-                        raster.AdjustBrightness(50);
+                        // Increase brightness uniformly (value range -255 to 255)
+                        rasterImage.AdjustBrightness(50);
+                    }
 
-                        // Save the brightened image as PNG
-                        PngOptions pngOptions = new PngOptions();
-                        raster.Save(outputPath, pngOptions);
-                    }
-                    else
-                    {
-                        Console.Error.WriteLine($"Unable to process image (not a raster image): {inputPath}");
-                        return;
-                    }
+                    // Save the result as PNG
+                    image.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -72,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to batch‑process Photoshop PSD files to make them uniformly brighter before publishing them as web‑ready PNGs.
- * 2. When an e‑commerce platform wants to automatically enhance product mock‑ups stored as PSDs and store the brighter versions as PNG thumbnails for faster page loads.
- * 3. When a marketing automation script must convert a set of layered PSD assets into brightened PNGs for use in email campaigns that require consistent lighting.
- * 4. When a digital asset management system needs to apply a fixed brightness offset to multiple PSD files and save the results as PNGs for preview generation.
- * 5. When a game development pipeline requires preprocessing of PSD texture maps by increasing their brightness and exporting them as PNGs for runtime use.
+ * 1. When a marketing team needs to quickly brighten a batch of Photoshop (PSD) assets before publishing them as web‑ready PNGs, a developer can use this C# code to automate the process.
+ * 2. When an e‑learning platform receives client‑provided PSD slides that are too dark and must be converted to PNG thumbnails with consistent brightness, the code provides a simple solution.
+ * 3. When a digital asset management system must reprocess legacy PSD files to improve visibility and store the results as PNG for faster preview loading, this routine can be integrated into the C# pipeline.
+ * 4. When a photo‑editing SaaS wants to apply a uniform brightness boost to multiple user‑uploaded PSD files and deliver the edited images as PNGs without manual Photoshop intervention, the example shows how to achieve it.
+ * 5. When a game development studio needs to prepare brightened texture maps from PSD source files and export them as PNGs for the engine, the code automates the raster image adjustment and format conversion.
  */

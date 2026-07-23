@@ -10,23 +10,25 @@ class Program
         string inputPath = "input.tif";
         string outputPath = "output.tif";
 
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             using (TiffImage image = (TiffImage)Image.Load(inputPath))
             {
-                // Resize using Lanczos resampling
-                image.Resize(image.Width / 2, image.Height / 2, ResizeType.LanczosResample);
+                // Resize using Lanczos resampling (double the size)
+                int newWidth = image.Width * 2;
+                int newHeight = image.Height * 2;
+                image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
                 // Embed digital signature with a password longer than four characters
-                image.EmbedDigitalSignature("secure123");
+                image.EmbedDigitalSignature("securePassword123");
 
                 // Save the processed image
                 image.Save(outputPath);
@@ -41,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to halve the dimensions of a high‑resolution TIFF scan (such as a legal contract) using Lanczos resampling and then protect the file with a password‑protected digital signature longer than four characters.
- * 2. When an application must prepare medical TIFF images for faster transmission by resizing them with Lanczos and ensuring authenticity by embedding a secure digital signature.
- * 3. When a GIS system processes large satellite TIFF tiles, reduces their size for web mapping using Lanczos, and adds a tamper‑evident digital signature to meet compliance requirements.
- * 4. When an engineering firm wants to archive detailed CAD drawings saved as multi‑page TIFFs, compress the pages by resizing and embed a strong password‑protected digital signature to prevent unauthorized modifications.
- * 5. When a document management workflow automatically converts scanned TIFF invoices to a smaller format for storage and adds a digital signature with a robust password to guarantee the invoice’s integrity.
+ * 1. When a developer needs to double the size of a high‑resolution TIFF scan for detailed printing while adding a password‑protected digital signature to ensure authenticity, this code provides a straightforward solution.
+ * 2. When a medical imaging system must enlarge DICOM‑converted TIFF X‑ray images using Lanczos resampling for better visual analysis and embed a secure signature to comply with data integrity regulations, the example can be applied.
+ * 3. When a document management application requires up‑scaling archived TIFF files for web preview and wants to embed a digital signature with a strong password to prevent tampering, this snippet handles both tasks.
+ * 4. When a GIS workflow needs to resize large satellite TIFF tiles with high‑quality Lanczos interpolation and then lock the files with a password‑protected digital signature before distribution, the code meets the requirement.
+ * 5. When an e‑commerce platform processes product catalog TIFF images, enlarges them for high‑resolution displays, and embeds a secure digital signature to verify the source, developers can reuse this example.
  */

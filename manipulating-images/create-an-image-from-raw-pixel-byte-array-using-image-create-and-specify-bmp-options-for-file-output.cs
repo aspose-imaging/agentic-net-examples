@@ -10,35 +10,56 @@ class Program
     {
         try
         {
-            // Hardcoded output path
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\rawpixels.bin";
             string outputPath = @"C:\temp\output.bmp";
 
-            // Ensure the output directory exists
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Raw pixel data (ARGB) for a 2x2 image
-            int[] pixels = new int[]
-            {
-                unchecked((int)0xFFFF0000), // Red
-                unchecked((int)0xFF00FF00), // Green
-                unchecked((int)0xFF0000FF), // Blue
-                unchecked((int)0xFFFFFFFF)  // White
-            };
-            int width = 2;
-            int height = 2;
+            // Define image dimensions (must match raw data size)
+            int width = 100;
+            int height = 100;
 
-            // BMP creation options
+            // Read raw pixel data (assumed 32‑bpp ARGB)
+            byte[] rawData = File.ReadAllBytes(inputPath);
+            int expectedLength = width * height * 4;
+            if (rawData.Length < expectedLength)
+            {
+                Console.Error.WriteLine("Insufficient pixel data.");
+                return;
+            }
+
+            // Convert byte array to int[] pixel array
+            int[] pixels = new int[width * height];
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                int offset = i * 4;
+                int a = rawData[offset];
+                int r = rawData[offset + 1];
+                int g = rawData[offset + 2];
+                int b = rawData[offset + 3];
+                pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
+            }
+
+            // Set BMP creation options
             BmpOptions bmpOptions = new BmpOptions
             {
-                BitsPerPixel = 24,
-                // Define where the image will be saved
+                BitsPerPixel = 32,
+                Compression = Aspose.Imaging.FileFormats.Bmp.BitmapCompression.Rgb,
                 Source = new FileCreateSource(outputPath, false)
             };
 
-            // Create the image from the raw pixel array
+            // Create image from pixel array and save
             using (Image image = Image.Create(bmpOptions, width, height, pixels))
             {
-                // Save the image (writes to the path defined in Source)
                 image.Save();
             }
         }
@@ -51,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 2×2 BMP thumbnail directly from a raw ARGB pixel array using Image.Create and BmpOptions in C# without loading an existing image file.
- * 2. When an application must build a custom icon or sprite sheet at runtime by converting an integer pixel buffer into a 24‑bit BMP file with FileCreateSource for immediate file output.
- * 3. When a server‑side service receives raw pixel data from a hardware device and has to save it as a BMP image using Aspose.Imaging’s Image.Create method and BMP options.
- * 4. When a unit test requires creating deterministic bitmap images from hard‑coded pixel values to verify image‑processing logic in .NET.
- * 5. When integrating with a legacy system that only accepts BMP files with specific BitsPerPixel settings, and the developer needs to construct those files directly from a pixel array using Aspose.Imaging for .NET.
+ * 1. When a developer receives raw sensor data from a medical imaging device and needs to convert the 32‑bpp ARGB byte stream into a BMP file for analysis or archival.
+ * 2. When a game engine exports framebuffer data as a binary file and the developer must reconstruct the screenshot as a BMP image for debugging or user sharing.
+ * 3. When a batch processing tool reads raw pixel dumps from a legacy camera system and creates BMP files to feed into a third‑party image viewer that only supports BMP.
+ * 4. When a security application captures screen pixels in memory, stores them as a raw byte array, and later needs to generate a BMP file for forensic reporting.
+ * 5. When a data‑visualization service receives generated pixel arrays from a GPU compute job and uses Aspose.Imaging to write them as BMP files for inclusion in reports or email attachments.
  */

@@ -1,41 +1,60 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Output file path
-            string outputPath = "Output\\signed.png";
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output_signed.png";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Four‑character password for the digital signature
+            string password = "ABCD";
 
-            // Create a 1024x1024 PNG image with TruecolorWithAlpha
-            using (PngImage png = new PngImage(1024, 1024, PngColorType.TruecolorWithAlpha))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Fill the image with opaque white pixels
-                int[] whitePixels = new int[1024 * 1024];
-                for (int i = 0; i < whitePixels.Length; i++)
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists (creates if missing)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Load the PNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Work with raster images (PNG is raster)
+                if (image is RasterImage rasterImage)
                 {
-                    whitePixels[i] = unchecked((int)0xFFFFFFFF); // ARGB white
+                    // Embed the digital signature using the password
+                    rasterImage.EmbedDigitalSignature(password);
+
+                    // Save the signed image
+                    rasterImage.Save(outputPath);
+
+                    // Verify the signature on the saved image
+                    using (Image verifyImage = Image.Load(outputPath))
+                    {
+                        if (verifyImage is RasterImage verifyRaster)
+                        {
+                            bool isSigned = verifyRaster.IsDigitalSigned(password);
+                            Console.WriteLine($"Signature verification result: {isSigned}");
+                        }
+                        else
+                        {
+                            Console.Error.WriteLine("Verification image is not a raster image.");
+                        }
+                    }
                 }
-                png.SaveArgb32Pixels(new Rectangle(0, 0, 1024, 1024), whitePixels);
-
-                // Embed a digital signature using a four‑character password
-                string password = "ABCD";
-                png.EmbedDigitalSignature(password);
-
-                // Verify that the signature was embedded
-                bool isSigned = png.IsDigitalSigned(password);
-                Console.WriteLine($"Signature embedded: {isSigned}");
-
-                // Save the signed image
-                png.Save(outputPath);
+                else
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                }
             }
         }
         catch (Exception ex)
@@ -47,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to protect a product logo PNG from unauthorized alteration by embedding a password‑protected digital signature before publishing it on a website.
- * 2. When an e‑commerce platform wants to embed a four‑character password signature into order confirmation PNG receipts to verify authenticity during customer support audits.
- * 3. When a medical imaging system must embed a digital signature into PNG scans of patient reports to ensure the images have not been tampered with when shared between clinics.
- * 4. When a government agency creates PNG maps with a password‑protected signature to confirm that the map files distributed to field agents are genuine and unmodified.
- * 5. When a developer builds a C# workflow that automatically signs and validates PNG thumbnails of confidential documents before storing them in a secure archive.
+ * 1. When a developer needs to protect a PNG logo with a four‑character password before distributing it to partners, they can embed a digital signature and later verify it to ensure authenticity.
+ * 2. When an e‑commerce platform wants to embed a hidden password‑protected signature into product thumbnail images to detect unauthorized copying, this code can sign and validate the PNG files.
+ * 3. When a document management system stores scanned PNG pages and must confirm that each page has not been altered, developers can use this routine to embed and later check a digital signature with a simple password.
+ * 4. When a mobile app generates user‑created PNG avatars and requires a lightweight method to verify the source before uploading, the code can embed a short password signature and verify it on the server.
+ * 5. When a compliance audit requires proof that a specific PNG diagram was approved at a certain time, developers can embed a four‑character password signature into the image and later validate its presence during the audit.
  */

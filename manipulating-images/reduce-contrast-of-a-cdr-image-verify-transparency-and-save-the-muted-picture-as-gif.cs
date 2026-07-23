@@ -2,18 +2,19 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\Images\sample.cdr";
+        string outputPath = @"C:\Images\sample_muted.gif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.cdr";
-            string outputPath = @"C:\Images\sample_muted.gif";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,30 +22,45 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CDR image
-            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+            using (Image cdrImage = Image.Load(inputPath))
             {
-                // Rasterize the CDR image to a PNG in memory
-                using (MemoryStream ms = new MemoryStream())
+                // Rasterize the vector CDR to a PNG stored in memory
+                using (var memoryStream = new MemoryStream())
                 {
-                    cdrImage.Save(ms, new PngOptions());
-                    ms.Position = 0;
+                    cdrImage.Save(memoryStream, new PngOptions());
+                    memoryStream.Position = 0; // Reset stream for reading
 
                     // Load the rasterized image
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    using (Image rasterImage = Image.Load(memoryStream))
                     {
-                        // Verify transparency (check if background color has alpha < 255)
-                        bool hasTransparency = raster.HasBackgroundColor && raster.BackgroundColor.A < 255;
-                        Console.WriteLine($"Transparency detected: {hasTransparency}");
+                        // Cast to RasterCachedImage to access AdjustContrast
+                        var raster = (RasterCachedImage)rasterImage;
 
                         // Reduce contrast (negative value reduces contrast)
                         raster.AdjustContrast(-30f);
 
-                        // Save the result as GIF
-                        GifOptions gifOptions = new GifOptions();
+                        // Verify transparency by scanning pixels for any alpha < 255
+                        bool hasTransparency = false;
+                        for (int y = 0; y < raster.Height && !hasTransparency; y++)
+                        {
+                            for (int x = 0; x < raster.Width; x++)
+                            {
+                                var pixel = raster.GetPixel(x, y);
+                                if (pixel.A < 255)
+                                {
+                                    hasTransparency = true;
+                                    break;
+                                }
+                            }
+                        }
+                        Console.WriteLine($"Transparency detected: {hasTransparency}");
+
+                        // Save the processed image as GIF
+                        var gifOptions = new GifOptions();
                         raster.Save(outputPath, gifOptions);
                     }
                 }
@@ -59,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a CorelDRAW (CDR) vector file to a GIF with reduced contrast for web thumbnails while preserving any alpha transparency.
- * 2. When an automated image pipeline must verify that a CDR source contains transparent background before rasterizing it to a low‑contrast GIF for email newsletters.
- * 3. When a desktop application processes user‑uploaded CDR artwork, adjusts its visual intensity, and saves the result as a GIF for preview in a product catalog.
- * 4. When a batch job has to ensure the output directory exists, load a CDR file, mute its colors by decreasing contrast, and output a GIF that retains the original transparency for mobile apps.
- * 5. When troubleshooting image quality, a developer wants to programmatically check for background alpha values, apply a negative contrast adjustment, and export the muted image as a GIF for quick visual inspection.
+ * 1. When a developer needs to convert a CorelDRAW (CDR) logo to a low‑contrast GIF for a website’s dark theme while ensuring the image retains its transparent background.
+ * 2. When an automated build script must rasterize vector CDR assets, mute their contrast for a print‑friendly preview, and verify that no opaque pixels were introduced before publishing.
+ * 3. When a marketing application generates animated GIF banners from CDR designs and must reduce contrast to meet brand guidelines and confirm that the original transparency is preserved.
+ * 4. When a batch‑processing tool processes user‑uploaded CDR files, applies a subtle contrast reduction to improve readability on low‑resolution screens, and checks for any alpha values less than 255 before saving as GIF.
+ * 5. When a desktop utility prepares CDR‑based UI icons for inclusion in an email template, lowering contrast to avoid visual clutter and validating transparency to prevent unwanted background blocks in the final GIF.
  */
