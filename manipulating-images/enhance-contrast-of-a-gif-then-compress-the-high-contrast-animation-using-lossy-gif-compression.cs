@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\sample.gif";
+        string outputPath = @"c:\temp\sample_contrast_lossy.gif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.gif";
-            string outputPath = @"C:\temp\output_contrast_lossy.gif";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,32 +21,26 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to GifImage to access GIF‑specific methods
                 GifImage gifImage = (GifImage)image;
 
-                // Adjust contrast (value in range [-100, 100])
+                // Increase contrast (value range: -100 to 100)
                 gifImage.AdjustContrast(50f);
 
-                // Prepare lossy GIF save options
+                // Configure lossy GIF compression
                 GifOptions saveOptions = new GifOptions
                 {
-                    // Enable lossy compression by setting MaxDiff > 0
-                    MaxDiff = 80,
-                    // Optional: improve palette quality
-                    DoPaletteCorrection = true
+                    MaxDiff = 80 // recommended value for optimal lossy compression
                 };
 
                 // Save the high‑contrast GIF with lossy compression
                 gifImage.Save(outputPath, saveOptions);
             }
-
-            Console.WriteLine("Processing completed successfully.");
         }
         catch (Exception ex)
         {
@@ -57,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer wants to improve the visual impact of an animated GIF banner while reducing its download size for faster page loads, they can use this C# code with Aspose.Imaging to boost contrast and apply lossy GIF compression.
- * 2. When an e‑learning platform needs to enhance the readability of instructional GIFs and store them efficiently on a CDN, the code can adjust contrast and compress the animation using Aspose.Imaging’s GifOptions in .NET.
- * 3. When a mobile app generates user‑created GIF stickers and must keep the file size under a limit without losing the high‑contrast effect, developers can call AdjustContrast and set MaxDiff in GifOptions as shown.
- * 4. When a digital marketing team automates batch processing of promotional GIFs to make colors pop and meet email size restrictions, this C# snippet provides a repeatable workflow with Aspose.Imaging’s contrast and lossy compression features.
- * 5. When a social media analytics tool extracts GIFs from posts and wants to standardize their appearance and storage footprint, the code demonstrates how to programmatically increase contrast and apply lossy compression in .NET.
+ * 1. When a web developer wants to improve the visual clarity of an animated GIF for a marketing banner and reduce its file size for faster page loads, they can use this C# code with Aspose.Imaging to boost contrast and apply lossy GIF compression.
+ * 2. When a mobile app needs to display high‑contrast animated icons while keeping the download size low, the code can adjust the GIF contrast and save it with a MaxDiff setting for efficient bandwidth usage.
+ * 3. When an e‑learning platform processes user‑uploaded GIF tutorials and wants to enhance readability of the frames without exceeding storage quotas, the developer can run this routine to increase contrast and compress the animation lossily.
+ * 4. When a social‑media scheduling tool automatically optimizes GIF memes for better visual impact and quicker sharing, the script provides a C# solution to adjust contrast and apply lossy compression using Aspose.Imaging.
+ * 5. When a digital signage system prepares animated GIF advertisements that must be bright and crisp on large screens yet fit within limited memory, this code enables contrast enhancement and size reduction through lossy GIF encoding.
  */
