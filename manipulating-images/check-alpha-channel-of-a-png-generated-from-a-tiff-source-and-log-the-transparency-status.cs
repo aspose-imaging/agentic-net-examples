@@ -9,12 +9,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\source.tif";
-        string outputPath = @"C:\temp\result.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\source.tif";
+            string outputPath = @"C:\temp\output.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,17 +28,17 @@ class Program
             // Load the TIFF image
             using (Image tiffImage = Image.Load(inputPath))
             {
-                // Convert and save as PNG
+                // Save as PNG
                 var pngOptions = new PngOptions();
                 tiffImage.Save(outputPath, pngOptions);
             }
 
-            // Load the generated PNG image
-            using (Image pngImg = Image.Load(outputPath))
+            // Load the generated PNG to check alpha channel
+            using (Image pngImage = Image.Load(outputPath))
             {
-                var pngImage = (PngImage)pngImg;
-                bool hasAlpha = pngImage.HasAlpha;
-                Console.WriteLine($"Generated PNG has alpha channel: {hasAlpha}");
+                var png = (PngImage)pngImage;
+                bool hasAlpha = png.HasAlpha;
+                Console.WriteLine($"PNG image '{outputPath}' has alpha channel: {hasAlpha}");
             }
         }
         catch (Exception ex)
@@ -50,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert scanned TIFF documents to PNG for web display and verify whether the resulting PNG retains any transparency for proper layering in HTML/CSS.
- * 2. When building an automated image pipeline that extracts alpha channel information from TIFF‑to‑PNG conversions to decide if the PNG can be used as a mask in graphic design workflows.
- * 3. When integrating Aspose.Imaging into a desktop application that generates thumbnails from multi‑page TIFF files and logs transparency status to avoid rendering artifacts in UI components.
- * 4. When creating a batch processing script that validates medical imaging files converted from TIFF to PNG, ensuring that no unintended alpha channel is introduced that could affect diagnostic software.
- * 5. When developing a GIS mapping tool that converts geospatial TIFF layers to PNG tiles and needs to confirm the presence of an alpha channel to correctly overlay tiles on a map canvas.
+ * 1. When a developer needs to convert a multi‑page TIFF scan to a PNG for web display and verify whether the resulting PNG retains transparency for overlay purposes.
+ * 2. When an image‑processing pipeline must ensure that PNG assets derived from TIFF sources contain an alpha channel before they are used in UI components that rely on translucency.
+ * 3. When a batch conversion tool has to log the transparency status of each PNG generated from archival TIFF files to comply with quality‑assurance reporting.
+ * 4. When a C# application integrates Aspose.Imaging to detect if a converted PNG includes an alpha channel, so it can decide whether to apply a background fill or preserve the original transparency.
+ * 5. When a developer is troubleshooting why a PNG exported from a TIFF loses its transparency and needs to programmatically check the HasAlpha property after saving.
  */
