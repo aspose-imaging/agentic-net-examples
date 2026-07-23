@@ -1,12 +1,10 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -15,57 +13,62 @@ class Program
         try
         {
             // Hardcoded input GIF paths
-            string[] inputPaths = { "gif1.gif", "gif2.gif", "gif3.gif" };
-            // Hardcoded output path
-            string outputPath = "merged.gif";
+            string inputPath1 = "input1.gif";
+            string inputPath2 = "input2.gif";
+            string inputPath3 = "input3.gif";
 
             // Validate input files
-            foreach (string inputPath in inputPaths)
+            if (!File.Exists(inputPath1))
             {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                Console.Error.WriteLine($"File not found: {inputPath1}");
+                return;
             }
+            if (!File.Exists(inputPath2))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath2}");
+                return;
+            }
+            if (!File.Exists(inputPath3))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath3}");
+                return;
+            }
+
+            // Output GIF path
+            string outputPath = "output.gif";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of first frames
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-            foreach (string inputPath in inputPaths)
+            // Load and deskew the first GIF
+            using (GifImage firstGif = (GifImage)Image.Load(inputPath1))
             {
-                using (GifImage gif = (GifImage)Image.Load(inputPath))
-                {
-                    RasterImage frame = (RasterImage)gif.Pages[0];
-                    sizes.Add(frame.Size);
-                }
-            }
+                // Deskew using NormalizeAngle (no resizing, white background)
+                firstGif.NormalizeAngle(false, Color.White);
 
-            // Calculate canvas dimensions (horizontal merge)
-            int canvasWidth = sizes.Sum(s => s.Width);
-            int canvasHeight = sizes.Max(s => s.Height);
-
-            // Create output GIF canvas bound to file
-            Source outputSource = new FileCreateSource(outputPath, false);
-            GifOptions gifOptions = new GifOptions() { Source = outputSource };
-            using (RasterImage canvas = (RasterImage)Image.Create(gifOptions, canvasWidth, canvasHeight))
-            {
-                int offsetX = 0;
-                foreach (string inputPath in inputPaths)
+                // Create output GIF using the first frame block
+                GifFrameBlock firstBlock = (GifFrameBlock)firstGif.ActiveFrame;
+                using (GifImage outputGif = new GifImage(firstBlock))
                 {
-                    using (GifImage gif = (GifImage)Image.Load(inputPath))
+                    // Load and deskew remaining GIFs, adding them as pages
+                    using (GifImage secondGif = (GifImage)Image.Load(inputPath2))
                     {
-                        RasterImage frame = (RasterImage)gif.Pages[0];
-                        Rectangle bounds = new Rectangle(offsetX, 0, frame.Width, frame.Height);
-                        canvas.SaveArgb32Pixels(bounds, frame.LoadArgb32Pixels(frame.Bounds));
-                        offsetX += frame.Width;
+                        secondGif.NormalizeAngle(false, Color.White);
+                        outputGif.AddPage(secondGif);
                     }
-                }
 
-                // Save the bound image
-                canvas.Save();
+                    using (GifImage thirdGif = (GifImage)Image.Load(inputPath3))
+                    {
+                        thirdGif.NormalizeAngle(false, Color.White);
+                        outputGif.AddPage(thirdGif);
+                    }
+
+                    // Prepare GIF save options (default)
+                    GifOptions gifOptions = new GifOptions();
+
+                    // Save the animated GIF
+                    outputGif.Save(outputPath, gifOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -77,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building a web application that receives scanned animated GIFs from users and needs to automatically correct their orientation with Aspose.Imaging for .NET before creating a single animated GIF preview.
- * 2. When generating product showcase animations from multiple camera‑captured GIF frames that may be slightly rotated, requiring deskew and side‑by‑side merging into one GIF for e‑commerce sites.
- * 3. When creating educational tutorials that combine several step‑by‑step GIF screenshots, each needing alignment correction, into a single animated GIF for online courses.
- * 4. When developing a social‑media tool that aggregates user‑uploaded GIF stickers, deskews them, and merges them into a composite animated GIF for sharing.
- * 5. When automating the preparation of marketing‑email assets by deskewing and stitching together multiple promotional GIFs into one animated GIF to reduce file size and improve visual consistency.
+ * 1. When a developer needs to correct the orientation of scanned GIF frames and combine them into a single animated GIF for a web slideshow, they can use this Aspose.Imaging C# code to deskew each image and merge them.
+ * 2. When an e‑learning platform must generate animated GIF tutorials from a series of hand‑drawn GIF sketches that are slightly tilted, the code provides a quick way to normalize angles and create a smooth animation.
+ * 3. When a marketing automation script has to batch‑process product GIFs captured from different cameras, deskew them, and bundle them into a promotional animated GIF, this example shows the required C# operations.
+ * 4. When a mobile app backend needs to receive user‑uploaded GIF stickers that may be skewed, correct them server‑side, and output a single animated GIF for sharing, the Aspose.Imaging workflow handles the deskew and merging.
+ * 5. When a digital archivist wants to preserve a sequence of historical GIF photographs that are misaligned, the code enables deskewing each frame and assembling them into an animated GIF for online exhibition.
  */
