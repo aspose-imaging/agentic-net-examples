@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
 
@@ -10,53 +11,57 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input/sample.cdr";
+        string outputPath = "Output/dimmed.tif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.cdr";
-            string outputPath = "dimmed_output.tif";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CDR image
             using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                // Rasterize CDR to PNG in memory
+                // Rasterize CDR to TIFF in memory
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageWidth = cdr.Width,
+                    PageHeight = cdr.Height
+                };
+
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    PngOptions pngOptions = new PngOptions
-                    {
-                        Source = new StreamSource(ms),
-                        VectorRasterizationOptions = new CdrRasterizationOptions
-                        {
-                            PageWidth = cdr.Width,
-                            PageHeight = cdr.Height
-                        }
-                    };
-                    cdr.Save(ms, pngOptions);
+                    cdr.Save(ms, tiffOptions);
                     ms.Position = 0;
 
-                    // Load rasterized image
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    using (TiffImage tiff = (TiffImage)Image.Load(ms))
                     {
-                        // Verify alpha channel presence
-                        bool hasAlpha = raster.HasAlpha;
-                        Console.WriteLine($"Alpha channel present: {hasAlpha}");
+                        // Dim the image by reducing brightness
+                        tiff.AdjustBrightness(-50);
 
-                        // Reduce brightness (negative value dims the image)
-                        raster.AdjustBrightness(-50);
+                        // Verify presence of alpha channel
+                        Rectangle bounds = tiff.Bounds;
+                        int[] pixels = tiff.LoadArgb32Pixels(bounds);
+                        bool hasAlpha = false;
+                        foreach (int pixel in pixels)
+                        {
+                            int alpha = (pixel >> 24) & 0xFF;
+                            if (alpha != 255)
+                            {
+                                hasAlpha = true;
+                                break;
+                            }
+                        }
+                        Console.WriteLine(hasAlpha ? "Alpha channel present." : "No alpha channel.");
 
-                        // Save as TIFF
-                        TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                        raster.Save(outputPath, tiffOptions);
+                        // Save the dimmed image as TIFF
+                        tiff.Save(outputPath);
                     }
                 }
             }
@@ -70,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a CorelDRAW (CDR) vector file to a high‑resolution TIFF for print production while confirming that the image contains an alpha channel, they can use this Aspose.Imaging C# code to rasterize, check transparency, dim the artwork, and save the result.
- * 2. When an e‑commerce platform wants to automatically generate darker preview images of product designs stored as CDR files and ensure the previews retain transparency before publishing them as TIFF assets, this code provides the necessary brightness adjustment and alpha verification.
- * 3. When a digital asset management system must ingest legacy CDR graphics, reduce their brightness to meet branding guidelines, and store them in a lossless TIFF format with confirmed alpha support, the sample demonstrates the complete workflow in C#.
- * 4. When a UI/UX team needs to programmatically dim vector icons saved in CDR, verify they still contain an alpha channel for overlay effects, and export them as TIFFs for inclusion in high‑DPI mockups, this snippet handles the rasterization and processing steps.
- * 5. When a batch‑processing script is required to prepare archival copies of CDR artwork by lowering brightness to protect sensitive details, checking for transparency, and converting the files to TIFF for long‑term storage, developers can reuse this Aspose.Imaging C# example.
+ * 1. When a graphic designer needs to batch‑process CorelDRAW (CDR) files to create darker preview thumbnails in TIFF format for a web gallery, this code can rasterize, dim, and verify transparency.
+ * 2. When an e‑learning platform must convert CDR illustrations to high‑resolution TIFFs with reduced brightness for print‑friendly handouts while ensuring any alpha channel is preserved, the snippet provides the needed steps.
+ * 3. When a document management system imports CDR logos, applies a uniform dimming effect to meet brand guidelines, and checks for semi‑transparent pixels before storing them as TIFF assets, developers can use this example.
+ * 4. When a digital archiving solution needs to migrate legacy CDR artwork to TIFF, lower the image brightness to match archival standards, and confirm the presence of an alpha channel for later compositing, this code handles the workflow.
+ * 5. When a marketing automation tool generates dimmed TIFF versions of CDR product images for email campaigns and must detect any non‑opaque pixels to avoid rendering issues, the provided C# code performs the required processing.
  */
