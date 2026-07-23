@@ -3,9 +3,10 @@ using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageLoadOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.CustomFontHandler;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Cdr.Objects;
 
 class Program
 {
@@ -13,57 +14,70 @@ class Program
     private static CustomFontData[] GetFontSource(params object[] args)
     {
         string fontsPath = string.Empty;
-        if (args.Length > 0)
+        if (args.Length > 0 && args[0] != null)
         {
-            fontsPath = args[0]?.ToString() ?? string.Empty;
+            fontsPath = args[0].ToString();
         }
 
         var fontList = new List<CustomFontData>();
-        foreach (var fontFile in Directory.GetFiles(fontsPath))
+        if (Directory.Exists(fontsPath))
         {
-            var fontBytes = File.ReadAllBytes(fontFile);
-            var fontName = Path.GetFileNameWithoutExtension(fontFile);
-            fontList.Add(new CustomFontData(fontName, fontBytes));
+            foreach (var fontFile in Directory.GetFiles(fontsPath))
+            {
+                var fontName = Path.GetFileNameWithoutExtension(fontFile);
+                var fontBytes = File.ReadAllBytes(fontFile);
+                fontList.Add(new CustomFontData(fontName, fontBytes));
+            }
         }
-
         return fontList.ToArray();
     }
 
     static void Main()
     {
-        // Hard‑coded paths – no argument validation
-        string inputFolder = @"C:\InputCdr";
-        string outputFolder = @"C:\OutputPdf";
-        string fontsFolder = @"C:\Fonts";
+        // Hard‑coded paths
+        string inputDir = @"C:\InputCdr";
+        string outputDir = @"C:\OutputPdf";
+        string fontsDir = @"C:\CustomFonts";
 
         try
         {
-            // Ensure the output root folder exists
-            Directory.CreateDirectory(outputFolder);
+            // Ensure output root exists
+            Directory.CreateDirectory(outputDir);
 
-            // Get all CDR files in the input folder
-            string[] cdrFiles = Directory.GetFiles(inputFolder, "*.cdr");
-
-            foreach (string cdrFilePath in cdrFiles)
+            // Process each CDR file in the input directory
+            foreach (var inputPath in Directory.GetFiles(inputDir, "*.cdr"))
             {
                 // Verify input file exists
-                if (!File.Exists(cdrFilePath))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {cdrFilePath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare load options with the custom font source
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string baseOutputPath = Path.Combine(outputDir, fileNameWithoutExt + ".pdf");
+
+                // Prepare load options with custom font source
                 var loadOptions = new CdrLoadOptions();
-                loadOptions.AddCustomFontSource(GetFontSource, fontsFolder);
+                loadOptions.AddCustomFontSource(GetFontSource, fontsDir);
 
                 // Load the CDR image
-                using (CdrImage cdrImage = (CdrImage)Image.Load(cdrFilePath, loadOptions))
+                using (var cdrImage = (CdrImage)Image.Load(inputPath, loadOptions))
                 {
-                    // Process each page of the CDR document
-                    for (int pageIndex = 0; pageIndex < cdrImage.Pages.Length; pageIndex++)
+                    // If the document has multiple pages, create a PDF per page
+                    for (int i = 0; i < cdrImage.Pages.Length; i++)
                     {
-                        var page = (CdrImagePage)cdrImage.Pages[pageIndex];
+                        var page = (CdrImagePage)cdrImage.Pages[i];
+
+                        // Determine output path for this page
+                        string outputPath = baseOutputPath;
+                        if (cdrImage.Pages.Length > 1)
+                        {
+                            outputPath = Path.Combine(outputDir, $"{fileNameWithoutExt}_page{i}.pdf");
+                        }
+
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                         // Configure PDF rasterization options
                         var rasterOptions = new CdrRasterizationOptions
@@ -79,16 +93,8 @@ class Program
                             VectorRasterizationOptions = rasterOptions
                         };
 
-                        // Build output file name (one PDF per page)
-                        string outputFileName = Path.Combine(
-                            outputFolder,
-                            $"{Path.GetFileNameWithoutExtension(cdrFilePath)}_page{pageIndex}.pdf");
-
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputFileName));
-
-                        // Save the page as PDF with embedded fonts
-                        page.Save(outputFileName, pdfOptions);
+                        // Save the page as PDF with embedded custom fonts
+                        page.Save(outputPath, pdfOptions);
                     }
                 }
             }
@@ -102,9 +108,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design studio needs to convert a batch of CorelDRAW (.cdr) files to PDF while ensuring that all custom corporate fonts are embedded in the resulting PDFs.
- * 2. When an automated publishing pipeline must render multiple CDR illustrations as PDF documents on a server without manual font installation.
- * 3. When a legal compliance system requires PDFs generated from CDR source files to contain embedded fonts to guarantee document fidelity across devices.
- * 4. When a cloud‑based document conversion service wants to process a folder of CDR assets, apply a specific font library, and output PDF files ready for archival.
- * 5. When a QA test suite validates that custom typefaces are correctly applied to CDR drawings after batch conversion to PDF with Aspose.Imaging for .NET.
+ * 1. When a design studio needs to convert a large collection of CorelDRAW (.cdr) artwork into PDF portfolios while ensuring that all proprietary typefaces from a custom font folder are embedded for consistent printing.
+ * 2. When an automated publishing pipeline must replace missing system fonts in CDR files with company‑specific fonts before generating PDF proofs for client review.
+ * 3. When a document management system processes incoming CDR submissions and creates searchable PDFs that retain the original layout by loading custom fonts from a shared network directory.
+ * 4. When a marketing department wants to batch render product catalog pages stored as CDR files into PDFs with embedded brand fonts to guarantee correct display on any device.
+ * 5. When a legal compliance tool converts archived CDR drawings into PDF/A files and needs to embed the exact fonts used in the original files to meet archival standards.
  */
