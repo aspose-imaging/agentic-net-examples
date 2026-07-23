@@ -14,38 +14,38 @@ class Program
             string inputDir = @"C:\Images\Input";
             string outputDir = @"C:\Images\Output";
 
-            // Ensure the input directory exists
-            if (!Directory.Exists(inputDir))
-            {
-                Console.Error.WriteLine($"Input directory not found: {inputDir}");
-                return;
-            }
+            // Get all TIFF files in the input directory
+            string[] tiffFiles = Directory.GetFiles(inputDir, "*.tif");
 
-            // Process each TIFF file in the input directory
-            foreach (string inputPath in Directory.GetFiles(inputDir, "*.tif"))
+            foreach (string inputPath in tiffFiles)
             {
-                // Verify the file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
+                // Determine output PNG path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 // Load the TIFF image
-                using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Rotate 90 degrees clockwise, resize proportionally, black background
-                    tiffImage.Rotate(90f, true, Color.Black);
+                    // Cast to TiffImage to access rotation methods
+                    TiffImage tiffImage = image as TiffImage;
+                    if (tiffImage != null)
+                    {
+                        // Rotate 90 degrees clockwise without flipping
+                        tiffImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                    }
 
-                    // Determine output PNG path
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-                    string outputPath = Path.Combine(outputDir, outputFileName);
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save as PNG
-                    tiffImage.Save(outputPath, new PngOptions());
+                    // Save the result as PNG
+                    image.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -58,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a large collection of scanned TIFF documents into web‑friendly PNG images while rotating each page 90° for correct orientation.
- * 2. When an archival system must automatically process incoming TIFF files, apply a clockwise rotation, and store the results as PNGs in a separate output folder for downstream applications.
- * 3. When a photo‑management tool has to batch‑resize and re‑orient TIFF photos from a camera’s raw export and save them as PNG thumbnails using C# and Aspose.Imaging.
- * 4. When a document‑conversion service requires a script that reads all TIFF files in a directory, rotates them, and outputs PNG files to a network share for easy viewing.
- * 5. When a Windows service needs to monitor a folder of TIFF scans, apply a 90‑degree rotation, and generate PNG versions for integration with a reporting dashboard.
+ * 1. When a medical imaging system receives scanned DICOM pages saved as TIFF files that need to be re‑oriented and delivered to a web portal as PNG thumbnails.
+ * 2. When an archival project must convert a folder of legacy scanned documents in TIFF format to PNG after rotating them 90° to match the correct page orientation for online viewing.
+ * 3. When a publishing workflow automates the preparation of high‑resolution TIFF artwork by rotating each page and exporting it as PNG for inclusion in e‑books.
+ * 4. When a GIS application processes satellite imagery stored as TIFF tiles, rotates them to align with map coordinates, and saves them as PNG for faster rendering in a web map.
+ * 5. When a batch job for a printing company needs to re‑orient incoming TIFF proofs and convert them to PNG files for quality‑control inspection on a Windows server.
  */
