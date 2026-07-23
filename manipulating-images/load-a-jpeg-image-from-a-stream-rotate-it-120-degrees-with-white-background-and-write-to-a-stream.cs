@@ -6,35 +6,38 @@ using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded input and output file paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
+
+        // Validate input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.jpg";
-            string outputPath = "output.jpg";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load JPEG image from a stream
+            // Open input stream and load JPEG image
             using (FileStream inputStream = File.OpenRead(inputPath))
-            using (JpegImage image = new JpegImage(inputStream))
+            using (JpegImage jpegImage = new JpegImage(inputStream))
             {
-                // Rotate 120 degrees clockwise, resize proportionally, white background
-                image.Rotate(120f, true, Aspose.Imaging.Color.White);
+                // Rotate 120 degrees, resize canvas proportionally, fill background with white
+                jpegImage.Rotate(120f, true, Aspose.Imaging.Color.White);
 
-                // Save the rotated image to a stream
-                using (FileStream outputStream = File.Open(outputPath, FileMode.Create))
+                // Prepare JPEG save options
+                JpegOptions jpegOptions = new JpegOptions();
+
+                // Save rotated image to output stream
+                using (FileStream outputStream = File.Create(outputPath))
                 {
-                    image.Save(outputStream, new JpegOptions());
+                    jpegImage.Save(outputStream, jpegOptions);
                 }
             }
         }
@@ -47,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to accept a JPEG uploaded by a user, rotate it by 120 degrees with a white background, and return the transformed image directly from a stream.
- * 2. When a desktop application processes scanned photos stored in a stream, applies a 120‑degree clockwise rotation to correct orientation, and saves the result as a new JPEG file.
- * 3. When an automated batch job reads JPEG images from a network share via streams, rotates them for consistent layout in a catalog, and writes the rotated images to another stream.
- * 4. When a mobile backend receives JPEG data from an API, rotates the image to match UI design specifications, and streams the modified JPEG back to the client.
- * 5. When a document generation system needs to embed a rotated JPEG into a PDF, it loads the image from a stream, rotates it 120 degrees with a white fill, and streams the rotated JPEG for further processing.
+ * 1. When a web service receives a user‑uploaded JPEG via an HTTP stream and must rotate the picture 120° for correct orientation before storing it back to a cloud storage bucket.
+ * 2. When a desktop application processes scanned receipts, loading each JPEG from a file stream, rotating them to align text at a 120° angle, and saving the corrected images for OCR.
+ * 3. When an automated batch job reads product photos from a network share, rotates them 120° to match a catalog layout, fills empty corners with white, and writes the results to another stream for publishing.
+ * 4. When a mobile backend receives camera images as streams, needs to apply a 120° rotation with a white background to meet a printing service’s layout requirements, and then streams the JPEG back to the client.
+ * 5. When a document generation system imports JPEG graphics from a database BLOB, rotates them 120° to fit a template, and streams the adjusted images into a PDF creation pipeline.
  */
