@@ -6,12 +6,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\sample.rotated.bmp";
-
         try
         {
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\input.bmp";
+            string outputPath = @"C:\temp\output_rotated.bmp";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -35,11 +35,7 @@ class Program
                 // Verify dimensions remain unchanged
                 if (image.Width != originalWidth || image.Height != originalHeight)
                 {
-                    Console.WriteLine("Dimensions changed after rotation.");
-                }
-                else
-                {
-                    Console.WriteLine("Dimensions unchanged after rotation.");
+                    Console.Error.WriteLine("Error: Image dimensions changed after rotation.");
                 }
 
                 // Save the rotated image
@@ -55,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to re‑orient scanned BMP documents by 270° for correct portrait display while ensuring the image size stays the same.
- * 2. When an automated batch job must rotate legacy BMP assets for a game’s sprite sheet without altering their pixel dimensions.
- * 3. When a Windows desktop application processes user‑uploaded BMP photos and must rotate them 270° clockwise before saving, while confirming the width and height remain unchanged.
- * 4. When a C# service generates printable BMP labels that require a 270° rotation to match printer orientation, and the code must verify that the label dimensions are preserved.
- * 5. When a migration script updates BMP files from an old system, applying a 270° RotateFlip operation and checking that the image dimensions are consistent for downstream processing.
+ * 1. When a developer needs to rotate a BMP file 270 degrees for display in a legacy Windows application while keeping the original pixel dimensions unchanged.
+ * 2. When an automated batch‑processing tool must re‑orient scanned BMP documents without altering their layout size before archiving.
+ * 3. When a C# service integrates Aspose.Imaging to correct the orientation of user‑uploaded BMP images for a web portal while preserving the original width and height for UI consistency.
+ * 4. When a desktop utility validates that a rotation operation does not distort image dimensions, ensuring that downstream GIS or CAD software receives correctly sized BMP files.
+ * 5. When a quality‑assurance script checks that the RotateFlip method works on BMP images and that the saved output retains the same dimensions for pixel‑perfect printing.
  */
