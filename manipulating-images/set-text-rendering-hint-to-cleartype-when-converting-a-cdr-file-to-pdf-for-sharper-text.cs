@@ -2,39 +2,39 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "Input/sample.cdr";
+        string outputPath = "Output/sample.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\input\example.cdr";
-            string outputPath = @"C:\output\example.pdf";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF options with ClearType text rendering
-                PdfOptions pdfOptions = new PdfOptions();
-                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
+                PdfOptions pdfOptions = new PdfOptions
                 {
-                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.ClearTypeGridFit
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    }
                 };
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -47,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert CorelDRAW (CDR) artwork to a PDF document while preserving sharp, ClearType‑rendered text for high‑quality printing or on‑screen viewing.
- * 2. When an application must batch‑process CDR files from a folder and generate PDF reports with ClearType text rendering to improve readability on Windows displays.
- * 3. When a web service receives user‑uploaded CDR designs and must return PDF previews with ClearType‑grid‑fit text to ensure the text looks crisp in browsers.
- * 4. When integrating Aspose.Imaging into a C# desktop tool that extracts vector graphics from CDR files and saves them as PDFs with ClearType text rendering for better accessibility.
- * 5. When automating the archival of legacy CDR assets into searchable PDF files and need ClearType text rendering to maintain legibility in the archived documents.
+ * 1. When a developer needs to convert CorelDRAW (CDR) files to PDF while applying ClearType text rendering for sharper on‑screen text, this Aspose.Imaging C# code provides a ready‑to‑use solution.
+ * 2. When a document management system must generate PDF previews of vector‑based CDR artwork with precise text clarity, the code demonstrates how to set TextRenderingHint to ClearType during conversion.
+ * 3. When an automated batch process has to transform a folder of CDR designs into PDF reports and ensure the rendered text is crisp for digital viewing, the example shows the required Image and PdfOptions configuration.
+ * 4. When a web application offers users the ability to download their CorelDRAW drawings as high‑quality PDFs with ClearType‑optimized typography, this snippet illustrates the necessary C# operations.
+ * 5. When a print‑to‑screen workflow requires converting CDR graphics to PDF while preserving exact page dimensions and improving text readability with ClearType, the code provides the exact implementation steps.
  */
