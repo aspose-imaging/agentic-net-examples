@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
-
         try
         {
+            // Hard‑coded input and output file paths
+            string inputPath = "input.tif";
+            string outputPath = "output.tif";
+
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,14 +23,14 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Open the input TIFF image from a file stream
+            // Open the input file as a stream and load it as a TiffImage
             using (FileStream inputStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputStream))
             {
-                // Rotate the image 180 degrees around its center, resizing proportionally
+                // Rotate the image 180 degrees around its centre, resizing proportionally
                 tiffImage.Rotate(180f, true, Aspose.Imaging.Color.Black);
 
-                // Save the rotated image to the output stream (file)
+                // Save the rotated image to the output stream
                 using (FileStream outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
                 {
                     tiffImage.Save(outputStream);
@@ -46,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application must rotate scanned DICOM‑derived TIFF files 180 degrees before storing them in a PACS archive using C# streams and Aspose.Imaging.
- * 2. When a document management system needs to correct upside‑down multi‑page TIFF invoices received from a fax server and save the corrected images back to a network share.
- * 3. When a GIS tool processes satellite TIFF rasters that were captured with inverted orientation and requires an in‑memory rotation before exporting the data to another service.
- * 4. When an e‑commerce platform automatically flips product catalog TIFF images uploaded by vendors so they display correctly on the website, using stream‑based processing to avoid temporary files.
- * 5. When a digital archiving workflow reads large TIFF scans from a cloud storage stream, rotates them 180° to match the original layout, and writes the adjusted images to a secure output stream for compliance storage.
+ * 1. When a medical imaging system receives a scanned DICOM‑derived TIFF file that was stored upside‑down and needs to rotate it 180° before displaying it to clinicians.
+ * 2. When a document management workflow processes multi‑page TIFF invoices that were scanned in reverse orientation and must be corrected using a stream‑based rotation before archiving.
+ * 3. When a GIS application imports aerial photography stored as TIFF, rotates the image to match north‑up orientation, and writes the result to a memory or file stream for further analysis.
+ * 4. When an e‑commerce platform generates product catalog pages as TIFF files, needs to flip them for right‑to‑left language layouts, and saves the rotated images directly to an output stream.
+ * 5. When a batch processing service reads large TIFF files from a network share, rotates each image 180 degrees to correct scanner misalignment, and streams the corrected files to a cloud storage bucket.
  */
