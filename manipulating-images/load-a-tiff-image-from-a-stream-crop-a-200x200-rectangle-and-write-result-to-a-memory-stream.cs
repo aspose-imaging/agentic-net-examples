@@ -1,47 +1,55 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input path
-        string inputPath = "input.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
-            // Load the TIFF image from a file stream
-            using (FileStream inputStream = File.OpenRead(inputPath))
-            using (Image image = Image.Load(inputStream))
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\input.tif";
+            string outputPath = @"C:\Temp\output";
+
+            // Verify the input file exists
+            if (!File.Exists(inputPath))
             {
-                // Cast to TiffImage to access TIFF-specific methods
-                TiffImage tiffImage = (TiffImage)image;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Define a 200x200 rectangle starting at (0,0)
-                var cropArea = new Rectangle(0, 0, 200, 200);
+            // Ensure the output directory exists (required by the safety rules)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Crop the image
-                tiffImage.Crop(cropArea);
+            // Load the TIFF image from a file stream into a memory stream
+            using (FileStream fileStream = File.OpenRead(inputPath))
+            using (MemoryStream inputMemory = new MemoryStream())
+            {
+                fileStream.CopyTo(inputMemory);
+                inputMemory.Position = 0; // Reset stream position for reading
 
-                // Save the cropped result to a memory stream (PNG format)
-                using (MemoryStream outputStream = new MemoryStream())
+                // Load the image from the memory stream
+                using (Image image = Image.Load(inputMemory))
                 {
-                    var pngOptions = new PngOptions();
-                    tiffImage.Save(outputStream, pngOptions);
+                    // Cast to TiffImage to access TIFF-specific methods
+                    TiffImage tiffImage = (TiffImage)image;
 
-                    // The memory stream now contains the cropped image data.
-                    // For demonstration, we can output its length.
-                    Console.WriteLine($"Cropped image size in bytes: {outputStream.Length}");
+                    // Define a 200x200 rectangle starting at the top‑left corner
+                    var cropRect = new Rectangle(0, 0, 200, 200);
+                    tiffImage.Crop(cropRect);
+
+                    // Save the cropped image to a memory stream (PNG format)
+                    using (MemoryStream outputMemory = new MemoryStream())
+                    {
+                        var pngOptions = new PngOptions();
+                        tiffImage.Save(outputMemory, pngOptions);
+
+                        // The memory stream now contains the cropped image data
+                        Console.WriteLine($"Cropped image size (bytes): {outputMemory.Length}");
+                    }
                 }
             }
         }
@@ -54,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to extract a 200 × 200 pixel region from a high‑resolution TIFF scan and send the cropped PNG directly over a web API without writing intermediate files.
- * 2. When a document management system processes multi‑page TIFF invoices, crops the top‑left logo area, and stores the result in a memory stream for further PDF generation.
- * 3. When a GIS tool reads satellite TIFF tiles from a stream, isolates a 200 × 200 area of interest, and converts it to PNG for quick preview in a web map viewer.
- * 4. When an e‑commerce platform receives product TIFF images, trims a fixed thumbnail region and keeps the cropped image in memory to embed it in an email template.
- * 5. When a digital archiving service validates incoming TIFF files, extracts a 200 × 200 sample patch, and streams the PNG to a machine‑learning model for image quality analysis.
+ * 1. When a developer needs to extract a 200 × 200 pixel region from a multi‑page TIFF stored in a database and return it as a PNG via a web API, they can load the TIFF from a stream, crop it, and write the result to a memory stream.
+ * 2. When an image‑processing service must generate thumbnail previews of high‑resolution TIFF scans without creating temporary files on disk, this code loads the TIFF into memory, crops a square area, and returns the PNG bytes directly from a MemoryStream.
+ * 3. When a desktop application has to display a specific portion of a large TIFF document in a UI control while preserving the original file, the developer can use the stream‑based load, crop, and in‑memory save pattern shown here.
+ * 4. When an automated workflow needs to convert a selected area of a TIFF satellite image to PNG for downstream GIS analysis, the code demonstrates how to read the TIFF from a stream, perform a rectangular crop, and keep the result in memory.
+ * 5. When a cloud function processes uploaded TIFF files and must quickly isolate a 200 × 200 pixel segment for validation or watermarking, this approach of streaming the input, cropping, and streaming the PNG output avoids disk I/O and improves performance.
  */
