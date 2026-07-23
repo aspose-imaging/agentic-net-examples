@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
@@ -13,12 +12,10 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string cdrPath = "Input/sample.cdr";
             string tiffPath = "Input/sample.tif";
-            string outputPath = "Output/combined.pdf";
+            string outputPdfPath = "Output/combined.pdf";
 
-            // Validate input files
             if (!File.Exists(cdrPath))
             {
                 Console.Error.WriteLine($"File not found: {cdrPath}");
@@ -30,57 +27,16 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
 
-            // Load source images
-            using (Image cdrImage = Image.Load(cdrPath))
-            using (Image tiffImage = Image.Load(tiffPath))
+            using (CdrImage cdrImage = (CdrImage)Image.Load(cdrPath))
+            using (TiffImage tiffImage = (TiffImage)Image.Load(tiffPath))
             {
-                var pages = new List<Image>();
-
-                // Extract pages from CDR image
-                if (cdrImage is IMultipageImage cdrMulti && cdrMulti.Pages != null)
+                Image[] images = new Image[] { cdrImage, tiffImage };
+                using (Image pdfDocument = Image.Create(images, true))
                 {
-                    foreach (Image page in cdrMulti.Pages)
-                    {
-                        pages.Add(page);
-                    }
-                }
-                else
-                {
-                    pages.Add(cdrImage);
-                }
-
-                // Extract pages from TIFF image
-                if (tiffImage is IMultipageImage tiffMulti && tiffMulti.Pages != null)
-                {
-                    foreach (Image page in tiffMulti.Pages)
-                    {
-                        pages.Add(page);
-                    }
-                }
-                else
-                {
-                    pages.Add(tiffImage);
-                }
-
-                // Create a multipage image from collected pages
-                using (Image multipage = Image.Create(pages.ToArray()))
-                {
-                    // Configure PDF export options
                     PdfOptions pdfOptions = new PdfOptions();
-                    pdfOptions.VectorRasterizationOptions = new CdrRasterizationOptions
-                    {
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None,
-                        // Use the size of the first page as a fallback
-                        PageWidth = multipage.Width,
-                        PageHeight = multipage.Height
-                    };
-
-                    // Save the combined multipage image as PDF
-                    multipage.Save(outputPath, pdfOptions);
+                    pdfDocument.Save(outputPdfPath, pdfOptions);
                 }
             }
         }
@@ -93,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to merge design artwork stored in CorelDRAW (CDR) files with scanned documents in TIFF format into a single PDF report.
- * 2. When an application must programmatically combine multi‑page CDR drawings and multi‑page TIFF scans into a unified PDF for archival or distribution.
- * 3. When a workflow requires converting a multi‑page vector illustration and a multi‑page raster image into a searchable PDF without manual export.
- * 4. When a system automates the creation of client‑ready PDFs that include both editable CDR pages and high‑resolution TIFF pages for printing.
- * 5. When a developer wants to validate that all pages from different source formats (CDR and TIFF) are correctly loaded and concatenated into one PDF document using Aspose.Imaging for .NET.
+ * 1. When a developer must combine a CorelDRAW (CDR) vector page with a scanned TIFF page into a single multipage PDF using Aspose.Imaging’s IMultipageImage for client delivery.
+ * 2. When an automated .NET workflow needs to load CDR and TIFF files, create a multipage image with Image.Create, and export it as a PDF for archival purposes.
+ * 3. When a printing application has to merge a CDR logo and several TIFF product sheets into one PDF document to streamline the print queue.
+ * 4. When a reporting tool generates a PDF that includes both vector diagrams saved as CDR and high‑resolution raster images saved as TIFF, using C# and Aspose.Imaging.
+ * 5. When a legal document system must bundle a CDR‑based diagram with TIFF‑scanned signatures into a single PDF for electronic filing.
  */
