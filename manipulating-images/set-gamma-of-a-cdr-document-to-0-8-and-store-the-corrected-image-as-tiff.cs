@@ -4,17 +4,17 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "sample.cdr";
-        string outputPath = "output.tif";
-
         try
         {
+            string inputPath = "C:\\input.cdr";
+            string outputPath = "C:\\output.tif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -29,21 +29,20 @@ class Program
                 {
                     var pngOptions = new PngOptions
                     {
-                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        VectorRasterizationOptions = new CdrRasterizationOptions
                         {
                             PageWidth = cdr.Width,
                             PageHeight = cdr.Height
                         }
                     };
+
                     cdr.Save(ms, pngOptions);
                     ms.Position = 0;
 
-                    using (Image raster = Image.Load(ms))
+                    using (TiffImage tiff = (TiffImage)Image.Load(ms))
                     {
-                        RasterImage rasterImg = (RasterImage)raster;
-                        rasterImg.AdjustGamma(0.8f);
-                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                        rasterImg.Save(outputPath, tiffOptions);
+                        tiff.AdjustGamma(0.8f);
+                        tiff.Save(outputPath);
                     }
                 }
             }
@@ -57,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When converting CorelDRAW (CDR) artwork to a high‑resolution TIFF for print production and needing to darken the image by applying a gamma of 0.8 to match the press profile.
- * 2. When an archival system requires rasterizing vector CDR files to lossless TIFF files while adjusting gamma to improve contrast for better visual inspection.
- * 3. When a web service generates preview TIFFs from uploaded CDR designs and must apply gamma correction to ensure consistent brightness across different browsers.
- * 4. When a batch‑processing tool automates the migration of legacy CDR assets to TIFF format and needs to standardize gamma to 0.8 for downstream image‑analysis algorithms.
- * 5. When a digital asset management workflow needs to store CDR graphics as TIFFs with corrected gamma so that color‑critical applications like OCR or medical imaging receive properly calibrated input.
+ * 1. When a printing workflow requires converting CorelDRAW (CDR) artwork to a high‑resolution TIFF while applying a gamma of 0.8 to ensure consistent brightness across different printers.
+ * 2. When a digital archiving system needs to preserve vector CDR files as lossless TIFF images with corrected gamma for accurate visual reproduction on archival monitors.
+ * 3. When a web service generates preview thumbnails of CDR designs in TIFF format and must adjust gamma to 0.8 to match the website’s color profile.
+ * 4. When an automated batch process migrates legacy CDR assets to TIFF for a document management system and applies gamma correction to compensate for faded colors in the original files.
+ * 5. When a scientific imaging application imports CDR diagrams, converts them to TIFF, and uses a gamma of 0.8 to improve contrast for downstream analysis.
  */
