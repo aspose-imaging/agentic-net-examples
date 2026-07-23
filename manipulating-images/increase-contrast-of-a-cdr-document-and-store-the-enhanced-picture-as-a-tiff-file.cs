@@ -9,12 +9,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.cdr";
-        string outputPath = @"C:\temp\sample_contrast.tif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "sample.cdr";
+            string outputPath = "output.tif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,30 +25,23 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image (CDR)
+            // Load the CDR document
             using (Image image = Image.Load(inputPath))
             {
-                // Adjust contrast depending on the actual image type
-                if (image is RasterImage rasterImage)
+                // Cast to RasterImage to access AdjustContrast
+                var raster = image as RasterImage;
+                if (raster == null)
                 {
-                    // Contrast value in range [-100, 100]
-                    rasterImage.AdjustContrast(50f);
-                }
-                else if (image is TiffImage tiffImage)
-                {
-                    tiffImage.AdjustContrast(50f);
-                }
-                else
-                {
-                    // Fallback: try casting to RasterImage
-                    ((RasterImage)image).AdjustContrast(50f);
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
                 }
 
-                // Prepare TIFF save options
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                // Increase contrast (value in range [-100, 100])
+                raster.AdjustContrast(50f);
 
                 // Save the enhanced image as TIFF
-                image.Save(outputPath, tiffOptions);
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                raster.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -60,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to batch‑process CorelDRAW (.cdr) files to improve visual clarity before sending them to a print shop that requires high‑contrast TIFF images.
- * 2. When an archival system converts legacy CDR drawings into lossless TIFF format while enhancing contrast to ensure details are preserved for long‑term storage.
- * 3. When a document management workflow automatically adjusts the contrast of scanned CDR schematics so that the resulting TIFF files are easier to read on low‑resolution monitors.
- * 4. When a web service generates preview thumbnails of CDR artwork, increasing contrast and exporting them as TIFF to meet client specifications for image quality.
- * 5. When a quality‑control application validates CDR logos by boosting contrast and saving them as TIFF to compare against reference images in automated testing.
+ * 1. When a printing service needs to convert a CorelDRAW (CDR) artwork to a high‑resolution TIFF for offset printing and wants to boost the image contrast to make colors pop.
+ * 2. When an archival system ingests legacy CDR files and stores them as lossless TIFFs, applying contrast enhancement to improve legibility of scanned drawings.
+ * 3. When a document‑management workflow automatically processes design files, increasing contrast of CDR diagrams before saving them as TIFF for OCR processing.
+ * 4. When a web application generates preview thumbnails of CDR graphics, adjusting contrast to ensure visual clarity and then exporting the result as a TIFF for downstream editing.
+ * 5. When a batch‑conversion utility needs to programmatically load CDR files, apply a 50‑point contrast boost, and output the enhanced images as TIFF files for compliance with industry file‑format standards.
  */
