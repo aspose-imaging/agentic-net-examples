@@ -14,7 +14,7 @@ class Program
     {
         try
         {
-            string inputPath = "input.png";
+            string inputPath = "input.jpg";
             string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
@@ -25,40 +25,56 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+            // Load image and keep original size
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                var maskExportOptions = new PngOptions
+                Size originalSize = image.Size;
+
+                // Resize for faster masking
+                image.ResizeHeightProportionally(600, ResizeType.HighQualityResample);
+
+                // Masking export options (in‑memory)
+                var exportOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
                     Source = new StreamSource(new MemoryStream())
                 };
 
+                // Auto‑masking options (GraphCut)
                 var maskingOptions = new AutoMaskingGraphCutOptions
                 {
                     CalculateDefaultStrokes = true,
-                    FeatheringRadius = (Math.Max(sourceImage.Width, sourceImage.Height) / 500) + 1,
+                    FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
                     Method = SegmentationMethod.GraphCut,
                     Decompose = false,
-                    ExportOptions = maskExportOptions,
+                    ExportOptions = exportOptions,
                     BackgroundReplacementColor = Color.Transparent
                 };
 
-                ImageMasking masking = new ImageMasking(sourceImage);
-                using (MaskingResult maskResult = masking.Decompose(maskingOptions))
-                using (RasterImage foregroundMask = maskResult[1].GetMask())
+                // Perform masking
+                var masking = new ImageMasking(image);
+                using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
                 {
-                    foregroundMask.Resize(sourceImage.Width, sourceImage.Height, ResizeType.NearestNeighbourResample);
-
-                    using (RasterImage maskedImage = (RasterImage)Image.Load(inputPath))
+                    // Get foreground mask and resize to original dimensions
+                    using (RasterImage foregroundMask = maskingResult[1].GetMask())
                     {
-                        ImageMasking.ApplyMask(maskedImage, foregroundMask, maskingOptions);
-                        maskedImage.Filter(maskedImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
+                        foregroundMask.Resize(originalSize.Width, originalSize.Height, ResizeType.NearestNeighbourResample);
 
-                        var saveOptions = new PngOptions
+                        // Apply mask to the original full‑size image
+                        using (RasterImage original = (RasterImage)Image.Load(inputPath))
                         {
-                            ColorType = PngColorType.TruecolorWithAlpha
-                        };
-                        maskedImage.Save(outputPath, saveOptions);
+                            ImageMasking.ApplyMask(original, foregroundMask, maskingOptions);
+
+                            // Apply median filter (kernel size 5)
+                            original.Filter(original.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MedianFilterOptions(5));
+
+                            // Save processed image
+                            var saveOptions = new PngOptions
+                            {
+                                ColorType = PngColorType.TruecolorWithAlpha
+                            };
+                            original.Save(outputPath, saveOptions);
+                        }
                     }
                 }
             }
@@ -72,9 +88,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically remove the background from product photos stored as PNG files and generate a transparent PNG for e‑commerce catalogs.
- * 2. When an image‑processing pipeline must isolate foreground objects in scanned documents, apply a median filter to reduce noise, and output a clean bitmap for OCR preprocessing.
- * 3. When a mobile app backend processes user‑uploaded selfies, using Aspose.Imaging auto‑masking to separate the person from the scene and then smoothing the mask with a median filter before saving a PNG with an alpha channel.
- * 4. When a digital asset management system requires batch conversion of legacy raster images to uniformly sized PNGs with transparent backgrounds, leveraging GraphCut segmentation and median filtering to maintain edge quality.
- * 5. When a scientific imaging application needs to extract cells from microscope PNG images, apply noise‑reducing median filtering, and return a processed raster image for further quantitative analysis.
+ * 1. When an e‑commerce site must automatically remove product backgrounds from JPEG photos, apply a median filter to smooth edges, and export the result as a transparent PNG for catalog listings.
+ * 2. When a mobile app needs to isolate a user’s portrait from an uploaded selfie, reduce image noise with a median filter, and save the processed bitmap as a high‑quality PNG with an alpha channel.
+ * 3. When a document‑management system scans paper receipts, uses auto‑masking to separate text from the paper background, applies a median filter to clean speckles, and returns a clean bitmap for OCR processing.
+ * 4. When a game developer prepares sprite assets by auto‑masking character images, removing background noise with a median filter, and exporting them as truecolor‑with‑alpha PNGs for use in the game engine.
+ * 5. When a social‑media analytics tool batch‑processes thousands of profile pictures to extract foreground objects, apply median filtering for noise reduction, and generate transparent PNG thumbnails for visual reports.
  */
