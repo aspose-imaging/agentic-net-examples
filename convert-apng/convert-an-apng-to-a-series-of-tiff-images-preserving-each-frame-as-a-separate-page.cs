@@ -1,59 +1,60 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.apng";
-        string outputPath = "output.tif";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the APNG image
-            using (Image loadedImage = Image.Load(inputPath))
+            // Hardcoded input and output paths
+            string inputPath = "input.apng";
+            string outputPath = "output\\result.tif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Cast to ApngImage to access frames
-                ApngImage apngImage = (ApngImage)loadedImage;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Prepare TIFF options (default format)
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the APNG image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to ApngImage to access frames (pages)
+                ApngImage apng = (ApngImage)image;
+
+                // Get dimensions from the first frame
+                RasterImage firstFrame = (RasterImage)apng.Pages[0];
+                int width = firstFrame.Width;
+                int height = firstFrame.Height;
+
+                // Configure TIFF options
+                TiffOptions tiffOptions = new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default);
+                tiffOptions.Photometric = Aspose.Imaging.FileFormats.Tiff.Enums.TiffPhotometrics.Rgb;
                 tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                tiffOptions.Photometric = TiffPhotometrics.Rgb;
-                tiffOptions.Compression = TiffCompressions.Lzw;
 
-                // Create the first TIFF frame from the first APNG frame
-                RasterImage firstRaster = (RasterImage)apngImage.Pages[0];
-                TiffFrame firstTiffFrame = new TiffFrame(firstRaster);
-
-                // Create a multi‑page TIFF image with the first frame
-                using (TiffImage tiffImage = new TiffImage(firstTiffFrame))
+                // Create a multi-page TIFF image
+                using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, width, height))
                 {
-                    // Add remaining frames as additional pages
-                    for (int i = 1; i < apngImage.PageCount; i++)
+                    // Add the first frame
+                    tiffImage.AddFrame(new TiffFrame(firstFrame));
+
+                    // Add remaining frames
+                    for (int i = 1; i < apng.PageCount; i++)
                     {
-                        RasterImage raster = (RasterImage)apngImage.Pages[i];
-                        TiffFrame tiffFrame = new TiffFrame(raster);
-                        tiffImage.AddFrame(tiffFrame);
+                        RasterImage frame = (RasterImage)apng.Pages[i];
+                        tiffImage.AddFrame(new TiffFrame(frame));
                     }
 
-                    // Save the multi‑page TIFF
+                    // Save the resulting TIFF file
                     tiffImage.Save(outputPath);
                 }
             }
@@ -67,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must archive every frame of an animated PNG (APNG) as separate pages in a losslessly compressed multi‑page TIFF for long‑term document storage, this code provides a straightforward C# solution using Aspose.Imaging.
- * 2. When a workflow requires converting APNG animations into individual TIFF pages to feed legacy printing systems that only accept multi‑page TIFF files, the example demonstrates how to preserve frame order and color fidelity.
- * 3. When an image‑processing pipeline needs to extract raster data from each APNG frame and apply LZW compression in a single TIFF document for efficient bandwidth transfer, the code shows the necessary C# operations.
- * 4. When a developer is building a digital asset management tool that indexes each animation frame as a searchable TIFF page, this snippet illustrates how to load the APNG, iterate its pages, and create a multi‑page TIFF with Aspose.Imaging.
- * 5. When a compliance‑driven application must convert animated web graphics into a standardized, non‑animated format for audit trails, the example provides a ready‑to‑use method to transform APNG frames into a single TIFF file in .NET.
+ * 1. When a developer needs to extract each animation frame from an APNG and store them as separate pages in a multi‑page TIFF for archival or printing workflows.
+ * 2. When a web application must convert user‑uploaded animated PNGs into a TIFF document that can be opened by legacy desktop publishing software that only supports TIFF.
+ * 3. When a medical imaging system requires converting animated PNG visualizations into a single TIFF file with each frame as a page for inclusion in patient reports.
+ * 4. When a digital asset management tool needs to generate a searchable, multi‑page TIFF from an APNG so that each frame can be indexed individually by metadata.
+ * 5. When an e‑learning platform wants to transform animated instructional graphics (APNG) into a multi‑page TIFF to embed them into PDF slide decks that preserve the sequence of steps.
  */
