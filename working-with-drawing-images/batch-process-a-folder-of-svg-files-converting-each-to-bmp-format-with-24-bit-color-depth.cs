@@ -5,42 +5,41 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output folders
-            string inputFolder = @"C:\InputSvgs";
-            string outputFolder = @"C:\OutputBmps";
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Get all SVG files in the input folder
-            string[] svgFiles = Directory.GetFiles(inputFolder, "*.svg");
+            Directory.CreateDirectory(outputDirectory);
 
-            foreach (string inputPath in svgFiles)
+            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+
+            foreach (string inputPath in files)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Determine output BMP path (same name, .bmp extension)
-                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".bmp");
-
-                // Ensure the output directory exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".bmp");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the SVG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Set BMP save options to 24‑bit color depth
                     var bmpOptions = new BmpOptions
                     {
-                        BitsPerPixel = 24
+                        BitsPerPixel = 24,
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height
+                        }
                     };
 
-                    // Save as BMP
                     image.Save(outputPath, bmpOptions);
                 }
             }
@@ -54,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically convert a large collection of SVG icons into 24‑bit BMP files for legacy Windows applications that only accept BMP images.
- * 2. When a batch image processing pipeline must generate high‑resolution bitmap thumbnails from SVG assets stored in a folder for use in a desktop publishing workflow.
- * 3. When a migration script has to transform vector graphics from a design repository into BMP format with a specific color depth to ensure compatibility with an older printing system.
- * 4. When an automated build process needs to include BMP versions of SVG logos in a resource folder, preserving 24‑bit color fidelity for consistent rendering across devices.
- * 5. When a C# utility is required to scan a directory of SVG diagrams and export each as a BMP file so that non‑vector‑aware tools can display the images without additional plugins.
+ * 1. When a developer needs to convert a whole folder of SVG graphics into 24‑bit BMP images for compatibility with legacy Windows software, this C# batch‑processing code using Aspose.Imaging provides a quick solution.
+ * 2. When an automated build pipeline must rasterize vector SVG assets into high‑quality BMP files with a white background for printing or documentation, the example demonstrates how to handle the conversion in .NET.
+ * 3. When a web service has to generate thumbnail BMP previews of uploaded SVG files on the server side, the code shows how to iterate through a directory, load each SVG, and save it as a 24‑bit bitmap.
+ * 4. When a desktop application needs to migrate a legacy image repository from scalable SVG format to fixed‑size BMP files for faster loading in older environments, this snippet illustrates the required file‑system and image‑processing steps.
+ * 5. When a data‑migration script must ensure all vector icons are stored as BMP with consistent color depth before archiving, the example provides the necessary C# logic to batch convert and organize the output files.
  */
