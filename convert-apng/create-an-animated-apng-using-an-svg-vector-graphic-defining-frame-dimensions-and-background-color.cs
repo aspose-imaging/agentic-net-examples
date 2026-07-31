@@ -12,66 +12,56 @@ class Program
     {
         try
         {
-            // Hardcoded input SVG and output APNG paths
             string inputPath = "input.svg";
             string outputPath = "output.apng";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG vector graphic
+            // Load SVG vector graphic
             using (Image svgImage = Image.Load(inputPath))
             {
-                // Determine frame dimensions (use SVG size)
                 int width = svgImage.Width;
                 int height = svgImage.Height;
 
-                // Create APNG options with desired frame time and color type
-                ApngOptions apngOptions = new ApngOptions
+                // Render SVG to a raster image (PNG in memory)
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100, // 100 ms per frame
-                    ColorType = PngColorType.TruecolorWithAlpha
-                };
-
-                // Create the APNG image canvas
-                using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, width, height))
-                {
-                    // Remove the default empty frame
-                    apngImage.RemoveAllFrames();
-
-                    // Number of frames to generate
-                    int frameCount = 5;
-
-                    for (int i = 0; i < frameCount; i++)
+                    svgImage.Save(ms, new PngOptions());
+                    ms.Position = 0;
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        // Create a raster canvas for the current frame
-                        using (RasterImage canvas = (RasterImage)Image.Create(new PngOptions
+                        // Create APNG with desired frame size and background color
+                        ApngOptions createOptions = new ApngOptions
                         {
+                            Source = new FileCreateSource(outputPath, false),
+                            DefaultFrameTime = 100, // 100 ms per frame
                             ColorType = PngColorType.TruecolorWithAlpha
-                        }, width, height))
+                        };
+
+                        using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
                         {
-                            // Draw background
-                            Graphics graphics = new Graphics(canvas);
-                            graphics.Clear(Color.White);
+                            apngImage.BackgroundColor = Color.White;
+                            apngImage.RemoveAllFrames();
 
-                            // Draw the SVG onto the canvas
-                            graphics.DrawImage(svgImage, new Point(0, 0));
+                            int totalFrames = 5;
+                            for (int i = 0; i < totalFrames; i++)
+                            {
+                                // Add the same raster frame; adjust gamma for variation
+                                apngImage.AddFrame(raster);
+                                ApngFrame lastFrame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
+                                lastFrame.AdjustGamma(i);
+                            }
 
-                            // Add the raster frame to the APNG
-                            apngImage.AddFrame(canvas);
+                            // Save the APNG (output is already bound via FileCreateSource)
+                            apngImage.Save();
                         }
                     }
-
-                    // Save the animated APNG
-                    apngImage.Save();
                 }
             }
         }
@@ -84,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a scalable SVG logo into a lightweight animated APNG for web banners, preserving vector quality while defining exact frame dimensions and background color.
- * 2. When building a cross‑platform mobile app that displays animated icons generated from SVG assets, the code can create APNG sequences with consistent frame timing and true‑color with alpha support.
- * 3. When an e‑learning platform wants to embed step‑by‑step illustrations where each step is a frame derived from an SVG diagram, this C# routine produces an APNG with precise frame size and background transparency.
- * 4. When a game developer requires animated UI elements, such as a rotating badge, and wants to generate the APNG frames programmatically from a single SVG source using Aspose.Imaging for .NET.
- * 5. When a marketing automation tool needs to batch‑process SVG graphics into animated APNG files with a uniform background color and fixed frame duration for email campaigns.
+ * 1. When a developer wants to convert a scalable SVG logo into a lightweight animated APNG banner with a white background for use on a website.
+ * 2. When an e‑learning platform needs to generate frame‑by‑frame animations from vector illustrations by rendering SVG to raster frames and assembling them into an APNG with defined frame time.
+ * 3. When a mobile app requires a high‑resolution animated icon created from an SVG asset, preserving transparency, setting explicit width and height, and applying a solid background color.
+ * 4. When a marketing automation tool programmatically creates product showcase animations by loading SVG files, rasterizing them, and exporting a multi‑frame APNG with consistent frame dimensions.
+ * 5. When a game UI designer needs to export vector‑based health‑bar animations as an APNG file, specifying background color and frame timing using C# and Aspose.Imaging.
  */
