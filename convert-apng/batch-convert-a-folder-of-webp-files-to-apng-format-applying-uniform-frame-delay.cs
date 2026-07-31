@@ -13,32 +13,33 @@ class Program
             string inputFolder = @"C:\InputWebp";
             string outputFolder = @"C:\OutputApng";
 
-            // Get all WEBP files in the input folder
-            foreach (string inputPath in Directory.GetFiles(inputFolder, "*.webp"))
+            // Uniform frame delay in milliseconds
+            uint frameDelay = 200;
+
+            // Get all .webp files in the input folder
+            string[] webpFiles = Directory.GetFiles(inputFolder, "*.webp");
+
+            foreach (string inputPath in webpFiles)
             {
-                // Verify the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output file path (same name with .png extension)
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".png");
+                // Build output file path (same name with .png extension)
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
 
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the WEBP image and save as APNG with a uniform frame delay
+                // Load the WebP image
                 using (Image image = Image.Load(inputPath))
                 {
-                    var apngOptions = new ApngOptions
-                    {
-                        // Frame delay in milliseconds (e.g., 200 ms)
-                        DefaultFrameTime = 200
-                    };
-                    image.Save(outputPath, apngOptions);
+                    // Save as APNG with the specified default frame time
+                    image.Save(outputPath, new ApngOptions() { DefaultFrameTime = frameDelay });
                 }
             }
         }
@@ -51,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automate the conversion of a large collection of animated WEBP files into APNG format for web deployment, applying a consistent frame delay across all animations.
- * 2. When a game studio wants to replace legacy WEBP sprite animations with APNG assets in a Unity project, using C# and Aspose.Imaging to process the entire assets folder in one run.
- * 3. When an e‑learning platform must generate uniformly timed APNG tutorials from user‑uploaded WEBP animations before publishing them to a learning management system.
- * 4. When a digital marketing team requires a script to batch convert promotional WEBP banners into APNGs with a fixed 200 ms frame interval for consistent playback on email newsletters.
- * 5. When a content management system needs to migrate archived WEBP animated images to APNG while ensuring each frame displays for the same duration, using a C# batch process with Aspose.Imaging.
+ * 1. When a developer needs to convert a collection of animated WebP assets from a design folder into APNG files for use in web browsers that support PNG animation, applying a consistent frame delay.
+ * 2. When an e‑learning platform must transform uploaded WebP lesson illustrations into APNG format so that all frames display at the same speed across different devices.
+ * 3. When a game studio automates the migration of sprite animations stored as WebP into APNG to integrate with a Unity UI system that expects PNG sequences with uniform timing.
+ * 4. When a marketing team requires a script to batch process promotional WebP animations into APNG for email newsletters, ensuring each frame shows for a fixed number of milliseconds.
+ * 5. When a content management system needs to generate APNG thumbnails from a folder of WebP files, using a standard frame delay to maintain consistent animation playback.
  */
