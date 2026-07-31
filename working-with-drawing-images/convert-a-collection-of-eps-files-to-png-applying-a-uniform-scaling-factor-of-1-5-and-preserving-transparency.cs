@@ -6,49 +6,46 @@ using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input EPS files and corresponding output PNG files
-            string[] inputPaths = {
-                @"C:\Images\Input1.eps",
-                @"C:\Images\Input2.eps"
-            };
+            string inputDirectory = "InputEps";
+            string outputDirectory = "OutputPng";
 
-            string[] outputPaths = {
-                @"C:\Images\Output1.png",
-                @"C:\Images\Output2.png"
-            };
-
-            for (int i = 0; i < inputPaths.Length; i++)
+            if (!Directory.Exists(inputDirectory))
             {
-                string inputPath = inputPaths[i];
-                string outputPath = outputPaths[i];
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add EPS files and rerun.");
+                return;
+            }
 
-                // Verify input file exists
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
+
+            foreach (string inputPath in epsFiles)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     continue;
                 }
 
-                // Ensure output directory exists
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load EPS image
-                using (var image = (EpsImage)Image.Load(inputPath))
+                using (EpsImage image = (EpsImage)Image.Load(inputPath))
                 {
-                    // Calculate new dimensions with a scaling factor of 1.5
                     int newWidth = (int)(image.Width * 1.5);
                     int newHeight = (int)(image.Height * 1.5);
-
-                    // Resize the image (using Lanczos resampling for quality)
-                    image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
-
-                    // Save as PNG preserving transparency
-                    var pngOptions = new PngOptions();
-                    image.Save(outputPath, pngOptions);
+                    image.Resize(newWidth, newHeight);
+                    image.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -61,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to generate high‑resolution PNG previews of EPS logos for a web‑based brand guide, scaling them by 1.5 while keeping transparent backgrounds.
- * 2. When an e‑commerce platform must convert product vector illustrations stored as EPS files into PNG thumbnails that are larger than the original and retain transparency for overlay on product pages.
- * 3. When a publishing workflow requires batch processing of EPS artwork into PNG assets for digital magazines, applying a uniform 150 % size increase to match the layout grid.
- * 4. When a mobile app development team wants to pre‑scale EPS icons to PNG format for retina displays, ensuring the images stay crisp and preserve alpha channels.
- * 5. When an automated CI/CD pipeline needs to validate that EPS assets can be rendered as PNG files at a larger size with transparency before they are deployed to a content delivery network.
+ * 1. When a developer needs to batch‑convert a folder of EPS vector files to PNG images for a web gallery, applying a uniform 1.5× scaling factor and preserving transparency using Aspose.Imaging in C#.
+ * 2. When a C# application must generate high‑resolution PNG previews of EPS logos for a branding portal, resizing each image by 150 % while keeping the alpha channel intact.
+ * 3. When an automated build script has to process incoming EPS artwork files and output scaled PNG assets for mobile apps, ensuring the images retain their transparent backgrounds.
+ * 4. When a document‑management system requires converting stored EPS diagrams to PNG thumbnails with consistent enlargement and transparent support for seamless UI rendering.
+ * 5. When a developer is creating a bulk image‑processing tool that reads EPS files from a directory, enlarges them by 1.5×, and saves them as PNGs with preserved transparency for downstream graphic workflows.
  */
