@@ -28,60 +28,44 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
+            string[] files = Directory.GetFiles(inputDirectory, "*.png");
+
             string reportPath = Path.Combine(outputDirectory, "report.txt");
-            File.WriteAllText(reportPath, string.Empty);
-
-            string[] sequenceDirs = Directory.GetDirectories(inputDirectory);
-            foreach (var seqDir in sequenceDirs)
+            using (var reportWriter = new StreamWriter(reportPath, false))
             {
-                string[] pngFiles = Directory.GetFiles(seqDir, "*.png");
-                if (pngFiles.Length == 0)
+                foreach (var inputPath in files)
                 {
-                    continue;
-                }
-
-                string outputFileName = Path.GetFileName(seqDir) + ".apng";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (RasterImage firstImage = (RasterImage)Image.Load(pngFiles[0]))
-                {
-                    int width = firstImage.Width;
-                    int height = firstImage.Height;
-
-                    ApngOptions createOptions = new ApngOptions
+                    if (!File.Exists(inputPath))
                     {
-                        Source = new FileCreateSource(outputPath, false),
-                        DefaultFrameTime = 70,
-                        ColorType = PngColorType.TruecolorWithAlpha
-                    };
-
-                    using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
-                    {
-                        apngImage.RemoveAllFrames();
-
-                        foreach (var pngPath in pngFiles)
-                        {
-                            if (!File.Exists(pngPath))
-                            {
-                                Console.Error.WriteLine($"File not found: {pngPath}");
-                                continue;
-                            }
-
-                            using (RasterImage frame = (RasterImage)Image.Load(pngPath))
-                            {
-                                apngImage.AddFrame(frame);
-                            }
-                        }
-
-                        apngImage.Save();
+                        Console.Error.WriteLine($"File not found: {inputPath}");
+                        return;
                     }
+
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".apng");
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+                    {
+                        ApngOptions createOptions = new ApngOptions
+                        {
+                            Source = new FileCreateSource(outputPath, false),
+                            DefaultFrameTime = 100,
+                            ColorType = PngColorType.TruecolorWithAlpha
+                        };
+
+                        using (ApngImage apng = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
+                        {
+                            apng.RemoveAllFrames();
+                            apng.AddFrame(sourceImage);
+                            apng.Save();
+                        }
+                    }
+
+                    reportWriter.WriteLine($"{fileNameWithoutExt}.png -> {fileNameWithoutExt}.apng");
                 }
-
-                File.AppendAllText(reportPath, $"Converted {seqDir} to {outputPath}: Success{Environment.NewLine}");
             }
-
-            Console.WriteLine("Batch processing completed.");
         }
         catch (Exception ex)
         {
@@ -92,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert multiple folders of sequential PNG frames into animated APNG files while automatically logging each conversion’s success or failure to a report file.
- * 2. When an e‑learning platform wants to transform lecture slide PNG sequences into lightweight APNG animations for web delivery and keep a concise text report of the processing results.
- * 3. When a game asset pipeline requires turning character sprite PNG frames into APNG animations and generating a status report for quality‑assurance tracking.
- * 4. When a marketing team automates the creation of product showcase animations from daily PNG screenshots using C# and Aspose.Imaging, producing APNG files and a verification report for audit purposes.
- * 5. When a CI/CD build script must validate that all PNG image sequences in a repository are correctly packaged into APNGs and produce a report indicating any conversion failures before deployment.
+ * 1. When a game developer needs to convert a series of sprite PNG frames into animated PNG (APNG) files for smoother in‑game animations while generating a text report of each conversion’s success.
+ * 2. When an e‑learning platform automates the creation of animated illustrations from PNG slide decks, using C# and Aspose.Imaging to batch produce APNG assets and log the results for quality assurance.
+ * 3. When a marketing team prepares lightweight web banners by turning multiple PNG images into APNG animations and records the conversion status in a report to verify all assets were generated correctly.
+ * 4. When a scientific visualization tool processes time‑lapse PNG image sequences into APNG movies for publication, employing batch processing in .NET and capturing success/failure details in a log file.
+ * 5. When a mobile app developer builds a build‑time pipeline that converts UI icon PNG sequences into APNG files for iOS, while writing a concise report to track which icons were successfully transformed.
  */
