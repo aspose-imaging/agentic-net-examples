@@ -9,48 +9,39 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Define output path
-            string outputPath = "output\\gradient.png";
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create PNG options
-            PngOptions pngOptions = new PngOptions();
-
-            // Define image dimensions
-            int width = 300;
-            int height = 300;
-
-            // Create a new image
-            using (Image image = Image.Create(pngOptions, width, height))
+            using (Image image = Image.Load(inputPath))
             {
-                // Initialize graphics for the image
                 Graphics graphics = new Graphics(image);
-
-                // Clear background
                 graphics.Clear(Color.White);
 
-                // Create a graphics path with a rectangle shape
                 GraphicsPath path = new GraphicsPath();
                 Figure figure = new Figure();
-                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
+
+                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
+                figure.AddShape(new EllipseShape(new RectangleF(100f, 100f, 150f, 100f)));
+
                 path.AddFigure(figure);
 
-                // Create a linear gradient brush (blue to red)
-                using (LinearGradientBrush brush = new LinearGradientBrush(
-                    new PointF(50f, 50f),
-                    new PointF(250f, 250f),
-                    Color.Blue,
-                    Color.Red))
+                using (SolidBrush brush = new SolidBrush(Color.Blue))
                 {
-                    // Fill the path with the gradient brush
+                    brush.Opacity = 100;
                     graphics.FillPath(brush, path);
                 }
 
-                // Save the image to the output file
+                PngOptions pngOptions = new PngOptions();
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -63,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PNG badge with a gradient‑filled rectangle for a web application, they can use Aspose.Imaging in C# to draw the shape with Graphics.FillPath and a LinearGradientBrush.
- * 2. When building a reporting dashboard that requires dynamic chart backgrounds, a developer can create gradient‑filled paths on the fly using Aspose.Imaging’s Graphics and LinearGradientBrush to produce PNG or JPEG assets.
- * 3. When adding a branded gradient border around a QR code, a developer can render the border as a gradient‑filled path with Aspose.Imaging and save it as a PNG file.
- * 4. When a Windows desktop application needs to create custom icons with smooth color transitions, a developer can use C# and Aspose.Imaging to fill a shape with a linear gradient via Graphics.FillPath.
- * 5. When automating the production of promotional flyers where key sections are highlighted with gradient rectangles, a developer can programmatically draw those shapes using Aspose.Imaging’s GraphicsPath and LinearGradientBrush and export them as PNG images.
+ * 1. When a developer needs to programmatically add a blue rectangle and ellipse overlay to a PNG file for a marketing banner, they can use Aspose.Imaging Graphics.FillPath with a SolidBrush to render the shapes onto the image.
+ * 2. When generating report thumbnails that require a consistent white background with highlighted regions, the code shows how to clear the canvas, draw a filled path, and save the result as a PNG using C# and Aspose.Imaging.
+ * 3. When creating custom UI icons where a specific shape must be filled with a solid color and saved in lossless PNG format, developers can employ GraphicsPath, Figure, and FillPath to composite the graphics at runtime.
+ * 4. When automating the addition of a colored watermark shape to a batch of images, this example demonstrates loading each input PNG, filling a path with a SolidBrush, and overwriting the file with the processed output.
+ * 5. When building a server‑side image‑generation service that draws geometric shapes onto user‑uploaded images, the code illustrates the essential steps of loading the image, clearing it, filling a path, and saving the final PNG using Aspose.Imaging for .NET.
  */
