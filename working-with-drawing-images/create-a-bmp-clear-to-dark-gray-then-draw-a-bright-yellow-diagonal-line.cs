@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -10,35 +11,34 @@ class Program
     {
         try
         {
-            // Define output path
-            string outputPath = "output.bmp";
+            // Output file path (hard‑coded)
+            string outputPath = "output/output.bmp";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create BMP options with bound file source
+            // Set up BMP options with a bound file source
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Define canvas size
-            int width = 500;
-            int height = 500;
+            int width = 200;
+            int height = 200;
 
-            // Create image canvas
-            using (Image image = Image.Create(bmpOptions, width, height))
+            // Create the BMP canvas (bound to the output file)
+            using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, width, height))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
+                // Obtain a graphics object for drawing
+                Graphics graphics = new Graphics(canvas);
 
-                // Clear canvas to dark gray
+                // Clear the canvas to dark gray
                 graphics.Clear(Color.DarkGray);
 
-                // Draw bright yellow diagonal line
-                Pen pen = new Pen(Color.Yellow, 1);
+                // Draw a bright yellow diagonal line
+                Pen pen = new Pen(Color.Yellow, 2);
                 graphics.DrawLine(pen, new Point(0, 0), new Point(width - 1, height - 1));
 
-                // Save the image (file is already bound to outputPath)
-                image.Save();
+                // Save the bound image
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -50,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP thumbnail with a dark‑gray background and a bright yellow diagonal marker for a file‑preview feature in a Windows desktop application.
- * 2. When an automated reporting tool must create a simple bitmap chart that highlights a trend line using a yellow diagonal on a gray canvas for quick visual inspection.
- * 3. When a game engine requires a placeholder texture in BMP format with a distinctive diagonal line to test rendering pipelines during development.
- * 4. When a batch image‑processing script has to produce diagnostic BMP images that show alignment by drawing a yellow diagonal across a dark gray background.
- * 5. When a documentation generator wants to embed a small BMP illustration showing a diagonal line example for teaching basic Aspose.Imaging drawing operations in C#.
+ * 1. Developers generate a simple BMP placeholder image with a dark gray background and a bright yellow diagonal line for UI mockups.
+ * 2. Engineers create a diagnostic test image to verify BMP file creation, color clearing, and line drawing operations in a C# imaging pipeline.
+ * 3. Designers produce a low‑resolution watermark template in BMP format where the diagonal yellow line serves as a visual guide for later overlay.
+ * 4. Developers automate the generation of thumbnail icons for a file‑explorer application that require a consistent dark gray background and a highlighted diagonal marker.
+ * 5. Game developers prepare a BMP asset for a loading screen where the bright yellow diagonal line indicates progress direction during development testing.
  */
