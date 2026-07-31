@@ -2,60 +2,73 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "Input/multipage.tif";
-            string outputPath = "Output/animation.apng";
+            // Hardcoded input and output paths
+            string inputPath = "input.tif";
+            string outputPath = "output.png";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the multi‑page TIFF
             using (Image image = Image.Load(inputPath))
             {
                 TiffImage tiffImage = (TiffImage)image;
 
-                int canvasWidth = tiffImage.Frames[0].Width;
-                int canvasHeight = tiffImage.Frames[0].Height;
-
+                // Prepare APNG options (default frame time will be overridden per frame)
                 ApngOptions apngOptions = new ApngOptions
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    ColorType = PngColorType.TruecolorWithAlpha
+                    DefaultFrameTime = 100 // placeholder, will be set per frame
                 };
 
-                using (ApngImage apngImage = (ApngImage)Image.Create(apngOptions, canvasWidth, canvasHeight))
+                // Create an APNG image with the size of the first frame
+                using (ApngImage apngImage = (ApngImage)Image.Create(
+                    apngOptions,
+                    tiffImage.Frames[0].Width,
+                    tiffImage.Frames[0].Height))
                 {
+                    // Remove the automatically created first frame
                     apngImage.RemoveAllFrames();
 
-                    for (int i = 0; i < tiffImage.Frames.Length; i++)
+                    // Add each TIFF frame as an APNG frame
+                    foreach (TiffFrame tiffFrame in tiffImage.Frames)
                     {
-                        tiffImage.ActiveFrame = tiffImage.Frames[i];
-                        RasterImage rasterFrame = (RasterImage)tiffImage;
-                        apngImage.AddFrame(rasterFrame);
+                        // Cast the frame to RasterImage to access resolution properties
+                        RasterImage raster = (RasterImage)tiffFrame;
 
-                        ApngFrame apngFrame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
+                        // Determine frame duration based on horizontal resolution (fallback to 100 ms)
+                        uint frameDuration = 100;
+                        if (raster.HorizontalResolution > 0)
+                        {
+                            // Example: higher DPI -> shorter display time
+                            frameDuration = (uint)(1000 / raster.HorizontalResolution);
+                            if (frameDuration == 0) frameDuration = 1;
+                        }
 
-                        double dpi = tiffImage.HorizontalResolution > 0 ? tiffImage.HorizontalResolution : 72.0;
-                        uint frameDuration = (uint)Math.Max(10, Math.Round(1000.0 / dpi));
+                        // Set the default frame time for this frame
+                        apngImage.DefaultFrameTime = frameDuration;
 
-                        apngFrame.FrameTime = (int)frameDuration;
+                        // Add the frame to the APNG
+                        apngImage.AddFrame(raster);
                     }
 
-                    apngImage.Save();
+                    // Save the resulting APNG
+                    apngImage.Save(outputPath);
                 }
             }
         }
@@ -68,9 +81,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to turn a multi‑page DICOM‑exported TIFF scan into an animated PNG for web‑based patient reports, preserving the scan’s DPI‑based timing.
- * 2. When a GIS system exports layered satellite imagery as a multi‑page TIFF and wants to create an APNG slideshow where higher‑resolution tiles stay on screen longer.
- * 3. When an e‑learning platform receives scanned lecture slides in a multi‑page TIFF and must generate an animated PNG that respects each slide’s original DPI to control slide display speed.
- * 4. When a digital archiving tool converts scanned historical documents stored as multi‑page TIFFs into APNG animations, using the DPI of each page to set frame durations for smooth scrolling.
- * 5. When a printing workflow creates proof animations from multi‑page TIFF proofs, converting them to APNG while using each page’s resolution to determine how long each frame appears in the preview.
+ * 1. When a developer needs to turn a multi‑page TIFF scanned document into an animated PNG for web preview, using each page’s DPI to set the display time of each frame.
+ * 2. When building a C# application that converts high‑resolution medical imaging TIFF series into an APNG slideshow where the pixel density of each slice determines how long it stays visible.
+ * 3. When creating an automated pipeline that transforms multi‑page TIFF receipts into a compact APNG animation, with the horizontal resolution of each page controlling the frame delay for better readability.
+ * 4. When developing a digital publishing tool that exports layered TIFF artwork as an animated PNG, leveraging Aspose.Imaging to read the resolution of each layer and assign appropriate frame durations.
+ * 5. When implementing a C# utility that generates an APNG from a multi‑page TIFF satellite image stack, using the resolution metadata of each frame to calculate realistic animation timing for GIS applications.
  */
