@@ -10,20 +10,30 @@ class Program
     {
         try
         {
-            string outputPath = "output\\canvas.bmp";
+            string outputPath = "Output\\canvas.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            FileCreateSource source = new FileCreateSource(outputPath, false);
+
+            Source source = new FileCreateSource(outputPath, false);
             BmpOptions options = new BmpOptions() { Source = source };
-            int width = 200;
-            int height = 200;
+
+            int width = 400;
+            int height = 400;
+
             using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
             {
                 Graphics graphics = new Graphics(canvas);
-                Pen pen = new Pen(Color.Black, 2);
-                graphics.DrawLine(pen, new Point(0, 0), new Point(width, height));
-                Matrix flipMatrix = new Matrix(-1, 0, 0, 1, width, 0);
-                graphics.MultiplyTransform(flipMatrix);
-                graphics.DrawLine(pen, new Point(0, 0), new Point(width, height));
+                graphics.Clear(Color.White);
+
+                Pen pen1 = new Pen(Color.Black, 2);
+                graphics.DrawLine(pen1, new Point(0, 0), new Point(width, height));
+
+                // Reflect across the vertical axis
+                graphics.ScaleTransform(-1, 1);
+                graphics.TranslateTransform(-width, 0);
+
+                Pen pen2 = new Pen(Color.Red, 2);
+                graphics.DrawLine(pen2, new Point(0, 0), new Point(width, height));
+
                 canvas.Save();
             }
         }
@@ -36,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP thumbnail with a mirrored diagonal watermark for branding purposes.
- * 2. When an application must create a simple black‑and‑white pattern by drawing a line and its vertical reflection for testing printer alignment.
- * 3. When a game engine requires a procedural texture that shows a symmetric diagonal line to be used as a UI overlay.
- * 4. When a reporting tool has to produce a BMP diagram that demonstrates geometric transformations such as reflection across the vertical axis.
- * 5. When a developer wants to validate that the Aspose.Imaging Graphics.MultiplyTransform method correctly flips raster images in a C# image‑processing pipeline.
+ * 1. When a developer needs to generate a BMP file with a simple geometric illustration, such as a diagonal line, for documentation or testing image pipelines.
+ * 2. When creating a mirrored version of a graphic element by reflecting a drawn line across the vertical axis, useful for generating symmetrical icons or UI assets.
+ * 3. When building a custom image processing routine that programmatically draws shapes on a raster canvas and saves the result as a BMP for compatibility with legacy Windows applications.
+ * 4. When implementing automated visual verification tests that require drawing and transforming lines to ensure the graphics engine correctly applies ScaleTransform and TranslateTransform operations.
+ * 5. When producing sample BMP images to demonstrate Aspose.Imaging’s Graphics API capabilities, including drawing, clearing, and applying coordinate transformations in C#.
  */
