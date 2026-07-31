@@ -26,17 +26,8 @@ class Program
             // Load the multi‑page TIFF
             using (Image image = Image.Load(inputPath))
             {
-                // Configure APNG options for lossless compression
-                var apngOptions = new ApngOptions
-                {
-                    // Default frame duration (in milliseconds); adjust as needed
-                    DefaultFrameTime = 100,
-                    // PNG compression level (0 = no compression, still lossless)
-                    PngCompressionLevel = 0
-                };
-
-                // Save as APNG
-                image.Save(outputPath, apngOptions);
+                // Save as APNG with default (lossless) PNG compression
+                image.Save(outputPath, new ApngOptions());
             }
         }
         catch (Exception ex)
@@ -48,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a multi‑page TIFF scanned document into a high‑quality animated PNG for web preview without losing any image detail.
- * 2. When an application must generate lossless animated graphics from a series of TIFF frames for inclusion in a mobile app’s onboarding tutorial.
- * 3. When a digital archiving system requires transforming multi‑page TIFF medical images into APNG format to enable smooth frame‑by‑frame navigation in a browser.
- * 4. When a game developer wants to create sprite animations from TIFF assets while preserving exact colors using C# and Aspose.Imaging’s lossless PNG compression.
- * 5. When an e‑learning platform needs to programmatically convert multi‑page TIFF lecture slides into an animated PNG that can be streamed with consistent frame timing.
+ * 1. When a developer needs to transform a multi‑page TIFF scan of a document into a single animated PNG for web display while preserving every pixel with lossless compression, they can use this code.
+ * 2. When an application must generate high‑quality animated previews of medical imaging series stored as TIFF stacks for integration into a browser‑based viewer, the snippet provides a straightforward C# solution.
+ * 3. When a digital archivist wants to convert scanned archival photographs saved as multi‑page TIFFs into lightweight APNG animations for online galleries without sacrificing image fidelity, this code handles the conversion.
+ * 4. When a reporting tool creates multi‑page TIFF charts and needs to embed them as animated PNGs in PDF or HTML reports to reduce file size while keeping lossless quality, the example demonstrates the required steps.
+ * 5. When a game developer imports sprite sheets delivered as multi‑page TIFF files and needs to export them as losslessly compressed APNG animations for use in Unity or other engines, this code performs the conversion.
  */
