@@ -2,9 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -12,61 +9,46 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.svg";
+            string tempPngPath = "temp.png";
             string outputPath = "output.jpg";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
 
-            // Load the vector image (SVG)
             using (Image vectorImage = Image.Load(inputPath))
             {
-                // Set up rasterization options for SVG
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                var rasterOptions = new VectorRasterizationOptions
                 {
-                    PageSize = vectorImage.Size,
-                    BackgroundColor = Color.White
+                    PageWidth = vectorImage.Width,
+                    PageHeight = vectorImage.Height,
+                    BackgroundColor = Aspose.Imaging.Color.White
                 };
 
-                // Prepare PNG options to rasterize the SVG into a memory stream
-                PngOptions pngOptions = new PngOptions
+                var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Rasterize SVG to PNG in memory
-                using (MemoryStream ms = new MemoryStream())
+                vectorImage.Save(tempPngPath, pngOptions);
+            }
+
+            using (Image rasterImageContainer = Image.Load(tempPngPath))
+            {
+                RasterImage rasterImage = (RasterImage)rasterImageContainer;
+
+                var jpegOptions = new JpegOptions
                 {
-                    vectorImage.Save(ms, pngOptions);
-                    ms.Position = 0;
+                    Quality = 95
+                };
 
-                    // Load the rasterized image
-                    using (Image rasterImg = Image.Load(ms))
-                    {
-                        RasterImage rasterImage = (RasterImage)rasterImg;
-
-                        // Apply motion blur (motion wiener) filter
-                        rasterImage.Filter(rasterImage.Bounds,
-                            new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0));
-
-                        // Configure high-quality JPEG options
-                        JpegOptions jpegOptions = new JpegOptions
-                        {
-                            Quality = 100
-                        };
-
-                        // Save the blurred image as JPEG
-                        rasterImage.Save(outputPath, jpegOptions);
-                    }
-                }
+                rasterImage.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -78,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web designer wants to convert scalable SVG icons into high‑resolution JPEG thumbnails with a motion‑blur effect for a dynamic gallery.
- * 2. When an e‑commerce platform needs to generate product preview images from vector logos, apply a motion blur to simulate movement, and store them as JPEGs for faster page loads.
- * 3. When a marketing automation tool creates animated email banners by rasterizing SVG assets, adding a motion‑blur filter, and exporting the result as a high‑quality JPEG for email clients.
- * 4. When a desktop publishing application processes user‑uploaded SVG illustrations, applies a motion‑blur effect to achieve a stylized look, and saves the output as JPEG for printing or web distribution.
- * 5. When a game development pipeline converts vector UI elements into blurred JPEG textures to reduce memory usage while preserving visual effects in C# using Aspose.Imaging.
+ * 1. When a developer needs to convert an SVG logo into a high‑quality JPEG for email newsletters or web pages that only support raster image formats.
+ * 2. When an application must generate JPEG previews of user‑uploaded vector graphics while preserving the original dimensions and a white background.
+ * 3. When a batch‑processing tool has to transform a collection of SVG icons into JPEG thumbnails with 95 % quality for a product catalog.
+ * 4. When a reporting system requires embedding vector diagrams as JPEG images in PDF reports, ensuring consistent color and resolution across platforms.
+ * 5. When a legacy system only accepts JPEG files, a developer can rasterize SVG assets to PNG first and then save them as high‑quality JPEGs for compatibility.
  */
