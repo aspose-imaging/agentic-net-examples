@@ -21,32 +21,31 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists (creates even if null)
+            Directory.CreateDirectory(outputDirectory);
+
             // Load the APNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to ApngImage to access frames
-                ApngImage apng = image as ApngImage;
-                if (apng == null)
-                {
-                    Console.Error.WriteLine("The provided file is not an APNG image.");
-                    return;
-                }
+                // Cast to ApngImage to access frames/pages
+                ApngImage apngImage = (ApngImage)image;
+
+                int frameCount = apngImage.PageCount;
 
                 // Iterate through each frame and save as BMP
-                for (int i = 0; i < apng.PageCount; i++)
+                for (int i = 0; i < frameCount; i++)
                 {
-                    // Retrieve the frame as a RasterImage
-                    using (RasterImage frame = (RasterImage)apng.Pages[i])
-                    {
-                        // Build output file path
-                        string outputPath = Path.Combine(outputDirectory, $"frame_{i:D4}.bmp");
+                    // Get the current frame
+                    Image frame = apngImage.Pages[i];
 
-                        // Ensure the output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Build output file path
+                    string outputPath = Path.Combine(outputDirectory, $"frame_{i:D4}.bmp");
 
-                        // Save the frame as BMP
-                        frame.Save(outputPath, new BmpOptions());
-                    }
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the frame as BMP using BmpOptions
+                    frame.Save(outputPath, new BmpOptions());
                 }
             }
         }
@@ -59,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each frame of an animated PNG (APNG) into BMP files for a legacy system that only supports static bitmap images.
- * 2. When integrating a .NET application with an older printing pipeline that requires BMP input, and the source assets are delivered as APNG animations.
- * 3. When creating frame‑by‑frame analysis or computer‑vision preprocessing on an APNG animation, and the analysis library only accepts BMP raster images.
- * 4. When migrating a game’s sprite animations stored as APNG to a classic game engine that loads individual BMP frames from a directory.
- * 5. When generating thumbnails or preview images for an archival tool that stores each APNG frame as a separate BMP to maintain compatibility with older Windows viewers.
+ * 1. When a developer needs to extract each frame of an animated PNG (APNG) and save them as individual BMP files for a legacy Windows application that only supports BMP images.
+ * 2. When a C# program must preprocess animation assets by converting APNG frames into BMP format to feed into a third‑party image processing pipeline that does not understand PNG transparency.
+ * 3. When an automation script has to generate a series of bitmap thumbnails from an APNG for printing on hardware that only accepts BMP files.
+ * 4. When a developer is migrating a digital signage system and must replace APNG animations with static BMP frames because the signage firmware cannot decode animated PNGs.
+ * 5. When a batch conversion tool written in .NET uses Aspose.Imaging to split an APNG into separate BMP files to archive each animation frame in a format compatible with older archival standards.
  */
