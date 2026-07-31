@@ -6,40 +6,34 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\temp\output.png";
+            // Output file path
+            string outputPath = @"c:\temp\output.png";
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a PNG image using a stream source
-            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+            // Set up PNG options with a bound file source
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
+
+            // Create a 500x500 image canvas
+            using (Image image = Image.Create(pngOptions, 500, 500))
             {
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new StreamSource(stream);
+                // Initialize graphics for the image
+                Graphics graphics = new Graphics(image);
 
-                // Create a new image with the specified dimensions
-                using (Image image = Image.Create(pngOptions, 500, 500))
-                {
-                    // Initialize Graphics from the created image
-                    Graphics graphics = new Graphics(image);
+                // Enable anti-aliasing for smoother edges
+                graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-                    // Set smoothing mode to AntiAlias for smoother edges
-                    graphics.SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias;
+                // Optional: clear background to white
+                graphics.Clear(Color.White);
 
-                    // Clear the background
-                    graphics.Clear(Aspose.Imaging.Color.Wheat);
-
-                    // Draw a sample rectangle
-                    graphics.DrawRectangle(new Pen(Aspose.Imaging.Color.Black, 2), new Rectangle(50, 50, 400, 400));
-
-                    // Save the image
-                    image.Save();
-                }
+                // Save the image (output is already bound to the file)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -51,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a PNG thumbnail with smooth borders for a web gallery, a developer can use this code to draw shapes with anti‑aliased edges.
- * 2. When creating a printable PDF cover page that requires a crisp rectangular frame, the code initializes Graphics from an image and sets SmoothingMode to AntiAlias.
- * 3. When building a custom charting component that outputs PNG charts, the developer uses this pattern to ensure lines and rectangles are rendered without jagged edges.
- * 4. When automating the production of UI mock‑ups where background colors and precise rectangle outlines are needed, the code demonstrates how to clear the canvas and draw a smooth rectangle.
- * 5. When developing a batch image processing tool that writes PNG files to a specific folder, this snippet shows how to create the image via a FileStream, apply anti‑aliasing, and save the result.
+ * 1. When generating a PNG thumbnail for a web gallery, a developer can use this code to create a 500×500 canvas and enable anti‑aliasing so the thumbnail’s edges appear smooth on browsers.
+ * 2. When producing printable marketing flyers in C#, initializing Graphics on a newly created image and setting SmoothingMode to AntiAlias ensures vector shapes and text render with high‑quality edges before saving as PNG.
+ * 3. When building a custom charting component that draws lines and curves on the fly, developers can use this snippet to create an image buffer, apply anti‑aliasing, and export the result to a file for reporting tools.
+ * 4. When automating the generation of QR codes or barcodes with additional decorative graphics, the code provides a clean image surface with anti‑aliased rendering to avoid jagged borders in the final PNG.
+ * 5. When developing a game asset pipeline that programmatically draws sprites or icons, initializing Graphics with SmoothingMode.AntiAlias guarantees that the rendered shapes look crisp when the PNG files are loaded into the game engine.
  */
