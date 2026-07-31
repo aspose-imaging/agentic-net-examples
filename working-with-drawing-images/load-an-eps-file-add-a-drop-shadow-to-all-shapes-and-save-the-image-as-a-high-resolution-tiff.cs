@@ -1,7 +1,10 @@
+// HOW-TO: Add Drop Shadow to EPS and Save as High‑Resolution TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -9,8 +12,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.png";
+            string inputPath = "input.eps";
+            string outputPath = "output.tif";
 
             if (!File.Exists(inputPath))
             {
@@ -18,12 +21,41 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (var eps = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
             {
-                var options = new PngOptions();
-                image.Save(outputPath, options);
+                var rasterOptions = new EpsRasterizationOptions
+                {
+                    PageWidth = eps.Width * 4,
+                    PageHeight = eps.Height * 4
+                };
+
+                using (var ms = new MemoryStream())
+                {
+                    eps.Save(ms, new PngOptions { VectorRasterizationOptions = rasterOptions });
+                    ms.Position = 0;
+
+                    using (var raster = (RasterImage)Image.Load(ms))
+                    {
+                        int offsetX = 10;
+                        int offsetY = 10;
+                        int canvasWidth = raster.Width + offsetX;
+                        int canvasHeight = raster.Height + offsetY;
+
+                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                        tiffOptions.Source = new FileCreateSource(outputPath, false);
+
+                        using (var canvas = Image.Create(tiffOptions, canvasWidth, canvasHeight))
+                        {
+                            Graphics graphics = new Graphics(canvas);
+                            graphics.Clear(Color.White);
+                            graphics.DrawImage(raster, offsetX, offsetY); // shadow
+                            graphics.DrawImage(raster, 0, 0); // original
+                            canvas.Save();
+                        }
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -35,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer uses Aspose.Imaging for .NET to convert vector EPS artwork into a print‑ready high‑resolution TIFF while applying a consistent drop‑shadow effect to every shape for enhanced depth in marketing brochures.
- * 2. When an e‑commerce platform must generate catalog images from designer‑provided EPS logos, automatically adding drop shadows to all vector elements with Aspose.Imaging and exporting them as 300 dpi TIFF files for high‑quality product listings.
- * 3. When a publishing workflow requires batch processing of EPS illustrations, using Aspose.Imaging to add a uniform drop shadow to each shape and saving the result as a lossless high‑resolution TIFF to meet the printer’s color‑management specifications.
- * 4. When a desktop C# application needs to preview EPS diagrams with a subtle shadow effect and then export the view as a high‑resolution TIFF for archival or compliance documentation using Aspose.Imaging.
- * 5. When a GIS system imports EPS map symbols, applies a drop‑shadow via Aspose.Imaging to improve visual separation on layered maps, and stores the final map tiles as high‑resolution TIFF images for analysis.
+ * 1. When you need to convert vector EPS artwork into a printable high‑resolution TIFF while adding a drop shadow for visual depth.
+ * 2. When a publishing workflow requires embedding EPS logos into TIFF pages with a consistent offset shadow to match page layout guidelines.
+ * 3. When generating product catalogs that combine vector graphics with raster images, and you must output a TIFF file with enhanced shadow effects for better presentation.
+ * 4. When automating batch processing of EPS files to create TIFF assets for archival, and you want each image to include a subtle shadow without manual editing.
+ * 5. When integrating Aspose.Imaging into a C# application to rasterize EPS files at 4× resolution, add a shadow, and save the result as a TIFF for downstream printing or imaging systems.
  */
