@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input_animation.webp";
+        string outputPath = "output_animation.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.webp";
-            string outputPath = "output\\animation.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,7 +26,7 @@ class Program
             // Load the animated WebP image
             using (Image image = Image.Load(inputPath))
             {
-                // Save as APNG preserving original timing
+                // Save as APNG, preserving original frame timing
                 image.Save(outputPath, new ApngOptions());
             }
         }
@@ -39,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert animated WebP graphics from a mobile app into APNG for cross‑browser compatibility while preserving the original frame timing.
- * 2. When a C# backend service must transform user‑uploaded animated WebP stickers into APNG files for use in a web‑based chat application that only supports PNG animation.
- * 3. When an image‑processing pipeline requires batch conversion of animated WebP advertisements to APNG to ensure consistent playback speed on legacy browsers.
- * 4. When a game developer wants to replace WebP sprite animations with APNG assets in Unity while keeping the exact animation delays for smooth motion.
- * 5. When a content management system needs to generate APNG previews from animated WebP uploads so that the preview animation matches the source timing.
+ * 1. When a developer needs to convert an animated WebP banner into an APNG for better cross‑browser support while keeping the original frame delays, this code provides a quick C# solution using Aspose.Imaging.
+ * 2. When a mobile app requires animated assets in APNG format for iOS compatibility, the snippet can transform existing WebP animations without losing timing information.
+ * 3. When an email marketing platform wants to embed animated images that are widely supported in email clients, the code converts WebP to APNG while preserving the animation speed.
+ * 4. When a game developer stores sprite animations as WebP files but the game engine only accepts APNG, this example shows how to batch‑convert them in .NET while retaining frame timing.
+ * 5. When a content management system needs to serve animated images in APNG to reduce bandwidth and maintain smooth playback, the program demonstrates the necessary file‑format conversion with Aspose.Imaging.
  */
