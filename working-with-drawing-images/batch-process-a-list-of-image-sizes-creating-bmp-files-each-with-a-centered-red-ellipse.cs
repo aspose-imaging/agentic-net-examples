@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -9,29 +11,48 @@ class Program
     {
         try
         {
-            var sizes = new (int width, int height)[]
+            // Define the list of image sizes (width, height)
+            var sizes = new List<(int width, int height)>
             {
                 (200, 200),
                 (400, 300),
                 (800, 600)
             };
 
+            // Output directory for BMP files
+            string outputDir = @"C:\Temp\BmpOutputs";
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
+
             foreach (var size in sizes)
             {
-                string outputPath = $"output_{size.width}x{size.height}.bmp";
+                // Construct the output file path
+                string outputPath = Path.Combine(outputDir, $"ellipse_{size.width}x{size.height}.bmp");
 
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                // Create a bound source for the BMP image
+                Source source = new FileCreateSource(outputPath, false);
+                BmpOptions bmpOptions = new BmpOptions() { Source = source };
 
-                FileCreateSource source = new FileCreateSource(outputPath, false);
-                BmpOptions options = new BmpOptions() { Source = source };
-
-                using (Aspose.Imaging.Image canvas = Aspose.Imaging.Image.Create(options, size.width, size.height))
+                // Create the BMP canvas bound to the file
+                using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, size.width, size.height))
                 {
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
-                    graphics.Clear(Aspose.Imaging.Color.White);
-                    graphics.DrawEllipse(
-                        new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 1),
-                        new Aspose.Imaging.Rectangle(0, 0, size.width, size.height));
+                    // Initialize graphics for drawing
+                    Graphics graphics = new Graphics(canvas);
+
+                    // Optional: clear background to white
+                    graphics.Clear(Color.White);
+
+                    // Create a red pen
+                    Pen redPen = new Pen(Color.Red, 2);
+
+                    // Define a rectangle that fills the canvas (centered ellipse)
+                    Rectangle ellipseBounds = new Rectangle(0, 0, size.width, size.height);
+
+                    // Draw the centered red ellipse
+                    graphics.DrawEllipse(redPen, ellipseBounds);
+
+                    // Save the bound image (no need to specify path again)
                     canvas.Save();
                 }
             }
@@ -45,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a set of placeholder BMP images of various dimensions with a centered red ellipse for UI mock‑ups or testing layout algorithms.
- * 2. When an automated build pipeline must create thumbnail BMP assets in multiple sizes for a legacy Windows application that only supports BMP files.
- * 3. When a reporting tool requires batch creation of BMP charts where each chart is represented by a red ellipse drawn on a white background at different resolutions.
- * 4. When a game developer wants to pre‑render simple BMP sprites containing a red ellipse at several sizes to be loaded quickly at runtime.
- * 5. When a documentation generator needs to produce sample BMP images of specific widths and heights with a red ellipse to illustrate image processing examples in Aspose.Imaging tutorials.
+ * 1. When generating placeholder graphics for UI mockups, a developer can batch‑create BMP files of various dimensions with a centered red ellipse to represent image slots.
+ * 2. When preparing test assets for automated visual regression testing, the code can produce BMP images of different sizes containing a consistent red ellipse as a known reference shape.
+ * 3. When building a batch image processing pipeline that needs to embed a simple watermark, developers can use this snippet to create BMP canvases of required resolutions with a centered red ellipse as the watermark.
+ * 4. When creating sample data for a machine‑learning model that classifies shapes, the code can generate BMP images at multiple resolutions with a centered red ellipse to serve as training examples.
+ * 5. When exporting diagram elements from a CAD or reporting tool, a developer can quickly generate BMP files of specified widths and heights with a centered red ellipse to illustrate circular components.
  */
