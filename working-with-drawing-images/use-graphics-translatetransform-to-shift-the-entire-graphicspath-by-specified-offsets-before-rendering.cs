@@ -10,34 +10,48 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the source image as a RasterImage
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
+                // Cache data for better performance
+                if (!image.IsCached) image.CacheData();
+
+                // Create a Graphics instance for drawing
                 Graphics graphics = new Graphics(image);
 
-                float offsetX = 50f;
-                float offsetY = 30f;
-
+                // Apply translation to shift all subsequent drawing operations
+                float offsetX = 50f; // horizontal shift
+                float offsetY = 30f; // vertical shift
                 graphics.TranslateTransform(offsetX, offsetY);
 
+                // Build a GraphicsPath containing a single rectangle shape
                 GraphicsPath path = new GraphicsPath();
                 Figure figure = new Figure();
-                figure.AddShape(new RectangleShape(new RectangleF(10f, 10f, 200f, 150f)));
+                // Rectangle at (0,0) with size 100x100; translation will move it
+                figure.AddShape(new RectangleShape(new RectangleF(0f, 0f, 100f, 100f)));
                 path.AddFigure(figure);
 
-                graphics.DrawPath(new Pen(Color.Blue, 2), path);
+                // Draw the path with a red pen
+                Pen pen = new Pen(Color.Red, 3);
+                graphics.DrawPath(pen, path);
 
-                image.Save(outputPath, new PngOptions());
+                // Save the modified image as PNG
+                PngOptions saveOptions = new PngOptions();
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add a watermark or logo to an existing PNG image and wants to position it at a specific offset from the original content, they can use Graphics.TranslateTransform to shift the drawing path before rendering.
- * 2. When creating a thumbnail generator that adds a decorative border around JPEG or PNG photos, TranslateTransform can move the rectangle shape so the border aligns correctly with the image edges.
- * 3. When building a batch image annotation tool that places measurement boxes at consistent distances from the top‑left corner of each raster image, the code translates the GraphicsPath to the required X and Y offsets before drawing.
- * 4. When implementing a custom UI overlay for scanned documents where a blue rectangle highlights a region of interest, developers can offset the rectangle using TranslateTransform to match the document’s margin settings.
- * 5. When developing a report‑generation system that merges multiple raster images into a single PNG and needs to shift each graphic element to avoid overlap, TranslateTransform provides the precise X/Y shift before drawing the path.
+ * 1. When a developer needs to add a consistent margin or offset to a vector shape—such as moving a logo rectangle 50 px right and 30 px down—before drawing it onto a PNG image.
+ * 2. When generating dynamic thumbnails where watermarks or decorative frames must be positioned relative to the original image dimensions using a translation transform.
+ * 3. When creating a batch‑processing tool that re‑positions UI elements in screenshots (e.g., shifting buttons) without altering the source file, by applying TranslateTransform to a GraphicsPath.
+ * 4. When implementing a custom annotation system that places red rectangular highlights at a calculated offset on medical imaging files saved as PNG.
+ * 5. When building a layout engine that aligns multiple shapes on a raster canvas by applying a uniform offset to each shape through Graphics.TranslateTransform before rendering.
  */
