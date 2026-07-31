@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -9,29 +10,32 @@ class Program
     {
         try
         {
-            string outputPath = "output.bmp";
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            int width = 200;
-            int height = 200;
+            string outputPath = "output/output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, width, height))
+            int width = 200;
+            int height = 200;
+
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.White);
+                Graphics graphics = new Graphics(image);
 
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
-                graphics.DrawLine(pen, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Point(width, height));
+                // Draw original diagonal line
+                Pen blackPen = new Pen(Color.Black, 2);
+                graphics.DrawLine(blackPen, new Point(0, 0), new Point(width, height));
 
+                // Apply horizontal mirror transform
                 graphics.ScaleTransform(-1, 1);
-                graphics.TranslateTransform(-width, 0);
+                graphics.TranslateTransform(width, 0);
 
-                graphics.DrawLine(pen, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Point(width, height));
+                // Draw mirrored diagonal line
+                Pen redPen = new Pen(Color.Red, 2);
+                graphics.DrawLine(redPen, new Point(0, 0), new Point(width, height));
 
+                // Save the image (output is already bound via FileCreateSource)
                 image.Save();
             }
         }
@@ -44,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP image with a diagonal line and its mirrored counterpart for a document preview watermark using Aspose.Imaging and C#.
- * 2. When creating a simple test pattern in a .NET console application to validate that Graphics.ScaleTransform correctly flips graphics horizontally in a BMP file.
- * 3. When building a batch process that adds symmetric diagonal lines to product label images saved as BMP format for visual consistency across a catalog.
- * 4. When developing a diagnostic tool that visualizes coordinate transformations by drawing an original and a mirrored diagonal line in the same bitmap using Aspose.Imaging.Graphics.
- * 5. When implementing a lightweight graphics routine to produce mirrored line art for educational tutorials on image processing concepts such as scaling and translation in C#.
+ * 1. When creating a simple BMP placeholder image for a legacy Windows application that requires a black diagonal line and its mirrored red counterpart for UI testing.
+ * 2. When generating diagnostic graphics in a C# console tool to visualize coordinate transformations, such as confirming that ScaleTransform correctly mirrors shapes across the vertical axis.
+ * 3. When producing a basic watermark template in BMP format where a diagonal line is duplicated in opposite directions to illustrate symmetry for branding guidelines.
+ * 4. When building an automated test that compares original and mirrored drawing operations by rendering both lines in a single BMP file to verify the graphics pipeline of Aspose.Imaging.
+ * 5. When needing to export a quick visual reference for documentation that shows how horizontal mirroring using Graphics.ScaleTransform affects line rendering in a 200×200 pixel image.
  */
