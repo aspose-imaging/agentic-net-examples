@@ -2,63 +2,55 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input PDF path
-            string inputPath = @"C:\Images\input.pdf";
+            string inputPath = "input.pdf";
+            string outputDir = "output";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the PDF document
+            Directory.CreateDirectory(outputDir);
+
             using (Image pdfImage = Image.Load(inputPath))
             {
-                // Determine page count (PDF is a multipage vector image)
-                var multipage = pdfImage as IMultipageImage;
-                int pageCount = multipage?.PageCount ?? 1;
-
-                // Loop through each page and export as PNG with alpha channel
-                for (int pageIndex = 0; pageIndex < pageCount; pageIndex++)
+                IMultipageImage multipage = pdfImage as IMultipageImage;
+                if (multipage == null)
                 {
-                    // Prepare PNG save options
-                    var pngOptions = new PngOptions
-                    {
-                        // Ensure each page is saved individually
-                        MultiPageOptions = new MultiPageOptions(new Aspose.Imaging.IntRange(pageIndex, pageIndex + 1))
-                    };
+                    Console.Error.WriteLine("The loaded document is not a multipage image.");
+                    return;
+                }
 
-                    // Configure vector rasterization to preserve transparency
-                    var vectorOptions = new VectorRasterizationOptions
-                    {
-                        // Use transparent background so alpha channel is retained
-                        BackgroundColor = Aspose.Imaging.Color.Transparent,
-                        // Preserve original size
-                        PageSize = new SizeF(pdfImage.Width, pdfImage.Height),
-                        // Optional: improve quality
-                        SmoothingMode = Aspose.Imaging.SmoothingMode.None,
-                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel
-                    };
-
-                    pngOptions.VectorRasterizationOptions = vectorOptions;
-
-                    // Define output file path for the current page
-                    string outputPath = Path.Combine(@"C:\Images\Output", $"page_{pageIndex + 1}.png");
-
-                    // Ensure the output directory exists
+                for (int i = 0; i < multipage.PageCount; i++)
+                {
+                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the current page as PNG
+                    PngOptions pngOptions = new PngOptions();
+
+                    if (pdfImage is VectorImage)
+                    {
+                        pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = pdfImage.Width,
+                            PageHeight = pdfImage.Height
+                        };
+                    }
+
+                    pngOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
+
                     pdfImage.Save(outputPath, pngOptions);
                 }
             }
@@ -72,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert multi‑page PDF brochures that contain vector illustrations into separate PNG files with preserved transparency for use on responsive web pages.
- * 2. When an e‑commerce platform must generate product‑label thumbnails from PDF templates, flattening any translucent elements so the PNG output retains an alpha channel for overlay on dynamic backgrounds.
- * 3. When a mobile app requires high‑resolution PNG assets extracted from a PDF design mockup, ensuring each page’s vector graphics are rasterized with a transparent background for seamless UI integration.
- * 4. When a reporting tool automates the creation of printable PNG charts from PDF dashboards, preserving vector quality and transparency to embed the images into PowerPoint slides.
- * 5. When a document‑management system needs to archive each page of a PDF contract as a PNG with an alpha channel, enabling quick preview thumbnails while maintaining the original vector‑based visual fidelity.
+ * 1. When a developer needs to convert each page of a multi‑page PDF that contains vector graphics into separate PNG files with preserved transparency for web preview.
+ * 2. When an application must flatten PDF transparency layers and export the pages as PNG images with an alpha channel for use in graphic design tools.
+ * 3. When a reporting system generates PDF invoices with vector logos and requires high‑resolution PNG thumbnails for email attachments.
+ * 4. When a document management workflow extracts individual pages from a scanned PDF and saves them as PNGs while maintaining the original page dimensions and background color.
+ * 5. When a C# service automates the conversion of PDF brochures into PNG assets for mobile apps, ensuring each page retains its vector quality and transparent elements.
  */
