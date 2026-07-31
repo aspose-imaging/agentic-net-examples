@@ -2,48 +2,57 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Wrap the whole logic in a try-catch to handle unexpected errors gracefully
         try
         {
-            // Hardcoded input and output paths
+            // Hard‑coded input and output file paths
             string inputPath = "input.eps";
-            string outputPath = "output/framed.png";
+            string outputPath = "output.png";
 
-            // Validate input file existence
+            // Verify that the input EPS file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists (creates it if necessary)
+            string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
+            Directory.CreateDirectory(outputDir);
 
-            // Load EPS image
-            using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
+            // Load the EPS image
+            using (var epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Configure PNG save options with rasterization settings to add a border
-                var pngOptions = new PngOptions();
+                // Configure rasterization options to add a border frame
                 var rasterOptions = new EpsRasterizationOptions
                 {
-                    BorderX = 10, // horizontal border thickness
-                    BorderY = 10, // vertical border thickness
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
+                    // Border size in pixels (adjust as needed)
+                    BorderX = 10,
+                    BorderY = 10,
+                    // Preserve original dimensions
+                    PageWidth = epsImage.Width,
+                    PageHeight = epsImage.Height
                 };
-                pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save the framed image as lossless PNG
-                image.Save(outputPath, pngOptions);
+                // Set up PNG save options with the rasterization settings
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save the framed image as a lossless PNG
+                epsImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
         {
+            // Output any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -51,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print‑shop application must convert vector EPS artwork into a web‑ready lossless PNG with a uniform 10‑pixel border for consistent thumbnail display.
- * 2. When an e‑commerce platform needs to generate product preview images from supplier EPS files, adding a safe margin around the graphic before storing them as PNGs for fast loading.
- * 3. When a digital asset management system automates the ingestion of EPS logos, applying a border frame to meet branding guidelines and saving the result as a lossless PNG for archival.
- * 4. When a desktop publishing tool offers users the option to export their EPS designs with a decorative border, using C# and Aspose.Imaging to rasterize and save the output as a high‑quality PNG.
- * 5. When a reporting service creates printable charts in EPS format and must embed them in PDF reports as PNG images with a consistent border to ensure alignment across different viewers.
+ * 1. When a print‑shop automation tool built with Aspose.Imaging for .NET needs to convert vector EPS artwork into a web‑ready PNG thumbnail with a uniform margin for preview pages.
+ * 2. When an e‑commerce platform using C# and Aspose.Imaging must generate product images from supplier EPS logos, adding a consistent frame before storing them as lossless PNG files for high‑quality display.
+ * 3. When a document‑management system written in C# imports EPS diagrams, adds a border via Aspose.Imaging rasterization options, and creates PNG snapshots for inclusion in reports.
+ * 4. When a desktop publishing application built on Aspose.Imaging for .NET offers users the ability to export their EPS designs as PNG assets with a customizable border for presentations.
+ * 5. When a batch‑processing script in C# processes archival EPS files, applies a safety margin using Aspose.Imaging’s EpsRasterizationOptions, and saves them as lossless PNG to ensure browser compatibility.
  */
