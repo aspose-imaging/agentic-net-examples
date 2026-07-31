@@ -13,7 +13,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output/output.apng";
+            string outputPath = "output\\output.apng";
 
             if (!File.Exists(inputPath))
             {
@@ -25,18 +25,19 @@ class Program
 
             using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                ApngOptions createOptions = new ApngOptions
+                ApngOptions options = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
+                    DefaultFrameTime = 100,
                     ColorType = PngColorType.TruecolorWithAlpha,
                     PngCompressionLevel = PngCompressionLevel.ZipLevel9
                 };
 
-                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
+                using (ApngImage apng = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
                 {
-                    apngImage.RemoveAllFrames();
-                    apngImage.AddFrame(sourceImage);
-                    apngImage.Save();
+                    apng.RemoveAllFrames();
+                    apng.AddFrame(sourceImage);
+                    apng.Save();
                 }
             }
         }
@@ -49,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a regular PNG into an animated PNG (APNG) using Aspose.Imaging for .NET with lossless ZipLevel9 compression for web optimization.
- * 2. When a developer wants to embed a truecolor with alpha color profile into an APNG while preserving transparency for high‑quality UI graphics.
- * 3. When a developer creates APNG files on the server from uploaded PNGs in a C# web API, using ApngOptions and FileCreateSource to ensure the output folder exists and the image is saved with maximum compression.
- * 4. When a developer builds a desktop tool that batches screenshots into APNGs, using RasterImage and ApngImage to maintain color fidelity and lossless compression.
- * 5. When a developer must programmatically generate an APNG from a source image, handle missing input files, and store the result in a nested directory structure using Aspose.Imaging’s image loading and saving methods.
+ * 1. When a developer needs to convert a single PNG asset into an animated PNG (APNG) with lossless compression for high‑quality web animations.
+ * 2. When a game developer wants to generate lightweight, losslessly compressed APNG sprites on the fly using C# and Aspose.Imaging to ensure crisp visuals across devices.
+ * 3. When an e‑learning platform must embed the original PNG color profile into an APNG tutorial slide to preserve accurate colors while delivering animated content.
+ * 4. When a desktop application has to batch‑process user‑uploaded PNGs into APNG files with a fixed frame duration and maximum ZIP compression for archival storage.
+ * 5. When a digital publishing workflow requires programmatically creating APNG files from source images in .NET, preserving truecolor with alpha and embedding ICC profile data for print‑ready output.
  */
