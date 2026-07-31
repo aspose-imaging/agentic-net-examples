@@ -3,68 +3,50 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded paths
-        string outputPath = @"C:\temp\concentric_rectangles.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Set BMP creation options (24‑bit colour)
+            // Output BMP file path (hard‑coded)
+            string outputPath = @"C:\temp\concentric_rectangles.bmp";
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Configure BMP options
             BmpOptions bmpOptions = new BmpOptions
             {
                 BitsPerPixel = 24,
-                // The FileCreateSource tells Aspose where to write the new file
                 Source = new FileCreateSource(outputPath, false)
             };
 
-            const int imageWidth = 500;
-            const int imageHeight = 500;
-            const int rectangleCount = 10;          // Number of concentric rectangles
-            const int step = 20;                    // Gap between successive rectangles
-
-            // Create a new BMP image
-            using (Image image = Image.Create(bmpOptions, imageWidth, imageHeight))
+            // Create a 500×500 BMP image
+            using (Image image = Image.Create(bmpOptions, 500, 500))
             {
-                // Initialise graphics object for drawing
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White); // White background
 
-                // Fill background with white
-                graphics.Clear(Color.White);
+                // Colors to alternate between
+                Color[] colors = { Color.Red, Color.Blue };
+                int penWidth = 5;
+                int rectCount = 5;          // Number of concentric rectangles
+                int offsetStep = 20;        // Gap between rectangles
 
-                // Colours to alternate between
-                Color[] colors = new Color[] { Color.Red, Color.Blue, Color.Green, Color.Orange, Color.Purple };
-
-                // Draw concentric rectangles
-                for (int i = 0; i < rectangleCount; i++)
+                // Draw each rectangle
+                for (int i = 0; i < rectCount; i++)
                 {
-                    int offset = i * step;
-                    // Prevent negative width/height
-                    if (imageWidth - 2 * offset <= 0 || imageHeight - 2 * offset <= 0)
-                        break;
-
-                    // Define rectangle bounds
-                    Rectangle rect = new Rectangle(
-                        offset,
-                        offset,
-                        imageWidth - 2 * offset,
-                        imageHeight - 2 * offset);
-
-                    // Choose pen colour cyclically
-                    Pen pen = new Pen(colors[i % colors.Length], 3f);
-
-                    // Draw the rectangle
+                    int offset = i * offsetStep;
+                    int size = 500 - 2 * offset;
+                    Rectangle rect = new Rectangle(offset, offset, size, size);
+                    Pen pen = new Pen(colors[i % colors.Length], penWidth);
                     graphics.DrawRectangle(pen, rect);
                 }
 
-                // Save changes (the file was already created by FileCreateSource)
+                // Save the image (writes to the path supplied in FileCreateSource)
                 image.Save();
             }
         }
@@ -77,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP thumbnail that visualizes nested layout zones for a UI mock‑up, this code can draw concentric rectangles with alternating pen colors.
- * 2. When creating test images to validate edge‑detection or shape‑recognition algorithms, the code provides a predictable BMP containing multiple rectangles of known dimensions.
- * 3. When producing printable pattern overlays for packaging design, developers can use this C# snippet to programmatically create a BMP with layered frames in alternating colors.
- * 4. When building a diagnostic tool that marks different resolution levels on a map or diagram, the code can render concentric rectangles on a BMP canvas to illustrate each level.
- * 5. When automating the generation of placeholder graphics for documentation or UI components, this code quickly creates a BMP file with concentric rectangles to demonstrate spacing and padding concepts.
+ * 1. When a developer needs to generate a 24‑bit BMP thumbnail that visualizes nested boundaries, such as a UI layout preview, they can use this code to draw concentric rectangles with alternating colors.
+ * 2. When creating test images for automated image‑processing pipelines that require known geometric patterns in a BMP file, this example provides a quick way to produce such patterns.
+ * 3. When building a reporting tool that embeds simple schematic diagrams (e.g., floor‑plan sections) directly into BMP files, the code can be used to render layered rectangles with configurable pen width and colors.
+ * 4. When preparing sample data for computer‑vision algorithms that detect edges or shapes, developers can generate a series of concentric rectangles in a BMP image to evaluate detection accuracy.
+ * 5. When a developer wants to programmatically produce a printable BMP badge or label with decorative borders, the code demonstrates how to draw multiple rectangles with alternating pen colors using Aspose.Imaging for .NET.
  */
