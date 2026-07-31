@@ -12,15 +12,19 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG file paths
-            string[] inputPaths = new string[]
+            // Hardcoded paths
+            string[] inputPaths = new[]
             {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
+                "Input\\image1.jpg",
+                "Input\\image2.jpg",
+                "Input\\image3.jpg"
             };
+            string tempFolder = "Temp";
+            string finalFolder = "Output";
+            string tempOutputPath = Path.Combine(tempFolder, "merged_temp.jpg");
+            string finalOutputPath = Path.Combine(finalFolder, "merged.jpg");
 
-            // Verify each input file exists
+            // Verify input files
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -30,11 +34,7 @@ class Program
                 }
             }
 
-            // Temporary and final output paths
-            string tempOutputPath = "temp\\merged.jpg";
-            string finalOutputPath = "output\\merged.jpg";
-
-            // Ensure directories exist for temporary and final outputs
+            // Ensure output directories exist
             Directory.CreateDirectory(Path.GetDirectoryName(tempOutputPath));
             Directory.CreateDirectory(Path.GetDirectoryName(finalOutputPath));
 
@@ -49,24 +49,24 @@ class Program
             }
 
             // Calculate canvas dimensions for horizontal merge
-            int newWidth = 0;
-            int newHeight = 0;
+            int canvasWidth = 0;
+            int canvasHeight = 0;
             foreach (Size sz in sizes)
             {
-                newWidth += sz.Width;
-                if (sz.Height > newHeight) newHeight = sz.Height;
+                canvasWidth += sz.Width;
+                if (sz.Height > canvasHeight) canvasHeight = sz.Height;
             }
 
-            // Create JPEG options with bound source
-            Source source = new FileCreateSource(tempOutputPath, false);
-            JpegOptions jpegOptions = new JpegOptions()
+            // Prepare JPEG options with temporary file source
+            Source tempSource = new FileCreateSource(tempOutputPath, false);
+            JpegOptions jpegOptions = new JpegOptions
             {
-                Source = source,
+                Source = tempSource,
                 Quality = 90
             };
 
-            // Create bound JPEG canvas
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
+            // Create canvas and merge images horizontally
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetX = 0;
                 foreach (string path in inputPaths)
@@ -78,14 +78,14 @@ class Program
                         offsetX += img.Width;
                     }
                 }
-
-                // Save the bound image
+                // Save the bound image (file already bound via Source)
                 canvas.Save();
             }
 
-            // Verify temporary file and move to final destination
-            if (File.Exists(tempOutputPath) && new FileInfo(tempOutputPath).Length > 0)
+            // Verify temporary file was created and move to final destination
+            if (File.Exists(tempOutputPath))
             {
+                // Overwrite if final file already exists
                 if (File.Exists(finalOutputPath))
                 {
                     File.Delete(finalOutputPath);
@@ -107,9 +107,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building a web service that combines multiple product photos into a single promotional banner, a developer can merge the JPEGs in a temporary folder, verify the output, and then move the final image to the public assets directory.
- * 2. When automating the creation of a printable photo collage for a wedding album, the code can stitch the JPEG files horizontally, store the intermediate result securely, and only publish the verified collage to the client‑facing folder.
- * 3. When generating a composite satellite image from several high‑resolution JPEG tiles in a GIS application, the temporary save allows the system to confirm dimensions and quality before moving the merged file to the analysis workspace.
- * 4. When implementing a batch job that assembles scanned document pages into a single JPEG for archival, the temporary location ensures that any corrupted input is detected before the final file is placed in the secure archive folder.
- * 5. When creating a dynamic thumbnail strip for an e‑commerce site, the merged JPEG can be written to a temp directory, validated for correct width and height, and then transferred to the CDN folder for fast delivery.
+ * 1. When a web service needs to combine multiple user‑uploaded JPEG photos into a single panoramic image, it can first write the merged file to a temporary folder, verify its integrity, and then move it to the final output directory.
+ * 2. When an automated batch job processes scanned documents, merges them side‑by‑side as a JPEG, and must ensure the merged file is successfully created before publishing it to a document management system, using a temp folder prevents incomplete files from being exposed.
+ * 3. When a desktop application creates a composite product thumbnail from several JPEG assets and wants to avoid displaying a partially rendered image, it can generate the thumbnail in a Temp directory, run a checksum verification, and then relocate it to the user‑visible Output folder.
+ * 4. When a CI/CD pipeline builds marketing assets by stitching together campaign JPEG images, storing the intermediate merged image in a temporary location allows the pipeline to roll back if the verification step fails before committing the final image to the release folder.
+ * 5. When a cloud‑based image processing API merges client‑provided JPEGs horizontally and must guarantee that only fully verified images are stored in the persistent storage bucket, it can write the result to a temporary path, perform validation, and then move the file to the final destination.
  */
