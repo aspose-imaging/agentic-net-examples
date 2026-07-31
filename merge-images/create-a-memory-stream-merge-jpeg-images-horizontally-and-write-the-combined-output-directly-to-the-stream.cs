@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
@@ -14,12 +12,7 @@ class Program
         try
         {
             // Hardcoded input JPEG file paths
-            string[] inputPaths = new string[]
-            {
-                "image1.jpg",
-                "image2.jpg",
-                "image3.jpg"
-            };
+            string[] inputPaths = { "image1.jpg", "image2.jpg", "image3.jpg" };
 
             // Validate input files
             foreach (string path in inputPaths)
@@ -31,52 +24,58 @@ class Program
                 }
             }
 
+            // Collect sizes of all images
+            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            foreach (string path in inputPaths)
+            {
+                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
+                {
+                    sizes.Add(img.Size);
+                }
+            }
+
+            // Calculate canvas dimensions for horizontal merge
+            int newWidth = 0;
+            int newHeight = 0;
+            foreach (var sz in sizes)
+            {
+                newWidth += sz.Width;
+                if (sz.Height > newHeight) newHeight = sz.Height;
+            }
+
             // Prepare output memory stream
             using (MemoryStream outputStream = new MemoryStream())
             {
-                // JPEG creation options bound to the memory stream
+                // JPEG options bound to the stream
                 JpegOptions jpegOptions = new JpegOptions
                 {
-                    Quality = 90,
+                    Quality = 100,
                     Source = new StreamSource(outputStream, false)
                 };
 
-                // Collect sizes of all input images
-                List<Size> sizes = new List<Size>();
-                foreach (string path in inputPaths)
-                {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
-                    {
-                        sizes.Add(img.Size);
-                    }
-                }
-
-                // Calculate canvas dimensions for horizontal merge
-                int newWidth = sizes.Sum(s => s.Width);
-                int newHeight = sizes.Max(s => s.Height);
-
-                // Create JPEG canvas bound to the memory stream
-                using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
+                // Create JPEG canvas
+                using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(jpegOptions, newWidth, newHeight))
                 {
                     int offsetX = 0;
                     foreach (string path in inputPaths)
                     {
-                        using (RasterImage img = (RasterImage)Image.Load(path))
+                        using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
                         {
-                            Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                            Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
                             canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                             offsetX += img.Width;
                         }
                     }
 
-                    // Save the merged image into the bound stream
+                    // Save the bound image to the stream
                     canvas.Save();
                 }
 
-                // At this point, outputStream contains the merged JPEG data
+                // At this point, outputStream contains the merged JPEG image
+                // Example: reset position if needed for further processing
                 outputStream.Position = 0;
+                // (Optional) write stream length to console
                 Console.WriteLine($"Merged image size in bytes: {outputStream.Length}");
-                // The stream can be used further as needed
             }
         }
         catch (Exception ex)
@@ -88,9 +87,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate a single panoramic JPEG from multiple product photos on the fly and send it directly to the client without creating temporary files.
- * 2. When an email service composes a promotional newsletter that combines several banner images into one horizontal JPEG and streams it as an attachment.
- * 3. When a mobile backend assembles user‑uploaded screenshots into a side‑by‑side comparison image and stores the result in a database as a byte array.
- * 4. When a reporting tool creates a composite chart by stitching together separate JPEG graphs and writes the merged image to a memory stream for PDF embedding.
- * 5. When an automated testing framework captures screenshots of different UI states, merges them horizontally, and feeds the combined JPEG into a visual‑diff algorithm without touching the file system.
+ * 1. When a web application needs to generate a side‑by‑side preview of multiple product photos and send the combined JPEG directly to the browser without creating temporary files.
+ * 2. When an email service must attach a single composite image that stitches together scanned receipts before encoding it into a MIME stream.
+ * 3. When a reporting tool creates a printable banner by concatenating chart images horizontally and streams the result to a PDF generator.
+ * 4. When a mobile backend assembles user‑uploaded profile pictures into a collage and returns the merged JPEG as a byte array for API consumption.
+ * 5. When a cloud function merges satellite image tiles into a wide‑format JPEG and writes the output to a memory stream for storage in a blob container.
  */
