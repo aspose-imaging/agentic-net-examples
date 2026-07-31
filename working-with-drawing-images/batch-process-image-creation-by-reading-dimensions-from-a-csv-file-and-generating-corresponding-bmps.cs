@@ -2,63 +2,50 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input CSV file path
-            string inputCsvPath = @"C:\temp\dimensions.csv";
-
-            // Verify input file exists
+            string inputCsvPath = "dimensions.csv";
             if (!File.Exists(inputCsvPath))
             {
                 Console.Error.WriteLine($"File not found: {inputCsvPath}");
                 return;
             }
 
-            // Hardcoded output directory
-            string outputDirectory = @"C:\temp\output";
-
-            // Read all non‑empty lines from the CSV
-            foreach (string line in File.ReadAllLines(inputCsvPath))
+            string[] lines = File.ReadAllLines(inputCsvPath);
+            int index = 0;
+            foreach (string line in lines)
             {
                 if (string.IsNullOrWhiteSpace(line))
                     continue;
 
-                // Expected CSV format: width,height,filename
                 string[] parts = line.Split(',');
-                if (parts.Length < 3)
-                    continue; // skip malformed lines
+                if (parts.Length < 2)
+                    continue;
 
-                if (!int.TryParse(parts[0].Trim(), out int width) ||
-                    !int.TryParse(parts[1].Trim(), out int height))
-                    continue; // skip lines with invalid dimensions
+                if (!int.TryParse(parts[0].Trim(), out int width) || !int.TryParse(parts[1].Trim(), out int height))
+                    continue;
 
-                string fileName = parts[2].Trim();
-                if (string.IsNullOrEmpty(fileName))
-                    continue; // skip if filename is missing
-
-                // Build full output path and ensure directory exists
-                string outputPath = Path.Combine(outputDirectory, fileName);
+                string outputDir = "output";
+                string outputPath = Path.Combine(outputDir, $"image_{index}.bmp");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Set up BMP creation options
-                BmpOptions bmpOptions = new BmpOptions
-                {
-                    BitsPerPixel = 24,
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.BitsPerPixel = 24;
+                bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-                // Create a blank BMP image with the specified dimensions
-                using (Image image = Image.Create(bmpOptions, width, height))
+                using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, width, height))
                 {
-                    // Save the image to the file (FileCreateSource handles the path)
-                    image.Save();
+                    canvas.Save();
                 }
+
+                index++;
             }
         }
         catch (Exception ex)
@@ -70,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a set of placeholder BMP files for UI mock‑ups by reading width, height and filenames from a CSV inventory.
- * 2. When an automated build pipeline must create device‑specific splash screen images in BMP format based on dimensions listed in a configuration CSV.
- * 3. When a testing framework requires a batch of blank bitmap images of varying sizes to simulate image uploads, using Aspose.Imaging in C# to read the size list from a CSV file.
- * 4. When a digital signage system must pre‑produce BMP assets for multiple screen resolutions defined in a spreadsheet, and the code creates the files in a designated output folder.
- * 5. When a data‑driven graphics generator needs to export a series of BMP thumbnails whose dimensions are stored in a CSV, enabling quick bulk creation without manual editing.
+ * 1. When a developer needs to generate a batch of placeholder BMP files for UI testing by reading width and height values from a CSV spreadsheet.
+ * 2. When an automation script must create custom-sized bitmap assets for a game level editor based on dimensions supplied by designers in a CSV file.
+ * 3. When a reporting tool has to produce blank BMP canvases of specific resolutions for later overlay of charts, using Aspose.Imaging in C# to read the sizes from a CSV list.
+ * 4. When a migration utility converts a list of image dimension specifications stored in a CSV into actual BMP files to seed a legacy imaging system.
+ * 5. When a CI/CD pipeline generates sample BMP images of various sizes for performance benchmarking of image processing libraries, driven by a CSV configuration file.
  */
