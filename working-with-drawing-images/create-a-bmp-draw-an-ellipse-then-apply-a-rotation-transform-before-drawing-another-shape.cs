@@ -4,24 +4,24 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
-            // Output file path (hard‑coded)
-            string outputPath = "output/output.bmp";
+            // Output file path
+            string outputPath = "Output\\ellipse_rotated.bmp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure BMP options
+            // Configure BMP options with a file source
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a 500×500 BMP image
+            // Create the image canvas
             using (Image image = Image.Create(bmpOptions, 500, 500))
             {
                 // Initialize graphics for drawing
@@ -29,17 +29,17 @@ public class Program
                 graphics.Clear(Color.Wheat);
 
                 // Draw an ellipse
-                Pen ellipsePen = new Pen(Color.Blue, 3);
-                graphics.DrawEllipse(ellipsePen, new Rectangle(100, 100, 300, 150));
+                Pen blackPen = new Pen(Color.Black, 2);
+                graphics.DrawEllipse(blackPen, new Rectangle(100, 100, 300, 200));
 
-                // Apply a 45‑degree rotation transform
+                // Apply a rotation transform (45 degrees)
                 graphics.RotateTransform(45);
 
                 // Draw a rectangle after rotation
-                Pen rectPen = new Pen(Color.Red, 3);
-                graphics.DrawRectangle(rectPen, new Rectangle(150, 150, 200, 100));
+                Pen redPen = new Pen(Color.Red, 2);
+                graphics.DrawRectangle(redPen, new Rectangle(150, 150, 200, 100));
 
-                // Save the image (file is already bound via FileCreateSource)
+                // Save the image (file is already bound to the source)
                 image.Save();
             }
         }
@@ -52,9 +52,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP file with custom vector graphics, such as an ellipse and a rotated rectangle, for use in legacy Windows applications or printing workflows.
- * 2. When creating a simple diagram or badge in C# where precise control over shape positioning and rotation is required, leveraging Aspose.Imaging’s Graphics API.
- * 3. When producing test images for automated UI testing that must include specific geometric shapes and transformations to validate rendering pipelines.
- * 4. When exporting design assets from a .NET service to a 24‑bit BMP format for compatibility with embedded systems that only support basic image formats.
- * 5. When building a server‑side image generation tool that programmatically draws shapes and applies rotation before saving the result as a BMP for downstream processing.
+ * 1. When a developer needs to generate a BMP report thumbnail that highlights an elliptical region and a rotated rectangle for a medical imaging annotation tool.
+ * 2. When creating a custom watermark image in BMP format where an ellipse represents a logo and a rotated rectangle adds a decorative border for branding.
+ * 3. When building a game asset pipeline that programmatically draws shapes—such as an ellipse for a character’s hitbox and a rotated rectangle for a directional indicator—directly into a BMP sprite sheet.
+ * 4. When automating the production of printable diagrams in C# where an ellipse outlines a process step and a rotated rectangle shows a rotated component orientation in engineering documentation.
+ * 5. When developing a UI mockup generator that outputs BMP mock screens with geometric placeholders, using an ellipse for a profile picture area and a rotated rectangle for a tilted button preview.
  */
