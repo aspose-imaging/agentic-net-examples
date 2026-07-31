@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
@@ -10,9 +9,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\InputSvgs";
-            string outputFolder = @"C:\OutputApngs";
+            // Hard‑coded input and output directories
+            string inputFolder = @"C:\Input\Svgs";
+            string outputFolder = @"C:\Output\Apngs";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(outputFolder);
@@ -29,18 +28,24 @@ class Program
                     return;
                 }
 
-                // Determine output file path (same name with .png extension)
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
+                // Build the output file path (same name, .png extension for APNG)
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".png");
 
-                // Ensure the directory for the output file exists
+                // Ensure the output directory exists (covers cases where outputFolder may be nested)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the SVG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Save as APNG with default frame delay
-                    image.Save(outputPath, new ApngOptions());
+                    // Set up APNG options with a default frame delay (e.g., 100 ms)
+                    var apngOptions = new ApngOptions
+                    {
+                        DefaultFrameTime = 100 // milliseconds
+                    };
+
+                    // Save as APNG
+                    image.Save(outputPath, apngOptions);
                 }
             }
         }
@@ -53,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate animated PNGs from a collection of vector icons stored as SVG files for use in web UI animations, they can use this code to batch‑convert them with Aspose.Imaging for .NET.
- * 2. When an e‑learning platform wants to replace static SVG diagrams with lightweight APNG animations that preserve transparency, the snippet provides a quick C# solution to process all files in a folder.
- * 3. When a game developer requires pre‑rendered APNG sprites from SVG assets to improve loading speed on mobile devices, this batch conversion script automates the task using Aspose’s ApngOptions.
- * 4. When a marketing team needs to create a set of animated product badges from designer‑provided SVG files without manually setting frame delays, the code handles the conversion in one pass.
- * 5. When an automated build pipeline must convert newly added SVG assets into APNG format for continuous integration testing of image rendering, the example demonstrates how to integrate the process into a C# workflow.
+ * 1. When a developer needs to generate animated PNGs from a library of SVG icons for a web dashboard, they can batch‑convert the SVG files to APNG with a default frame delay using Aspose.Imaging for .NET.
+ * 2. When an e‑learning platform wants to turn vector‑based slide illustrations into lightweight animated PNGs for offline mobile consumption, this C# code can process all SVG assets in one folder and output APNG files automatically.
+ * 3. When a game UI team requires animated button graphics created from scalable SVG assets, they can run the script to produce APNG animations with consistent timing without manually editing each file.
+ * 4. When a marketing automation system needs to embed simple vector animations into email newsletters, the batch conversion from SVG to APNG ensures the images are compatible with most email clients while preserving animation timing.
+ * 5. When a CI/CD pipeline must validate that newly added SVG assets are also available as animated PNGs for cross‑platform testing, the code can be integrated to convert the entire SVG directory to APNG with a default 100 ms frame delay.
  */
