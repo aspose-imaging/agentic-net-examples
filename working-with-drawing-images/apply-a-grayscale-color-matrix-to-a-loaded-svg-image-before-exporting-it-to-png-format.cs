@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -25,31 +25,29 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the SVG image
-            using (Image svgImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare rasterization options for SVG -> PNG conversion
-                var rasterizationOptions = new SvgRasterizationOptions();
-                var pngOptions = new PngOptions
+                // Prepare SVG export options with grayscale color mode
+                var svgExportOptions = new SvgOptions
                 {
-                    VectorRasterizationOptions = rasterizationOptions
+                    ColorType = SvgColorMode.Grayscale
                 };
 
-                // Rasterize SVG to PNG in memory
-                using (var memoryStream = new MemoryStream())
+                // Rasterization options required for PNG conversion
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    svgImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
+                    PageSize = image.Size
+                };
+                svgExportOptions.VectorRasterizationOptions = rasterOptions;
 
-                    // Load the rasterized PNG from memory
-                    using (PngImage pngImage = (PngImage)Image.Load(memoryStream))
-                    {
-                        // Apply grayscale conversion
-                        pngImage.Grayscale();
+                // PNG save options using the same rasterization settings
+                var pngSaveOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                        // Save the final grayscale PNG to disk
-                        pngImage.Save(outputPath);
-                    }
-                }
+                // Save the rasterized grayscale image as PNG
+                image.Save(outputPath, pngSaveOptions);
             }
         }
         catch (Exception ex)
@@ -61,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application must generate a black‑and‑white preview thumbnail of a user‑uploaded SVG logo for display on a product catalog page.
- * 2. When an automated reporting tool needs to convert vector diagrams stored as SVG into grayscale PNG images to embed in PDF reports that require consistent print‑ready contrast.
- * 3. When a mobile app backend processes SVG icons and creates low‑color‑depth PNG assets for devices that only support grayscale displays.
- * 4. When a document management system archives SVG illustrations as grayscale PNG files to reduce storage size while preserving visual fidelity for archival purposes.
- * 5. When a batch‑processing script applies a grayscale color matrix to SVG graphics before exporting them to PNG for use in a machine‑learning pipeline that expects single‑channel images.
+ * 1. When a web application uses Aspose.Imaging for .NET to generate grayscale thumbnails from user‑uploaded SVG logos and save them as PNG files for faster page loads.
+ * 2. When an automated reporting service needs to convert vector diagrams in SVG format to monochrome PNG images with Aspose.Imaging’s rasterization options for inclusion in printable PDF reports.
+ * 3. When a desktop utility processes a batch of SVG icons, applies a grayscale color matrix via Aspose.Imaging, and exports them to PNG to match a dark‑mode UI theme.
+ * 4. When a CI/CD pipeline validates that SVG assets are correctly rendered in grayscale by rasterizing them to PNG with Aspose.Imaging for visual regression testing.
+ * 5. When a mobile app backend prepares low‑contrast PNG assets from SVG illustrations using Aspose.Imaging’s grayscale export to improve accessibility for users with visual sensitivities.
  */
