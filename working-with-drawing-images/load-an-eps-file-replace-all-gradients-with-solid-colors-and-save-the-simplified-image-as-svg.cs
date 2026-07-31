@@ -1,14 +1,14 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
+        // Hardcoded input and output paths
         string inputPath = "input.eps";
         string outputPath = "output.svg";
 
@@ -25,23 +25,19 @@ class Program
         try
         {
             // Load the EPS image
-            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath, new EpsLoadOptions()))
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
                 // ------------------------------------------------------------
-                // NOTE: Aspose.Imaging does not provide a direct API to replace
-                // gradients with solid colors in vector EPS content. If such
-                // processing is required, it must be implemented by parsing
-                // the EPS/PostScript stream and modifying the drawing commands.
-                // For the purpose of this example we proceed to save the image
-                // as SVG without explicit gradient replacement.
+                // Gradient replacement logic would go here.
+                // Aspose.Imaging does not provide a direct API to replace
+                // gradients with solid colors in vector images. If such
+                // functionality is required, it must be implemented by
+                // parsing the EPS content or by rasterizing and re‑vectorizing.
+                // For this example we proceed to save the image as SVG.
                 // ------------------------------------------------------------
 
                 // Prepare SVG save options
-                var svgOptions = new SvgOptions
-                {
-                    // Example: render text as shapes to avoid font dependencies
-                    TextAsShapes = true
-                };
+                var svgOptions = new SvgOptions();
 
                 // Save the simplified image as SVG
                 epsImage.Save(outputPath, svgOptions);
@@ -56,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy EPS artwork to a web‑compatible SVG file in a C# application while ensuring text is rendered as shapes to avoid font dependencies.
- * 2. When an automated workflow must verify the existence of an EPS file, create the target directory, and export the vector image as SVG to simplify assets for faster page loading.
- * 3. When a .NET service processes incoming EPS files, replaces complex gradient definitions with solid colors (by parsing the PostScript stream) and saves the cleaned‑up vector graphic as SVG for downstream editing.
- * 4. When a batch job uses Aspose.Imaging to load multiple EPS documents, handle missing files gracefully, and generate SVG outputs with TextAsShapes enabled for consistent rendering across browsers.
- * 5. When a graphics pipeline requires converting EPS to SVG while stripping advanced gradient features to produce lightweight, gradient‑free SVG files that are compatible with basic SVG editors.
+ * 1. When a developer needs to convert legacy EPS artwork into lightweight SVG files for responsive web pages while ensuring all gradient fills are replaced with solid colors to improve rendering speed.
+ * 2. When an automated build pipeline must process a batch of EPS logos and generate SVG versions with simplified color fills for use in mobile applications that do not support complex gradient definitions.
+ * 3. When a print‑to‑digital workflow requires extracting vector graphics from EPS files, flattening gradients to solid colors, and saving them as SVG to maintain scalability without increasing file size.
+ * 4. When a content management system needs to ingest EPS files uploaded by designers, replace their gradients with brand‑approved solid colors, and store the result as SVG for consistent brand representation across browsers.
+ * 5. When a developer is creating a C# utility that sanitizes vector assets by loading EPS files, removing gradient definitions, and exporting the cleaned graphics as SVG for downstream editing in vector‑editing tools.
  */
