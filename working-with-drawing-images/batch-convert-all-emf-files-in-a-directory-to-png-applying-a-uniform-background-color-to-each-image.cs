@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
@@ -10,27 +11,24 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputEmf";
-            string outputDirectory = @"C:\OutputPng";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            string inputDirectory = @"C:\EmfInput";
+            string outputDirectory = @"C:\PngOutput";
 
             // Get all EMF files in the input directory
             string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf");
 
             foreach (string inputPath in emfFiles)
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build output file path with .png extension
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                // Determine output file path (same name with .png extension in output directory)
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -38,15 +36,15 @@ class Program
                 // Load the EMF image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Set up rasterization options with a uniform background color
-                    var rasterOptions = new EmfRasterizationOptions
+                    // Prepare rasterization options with a uniform background color
+                    EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
                     {
                         BackgroundColor = Aspose.Imaging.Color.LightGray,
                         PageSize = image.Size
                     };
 
-                    // Set up PNG save options
-                    var pngOptions = new PngOptions
+                    // Prepare PNG save options and attach rasterization options
+                    PngOptions pngOptions = new PngOptions
                     {
                         VectorRasterizationOptions = rasterOptions
                     };
@@ -65,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must generate web‑ready PNG thumbnails from a folder of Windows Metafile (EMF) diagrams while ensuring a consistent light‑gray background for all images.
- * 2. When an automated build process needs to convert a batch of vector‑based EMF icons to raster PNG assets for inclusion in a cross‑platform mobile app.
- * 3. When a reporting tool exports charts as EMF files and the developer wants to batch‑convert them to PNG with a uniform background color for embedding in PDF documents.
- * 4. When a legacy CAD system outputs technical drawings in EMF format and the developer needs to produce PNG previews for a cloud‑based viewer that requires a solid background.
- * 5. When a content management workflow requires periodic conversion of EMF logos stored in a directory to PNG files with a predefined background to maintain visual consistency across a website.
+ * 1. When a developer needs to migrate a legacy collection of vector EMF diagrams to web‑friendly PNG images while applying a consistent background color for branding.
+ * 2. When an automated build script must generate thumbnail previews of EMF reports stored in a folder, converting them to PNG with a uniform light‑gray canvas for UI display.
+ * 3. When a Windows desktop application has to export user‑created EMF charts to PNG files for email attachment, ensuring all images share the same background shade.
+ * 4. When a document‑processing pipeline processes batches of EMF graphics from a shared network drive and converts them to PNG for inclusion in PDF reports, using Aspose.Imaging’s rasterization options.
+ * 5. When a migration tool needs to bulk‑convert EMF assets in a legacy asset library to PNG format with a predefined background color to maintain visual consistency across a new mobile app.
  */
