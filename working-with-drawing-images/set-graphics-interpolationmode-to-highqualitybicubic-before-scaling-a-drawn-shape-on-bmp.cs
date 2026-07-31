@@ -10,36 +10,53 @@ class Program
     {
         try
         {
-            // Output BMP file path
-            string outputPath = "output.bmp";
+            // Hardcoded input and output paths
+            string inputPath = "input\\source.bmp";
+            string outputPath = "output\\scaled.bmp";
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create BMP options with a file source bound to the output path
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a 300x300 BMP image
-            using (Image image = Image.Create(bmpOptions, 300, 300))
+            // Load the source BMP image
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-
-                // Set high-quality bicubic interpolation before scaling
+                // Create graphics for the source image
+                Graphics graphics = new Graphics(sourceImage);
+                // Set high-quality interpolation mode before drawing/scaling
                 graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-                // Draw a blue rectangle
-                graphics.DrawRectangle(new Pen(Color.Blue, 2), new Rectangle(50, 50, 100, 100));
+                // Draw a rectangle shape onto the source image
+                graphics.DrawRectangle(new Pen(Color.Blue, 5), new Rectangle(50, 50, 200, 150));
 
-                // Apply scaling transform (2x)
-                graphics.ScaleTransform(2.0f, 2.0f);
+                // Define scaled dimensions (e.g., 2x scaling)
+                int scaledWidth = sourceImage.Width * 2;
+                int scaledHeight = sourceImage.Height * 2;
 
-                // Draw a red rectangle (will be scaled)
-                graphics.DrawRectangle(new Pen(Color.Red, 2), new Rectangle(50, 50, 100, 100));
+                // Create a new BMP image bound to the output file
+                BmpOptions bmpOptions = new BmpOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                using (Image scaledImage = Image.Create(bmpOptions, scaledWidth, scaledHeight))
+                {
+                    // Create graphics for the scaled image
+                    Graphics scaledGraphics = new Graphics(scaledImage);
+                    // Set interpolation mode for scaling operation
+                    scaledGraphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-                // Save the image (bound to the file source)
-                image.Save();
+                    // Draw the source image onto the scaled canvas with scaling
+                    scaledGraphics.DrawImage(sourceImage, new Rectangle(0, 0, scaledWidth, scaledHeight));
+
+                    // Save the scaled image (output path already bound)
+                    scaledImage.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -51,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating high‑resolution product labels in BMP format, a developer can use Aspose.Imaging to draw vector shapes and apply HighQualityBicubic interpolation before scaling them to ensure crisp edges and accurate dimensions.
- * 2. When creating printable floor‑plan diagrams that require zoom‑in functionality, setting Graphics.InterpolationMode to HighQualityBicubic in C# guarantees that scaled rectangles retain smooth lines without pixelation.
- * 3. When producing thumbnail previews of scanned documents where the original BMP image contains drawn annotations, using HighQualityBicubic interpolation before scaling preserves the visual quality of the annotation shapes.
- * 4. When developing a custom charting component that renders BMP charts with resizable bars, applying HighQualityBicubic interpolation ensures that the bars remain sharp after the graphics are scaled for different screen resolutions.
- * 5. When automating the generation of BMP‑based game sprites that need to be enlarged for high‑DPI displays, setting the interpolation mode to HighQualityBicubic before scaling the sprite shapes prevents jagged edges and maintains visual fidelity.
+ * 1. When a developer needs to generate high‑resolution printable marketing material by scaling a BMP that contains drawn shapes such as rectangles, using HighQualityBicubic ensures smooth, anti‑aliased edges.
+ * 2. When an application creates thumbnail previews of user‑drawn BMP diagrams and wants the scaled preview to retain crisp lines, setting InterpolationMode to HighQualityBicubic before scaling achieves that.
+ * 3. When a batch‑processing tool adds watermarks or borders to BMP files and then enlarges the images for large‑format displays, HighQualityBicubic interpolation prevents jagged artifacts on the drawn shapes.
+ * 4. When a CAD‑style web service exports technical drawings as BMP and must resize them for different screen densities while preserving line quality, using HighQualityBicubic in the graphics pipeline is essential.
+ * 5. When a game asset pipeline programmatically draws UI elements onto BMP textures and later doubles their size for high‑DPI monitors, applying HighQualityBicubic interpolation during scaling keeps the UI edges smooth.
  */
