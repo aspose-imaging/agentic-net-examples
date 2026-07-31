@@ -12,39 +12,44 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output.apng";
+            string outputPath = "output\\animation.apng";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the source PNG as a raster image
             using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                const int frameDuration = 100; // milliseconds
-                const int animationDuration = 1000; // total animation duration in milliseconds
-                int numFrames = animationDuration / frameDuration;
-
+                // Configure APNG creation options
                 ApngOptions createOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = (uint)frameDuration,
+                    DefaultFrameTime = 100u, // 100 ms per frame
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
+                // Create the APNG image bound to the output file
+                using (ApngImage apngImage = (ApngImage)Image.Create(
+                    createOptions,
+                    sourceImage.Width,
+                    sourceImage.Height))
                 {
+                    // Remove the default empty frame
                     apngImage.RemoveAllFrames();
 
-                    for (int i = 0; i < numFrames; i++)
-                    {
-                        apngImage.AddFrame(sourceImage);
-                    }
+                    // Add the single source frame (default frame time applied)
+                    apngImage.AddFrame(sourceImage);
 
+                    // Save the APNG (output path already bound via FileCreateSource)
                     apngImage.Save();
                 }
             }
@@ -58,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to create a looping animated icon for a desktop application by converting a static PNG logo into an APNG with a 100 ms frame delay.
- * 2. When a web developer needs to generate lightweight animated graphics for a website banner by duplicating a single PNG frame into an APNG sequence using C# and Aspose.Imaging.
- * 3. When an e‑learning platform programmatically produces animated step‑by‑step illustrations from a base PNG diagram, ensuring each frame displays for 100 ms in the resulting APNG file.
- * 4. When a game developer automates the creation of sprite animations from a single PNG asset, using Aspose.Imaging to build an APNG with consistent frame timing for UI elements.
- * 5. When a mobile app backend service converts uploaded PNG avatars into short looping APNG avatars with a 100 ms delay per frame for use in chat interfaces.
+ * 1. When a developer needs to turn a static PNG logo into a looping animated PNG for web banners, applying a 100 ms frame delay to create a subtle pulse effect.
+ * 2. When building a C# desktop application that generates lightweight APNG sprites from single‑frame PNG assets for UI animations without using GIF.
+ * 3. When automating the creation of animated product thumbnails for an e‑commerce site, converting each product’s high‑resolution PNG into a 100 ms per frame APNG preview.
+ * 4. When integrating Aspose.Imaging into a server‑side service that produces animated status icons from a single PNG template, ensuring a consistent 100 ms frame timing across all outputs.
+ * 5. When developing a game asset pipeline that converts single‑frame PNG textures into APNG sequences with a fixed 100 ms delay for use as animated UI elements in web‑based games.
  */
