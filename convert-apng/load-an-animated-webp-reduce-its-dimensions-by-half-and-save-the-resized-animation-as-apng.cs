@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\animation_input.webp";
-        string outputPath = @"C:\Images\animation_resized_apng.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.webp";
+            string outputPath = "output\\resized.apng";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -31,10 +31,10 @@ class Program
                 int newWidth = webPImage.Width / 2;
                 int newHeight = webPImage.Height / 2;
 
-                // Resize all frames proportionally
+                // Resize all frames of the animation
                 webPImage.Resize(newWidth, newHeight);
 
-                // Save as APNG (Animated PNG)
+                // Save the resized animation as APNG
                 webPImage.Save(outputPath, new ApngOptions());
             }
         }
@@ -47,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a mobile app needs to display a lightweight animated WebP preview but must deliver a compatible animated PNG for browsers that don’t support WebP, a developer can load the WebP, halve its size, and save it as APNG.
- * 2. When an e‑learning platform wants to reduce bandwidth by shrinking animated illustrations stored as WebP and then provide them as APNG for cross‑platform playback, this code resizes and converts the animation.
- * 3. When a game UI designer requires animated icons at a smaller resolution for high‑DPI screens and needs them in the APNG format for Unity, the snippet loads the WebP, scales it down, and saves it as an animated PNG.
- * 4. When a content management system automatically generates thumbnail‑size animated previews from user‑uploaded WebP files and stores them as APNG for consistent rendering, the code performs the resize‑and‑convert operation.
- * 5. When a marketing automation tool needs to batch‑process animated WebP banners, halve their dimensions to fit email templates, and output them as APNG to ensure compatibility with most email clients, this example provides the necessary steps.
+ * 1. When a mobile app needs to display a smaller animated WebP banner but the platform only supports APNG, a developer can resize the animation by half and convert it to APNG for seamless playback.
+ * 2. When an e‑learning website wants to reduce bandwidth by shrinking animated WebP illustrations and deliver them as APNG files compatible with all modern browsers, this code automates the resizing and format conversion.
+ * 3. When a game developer prepares animated UI assets for a low‑resolution mode, they can use this snippet to halve the dimensions of WebP sprites and save them as APNG for the engine’s texture pipeline.
+ * 4. When a digital marketing tool generates custom animated stickers from user‑uploaded WebP files, the code ensures the stickers are resized for email newsletters and saved in APNG, which many email clients accept.
+ * 5. When a content management system batch‑processes uploaded animated WebP files to create thumbnail previews, the developer can resize each animation to 50 % of its original size and store the result as APNG for fast preview rendering.
  */
