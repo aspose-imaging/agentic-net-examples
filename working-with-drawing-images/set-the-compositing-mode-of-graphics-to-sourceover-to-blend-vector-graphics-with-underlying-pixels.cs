@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -21,16 +21,17 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            using (RasterImage inputImage = (RasterImage)Image.Load(inputPath))
             {
-                Graphics graphics = new Graphics(image);
-                using (SolidBrush brush = new SolidBrush(Color.FromArgb(128, 0, 0, 255)))
-                {
-                    graphics.FillRectangle(brush, 50, 50, 200, 100);
-                }
+                Source source = new FileCreateSource(outputPath, false);
+                PngOptions pngOptions = new PngOptions() { Source = source };
 
-                PngOptions options = new PngOptions();
-                image.Save(outputPath, options);
+                using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, inputImage.Width, inputImage.Height))
+                {
+                    Graphics graphics = new Graphics(canvas);
+                    graphics.DrawImage(inputImage, new Point(0, 0));
+                    canvas.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -42,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to add a semi‑transparent PNG watermark or logo on top of an existing image, using Graphics with SourceOver compositing blends the overlay smoothly with the underlying pixels.
- * 2. When generating dynamic report charts in a C# web application, setting the compositing mode to SourceOver lets vector shapes like bars or lines be drawn over a background image without erasing its details.
- * 3. When creating custom UI skins for a Windows Forms app, a developer can render translucent button highlights on a PNG asset by filling rectangles with an ARGB brush and SourceOver blending.
- * 4. When processing scanned documents and need to highlight selected regions with a colored overlay, using Graphics.SourceOver ensures the highlight color mixes with the original scan while preserving readability.
- * 5. When building an image‑based email template generator, a developer can overlay semi‑transparent promotional banners on product photos, relying on SourceOver compositing to maintain the photo’s original colors and texture.
+ * 1. When a developer needs to overlay a transparent PNG logo onto a background image while preserving the logo’s alpha channel, they can use Aspose.Imaging’s Graphics with SourceOver compositing to blend the two raster images.
+ * 2. When creating a composite thumbnail that combines a product photo with a promotional badge, the SourceOver mode ensures the badge is drawn on top of the photo without erasing its underlying pixels.
+ * 3. When generating watermarked PDFs by rendering vector‑based watermark graphics onto each page image, SourceOver blending lets the watermark appear semi‑transparent over the original content.
+ * 4. When building a photo‑editing tool that lets users add stickers or emojis to pictures, using Graphics.DrawImage with SourceOver merges the sticker’s pixels with the base image while respecting transparency.
+ * 5. When automating the preparation of UI assets by compositing multiple PNG layers (background, icons, text) into a single image for mobile apps, SourceOver ensures each layer blends correctly without losing detail.
  */
