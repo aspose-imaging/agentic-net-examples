@@ -1,55 +1,53 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.svg";
-            string outputPath = @"C:\Images\output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to SvgImage to access SetPalette
-                SvgImage svgImage = image as SvgImage;
-                if (svgImage == null)
+                // Apply a custom palette to the SVG if possible
+                if (image is SvgImage svgImage)
                 {
-                    Console.Error.WriteLine("Loaded image is not an SVG.");
-                    return;
+                    // Create an 8‑bit palette (you can customize this as needed)
+                    var customPalette = ColorPaletteHelper.Create8Bit();
+
+                    // Apply the palette and update existing colors
+                    svgImage.SetPalette(customPalette, true);
                 }
 
-                // Create a custom 8‑bit palette (example uses the default 8‑bit palette)
-                IColorPalette palette = ColorPaletteHelper.Create8Bit();
-
-                // Apply the palette to the SVG; updateColors = true to remap existing colors
-                svgImage.SetPalette(palette, true);
-
-                // Configure PNG options for indexed (8‑bit) output
-                PngOptions pngOptions = new PngOptions
+                // Configure PNG options for 8‑bit indexed color
+                var pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.IndexedColor,
-                    Palette = palette
+                    Palette = ColorPaletteHelper.Create8Bit(), // use the same or another palette
+                    CompressionLevel = 9,
+                    Progressive = true
                 };
 
-                // Save the image as an 8‑bit PNG
+                // Save as PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -62,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application must generate low‑size thumbnails from user‑uploaded SVG icons by applying a custom 8‑bit color palette before saving them as indexed PNGs for faster page loads.
- * 2. When a desktop tool needs to convert corporate brand SVG logos into 8‑bit PNG assets that match a predefined palette for consistent printing across legacy printers.
- * 3. When an e‑learning platform wants to reduce bandwidth by remapping SVG illustrations to a limited color set and exporting them as indexed PNG files for mobile devices.
- * 4. When a game developer is preparing sprite sheets from vector SVG artwork and must enforce a specific 256‑color palette to meet the engine’s texture memory constraints.
- * 5. When an automated batch process must validate that an SVG file is correctly loaded, apply a custom palette, and output an 8‑bit PNG for archival in a content‑management system.
+ * 1. When a developer needs to generate web‑optimized 8‑bit PNG thumbnails from brand‑styled SVG icons while enforcing a corporate color palette.
+ * 2. When an application must convert user‑uploaded SVG diagrams into low‑size indexed PNGs for email attachments that require a specific palette for consistent rendering across email clients.
+ * 3. When a game engine imports vector assets and requires them as 8‑bit PNG sprites with a predefined palette to match the engine’s limited color set.
+ * 4. When a reporting tool transforms SVG charts into printable PNG images and must replace the original colors with a printer‑friendly palette to avoid color shifts.
+ * 5. When a mobile app pre‑processes SVG assets into 8‑bit PNG resources to reduce memory usage and enforce a custom palette for theme consistency.
  */
