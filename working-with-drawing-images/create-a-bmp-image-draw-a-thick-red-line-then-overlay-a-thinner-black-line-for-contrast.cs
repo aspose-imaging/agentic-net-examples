@@ -1,7 +1,7 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -9,34 +9,30 @@ class Program
     {
         try
         {
-            // Define output path
-            string outputPath = @"C:\temp\output.bmp";
+            string outputPath = "output.bmp";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Set BMP options with file source
+            // BMP options
             BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a new image canvas
-            int width = 200;
-            int height = 200;
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, width, height))
+            // Create a 200x200 BMP image
+            using (Image image = Image.Create(bmpOptions, 200, 200))
             {
-                // Initialize graphics for drawing
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                // Graphics for drawing
+                Graphics graphics = new Graphics(image);
 
-                // Draw a thick red line
-                Aspose.Imaging.Pen redPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 10);
-                graphics.DrawLine(redPen, new Aspose.Imaging.Point(10, 10), new Aspose.Imaging.Point(190, 190));
+                // Thick red line
+                Pen thickRedPen = new Pen(Color.Red, 10);
+                graphics.DrawLine(thickRedPen, new Point(20, 20), new Point(180, 180));
 
-                // Overlay a thinner black line for contrast
-                Aspose.Imaging.Pen blackPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
-                graphics.DrawLine(blackPen, new Aspose.Imaging.Point(10, 10), new Aspose.Imaging.Point(190, 190));
+                // Thinner black line for contrast
+                Pen thinBlackPen = new Pen(Color.Black, 2);
+                graphics.DrawLine(thinBlackPen, new Point(20, 20), new Point(180, 180));
 
-                // Save the image (source is already bound to the file)
-                image.Save();
+                // Save the image
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a BMP image with a bold diagonal highlight for a custom UI icon, this code draws a thick red line and adds a thin black line for contrast.
- * 2. When generating printable test patterns that require a high‑visibility guide line, the code produces a BMP file with a red line overlaid by a black line to improve readability.
- * 3. When building a simple graphics editor that supports drawing primitives, this snippet shows how to use Aspose.Imaging in C# to render a thick red stroke and a finer black stroke on a BMP canvas.
- * 4. When automating the creation of watermark overlays for legacy BMP assets, the code demonstrates drawing a prominent red line and a subtle black line to ensure the watermark stands out on any background.
- * 5. When preparing diagnostic images for debugging image‑processing pipelines, developers can use this example to generate a BMP file with a clearly visible red line bordered by a thin black line for easy visual inspection.
+ * 1. When generating a BMP icon for a desktop application that requires a bold red line with a thin black outline to improve visibility across different UI themes.
+ * 2. When creating a printable schematic in C# where a thick red line highlights a critical path and a thinner black line adds contrast for laser engraving.
+ * 3. When producing a diagnostic BMP image for a medical device that uses a thick red marker overlaid with a thin black line to emphasize a region of interest.
+ * 4. When building a game asset pipeline that programmatically draws highlighted borders on BMP textures, using a thick red stroke with a finer black edge for depth.
+ * 5. When automating the generation of custom watermarks in BMP format where a bold red line is overlaid with a thinner black line to ensure legibility on both light and dark backgrounds.
  */
