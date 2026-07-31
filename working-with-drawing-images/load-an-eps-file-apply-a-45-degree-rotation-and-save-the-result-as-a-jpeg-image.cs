@@ -10,11 +10,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = "input.eps";
             string outputPath = "output.jpg";
 
-            // Verify that the input EPS file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -37,7 +37,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -45,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to convert a vector EPS logo into a rotated JPEG thumbnail for a web page preview.
- * 2. When an e‑commerce platform must display product brochures originally saved as EPS files at a 45‑degree angle in a JPEG carousel.
- * 3. When a publishing workflow requires batch processing of EPS illustrations, rotating them for layout alignment and saving them as JPEGs for quick preview.
- * 4. When a mobile app backend receives EPS assets from users, rotates them to match orientation guidelines, and stores them as JPEG images for faster delivery.
- * 5. When a document management system automates the conversion of EPS diagrams into rotated JPEG snapshots for indexing and search.
+ * 1. When a developer needs to convert a vector EPS logo into a raster JPEG thumbnail while rotating it 45 degrees for a web gallery.
+ * 2. When an automated build script must generate rotated preview images from EPS artwork for a print‑to‑digital workflow using C# and Aspose.Imaging.
+ * 3. When a desktop application has to display a rotated version of a technical diagram stored as EPS by converting it to JPEG for faster rendering.
+ * 4. When a batch processing tool processes incoming EPS files from designers, applies a 45‑degree rotation to align them, and saves them as JPEGs for email attachments.
+ * 5. When a content management system imports EPS illustrations, rotates them to match layout requirements, and stores them as JPEGs for browser compatibility.
  */
