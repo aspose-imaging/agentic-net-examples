@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
@@ -12,41 +11,36 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.apng";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load source raster image
-            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage sourceImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                // Configure APNG options
-                ApngOptions options = new ApngOptions
+                ApngOptions createOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100, // default frame duration in ms
+                    DefaultFrameTime = 70,
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                // Create APNG image bound to the output file
-                using (ApngImage apngImage = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
+                using (ApngImage apngImage = (ApngImage)Aspose.Imaging.Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
                 {
-                    // Remove default frame
+                    int numOfFrames = 10;
                     apngImage.RemoveAllFrames();
 
-                    // Add the source image as a single frame
-                    apngImage.AddFrame(sourceImage);
+                    for (int i = 0; i < numOfFrames; i++)
+                    {
+                        apngImage.AddFrame(sourceImage);
+                    }
 
-                    // Save the APNG (output path already bound)
                     apngImage.Save();
                 }
             }
@@ -60,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating animated PNGs for a web application, a developer may embed the Aspose.Imaging for .NET version in the “Software” metadata field to trace which library produced the file.
- * 2. When automating a batch conversion pipeline that creates APNG assets for a mobile game, setting the “Software” tag to the library version helps QA teams verify that the correct processing tool was used.
- * 3. When complying with digital asset management policies that require provenance information, developers can record the Aspose.Imaging version in the APNG “Software” metadata before saving the file.
- * 4. When troubleshooting rendering issues across different browsers, adding the library version to the APNG “Software” field allows support engineers to correlate problems with specific Aspose.Imaging releases.
- * 5. When delivering client‑side graphics where the client requests a report of the generation tool, embedding the Aspose.Imaging for .NET version in the APNG “Software” metadata provides a transparent audit trail.
+ * 1. When a developer wants to embed the Aspose.Imaging for .NET version into the APNG “Software” metadata field to trace which library generated the animated PNG during a CI/CD pipeline.
+ * 2. When a graphics workflow requires recording the processing tool’s version in the APNG file so that downstream applications can verify compatibility before rendering.
+ * 3. When an e‑learning platform creates animated PNG tutorials and needs to tag each file with the exact library version for future maintenance and support tickets.
+ * 4. When a digital asset management system archives APNG assets and relies on the “Software” metadata to filter images processed by a specific version of Aspose.Imaging.
+ * 5. When a QA team runs automated tests on image conversion scripts and uses the APNG “Software” field to confirm that the correct library build was used for each generated animation.
  */
