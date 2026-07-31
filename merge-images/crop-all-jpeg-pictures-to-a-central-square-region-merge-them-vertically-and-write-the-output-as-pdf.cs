@@ -1,11 +1,12 @@
+// HOW-TO: Crop JPEG Images to Central Square and Merge Vertically into PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -13,11 +14,11 @@ class Program
     {
         try
         {
-            // Input and output directories (hard‑coded)
+            // Input and output directories
             string inputDirectory = "Input";
             string outputDirectory = "Output";
 
-            // Ensure input directory exists
+            // Ensure directories exist
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -25,87 +26,84 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
             // Gather JPEG files
-            string[] files = Directory.GetFiles(inputDirectory, "*.*")
-                                      .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                                                  f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
-                                      .ToArray();
+            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg")
+                .Concat(Directory.GetFiles(inputDirectory, "*.jpeg"))
+                .ToArray();
 
-            if (files.Length == 0)
+            if (jpegFiles.Length == 0)
             {
                 Console.WriteLine("No JPEG files found in the input directory.");
                 return;
             }
 
-            // Validate each file exists
-            foreach (string filePath in files)
+            // First pass: determine square side lengths
+            List<int> sideLengths = new List<int>();
+            foreach (string filePath in jpegFiles)
             {
                 if (!File.Exists(filePath))
                 {
                     Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
-            }
 
-            // First pass: determine square size for each image
-            List<int> squareSizes = new List<int>();
-            foreach (string filePath in files)
-            {
                 using (RasterImage img = (RasterImage)Image.Load(filePath))
                 {
-                    if (!img.IsCached) img.CacheData();
-                    int size = Math.Min(img.Width, img.Height);
-                    squareSizes.Add(size);
+                    int side = Math.Min(img.Width, img.Height);
+                    sideLengths.Add(side);
                 }
             }
 
-            // Canvas dimensions (vertical merge of squares)
-            int canvasWidth = squareSizes.Max();
-            int canvasHeight = squareSizes.Sum();
+            int canvasWidth = sideLengths.Max();
+            int canvasHeight = sideLengths.Sum();
 
-            // Output path
-            string outputPath = Path.Combine(outputDirectory, "merged.png");
+            // Prepare output PDF path
+            string outputPath = Path.Combine(outputDirectory, "Merged.pdf");
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create an unbound PNG canvas
-            PngOptions pngOptions = new PngOptions
+            // Create an unbound canvas (JPEG image) to hold merged content
+            using (JpegOptions canvasOptions = new JpegOptions())
             {
-                Source = new FileCreateSource(outputPath, false)
-            };
-
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
-            {
-                int offsetY = 0;
-                for (int i = 0; i < files.Length; i++)
+                using (JpegImage canvas = (JpegImage)Image.Create(canvasOptions, canvasWidth, canvasHeight))
                 {
-                    string filePath = files[i];
-                    int size = squareSizes[i];
+                    int offsetY = 0;
 
-                    using (RasterImage img = (RasterImage)Image.Load(filePath))
+                    // Second pass: load, crop, and copy each image onto the canvas
+                    foreach (string filePath in jpegFiles)
                     {
-                        if (!img.IsCached) img.CacheData();
+                        using (RasterImage img = (RasterImage)Image.Load(filePath))
+                        {
+                            int side = Math.Min(img.Width, img.Height);
+                            int left = (img.Width - side) / 2;
+                            int top = (img.Height - side) / 2;
 
-                        // Crop to square region (top‑left)
-                        img.Crop(new Rectangle(0, 0, size, size));
+                            // Crop to central square
+                            img.Crop(new Rectangle(left, top, side, side));
 
-                        // Copy pixels onto canvas
-                        canvas.SaveArgb32Pixels(
-                            new Rectangle(0, offsetY, size, size),
-                            img.LoadArgb32Pixels(img.Bounds));
+                            // Destination rectangle on the canvas
+                            Rectangle destRect = new Rectangle(0, offsetY, side, side);
 
-                        offsetY += size;
+                            // Copy pixel data
+                            canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
+
+                            offsetY += side;
+                        }
+                    }
+
+                    // Save the merged canvas as PDF
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        canvas.Save(outputPath, pdfOptions);
                     }
                 }
-
-                // Save the bound canvas
-                canvas.Save();
             }
+
+            Console.WriteLine($"Merged PDF created at: {outputPath}");
         }
         catch (Exception ex)
         {
@@ -116,9 +114,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a printable PDF portfolio of product photos where each JPEG must be centered and uniformly square before stacking vertically.
- * 2. When an e‑learning platform wants to combine student‑submitted JPEG screenshots into a single PDF report with a consistent square thumbnail layout.
- * 3. When a real‑estate website creates a PDF brochure that vertically lists square‑cropped property images extracted from JPEG files.
- * 4. When a marketing automation script prepares a PDF catalog of campaign images, ensuring each JPEG is cropped to a central square and merged in order.
- * 5. When a document management system converts a folder of scanned JPEG receipts into a single PDF, aligning each receipt as a centered square image for easy viewing.
+ * 1. When you need to create a printable PDF portfolio from a set of portrait‑oriented JPEG photos by cropping each to a square and stacking them vertically.
+ * 2. When an e‑commerce site wants to generate a single PDF catalog page from product JPEG images that must be uniformly square.
+ * 3. When a mobile app prepares a PDF slideshow of user‑uploaded photos, ensuring each image is centered and square before merging.
+ * 4. When a reporting tool converts scanned JPEG receipts into a compact PDF where each receipt is cropped to its central square region.
+ * 5. When an automated workflow batch‑processes JPEG screenshots, crops them to a consistent square size, and combines them into a single PDF document for archival.
  */
