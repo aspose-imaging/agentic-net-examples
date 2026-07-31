@@ -2,11 +2,10 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -15,6 +14,7 @@ class Program
         try
         {
             string inputPath = "input.svg";
+            string tempPngPath = "temp.png";
             string outputPath = "output.jpg";
 
             if (!File.Exists(inputPath))
@@ -23,41 +23,34 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image vectorImage = Image.Load(inputPath))
+            using (Image svgImage = Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions
+                PngOptions pngOptions = new PngOptions();
+                pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        PageWidth = vectorImage.Width,
-                        PageHeight = vectorImage.Height
-                    }
+                    PageSize = new SizeF(svgImage.Width * 2, svgImage.Height * 2)
                 };
 
-                using (var memoryStream = new MemoryStream())
+                svgImage.Save(tempPngPath, pngOptions);
+            }
+
+            using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
+            {
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 1.0));
+
+                JpegOptions jpegOptions = new JpegOptions
                 {
-                    vectorImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
+                    Quality = 95
+                };
 
-                    using (RasterImage rasterImage = (RasterImage)Image.Load(memoryStream))
-                    {
-                        var blurOptions = new GaussianBlurFilterOptions
-                        {
-                            Radius = 8
-                        };
-                        rasterImage.Filter(rasterImage.Bounds, blurOptions);
+                raster.Save(outputPath, jpegOptions);
+            }
 
-                        var jpegOptions = new JpegOptions
-                        {
-                            Quality = 95,
-                            Source = new FileCreateSource(outputPath, false)
-                        };
-
-                        rasterImage.Save(outputPath, jpegOptions);
-                    }
-                }
+            if (File.Exists(tempPngPath))
+            {
+                File.Delete(tempPngPath);
             }
         }
         catch (Exception ex)
@@ -69,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG logo into a high‑resolution JPEG thumbnail with a tilt‑shift blur for a marketing website.
- * 2. When an e‑commerce platform must generate stylized product images from vector illustrations on‑the‑fly using C# and Aspose.Imaging.
- * 3. When a desktop publishing tool requires rasterizing SVG artwork, applying a Gaussian blur tilt‑shift effect, and saving the result as a print‑ready JPEG.
- * 4. When a mobile app backend needs to batch‑process SVG icons into blurred JPEG assets for faster loading on low‑bandwidth devices.
- * 5. When a digital signage system automatically transforms vector graphics into high‑quality JPEG backgrounds with a depth‑of‑field effect using .NET.
+ * 1. When a developer needs to convert an SVG illustration to a high‑resolution JPEG for web or print while applying a tilt‑shift style blur using Aspose.Imaging for .NET in C#.
+ * 2. When a C# desktop tool must upscale vector graphics, rasterize them to PNG, apply a Gaussian blur filter, and output a 95‑quality JPEG for marketing materials.
+ * 3. When an e‑commerce platform requires automated processing of SVG product icons into blurred, high‑definition JPEG thumbnails for a modern UI.
+ * 4. When a batch‑processing script has to read vector files, enlarge the canvas, add a stylized blur effect, and save the results as JPEGs for archival or publishing workflows.
+ * 5. When a developer wants to demonstrate Aspose.Imaging’s vector‑to‑raster conversion, image filtering, and JPEG export capabilities in a C# code sample for documentation or training.
  */
