@@ -3,31 +3,26 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input PNG files
-            string[] inputPaths = {
-                "frame1.png",
-                "frame2.png",
-                "frame3.png"
-            };
+            // Hardcoded input PNG files
+            string[] inputPaths = { "frame1.png", "frame2.png", "frame3.png" };
+            // Hardcoded output APNG file
+            string outputPath = "output_animation.png";
 
-            // Hard‑coded output APNG file
-            string outputPath = "animation.apng";
-
-            // Verify each input file exists
-            foreach (string inputPath in inputPaths)
+            // Validate each input file exists
+            foreach (var path in inputPaths)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
             }
@@ -35,38 +30,36 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the first image to obtain dimensions (assumes all frames share size)
-            using (RasterImage firstImage = (RasterImage)Image.Load(inputPaths[0]))
+            // Load the first image to obtain canvas size
+            using (RasterImage first = (RasterImage)Image.Load(inputPaths[0]))
             {
-                int width = firstImage.Width;
-                int height = firstImage.Height;
-
-                // Configure APNG creation options
-                ApngOptions createOptions = new ApngOptions
+                // Create source and APNG options
+                Source source = new FileCreateSource(outputPath, false);
+                ApngOptions options = new ApngOptions
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    NumPlays = 3,                     // custom loop count (3 times)
-                    DefaultFrameTime = 100,           // default frame duration in ms
-                    ColorType = PngColorType.TruecolorWithAlpha
+                    Source = source,
+                    DefaultFrameTime = 100, // frame duration in ms
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    NumPlays = 3 // custom loop count
                 };
 
-                // Create the APNG image container
-                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
+                // Create APNG canvas bound to the output file
+                using (ApngImage apng = (ApngImage)Image.Create(options, first.Width, first.Height))
                 {
                     // Remove the default single frame
-                    apngImage.RemoveAllFrames();
+                    apng.RemoveAllFrames();
 
                     // Add each PNG as a frame
-                    foreach (string path in inputPaths)
+                    foreach (var path in inputPaths)
                     {
                         using (RasterImage frame = (RasterImage)Image.Load(path))
                         {
-                            apngImage.AddFrame(frame);
+                            apng.AddFrame(frame);
                         }
                     }
 
                     // Save the assembled animation
-                    apngImage.Save();
+                    apng.Save();
                 }
             }
         }
@@ -79,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a product showcase on a website, a developer can combine several PNG screenshots into an animated APNG that loops three times to highlight features.
- * 2. When generating a step‑by‑step tutorial, a developer can stitch PNG diagrams into a single APNG animation with a custom frame duration and loop count for easy embedding in documentation.
- * 3. When building a mobile game UI, a developer can merge PNG sprite frames into an APNG that plays a limited number of loops to animate character actions without using heavy video files.
- * 4. When preparing a marketing email, a developer can assemble promotional PNG images into an APNG banner that repeats three times, ensuring consistent animation across email clients that support APNG.
- * 5. When automating a reporting tool, a developer can convert a series of PNG charts into an APNG animation that cycles a set number of times to illustrate data trends in a compact, loop‑controlled format.
+ * 1. When creating an animated product showcase where each PNG represents a product view and the APNG animation must loop exactly three times.
+ * 2. When generating a step‑by‑step tutorial that stitches together a series of screenshot PNGs into an APNG that repeats a custom number of cycles for e‑learning platforms.
+ * 3. When building a web banner that cycles through promotional PNG images and requires a fixed loop count to meet advertising display rules.
+ * 4. When exporting a sequence of medical imaging slices as a single APNG file so researchers can view the PNG frames in a controlled three‑play loop.
+ * 5. When developing a game UI that displays a short animated icon composed of multiple PNG frames and needs the animation to stop after three repetitions.
  */
