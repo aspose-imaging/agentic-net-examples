@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -9,31 +10,38 @@ class Program
         try
         {
             // Define image dimensions
-            int width = 500;
-            int height = 500;
+            int width = 200;
+            int height = 200;
 
-            // Create a BMP image with default options
-            BmpOptions createOptions = new BmpOptions();
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(createOptions, width, height))
+            // Create BMP options
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+
+            // Create a new BMP image
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
                 // Initialize graphics for drawing
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // Clear background to white
-                graphics.Clear(Aspose.Imaging.Color.White);
+                // Create a thick green pen
+                Pen pen = new Pen(Color.Green, 5);
 
-                // Draw a thick green ellipse
-                Aspose.Imaging.Pen greenPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Green, 10);
-                graphics.DrawEllipse(greenPen, new Aspose.Imaging.Rectangle(50, 50, 400, 300));
+                // Draw an ellipse
+                graphics.DrawEllipse(pen, new Rectangle(20, 20, 160, 160));
 
-                // Export the image to a byte array using a memory stream
+                // Export image to a byte array
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    // Save the image into the stream with BMP options
+                    // Save the image to the memory stream using BMP options
                     image.Save(ms, new BmpOptions());
 
                     byte[] imageBytes = ms.ToArray();
-                    Console.WriteLine($"Image exported as byte array. Length: {imageBytes.Length}");
+
+                    // Optional: write the byte array to a file for verification
+                    string outputPath = "output.bmp";
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                    File.WriteAllBytes(outputPath, imageBytes);
                 }
             }
         }
@@ -46,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must generate a BMP image with a thick green ellipse for a medical report thumbnail and transmit it via a web API as a byte array.
- * 2. When an e‑commerce platform needs to create on‑the‑fly product placeholders in BMP format with a green ellipse overlay and store them in a database as binary data.
- * 3. When a desktop application requires drawing a green elliptical selection area on a BMP canvas and saving the result directly to memory for further processing without writing to disk.
- * 4. When a game engine tool needs to export a BMP sprite sheet containing a green ellipse shape as a byte array to embed in resource files.
- * 5. When an automated testing suite must generate a BMP image with a green ellipse to validate image‑processing algorithms and compare the resulting byte array against expected values.
+ * 1. When a developer needs to generate a BMP thumbnail with a highlighted thick green ellipse for a document preview in a C# web application.
+ * 2. When an automated reporting tool must embed a simple vector shape into a BMP image and transmit it as a byte array over a network API.
+ * 3. When a desktop utility creates a printable BMP badge that includes a thick green ellipse as a visual marker and stores the image in memory for further processing.
+ * 4. When a cloud service converts dynamically drawn graphics into BMP byte streams for storage in a database without writing intermediate files.
+ * 5. When a game engine loads custom UI elements from BMP byte arrays generated at runtime, such as a green ellipse button background.
  */
