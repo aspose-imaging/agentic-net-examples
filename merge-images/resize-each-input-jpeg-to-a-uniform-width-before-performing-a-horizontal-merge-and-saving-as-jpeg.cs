@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
@@ -14,71 +12,82 @@ class Program
         try
         {
             // Hardcoded input JPEG file paths
-            string[] inputPaths = new[]
+            string[] inputPaths = new string[]
             {
                 "input1.jpg",
                 "input2.jpg",
                 "input3.jpg"
             };
 
-            // Hardcoded output JPEG path
-            string outputPath = "merged.jpg";
-
-            // Uniform width for each image after resizing
-            int uniformWidth = 200;
-
-            // Validate input files
-            foreach (string inputPath in inputPaths)
+            // Verify each input file exists
+            foreach (string path in inputPaths)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Desired uniform width for all images
+            int targetWidth = 200;
 
-            // First pass: calculate total canvas size
-            int totalWidth = 0;
-            int maxHeight = 0;
-            foreach (string inputPath in inputPaths)
+            // Lists to hold resized dimensions
+            List<int> widths = new List<int>();
+            List<int> heights = new List<int>();
+
+            // First pass: load, resize, and collect sizes
+            foreach (string path in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                using (JpegImage img = (JpegImage)Aspose.Imaging.Image.Load(path))
                 {
-                    int targetHeight = (int)Math.Round((double)img.Height * uniformWidth / img.Width);
-                    totalWidth += uniformWidth;
-                    if (targetHeight > maxHeight)
-                        maxHeight = targetHeight;
+                    int newHeight = img.Height * targetWidth / img.Width;
+                    img.Resize(targetWidth, newHeight);
+                    widths.Add(img.Width);
+                    heights.Add(img.Height);
                 }
             }
 
+            // Calculate canvas size for horizontal merge
+            int canvasWidth = 0;
+            int canvasHeight = 0;
+            foreach (int w in widths) canvasWidth += w;
+            foreach (int h in heights) if (h > canvasHeight) canvasHeight = h;
+
+            // Output path for merged JPEG
+            string outputPath = "merged.jpg";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
             // Prepare JPEG options with bound source
-            Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions
+            FileCreateSource src = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions()
             {
-                Source = source,
+                Source = src,
                 Quality = 90
             };
 
-            // Create canvas bound to the output file
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
+            // Create canvas image bound to the output file
+            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetX = 0;
-                foreach (string inputPath in inputPaths)
+                // Second pass: load, resize, and copy onto canvas
+                foreach (string path in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                    using (JpegImage img = (JpegImage)Aspose.Imaging.Image.Load(path))
                     {
-                        int targetHeight = (int)Math.Round((double)img.Height * uniformWidth / img.Width);
-                        img.Resize(uniformWidth, targetHeight);
-                        var bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                        int newHeight = img.Height * targetWidth / img.Width;
+                        img.Resize(targetWidth, newHeight);
+
+                        Aspose.Imaging.Rectangle destRect = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
+
                         offsetX += img.Width;
                     }
                 }
 
-                // Save the bound canvas
+                // Save the bound canvas (output file)
                 canvas.Save();
             }
         }
@@ -91,9 +100,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building a product catalog website, a developer can use this C# Aspose.Imaging code to resize each product JPEG to the same width and merge them side‑by‑side into a single thumbnail strip for quick visual browsing.
- * 2. When generating a social‑media collage, the code ensures all uploaded JPEG photos are uniformly scaled and horizontally combined, creating a ready‑to‑post image with consistent dimensions.
- * 3. When preparing an email newsletter, a developer can batch‑process multiple JPEG banners, resize them to a fixed width, and merge them into one horizontal strip to reduce email size and improve load times.
- * 4. When creating a printable banner, the code resizes each component JPEG to a uniform width and stitches them horizontally, guaranteeing a seamless layout that matches the required print specifications.
- * 5. When displaying before‑and‑after comparisons on a medical imaging portal, the developer can use this routine to align the original and processed JPEGs at the same width and merge them horizontally for easy side‑by‑side analysis.
+ * 1. When creating a product catalog thumbnail strip where multiple JPEG photos must share the same width and be combined side‑by‑side for a web page.
+ * 2. When generating a before‑and‑after comparison image for a photo‑editing app, resizing each JPEG to a fixed width and stitching them horizontally.
+ * 3. When preparing a printable banner that consists of several JPEG logos that need uniform width and a single merged image for consistent layout.
+ * 4. When building an automated email newsletter that includes a row of resized JPEG images merged into one file to reduce attachment size.
+ * 5. When developing a digital signage system that displays a horizontal carousel of JPEG images, each resized to the same width for seamless scrolling.
  */
