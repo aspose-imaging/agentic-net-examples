@@ -9,7 +9,7 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output directories
+            // Hardcoded input and output directories
             string inputDirectory = @"C:\Images\Input";
             string outputDirectory = @"C:\Images\Output";
 
@@ -18,23 +18,25 @@ class Program
 
             foreach (string inputPath in tiffFiles)
             {
-                // Verify the input file exists
+                // Verify that the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output file path (same name, .png extension)
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
+                // Build the output file path (same name with .png extension)
+                string outputPath = Path.Combine(
+                    outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the TIFF image and save it as APNG with 3 loops
+                // Load the TIFF image
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Save as APNG with 3 loops
                     var apngOptions = new ApngOptions
                     {
                         NumPlays = 3 // default loop count
@@ -52,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to use Aspose.Imaging for .NET to batch convert a folder of multi‑page TIFF scans into animated PNGs that automatically loop three times for web galleries.
- * 2. When an automated C# script must process medical imaging TIFF files and output APNGs with a default NumPlays value of three for inclusion in presentation slides.
- * 3. When a content management system requires converting uploaded TIFF assets to APNG format using ApngOptions so that each animation repeats exactly three times across browsers.
- * 4. When a desktop utility built in C# has to generate lightweight animated PNGs from high‑resolution TIFF textures for game UI assets, limiting the animation to three cycles with Aspose.Imaging.
- * 5. When a nightly build pipeline needs to transform archived TIFF documentation into APNG files that play three loops, ensuring consistent playback in interactive PDFs.
+ * 1. When a developer needs to convert a large collection of scanned TIFF documents into animated PNGs for web galleries that require a three‑loop animation, they can use this batch‑processing code.
+ * 2. When an e‑learning platform must transform multi‑page TIFF lesson slides into looping APNG assets for interactive tutorials, the script automates the conversion across a folder.
+ * 3. When a medical imaging system stores radiology scans as TIFF files and wants to generate lightweight, three‑loop APNG previews for quick review in a browser, this code provides the necessary conversion.
+ * 4. When a digital archivist wants to create animated PNG thumbnails that loop three times from a directory of high‑resolution TIFF photographs for a searchable online catalog, the program handles the batch conversion.
+ * 5. When a marketing team needs to repurpose multi‑frame TIFF advertisements into looping APNG banners that play three cycles on a website, developers can employ this C# routine to process all files automatically.
  */
