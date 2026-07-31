@@ -14,7 +14,7 @@ class Program
             string outputPath = "output.png";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            var pngOptions = new PngOptions();
+            PngOptions pngOptions = new PngOptions();
             pngOptions.Source = new FileCreateSource(outputPath, false);
 
             using (Image image = Image.Create(pngOptions, 500, 500))
@@ -22,15 +22,15 @@ class Program
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                GraphicsPath path = new GraphicsPath();
+                RectangleF rect = new RectangleF(150f, 150f, 200f, 200f);
                 Figure figure = new Figure();
-                figure.AddShape(new RectangleShape(new RectangleF(150, 150, 200, 200)));
+                figure.AddShape(new RectangleShape(rect));
+                GraphicsPath path = new GraphicsPath();
                 path.AddFigure(figure);
 
-                float angle = 45f;
-                graphics.RotateTransform(angle);
+                Pen pen = new Pen(Color.Black, 2);
+                graphics.DrawPath(pen, path);
 
-                graphics.DrawPath(new Pen(Color.Black, 2), path);
                 image.Save();
             }
         }
@@ -43,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a thumbnail PNG that shows a rotated logo for a branding preview, a developer can use RotateTransform to turn the rectangular shape 45 degrees around its center.
- * 2. When creating a diagram that requires a diamond‑shaped marker, a developer can rotate a square path 45 degrees to produce the diamond in a PNG image.
- * 3. When building a custom QR code overlay where the background pattern must be tilted, a developer can apply RotateTransform to rotate the pattern path before drawing it.
- * 4. When designing a UI mock‑up that demonstrates a rotated button icon, a developer can rotate the rectangular shape around its center to visualize the effect.
- * 5. When producing a printable report that includes a rotated watermark, a developer can rotate the path 45 degrees to position the watermark correctly on the PNG canvas.
+ * 1. When a developer needs to generate a PNG badge with a logo that is rotated 45 degrees using Graphics.RotateTransform to create a tilted square for branding.
+ * 2. When creating a technical illustration where a rectangular annotation must be rotated 45 degrees around its center with Graphics.RotateTransform to match a slanted axis.
+ * 3. When producing a game UI asset such as a compass needle that requires a 45‑degree rotation of a rectangle via Graphics.RotateTransform and saving the result as a transparent PNG.
+ * 4. When automating printable label preparation where a rectangle is rotated 45 degrees around its center using Graphics.RotateTransform to fit a diagonal layout on the sheet.
+ * 5. When building a data‑visualization report that overlays a rotated rectangle on a chart, applying Graphics.RotateTransform to the GraphicsPath and exporting the image as a high‑resolution PNG.
  */
