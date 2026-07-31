@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -11,23 +10,42 @@ class Program
     {
         try
         {
-            string outputPath = "output/output.bmp";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputPath = "output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            Source source = new FileCreateSource(outputPath, false);
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24,
-                Source = source
-            };
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, 500, 500))
+            int width = 500;
+            int height = 500;
+
+            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
             {
                 Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Aspose.Imaging.Color.Ivory);
+                graphics.Clear(Color.Ivory);
 
-                Pen pen = new Pen(Aspose.Imaging.Color.Black, 1);
-                graphics.DrawRectangle(pen, new Rectangle(0, 0, canvas.Width, canvas.Height));
+                Pen pen = new Pen(Color.Black, 1f);
+
+                // Forward diagonal hatch
+                for (int offset = -height; offset < width; offset += 20)
+                {
+                    int x1 = Math.Max(0, offset);
+                    int y1 = Math.Max(0, -offset);
+                    int x2 = Math.Min(width, offset + height);
+                    int y2 = Math.Min(height, height + offset);
+                    graphics.DrawLine(pen, new Point(x1, y1), new Point(x2, y2));
+                }
+
+                // Backward diagonal hatch
+                for (int offset = 0; offset <= width + height; offset += 20)
+                {
+                    int x1 = Math.Max(0, offset - height);
+                    int y1 = Math.Min(height, offset);
+                    int x2 = Math.Min(width, offset);
+                    int y2 = Math.Max(0, offset - width);
+                    graphics.DrawLine(pen, new Point(x1, y1), new Point(x2, y2));
+                }
 
                 canvas.Save();
             }
@@ -41,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 500 × 500 BMP file with a solid ivory background for use as a placeholder image in a Windows desktop application.
- * 2. When an automated reporting tool must create a bitmap chart legend that requires a clean ivory canvas and a black rectangular border drawn with Aspose.Imaging in C#.
- * 3. When a batch image processing script has to produce BMP thumbnails with a consistent background color and a simple frame for branding purposes.
- * 4. When a game asset pipeline needs to programmatically generate texture maps in BMP format with a uniform ivory fill and a defined border before applying further effects.
- * 5. When a document generation system creates printable forms and needs to embed a blank BMP page with an ivory background and a black outline as a template for manual annotations.
+ * 1. When a developer needs to generate a 500 × 500 BMP background with an ivory fill and a diagonal hatch pattern for use as a printable watermark in a .NET reporting application.
+ * 2. When a C# program must create a simple bitmap texture with black diagonal lines for tiling in a game engine that relies on BMP assets processed by Aspose.Imaging.
+ * 3. When an automation script has to produce a high‑contrast hatch overlay on an ivory canvas to serve as a placeholder image in a document‑generation workflow.
+ * 4. When a Windows desktop utility requires dynamically drawing a cross‑hatched pattern onto a BMP file to indicate a disabled or unavailable UI element.
+ * 5. When a batch image‑processing tool needs to programmatically generate BMP files with a custom hatch pattern for use as background layers in architectural blueprint visualizations.
  */
