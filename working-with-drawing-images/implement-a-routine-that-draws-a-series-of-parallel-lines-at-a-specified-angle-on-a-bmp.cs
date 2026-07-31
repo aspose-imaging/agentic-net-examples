@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -9,65 +10,53 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.bmp";
+            // Output BMP file path
             string outputPath = "output.bmp";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the source BMP image
-            using (Image image = Image.Load(inputPath))
+            // Image dimensions
+            int width = 800;
+            int height = 600;
+
+            // Parallel lines parameters
+            double angleDegrees = 45.0; // angle of lines
+            int spacing = 20;           // distance between lines in pixels
+
+            // Prepare BMP options with bound file source
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+            // Create the image canvas
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                // Create a Graphics object for drawing
+                // Pen for drawing lines
+                Pen pen = new Pen(Color.Black, 1);
+
+                // Graphics object for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Parameters for parallel lines
-                double angleDegrees = 45.0;          // Desired angle
-                double spacing = 20.0;               // Space between lines (pixels)
-                int lineCount = 20;                  // Number of lines on each side of center
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 2);
+                // Convert angle to radians and compute tangent
+                double rad = angleDegrees * Math.PI / 180.0;
+                double tan = Math.Tan(rad);
 
-                // Precompute trigonometric values
-                double angleRad = angleDegrees * Math.PI / 180.0;
-                double dirX = Math.Cos(angleRad);
-                double dirY = Math.Sin(angleRad);
-                double perpX = -dirY; // Perpendicular direction
-                double perpY = dirX;
-
-                // Center of the image
-                double cx = image.Width / 2.0;
-                double cy = image.Height / 2.0;
-
-                // Length sufficient to cover the whole canvas
-                double length = Math.Sqrt(image.Width * image.Width + image.Height * image.Height);
-
-                for (int i = -lineCount; i <= lineCount; i++)
+                // Draw lines with varying intercept (b) to cover the canvas
+                for (double b = -height; b <= height; b += spacing)
                 {
-                    double offset = i * spacing;
+                    // Start point at left edge (x = 0)
+                    int x1 = 0;
+                    int y1 = (int)Math.Round(b);
 
-                    // Compute start and end points for each line
-                    double startX = cx + perpX * offset - dirX * length;
-                    double startY = cy + perpY * offset - dirY * length;
-                    double endX   = cx + perpX * offset + dirX * length;
-                    double endY   = cy + perpY * offset + dirY * length;
+                    // End point at right edge (x = width)
+                    int x2 = width;
+                    int y2 = (int)Math.Round(tan * width + b);
 
-                    Aspose.Imaging.Point p1 = new Aspose.Imaging.Point((int)Math.Round(startX), (int)Math.Round(startY));
-                    Aspose.Imaging.Point p2 = new Aspose.Imaging.Point((int)Math.Round(endX),   (int)Math.Round(endY));
-
-                    graphics.DrawLine(pen, p1, p2);
+                    graphics.DrawLine(pen, x1, y1, x2, y2);
                 }
 
-                // Save the modified image as BMP
-                BmpOptions bmpOptions = new BmpOptions();
-                image.Save(outputPath, bmpOptions);
+                // Save the image (output path already bound)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -79,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to overlay a grid of diagonal hatch lines on a BMP blueprint for visual emphasis using Aspose.Imaging for .NET.
- * 2. When a developer wants to generate a watermark pattern of evenly spaced parallel lines at a custom angle on a BMP image for document security.
- * 3. When a developer must create a background texture of slanted stripes for a game sprite sheet stored as BMP using C# graphics drawing.
- * 4. When a developer is required to simulate road lane markings by drawing parallel lines at a specified angle on a BMP map.
- * 5. When a developer needs to produce a printable BMP template with angled guide lines for aligning scanned forms in an imaging workflow.
+ * 1. When a developer needs to generate a BMP watermark pattern of diagonal hatch lines at a custom angle using Aspose.Imaging in C#.
+ * 2. When an application must create a printable grid overlay with evenly spaced parallel lines for engineering drawings saved as BMP files.
+ * 3. When a game engine requires procedural generation of textured floor tiles with slanted parallel lines and needs to export the result as a BMP image.
+ * 4. When a reporting tool wants to add slanted line shading to chart backgrounds and store the final graphic as a BMP using C# graphics operations.
+ * 5. When a web service produces custom security stamp patterns with adjustable line spacing and angle and saves them in BMP format.
  */
