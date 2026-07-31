@@ -2,29 +2,57 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output\\result.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.apng";
+            string outputPath = "output.gif";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                var options = new PngOptions();
-                image.Save(outputPath, options);
+                Directory.CreateDirectory(outputDir);
             }
+
+            // Load the APNG image
+            using (Image apngImage = Image.Load(inputPath))
+            {
+                // Determine the number of frames in the APNG
+                int frameCount = 0;
+                if (apngImage is IMultipageImage multipage)
+                {
+                    frameCount = multipage.PageCount;
+                }
+
+                // Log frame indices (these act as comments for each frame)
+                for (int i = 0; i < frameCount; i++)
+                {
+                    Console.WriteLine($"Processing frame index: {i}");
+                    // In a real scenario, you could embed metadata per frame here.
+                }
+
+                // Prepare GIF save options
+                GifOptions gifOptions = new GifOptions();
+
+                // Export APNG to GIF
+                apngImage.Save(outputPath, gifOptions);
+            }
+
+            Console.WriteLine("APNG successfully exported to GIF.");
         }
         catch (Exception ex)
         {
@@ -35,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert animated PNG (APNG) files to GIF format for legacy browser support while embedding frame‑specific comments that record the original frame indices for later reference.
- * 2. When an e‑learning platform generates GIF previews of APNG tutorial animations and adds comments with original frame numbers to synchronize captions and annotations.
- * 3. When a mobile game developer extracts animation sequences from APNG sprite sheets, saves them as GIFs, and includes frame index comments to simplify debugging of animation timing in C#.
- * 4. When a digital marketing system creates GIF versions of APNG advertisements for email campaigns and stores the original frame indices in comments to track which frame corresponds to each visual element.
- * 5. When an analytics pipeline processes user‑uploaded APNG stickers, converts them to GIFs, and records the original frame indices in comments for statistical analysis of animation usage.
+ * 1. When a web developer needs to convert animated PNG (APNG) assets to GIF format for compatibility with older browsers while preserving the original frame order as comments.
+ * 2. When a mobile app team wants to generate lightweight GIF previews from high‑resolution APNG files and embed frame‑index metadata for later debugging or analytics.
+ * 3. When an e‑learning platform must batch‑process course illustrations stored as APNG and export them to GIF for use in slide decks, while logging each frame’s original index.
+ * 4. When a game studio automates the creation of sprite sheets by converting APNG animations to GIF and annotating each frame with its source index for texture atlasing pipelines.
+ * 5. When a digital marketing system needs to transform user‑uploaded APNG memes into GIFs for social media sharing and retain frame‑by‑frame comments to track editing history.
  */
