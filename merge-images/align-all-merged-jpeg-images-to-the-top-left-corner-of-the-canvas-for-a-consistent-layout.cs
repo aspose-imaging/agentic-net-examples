@@ -1,7 +1,7 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
@@ -13,20 +13,15 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string[] inputPaths = new string[]
-            {
-                "Input\\image1.jpg",
-                "Input\\image2.jpg",
-                "Input\\image3.jpg"
-            };
-            string outputPath = "Output\\merged.jpg";
+            string[] inputPaths = new[] { "input1.jpg", "input2.jpg", "input3.jpg" };
+            string outputPath = "output/merged.jpg";
 
             // Validate input files
-            foreach (string inputPath in inputPaths)
+            foreach (var path in inputPaths)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
             }
@@ -35,38 +30,31 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Collect sizes of all images
-            List<Size> sizes = new List<Size>();
-            foreach (string inputPath in inputPaths)
+            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            foreach (var path in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
                 {
-                    sizes.Add(img.Size);
+                    sizes.Add(new Aspose.Imaging.Size(img.Width, img.Height));
                 }
             }
 
-            // Calculate canvas dimensions (horizontal merge, top‑left alignment)
-            int canvasWidth = 0;
-            int canvasHeight = 0;
-            foreach (Size sz in sizes)
-            {
-                canvasWidth += sz.Width;
-                if (sz.Height > canvasHeight) canvasHeight = sz.Height;
-            }
+            // Calculate canvas dimensions (horizontal layout, top‑left alignment)
+            int canvasWidth = sizes.Sum(s => s.Width);
+            int canvasHeight = sizes.Max(s => s.Height);
 
-            // Create JPEG canvas with bound output file
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                Source = new FileCreateSource(outputPath, false),
-                Quality = 100
-            };
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            // Create JPEG canvas bound to the output file
+            FileCreateSource src = new FileCreateSource(outputPath, false);
+            JpegOptions options = new JpegOptions() { Source = src, Quality = 100 };
+
+            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(options, canvasWidth, canvasHeight))
             {
                 int offsetX = 0;
-                foreach (string inputPath in inputPaths)
+                foreach (var path in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                    using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
                     {
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                        var bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
@@ -85,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a product catalog thumbnail that stitches multiple product photos side‑by‑side into a single JPEG for faster web loading.
- * 2. When creating a printable contact sheet where several scanned JPEG images need to be placed horizontally with top‑left alignment to maintain consistent margins.
- * 3. When building a dashboard that combines real‑time camera snapshots into one JPEG banner, ensuring each snapshot starts at the top‑left corner of the canvas.
- * 4. When preparing a batch of marketing assets that require merging brand‑logo JPEGs with promotional images into a single file with uniform alignment for automated publishing.
- * 5. When developing a mobile app that concatenates user‑uploaded JPEG pictures into a single image for sharing, needing top‑left placement to avoid gaps and preserve layout.
+ * 1. When creating a product catalog where multiple product photos need to be combined into a single high‑quality JPEG banner with all images aligned to the top‑left corner for a uniform layout.
+ * 2. When generating a printable photo collage from user‑uploaded JPEG files in a web application, and the developer wants to place each picture side‑by‑side on a canvas while keeping them top‑left aligned to avoid gaps.
+ * 3. When building an automated email marketing system that merges several promotional JPEG images into one email‑friendly image, ensuring consistent alignment at the top‑left to maintain visual hierarchy.
+ * 4. When developing a desktop utility that consolidates scanned document pages saved as JPEGs into a single overview image, aligning each page to the top‑left of the combined canvas for easy preview.
+ * 5. When implementing a digital signage solution that stitches multiple JPEG advertisements into a single slide, using C# and Aspose.Imaging to align the ads to the top‑left corner for a clean, side‑by‑side presentation.
  */
