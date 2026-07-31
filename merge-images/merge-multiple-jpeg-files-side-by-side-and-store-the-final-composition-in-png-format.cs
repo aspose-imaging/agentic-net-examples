@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
@@ -12,15 +13,12 @@ class Program
         try
         {
             // Hardcoded input JPEG file paths
-            string[] inputPaths = new[]
-            {
-                "image1.jpg",
-                "image2.jpg",
-                "image3.jpg"
-            };
+            string[] inputPaths = { "image1.jpg", "image2.jpg", "image3.jpg" };
+            // Hardcoded output PNG file path
+            string outputPath = "merged.png";
 
             // Validate each input file exists
-            foreach (string path in inputPaths)
+            foreach (var path in inputPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -29,15 +27,12 @@ class Program
                 }
             }
 
-            // Hardcoded output PNG path
-            string outputPath = "merged.png";
-
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Collect sizes of all input images
             List<Size> sizes = new List<Size>();
-            foreach (string path in inputPaths)
+            foreach (var path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
@@ -46,36 +41,28 @@ class Program
             }
 
             // Calculate canvas dimensions for horizontal merge
-            int canvasWidth = 0;
-            int canvasHeight = 0;
-            foreach (Size sz in sizes)
-            {
-                canvasWidth += sz.Width;
-                if (sz.Height > canvasHeight)
-                    canvasHeight = sz.Height;
-            }
+            int canvasWidth = sizes.Sum(s => s.Width);
+            int canvasHeight = sizes.Max(s => s.Height);
 
-            // Create PNG canvas with bound output source
-            PngOptions pngOptions = new PngOptions
-            {
-                Source = new FileCreateSource(outputPath, false)
-            };
+            // Prepare PNG creation options with bound output source
+            Source src = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions { Source = src };
 
+            // Create the output canvas
             using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
             {
                 int offsetX = 0;
-                foreach (string path in inputPaths)
+                // Merge each JPEG onto the canvas side by side
+                foreach (var path in inputPaths)
                 {
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
                         Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                        int[] pixels = img.LoadArgb32Pixels(img.Bounds);
-                        canvas.SaveArgb32Pixels(bounds, pixels);
+                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
-
-                // Save the bound canvas (output path already set in options)
+                // Save the bound canvas (output path already set in source)
                 canvas.Save();
             }
         }
@@ -88,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a single PNG banner that combines multiple product photos stored as JPEG files for an e‑commerce website, they can use this code to stitch the images side by side.
- * 2. When creating a printable PDF report that requires a composite image of several scanned JPEG pages displayed horizontally, the code merges them into a high‑quality PNG canvas before embedding.
- * 3. When building a photo‑gallery slideshow where thumbnail previews are composed from several JPEG thumbnails into one PNG strip, this routine assembles the thumbnails in a single row.
- * 4. When an automated marketing tool must combine customer‑uploaded JPEG logos into a single PNG header image for email campaigns, the code provides a fast C# solution using Aspose.Imaging.
- * 5. When a desktop application needs to compare visual differences by placing original JPEG screenshots next to each other in a PNG layout, the code creates the side‑by‑side composition for analysis.
+ * 1. When creating a product catalog thumbnail that combines multiple JPEG photos side by side into a single PNG for web display.
+ * 2. When generating a before‑and‑after comparison image by stitching two JPEG shots horizontally and exporting the result as a lossless PNG for documentation.
+ * 3. When building a photo‑strip collage for a social‑media post where several JPEG snapshots need to be merged into one PNG banner using C# and Aspose.Imaging.
+ * 4. When preparing a printable proof sheet that aligns several JPEG scans on a single canvas and saves it as a high‑resolution PNG for quality control.
+ * 5. When developing an automated report that assembles chart images captured as JPEGs into a single side‑by‑side PNG diagram for inclusion in PDF reports.
  */
