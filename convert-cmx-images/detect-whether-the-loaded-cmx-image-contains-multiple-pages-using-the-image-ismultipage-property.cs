@@ -9,17 +9,14 @@ class Program
     {
         try
         {
-            // Hardcoded input path
             string inputPath = "sample.cmx";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load CMX image
             using (CmxImage image = (CmxImage)Image.Load(inputPath))
             {
                 bool isMultiPage = false;
@@ -27,8 +24,6 @@ class Program
                 {
                     isMultiPage = multipageImage.PageCount > 1;
                 }
-
-                // Output the result
                 Console.WriteLine($"Is multi-page: {isMultiPage}");
             }
         }
@@ -41,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD application imports CMX drawings and must decide whether to treat the file as a single sheet or iterate through multiple pages for batch rendering.
- * 2. When a document conversion service needs to split a multi‑page CMX file into separate PNGs, it first checks Image.IsMultiPage to avoid unnecessary processing on single‑page files.
- * 3. When an automated quality‑control pipeline validates that a submitted CMX design contains more than one layout page before triggering a multi‑page review workflow.
- * 4. When a web‑based viewer loads CMX assets and wants to display navigation controls only if the loaded image reports a page count greater than one via IMultipageImage.
- * 5. When a reporting tool aggregates statistics on CMX files and uses the IsMultiPage property to categorize files into single‑page versus multi‑page groups for analytics.
+ * 1. When a CAD application imports a CMX file and must decide whether to render a single drawing or iterate through multiple pages for batch processing.
+ * 2. When an automated document conversion service needs to split a multi‑page CMX drawing into separate PNG files, it first checks the Image.IsMultiPage property.
+ * 3. When a quality‑control script validates incoming design assets and flags multi‑page CMX files that require special handling before publishing.
+ * 4. When a cloud‑based image viewer loads a CMX file and determines whether to enable page navigation controls based on the page count.
+ * 5. When a migration tool moves legacy CMX drawings to a new repository and uses the IMultipageImage interface to identify and log files that contain more than one page.
  */
