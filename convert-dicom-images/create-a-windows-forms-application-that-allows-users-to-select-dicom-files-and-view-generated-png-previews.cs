@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,8 +11,9 @@ class Program
     {
         try
         {
-            // Hardcoded input DICOM file path
-            string inputPath = "sample.dcm";
+            // Hardcoded input DICOM file and output directory
+            string inputPath = "Input/sample.dcm";
+            string outputDirectory = "Output";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,33 +22,23 @@ class Program
                 return;
             }
 
-            // Hardcoded output directory for PNG previews
-            string outputDirectory = "Previews";
-
             // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            Directory.CreateDirectory(outputDirectory);
 
-            // Open DICOM file as a stream
-            using (FileStream stream = File.OpenRead(inputPath))
+            // Load DICOM image and generate PNG previews for each page
+            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
             {
-                // Load DICOM image from stream
-                using (DicomImage dicomImage = new DicomImage(stream))
+                int pageIndex = 0;
+                foreach (var dicomPage in dicomImage.DicomPages)
                 {
-                    // Iterate through each page in the DICOM image
-                    foreach (DicomPage page in dicomImage.DicomPages)
-                    {
-                        // Build PNG file path for the current page
-                        string pngPath = Path.Combine(outputDirectory, $"page_{page.Index}.png");
+                    string outputPath = Path.Combine(outputDirectory, $"page_{pageIndex}.png");
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Ensure the directory for the PNG file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
+                    // Save the page as PNG
+                    dicomPage.Save(outputPath, new PngOptions());
 
-                        // Save the page as a PNG image
-                        page.Save(pngPath, new PngOptions());
-                    }
+                    pageIndex++;
                 }
             }
         }
@@ -59,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to generate quick PNG thumbnails of DICOM scans so radiologists can browse studies in a Windows Forms viewer.
- * 2. When a hospital IT system must automatically convert multi‑frame DICOM files into separate PNG images for integration with electronic health record portals.
- * 3. When a research lab wants to extract each slice of a 3D MRI DICOM series and save them as PNG files for analysis with standard image‑processing tools.
- * 4. When a developer builds a desktop program that lets users select a DICOM file and instantly preview its pages as PNGs without requiring external viewers.
- * 5. When a batch‑processing tool has to verify the existence of DICOM files, create an output folder, and export every DICOM page to PNG using Aspose.Imaging in C#.
+ * 1. When a radiology application needs to let clinicians quickly preview multi‑frame DICOM studies as PNG thumbnails in a Windows Forms viewer.
+ * 2. When a health‑tech startup wants to generate web‑ready PNG snapshots from DICOM files for integration into electronic health record portals.
+ * 3. When a research lab must batch‑convert DICOM series into PNG images for machine‑learning preprocessing using C# and Aspose.Imaging.
+ * 4. When a hospital IT team needs a simple Windows desktop tool that lets users select a DICOM file and instantly view each slice as a PNG without installing a full PACS viewer.
+ * 5. When a medical device manufacturer requires an automated C# utility to extract every page of a multi‑page DICOM file and save them as PNG files for quality‑control documentation.
  */
