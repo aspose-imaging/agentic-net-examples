@@ -1,9 +1,13 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,7 +15,7 @@ class Program
     {
         try
         {
-            string inputPath = "sample.cmx";
+            string inputPath = "input.cmx";
             string outputPath = "output.pdf";
 
             if (!File.Exists(inputPath))
@@ -21,15 +25,50 @@ class Program
             }
 
             string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(outputDir);
 
-            using (Image image = Image.Load(inputPath))
+            // Load CMX image
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
             {
-                PdfOptions pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                // Cache all pages to avoid repeated loading
+                foreach (Image page in cmx.Pages)
+                {
+                    page.CacheData();
+                }
+
+                // Determine canvas size (stack pages vertically)
+                int maxWidth = 0;
+                int totalHeight = 0;
+                foreach (Image page in cmx.Pages)
+                {
+                    if (page.Width > maxWidth) maxWidth = page.Width;
+                    totalHeight += page.Height;
+                }
+
+                // Create an unbound raster canvas (JPEG format)
+                using (RasterImage canvas = (RasterImage)Image.Create(new JpegOptions(), maxWidth, totalHeight))
+                {
+                    int offsetY = 0;
+                    foreach (Image page in cmx.Pages)
+                    {
+                        // Render page to a temporary PNG in memory
+                        using (MemoryStream ms = new MemoryStream())
+                        {
+                            page.Save(ms, new PngOptions());
+                            ms.Position = 0;
+                            using (RasterImage pageRaster = (RasterImage)Image.Load(ms))
+                            {
+                                // Copy page pixels onto canvas
+                                Rectangle bounds = new Rectangle(0, offsetY, pageRaster.Width, pageRaster.Height);
+                                canvas.SaveArgb32Pixels(bounds, pageRaster.LoadArgb32Pixels(pageRaster.Bounds));
+                                offsetY += pageRaster.Height;
+                            }
+                        }
+                    }
+
+                    // Save the combined canvas as a single‑page PDF
+                    canvas.Save(outputPath, new PdfOptions());
+                }
             }
         }
         catch (Exception ex)
@@ -41,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a printing company receives multi‑page CMX artwork and must deliver a single‑page PDF proof to a client, they can use this C# code with Aspose.Imaging to flatten all CMX pages into one PDF page.
- * 2. When an archival system needs to store legacy CorelDRAW CMX files as compact, searchable PDFs without preserving individual layers, the code converts the CMX into a single‑page PDF for easy indexing.
- * 3. When a web application allows users to upload CMX designs and instantly preview them in a browser, the developer can run this snippet to transform the multi‑page CMX into a single‑page PDF that browsers render natively.
- * 4. When an automated workflow processes batch CMX files and consolidates each document into a single PDF for downstream OCR processing, the Aspose.Imaging C# routine provides the required conversion.
- * 5. When a mobile app needs to display a CMX drawing as a single image on a small screen, the developer can flatten the CMX pages into one PDF page using this code and then render it as a bitmap.
+ * 1. When a printing company receives multi‑page CorelDRAW CMX files and must deliver a single‑page PDF proof to a client for quick review.
+ * 2. When an archival system needs to store legacy CMX artwork as a compact PDF where all layers are flattened onto one page for easy indexing.
+ * 3. When a web application generates a downloadable PDF catalog from a CMX design that contains several pages, merging them into one continuous page for seamless scrolling.
+ * 4. When a document management workflow requires converting multi‑page CMX drawings into a single‑page PDF to embed in a larger report without preserving individual page boundaries.
+ * 5. When an automated batch process consolidates CMX files into a single‑page PDF for compliance audits, ensuring all pages are rasterized and flattened for consistent rendering.
  */
