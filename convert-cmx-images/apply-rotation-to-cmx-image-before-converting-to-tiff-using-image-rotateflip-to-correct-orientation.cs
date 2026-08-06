@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -25,14 +27,16 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CMX image
-            using (Image image = Image.Load(inputPath))
+            using (Image cmxImage = Image.Load(inputPath))
             {
-                // Rotate the image 90 degrees clockwise (adjust as needed)
-                image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                // Rotate 90 degrees clockwise (adjust as needed)
+                cmxImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+
+                // Prepare TIFF save options
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
                 // Save the rotated image as TIFF
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                image.Save(outputPath, tiffOptions);
+                cmxImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -44,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD application exports drawings as CMX files that appear sideways, a developer can use this code to rotate the image and convert it to a correctly oriented TIFF for printing or archiving.
- * 2. When an automated document processing pipeline receives scanned engineering schematics in CMX format and needs to standardize them to TIFF while fixing orientation, this snippet provides the necessary rotation and conversion steps.
- * 3. When integrating legacy CorelDRAW assets into a modern .NET web service, developers can employ this code to rotate misaligned CMX images before saving them as TIFF for web display.
- * 4. When building a batch job that prepares CMX drawings for OCR, the code can rotate each image to the proper orientation and output TIFF files compatible with OCR engines.
- * 5. When a desktop utility must ensure that CMX files exported from different workstations have a uniform orientation before being stored in a digital asset management system, this example shows how to rotate and convert them to TIFF using Aspose.Imaging for .NET.
+ * 1. When a printing workflow receives CMX artwork that was scanned upside‑down and must be rotated before archiving it as a TIFF file for downstream printers.
+ * 2. When a document management system imports legacy CorelDRAW CMX drawings and needs to correct their orientation before converting them to searchable TIFF images.
+ * 3. When a batch‑processing service handles CAD‑style CMX files from field engineers, applying a 90‑degree rotation to match map orientation before saving them as TIFF for GIS integration.
+ * 4. When an e‑learning platform converts user‑uploaded CMX diagrams into TIFF thumbnails and must ensure the diagrams are displayed upright on the course pages.
+ * 5. When a medical imaging application receives CMX scans of handwritten notes, rotates them to the proper view, and stores them as TIFF for compliance and long‑term storage.
  */
