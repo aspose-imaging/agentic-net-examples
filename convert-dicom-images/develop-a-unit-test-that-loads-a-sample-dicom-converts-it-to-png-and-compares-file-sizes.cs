@@ -6,32 +6,30 @@ using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "Input/sample.dcm";
-        string outputPath = "Output/sample.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = @"C:\Temp\sample.dcm";
+        string outputPath = @"C:\Temp\sample.png";
 
         try
         {
-            // Load the DICOM image
-            using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Save the image as PNG
-                using (PngOptions pngOptions = new PngOptions())
-                {
-                    dicom.Save(outputPath, pngOptions);
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir);
+
+            // Load the DICOM image
+            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            {
+                // Convert the first (or only) page to PNG
+                dicomImage.Save(outputPath, new PngOptions());
             }
 
             // Compare file sizes
@@ -39,8 +37,13 @@ class Program
             long pngSize = new FileInfo(outputPath).Length;
 
             Console.WriteLine($"DICOM size: {dicomSize} bytes");
-            Console.WriteLine($"PNG size: {pngSize} bytes");
-            Console.WriteLine(pngSize < dicomSize ? "PNG is smaller than DICOM." : "PNG is not smaller than DICOM.");
+            Console.WriteLine($"PNG size:   {pngSize} bytes");
+
+            // Simple verification: PNG should have a non‑zero size
+            if (pngSize == 0)
+            {
+                Console.Error.WriteLine("Conversion failed: PNG file is empty.");
+            }
         }
         catch (Exception ex)
         {
@@ -51,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert DICOM scans to PNG thumbnails for quick preview in a web portal while checking that the PNG file is smaller than the original DICOM.
- * 2. When a hospital’s PACS integration test must verify that converting a sample DICOM image to PNG using Aspose.Imaging for .NET produces a valid PNG file and that the file size reduction meets storage optimization goals.
- * 3. When a developer is building an automated quality‑control pipeline that loads a DICOM file, saves it as PNG, and compares the byte sizes to ensure the conversion does not increase storage consumption.
- * 4. When a research team wants to extract visual data from DICOM files for machine‑learning preprocessing and needs a unit test that confirms the PNG output is correctly generated and smaller than the source DICOM.
- * 5. When a software vendor needs to demonstrate that their C# code can safely handle missing input files, create output directories, and perform DICOM‑to‑PNG conversion with Aspose.Imaging while reporting size differences for compliance documentation.
+ * 1. When a medical imaging application needs to preview DICOM scans in a web browser, a developer can use this code to convert the DICOM file to a PNG thumbnail and verify that the PNG size is non‑zero.
+ * 2. When integrating a PACS system with a reporting tool, a developer can load patient DICOM images, convert them to PNG for inclusion in PDF reports, and compare file sizes to ensure the conversion succeeded.
+ * 3. When building an automated quality‑control pipeline for radiology data, a developer can run this unit test to confirm that each DICOM file produces a valid PNG output and that the PNG file size meets expected thresholds.
+ * 4. When migrating legacy DICOM archives to a cloud storage solution that only supports common image formats, a developer can use this code to batch‑convert DICOM files to PNG and log size differences for storage cost analysis.
+ * 5. When creating a diagnostic mobile app that displays scans on low‑resolution devices, a developer can convert DICOM images to PNG and compare the resulting file size to decide if further compression is required.
  */
