@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.CoreExceptions.ImageFormats;
+using Aspose.Imaging.CoreExceptions;
 
 class Program
 {
@@ -22,23 +23,36 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
 
-            // Load the DICOM image (may throw DicomImageException)
-            using (Image image = Image.Load(inputPath))
+            try
             {
-                // Save the image as PNG
-                image.Save(outputPath, new PngOptions());
+                // Load DICOM image
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Save as PNG
+                    image.Save(outputPath, new PngOptions());
+                }
+            }
+            catch (DicomImageException dex)
+            {
+                // Log Aspose.Imaging DICOM-specific errors (e.g., corrupted data)
+                Console.Error.WriteLine($"Dicom conversion error: {dex.Message}");
+            }
+            catch (ImageSaveException isex)
+            {
+                // Log errors that occur during saving
+                Console.Error.WriteLine($"Image save error: {isex.Message}");
+            }
+            catch (PngImageException pex)
+            {
+                // Log PNG-specific errors
+                Console.Error.WriteLine($"PNG conversion error: {pex.Message}");
             }
         }
-        // Capture specific DICOM conversion errors
-        catch (DicomImageException ex)
-        {
-            Console.Error.WriteLine($"Dicom conversion error: {ex.Message}");
-        }
-        // Capture any other runtime errors
         catch (Exception ex)
         {
+            // Catch any other unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -46,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application must convert patient DICOM scans to PNG thumbnails and needs to log conversion failures caused by corrupted DICOM files.
- * 2. When a hospital's PACS integration script processes batch DICOM files and must capture Aspose.Imaging DicomImageException to prevent the entire batch from stopping.
- * 3. When a cloud‑based image processing service receives DICOM uploads and wants to record detailed error messages if the data is incomplete or damaged during PNG conversion.
- * 4. When a diagnostic software tool validates incoming DICOM images before display and requires exception handling to alert users of unreadable files.
- * 5. When an automated ETL pipeline extracts DICOM images, converts them to PNG for analytics, and needs to log any runtime or format‑specific errors to a monitoring system.
+ * 1. When a hospital’s PACS system automatically converts incoming DICOM scans to PNG thumbnails for a web portal and needs to capture and log conversion failures caused by corrupted DICOM data.
+ * 2. When a research lab processes large batches of medical images and wants to record any DicomImageException that occurs during batch conversion to PNG so the problematic files can be reviewed later.
+ * 3. When a telemedicine application receives patient‑uploaded DICOM files and must safely attempt to save them as PNG while logging detailed Aspose.Imaging errors if the file is incomplete or damaged.
+ * 4. When an imaging middleware service integrates Aspose.Imaging to transform DICOM images into PNG for downstream AI analysis and needs to log ImageSaveException or PngImageException when the save step fails.
+ * 5. When a desktop utility converts DICOM files to PNG for clinicians and must provide clear error messages in the console for any unexpected exceptions, ensuring corrupted data does not crash the application.
  */
