@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.png";
-            string outputPath = @"C:\temp\output.tif";
+            string inputPath = "C:\\temp\\input.png";
+            string outputPath = "C:\\temp\\output.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,26 +21,19 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure TIFF options for CCITT Group 4 compression (monochrome)
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                {
-                    // 1 bit per pixel
-                    BitsPerSample = new ushort[] { 1 },
+                // Configure TIFF options for CCITT Group 4 (monochrome) compression
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Compression = TiffCompressions.CcittFax4;   // CCITT Group 4
+                tiffOptions.BitsPerSample = new ushort[] { 1 };        // 1 bit per pixel
+                tiffOptions.Photometric = TiffPhotometrics.MinIsBlack; // Black = 0
 
-                    // Black is 0, white is 1
-                    Photometric = TiffPhotometrics.MinIsBlack,
-
-                    // CCITT Group 4 compression
-                    Compression = TiffCompressions.CcittFax4
-                };
-
-                // Save the image as a monochrome TIFF with the specified options
+                // Save the image as TIFF with the specified options
                 image.Save(outputPath, tiffOptions);
             }
         }
@@ -53,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert scanned PNG documents to monochrome TIFF files with CCITT Group 4 compression for long‑term legal archiving using C# and Aspose.Imaging.
- * 2. When a medical imaging application must export X‑ray images as 1‑bit per pixel TIFFs to meet DICOM storage requirements while minimizing file size.
- * 3. When a document management system requires batch conversion of color PNGs to black‑and‑white TIFFs with MinIsBlack photometric settings for OCR preprocessing.
- * 4. When a printing workflow needs to generate high‑resolution, low‑bandwidth TIFF files for fax transmission by applying CCITT Fax 4 compression in a .NET service.
- * 5. When a GIS tool must store raster map overlays as compact monochrome TIFF layers, using Aspose.Imaging to set BitsPerSample = 1 and ensure compatibility with legacy GIS software.
+ * 1. When a developer needs to generate fax‑compatible monochrome documents by converting PNG scans to TIFF files with CCITT Group 4 compression for minimal file size.
+ * 2. When an archival system requires storing black‑and‑white engineering drawings as 1‑bit per pixel TIFF images to preserve quality while reducing storage costs.
+ * 3. When a medical imaging workflow must transform scanned pathology slides from PNG to a standard TIFF format with MinIsBlack photometric interpretation for downstream analysis tools.
+ * 4. When a printing pipeline needs to create high‑speed, low‑bandwidth print jobs by converting color PNG assets to monochrome TIFF using Aspose.Imaging in a C# application.
+ * 5. When a document management solution automates the conversion of user‑uploaded PNG receipts into compact, searchable TIFF files that comply with CCITT Group 4 fax standards.
  */
