@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "c:\\temp\\sample.dicom";
-            string outputPath = "c:\\temp\\resized.png";
+            string inputPath = @"c:\temp\sample.dicom";
+            string outputPath = @"c:\temp\resized.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -25,15 +25,17 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the DICOM image
-            using (DicomImage image = (DicomImage)Image.Load(inputPath))
+            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
             {
-                // Resize to the desired dimensions (e.g., 800x600) using Bilinear resampling
-                int newWidth = 800;
-                int newHeight = 600;
-                image.Resize(newWidth, newHeight, ResizeType.BilinearResample);
+                // Desired dimensions for resizing
+                int newWidth = 800;   // set your target width
+                int newHeight = 600;  // set your target height
+
+                // Resize using Bilinear resampling
+                dicomImage.Resize(newWidth, newHeight, ResizeType.BilinearResample);
 
                 // Save the resized image as PNG
-                image.Save(outputPath, new PngOptions());
+                dicomImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -45,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging web portal needs fast‑loading thumbnail previews of DICOM scans, developers resize the image to 800×600 and convert it to PNG for browser display.
- * 2. When generating PDF radiology reports, developers downscale DICOM images to fit the page layout and save them as PNG to ensure the PDF library can embed the graphics.
- * 3. When preparing training data for a machine‑learning model, developers resize DICOM files to a uniform resolution and convert them to PNG to provide consistent, lightweight inputs.
- * 4. When a hospital’s PACS must transmit scans to a third‑party viewer that only accepts PNG, developers resize the DICOM image to a manageable size and perform the format conversion.
- * 5. When an electronic health record system stores patient scan thumbnails for quick lookup, developers use this code to downscale the original DICOM and save it as a PNG thumbnail.
+ * 1. When a medical imaging application needs to generate thumbnail previews of large DICOM scans for a web portal, a developer can resize the DICOM image to 800×600 pixels and save it as a PNG for fast loading.
+ * 2. When integrating DICOM files into a hospital’s electronic health record system that only supports PNG, a developer can use the Image.Resize method to downscale the image before conversion to meet size constraints.
+ * 3. When preparing DICOM radiology images for machine‑learning preprocessing pipelines that require uniform input dimensions, a developer can resize each image to a fixed width and height and export it as PNG.
+ * 4. When creating printable reports that embed DICOM images as PNG graphics with consistent layout, a developer can resize the original DICOM to the desired dimensions to ensure the report fits on standard paper sizes.
+ * 5. When sending DICOM images over a low‑bandwidth network to a remote diagnostic workstation, a developer can reduce the pixel count by resizing the image and converting it to PNG to minimize transfer time.
  */
