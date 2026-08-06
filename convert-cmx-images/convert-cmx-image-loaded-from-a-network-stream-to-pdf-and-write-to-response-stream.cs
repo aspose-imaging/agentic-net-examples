@@ -2,50 +2,39 @@ using System;
 using System.IO;
 using System.Net.Http;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static async System.Threading.Tasks.Task Main()
+    static void Main()
     {
-        // Hardcoded paths as required
-        string inputPath = @"C:\Windows\System32\notepad.exe"; // dummy existing file for existence check
+        // Hardcoded input URL and output file path
+        string inputUrl = "https://example.com/sample.cmx";
         string outputPath = @"C:\Temp\output.pdf";
-
-        // Input path existence check (exactly as specified)
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists (unconditionally)
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // URL of the CMX image to load from a network stream
-            string cmxUrl = "https://example.com/sample.cmx";
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Download the CMX file into a stream
+            // Download the CMX image into a memory stream
             using (HttpClient httpClient = new HttpClient())
-            using (HttpResponseMessage response = await httpClient.GetAsync(cmxUrl))
-            using (Stream networkStream = await response.Content.ReadAsStreamAsync())
+            using (Stream networkStream = httpClient.GetStreamAsync(inputUrl).Result)
+            using (MemoryStream cmxStream = new MemoryStream())
             {
-                // Load CMX image from the network stream using StreamContainer
-                using (CmxImage cmxImage = new CmxImage(new StreamContainer(networkStream), null))
-                {
-                    // Optional: cache data for performance
-                    cmxImage.CacheData();
+                networkStream.CopyTo(cmxStream);
+                cmxStream.Position = 0; // Reset stream position for loading
 
+                // Load the CMX image from the stream
+                using (Image image = Image.Load(cmxStream))
+                {
                     // Prepare PDF save options
                     PdfOptions pdfOptions = new PdfOptions();
 
-                    // Write the converted PDF to the response stream (here using Console output as placeholder)
-                    using (Stream outputStream = Console.OpenStandardOutput())
+                    // Save the image as PDF to the output file stream
+                    using (FileStream outputFileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
                     {
-                        cmxImage.Save(outputStream, pdfOptions);
+                        image.Save(outputFileStream, pdfOptions);
                     }
                 }
             }
@@ -59,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to fetch a CMX vector drawing from a remote server, convert it to PDF, and stream the result directly to a client’s browser without writing intermediate files.
- * 2. When an enterprise document management system must ingest legacy CMX CAD files from a cloud storage endpoint, transform them into searchable PDF documents, and return the PDFs via an API response stream.
- * 3. When a mobile backend processes user‑uploaded CMX schematics hosted on a CDN, converts them to PDF for archival, and streams the PDF back to the mobile app for preview.
- * 4. When an automated reporting tool downloads CMX charts from a partner’s REST endpoint, converts them to PDF on the fly, and pipes the PDF into an email attachment stream.
- * 5. When a SaaS platform provides on‑demand PDF rendering of CMX technical illustrations stored on a remote server, delivering the PDF through an HTTP response without persisting temporary files on disk.
+ * 1. When a web application must fetch a CorelDRAW CMX file from a remote URL using HttpClient, convert it to a PDF with Aspose.Imaging, and stream the PDF directly to the browser for preview.
+ * 2. When an automated reporting service downloads CMX diagrams over HTTP, transforms them into PDF files via Image.Load and PdfOptions, and saves the PDFs to a local archive for compliance auditing.
+ * 3. When a document management system needs to ingest CMX graphics received from a network stream, convert them to PDF, and write the PDF to a response stream for immediate client download.
+ * 4. When a microservice processes incoming CMX image streams, converts them to PDF format for downstream OCR processing, and forwards the PDF through a FileStream to another service.
+ * 5. When a desktop utility downloads CMX assets from an external server, converts them to PDF using Aspose.Imaging, and writes the PDF to a specified folder for offline viewing.
  */
