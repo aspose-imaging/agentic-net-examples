@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -9,11 +10,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input and output file paths
             string inputPath = @"C:\Images\source.jpg";
             string outputPath = @"C:\Images\output.png";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -29,8 +30,9 @@ class Program
                 // Configure PNG options with a balanced compression level
                 var pngOptions = new PngOptions
                 {
-                    // CompressionLevel 6 provides a good trade‑off between size and speed
+                    // CompressionLevel range is 0-9; 6 offers a good trade‑off
                     CompressionLevel = 6,
+                    // Optional: enable progressive loading
                     Progressive = true
                 };
 
@@ -47,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert high‑resolution JPEG photographs to PNG for web delivery while keeping file size low and preserving visual quality, they can set CompressionLevel 6 in PngOptions.
- * 2. When an e‑commerce platform generates product thumbnails on the fly and wants faster page loads, the code can be used to produce progressive PNGs with balanced compression.
- * 3. When a document management system archives scanned documents as lossless PNGs but must stay within storage quotas, adjusting the PNG compression level helps achieve the required size‑quality trade‑off.
- * 4. When a mobile app syncs user‑generated images to a cloud service and needs to minimize bandwidth usage without noticeable degradation, developers can apply this C# snippet to save images as PNG with moderate compression.
- * 5. When a reporting tool exports charts as PNG images for inclusion in PDF reports and wants consistent rendering across browsers, configuring the PNG options with a specific compression level ensures predictable file size and quality.
+ * 1. When a web application needs to convert user‑uploaded JPEG photos to PNG with a balanced compression level to reduce bandwidth while preserving visual quality.
+ * 2. When a desktop utility processes a batch of high‑resolution images and saves them as progressive PNG files for faster incremental rendering in browsers.
+ * 3. When an e‑commerce platform generates product thumbnails in PNG format and wants to control the compression level to keep file sizes small without noticeable loss.
+ * 4. When a mobile app prepares images for offline storage by converting JPEGs to PNG with a specific CompressionLevel to optimize device storage usage.
+ * 5. When a document management system archives scanned documents as PNG and requires consistent compression settings to maintain a predictable archive size.
  */
