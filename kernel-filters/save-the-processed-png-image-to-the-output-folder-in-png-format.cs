@@ -9,33 +9,30 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\input.bmp";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.jpg";
             string outputPath = @"C:\Images\output.png";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image using Aspose.Imaging
+            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // (Optional) image processing could be performed here
-
-                // Save the image as PNG with default options
+                // Save the image as PNG using default options
                 PngOptions pngOptions = new PngOptions();
                 image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -43,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy BMP files to PNG for web delivery, this code loads the BMP and saves it as a PNG with default options.
- * 2. When an automated batch job must ensure that all images in a folder are stored in a lossless PNG format for archival, the snippet verifies the input file, creates the output directory, and performs the conversion.
- * 3. When a C# application processes user‑uploaded bitmap images and must return a PNG thumbnail, the example shows how to load the bitmap, optionally apply processing, and save the result as PNG.
- * 4. When a Windows service monitors a directory for new BMP assets and needs to generate PNG versions for downstream services, the code demonstrates the required file existence check and directory creation before saving.
- * 5. When a developer is building a migration tool that standardizes image formats across a legacy system, this snippet provides a simple way to read each BMP and write it out as a PNG using Aspose.Imaging.
+ * 1. When a developer needs to convert a JPEG photograph to a lossless PNG for web display or archival, they can use this code to load the JPEG and save it as PNG in a specified folder.
+ * 2. When an application must ensure that all uploaded images are stored in a consistent PNG format before further processing, this snippet validates the source file and writes the PNG output using Aspose.Imaging.
+ * 3. When a batch job processes images from a legacy system and requires creating PNG thumbnails for a mobile app, the code demonstrates loading the original image and saving it with default PNG options.
+ * 4. When a developer wants to programmatically generate PNG assets for a reporting tool and needs to guarantee the output directory exists, the example shows directory creation and error handling while saving the image.
+ * 5. When integrating image conversion into a C# service that receives JPEG files and must deliver PNG files to downstream services, this example provides a simple, exception‑safe way to perform the conversion using Aspose.Imaging.ImageOptions.
  */

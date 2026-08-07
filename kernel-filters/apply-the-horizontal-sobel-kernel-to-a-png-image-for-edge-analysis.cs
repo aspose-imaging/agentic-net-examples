@@ -9,18 +9,18 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\temp\input.png";
-            string outputPath = @"C:\temp\output_sobel.png";
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\input.png";
+            string outputPath = "C:\\temp\\output_sobel.png";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
@@ -37,11 +37,8 @@ class Program
                     { -1, 0, 1 }
                 };
 
-                // Create convolution filter options with the Sobel kernel
-                var filterOptions = new ConvolutionFilterOptions(sobelKernel);
-
-                // Apply the filter to the entire image bounds
-                raster.Filter(raster.Bounds, filterOptions);
+                // Apply the convolution filter over the entire image bounds
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(sobelKernel));
 
                 // Save the processed image
                 raster.Save(outputPath);
@@ -56,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to detect horizontal edges in scanned PNG receipts to improve OCR accuracy, they can use the Aspose.Imaging convolution filter with a Sobel kernel as shown.
- * 2. When building a medical imaging application that highlights bone structures in PNG X‑ray images, applying the horizontal Sobel convolution filter emphasizes linear features for analysis.
- * 3. When creating a quality‑control system for printed circuit boards, applying the Sobel filter to PNG photographs of the board reveals missing or misaligned traces by extracting horizontal edges.
- * 4. When developing a computer‑vision preprocessing step for autonomous drones, the code can generate a horizontal edge map from PNG terrain snapshots using the Sobel convolution filter to aid navigation.
- * 5. When generating artistic edge‑enhanced thumbnails of PNG photos for a web gallery, the Sobel filter provides a fast way to accentuate outlines while preserving the original image format.
+ * 1. When a developer needs to detect horizontal edges in a PNG photograph to highlight road lane markings for a traffic‑analysis application.
+ * 2. When a C# program must preprocess scanned documents by applying a Sobel filter to emphasize text baselines before OCR processing.
+ * 3. When an image‑processing pipeline requires extracting horizontal gradients from satellite PNG tiles to identify river boundaries.
+ * 4. When a developer wants to create a visual effect that outlines the top and bottom edges of objects in a game sprite sheet using convolution.
+ * 5. When a quality‑control tool needs to compare the edge intensity of manufactured product images by generating Sobel‑filtered PNGs for defect detection.
  */

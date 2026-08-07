@@ -2,36 +2,49 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output.jpg";
+
         try
         {
-            string inputPath = "input.jpg";
-            string outputPath = "output.jpg";
-
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (JpegImage image = (JpegImage)Image.Load(inputPath))
+            // Load the JPEG image
+            using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage to access raster-specific methods
+                RasterImage raster = (RasterImage)image;
+
                 // Correct orientation based on EXIF data
-                image.AutoRotate();
+                raster.AutoRotate();
 
-                // Apply a sharpen filter
-                image.Filter(image.Bounds, new SharpenFilterOptions(5, 4.0));
+                // Apply a sharpen filter to the entire image
+                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                // Save the processed image as JPEG
-                JpegOptions jpegOptions = new JpegOptions();
+                // Prepare JPEG save options
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    Quality = 90,
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                // Save the processed image
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -44,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application receives user‑uploaded JPEG photos that may have been taken on phones with different orientations, a developer can use this code to auto‑rotate the images based on EXIF data before applying a sharpen filter and saving them for display.
- * 2. When building a batch image‑processing tool that prepares product photos for an e‑commerce catalog, a developer can run this code to correct the orientation of each JPEG, enhance details with a sharpen filter, and output optimized JPEG files.
- * 3. When integrating an automated photo‑enhancement pipeline into a digital asset management system, a developer can employ this code to ensure all stored JPEGs have the correct orientation before applying kernel‑based filters such as sharpening.
- * 4. When creating a desktop utility that fixes rotated screenshots taken on mobile devices and improves their clarity, a developer can use this C# example to auto‑rotate the JPEG, apply a sharpen filter, and save the result.
- * 5. When developing a server‑side image service that generates thumbnails from user‑submitted JPEGs, a developer can first correct EXIF orientation with AutoRotate, sharpen the image for better visual quality, and then save the processed JPEG for further resizing.
+ * 1. When processing user‑uploaded photos for a web gallery, a developer must auto‑rotate JPEGs based on EXIF orientation before sharpening them to ensure thumbnails display correctly.
+ * 2. When building a desktop photo‑editing tool that applies kernel filters, a developer needs to correct the image’s orientation first so the filter aligns with the visual content.
+ * 3. When generating print‑ready images from mobile camera shots, a developer uses this code to normalize EXIF rotation and then enhance edge detail with a sharpen filter.
+ * 4. When creating an automated batch‑processing pipeline for product catalog images, a developer employs the routine to fix orientation and improve clarity before saving high‑quality JPEGs.
+ * 5. When integrating image preprocessing into a machine‑learning data pipeline, a developer applies AutoRotate and a sharpen filter to JPEG inputs to provide consistently oriented and sharpened training data.
  */

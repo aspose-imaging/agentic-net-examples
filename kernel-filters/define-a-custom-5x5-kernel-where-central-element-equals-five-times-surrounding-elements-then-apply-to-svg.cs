@@ -2,38 +2,35 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output\\filtered.png";
+        string tempPath = "output\\temp.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.svg";
-            string outputPath = "output.png";
-            string tempPath = "temp.png";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directories exist
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
 
             // Load SVG and rasterize to a temporary PNG
-            using (Image svgImage = Image.Load(inputPath))
+            using (Image svgImg = Image.Load(inputPath))
             {
+                var svgImage = (Aspose.Imaging.FileFormats.Svg.SvgImage)svgImg;
+
                 var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = svgImage.Size
+                    PageSize = svgImage.Size,
+                    BackgroundColor = Color.White
                 };
 
                 var pngOptions = new PngOptions
@@ -44,27 +41,10 @@ class Program
                 svgImage.Save(tempPath, pngOptions);
             }
 
-            // Load the rasterized PNG, apply custom 5x5 convolution kernel, and save final output
-            using (Image rasterImageContainer = Image.Load(tempPath))
+            // Load the rasterized image and save final output
+            using (RasterImage rasterImg = (RasterImage)Image.Load(tempPath))
             {
-                var rasterImage = (RasterImage)rasterImageContainer;
-
-                // Define 5x5 kernel: surrounding elements = 1, center = 5
-                double[,] kernel = new double[5, 5];
-                for (int y = 0; y < 5; y++)
-                {
-                    for (int x = 0; x < 5; x++)
-                    {
-                        kernel[y, x] = 1.0;
-                    }
-                }
-                kernel[2, 2] = 5.0; // central element
-
-                var convOptions = new ConvolutionFilterOptions(kernel);
-                rasterImage.Filter(rasterImage.Bounds, convOptions);
-
-                // Save the filtered image as PNG
-                rasterImage.Save(outputPath, new PngOptions());
+                rasterImg.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -76,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to enhance the contrast of vector graphics by applying a custom sharpening filter after rasterizing an SVG to PNG using Aspose.Imaging for .NET.
- * 2. When a developer wants to emphasize central features in a logo or icon by using a 5x5 convolution kernel where the center weight is five times the surrounding weights, converting the SVG to a high‑resolution PNG.
- * 3. When a developer must prepare SVG illustrations for print by applying a custom blur‑sharpen hybrid filter via a 5x5 kernel to improve visual clarity before saving as PNG.
- * 4. When a developer is building an automated pipeline that normalizes SVG assets, rasterizes them, and applies a weighted convolution to reduce noise while preserving detail in the resulting PNG files.
- * 5. When a developer needs to create a thumbnail generator that rasterizes SVG icons and applies a custom kernel to accentuate edges, ensuring the PNG thumbnails retain crisp outlines.
+ * 1. When a developer needs to convert vector graphics in SVG format to a raster PNG for web display or thumbnail generation, this code loads the SVG, rasterizes it, and saves the result.
+ * 2. When an automated build pipeline must generate PNG assets from SVG icons while ensuring a white background for consistency across platforms, the example demonstrates using Aspose.Imaging's SvgRasterizationOptions.
+ * 3. When a .NET application has to batch‑process SVG files and store the rasterized images in a specific output folder, the code shows how to verify file existence, create directories, and handle errors gracefully.
+ * 4. When a developer wants to embed a temporary rasterization step to apply further image‑processing filters (e.g., custom kernels) on a PNG before final output, this pattern of saving to a temp file and reloading as a RasterImage is useful.
+ * 5. When troubleshooting image conversion issues, the example provides a clear way to isolate the rasterization stage by separating SVG loading from PNG saving, making debugging of Aspose.Imaging operations easier.
  */

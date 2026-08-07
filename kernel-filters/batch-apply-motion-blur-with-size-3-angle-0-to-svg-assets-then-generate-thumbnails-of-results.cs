@@ -2,80 +2,73 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded directories
-            string inputDir = "InputSvgs";
-            string outputDir = "OutputSvgs";
-            string thumbDir = "Thumbnails";
+            string inputDir = "Input";
+            string outputDir = "Output";
+            string thumbDir = Path.Combine(outputDir, "Thumbnails");
 
-            // Ensure output directories exist
             Directory.CreateDirectory(outputDir);
             Directory.CreateDirectory(thumbDir);
 
-            // Get all SVG files in the input directory
-            string[] svgFiles = Directory.GetFiles(inputDir, "*.svg");
-
-            foreach (string inputPath in svgFiles)
+            string[] files = Directory.GetFiles(inputDir, "*.svg");
+            foreach (var inputPath in files)
             {
-                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Prepare output paths
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string blurredPath = Path.Combine(outputDir, fileNameWithoutExt + "_blurred.png");
-                string thumbPath = Path.Combine(thumbDir, fileNameWithoutExt + "_thumb.png");
-
-                // Ensure directories for each output file
-                Directory.CreateDirectory(Path.GetDirectoryName(blurredPath));
-                Directory.CreateDirectory(Path.GetDirectoryName(thumbPath));
-
-                // Temporary rasterized PNG path
-                string tempPng = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".png");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string tempPngPath = Path.Combine(outputDir, fileName + "_temp.png");
+                Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
 
                 // Rasterize SVG to PNG
                 using (Image svgImage = Image.Load(inputPath))
                 {
-                    var rasterOptions = new Aspose.Imaging.ImageOptions.SvgRasterizationOptions
+                    var svgOptions = new SvgRasterizationOptions
                     {
-                        PageSize = svgImage.Size
+                        PageWidth = svgImage.Width,
+                        PageHeight = svgImage.Height,
+                        BackgroundColor = Color.White
                     };
-                    var pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions
-                    };
-                    svgImage.Save(tempPng, pngOptions);
+                    var pngOptions = new PngOptions { VectorRasterizationOptions = svgOptions };
+                    svgImage.Save(tempPngPath, pngOptions);
                 }
 
-                // Apply motion blur filter to the rasterized image and save blurred version
-                using (Image rasterImg = Image.Load(tempPng))
+                // Apply motion blur filter
+                using (Image rasterImage = Image.Load(tempPngPath))
                 {
-                    var raster = (RasterImage)rasterImg;
-                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(3, 1.0, 0.0));
-                    raster.Save(blurredPath);
-                }
+                    var raster = (RasterImage)rasterImage;
+                    raster.Filter(raster.Bounds, new MotionWienerFilterOptions(3, 1.0, 0.0));
 
-                // Generate thumbnail (100x100) from blurred image
-                using (Image blurredImg = Image.Load(blurredPath))
-                {
-                    var raster = (RasterImage)blurredImg;
-                    raster.Resize(100, 100, ResizeType.NearestNeighbourResample);
-                    raster.Save(thumbPath);
+                    string filteredPath = Path.Combine(outputDir, fileName + "_filtered.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(filteredPath));
+                    raster.Save(filteredPath);
+
+                    // Generate thumbnail
+                    using (Image thumbImg = Image.Load(filteredPath))
+                    {
+                        thumbImg.Resize(200, 200, ResizeType.NearestNeighbourResample);
+                        string thumbPath = Path.Combine(thumbDir, fileName + "_thumb.png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(thumbPath));
+                        thumbImg.Save(thumbPath);
+                    }
                 }
 
                 // Clean up temporary file
-                if (File.Exists(tempPng))
+                if (File.Exists(tempPngPath))
                 {
-                    File.Delete(tempPng);
+                    File.Delete(tempPngPath);
                 }
             }
         }
@@ -88,9 +81,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑process a collection of SVG icons, apply a uniform motion blur (size 3, angle 0) and save the blurred results as PNG files for consistent UI styling.
- * 2. When an e‑commerce platform wants to generate blurred preview images of product vector graphics for a “loading” effect while also creating small thumbnails for catalog listings.
- * 3. When a marketing team requires automated conversion of SVG logos into blurred PNG assets for social‑media posts, with accompanying thumbnail versions for quick preview in a CMS.
- * 4. When a game developer must pre‑render motion‑blurred versions of SVG sprites and generate low‑resolution thumbnails for asset management tools.
- * 5. When a documentation generator needs to apply a subtle motion blur to SVG diagrams and produce thumbnail previews to embed in PDF or HTML help files.
+ * 1. When a web designer needs to create a set of stylized SVG icons with a subtle motion‑blur effect and preview thumbnails for a UI component library, they can use this code to rasterize, blur, and thumbnail the assets in one batch.
+ * 2. When an e‑learning platform wants to automatically generate blurred background images from vector illustrations and small preview PNGs for course catalogs, this C# routine processes all SVG files and outputs the filtered PNGs and thumbnails.
+ * 3. When a marketing team prepares animated banner assets and requires a quick way to apply a uniform motion blur of size 3 at angle 0 to dozens of SVG logos while also creating low‑resolution thumbnails for A/B testing, the script handles the conversion and filtering automatically.
+ * 4. When a mobile app developer needs to pre‑process SVG assets into blurred PNG sprites and corresponding thumbnail files to reduce runtime rendering cost on devices, the batch code performs rasterization, motion‑blur filtering, and thumbnail generation in C#.
+ * 5. When a digital publishing workflow must produce print‑ready PNG images with a motion‑blur effect from vector diagrams and also generate web‑friendly thumbnail previews for the editorial CMS, this Aspose.Imaging example streamlines the entire process.
  */

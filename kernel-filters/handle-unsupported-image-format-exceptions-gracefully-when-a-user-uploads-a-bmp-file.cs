@@ -14,35 +14,30 @@ class Program
 
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image, handling BMP-specific format issues
-            Image image;
-            try
+            // Load the BMP image
+            using (Image image = Image.Load(inputPath))
             {
-                image = Image.Load(inputPath);
-            }
-            catch (BmpImageException bmpEx)
-            {
-                Console.Error.WriteLine($"Unsupported BMP format: {bmpEx.Message}");
-                return;
-            }
-
-            using (image)
-            {
-                // Convert and save as PNG
+                // Save the image as PNG using default options
                 var pngOptions = new PngOptions();
                 image.Save(outputPath, pngOptions);
             }
         }
+        // Handle BMP-specific format errors gracefully
+        catch (BmpImageException bmpEx)
+        {
+            Console.Error.WriteLine($"BMP format error: {bmpEx.Message}");
+        }
+        // Catch any other unexpected exceptions
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
@@ -52,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application allows users to upload BMP photos and must convert them to PNG while providing a clear error message if the BMP version is unsupported.
- * 2. When an enterprise document management system processes scanned BMP files in bulk and needs to skip corrupted or legacy BMP formats without crashing the batch job.
- * 3. When a desktop C# utility imports user‑selected BMP images for editing and must gracefully inform the user when the file uses an unsupported BMP compression scheme.
- * 4. When a cloud‑based image‑processing API receives BMP uploads from mobile devices and must convert them to PNG while handling format exceptions to maintain service reliability.
- * 5. When an automated workflow converts legacy BMP assets to modern PNG format for a marketing website and must log unsupported BMP errors without interrupting the pipeline.
+ * 1. When a web application allows users to upload BMP files and must convert them to PNG while handling unsupported BMP format errors gracefully.
+ * 2. When a desktop utility processes batch image conversions from BMP to PNG and needs to verify file existence and catch BmpImageException to avoid crashes.
+ * 3. When an automated image pipeline receives BMP inputs from legacy systems and must ensure the output directory is created before saving the PNG conversion.
+ * 4. When a cloud service validates uploaded images, loads them with Aspose.Imaging, and provides clear error messages for corrupted BMP files.
+ * 5. When a C# console tool integrates Aspose.Imaging to transform user‑provided BMP images to PNG and must handle any unexpected exceptions during processing.
  */

@@ -8,13 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Textures\source.png";
-        string outputPath = @"C:\Textures\embossed.png";
-
-        // Ensure any runtime exception is reported without crashing
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Textures\input.png";
+            string outputPath = @"C:\Textures\output_emboss.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,10 +27,10 @@ class Program
             // Load the image using Aspose.Imaging
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
+                // Cast to RasterImage to access filtering methods
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Create convolution filter options with the built‑in Emboss 3x3 kernel
+                // Create emboss filter options using the 3x3 emboss kernel
                 var embossOptions = new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3);
 
                 // Apply the emboss filter to the whole image
@@ -50,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a Unity developer wants to generate a stylized embossed version of a PNG texture at build time to give in‑game objects a raised‑relief appearance without manually editing each file.
- * 2. When an automated asset pipeline needs to apply a 3x3 emboss convolution filter to all source images in a folder before they are imported into Unity, ensuring consistent visual depth across platforms.
- * 3. When a game modding tool written in C# must let players preview an embossed effect on custom textures by loading the image, applying the Aspose.Imaging ConvolutionFilter.Emboss3x3, and saving the result for immediate use in the Unity editor.
- * 4. When a continuous integration script validates that texture assets exist, creates missing output directories, and uses Aspose.Imaging to emboss textures as part of a quality‑assurance step before publishing the Unity build.
- * 5. When a runtime utility in a Unity project needs to catch file‑not‑found or processing exceptions while loading a PNG, applying an emboss filter, and saving the modified raster image to prevent crashes during gameplay.
+ * 1. When a Unity game needs to apply a real‑time emboss effect to PNG textures loaded from disk, a developer can use this C# code with Aspose.Imaging to read the image, run a 3×3 convolution emboss filter, and save the modified texture for use in the game.
+ * 2. When an asset pipeline requires batch processing of texture assets to give them a stylized raised‑edge look before they are imported into a C#‑based game engine, this example shows how to load each image, apply the Emboss3x3 filter, and output a new PNG file.
+ * 3. When a developer wants to dynamically generate embossed UI icons on the fly in a Windows application, they can employ the RasterImage.Filter method with ConvolutionFilterOptions to transform a source PNG into an embossed version without external tools.
+ * 4. When an AR/VR application needs to pre‑process high‑resolution JPEG or BMP textures to add depth cues by embossing them during a build step, the code demonstrates how to verify file existence, create output directories, and apply the convolution filter using Aspose.Imaging in C#.
+ * 5. When a game modding tool must allow users to preview an emboss effect on their custom texture files, this snippet provides a straightforward way to load the user‑selected image, apply the 3×3 emboss kernel, and save the result for immediate visual feedback.
  */

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -26,10 +27,10 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
+                // Cast to RasterImage to apply filters
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply a 5x5 sharpen filter (kernel size 5, sigma 4.0)
+                // Apply Sharpen filter with a 5x5 kernel (size 5, sigma 4.0)
                 rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
                 // Save the processed image
@@ -45,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating product catalog thumbnails, a developer can load a PNG template, sharpen it with a 5×5 filter, and save the enhanced image for clearer display on e‑commerce sites.
- * 2. When preparing scanned documents for OCR, a C# application can load the PNG scan, apply the Sharpen5x5 filter to improve edge contrast, and then release the image memory before further processing.
- * 3. When creating marketing banners that use a PNG background, a developer may sharpen the template to make text and graphics pop, then save the result for use in web ads.
- * 4. When building a desktop photo‑editing tool that offers a “quick sharpen” feature, the code can load the user’s PNG, apply the 5×5 sharpen filter, and dispose the image to keep the application responsive.
- * 5. When automating batch processing of PNG assets for a mobile app, a developer can load each template, apply SharpenFilterOptions(5, 4.0) to enhance visual quality, and free resources after saving to avoid memory leaks.
+ * 1. When generating product catalog thumbnails, a developer can use C# Image.Load to read a PNG template, apply a SharpenFilterOptions(5, 4.0) to enhance details, and save the sharpened PNG for web display.
+ * 2. When preparing scanned documents for OCR, a developer can load the PNG file, cast it to RasterImage, apply the 5×5 sharpen filter to improve text legibility, and then dispose the image to free memory.
+ * 3. When creating high‑resolution marketing banners, a developer can load a base PNG design, sharpen edges with the 5×5 kernel, save the output PNG, and rely on the using block to automatically release resources.
+ * 4. When building a server‑side photo‑editing API, a developer can accept a PNG upload, apply the Sharpen5x5 filter via RasterImage.Filter, and return the processed PNG while ensuring proper disposal of image objects.
+ * 5. When automating batch processing of PNG textures for a game, a developer can iterate over files, apply SharpenFilterOptions(5, 4.0) to each image, save the results, and let the using statement clean up memory after each iteration.
  */

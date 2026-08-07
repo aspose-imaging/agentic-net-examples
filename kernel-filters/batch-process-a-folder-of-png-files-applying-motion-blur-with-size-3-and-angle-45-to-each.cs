@@ -8,44 +8,53 @@ class Program
     {
         try
         {
+            // Define input and output directories
             string inputDirectory = "Input";
             string outputDirectory = "Output";
 
+            // Validate input directory
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add PNG files and rerun.");
                 return;
             }
 
+            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
+            // Get all PNG files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
             foreach (string inputPath in files)
             {
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + "_motion.png");
+                // Prepare output path
+                string fileName = Path.GetFileName(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName);
 
+                // Ensure the output directory exists (unconditional as required)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+                // Load, process, and save the image
+                using (Image image = Image.Load(inputPath))
                 {
-                    Aspose.Imaging.RasterImage rasterImage = (Aspose.Imaging.RasterImage)image;
+                    Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
 
-                    rasterImage.Filter(rasterImage.Bounds,
+                    // Apply motion blur with size 3, smooth factor 1.0, angle 45 degrees
+                    raster.Filter(raster.Bounds,
                         new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(3, 1.0, 45.0));
 
-                    rasterImage.Save(outputPath);
+                    raster.Save(outputPath);
                 }
             }
         }
@@ -58,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically add a motion blur effect to a collection of PNG product photos before uploading them to an e‑commerce site.
- * 2. When a game asset pipeline requires batch processing of sprite sheets to simulate movement by applying a 3‑pixel motion blur at a 45‑degree angle.
- * 3. When a marketing team wants to generate stylized PNG banners with consistent motion blur for a social media campaign using C# and Aspose.Imaging.
- * 4. When a photo‑editing application must convert user‑uploaded PNG images into motion‑blurred thumbnails for faster preview generation.
- * 5. When an automated build script has to preprocess PNG icons by applying a motion Wiener filter to improve visual consistency across different screen resolutions.
+ * 1. When a developer needs to automatically add a subtle motion‑blur effect to a batch of product PNG images before publishing them on an e‑commerce website.
+ * 2. When a game‑development pipeline must process multiple sprite PNG files to simulate motion by applying a 45‑degree blur with size 3 using C# and Aspose.Imaging.
+ * 3. When a marketing team wants to generate a series of promotional PNG banners with a consistent motion‑blur style for social‑media ads via a .NET batch script.
+ * 4. When an archival system requires preprocessing scanned PNG photographs by adding a uniform motion blur to reduce visual noise before long‑term storage.
+ * 5. When a developer creates a desktop utility that scans a folder of PNG icons and applies a 45‑degree motion blur to produce a stylized “loading” effect for UI themes.
  */

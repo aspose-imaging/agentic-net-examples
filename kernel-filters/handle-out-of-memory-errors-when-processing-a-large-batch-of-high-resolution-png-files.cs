@@ -8,32 +8,28 @@ class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output directories
+        string inputDir = @"C:\Images\Input";
+        string outputDir = @"C:\Images\Output";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
-
-            // Ensure the output base directory exists
-            Directory.CreateDirectory(outputDir);
-
             // Get all PNG files in the input directory
             string[] inputFiles = Directory.GetFiles(inputDir, "*.png");
 
             foreach (string inputPath in inputFiles)
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Determine corresponding output path
-                string fileName = Path.GetFileName(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName);
+                // Build the corresponding output path
+                string outputPath = Path.Combine(outputDir, Path.GetFileName(inputPath));
 
-                // Ensure the output directory for this file exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 try
@@ -41,32 +37,36 @@ class Program
                     // Load the PNG image
                     using (Image image = Image.Load(inputPath))
                     {
-                        // Set a memory limit to mitigate out‑of‑memory issues
+                        // Set a memory limit for internal buffers to mitigate OOM
                         var saveOptions = new PngOptions
                         {
-                            BufferSizeHint = 200 // limit internal buffers to 200 MB
+                            BufferSizeHint = 200 // limit to 200 MB
                         };
 
-                        // Save the image to the output location using the specified options
+                        // Save the image using the specified options
                         image.Save(outputPath, saveOptions);
                     }
                 }
-                catch (PngImageException ex)
+                catch (OutOfMemoryException oome)
                 {
-                    Console.Error.WriteLine($"PngImageException processing {inputPath}: {ex.Message}");
+                    // Handle out‑of‑memory situations gracefully
+                    Console.Error.WriteLine($"Out of memory processing {inputPath}: {oome.Message}");
                 }
-                catch (OutOfMemoryException ex)
+                catch (PngImageException pngEx)
                 {
-                    Console.Error.WriteLine($"Out of memory processing {inputPath}: {ex.Message}");
+                    // Handle PNG‑specific errors
+                    Console.Error.WriteLine($"PNG error processing {inputPath}: {pngEx.Message}");
                 }
                 catch (Exception ex)
                 {
+                    // Handle any other errors for this file
                     Console.Error.WriteLine($"Error processing {inputPath}: {ex.Message}");
                 }
             }
         }
         catch (Exception ex)
         {
+            // Global error handling
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -74,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photo‑editing service needs to convert thousands of high‑resolution PNG assets to a standardized format without crashing due to memory limits.
- * 2. When a medical imaging application processes large PNG scans in batch and must prevent out‑of‑memory exceptions on a server with limited RAM.
- * 3. When an e‑commerce platform generates product thumbnails from high‑resolution PNG files overnight and wants to ensure the batch job completes reliably.
- * 4. When a GIS tool re‑projects and saves massive PNG map tiles and needs to cap internal buffers to avoid memory overflow.
- * 5. When a digital archiving system migrates legacy PNG documents to a new storage location and must handle occasional missing files while protecting against memory exhaustion.
+ * 1. When a C# application must convert or re‑save a large batch of high‑resolution PNG files without crashing due to out‑of‑memory errors, this Aspose.Imaging code can be used to limit internal buffer size and handle OOM exceptions.
+ * 2. When processing thousands of 8K PNG images for a digital asset management system, developers can use this pattern to ensure each file is loaded, saved, and any memory‑limit issues are logged instead of terminating the whole job.
+ * 3. When building an automated image pipeline that reads PNG files from a network share and writes them to a different folder, the code helps gracefully skip files that exceed available RAM by catching OutOfMemoryException.
+ * 4. When integrating Aspose.Imaging into a C# console tool that resaves PNGs with specific options (e.g., BufferSizeHint) to reduce memory pressure on low‑end servers, this example shows the required try‑catch structure.
+ * 5. When a developer needs to validate the existence of input PNGs, create missing output directories, and protect the batch process from memory spikes while using Aspose.Imaging’s PngOptions, this snippet provides a ready‑to‑use solution.
  */

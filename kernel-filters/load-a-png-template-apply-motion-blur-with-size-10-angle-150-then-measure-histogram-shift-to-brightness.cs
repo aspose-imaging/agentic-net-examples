@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,9 +9,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hard‑coded input and output paths
             string inputPath = @"C:\Images\template.png";
-            string outputPath = @"C:\Images\output_blur.png";
+            string outputPath = @"C:\Images\output_motion_blur.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,29 +20,28 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for pixel access and filtering
                 RasterImage raster = (RasterImage)image;
 
                 // Compute average brightness before applying the filter
                 double avgBefore = ComputeAverageBrightness(raster);
 
-                // Apply motion blur (motion wiener filter) with size 10 and angle 150 degrees
-                raster.Filter(raster.Bounds, new MotionWienerFilterOptions(10, 1.0, 150.0));
+                // Apply motion blur (size = 10, sigma = 1.0, angle = 150 degrees)
+                var motionOptions = new MotionWienerFilterOptions(10, 1.0, 150.0);
+                raster.Filter(raster.Bounds, motionOptions);
 
-                // Compute average brightness after applying the filter
+                // Compute average brightness after the filter
                 double avgAfter = ComputeAverageBrightness(raster);
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                double brightnessShift = avgAfter - avgBefore;
+                Console.WriteLine($"Brightness shift after motion blur: {brightnessShift:F2}");
 
                 // Save the processed image
                 raster.Save(outputPath);
-
-                // Report the brightness shift
-                Console.WriteLine($"Brightness shift: {avgAfter - avgBefore}");
             }
         }
         catch (Exception ex)
@@ -53,38 +51,32 @@ class Program
     }
 
     // Helper method to calculate average brightness of a raster image
-    private static double ComputeAverageBrightness(RasterImage raster)
+    static double ComputeAverageBrightness(RasterImage raster)
     {
-        long total = 0;
-        int width = raster.Width;
-        int height = raster.Height;
-        int pixelCount = width * height;
+        // Load all ARGB pixels within the image bounds
+        int[] pixels = raster.GetDefaultArgb32Pixels(raster.Bounds);
+        long totalBrightness = 0;
 
-        // Iterate over all pixels
-        for (int y = 0; y < height; y++)
+        foreach (int argb in pixels)
         {
-            for (int x = 0; x < width; x++)
-            {
-                int argb = raster.GetArgb32Pixel(x, y);
-                // Extract RGB components
-                int r = (argb >> 16) & 0xFF;
-                int g = (argb >> 8) & 0xFF;
-                int b = argb & 0xFF;
-                // Simple luminance approximation
-                int brightness = (r + g + b) / 3;
-                total += brightness;
-            }
+            // Extract R, G, B components
+            int r = (argb >> 16) & 0xFF;
+            int g = (argb >> 8) & 0xFF;
+            int b = argb & 0xFF;
+
+            // Simple luminance approximation (average of R, G, B)
+            totalBrightness += (r + g + b) / 3;
         }
 
-        return (double)total / pixelCount;
+        return (double)totalBrightness / pixels.Length;
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add realistic motion blur to a PNG template for a product catalog and then quantify how the blur affects overall image brightness.
- * 2. When an automated graphics pipeline must process user‑uploaded PNG assets, apply a 10‑pixel motion‑wiener filter at a 150° angle, and verify the brightness change before saving the result.
- * 3. When a game‑development tool requires pre‑rendered background PNGs with directional blur and needs to log the histogram shift to maintain visual consistency across scenes.
- * 4. When a medical‑imaging application wants to simulate motion artifacts on PNG scans and measure the average brightness difference for quality‑control reporting.
- * 5. When a web‑service generates promotional banners by loading a PNG template, applying motion blur, and comparing before‑and‑after brightness to adjust downstream color‑grading algorithms.
+ * 1. When a developer needs to generate a motion‑blurred preview of a PNG product template for an e‑commerce site and verify that the blur does not unintentionally darken the image, they can use this code to apply a 150° motion blur of size 10 and measure the brightness shift.
+ * 2. When building an automated quality‑control pipeline that checks whether a PNG watermark remains visible after simulating camera shake, the code can apply a motion blur filter and compare average brightness before and after to ensure compliance.
+ * 3. When creating a visual‑effects tool that lets users preview motion blur on PNG assets and instantly see how the overall luminance changes, developers can employ this snippet to compute the histogram‑based brightness shift for real‑time feedback.
+ * 4. When preparing training data for a machine‑learning model that classifies blurred versus sharp PNG images, the code can programmatically blur each template with a 150° motion blur and record the brightness change as a feature.
+ * 5. When integrating Aspose.Imaging into a C# desktop application that generates animated GIF frames from a static PNG template, the developer can first apply a motion blur with size 10 and angle 150 and then use the measured brightness shift to adjust subsequent frames for consistent exposure.
  */

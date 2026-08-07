@@ -1,17 +1,25 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
-public class Program
+class SignalRHub
 {
-    public static void Main(string[] args)
+    public static void Broadcast(byte[] imageData)
     {
+        // Implement SignalR broadcasting to connected clients here
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output/output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,10 +30,16 @@ public class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-                raster.Save(outputPath);
+                RasterImage rasterImage = (RasterImage)image;
+
+                rasterImage.Filter(rasterImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+
+                var pngOptions = new PngOptions();
+                rasterImage.Save(outputPath, pngOptions);
             }
+
+            byte[] imageData = File.ReadAllBytes(outputPath);
+            SignalRHub.Broadcast(imageData);
         }
         catch (Exception ex)
         {
@@ -36,9 +50,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to apply a Gaussian blur to user‑uploaded PNG files and instantly push the processed images to all connected browsers via SignalR.
- * 2. When a live‑streaming dashboard must transform incoming screenshots with a kernel filter and broadcast the updated visuals to monitoring clients in real time.
- * 3. When an e‑learning platform wants to anonymize sensitive details in uploaded diagrams by blurring them and then deliver the sanitized images to students through a SignalR hub.
- * 4. When a collaborative design tool requires applying a custom blur effect to shared assets and synchronizing the changes across multiple editors using C# and SignalR.
- * 5. When a security system processes captured camera frames with a Gaussian blur for privacy compliance and immediately sends the filtered frames to a control‑room client application via SignalR.
+ * 1. When building a real‑time photo‑editing web app that needs to apply a Gaussian blur kernel to uploaded PNG images and instantly push the filtered result to all connected browsers via SignalR.
+ * 2. When creating a collaborative design tool where multiple users see the same image updates, and the server must process a raster image, apply a blur filter, save it as PNG, and broadcast the byte array to clients.
+ * 3. When implementing a live surveillance dashboard that receives raw image files, applies a smoothing filter to reduce noise, stores the processed PNG, and streams the cleaned image to monitoring stations using SignalR.
+ * 4. When developing an e‑learning platform that demonstrates image‑processing algorithms, requiring C# code to load a PNG, run a Gaussian blur kernel, save the output, and push the result to student browsers in real time.
+ * 5. When integrating Aspose.Imaging into a .NET microservice that processes user‑submitted images, applies a kernel filter for artistic effect, and notifies connected client applications through a SignalR hub.
  */

@@ -7,11 +7,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output\\result.png";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -20,13 +20,13 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            using (RasterImage rasterImage = (RasterImage)Image.Load(inputPath))
             {
                 double[,] kernel = new double[,]
                 {
-                    { 0.0, 1.0, 0.0 },
-                    { 1.0, -4.0, 1.0 },
-                    { 0.0, 1.0, 0.0 }
+                    { 0, -1, 0 },
+                    { -1, 5, -1 },
+                    { 0, -1, 0 }
                 };
 
                 double sum = 0;
@@ -35,17 +35,16 @@ class Program
                     sum += v;
                 }
 
-                if (Math.Abs(sum - 1.0) > 1e-6)
+                const double tolerance = 1e-6;
+                if (Math.Abs(sum - 1.0) > tolerance)
                 {
-                    Console.Error.WriteLine("Kernel coefficients sum is not equal to 1.");
+                    Console.Error.WriteLine("Kernel coefficients do not sum to 1. Filter not applied.");
                     return;
                 }
 
-                var options = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 3);
-                raster.Filter(raster.Bounds, options);
-
-                var saveOptions = new PngOptions();
-                raster.Save(outputPath, saveOptions);
+                var options = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 0);
+                rasterImage.Filter(rasterImage.Bounds, options);
+                rasterImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -57,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When processing medical imaging scans in PNG format and applying a custom edge‑enhancement convolution kernel, a developer must verify that the kernel coefficients sum to one to preserve the overall brightness of the image.
- * 2. When building an automated photo‑editing pipeline that uses Aspose.Imaging to apply user‑defined sharpening filters, checking the kernel sum prevents unintended darkening or brightening of the output PNG files.
- * 3. When implementing a real‑time video‑frame analysis tool in C# that reuses the same convolution matrix for each frame, validating the coefficient total ensures consistent luminance across all processed frames.
- * 4. When creating a batch‑processing utility that reads input PNGs, applies a Laplacian‑type filter, and saves results to a designated folder, the sum‑check guards against malformed kernels that could corrupt the saved images.
- * 5. When integrating a custom convolution filter into a desktop application that lets end‑users adjust kernel values, the code must confirm the coefficients add up to one before calling raster.Filter to avoid unexpected visual artifacts.
+ * 1. When a developer wants to apply a sharpening convolution filter to a PNG image using Aspose.Imaging for .NET but must ensure the custom kernel is normalized so the image brightness remains unchanged.
+ * 2. When processing scanned documents in C# and applying edge‑enhancement filters, validating that the sum of the kernel coefficients equals one prevents unintended darkening or brightening of the output PDF or PNG.
+ * 3. When building an automated image‑processing pipeline that reads raster images, applies user‑defined convolution kernels, and saves the result, checking the kernel sum avoids runtime errors and preserves color balance.
+ * 4. When integrating custom image filters into a Windows desktop application, the code ensures that any 3×3 kernel supplied by the UI is correctly normalized before the Aspose.Imaging Filter method is called.
+ * 5. When performing batch conversion of JPEG files to PNG with a custom filter, the tolerance check guarantees that only properly normalized kernels are applied, maintaining consistent visual quality across all output images.
  */

@@ -12,7 +12,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"c:\temp\sample.png";
-            string outputDir = @"c:\temp\filtered";
+            string outputDir = @"c:\temp\output\";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,7 +27,7 @@ class Program
             // Get original file size
             long originalSize = new FileInfo(inputPath).Length;
 
-            // Define filter types to test
+            // Define the filter types to test
             PngFilterType[] filterTypes = new PngFilterType[]
             {
                 PngFilterType.None,
@@ -43,35 +43,31 @@ class Program
             {
                 foreach (PngFilterType filter in filterTypes)
                 {
-                    // Prepare PNG options with the current filter
+                    // Prepare PNG save options
                     PngOptions options = new PngOptions
                     {
                         FilterType = filter,
-                        CompressionLevel = 9, // maximum compression for consistency
-                        Progressive = true
+                        CompressionLevel = 9, // maximum compression
+                        Progressive = true   // optional, not required for size measurement
                     };
 
                     // Build output file path
                     string outputPath = Path.Combine(outputDir, $"{filter}.png");
 
-                    // Ensure the directory for the output file exists (already created above)
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the image with the specified options
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        image.Save(ms, options);
-                        // Write the stream to the file system
-                        File.WriteAllBytes(outputPath, ms.ToArray());
-                    }
+                    // Save the image with the current filter
+                    image.Save(outputPath, options);
 
-                    // Get size of the filtered image
+                    // Measure the size of the filtered image
                     long filteredSize = new FileInfo(outputPath).Length;
 
-                    // Calculate compression ratio (original / filtered)
+                    // Compute compression ratio (original / filtered)
                     double ratio = (double)originalSize / filteredSize;
 
-                    Console.WriteLine($"Filter: {filter}, Original: {originalSize} bytes, Filtered: {filteredSize} bytes, Ratio: {ratio:F3}");
+                    // Output the results
+                    Console.WriteLine($"Filter: {filter}, Size: {filteredSize} bytes, Ratio: {ratio:F2}");
                 }
             }
         }
@@ -84,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to evaluate which PNG filter (None, Up, Sub, Paeth, Avg, Adaptive) yields the smallest file size for web‑optimized images, they can use this code to compare compression ratios.
- * 2. When a SaaS platform stores user‑uploaded PNG assets and wants to minimize storage costs, the code helps determine the most efficient filter setting before saving the image with Aspose.Imaging.
- * 3. When a mobile app generates screenshots and must meet strict bundle size limits, the developer can run this script to measure how each filter impacts the final PNG size.
- * 4. When a CI/CD pipeline validates image assets for a game release, the code can automatically log compression differences to ensure the chosen filter meets quality‑vs‑size requirements.
- * 5. When an e‑commerce site wants to serve high‑resolution product photos with progressive loading, the developer can use this example to compare filter‑based compression and select the optimal setting for faster page loads.
+ * 1. When a developer needs to determine which PNG filter (None, Up, Sub, Paeth, Avg, Adaptive) yields the smallest file size for web‑optimized images, they can use this code to compare compression ratios and choose the most storage‑efficient option.
+ * 2. When preparing a large set of product photos for an e‑commerce catalog, a developer can run this script to measure how different PNG filter types affect disk usage and select the filter that minimizes bandwidth without sacrificing image quality.
+ * 3. When building a mobile app that stores PNG assets locally, a developer can employ this example to evaluate the storage impact of each filter and decide on the optimal compression settings to keep the app size under a target limit.
+ * 4. When implementing an automated CI/CD pipeline that validates image assets, a developer can use this code to automatically generate filtered PNG versions, calculate their compression ratios, and fail the build if the size reduction does not meet predefined thresholds.
+ * 5. When archiving scientific or medical PNG images for long‑term storage, a developer can run this program to compare filter‑based compression results and document the most space‑saving configuration for compliance and cost‑effectiveness.
  */
