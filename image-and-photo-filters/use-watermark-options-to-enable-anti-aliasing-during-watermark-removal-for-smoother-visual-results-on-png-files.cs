@@ -4,6 +4,10 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.MagicWand;
+using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging.Watermark;
+using Aspose.Imaging.Watermark.Options;
 
 class Program
 {
@@ -11,34 +15,45 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists (null‑safe)
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
+                Directory.CreateDirectory(outputDir);
 
-            using (var image = Aspose.Imaging.Image.Load(inputPath))
+            // Load the PNG image
+            using (var image = Image.Load(inputPath))
             {
                 var pngImage = (PngImage)image;
 
+                // Define the mask region using a graphics path
                 var mask = new GraphicsPath();
                 var figure = new Figure();
                 figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
                 mask.AddFigure(figure);
 
-                var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask)
+                // Configure Telea options and enable smoother result via larger half‑patch size
+                var options = new TeleaWatermarkOptions(mask)
                 {
-                    // Adjust half patch size to improve smoothing (acts as anti‑aliasing)
-                    HalfPatchSize = 2
+                    HalfPatchSize = 5 // larger patch size improves anti‑aliasing effect
                 };
 
-                var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options);
-                result.Save(outputPath);
+                // Perform watermark removal
+                using (var result = WatermarkRemover.PaintOver(pngImage, options))
+                {
+                    // Save the processed image as PNG
+                    result.Save(outputPath, new PngOptions());
+                }
             }
         }
         catch (Exception ex)
@@ -50,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application automatically removes watermarks from PNG product photos and needs anti‑aliasing to keep the edges smooth for a professional storefront display.
- * 2. When a mobile app processes user‑uploaded screenshots and must erase embedded logos from PNG files without creating jagged artifacts, using Aspose.Imaging’s TeleaWatermarkOptions with anti‑aliasing.
- * 3. When a digital publishing workflow strips promotional watermarks from high‑resolution PNG illustrations before embedding them into e‑books, ensuring the resulting images retain visual quality.
- * 4. When an automated batch script cleanses a library of PNG assets for a game UI, applying the HalfPatchSize setting to achieve smoother transitions where the watermark was removed.
- * 5. When a SaaS platform offers an API to sanitize PNG avatars by removing background watermarks and needs anti‑aliased results to keep the avatar’s edges crisp for social media sharing.
+ * 1. When a web application needs to automatically clean up user‑uploaded PNG logos that contain semi‑transparent watermarks, preserving smooth edges with anti‑aliasing.
+ * 2. When a desktop utility processes scanned PNG documents to erase embedded stamps while keeping the original resolution and color fidelity.
+ * 3. When an e‑commerce platform batch‑converts product images in PNG format, removing promotional watermarks without jagged artifacts for better display on high‑DPI screens.
+ * 4. When a mobile app prepares PNG assets for AR overlays by stripping out placeholder watermarks and ensuring the resulting transparent regions blend seamlessly.
+ * 5. When a digital archiving system restores archived PNG graphics by programmatically removing watermarks and applying a larger half‑patch size to achieve smoother visual results.
  */

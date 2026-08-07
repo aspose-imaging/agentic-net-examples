@@ -4,45 +4,33 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output\\output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the image as a RasterImage
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Simulate a UI button press (press Enter to apply the mask)
-                Console.WriteLine("Press Enter to apply Magic Wand mask at cursor coordinates.");
-                Console.ReadLine();
-
-                // Current cursor coordinates (seed point) – replace with actual values as needed
                 int cursorX = 120;
                 int cursorY = 100;
 
-                // Create a mask using MagicWandTool and apply it to the image
                 MagicWandTool
                     .Select(image, new MagicWandSettings(cursorX, cursorY))
                     .Apply();
 
-                // Save the modified image with PNG options (transparent background)
                 image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
             }
         }
@@ -55,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building a C# Windows Forms photo‑editor that lets users click a “Remove Background” button to instantly apply a Magic Wand selection at the mouse cursor and save the result as a transparent PNG.
- * 2. When creating an image‑annotation tool where a toolbar button triggers MagicWandTool.Apply to highlight a region around the current cursor position for later labeling or cropping.
- * 3. When developing a desktop application that lets users click a “Select Similar Color” button to generate a mask based on the pixel under the cursor, enabling quick isolation of objects in PNG or JPEG files.
- * 4. When implementing a UI for a graphics‑pipeline where a “Apply Mask” button uses the cursor coordinates as the seed point to produce a transparent background for product images before uploading to an e‑commerce site.
- * 5. When adding an interactive “Magic Wand” feature to a C# WPF viewer that, upon button press, creates a mask from the cursor location, applies it to the RasterImage, and saves the edited image with alpha channel support.
+ * 1. When building a photo‑editing desktop app that lets users click a “Select Background” button to automatically mask the area under the mouse pointer in a PNG image.
+ * 2. When adding an interactive “Remove Object” feature to a C# WPF application that uses the MagicWandTool to create a selection based on the cursor’s X,Y coordinates and then saves the edited image with alpha transparency.
+ * 3. When implementing a web‑based image annotation tool in ASP.NET where a toolbar button captures the current mouse position, applies the magic wand selection to a raster PNG, and stores the result for further processing.
+ * 4. When creating a batch‑processing utility that lets users preview a mask by clicking a UI button, which runs MagicWandTool.Select on the clicked point and writes the masked PNG to an output folder.
+ * 5. When developing a medical imaging viewer that requires a “Select Region of Interest” button to generate a mask from the cursor location on a grayscale PNG and preserve the selection using TruecolorWithAlpha options.
  */

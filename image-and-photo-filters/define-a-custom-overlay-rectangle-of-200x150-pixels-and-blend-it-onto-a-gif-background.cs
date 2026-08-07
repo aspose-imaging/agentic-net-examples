@@ -3,18 +3,19 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Gif.Blocks;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.gif";
-        string outputPath = "output.gif";
-
         try
         {
+            string inputPath = "input.gif";
+            string outputPath = "output.gif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,27 +24,32 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (GifImage gif = (GifImage)Image.Load(inputPath))
+            // Load the background GIF as a raster image
+            using (RasterImage background = (RasterImage)Image.Load(inputPath))
             {
-                // Create graphics for the GIF image
-                Graphics graphics = new Graphics(gif);
-
-                // Define a solid brush for the overlay rectangle
-                using (SolidBrush brush = new SolidBrush(Color.Blue))
+                // Create an overlay rectangle image (200x150)
+                using (var overlayStream = new MemoryStream())
                 {
-                    // Optional: set opacity (0-255). GIF does not support alpha, but setting may affect palette.
-                    brush.Opacity = 255;
+                    Source overlaySource = new StreamSource(overlayStream);
+                    PngOptions overlayOptions = new PngOptions() { Source = overlaySource };
+                    using (RasterImage overlay = (RasterImage)Image.Create(overlayOptions, 200, 150))
+                    {
+                        // Draw a semi‑transparent red rectangle onto the overlay
+                        Graphics graphics = new Graphics(overlay);
+                        SolidBrush brush = new SolidBrush(Color.FromArgb(128, Color.Red));
+                        graphics.FillRectangle(brush, new Rectangle(0, 0, 200, 150));
 
-                    // Draw a rectangle of size 200x150 at position (50,50)
-                    graphics.FillRectangle(brush, new Rectangle(50, 50, 200, 150));
+                        // Blend the overlay onto the background at position (50,50) with 50% opacity
+                        background.Blend(new Point(50, 50), overlay, 128);
+                    }
                 }
 
-                // Prepare save options with a file source
-                Source source = new FileCreateSource(outputPath, false);
-                GifOptions options = new GifOptions { Source = source };
-
-                // Save the modified GIF
-                gif.Save(outputPath, options);
+                // Save the resulting image as GIF
+                GifOptions gifOptions = new GifOptions()
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                background.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -55,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to add a branded blue banner overlay rectangle to an animated GIF for marketing emails using Aspose.Imaging for .NET.
- * 2. When you want to highlight a region of interest in a GIF tutorial by drawing a 200 × 150‑pixel rectangle with a SolidBrush in C#.
- * 3. When you must create a simple watermark overlay on a GIF before publishing it on a website, using the Graphics.FillRectangle method.
- * 4. When you are generating a frame‑specific call‑to‑action area in a GIF advertisement by blending a custom rectangle onto the background.
- * 5. When you are preparing a GIF with a colored overlay to test color contrast and accessibility compliance using Aspose.Imaging.
+ * 1. When a developer wants to add a semi‑transparent promotional banner to an animated GIF for email marketing, they can use this code to draw a 200×150 red overlay and blend it onto the background.
+ * 2. When building a web service that watermarks user‑uploaded GIFs with a custom logo rectangle, the snippet shows how to create the overlay in memory and merge it at a specific position.
+ * 3. When generating dynamic GIF thumbnails with a colored call‑to‑action area, this example demonstrates blending a 200×150 rectangle onto the original animation using Aspose.Imaging for .NET.
+ * 4. When creating an automated report that highlights a region of interest in a GIF by overlaying a translucent rectangle, the code provides the exact steps to draw and blend the overlay.
+ * 5. When integrating GIF editing into a desktop application that needs to apply a semi‑transparent red filter to a defined area, this sample illustrates loading the GIF, creating the overlay, and saving the result.
  */

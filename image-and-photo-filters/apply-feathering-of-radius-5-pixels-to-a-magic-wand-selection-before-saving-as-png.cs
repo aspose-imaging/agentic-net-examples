@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.MagicWand;
 using Aspose.Imaging.MagicWand.ImageMasks;
 
@@ -10,12 +8,12 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output file paths
+        string inputPath = "input.png";
+        string outputPath = "output/output.png";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,17 +24,17 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image as a raster image
+            // Load the image as a RasterImage
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Create a magic wand selection at point (120,100), feather it with radius 5, and apply to the image
+                // Create a magic wand mask at point (120, 100), feather it with radius 5, and apply to the image
                 MagicWandTool
                     .Select(image, new MagicWandSettings(120, 100))
-                    .GetFeathered(new FeatheringSettings { Size = 5 })
+                    .GetFeathered(new FeatheringSettings() { Size = 5 })
                     .Apply();
 
-                // Save the resulting image as PNG with alpha channel support
-                image.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                // Save the resulting image as PNG
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -48,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to isolate a foreground object in a PNG photograph and smooth the selection edges with a 5‑pixel feather to avoid harsh borders before exporting the image.
- * 2. When building a C# image‑editing tool that lets users click a point, uses Aspose.Imaging’s Magic Wand to select similar colors, and applies a 5‑pixel feather to create a soft transition for overlay graphics saved as a TruecolorWithAlpha PNG.
- * 3. When preparing product‑shot images for an e‑commerce site, a programmer can use the Magic Wand selection with a 5‑pixel feather to gently blend the background removal and then save the result as a PNG with transparency.
- * 4. When automating batch processing of scanned documents, a developer may apply a 5‑pixel feather to the Magic Wand selection to smooth out jagged edges around highlighted regions before saving the cleaned‑up pages as PNG files.
- * 5. When creating a C# workflow that extracts a logo from a larger PNG banner, the Magic Wand tool with a 5‑pixel feather can be used to capture the logo with softened edges and preserve the alpha channel on export.
+ * 1. When a developer needs to smooth the edges of a region selected with a magic wand tool in a PNG screenshot before exporting it for a web UI, they can apply a 5‑pixel feather to the selection using Aspose.Imaging for .NET.
+ * 2. When creating product catalog images where the background must be softly blended around a selected object, the code can feather the magic wand selection by 5 pixels and save the result as a transparent PNG.
+ * 3. When automating the preparation of icons that require a subtle anti‑alias border around a color‑based selection, a developer can use this C# snippet to feather the selection and output a PNG file.
+ * 4. When processing scanned documents to isolate a logo and need a gentle transition to the surrounding area, the magic wand with a 5‑pixel feather applied via Aspose.Imaging ensures the logo is saved cleanly as a PNG.
+ * 5. When building a batch image‑processing tool that refines user‑defined selections with soft edges before archiving them, the code demonstrates how to feather a magic wand selection and store the final image in PNG format.
  */

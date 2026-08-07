@@ -1,58 +1,34 @@
+// HOW-TO: Create Elliptical Mask on PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input\\ball.png";
-        string outputPath = "output\\result.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            Console.WriteLine("Select watermark removal algorithm:");
-            Console.WriteLine("1 - Telea");
-            Console.WriteLine("2 - Content Aware Fill");
-            Console.Write("Enter choice (1 or 2): ");
-            string choice = Console.ReadLine();
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
-            using (var image = Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
-                var pngImage = (PngImage)image;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                var mask = new GraphicsPath();
-                var figure = new Figure();
-                figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                GraphicsPath mask = new GraphicsPath();
+                Figure figure = new Figure();
+                figure.AddShape(new EllipseShape(new RectangleF(10, 10, 100, 100)));
                 mask.AddFigure(figure);
 
-                object options;
-                if (choice == "2")
-                {
-                    options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
-                    {
-                        MaxPaintingAttempts = 4
-                    };
-                }
-                else
-                {
-                    options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
-                }
-
-                var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, (Aspose.Imaging.Watermark.Options.WatermarkOptions)options);
-                result.Save(outputPath);
-                result.Dispose();
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -64,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to integrate a UI that lets users choose between Telea and Content‑Aware Fill algorithms to remove watermarks from PNG files in a C# application.
- * 2. When an image‑processing tool must support interactive selection of a mask shape (e.g., an ellipse) and apply the chosen algorithm to paint over the watermark region.
- * 3. When a batch‑processing service requires configurable watermark removal options, allowing clients to specify the algorithm at runtime for better visual results on different image contents.
- * 4. When a desktop utility must validate the existence of the input image, create the output directory, and then perform watermark removal using Aspose.Imaging’s WatermarkRemover with user‑selected settings.
- * 5. When a developer wants to expose a simple console or graphical interface that captures user input, maps it to TeleaWatermarkOptions or ContentAwareFillWatermarkOptions, and saves the cleaned PNG image.
+ * 1. When you need to programmatically define an elliptical region to hide or process part of a PNG image in a .NET application.
+ * 2. When building a photo‑editing tool that lets users draw elliptical selections for cropping or applying effects using Aspose.Imaging.
+ * 3. When automating batch processing to add transparent masks over specific areas of PNG files before further image manipulation.
+ * 4. When integrating image masking into a web service that receives PNG uploads and returns the same image with an elliptical overlay.
+ * 5. When creating a custom UI that generates shape‑based masks (e.g., ellipses) for watermark removal or content‑aware fill operations in C#.
  */

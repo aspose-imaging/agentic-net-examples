@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Shapes;
 
@@ -10,33 +11,43 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists (null‑safe)
             string outputDir = Path.GetDirectoryName(outputPath);
             if (!string.IsNullOrEmpty(outputDir))
                 Directory.CreateDirectory(outputDir);
 
+            // Load the PNG image
             using (var image = Image.Load(inputPath))
             {
                 var pngImage = (PngImage)image;
 
+                // Create a mask using GraphicsPath
                 var mask = new GraphicsPath();
                 var figure = new Figure();
+                // Example ellipse mask; adjust coordinates as needed
                 figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
                 mask.AddFigure(figure);
 
+                // Configure Telea algorithm options
                 var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
-                options.HalfPatchSize = 5; // set removal attempts equivalent
 
-                var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options);
-                result.Save(outputPath);
+                // Remove the watermark
+                using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options))
+                {
+                    // Save the cleaned image
+                    result.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)
@@ -48,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must automatically erase a logo or text watermark from a PNG product image using Aspose.Imaging’s Telea inpainting algorithm with five removal attempts.
- * 2. When a C# application needs to prepare clean PNG assets for an e‑commerce catalog by programmatically masking and removing watermarks before publishing.
- * 3. When a batch‑processing script has to remove watermarks from scanned PNG documents while preserving image quality by configuring the Telea algorithm’s half‑patch size to five.
- * 4. When a photo‑editing tool built with .NET requires a fast, repeatable method to eliminate unwanted PNG overlays without manual retouching.
- * 5. When an automated workflow must generate watermark‑free PNG thumbnails for a mobile app, using Aspose.Imaging’s WatermarkRemover with a controlled number of inpainting attempts.
+ * 1. When a developer must batch‑process PNG marketing images to erase a watermark logo by defining an elliptical mask and applying the Telea inpainting algorithm with five removal attempts.
+ * 2. When an e‑commerce platform needs to programmatically strip a copyright watermark from user‑uploaded PNG product pictures before displaying them on the storefront.
+ * 3. When a digital archivist wants to restore scanned PNG documents that contain a faint overlay by using Aspose.Imaging’s TeleaWatermarkOptions to intelligently fill the masked area.
+ * 4. When a mobile app backend processes PNG screenshots and needs to remove a test‑environment watermark without degrading image quality, leveraging C# and the Telea algorithm.
+ * 5. When a content‑management system integrates Aspose.Imaging to automatically clean PNG assets by painting over watermarks with five iterative Telea passes before publishing.
  */

@@ -10,32 +10,25 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image as a raster image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Build a mask using Magic Wand, refine it with Subtract and Feathering, then apply
-                MagicWandTool
-                    .Select(image, new MagicWandSettings(100, 100))                     // Initial selection point
-                    .Subtract(new MagicWandSettings(150, 120) { Threshold = 30 })      // Remove unwanted region via magic wand
-                    .Subtract(new RectangleMask(200, 200, 50, 50))                     // Remove a rectangular area
-                    .GetFeathered(new FeatheringSettings() { Size = 5 })              // Feather the mask edges
-                    .Apply();                                                          // Apply the refined mask to the image
+                MagicWandTool.Select(image, new MagicWandSettings(100, 100))
+                    .Subtract(new MagicWandSettings(200, 200) { Threshold = 30 })
+                    .Subtract(new RectangleMask(50, 50, 100, 100))
+                    .GetFeathered(new FeatheringSettings() { Size = 5 })
+                    .Apply();
 
-                // Save the resulting image
                 image.Save(outputPath);
             }
         }
@@ -48,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to remove a cluttered background from a PNG product photo by selecting the object with Magic Wand, subtracting stray areas, and feathering the mask to create a smooth edge for online catalogs.
- * 2. When a developer wants to isolate a portrait subject, uses Magic Wand to select the person, subtracts unwanted clothing regions, and applies feathering so the mask blends naturally before saving as JPEG.
- * 3. When a developer is preparing a GIS map overlay, they employ Magic Wand to trace a complex coastline, subtract overlapping water polygons, and feather the mask to achieve a seamless transition with the base map.
- * 4. When a developer creates a marketing banner, they use Magic Wand to pick a background, subtract a rectangular logo area, and feather the mask so the logo appears integrated without harsh borders.
- * 5. When a developer cleans scanned documents, they apply Magic Wand to select ink stains, subtract them from the page mask, and feather the edges to retain crisp text while exporting to PDF.
+ * 1. When a developer needs to remove a background from a product photo with irregular edges and then soften the transition to avoid harsh lines, they can chain Subtract and GetFeathered on a PNG image.
+ * 2. When preparing scanned documents that contain stamps or seals with jagged borders, chaining Subtract to cut out the unwanted area and GetFeathered to smooth the mask ensures clean extraction for OCR.
+ * 3. When creating a composite image for a marketing brochure, a designer can use Subtract to eliminate overlapping objects and then apply GetFeathered to blend the remaining mask seamlessly with the new background.
+ * 4. When automating the removal of watermarks from legacy JPEG assets that have complex contours, chaining Subtract with a custom threshold and GetFeathered produces a refined mask that preserves surrounding details.
+ * 5. When developing an image‑editing tool that lets users click to select a region, using Subtract to fine‑tune the selection and GetFeathered to add a soft edge improves the visual quality of the final PNG output.
  */

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
 
@@ -12,44 +13,44 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputBmpPath = @"C:\Images\background.bmp";
-            string inputPngPath = @"C:\Images\overlay.png";
-            string outputTiffPath = @"C:\Images\result.tif";
-
-            // Validate input files
-            if (!File.Exists(inputBmpPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputBmpPath}");
-                return;
-            }
-            if (!File.Exists(inputPngPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPngPath}");
-                return;
-            }
+            string bmpPath = "background.bmp";
+            string pngPath = "overlay.png";
+            string outputPath = "output/result.tif";
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputTiffPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load background BMP and overlay PNG
-            using (RasterImage background = (RasterImage)Image.Load(inputBmpPath))
-            using (RasterImage overlay = (RasterImage)Image.Load(inputPngPath))
+            // Validate input files
+            if (!File.Exists(bmpPath))
+            {
+                Console.Error.WriteLine($"File not found: {bmpPath}");
+                return;
+            }
+            if (!File.Exists(pngPath))
+            {
+                Console.Error.WriteLine($"File not found: {pngPath}");
+                return;
+            }
+
+            // Load images
+            using (RasterImage background = (RasterImage)Image.Load(bmpPath))
+            using (RasterImage overlay = (RasterImage)Image.Load(pngPath))
             {
                 // Calculate center position
                 int offsetX = (background.Width - overlay.Width) / 2;
                 int offsetY = (background.Height - overlay.Height) / 2;
 
-                // Blend overlay onto background at center
+                // Blend overlay onto background with full opacity
                 background.Blend(new Point(offsetX, offsetY), overlay, 255);
 
                 // Prepare TIFF save options
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
-                    Source = new FileCreateSource(outputTiffPath, false)
+                    Source = new FileCreateSource(outputPath, false)
                 };
 
                 // Save the blended image as TIFF
-                background.Save(outputTiffPath, tiffOptions);
+                background.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -61,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to place a company logo (PNG) at the exact center of a high‑resolution BMP background and deliver the final composite as a lossless TIFF for printing.
- * 2. When an application must combine a scanned BMP document with a transparent PNG watermark, calculate the center offset, blend them, and export the result to a TIFF archive.
- * 3. When a GIS tool requires overlaying a PNG map layer onto a BMP terrain image, centering it automatically before saving the output in TIFF format for further analysis.
- * 4. When an e‑commerce platform generates product mock‑ups by centering a PNG design over a BMP template and needs the final image in TIFF to meet catalog specifications.
- * 5. When a medical imaging system merges a PNG annotation onto a BMP radiograph, aligns it to the center, and stores the blended image as a TIFF for compliance with DICOM workflows.
+ * 1. When a developer needs to place a PNG logo at the exact center of a BMP background and export the composite as a high‑resolution TIFF for printing.
+ * 2. When an application must combine a scanned BMP document with a transparent PNG watermark, aligning it centrally before saving to a lossless TIFF file.
+ * 3. When a GIS system requires overlaying a satellite PNG tile onto a BMP map canvas, centering it and storing the result as a TIFF for further spatial analysis.
+ * 4. When a medical imaging workflow needs to merge a BMP scan background with a PNG annotation layer, positioning it in the middle and outputting a TIFF for archival compliance.
+ * 5. When an e‑commerce platform wants to generate product catalog images by centering a PNG badge on a BMP product photo and saving the final image as a TIFF for high‑quality catalog printing.
  */

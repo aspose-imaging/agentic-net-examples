@@ -1,46 +1,31 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.MagicWand;
-using Aspose.Imaging.MagicWand.ImageMasks;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputImagePath = "input\\source.tif";
-        string outputImagePath = "output\\result.tif";
+        string inputPath = "input/input.tif";
+        string outputPath = "output/output.tif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputImagePath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputImagePath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputImagePath) ?? ".");
-
-            // Load the TIFF image
-            using (RasterImage image = (RasterImage)Image.Load(inputImagePath))
-            {
-                // Create first mask using magic wand at point (100, 100)
-                ImageBitMask mask1 = MagicWandTool.Select(image, new MagicWandSettings(100, 100));
-
-                // Create second mask using magic wand at point (200, 200)
-                ImageBitMask mask2 = MagicWandTool.Select(image, new MagicWandSettings(200, 200));
-
-                // Combine the two masks using Union
-                ImageBitMask combinedMask = mask1.Union(mask2);
-
-                // Apply the combined mask to the image
-                combinedMask.ApplyTo(image);
-
-                // Save the modified image
-                image.Save(outputImagePath);
+                TiffOptions options = new TiffOptions(TiffExpectedFormat.Default);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -52,9 +37,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to remove or highlight multiple separate regions (e.g., stains or logos) in a high‑resolution TIFF scan by selecting each area with a magic wand and merging the selections with a Union mask.
- * 2. When an application must create a composite mask from two user‑clicked points on a satellite TIFF image to isolate overlapping land parcels for further analysis.
- * 3. When a batch‑processing tool has to combine two automatically detected defect areas in a scanned document TIFF and apply the combined mask to erase them in one operation.
- * 4. When a medical imaging system wants to select two distinct tissue regions in a pathology TIFF slide, merge the selections, and apply the mask to adjust contrast only within the combined area.
- * 5. When a GIS developer needs to union two polygonal selections on a georeferenced TIFF map and apply the resulting mask to clip the map to those combined zones.
+ * 1. When a developer needs to hide confidential sections of a multi‑page TIFF document by merging two region masks and applying the combined mask to protect sensitive data.
+ * 2. When an application must overlay watermarks only on specific areas of a scanned TIFF image by uniting masks created from different coordinates and applying the result.
+ * 3. When a GIS system requires clipping satellite TIFF imagery to a complex polygon defined by multiple points, using mask union to generate the final clipping region.
+ * 4. When a medical imaging tool wants to isolate and analyze overlapping anatomical structures in a TIFF X‑ray by combining masks from separate points of interest.
+ * 5. When an e‑commerce platform wants to remove background artifacts from product photos stored as TIFF files by merging masks of foreground and background regions before saving.
  */
