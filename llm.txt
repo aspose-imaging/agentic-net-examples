@@ -4,7 +4,7 @@
 - Examples: 2,929
 - Categories: 17
 - Pass Rate: 100.0%
-- NuGet Version: 26.7.0
+- NuGet Version: 26.8.0
 - Framework: net9.0
 - Last Updated: 2026-08-07
 - Agent API: https://faisalabad-examples-mcp.dynabic.com:7009/aspose-imaging/agentic-net-examples/.well-known/agent.json
