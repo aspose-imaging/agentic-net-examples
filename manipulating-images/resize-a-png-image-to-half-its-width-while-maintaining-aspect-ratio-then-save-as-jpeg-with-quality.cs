@@ -7,9 +7,9 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.jpg";
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\Images\input.png";
+        string outputPath = @"C:\Images\output.jpg";
 
         try
         {
@@ -26,17 +26,17 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Compute new dimensions: half the width, maintain aspect ratio
+                // Calculate new dimensions (half the original size, preserving aspect ratio)
                 int newWidth = image.Width / 2;
                 int newHeight = image.Height / 2;
 
                 // Resize the image
                 image.Resize(newWidth, newHeight);
 
-                // Set JPEG save options with desired quality
-                JpegOptions jpegOptions = new JpegOptions
+                // Prepare JPEG save options with desired quality
+                var jpegOptions = new JpegOptions
                 {
-                    Quality = 80 // Quality range: 1-100
+                    Quality = 85 // Adjust quality as needed (1‑100)
                 };
 
                 // Save the resized image as JPEG
@@ -45,6 +45,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -52,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate thumbnail previews of user‑uploaded PNG files by halving their width while preserving aspect ratio and then store them as compressed JPEGs for faster page loads.
- * 2. When an e‑commerce platform must convert high‑resolution product PNG images to smaller JPEG files with a specific quality setting to reduce bandwidth without distorting the original proportions.
- * 3. When a desktop utility processes a batch of PNG screenshots, resizing each to half its original width and saving them as JPEGs to fit within email attachment size limits.
- * 4. When a mobile app backend receives PNG icons, needs to downscale them to half width to match device screen constraints and save them as JPEG with 80 % quality for optimal storage.
- * 5. When a content management system automates the preparation of PNG graphics for print‑to‑web conversion, resizing them while maintaining aspect ratio and outputting JPEGs with controlled compression.
+ * 1. When a web application needs to generate thumbnail previews of user‑uploaded PNG files by reducing the width to half while keeping the aspect ratio and then storing them as compressed JPEGs for faster page loads.
+ * 2. When a batch‑processing tool must convert high‑resolution PNG assets into smaller JPEG images for email newsletters, ensuring the resized width is 50 % of the original and the JPEG quality is set to 85.
+ * 3. When a desktop utility has to prepare product photos for an e‑commerce catalog by shrinking PNG images to half size, preserving proportions, and saving them as JPEGs with a specific quality level to meet platform size limits.
+ * 4. When a mobile backend service processes incoming PNG screenshots, resizes them to half their width to reduce bandwidth, and outputs JPEG files with controlled compression for storage in a cloud bucket.
+ * 5. When an automated report generator needs to embed PNG charts as smaller JPEG images, resizing them to 50 % width while maintaining aspect ratio and applying a quality setting to balance visual fidelity and file size.
  */

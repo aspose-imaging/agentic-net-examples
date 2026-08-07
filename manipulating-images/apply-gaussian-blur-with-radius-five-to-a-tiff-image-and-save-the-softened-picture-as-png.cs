@@ -1,30 +1,30 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.tif";
-        string outputPath = @"C:\Images\output.png";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Images\input.tif";
+            string outputPath = @"C:\Images\output.png";
+
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
@@ -34,7 +34,7 @@ class Program
                 // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
                 tiffImage.Filter(tiffImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Save the result as PNG
+                // Save the processed image as PNG
                 tiffImage.Save(outputPath, new PngOptions());
             }
         }
@@ -47,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to soften the details of a high‑resolution TIFF scan (e.g., a scanned document or photograph) before publishing it as a web‑friendly PNG, they can use this code to apply a Gaussian blur with radius five and convert the format.
- * 2. When an application must generate preview thumbnails of large TIFF images for a gallery and wants the previews to have a subtle blur effect to reduce visual noise, this snippet shows how to blur and save them as PNG files.
- * 3. When integrating a document‑management system that stores original TIFF files but requires blurred PNG copies for privacy‑sensitive viewing, the code demonstrates the necessary C# steps with Aspose.Imaging.
- * 4. When a batch‑processing tool needs to automatically apply a Gaussian blur to medical imaging TIFFs (e.g., X‑ray or MRI scans) and output them as PNG for easier sharing with clinicians, this example provides the exact workflow.
- * 5. When a developer is building a reporting service that converts scanned TIFF invoices into blurred PNG images to protect confidential details while still showing layout, the code illustrates how to achieve that using Aspose.Imaging for .NET.
+ * 1. When a developer needs to soften a high‑resolution scanned TIFF document (e.g., a blueprint or photograph) before publishing it on a website, they can apply a Gaussian blur with radius five and save the result as a PNG for web‑friendly delivery.
+ * 2. When preparing archival TIFF images for inclusion in a PDF report, a developer may blur sensitive details using a radius‑5 Gaussian filter and convert the output to PNG to reduce file size while preserving transparency.
+ * 3. When building an automated image‑processing pipeline that receives TIFF files from a scanner, a developer can use this code to smooth the images with a Gaussian blur (radius 5) and store them as PNGs for downstream machine‑learning models that require a consistent format.
+ * 4. When creating thumbnail previews of large TIFF photographs for a digital asset management system, a developer can apply a radius‑5 Gaussian blur to reduce visual noise and then save the thumbnails as PNGs for fast loading.
+ * 5. When a developer must comply with a client’s branding guidelines that require all exported images to have a subtle soft‑focus effect, they can blur the original TIFF using a radius of five and output the final image in PNG format for use in marketing materials.
  */

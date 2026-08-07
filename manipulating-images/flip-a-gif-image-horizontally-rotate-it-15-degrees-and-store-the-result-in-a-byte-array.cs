@@ -8,11 +8,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.gif";
+        string outputPath = "output.gif";
+
         try
         {
-            string inputPath = "input.gif";
-            string outputPath = "output.gif";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,14 +25,17 @@ class Program
             {
                 // Flip horizontally
                 gif.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                // Rotate 15 degrees with transparent background
-                gif.Rotate(15f, true, Color.Transparent);
+                // Rotate 15 degrees with white background
+                gif.Rotate(15f, true, Color.White);
 
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    gif.Save(ms, new GifOptions());
-                    byte[] result = ms.ToArray();
-                    Console.WriteLine($"Result byte array length: {result.Length}");
+                    GifOptions options = new GifOptions();
+                    gif.Save(ms, options);
+                    byte[] resultBytes = ms.ToArray();
+
+                    // Optionally write to file
+                    File.WriteAllBytes(outputPath, resultBytes);
                 }
             }
         }
@@ -45,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a web service that generates animated GIF thumbnails with a mirrored effect and a slight rotation for a social media preview, a developer can use this code to flip, rotate, and return the image as a byte array.
- * 2. When building an email marketing platform that needs to embed custom‑styled GIF banners with a horizontal flip and a 15‑degree tilt to match a campaign’s visual theme, this snippet processes the GIF and provides the result in memory for attachment.
- * 3. When developing a mobile app that applies playful transformations to user‑uploaded GIF stickers—flipping them horizontally and rotating them before sending them to a server—the code performs the transformation and supplies the byte array for network transmission.
- * 4. When implementing a server‑side image‑processing pipeline that converts uploaded GIF avatars into a consistent orientation by flipping and rotating them, the byte array output can be stored directly in a database or cache.
- * 5. When creating an automated testing tool that validates GIF rendering after applying geometric transformations, the developer can use this example to flip, rotate, and capture the resulting image data as a byte array for comparison.
+ * 1. When a web developer wants to create a mirrored and slightly rotated animated GIF for a banner and needs the transformed image as a byte array to embed directly into an HTML response.
+ * 2. When a mobile app backend must generate a horizontally flipped, 15‑degree rotated GIF thumbnail and store it in a database as binary data.
+ * 3. When an e‑learning platform needs to preprocess user‑uploaded GIFs by flipping and rotating them before saving the result to a CDN, using C# and Aspose.Imaging.
+ * 4. When a desktop application requires on‑the‑fly manipulation of GIF animations—flipping, rotating, and retrieving the result as a byte[] for further processing or transmission.
+ * 5. When an email marketing system must adjust the orientation of animated GIFs (flip and rotate) and embed the final image bytes into MIME messages without writing intermediate files.
  */

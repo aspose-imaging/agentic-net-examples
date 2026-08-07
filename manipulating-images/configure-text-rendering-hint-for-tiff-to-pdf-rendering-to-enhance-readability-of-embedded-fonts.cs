@@ -1,18 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\input.tif";
+        string outputPath = @"C:\Temp\output.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.tif";
-            string outputPath = "C:\\temp\\output.pdf";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,25 +25,20 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TIFF image
-            using (Image image = Image.Load(inputPath))
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Configure rasterization options with enhanced text rendering
-                var rasterizationOptions = new VectorRasterizationOptions
+                // Configure PDF options with vector rasterization settings
+                PdfOptions pdfOptions = new PdfOptions
                 {
-                    // Use anti‑aliased text rendering for better readability of embedded fonts
-                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias,
-                    // Preserve original image size
-                    PageSize = image.Size
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        // Enhance readability of embedded fonts
+                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias
+                    }
                 };
 
-                // Set PDF options to use the configured rasterization options
-                var pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = rasterizationOptions
-                };
-
-                // Save the image as PDF
-                image.Save(outputPath, pdfOptions);
+                // Save the TIFF as PDF using the configured options
+                tiffImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -54,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When converting scanned legal documents saved as TIFF files to searchable PDFs and need anti‑aliased text rendering to keep the embedded fonts clear for court reviewers.
- * 2. When generating PDF reports from high‑resolution TIFF maps that contain street names, and you want the text labels to appear crisp by setting TextRenderingHint to AntiAlias.
- * 3. When automating archival of medical imaging records stored as TIFF and require readable patient information in the resulting PDFs for compliance audits.
- * 4. When building a C# desktop application that batch‑processes engineering drawings in TIFF format into PDFs, and you need enhanced text readability for dimension annotations.
- * 5. When creating an e‑learning platform that converts scanned textbook pages (TIFF) to PDFs, ensuring the embedded font text is legible on various devices by configuring rasterization options.
+ * 1. When a developer needs to convert multi‑page TIFF scans of contracts into searchable PDF files while ensuring that any embedded text appears crisp and legible on screen, they can set the TextRenderingHint to AntiAlias as shown.
+ * 2. When generating PDF reports from high‑resolution TIFF maps for a GIS application, configuring the text rendering hint improves the readability of map labels and annotations after conversion.
+ * 3. When automating the archival of scanned invoices stored as TIFF images into PDF format for an accounting system, applying the AntiAlias rendering hint prevents blurry font rendering in the resulting PDFs.
+ * 4. When building a C# service that batches medical record TIFFs into PDF documents for electronic health records, using Aspose.Imaging’s TextRenderingHint ensures that patient information text remains clear for clinicians.
+ * 5. When creating a desktop utility that converts TIFF‑based e‑books into PDF while preserving the quality of embedded fonts for e‑readers, setting the TextRenderingHint to AntiAlias enhances the reading experience.
  */

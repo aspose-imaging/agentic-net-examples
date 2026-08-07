@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -23,22 +23,19 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                // Apply Gaussian blur if the image is raster
-                if (image is RasterImage raster)
+                // Apply Gaussian blur to the raster image
+                RasterImage raster = image as RasterImage;
+                if (raster != null)
                 {
-                    raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                    raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
                 }
 
-                // Prepare PNG export options with text rendering hint
-                PngOptions pngOptions = new PngOptions
-                {
-                    Source = new FileCreateSource(outputPath, false),
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel
-                    }
-                };
+                // Configure PNG export options with text rendering hint
+                PngOptions pngOptions = new PngOptions();
+                pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions();
+                pngOptions.VectorRasterizationOptions.TextRenderingHint = TextRenderingHint.SingleBitPerPixel;
 
+                // Save the processed image as PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -51,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to soften a Photoshop PSD layer before generating a web‑ready PNG thumbnail, applying a Gaussian blur and preserving text clarity with a specific rendering hint.
- * 2. When an automated pipeline must convert high‑resolution PSD designs into PNG assets for mobile apps while ensuring any embedded vector text is rasterized with single‑bit per pixel rendering for consistent appearance.
- * 3. When a content management system imports user‑uploaded PSD files, applies a blur effect to hide sensitive details, and saves the result as a PNG for fast preview loading.
- * 4. When a batch‑processing tool processes a folder of PSD files, adds a subtle Gaussian blur to background elements, and exports them to PNG with Aspose.Imaging’s TextRenderingHint to maintain crisp typography.
- * 5. When a digital publishing workflow requires converting layered PSD artwork into PNG images with controlled text rasterization, using C# and Aspose.Imaging to apply blur and set the rendering hint in one step.
+ * 1. When a web developer needs to create a softened preview of a Photoshop PSD file for faster page loading, they can apply a Gaussian blur and export it as a PNG with optimized text rendering.
+ * 2. When an e‑learning platform wants to generate low‑resolution PNG thumbnails of high‑resolution PSD slides while preserving crisp vector text, they can use this code to blur the background and set the TextRenderingHint to SingleBitPerPixel.
+ * 3. When a digital asset management system must automatically produce watermarked PNG copies of PSD artwork with a subtle blur effect to protect intellectual property, the code provides the necessary image filtering and export options.
+ * 4. When a mobile app needs to display a blurred background derived from a PSD design and ensure that any overlaid text renders sharply in the PNG output, developers can employ this routine.
+ * 5. When a batch‑processing tool is required to convert multiple PSD files into PNG format with a uniform Gaussian blur and consistent text rendering settings for print‑ready PDFs, this snippet handles the conversion efficiently.
  */

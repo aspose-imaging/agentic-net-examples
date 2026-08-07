@@ -3,39 +3,40 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.gif";
-        string outputPath = "output.gif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.gif";
+            string outputPath = "output.gif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
                 GifImage gif = (GifImage)image;
 
                 // Apply Gaussian blur to the entire GIF
-                gif.Filter(gif.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                gif.Filter(gif.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Configure lossy compression
+                // Configure lossy compression options
                 GifOptions options = new GifOptions
                 {
-                    MaxDiff = 80 // Enable lossy compression with recommended value
+                    MaxDiff = 80 // Recommended lossy compression level
                 };
 
                 // Save the blurred GIF with lossy compression
@@ -51,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a privacy‑preserving animated preview for a user‑generated GIF, a developer can blur the frames and then apply lossy GIF compression to reduce file size for faster web delivery.
- * 2. When generating low‑bandwidth email newsletters that include animated graphics, a developer can soften the animation with a Gaussian blur and compress it using Aspose.Imaging’s lossy GIF algorithm to stay under size limits.
- * 3. When preparing animated stickers for a mobile app where visual detail is less critical, a developer can apply a blur filter to the GIF and then use the MaxDiff setting to achieve aggressive lossy compression for quicker loading.
- * 4. When building a content‑moderation pipeline that needs to obscure faces in GIF memes before storage, a developer can blur the entire animation and compress it with Aspose.Imaging to save disk space.
- * 5. When optimizing product demo GIFs for e‑commerce sites that require quick page rendering, a developer can soften the animation with a Gaussian blur filter and then apply lossy GIF compression to balance visual quality and performance.
+ * 1. When creating a privacy‑preserving animated meme, a developer can blur the original GIF and then reduce its file size with Aspose.Imaging’s lossy GIF compression to share quickly on social media.
+ * 2. When optimizing an animated tutorial for a mobile app, a developer may apply a Gaussian blur to smooth visual noise and then save the result with a MaxDiff setting to meet bandwidth constraints.
+ * 3. When preparing a GIF‑based loading indicator for a web page, a developer can use the code to soften the animation and compress it, ensuring faster page load times without noticeable quality loss.
+ * 4. When generating a low‑resolution preview of a high‑detail animated advertisement, a developer can blur the frames and apply lossy compression to produce a lightweight GIF that still conveys the motion.
+ * 5. When archiving user‑submitted animated content that may contain sensitive details, a developer can automatically blur the GIF and compress it with Aspose.Imaging to protect privacy while minimizing storage usage.
  */

@@ -8,38 +8,52 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            // Hardcoded input and output directories
+            string inputDir = "InputImages";
+            string outputDir = "OutputImages";
 
-            // Ensure input and output directories exist
-            Directory.CreateDirectory(inputDirectory);
-            Directory.CreateDirectory(outputDirectory);
-
-            string[] files = Directory.GetFiles(inputDirectory);
-            foreach (string inputPath in files)
+            // Validate input directory
+            if (!Directory.Exists(inputDir))
             {
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Get all files in the input directory
+            string[] files = Directory.GetFiles(inputDir);
+            foreach (string file in files)
+            {
+                string inputPath = file;
+
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     continue;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                // Prepare output file path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                 string extension = Path.GetExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, $"{fileName}_processed{extension}");
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + "_processed" + extension);
 
-                // Ensure the output directory exists
+                // Ensure output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+                // Load, process, and save the image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Crop: remove 10 pixels from each side if possible
-                    if (image.Width > 20 && image.Height > 20)
-                    {
-                        var cropRect = new Rectangle(10, 10, image.Width - 20, image.Height - 20);
-                        image.Crop(cropRect);
-                    }
+                    // Crop 10% from each side
+                    int cropX = image.Width / 10;
+                    int cropY = image.Height / 10;
+                    int cropWidth = image.Width - 2 * cropX;
+                    int cropHeight = image.Height - 2 * cropY;
+                    var cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
+                    image.Crop(cropRect);
 
                     // Rotate 90 degrees clockwise
                     image.RotateFlip(RotateFlipType.Rotate90FlipNone);
@@ -63,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically prepare a batch of product photos (e.g., JPEG or PNG) by trimming borders, rotating them to portrait orientation, and shrinking them for faster web loading.
- * 2. When an e‑commerce platform must process user‑uploaded images in a folder, applying a 10‑pixel crop, a 90‑degree clockwise rotate, and resizing to half size before storing them in a CDN.
- * 3. When a digital asset management system requires a nightly C# job that reads all images from an Input directory, normalizes their orientation, removes unwanted edges, and reduces dimensions to conserve storage.
- * 4. When a marketing team wants to generate thumbnail versions of a large collection of campaign graphics by cropping, rotating, and resizing them in a single Aspose.Imaging pipeline.
- * 5. When a mobile app backend needs to batch‑convert scanned documents (TIFF, BMP) into smaller, correctly oriented images for preview thumbnails using C# and Aspose.Imaging.
+ * 1. When a developer needs to automatically prepare a large collection of product photos (e.g., JPEG or PNG) by cropping borders, rotating to a standard orientation, and resizing them for an e‑commerce catalog, they can use this Aspose.Imaging batch pipeline.
+ * 2. When a content management system must ingest user‑uploaded images and enforce consistent dimensions and aspect ratios before storage, the code can process an entire input folder and output uniformly cropped, rotated, and resized files.
+ * 3. When a digital asset workflow requires nightly conversion of scanned documents into web‑ready thumbnails, the developer can run this C# script to batch‑process the scan folder, applying a 10 % crop, a 90‑degree rotation, and a size reduction in one pass.
+ * 4. When a mobile app backend needs to generate optimized profile pictures from a batch of raw uploads, the code provides a simple way to load each image, apply cropping, rotate to portrait, and resize to the required pixel dimensions using Aspose.Imaging.
+ * 5. When a marketing team wants to bulk‑prepare banner images for multiple languages, a developer can point the script at the source directory and automatically produce processed versions with consistent cropping, rotation, and scaling for each locale.
  */

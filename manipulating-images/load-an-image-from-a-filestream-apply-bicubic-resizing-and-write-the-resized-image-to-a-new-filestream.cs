@@ -8,42 +8,40 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output file paths
         string inputPath = @"C:\temp\input.jpg";
         string outputPath = @"C:\temp\output.png";
 
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
-            // Ensure output directory exists
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Open input file stream
+            // Open input file stream and load the image
             using (FileStream inputStream = File.OpenRead(inputPath))
+            using (Image image = Image.Load(inputStream))
             {
-                // Load image from stream
-                using (Image image = Image.Load(inputStream))
+                // Desired dimensions for resizing (example: half size)
+                int newWidth = image.Width / 2;
+                int newHeight = image.Height / 2;
+
+                // Apply bicubic (cubic convolution) resizing
+                image.Resize(newWidth, newHeight, ResizeType.CubicConvolution);
+
+                // Prepare PNG save options (can be changed to other formats)
+                PngOptions saveOptions = new PngOptions();
+
+                // Open output file stream and save the resized image
+                using (FileStream outputStream = File.Open(outputPath, FileMode.Create))
                 {
-                    // Determine new dimensions (example: half the original size)
-                    int newWidth = image.Width / 2;
-                    int newHeight = image.Height / 2;
-
-                    // Resize using bicubic (CubicConvolution) interpolation
-                    image.Resize(newWidth, newHeight, ResizeType.CubicConvolution);
-
-                    // Prepare output stream and save options
-                    using (FileStream outputStream = File.Open(outputPath, FileMode.Create))
-                    {
-                        var saveOptions = new PngOptions();
-                        // Save resized image to output stream
-                        image.Save(outputStream, saveOptions);
-                    }
+                    image.Save(outputStream, saveOptions);
                 }
             }
         }
@@ -56,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to generate thumbnail previews of uploaded JPEG photos for a gallery, it can load the image from a FileStream, resize it with bicubic interpolation, and save the smaller PNG to a response stream.
- * 2. When a desktop application must batch‑convert high‑resolution product images to web‑friendly PNGs at half size, the code reads each file via FileStream, applies a cubic convolution resize, and writes the optimized image back to disk.
- * 3. When an e‑commerce platform wants to create fast‑loading preview images for mobile devices, it can stream the original JPG, resize it using Aspose.Imaging’s bicubic algorithm, and store the result as a PNG in a temporary folder.
- * 4. When a document generation tool embeds resized company logos into PDFs, it can load the source logo from a FileStream, shrink it with high‑quality bicubic scaling, and output the PNG to a memory or file stream for further processing.
- * 5. When an automated CI/CD pipeline validates image assets by down‑sampling them before publishing, the pipeline can read each asset via FileStream, resize with ResizeType.CubicConvolution, and write the reduced PNG to the build output directory.
+ * 1. When a web service needs to generate thumbnail previews of user‑uploaded JPEG photos and store them as PNG files on disk.
+ * 2. When a desktop application must batch‑process scanned documents, reducing their resolution by half using bicubic interpolation before archiving them in a lossless format.
+ * 3. When an e‑commerce platform wants to create smaller product images on the fly to improve page load speed while preserving quality, reading the original file via FileStream and writing the resized PNG.
+ * 4. When a mobile backend needs to convert high‑resolution camera captures to a more bandwidth‑friendly size for email attachments, using C# streams and Aspose.Imaging’s ResizeType.CubicConvolution.
+ * 5. When an automated reporting tool extracts charts from PDFs, resizes them to fit a PDF page, and saves the result as PNG using file streams for reliable resource management.
  */

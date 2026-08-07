@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
@@ -9,8 +10,9 @@ class Program
     {
         try
         {
-            // Hard‑coded list of TIFF files to process
-            string[] inputFiles = {
+            // Hard‑coded list of input TIFF files
+            string[] inputFiles = new[]
+            {
                 @"C:\Images\sample1.tif",
                 @"C:\Images\sample2.tif",
                 @"C:\Images\sample3.tif"
@@ -22,11 +24,13 @@ class Program
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Determine the output PDF path (same folder, same name, .pdf extension)
-                string outputPath = Path.ChangeExtension(inputPath, ".pdf");
+                // Determine output PDF path (same name, .pdf extension, placed in C:\Output)
+                string outputDirectory = @"C:\Output";
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -35,20 +39,15 @@ class Program
                 using (Image image = Image.Load(inputPath))
                 {
                     // Configure PDF export options with high‑quality smoothing
-                    var pdfOptions = new PdfOptions();
-
-                    // Vector rasterization options enable anti‑aliasing (smoothing)
-                    var vectorOptions = new VectorRasterizationOptions
+                    var pdfOptions = new PdfOptions
                     {
-                        SmoothingMode = SmoothingMode.AntiAlias,
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            SmoothingMode = SmoothingMode.HighQuality
+                        }
                     };
 
-                    pdfOptions.VectorRasterizationOptions = vectorOptions;
-
-                    // Save the image as a high‑quality PDF
+                    // Save as PDF
                     image.Save(outputPath, pdfOptions);
                 }
             }
@@ -62,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a batch of multi‑page TIFF scans into high‑resolution PDF documents with anti‑aliasing to preserve text clarity for archiving.
- * 2. When an application must generate printable PDFs from medical imaging TIFF files while ensuring smooth edges and a consistent white background for regulatory compliance.
- * 3. When a document management system requires automated conversion of scanned invoices stored as TIFFs into searchable PDFs with high‑quality smoothing for better OCR results.
- * 4. When a desktop utility processes large sets of architectural blueprint TIFF images into PDF portfolios, using Aspose.Imaging’s VectorRasterizationOptions to maintain line sharpness.
- * 5. When a web service needs to transform user‑uploaded TIFF photos into PDF portfolios with anti‑aliasing to improve visual quality before delivering them to clients.
+ * 1. When a developer needs to batch‑convert scanned TIFF documents into PDF files with high‑quality smoothing for archival or distribution.
+ * 2. When an application must generate print‑ready PDFs from multi‑page TIFF medical images while preserving visual fidelity using Aspose.Imaging’s SmoothingMode.HighQuality.
+ * 3. When a document management system requires automated conversion of TIFF invoices to PDF format with anti‑aliasing to ensure crisp text and graphics.
+ * 4. When a GIS tool needs to export raster TIFF map tiles to PDF maps with smooth rendering for inclusion in analytical reports.
+ * 5. When a legal firm wants to batch‑process TIFF evidence files into PDF packets, applying high‑quality smoothing to maintain detail for courtroom presentation.
  */

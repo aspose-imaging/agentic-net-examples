@@ -1,18 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output\\rotated.bmp";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,18 +24,20 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
-            using (Image image = Image.Load(inputPath))
+            // Load BMP image as RasterImage
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to BmpImage to access BMP-specific features if needed
-                BmpImage bmp = (BmpImage)image;
+                // Rotate 120 degrees, resize proportionally, fill background with blue
+                image.Rotate(120f, true, Aspose.Imaging.Color.Blue);
 
-                // Rotate 120 degrees, resize proportionally, fill empty corners with a custom background color
-                Color backgroundColor = Color.FromArgb(255, 200, 200, 200); // Light gray
-                bmp.Rotate(120f, true, backgroundColor);
+                // Prepare BMP save options with bound file source
+                BmpOptions options = new BmpOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
 
                 // Save the rotated image
-                bmp.Save(outputPath);
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -46,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating printable game assets that must be rotated at a non‑right angle, a developer can use Aspose.Imaging for .NET to rotate a BMP sprite by 120° and fill the resulting empty corners with a light‑gray background color to maintain a consistent visual appearance.
- * 2. When converting legacy BMP diagrams into a rotated layout for a technical manual, a C# application can apply a custom background color during the 120‑degree rotation to avoid transparent gaps that would otherwise appear in the PDF output.
- * 3. When creating a batch‑processing tool that aligns scanned BMP photographs to a standard orientation, developers can rotate each image by 120° with Aspose.Imaging and specify a background color so the newly exposed corners blend with the surrounding page background.
- * 4. When building a custom map‑tiling service that needs to display BMP tiles at an angled perspective, the code can rotate each tile by 120 degrees and fill empty corners with a chosen color to prevent visual artifacts in the rendered map.
- * 5. When developing an automated watermarking pipeline that first rotates BMP logos by 120° before overlaying them, using a custom background color ensures the rotated logo’s corners match the document’s background and do not appear transparent.
+ * 1. When a developer needs to rotate a BMP image by a non‑right‑angle (e.g., 120°) and fill the uncovered corners with a specific background color such as blue for a game asset pipeline.
+ * 2. When an application must process legacy BMP files, apply a custom rotation while preserving the original pixel format, and ensure the output file is saved with the same BMP format.
+ * 3. When generating printable marketing material that requires rotating scanned BMP graphics and using a solid background color to avoid transparent gaps in the final PDF.
+ * 4. When building a C# desktop utility that batch‑processes BMP icons, rotates each icon by 120 degrees, and uses a uniform background to maintain visual consistency across different screen resolutions.
+ * 5. When integrating Aspose.Imaging into an automated workflow that reads BMP images from a folder, rotates them for correct orientation, and saves them with a custom background color to meet branding guidelines.
  */

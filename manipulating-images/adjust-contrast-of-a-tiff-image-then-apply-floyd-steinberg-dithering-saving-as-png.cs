@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.tif";
-        string outputPath = @"c:\temp\output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\input.tif";
+            string outputPath = @"c:\temp\output.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -33,7 +33,7 @@ class Program
                 // Adjust contrast (example value: 50)
                 tiffImage.AdjustContrast(50f);
 
-                // Apply Floyd‑Steinberg dithering with 1‑bit palette
+                // Apply Floyd‑Steinberg dithering with a 1‑bit palette
                 tiffImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
 
                 // Save the processed image as PNG
@@ -50,8 +50,8 @@ class Program
 /*
  * Real-World Use Cases:
  * 1. When a developer needs to improve the visual quality of a scanned document by increasing contrast before converting a multi‑page TIFF to a web‑friendly PNG.
- * 2. When an application must reduce the file size of a high‑resolution TIFF by applying Floyd‑Steinberg dithering to a 1‑bit palette and saving the result as PNG for faster download.
- * 3. When a batch‑processing tool has to prepare archival TIFF images for printing on monochrome printers, adjusting contrast and dithering to ensure crisp black‑and‑white output.
- * 4. When a medical imaging system requires conversion of diagnostic TIFF scans to PNG while enhancing contrast and applying error‑diffusion dithering to preserve detail in low‑bit displays.
- * 5. When a GIS workflow needs to transform satellite TIFF layers into PNG tiles with adjusted contrast and Floyd‑Steinberg dithering for consistent map rendering.
+ * 2. When an application must reduce a high‑resolution TIFF to a 1‑bit black‑and‑white PNG using Floyd‑Steinberg dithering for printing on monochrome printers.
+ * 3. When a batch‑processing tool has to prepare archival TIFF images for mobile devices by adjusting contrast and applying dithering to keep file size low.
+ * 4. When a GIS system requires converting satellite TIFF imagery to PNG while enhancing contrast and preserving edge detail through dithering.
+ * 5. When a digital archiving workflow needs to standardize incoming TIFF files by normalizing contrast and generating a PNG preview with Floyd‑Steinberg dithering.
  */

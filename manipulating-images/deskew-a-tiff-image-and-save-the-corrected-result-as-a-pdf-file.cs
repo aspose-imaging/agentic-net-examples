@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -11,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "C:\\Images\\skewed.tif";
-            string outputPath = "C:\\Images\\deskewed.pdf";
+            string inputPath = @"C:\Images\input.tif";
+            string outputPath = @"C:\Images\output.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -43,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a scanning workflow receives skewed TIFF documents from a multi-function printer and needs to automatically straighten them before archiving as searchable PDF files.
- * 2. When a legal firm digitizes signed contracts that are saved as TIFF images and wants to correct the tilt and convert them to PDF for e‑filing.
- * 3. When a medical records system imports scanned patient forms in TIFF format, deskews them to improve OCR accuracy, and stores the cleaned pages as PDF reports.
- * 4. When a construction company processes blueprint scans that are slightly rotated, uses C# and Aspose.Imaging to normalize the angle and generate PDF drawings for distribution.
- * 5. When an e‑commerce platform receives product label scans as TIFF files, needs to remove skew for consistent presentation, and saves the result as PDF for catalog publishing.
+ * 1. When a developer needs to automatically correct the skew of scanned TIFF documents (such as invoices or contracts) and archive them as searchable PDF files using C# and Aspose.Imaging.
+ * 2. When a batch‑processing service must validate that incoming multi‑page TIFF files are properly aligned before converting them to PDF for downstream OCR pipelines.
+ * 3. When an enterprise application integrates a document‑upload feature that receives rotated TIFF images from mobile scanners and must deskew them on the server before saving as PDF for compliance records.
+ * 4. When a digital‑archiving tool requires straightening legacy TIFF scans and storing the results in PDF format to reduce storage size and improve viewing consistency across platforms.
+ * 5. When a C# console utility is needed to verify the existence of a TIFF file, correct its orientation using NormalizeAngle with a white background, and output a PDF for easy distribution to clients.
  */

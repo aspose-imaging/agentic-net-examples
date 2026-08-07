@@ -12,44 +12,54 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.jpg";
-        string outputPath = "output\\masked.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input\\image.png";
+            string outputPath = "output\\result.png";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the source image as a raster image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                PngOptions exportOptions = new PngOptions
+                // Export options for the masking process
+                var exportOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
                     Source = new StreamSource(new MemoryStream())
                 };
 
-                AutoMaskingGraphCutOptions maskingOptions = new AutoMaskingGraphCutOptions
+                // Configure masking options (auto‑masking with GraphCut)
+                var maskingOptions = new MaskingOptions
                 {
-                    CalculateDefaultStrokes = true,
-                    FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
                     Method = SegmentationMethod.GraphCut,
                     Decompose = false,
-                    ExportOptions = exportOptions,
-                    BackgroundReplacementColor = Color.Transparent
+                    Args = new AutoMaskingArgs(),
+                    BackgroundReplacementColor = Color.Transparent,
+                    ExportOptions = exportOptions
                 };
 
-                using (MaskingResult maskingResult = new ImageMasking(image).Decompose(maskingOptions))
+                // Perform masking
+                var masking = new ImageMasking(image);
+                using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
                 {
+                    // Retrieve the foreground segment (index 1)
                     using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
                     {
+                        // Save the foreground as a PNG file
                         foreground.Save(outputPath, new PngOptions
                         {
-                            ColorType = PngColorType.TruecolorWithAlpha
+                            ColorType = PngColorType.TruecolorWithAlpha,
+                            Source = new FileCreateSource(outputPath, false)
                         });
                     }
                 }
@@ -64,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically remove the background from user‑uploaded JPEG photos and save the resulting transparent PNG for use in web galleries.
- * 2. When an e‑commerce platform must batch‑process product images, applying auto‑masking to isolate the product and export it as a PNG with an alpha channel for overlay on promotional banners.
- * 3. When a mobile app backend receives raw image files and must generate cut‑out images with transparent backgrounds for avatar creation, using GraphCut segmentation in C#.
- * 4. When a digital publishing workflow requires converting scanned JPEG illustrations into PNG assets with transparent backgrounds to embed in PDF layouts.
- * 5. When a content‑management system needs to accept image path arguments, perform auto‑masking, and store the masked PNG in a specified folder for later retrieval by a front‑end UI.
+ * 1. When a developer needs to batch‑process product photos from a folder, automatically remove the background with GraphCut auto‑masking and save the transparent PNGs to an output directory.
+ * 2. When an e‑commerce platform requires a command‑line tool that accepts image file paths, isolates the foreground objects, and generates PNG files with alpha channels for seamless web display.
+ * 3. When a digital asset management system must convert scanned PNG scans into cut‑out images by applying auto‑masking and exporting the result as a true‑color‑with‑alpha PNG.
+ * 4. When a game‑development pipeline needs a quick C# console utility to strip backgrounds from sprite sheets using Aspose.Imaging’s ImageMasking and output the masked sprites as PNG files.
+ * 5. When a marketing automation script has to process user‑uploaded PNG logos, automatically separate the logo from its background, and store the transparent PNGs for later use in branding materials.
  */

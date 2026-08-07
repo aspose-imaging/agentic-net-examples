@@ -10,49 +10,45 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\InputImages";
-            string outputDir = @"C:\OutputPdfs";
-
-            // List of PSD files to process
-            string[] psdFiles = new[]
+            // Hardcoded input PSD files
+            string[] inputPaths = new string[]
             {
-                "sample1.psd",
-                "sample2.psd",
-                "sample3.psd"
+                @"C:\Images\input1.psd",
+                @"C:\Images\input2.psd"
             };
 
-            foreach (string fileName in psdFiles)
+            // Corresponding output PDF files
+            string[] outputPaths = new string[]
             {
-                // Build full input and output paths
-                string inputPath = Path.Combine(inputDir, fileName);
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".pdf");
+                @"C:\Images\output1.pdf",
+                @"C:\Images\output2.pdf"
+            };
 
-                // Verify input file exists
+            for (int i = 0; i < inputPaths.Length; i++)
+            {
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Ensure output directory exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the PSD image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to apply dithering
-                    RasterImage rasterImage = image as RasterImage;
-                    if (rasterImage != null)
+                    // Apply dithering to the raster image (if applicable)
+                    RasterImage raster = image as RasterImage;
+                    if (raster != null)
                     {
-                        // Apply Floyd‑Steinberg dithering with a 1‑bit palette (black & white)
-                        rasterImage.Dither(DitheringMethod.FloydSteinbergDithering, 1);
+                        raster.Dither(DitheringMethod.FloydSteinbergDithering, 1);
                     }
 
-                    // Prepare PDF save options
-                    PdfOptions pdfOptions = new PdfOptions();
-
                     // Save the processed image as PDF
+                    PdfOptions pdfOptions = new PdfOptions();
                     image.Save(outputPath, pdfOptions);
                 }
             }
@@ -66,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate printable black‑and‑white PDFs from a set of Photoshop PSD files for a fast‑preview workflow, they can use this code to dither each image and save it as a PDF.
- * 2. When an e‑commerce platform must automatically create low‑size PDF catalog pages from high‑resolution PSD product images while preserving visual contrast, this code provides batch dithering and conversion.
- * 3. When a document management system requires archival of design assets as PDFs with 1‑bit dithering to reduce storage costs, the code can process multiple PSD files in one run.
- * 4. When a web service offers on‑the‑fly conversion of uploaded PSD files to PDF for mobile devices, applying Floyd‑Steinberg dithering ensures the output is clear on monochrome screens.
- * 5. When a QA automation script needs to validate that PSD files render correctly after dithering by comparing the resulting PDFs, this snippet automates loading, dithering, and saving.
+ * 1. When a developer needs to batch‑convert Photoshop PSD files to PDF documents while applying Floyd‑Steinberg dithering to preserve visual quality for print‑ready output.
+ * 2. When an automated workflow must generate PDF portfolios from multiple PSD artworks, using C# image loading and PdfOptions to ensure consistent dithering across all files.
+ * 3. When a web service processes user‑uploaded PSD designs and returns PDF previews, applying raster dithering to improve gradient smoothness on screen.
+ * 4. When a desktop application prepares marketing assets by converting several PSD files to PDFs with uniform dithering, guaranteeing that color transitions appear smooth on different devices.
+ * 5. When a CI/CD pipeline validates graphic assets by converting source PSD files to PDF and applying Floyd‑Steinberg dithering to detect rendering issues before release.
  */

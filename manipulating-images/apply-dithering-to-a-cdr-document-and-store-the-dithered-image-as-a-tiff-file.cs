@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.cdr";
-            string outputPath = "output.tif";
+            string inputPath = @"C:\temp\sample.cdr";
+            string outputPath = @"C:\temp\sample_dithered.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -28,14 +28,21 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to RasterImage to access Dither method
-                RasterImage raster = (RasterImage)image;
+                RasterImage rasterImage = (RasterImage)image;
 
                 // Apply Floyd‑Steinberg dithering with 1‑bit palette
-                raster.Dither(DitheringMethod.FloydSteinbergDithering, 1);
+                rasterImage.Dither(DitheringMethod.FloydSteinbergDithering, 1);
+
+                // Prepare TIFF saving options
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    BitsPerSample = new ushort[] { 1, 1, 1 }, // 1‑bit per channel
+                    Compression = TiffCompressions.None,
+                    Photometric = TiffPhotometrics.MinIsWhite
+                };
 
                 // Save the dithered image as TIFF
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                raster.Save(outputPath, tiffOptions);
+                rasterImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a CorelDRAW CDR illustration into a 1‑bit black‑and‑white TIFF for high‑contrast printing, they can use this code to apply Floyd‑Steinberg dithering before saving.
- * 2. When preparing archival copies of vector artwork in a lossless TIFF format while preserving fine details through dithering, this C# snippet using Aspose.Imaging handles the CDR to TIFF conversion.
- * 3. When an application must generate low‑resolution preview images of CDR files for web thumbnails that require a binary palette, the code demonstrates how to dither and export as TIFF.
- * 4. When integrating a document processing pipeline that receives CDR files and needs to output printer‑ready TIFFs with halftone simulation, developers can employ this raster‑image dithering approach.
- * 5. When automating batch conversion of multiple CDR designs into TIFF files with consistent 1‑bit dithering for fax transmission, the example shows the necessary file checks, raster conversion, and saving steps in .NET.
+ * 1. When a developer needs to convert a CorelDRAW (CDR) illustration into a high‑contrast 1‑bit TIFF for laser printing or archival, they can use this code to dither and save the image.
+ * 2. When a workflow requires generating black‑and‑white TIFF previews of vector designs for inclusion in PDF reports, the dithering routine ensures the preview matches the original shading.
+ * 3. When an e‑commerce platform must create low‑size, monochrome thumbnails of product artwork stored as CDR files for fast web loading, this code produces the compressed TIFF.
+ * 4. When a document management system must store scanned‑style copies of CDR logos in a format compatible with legacy fax machines, applying Floyd‑Steinberg dithering and saving as TIFF meets the requirement.
+ * 5. When a batch‑processing tool needs to prepare CDR graphics for inclusion in a GIS raster dataset that only accepts 1‑bit TIFF layers, the code provides the necessary conversion and dithering step.
  */

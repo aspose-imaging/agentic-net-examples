@@ -7,38 +7,38 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.tif";
-        string outputPath = @"C:\Output\sample.pdf";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.tif";
+            string outputPath = @"C:\Output\sample.pdf";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure multiple font directories (example: Latin and CJK scripts)
-            string[] fontFolders = new string[]
+            // Configure multiple font directories (recursive search enabled)
+            string[] fontDirectories = new string[]
             {
                 @"C:\Fonts\Latin",
-                @"C:\Fonts\CJK"
+                @"C:\Fonts\CJK",
+                @"C:\Fonts\Arabic"
             };
-            // Set the font folders and enable recursive search
-            FontSettings.SetFontsFolders(fontFolders, true);
+            FontSettings.SetFontsFolders(fontDirectories, true);
 
             // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up PDF saving options
+                // Prepare PDF save options
                 var pdfOptions = new PdfOptions();
 
-                // Save the image as PDF
+                // Save as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -51,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert multi‑language TIFF scans (e.g., documents containing both Latin and CJK characters) to searchable PDF files and must point Aspose.Imaging to separate font folders so the correct glyphs are rendered.
- * 2. When an automated document‑processing service processes archived TIFF images from different regions and must ensure the PDF output uses the appropriate regional fonts stored in distinct directories.
- * 3. When building a desktop C# application that generates PDFs from user‑uploaded TIFF files and the application must support custom corporate fonts located in multiple folder paths.
- * 4. When integrating Aspose.Imaging into a batch conversion pipeline that reads TIFF files with embedded text and requires recursive loading of fonts from both a standard system folder and a network share to preserve text appearance in the resulting PDF.
- * 5. When creating a multilingual e‑learning platform that converts scanned lecture notes (TIFF) to PDF and needs to configure FontSettings to include both Latin and Asian font directories to avoid missing characters.
+ * 1. When a multinational company needs to convert scanned TIFF documents containing Latin, CJK, and Arabic text into searchable PDFs, they can use this code to load the appropriate fonts from separate directories.
+ * 2. When a legal firm digitizes multilingual contracts stored as TIFF files and must preserve the original script in the resulting PDF, the code ensures the correct fonts are applied during conversion.
+ * 3. When a publishing house automates the generation of PDF e‑books from high‑resolution TIFF artwork that includes captions in various languages, configuring multiple font folders guarantees accurate rendering.
+ * 4. When a government agency processes archival TIFF images of historical records written in different scripts and needs to produce PDF archives that display the text correctly, this code provides the necessary font resolution.
+ * 5. When a medical imaging system exports patient scans saved as TIFF files with embedded annotations in several languages and must create PDF reports that retain those annotations, the code’s FontSettings setup handles the multilingual fonts.
  */

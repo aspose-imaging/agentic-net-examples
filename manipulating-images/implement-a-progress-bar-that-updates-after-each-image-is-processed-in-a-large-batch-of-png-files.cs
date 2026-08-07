@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -11,57 +10,65 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\Input";
-            string outputDirectory = @"C:\Images\Output";
+            string inputDirectory = @"C:\input";
+            string outputDirectory = @"C:\output";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            // Verify input directory exists
+            if (!Directory.Exists(inputDirectory))
+            {
+                Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
+                return;
+            }
 
             // Get all PNG files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.png");
-
-            int total = inputFiles.Length;
-            if (total == 0)
+            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.png", SearchOption.TopDirectoryOnly);
+            int totalFiles = inputFiles.Length;
+            if (totalFiles == 0)
             {
                 Console.WriteLine("No PNG files found to process.");
                 return;
             }
 
-            // Prepare save options with progressive encoding
-            var saveOptions = new PngOptions
-            {
-                Progressive = true
-            };
-
-            for (int i = 0; i < total; i++)
+            // Process each file
+            for (int i = 0; i < totalFiles; i++)
             {
                 string inputPath = inputFiles[i];
 
-                // Verify input file exists
+                // Input file existence check
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output path (same file name in output directory)
+                // Determine output path
                 string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
 
-                // Ensure the output directory exists (unconditional as per rules)
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Save with progressive PNG options
-                    image.Save(outputPath, saveOptions);
+                    // Set progressive PNG options
+                    var pngOptions = new PngOptions
+                    {
+                        Progressive = true
+                    };
+
+                    // Save the image with progressive option
+                    image.Save(outputPath, pngOptions);
                 }
 
-                // Update simple progress bar
-                Console.Write($"\rProcessed {i + 1}/{total} images");
+                // Update progress bar
+                int processed = i + 1;
+                double percent = (processed / (double)totalFiles) * 100;
+                Console.Write($"\rProcessed {processed}/{totalFiles} ({percent:0.##}%)");
             }
 
-            Console.WriteLine("\nProcessing completed.");
+            // Move to next line after progress bar completes
+            Console.WriteLine();
+            Console.WriteLine("Batch processing completed successfully.");
         }
         catch (Exception ex)
         {
@@ -72,9 +79,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a large collection of PNG assets to progressive PNGs for faster web loading while showing a console progress indicator.
- * 2. When an image processing pipeline must ensure all PNG files in a folder are saved with progressive encoding to reduce file size before uploading to a CDN.
- * 3. When a desktop application has to batch‑process user‑uploaded screenshots, applying Aspose.Imaging’s PngOptions and reporting real‑time progress in the console.
- * 4. When a migration script must move PNG images from a legacy directory to a new location, preserving filenames and providing feedback on how many files have been processed.
- * 5. When an automated build step requires validating that every PNG in a source folder can be loaded and saved with Aspose.Imaging, while displaying a simple progress bar to monitor job completion.
+ * 1. When a developer needs to batch‑convert a large collection of PNG files to progressive PNG format using Aspose.Imaging in a C# console application and display a real‑time progress bar for each image processed.
+ * 2. When an e‑commerce site must optimize product images for faster web loading by converting existing PNG assets to progressive PNGs while providing users with a visual progress indicator during the bulk operation.
+ * 3. When a desktop utility is created to migrate legacy PNG resources to progressive PNGs for mobile apps, and the developer wants a command‑line progress bar that updates after each file is saved.
+ * 4. When an automated CI/CD pipeline includes an image‑processing step that transforms PNG resources to progressive PNGs and requires a progress bar to monitor the batch conversion time.
+ * 5. When a photographer’s workflow script processes hundreds of high‑resolution PNG photos with Aspose.Imaging and needs a progress bar to track the conversion status of each image.
  */

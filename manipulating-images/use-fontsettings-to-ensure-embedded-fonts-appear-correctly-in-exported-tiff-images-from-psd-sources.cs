@@ -1,38 +1,48 @@
+// HOW-TO: Export PSD to TIFF with Correct Embedded Fonts Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.psd";
+        string outputPath = "output.tif";
+
+        // Ensure any runtime exception is reported cleanly
         try
         {
-            string inputPath = "Input/sample.psd";
-            string outputPath = "Output/sample.tif";
-
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            Aspose.Imaging.FontSettings.SetFontsFolders(new string[] { "Fonts" }, false);
-
-            using (Aspose.Imaging.Image psdImage = Aspose.Imaging.Image.Load(inputPath))
+            // Create output directory (if any) unconditionally
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
             {
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                {
-                    Source = new FileCreateSource(outputPath, false),
-                    Photometric = TiffPhotometrics.Rgb,
-                    BitsPerSample = new ushort[] { 8, 8, 8 }
-                };
+                Directory.CreateDirectory(outputDir);
+            }
 
-                psdImage.Save(outputPath, tiffOptions);
+            // Configure font settings so that fonts used in the PSD are available
+            // Adjust the folder path to a location that contains the required fonts
+            FontSettings.SetFontsFolder(@"C:\Windows\Fonts");
+            FontSettings.UpdateFonts();
+
+            // Load the PSD image
+            using (Image image = Image.Load(inputPath))
+            {
+                // Prepare TIFF save options
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                // Save the image as TIFF with the configured options
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -44,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert Photoshop PSD files that contain text layers with custom fonts into high‑resolution TIFF images for print‑ready output, ensuring the embedded fonts are rendered correctly using Aspose.Imaging FontSettings.
- * 2. When an automated workflow must generate archival TIFF copies of design assets from PSD sources while preserving exact font appearance for legal or compliance documentation.
- * 3. When a web service processes user‑uploaded PSD files and returns TIFF previews that display the original typography, requiring explicit font folder configuration in C#.
- * 4. When a desktop application batch‑converts a library of PSD graphics to TIFF for integration into a digital asset management system, and the fonts are stored in a non‑standard directory.
- * 5. When a CI/CD pipeline validates that PSD files used in marketing campaigns render correctly as TIFFs on downstream systems by loading custom fonts via Aspose.Imaging FontSettings before saving.
+ * 1. When a designer needs to convert layered PSD files to high‑resolution TIFFs for print production while preserving the exact appearance of custom fonts.
+ * 2. When an automated workflow must generate archival TIFF images from Photoshop documents on a server that does not have the original font files installed.
+ * 3. When a web service creates preview TIFFs of user‑uploaded PSDs and must ensure the text renders with the same typefaces as in the source file.
+ * 4. When a batch‑processing tool prepares TIFF assets for a digital asset management system and has to embed missing fonts to avoid font substitution errors.
+ * 5. When a desktop application exports PSD artwork to TIFF for OCR or PDF conversion and needs the fonts to be available so the text remains searchable and selectable.
  */

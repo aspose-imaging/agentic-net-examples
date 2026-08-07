@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.gif";
-        string outputPath = @"C:\Images\sample_flipped.gif";
+        string inputPath = @"C:\temp\input.gif";
+        string outputPath = @"C:\temp\output_flipped.gif";
 
         try
         {
@@ -23,13 +23,10 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the GIF image
+            // Load the GIF image, flip horizontally, and save
             using (GifImage image = (GifImage)Image.Load(inputPath))
             {
-                // Flip horizontally (no rotation)
                 image.RotateFlip(RotateFlipType.RotateNoneFlipX);
-
-                // Save the flipped image
                 image.Save(outputPath);
             }
         }
@@ -42,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer wants to mirror an animated GIF banner for a right‑to‑left language layout, they can use Aspose.Imaging for .NET to load the GIF, apply RotateFlipType.RotateNoneFlipX, and save the flipped file.
- * 2. When a game developer needs to create a horizontally reversed sprite sheet from an existing GIF animation for character movement, the code demonstrates how to load, flip, and export the new image using C#.
- * 3. When an e‑commerce platform must generate a mirrored product preview GIF for a 360° view on the opposite side of the product, the snippet shows how to perform the flip operation with Aspose.Imaging and save it to a new path.
- * 4. When a marketing automation script has to batch‑process user‑uploaded GIFs to ensure they face the correct direction in email newsletters, this example illustrates the C# RotateFlip method for horizontal flipping.
- * 5. When a desktop application needs to correct the orientation of a GIF captured from a camera that records mirrored images, the code provides a simple way to load, flip horizontally, and store the corrected GIF using Aspose.Imaging for .NET.
+ * 1. When creating a web gallery that mirrors animated GIFs for a right‑to‑left language layout, a developer can use this C# code with Aspose.Imaging to flip the GIF horizontally and store the result.
+ * 2. When generating thumbnail previews that need to show the opposite orientation of a user‑uploaded GIF, the RotateFlipType.RotateNoneFlipX operation lets the developer produce a flipped copy without altering the original file.
+ * 3. When building an e‑learning platform that reuses existing GIF animations but requires a mirrored version for a different UI theme, the code demonstrates how to load, flip, and save the GIF using Aspose.Imaging for .NET.
+ * 4. When automating a batch process that corrects mistakenly reversed GIF assets in a content management system, the developer can apply this snippet to flip each image horizontally and write it to a new location.
+ * 5. When implementing a custom image‑processing service that needs to provide a “mirror” effect for animated GIFs on demand, the example shows how to perform the flip operation and return the new file path in a C# application.
  */

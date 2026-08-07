@@ -9,38 +9,32 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.psd";
-            string outputPath = "Output/sample.png";
+            string inputPath = "Input\\sample.psd";
+            string outputPath = "Output\\sample.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PSD image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG options with high‑quality smoothing
-                PngOptions pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        SmoothingMode = SmoothingMode.AntiAlias,
-                        TextRenderingHint = TextRenderingHint.AntiAlias
-                    }
-                };
+                var exportOptions = new PngOptions();
 
-                // Save as PNG with the specified options
-                image.Save(outputPath, pngOptions);
+                if (image is VectorImage)
+                {
+                    var vectorOptions = new VectorRasterizationOptions
+                    {
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+                    exportOptions.VectorRasterizationOptions = vectorOptions;
+                }
+
+                image.Save(outputPath, exportOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web designer needs to convert layered Photoshop PSD files to PNG for responsive websites while preserving smooth edges and anti‑aliased text, this code ensures high‑quality visual fidelity.
- * 2. When an e‑learning platform generates PNG thumbnails from PSD lesson assets and wants crisp graphics without jagged lines, the smoothing mode improves the thumbnail appearance.
- * 3. When a digital marketing agency automates batch conversion of PSD logos to PNG for social media posts, enabling anti‑aliasing prevents pixelated edges on various screen resolutions.
- * 4. When a print‑to‑screen workflow requires exporting PSD artwork as PNG for proofing on client devices, the high‑quality smoothing maintains the original design’s smooth curves and text rendering.
- * 5. When a desktop application creates PNG previews of PSD files for a file explorer preview pane, using SmoothingMode.AntiAlias ensures the previews look professional and clear.
+ * 1. When a web designer uses Aspose.Imaging for .NET to convert layered PSD artwork into PNG thumbnails for a website and needs high‑quality smoothing to keep edges anti‑aliased and crisp.
+ * 2. When an e‑learning platform automatically processes instructor‑provided PSD slides in C# and saves them as PNG images with smoothing enabled to ensure clear, legible visuals on mobile devices.
+ * 3. When a digital asset management system imports Photoshop files and generates PNG previews using Aspose.Imaging, applying smoothing to preserve smooth gradients and fine details for quick browsing.
+ * 4. When a print‑to‑screen workflow rasterizes vector layers inside a PSD to PNG in C# and requires smoothing to avoid jagged lines and maintain visual fidelity on screen displays.
+ * 5. When a batch‑processing utility written in C# converts a directory of PSD files to PNG for archival, enabling high‑quality smoothing to retain smooth color transitions and sharp image quality.
  */

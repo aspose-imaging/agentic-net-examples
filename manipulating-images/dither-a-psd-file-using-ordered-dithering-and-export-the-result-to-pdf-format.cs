@@ -10,9 +10,9 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = "input.psd";
-            string outputPath = "output.pdf";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.psd";
+            string outputPath = @"C:\Images\output.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -28,19 +28,19 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to RasterImage to access Dither method
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
+                RasterImage rasterImage = image as RasterImage;
+                if (rasterImage == null)
                 {
-                    Console.Error.WriteLine("The loaded image is not a raster image and cannot be dithered.");
+                    Console.Error.WriteLine("The loaded image is not a raster image.");
                     return;
                 }
 
-                // Perform ordered‑like dithering (using ThresholdDithering as the closest available method)
-                raster.Dither(DitheringMethod.ThresholdDithering, 8);
+                // Perform ordered (threshold) dithering with a 4‑bit palette
+                rasterImage.Dither(DitheringMethod.ThresholdDithering, 4);
 
                 // Save the dithered image as PDF
                 PdfOptions pdfOptions = new PdfOptions();
-                raster.Save(outputPath, pdfOptions);
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to convert a high‑resolution Photoshop PSD file into a lightweight PDF for client review while preserving visual fidelity through ordered dithering.
- * 2. When a publishing workflow requires batch processing of PSD assets to PDF with dithering to ensure consistent grayscale output on low‑color‑depth printers.
- * 3. When a web application must generate PDF previews of PSD files on the fly, applying threshold dithering to reduce file size without losing essential detail.
- * 4. When an archival system stores design files as PDFs and uses ordered‑like dithering to maintain the appearance of complex PSD layers in a single rasterized document.
- * 5. When a C#‑based document conversion service needs to transform PSD images into PDF format with dithering to meet compliance standards for monochrome printing.
+ * 1. When a developer needs to convert high‑resolution Photoshop PSD files into compact PDF documents while preserving visual fidelity by applying ordered (threshold) dithering with a 4‑bit palette.
+ * 2. When an automated batch‑processing service must generate printable PDFs from layered PSD assets and reduce file size using Aspose.Imaging’s Dither method before saving.
+ * 3. When a web application offers users the ability to download their edited PSD artwork as a PDF and wants to ensure consistent monochrome rendering across different browsers by applying threshold dithering.
+ * 4. When a digital archiving system requires converting legacy PSD files to PDF for long‑term storage and needs to apply ordered dithering to maintain detail in low‑color‑depth PDFs.
+ * 5. When a C# desktop tool needs to validate that a loaded image is a raster image, apply a 4‑bit ordered dithering effect, and then export the result to PDF for inclusion in reports or invoices.
  */

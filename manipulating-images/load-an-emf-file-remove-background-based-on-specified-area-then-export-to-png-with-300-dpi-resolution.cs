@@ -4,7 +4,6 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,41 +11,37 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.emf";
             string outputPath = "output.png";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Cast to EmfImage to access vector-specific methods
-                EmfImage emf = image as EmfImage;
-                if (emf != null)
-                {
-                    // Remove background (global operation)
-                    emf.RemoveBackground();
-                }
+                var emfImage = (Aspose.Imaging.FileFormats.Emf.EmfImage)image;
 
-                // Configure PNG export options with 300 DPI resolution
-                PngOptions pngOptions = new PngOptions
+                // Remove background (default settings)
+                emfImage.RemoveBackground(new RemoveBackgroundSettings());
+
+                // Configure PNG export with 300 DPI resolution
+                var pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new FileCreateSource(outputPath, false),
-                    ResolutionSettings = new ResolutionSetting(300, 300)
+                    ResolutionSettings = new ResolutionSetting(300, 300),
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        PageSize = emfImage.Size,
+                        BackgroundColor = Aspose.Imaging.Color.Transparent
+                    }
                 };
 
-                // Save the processed image as PNG
-                image.Save(outputPath, pngOptions);
+                emfImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -58,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy EMF vector graphics into high‑resolution PNGs for web publishing while stripping any unwanted background.
- * 2. When an application must generate print‑ready PNG assets at 300 DPI from EMF diagrams supplied by third‑party vendors.
- * 3. When a reporting tool has to embed clean, transparent PNG images derived from EMF charts into PDF or Word documents.
- * 4. When a batch‑processing service automates the removal of background layers from EMF icons before saving them as PNG thumbnails for a UI library.
- * 5. When a migration script updates an old Windows‑based graphics repository by converting EMF files to PNG with true‑color and alpha support for modern platforms.
+ * 1. When a developer needs to convert legacy Windows Metafile (EMF) diagrams into high‑resolution PNG images for web publishing while stripping the original white background.
+ * 2. When an application must generate print‑ready PNG assets from vector EMF logos, ensuring a 300 DPI resolution and transparent background for overlay on marketing materials.
+ * 3. When a reporting tool has to embed EMF charts into PDF reports by first rasterizing them to PNG at 300 DPI and removing the background to match the document’s theme.
+ * 4. When a batch‑processing service automates the migration of EMF icons to PNG thumbnails with consistent DPI and no background clutter for use in mobile apps.
+ * 5. When a GIS system requires converting EMF map overlays into PNG layers at 300 DPI, eliminating the background so the layers can be stacked transparently in a mapping UI.
  */
