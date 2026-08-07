@@ -2,13 +2,16 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Exif;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "sample.jpg";
+        // Hardcoded input path
+        string inputPath = @"C:\Images\sample.jpg";
 
+        // Path safety checks
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -17,42 +20,34 @@ class Program
 
         try
         {
-            using (Image image = Image.Load(inputPath))
+            // Load the JPEG image
+            using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                var jpegImage = image as Aspose.Imaging.FileFormats.Jpeg.JpegImage;
-                if (jpegImage == null)
-                {
-                    Console.WriteLine("The file is not a JPEG image.");
-                    return;
-                }
+                // Retrieve EXIF data container
+                JpegExifData exifData = image.ExifData as JpegExifData;
 
-                var exifData = jpegImage.ExifData;
                 if (exifData == null)
                 {
-                    Console.WriteLine("No EXIF data found.");
+                    Console.WriteLine("No EXIF data found in the image.");
                     return;
                 }
 
-                var exifType = exifData.GetType();
-                var properties = exifType.GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+                // All EXIF tags (common, EXIF, GPS) are available via the Properties collection
+                var allTags = exifData.Properties;
 
-                Console.WriteLine("{0,-30} {1}", "Tag", "Value");
-                Console.WriteLine(new string('-', 60));
+                // Table header
+                Console.WriteLine("{0,-10} | {1,-30} | {2}", "Tag ID", "Tag Name", "Value");
+                Console.WriteLine(new string('-', 70));
 
-                foreach (var prop in properties)
+                // Iterate and display each tag
+                foreach (var tag in allTags)
                 {
-                    try
-                    {
-                        var value = prop.GetValue(exifData);
-                        if (value != null)
-                        {
-                            Console.WriteLine("{0,-30} {1}", prop.Name, value);
-                        }
-                    }
-                    catch
-                    {
-                        // Ignore any property that throws
-                    }
+                    // TagId is a ushort, TagName is a string, Value is an object
+                    // Use reflection to get the tag name if available; otherwise fallback to tag.ToString()
+                    string tagName = tag.GetType().GetProperty("TagName")?.GetValue(tag) as string ?? tag.ToString();
+                    string value = tag.GetType().GetProperty("Value")?.GetValue(tag)?.ToString() ?? "null";
+
+                    Console.WriteLine("{0,-10} | {1,-30} | {2}", tag.GetType().GetProperty("TagId")?.GetValue(tag) ?? "N/A", tagName, value);
                 }
             }
         }
@@ -65,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract camera settings such as ISO, aperture, and shutter speed from JPEG photos for a photo‑gallery web application, this code reads and displays all EXIF tags in a formatted console table.
- * 2. When building a digital asset management system that validates image metadata before indexing, the snippet helps verify that required EXIF fields are present in JPEG files.
- * 3. When creating a batch‑processing tool that flags images missing GPS coordinates, a developer can use this code to list every EXIF tag and detect the absence of location data.
- * 4. When troubleshooting an image‑processing pipeline that may be stripping metadata, the example provides a quick C# way to compare original and processed JPEG EXIF data.
- * 5. When generating compliance reports that require specific EXIF information such as date‑time stamps in regulated image archives, this code reads and prints the tags for audit purposes.
+ * 1. When a developer needs to audit or log JPEG metadata in a digital asset management system, this code extracts and prints every EXIF tag in a readable console table.
+ * 2. When building a photo‑organizing tool that groups images by camera settings, the code can display all EXIF properties to verify the data before applying filters.
+ * 3. When troubleshooting image‑processing pipelines that rely on GPS coordinates, a developer can use this snippet to confirm that the required EXIF GPS tags are present and correctly formatted.
+ * 4. When creating a compliance report for media files that must include copyright or author information, the code quickly lists the EXIF fields such as Artist, Copyright, and DateTime.
+ * 5. When integrating Aspose.Imaging into a C# application that needs to validate incoming JPEG uploads, this example shows how to read every EXIF tag to detect missing or malformed metadata.
  */

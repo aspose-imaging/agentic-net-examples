@@ -5,9 +5,9 @@ using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.FileFormats.Pdf;
 
-public class Program
+class Program
 {
-    public static void Main()
+    static void Main(string[] args)
     {
         try
         {
@@ -25,26 +25,30 @@ public class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load CMX image
+            // Load the CMX vector image
             using (Image image = Image.Load(inputPath))
             {
                 // Configure PDF options with custom title
-                using (PdfOptions pdfOptions = new PdfOptions())
+                var pdfOptions = new PdfOptions
                 {
-                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo { Title = "Custom Document Title" };
+                    PdfDocumentInfo = new PdfDocumentInfo { Title = "Custom Document Title" }
+                };
 
-                    // Set vector rasterization options for proper CMX rendering
-                    pdfOptions.VectorRasterizationOptions = new CmxRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None,
-                        Positioning = PositioningTypes.DefinedByDocument
-                    };
+                // Set up vector rasterization options for CMX conversion
+                var rasterOptions = new CmxRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
+                    Positioning = PositioningTypes.DefinedByDocument
+                };
 
-                    // Save as PDF
-                    image.Save(outputPath, pdfOptions);
-                }
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save as PDF
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -56,9 +60,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD department needs to archive legacy CMX drawings as searchable PDFs with a custom document title for easy identification in document management systems.
- * 2. When an engineering web service converts user‑uploaded CMX files to PDF on the fly, embedding a specific title so the resulting PDFs can be sorted and displayed correctly in a portal.
- * 3. When a batch‑processing job migrates a library of CMX schematics to PDF while preserving vector fidelity and setting a consistent title for compliance reporting.
- * 4. When a desktop application allows designers to export their CMX artwork to PDF and automatically adds a project‑specific title to meet client branding guidelines.
- * 5. When an automated workflow generates PDF reports from CMX images and includes a custom title to link each PDF back to its source file in a tracking database.
+ * 1. When a developer needs to archive legacy CorelDRAW CMX vector drawings as searchable PDF files with a custom document title for easy identification in document management systems.
+ * 2. When an engineering workflow requires converting CMX schematics to PDF reports while preserving exact page dimensions and setting a specific title for inclusion in automated report generators.
+ * 3. When a web application must allow users to upload CMX artwork and instantly generate PDF previews with a predefined title that appears in the PDF metadata for SEO and indexing purposes.
+ * 4. When a batch processing script has to transform a folder of CMX files into PDFs, ensuring each PDF carries a consistent title that matches the project naming convention for downstream printing pipelines.
+ * 5. When a compliance tool needs to convert CMX legal diagrams to PDF format and embed a custom title in the PDF metadata to satisfy audit trail requirements.
  */

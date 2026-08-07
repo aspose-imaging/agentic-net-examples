@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
@@ -8,32 +9,41 @@ class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = @"c:\temp\output.bmp";
-
         try
         {
+            // Output file path (hardcoded)
+            string outputPath = @"C:\temp\output.bmp";
+
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Create BMP options with a FileCreateSource bound to the output file
             BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 400, 300))
+            // Define canvas size
+            int width = 400;
+            int height = 300;
+
+            // Create the image canvas
+            using (Image image = Image.Create(bmpOptions, width, height))
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.White);
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(image);
 
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
-                Aspose.Imaging.Rectangle rect = new Aspose.Imaging.Rectangle(50, 50, 200, 150);
-                graphics.DrawRectangle(pen, rect);
+                // Define rectangle bounds
+                Rectangle rect = new Rectangle(50, 50, 300, 200);
 
-                using (SolidBrush brush = new SolidBrush())
+                // Draw rectangle outline
+                graphics.DrawRectangle(new Pen(Color.Black, 2), rect);
+
+                // Fill rectangle interior with solid color
+                using (SolidBrush brush = new SolidBrush(Color.Blue))
                 {
-                    brush.Color = Aspose.Imaging.Color.LightBlue;
-                    brush.Opacity = 100;
                     graphics.FillRectangle(brush, rect);
                 }
 
+                // Save the image (file is already bound to outputPath)
                 image.Save();
             }
         }
@@ -46,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP file and draw a black‑bordered, light‑blue filled rectangle to highlight a region in a Windows desktop preview pane.
- * 2. When an automated reporting service creates BMP charts and uses Aspose.Imaging.Graphics to outline and fill a rectangle that marks a critical data threshold.
- * 3. When a game developer wants to produce a simple BMP sprite with a solid‑color rectangle to visualize a hitbox during debugging.
- * 4. When a batch processing script must add a solid‑filled rectangle overlay to scanned documents saved as BMP to indicate a watermark or signature area.
- * 5. When a legacy application that only supports BMP images requires programmatic drawing of UI components, such as buttons, using a black pen and a solid brush fill.
+ * 1. When a developer needs to generate a BMP thumbnail with a highlighted area for a reporting dashboard, they can use this code to draw and fill a rectangle on a bitmap.
+ * 2. When creating a simple placeholder image for a UI component that requires a solid‑color background within a defined border, this snippet shows how to draw and fill a rectangle in C# with Aspose.Imaging.
+ * 3. When automating the production of printable labels that include a colored box to emphasize product information, the code can create a BMP file, outline the box, and fill it with a solid brush.
+ * 4. When building a test harness that validates image‑processing pipelines by generating known BMP files with specific shapes and colors, this example provides a quick way to draw a filled rectangle.
+ * 5. When developing a game asset pipeline that needs to programmatically generate BMP sprites with colored rectangular hit‑boxes, the code demonstrates how to create the file, draw the rectangle outline, and fill its interior using a SolidBrush.
  */

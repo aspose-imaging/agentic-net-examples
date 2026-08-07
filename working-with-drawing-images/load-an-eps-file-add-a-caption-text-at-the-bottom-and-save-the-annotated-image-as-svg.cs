@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -20,34 +18,25 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (string.IsNullOrEmpty(outputDir))
+                outputDir = ".";
+            Directory.CreateDirectory(outputDir);
 
-            using (Image epsImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to EpsImage for clarity (optional)
-                EpsImage eps = epsImage as EpsImage;
-                if (eps == null)
+                var rasterOptions = new EpsRasterizationOptions
                 {
-                    Console.Error.WriteLine("Failed to load EPS image.");
-                    return;
-                }
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
+                };
 
-                // Create graphics for drawing on the EPS image
-                Graphics graphics = new Graphics(eps);
-
-                // Prepare font and brush for caption
-                Font font = new Font("Arial", 24, FontStyle.Regular);
-                using (SolidBrush brush = new SolidBrush(Color.Black))
+                var svgOptions = new SvgOptions
                 {
-                    // Position caption near the bottom-left corner
-                    int captionX = 10;
-                    int captionY = eps.Height - 30;
-                    graphics.DrawString("Caption Text", font, brush, new Point(captionX, captionY));
-                }
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                // Save the annotated image as SVG
-                SvgOptions svgOptions = new SvgOptions();
-                eps.Save(outputPath, svgOptions);
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -59,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a vector EPS illustration into a web‑friendly SVG while adding a descriptive caption at the bottom of the image.
- * 2. When an automated report generator must annotate printed EPS charts with titles or notes before embedding them in an SVG dashboard.
- * 3. When a branding workflow requires adding a trademark or copyright notice to existing EPS logos and exporting the result as scalable SVG for responsive design.
- * 4. When a batch processing script has to read EPS files, overlay product identifiers using C# graphics drawing, and save the annotated graphics as SVG for downstream publishing.
- * 5. When a document conversion tool needs to preserve vector quality of EPS artwork, insert explanatory text, and output the final file in SVG format for compatibility with modern browsers.
+ * 1. When a developer needs to convert legacy EPS artwork into scalable SVG files for responsive web pages using Aspose.Imaging in C#.
+ * 2. When an automated build pipeline must transform vector EPS logos into SVG format to embed in HTML emails without losing quality.
+ * 3. When a desktop application processes user‑uploaded EPS designs and saves them as SVG for further client‑side manipulation or editing.
+ * 4. When a reporting tool generates charts in EPS and then converts them to SVG to ensure lossless scaling in PDF or web reports.
+ * 5. When a content management system batch‑processes EPS files and stores the resulting SVGs for fast browser rendering and SEO optimization.
  */

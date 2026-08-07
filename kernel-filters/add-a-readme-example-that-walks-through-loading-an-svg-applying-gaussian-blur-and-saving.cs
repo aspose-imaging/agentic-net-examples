@@ -1,104 +1,103 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 namespace SvgGaussianBlurExample
 {
-    // README EXAMPLE
-    // This example demonstrates how to:
-    // 1. Load an SVG image from a file.
-    // 2. Rasterize the SVG to a PNG image.
-    // 3. Apply a Gaussian blur filter to the rasterized image.
-    // 4. Save the blurred image to a new file.
-    //
-    // The code follows strict path‑safety rules:
-    // - Input and output paths are hard‑coded string literals.
-    // - The existence of the input file is verified with File.Exists.
-    // - The output directory is created unconditionally before saving.
-    // - All operations are wrapped in a try/catch block to report errors gracefully.
-
     class Program
     {
         static void Main()
         {
-            // Hard‑coded paths (do not use args)
-            string inputPath = @"C:\Images\input.svg";
-            string outputPath = @"C:\Images\output_blurred.png";
+            // Path definitions (hard‑coded as required)
+            string inputSvgPath = @"C:\temp\input.svg";
+            string intermediatePngPath = @"C:\temp\intermediate.png";
+            string outputPngPath = @"C:\temp\output_blur.png";
 
             try
             {
-                // Verify input file exists
-                if (!File.Exists(inputPath))
+                // Verify input SVG exists
+                if (!File.Exists(inputSvgPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {inputSvgPath}");
                     return;
                 }
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Ensure output directories exist
+                Directory.CreateDirectory(Path.GetDirectoryName(intermediatePngPath));
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPngPath));
 
-                // -----------------------------------------------------------------
-                // Step 1: Load the SVG image from the file stream
-                // -----------------------------------------------------------------
-                using (FileStream svgStream = File.OpenRead(inputPath))
-                using (SvgImage svgImage = new SvgImage(svgStream))
+                // ------------------------------------------------------------
+                // Step 1: Load the SVG and rasterize it to a temporary PNG file
+                // ------------------------------------------------------------
+                using (Image svgImage = Image.Load(inputSvgPath))
                 {
-                    // -----------------------------------------------------------------
-                    // Step 2: Rasterize the SVG to a PNG image in memory
-                    // -----------------------------------------------------------------
-                    // Configure rasterization options (default DPI, size based on SVG)
-                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                    // Configure rasterization options for SVG → PNG conversion
+                    var rasterizationOptions = new SvgRasterizationOptions();
+                    var pngSaveOptions = new PngOptions
                     {
-                        // You can set Width/Height/Dpi if needed; defaults are used here
+                        VectorRasterizationOptions = rasterizationOptions
                     };
 
-                    // Prepare PNG save options and attach rasterization settings
-                    PngOptions pngSaveOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions
-                    };
+                    // Save the rasterized image to the intermediate PNG file
+                    svgImage.Save(intermediatePngPath, pngSaveOptions);
+                }
 
-                    // Save the rasterized PNG to a memory stream
-                    using (MemoryStream rasterizedStream = new MemoryStream())
-                    {
-                        svgImage.Save(rasterizedStream, pngSaveOptions);
-                        rasterizedStream.Position = 0; // Reset for reading
+                // ------------------------------------------------------------
+                // Step 2: Load the rasterized PNG, apply Gaussian blur, and save
+                // ------------------------------------------------------------
+                using (Image rasterImageContainer = Image.Load(intermediatePngPath))
+                {
+                    // Cast to RasterImage to gain access to filtering capabilities
+                    var rasterImage = (RasterImage)rasterImageContainer;
 
-                        // -----------------------------------------------------------------
-                        // Step 3: Load the rasterized PNG as a RasterImage to apply filter
-                        // -----------------------------------------------------------------
-                        using (Image rasterImage = Image.Load(rasterizedStream))
-                        {
-                            // Cast to RasterImage (the loaded PNG is a raster image)
-                            RasterImage raster = (RasterImage)rasterImage;
+                    // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
+                    var blurOptions = new GaussianBlurFilterOptions(5, 4.0);
+                    rasterImage.Filter(rasterImage.Bounds, blurOptions);
 
-                            // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
-                            raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
-
-                            // -----------------------------------------------------------------
-                            // Step 4: Save the blurred image to the final output path
-                            // -----------------------------------------------------------------
-                            raster.Save(outputPath);
-                        }
-                    }
+                    // Save the blurred image to the final output path
+                    rasterImage.Save(outputPngPath);
                 }
             }
             catch (Exception ex)
             {
+                // Any unexpected error is reported without crashing the program
                 Console.Error.WriteLine($"Error: {ex.Message}");
             }
         }
     }
+
+    /*
+    README Example
+    ---------------
+    This example demonstrates how to:
+    1. Load an SVG file from disk.
+    2. Rasterize the SVG to a PNG image.
+    3. Apply a Gaussian blur filter to the rasterized image.
+    4. Save the processed image.
+
+    Steps:
+    • Define the input SVG path and the desired output PNG path.
+    • Use `Image.Load` to read the SVG.
+    • Configure `SvgRasterizationOptions` and `PngOptions` to rasterize the SVG.
+    • Save the rasterized PNG to a temporary location.
+    • Load the temporary PNG as a `RasterImage`.
+    • Call `Filter` with `GaussianBlurFilterOptions` to blur the image.
+    • Save the final blurred PNG.
+
+    The code follows strict path‑safety rules:
+    • Input existence is checked with `File.Exists`.
+    • Output directories are created with `Directory.CreateDirectory`.
+    • All operations are wrapped in a try/catch block to report errors gracefully.
+    */
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate a blurred thumbnail from an SVG logo for use in UI placeholders.
- * 2. When an e‑commerce platform wants to create a soft‑focus product badge by rasterizing vector icons to PNG and applying a Gaussian blur.
- * 3. When a reporting tool must convert scalable diagrams into blurred background images for PDF reports using C# and Aspose.Imaging.
- * 4. When a mobile app backend processes user‑uploaded SVG avatars, rasterizes them to PNG, and adds a Gaussian blur for privacy masking.
- * 5. When a digital signage system prepares blurred promotional graphics by loading SVG assets, rasterizing them, and saving the result as PNG files.
+ * 1. When a developer needs to convert vector graphics (SVG) into a raster format (PNG) and then apply a Gaussian blur for creating soft‑focused thumbnails in a C# web application.
+ * 2. When an e‑commerce platform wants to generate blurred background images from product SVG logos for promotional banners using Aspose.Imaging for .NET.
+ * 3. When a UI designer requires automated preprocessing of SVG icons into blurred PNG assets for mobile app splash screens via C# code.
+ * 4. When a reporting tool must embed blurred SVG diagrams into PDF reports by rasterizing them to PNG and applying a Gaussian blur filter with Aspose.Imaging.
+ * 5. When a content management system automates the creation of stylized, blurred preview images from uploaded SVG files for SEO‑friendly image galleries.
  */

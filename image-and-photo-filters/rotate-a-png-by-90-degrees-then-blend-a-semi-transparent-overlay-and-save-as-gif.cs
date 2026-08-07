@@ -1,6 +1,9 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -10,7 +13,7 @@ class Program
         {
             string inputPngPath = "input.png";
             string overlayPath = "overlay.png";
-            string outputGifPath = "output.gif";
+            string outputGifPath = "Output/output.gif";
 
             if (!File.Exists(inputPngPath))
             {
@@ -25,16 +28,19 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputGifPath));
 
-            using (Aspose.Imaging.RasterImage baseImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPngPath))
+            using (RasterImage baseImage = (RasterImage)Image.Load(inputPngPath))
             {
-                baseImage.Rotate(90f, true, Aspose.Imaging.Color.White);
+                baseImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-                using (Aspose.Imaging.RasterImage overlayImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(overlayPath))
+                using (RasterImage overlayImage = (RasterImage)Image.Load(overlayPath))
                 {
-                    baseImage.Blend(new Aspose.Imaging.Point(0, 0), overlayImage, 128);
+                    baseImage.Blend(new Point(0, 0), overlayImage, 128);
                 }
 
-                GifOptions gifOptions = new GifOptions();
+                GifOptions gifOptions = new GifOptions
+                {
+                    Source = new FileCreateSource(outputGifPath, false)
+                };
                 baseImage.Save(outputGifPath, gifOptions);
             }
         }
@@ -47,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating animated web banners that need a rotated base image with a semi‑transparent logo overlay before converting to GIF for browser compatibility.
- * 2. When generating product thumbnails where the original PNG must be rotated to portrait orientation, blended with a watermark overlay at 50 % opacity, and saved as a lightweight GIF for e‑commerce listings.
- * 3. When preparing social‑media share images that require a 90‑degree rotation of a screenshot PNG, adding a translucent call‑to‑action overlay, and exporting to GIF to meet platform size limits.
- * 4. When building a desktop reporting tool that rotates scanned PNG diagrams, applies a semi‑transparent grid overlay for visual reference, and stores the result as a GIF for inclusion in PDF reports.
- * 5. When developing a game asset pipeline that reorients character sprites (PNG), blends a semi‑transparent effect layer, and outputs GIF frames for animation sequences.
+ * 1. When creating animated web banners that require a portrait‑oriented PNG to be rotated to landscape, overlaid with a semi‑transparent logo, and delivered as a lightweight GIF for browser compatibility.
+ * 2. When generating product thumbnails for an e‑commerce site where the original PNG image must be rotated 90°, combined with a translucent promotional badge, and saved as a GIF to reduce file size.
+ * 3. When preparing printable QR‑code stickers that need the code image rotated, blended with a faint watermark, and exported as a GIF for use in legacy printing workflows.
+ * 4. When building a mobile game asset pipeline that rotates character sprites, applies a semi‑transparent effect overlay, and outputs GIF frames for animation sequences.
+ * 5. When automating the creation of email newsletters that embed rotated PNG graphics with a translucent call‑to‑action overlay, saved as GIFs to ensure consistent rendering across email clients.
  */

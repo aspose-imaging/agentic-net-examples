@@ -10,34 +10,25 @@ class Program
     {
         try
         {
-            // Create a memory stream to hold the BMP image.
-            using (MemoryStream memoryStream = new MemoryStream())
+            using (MemoryStream ms = new MemoryStream())
             {
-                // Set up BMP options with the memory stream as the destination.
                 BmpOptions bmpOptions = new BmpOptions();
-                bmpOptions.Source = new StreamSource(memoryStream);
+                bmpOptions.Source = new StreamSource(ms);
 
-                // Define image dimensions.
                 int width = 200;
                 int height = 200;
 
-                // Create the image.
                 using (Image image = Image.Create(bmpOptions, width, height))
                 {
-                    // Create a Graphics object for drawing.
                     Graphics graphics = new Graphics(image);
-
-                    // Draw a green rectangle.
-                    graphics.DrawRectangle(new Pen(Color.Green, 2), new Rectangle(50, 50, 100, 100));
-
-                    // Save the image to the bound stream.
+                    graphics.DrawRectangle(new Pen(Color.Green, 2), new Rectangle(20, 20, 100, 50));
                     image.Save();
                 }
 
-                // Write the memory stream contents to a file.
-                string outputPath = @"C:\temp\output.bmp";
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                File.WriteAllBytes(outputPath, memoryStream.ToArray());
+                // Example of writing the stream to a file (optional)
+                // string outputPath = "output.bmp";
+                // Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // File.WriteAllBytes(outputPath, ms.ToArray());
             }
         }
         catch (Exception ex)
@@ -49,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a thumbnail preview of a document on the fly and needing to store the BMP image in memory before saving it to disk or sending it over a network.
- * 2. When creating a dynamic watermark or annotation (e.g., a green rectangle) on a BMP image in a web service without writing intermediate files to the server’s file system.
- * 3. When implementing an in‑memory image processing pipeline that converts user‑drawn shapes into BMP format for later embedding into PDF reports.
- * 4. When building a desktop application that captures screen regions, draws diagnostic overlays, and writes the result directly to a MemoryStream for quick caching.
- * 5. When developing a unit test that verifies drawing operations on a BMP image by creating the image in a MemoryStream and comparing the byte array to an expected result.
+ * 1. When a developer needs to generate a BMP thumbnail with a highlighted area on the fly and send it directly over a network without creating a temporary file, they can use a MemoryStream with Aspose.Imaging to draw a green rectangle and stream the image.
+ * 2. When building a web API that returns a dynamically created BMP diagram (e.g., a simple UI mock‑up) as a byte array, the code creates the image in memory, draws a green rectangle, and writes it to the response stream.
+ * 3. When implementing a document conversion service that embeds a visual marker into BMP pages before packaging them, the developer can draw a green rectangle using Aspose.Imaging’s Graphics object and keep the result in a MemoryStream for further processing.
+ * 4. When creating unit tests for image‑processing pipelines that require a known BMP input with a specific shape, this snippet quickly generates the test image in memory without touching the file system.
+ * 5. When developing a desktop application that needs to preview a BMP with a selection box before saving, the code draws the green rectangle on a MemoryStream‑based image, allowing the preview to be displayed instantly.
  */

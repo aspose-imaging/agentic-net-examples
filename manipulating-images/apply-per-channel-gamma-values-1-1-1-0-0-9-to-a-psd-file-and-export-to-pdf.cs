@@ -10,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.psd";
-            string outputPath = @"C:\Images\output.pdf";
+            string inputPath = "C:\\temp\\input.psd";
+            string outputPath = "C:\\temp\\output.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,14 +26,13 @@ class Program
             // Load the PSD image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access AdjustGamma
-                if (image is RasterImage rasterImage)
+                // Apply per‑channel gamma correction (R=1.1, G=1.0, B=0.9)
+                if (image is RasterImage raster)
                 {
-                    // Apply per‑channel gamma values: Red=1.1, Green=1.0, Blue=0.9
-                    rasterImage.AdjustGamma(1.1f, 1.0f, 0.9f);
+                    raster.AdjustGamma(1.1f, 1.0f, 0.9f);
                 }
 
-                // Save as PDF using default PDF options
+                // Export to PDF
                 PdfOptions pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
@@ -47,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to correct color balance of a Photoshop PSD by applying different gamma values to red, green, and blue channels before sharing it as a PDF document.
- * 2. When an automated image‑processing pipeline must convert layered PSD files to PDF while adjusting per‑channel gamma to match print‑ready color profiles.
- * 3. When a web service generates PDF previews of user‑uploaded PSD artwork and wants to enhance contrast by increasing red gamma, keeping green unchanged, and decreasing blue gamma.
- * 4. When a desktop application prepares marketing assets by loading a PSD, applying custom gamma correction per channel, and exporting the result as a PDF for client review.
- * 5. When a batch job processes a folder of PSD files, applies specific per‑channel gamma adjustments to improve visual consistency, and saves each file as a PDF for archival purposes.
+ * 1. When a developer needs to correct color balance of a Photoshop PSD by applying different gamma values to the red, green, and blue channels before generating a printable PDF document.
+ * 2. When an automated image‑processing pipeline must batch‑process PSD files, adjust per‑channel gamma to match brand color guidelines, and export the results as PDF reports.
+ * 3. When a web service receives user‑uploaded PSD artwork, applies subtle gamma tweaks to enhance contrast per channel, and returns a PDF preview for client review.
+ * 4. When a desktop application converts layered PSD designs into PDF portfolios while ensuring that each color channel is calibrated with specific gamma settings for accurate on‑screen rendering.
+ * 5. When a quality‑control script validates that a PSD file exists, performs per‑channel gamma correction, and saves the final output as a PDF for archival or compliance purposes.
  */

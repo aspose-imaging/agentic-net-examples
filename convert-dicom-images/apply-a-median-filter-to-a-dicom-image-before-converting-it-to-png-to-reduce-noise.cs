@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"c:\temp\sample.dicom";
-            string outputPath = @"c:\temp\sample.filtered.png";
+            string inputPath = "input.dcm";
+            string outputPath = "output\\filtered.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -31,7 +31,7 @@ class Program
                 // Cast to DicomImage to access DICOM-specific methods
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Apply a median filter with size 5 to the whole image
+                // Apply median filter with size 5 to the whole image
                 dicomImage.Filter(dicomImage.Bounds, new MedianFilterOptions(5));
 
                 // Save the filtered image as PNG
@@ -47,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to reduce speckle noise in a DICOM X‑ray before exporting it as a PNG for web viewing, the median filter can be applied as shown.
- * 2. When a radiology workflow requires converting noisy CT scan slices to PNG thumbnails for PACS integration, developers can load the DICOM, filter it, and save the cleaned PNG.
- * 3. When a research tool must preprocess MRI DICOM files to improve visual clarity before performing image analysis in a C# environment, applying a median filter prior to PNG conversion is essential.
- * 4. When a hospital’s reporting system needs to generate printable PNG reports from DICOM ultrasound images while minimizing grainy artifacts, the code demonstrates the required steps.
- * 5. When a healthcare mobile app needs to display patient DICOM images with reduced noise on low‑resolution screens, developers can use this median‑filter‑and‑save routine in .NET.
+ * 1. When a radiology web portal needs to reduce speckle noise in a DICOM X‑ray image before creating a PNG thumbnail for fast browser display.
+ * 2. When a medical research workflow must preprocess noisy CT scan DICOM files with a median filter to improve visual clarity before archiving them as lossless PNGs.
+ * 3. When a hospital PACS integration project requires converting DICOM ultrasound frames to PNG for inclusion in patient reports, applying a median filter to enhance image quality.
+ * 4. When a diagnostic AI model expects clean PNG inputs, developers can apply a median filter to the original DICOM MRI slices and save the results as PNGs for training data.
+ * 5. When a mobile health app needs to display DICOM dental images on iOS or Android, the backend can filter the DICOM with a median filter and export a PNG for fast rendering.
  */

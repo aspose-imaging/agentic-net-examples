@@ -12,35 +12,42 @@ class Program
     {
         try
         {
-            // Output BMP file path
+            // Hardcoded output path
             string outputPath = @"C:\temp\output.bmp";
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure BMP options with desired compression
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Compression = BitmapCompression.Rgb; // Set compression level
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a new BMP image canvas
-            using (Image image = Image.Create(bmpOptions, 500, 500))
+            // Configure BMP options with compression
+            using (BmpOptions bmpOptions = new BmpOptions())
             {
-                // Draw shapes on the canvas
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                bmpOptions.BitsPerPixel = 24;
+                bmpOptions.Compression = BitmapCompression.Rgb;
+                bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-                // Draw a blue rectangle
-                graphics.DrawRectangle(new Pen(Color.Blue, 5), new Rectangle(50, 50, 400, 400));
+                // Create a canvas image bound to the output file
+                using (Image image = Image.Create(bmpOptions, 500, 500))
+                {
+                    // Drawing operations
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Color.White);
 
-                // Draw a red ellipse inside the rectangle
-                graphics.DrawEllipse(new Pen(Color.Red, 3), new Rectangle(100, 100, 300, 200));
+                    // Pen for drawing outlines
+                    Pen pen = new Pen(Color.Blue, 5);
+                    graphics.DrawRectangle(pen, new Rectangle(50, 50, 200, 150));
+                    graphics.DrawEllipse(pen, new Rectangle(300, 100, 150, 150));
 
-                // Draw a green line
-                graphics.DrawLine(new Pen(Color.Green, 2), new Point(50, 250), new Point(450, 250));
+                    // Fill a rectangle with a solid brush
+                    using (SolidBrush brush = new SolidBrush())
+                    {
+                        brush.Color = Color.LightGreen;
+                        brush.Opacity = 100;
+                        graphics.FillRectangle(brush, new Rectangle(100, 300, 200, 100));
+                    }
 
-                // Save the image (bound to the file via FileCreateSource)
-                image.Save();
+                    // Save the image (output path already bound)
+                    image.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -52,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating custom report graphics in a C# desktop application that must be saved as a compressed BMP file for legacy Windows printing systems.
- * 2. When creating thumbnails with drawn annotations (rectangles, ellipses, lines) for a medical imaging viewer that requires BMP format with specific compression to reduce file size.
- * 3. When exporting diagrammatic schematics from an engineering tool to BMP while controlling compression to meet storage constraints in an embedded device.
- * 4. When producing batch‑processed BMP assets for a game that uses simple vector shapes and needs consistent compression across all images for faster loading.
- * 5. When implementing an automated document conversion service that adds watermarks to scanned BMP images and sets the compression level to balance quality and bandwidth.
+ * 1. When generating printable engineering diagrams that must be stored as loss‑less BMP files with Rgb compression to reduce file size while preserving 24‑bit color fidelity.
+ * 2. When creating thumbnail previews of scanned documents in a Windows desktop application and need to draw overlay shapes before saving the BMP with a specific compression level for faster loading.
+ * 3. When exporting custom map tiles from a GIS system, drawing borders and labels on a 500×500 canvas and using BmpOptions to set 24‑bit depth and Rgb compression for compatibility with legacy mapping software.
+ * 4. When building a medical imaging tool that annotates X‑ray images with rectangles and ellipses and saves the result as a BMP with controlled compression to meet DICOM storage requirements.
+ * 5. When developing an automated report generator that programmatically draws charts and fills areas, then saves them as BMP files with a defined compression setting to keep the output files under a size limit for email attachments.
  */

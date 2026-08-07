@@ -9,44 +9,37 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Define input and output paths
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputPath = Path.Combine(baseDir, "Input", "sample.cmx");
-        string outputPath = Path.Combine(baseDir, "Output", "sample.pdf");
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load CMX image
-            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
-            {
-                // Prepare PDF options and copy metadata
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    pdfOptions.KeepMetadata = true;
-                    pdfOptions.ExifData = cmxImage.ExifData;
-                    pdfOptions.XmpData = cmxImage.XmpData;
+            string inputPath = "Input\\sample.cmx";
+            string outputPath = "Output\\sample.pdf";
 
-                    // Set vector rasterization options for proper rendering
-                    pdfOptions.VectorRasterizationOptions = new CmxRasterizationOptions
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
+            {
+                var pdfOptions = new PdfOptions
+                {
+                    KeepMetadata = true,
+                    ExifData = cmx.ExifData,
+                    XmpData = cmx.XmpData,
+                    VectorRasterizationOptions = new CmxRasterizationOptions
                     {
                         BackgroundColor = Aspose.Imaging.Color.White,
+                        PageWidth = cmx.Width,
+                        PageHeight = cmx.Height,
                         TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
                         SmoothingMode = Aspose.Imaging.SmoothingMode.None
-                    };
+                    }
+                };
 
-                    // Save as PDF preserving metadata
-                    cmxImage.Save(outputPath, pdfOptions);
-                }
+                cmx.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -58,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an engineering firm needs to archive legacy CorelDRAW CMX drawings as PDF while keeping original EXIF and XMP metadata for regulatory compliance.
- * 2. When a printing service converts customer‑submitted CMX artwork to PDF for proofing and must retain author, creation date, and color profile information embedded in the image properties.
- * 3. When a document management system ingests CMX files and stores them as searchable PDFs, preserving metadata to enable accurate indexing and retrieval.
- * 4. When a CAD/CAM pipeline transforms CMX schematics into PDF manuals and requires the original metadata to be carried over for version tracking and traceability.
- * 5. When a legal department archives CMX‑based technical illustrations as PDFs and needs the embedded metadata to remain intact for evidentiary purposes.
+ * 1. When a printing company needs to convert legacy CMX vector artwork to PDF for client delivery while retaining original EXIF and XMP metadata for traceability, this code ensures the metadata is preserved.
+ * 2. When an engineering firm archives technical drawings stored as CMX files into searchable PDF documents, copying ImageProperties maintains the embedded metadata required for regulatory compliance.
+ * 3. When a digital asset management system migrates CMX graphics to PDF format, preserving metadata allows the assets to be indexed and retrieved using existing metadata fields.
+ * 4. When a legal department converts CMX schematics to PDF for evidence submission, retaining the original metadata validates the document’s authenticity and creation date.
+ * 5. When a software vendor builds a C# batch‑processing tool that transforms multiple CMX files into PDFs, using this code guarantees that each PDF inherits the source image’s EXIF and XMP information for downstream workflows.
  */

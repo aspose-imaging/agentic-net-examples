@@ -8,36 +8,38 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"C:\Images\sample.cmx";
-        string outputPath = @"C:\Images\output.tif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.cmx";
+            string outputPath = "Output/output.tif";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the multi‑page CMX image
             using (Image image = Image.Load(inputPath))
             {
-                TiffOptions exportOptions = new TiffOptions(TiffExpectedFormat.Default);
+                // Prepare TIFF save options
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
-                if (image is VectorImage)
+                // Configure vector rasterization to render each CMX page
+                tiffOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                 {
-                    exportOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    };
-                }
+                    BackgroundColor = Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
+                };
 
-                image.Save(outputPath, exportOptions);
+                // Save all pages as a multi‑page TIFF preserving order
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a printing workflow requires archiving multi‑page CMX vector drawings as a single multi‑page TIFF document while keeping the original page sequence for downstream raster‑based printers.
- * 2. When a document management system needs to ingest legacy CMX files and store them as searchable TIFF images that preserve page order for consistent pagination.
- * 3. When a medical imaging application converts multi‑page CMX schematics into TIFF files to embed them in patient records while maintaining the correct slide order.
- * 4. When an e‑learning platform batch‑processes CMX lesson slides into multi‑page TIFFs so that the slides appear in the intended sequence during PDF generation.
- * 5. When a GIS tool exports multi‑page CMX maps to multi‑page TIFFs to ensure that each map layer retains its original ordering for accurate overlay rendering.
+ * 1. When a developer needs to archive legacy multi‑page CMX drawings into a widely supported multi‑page TIFF for long‑term storage or compliance.
+ * 2. When a printing workflow requires converting CMX vector pages to raster TIFF pages while preserving the original page order for accurate pagination.
+ * 3. When a document management system must ingest CMX files and store them as TIFFs to enable thumbnail generation and preview in web browsers.
+ * 4. When a batch processing tool automates the migration of engineering schematics from CMX to TIFF to integrate with OCR or image analysis pipelines.
+ * 5. When a C# application needs to export multi‑page CMX artwork to a single TIFF file for easy sharing with clients who only have TIFF viewers.
  */

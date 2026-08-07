@@ -8,37 +8,40 @@ class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = "Output/output.png";
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Define output path (relative)
+            string outputPath = "Output/output.png";
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Define image size
             int width = 200;
             int height = 200;
 
+            // Create a new PNG image
             using (PngImage png = new PngImage(width, height))
             {
+                // Optional: fill the image with a solid color
                 Graphics graphics = new Graphics(png);
-                using (SolidBrush brush = new SolidBrush(Color.Red))
-                {
-                    graphics.FillRectangle(brush, png.Bounds);
-                }
+                SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Red);
+                graphics.FillRectangle(brush, png.Bounds);
 
+                // Store original dimensions
                 int originalWidth = png.Width;
                 int originalHeight = png.Height;
 
-                png.Rotate(45f, false, Color.Transparent);
+                // Rotate 45 degrees without resizing, using transparent background
+                png.Rotate(45f, false, Aspose.Imaging.Color.Transparent);
 
-                if (png.Width == originalWidth && png.Height == originalHeight)
-                {
-                    Console.WriteLine("Dimensions unchanged after rotation.");
-                }
-                else
-                {
-                    Console.WriteLine("Dimensions changed after rotation.");
-                }
+                // Verify that dimensions remain unchanged
+                bool dimensionsUnchanged = (png.Width == originalWidth) && (png.Height == originalHeight);
+                Console.WriteLine(dimensionsUnchanged
+                    ? "Dimensions unchanged after rotation."
+                    : $"Dimensions changed: {originalWidth}x{originalHeight} -> {png.Width}x{png.Height}");
 
+                // Save the rotated image
                 png.Save(outputPath);
             }
         }
@@ -51,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PNG thumbnail with a rotated watermark while preserving the original canvas size for consistent layout in a web UI.
- * 2. When an e‑commerce platform wants to create product images that are rotated 45 degrees with a transparent background so they fit into a fixed‑size grid without altering the image dimensions.
- * 3. When a reporting tool must embed rotated icons into PDF pages and must keep the PNG dimensions unchanged to align with pre‑defined placeholders.
- * 4. When a game UI designer requires programmatically created PNG sprites that are rotated for visual effect but must retain their original width and height for collision detection.
- * 5. When an automated batch process creates PNG assets for a mobile app, applying a 45‑degree rotation with transparency while ensuring the file size and dimensions stay constant for responsive design.
+ * 1. When generating product thumbnails for an e‑commerce site, a developer can create a 200 × 200 PNG, rotate it 45° with a transparent background, and confirm the canvas size stays the same to maintain layout consistency.
+ * 2. When preparing assets for a mobile game UI, a developer may need to rotate icon images by 45 degrees without resizing the PNG so that hit‑testing and sprite sheets remain aligned.
+ * 3. When automating the creation of watermark overlays, a developer can produce a PNG, apply a 45‑degree rotation with transparency, and verify unchanged dimensions to ensure the watermark fits the original document size.
+ * 4. When converting scanned documents to PNG for archival, a developer might rotate each page 45 degrees to correct skew while preserving the original width and height for downstream processing.
+ * 5. When building a reporting tool that embeds rotated charts into PDF reports, a developer can generate a PNG, rotate it 45° with a transparent background, and check that the image dimensions are unchanged to avoid layout shifts in the final PDF.
  */

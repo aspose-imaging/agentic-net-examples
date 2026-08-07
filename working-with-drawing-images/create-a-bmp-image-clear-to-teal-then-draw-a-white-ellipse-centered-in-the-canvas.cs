@@ -1,38 +1,41 @@
 using System;
 using System.IO;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
+            // Hardcoded output path
             string outputPath = @"C:\temp\output.bmp";
+
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            Aspose.Imaging.Sources.FileCreateSource source = new Aspose.Imaging.Sources.FileCreateSource(outputPath, false);
-            BmpOptions options = new BmpOptions() { Source = source };
-
-            int width = 500;
-            int height = 500;
-
-            using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(options, width, height))
+            // Create a 500x500 BMP image
+            using (BmpImage bmp = new BmpImage(500, 500))
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
-                graphics.Clear(Aspose.Imaging.Color.Teal);
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(bmp);
 
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.White, 2);
-                int ellipseSize = 300;
-                Aspose.Imaging.Rectangle ellipseRect = new Aspose.Imaging.Rectangle(
-                    (width - ellipseSize) / 2,
-                    (height - ellipseSize) / 2,
-                    ellipseSize,
-                    ellipseSize);
+                // Clear the canvas to teal
+                graphics.Clear(Color.Teal);
 
-                graphics.DrawEllipse(pen, ellipseRect);
-                canvas.Save();
+                // Calculate ellipse bounds to be centered
+                int ellipseWidth = 300;
+                int ellipseHeight = 300;
+                int x = (bmp.Width - ellipseWidth) / 2;
+                int y = (bmp.Height - ellipseHeight) / 2;
+
+                // Draw a white ellipse
+                Pen whitePen = new Pen(Color.White, 2);
+                graphics.DrawEllipse(whitePen, x, y, ellipseWidth, ellipseHeight);
+
+                // Save the image to the specified path
+                bmp.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -44,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP placeholder image with a solid teal background and a centered white ellipse for UI mockups or testing image loading pipelines.
- * 2. When an application must programmatically create a 500×500 bitmap file for a game asset, using Aspose.Imaging to clear the canvas to teal and draw a white ellipse as a simple sprite.
- * 3. When a reporting tool requires dynamic generation of BMP charts where the background color is teal and a white ellipse represents a data point or highlight.
- * 4. When a batch process creates thumbnail previews for scanned documents, and the developer wants to add a teal backdrop with a white ellipse watermark using C# and Aspose.Imaging.
- * 5. When an automated test suite validates image processing functions by producing a known BMP image with a teal fill and a centered white ellipse to compare against expected results.
+ * 1. When a developer needs to generate a BMP thumbnail with a teal background and a centered white ellipse for a custom UI icon.
+ * 2. When an automated reporting tool must create a simple BMP chart element that highlights data points using a white ellipse on a teal canvas.
+ * 3. When a game asset pipeline requires programmatically producing BMP textures with a teal base color and a white circular mask for sprite masking.
+ * 4. When a document generation system has to embed a BMP placeholder image containing a centered white ellipse to indicate where user‑uploaded photos will appear.
+ * 5. When a testing framework needs to create a deterministic BMP image with known colors and shapes (teal background and white ellipse) to validate image processing algorithms.
  */

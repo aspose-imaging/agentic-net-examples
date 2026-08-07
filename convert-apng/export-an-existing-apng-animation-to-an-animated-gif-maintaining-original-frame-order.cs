@@ -7,32 +7,27 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\animation.apng";
-        string outputPath = @"C:\Images\animation_converted.gif";
+        // Hardcoded input and output file paths
+        string inputPath = "input.apng";
+        string outputPath = "output.gif";
 
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the APNG image
+            // Load the APNG animation
             using (Image image = Image.Load(inputPath))
             {
-                // Save as animated GIF, preserving frame order
-                var gifOptions = new GifOptions
-                {
-                    // FullFrame ensures each frame is saved as a full image (optional)
-                    FullFrame = true
-                };
-                image.Save(outputPath, gifOptions);
+                // Save as an animated GIF, preserving frame order
+                image.Save(outputPath, new GifOptions());
             }
         }
         catch (Exception ex)
@@ -44,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to convert user‑uploaded APNG stickers into animated GIFs for browsers that only support GIF animation, they can use this C# Aspose.Imaging code to preserve the original frame order.
- * 2. When a mobile app backend must generate shareable GIF previews from APNG game assets while keeping the animation sequence intact, the example shows how to load the APNG and save it as a GIF using Aspose.Imaging.
- * 3. When an e‑learning platform wants to transform APNG tutorial animations into GIFs for email newsletters, the code demonstrates the C# file‑system checks and GifOptions needed to maintain frame timing.
- * 4. When a digital marketing team automates batch processing of APNG product demos into GIFs for social media, this snippet provides the necessary steps to load, verify, and export each animation with correct frame ordering.
- * 5. When a legacy content management system only accepts GIF files, developers can employ this Aspose.Imaging for .NET routine to convert APNG banners to animated GIFs without losing the original frame sequence.
+ * 1. When a web developer needs to convert an APNG sprite animation into a widely supported animated GIF for older browsers using C# and Aspose.Imaging while keeping the original frame sequence.
+ * 2. When a mobile app team wants to generate GIF previews of user‑uploaded APNG stickers on a server‑side .NET service, preserving the animation order with Aspose.Imaging.
+ * 3. When an e‑learning platform must transform APNG tutorial animations into GIFs for inclusion in PDF handouts, using C# code that maintains frame order.
+ * 4. When a digital marketing system automatically creates animated GIF banners from APNG assets for email campaigns, requiring reliable frame‑by‑frame conversion via Aspose.Imaging.
+ * 5. When a game developer exports APNG character animations to GIF files for documentation or social media sharing, ensuring the original frame order is retained with C#.
  */

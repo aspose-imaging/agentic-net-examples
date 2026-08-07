@@ -7,13 +7,13 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.eps";
+        string outputPath = @"C:\Images\sample.jpg";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "input.eps";
-            string outputPath = "output/output.jpg";
-
-            // Verify that the input file exists
+            // Verify that the input EPS file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,15 +23,19 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EPS image and save it as JPEG
+            // Load the EPS image
             using (Image image = Image.Load(inputPath))
             {
+                // Prepare JPEG export options (default settings)
                 var jpegOptions = new JpegOptions();
+
+                // Save the image as JPEG
                 image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
         {
+            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -39,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to display a thumbnail of an EPS logo, a developer can use this C# code to load the EPS file and save it as a JPEG image for fast browser rendering.
- * 2. When a document management system must generate preview images for stored EPS artwork, the code can convert each EPS into a JPEG using Aspose.Imaging’s Image.Load and Image.Save methods.
- * 3. When a print shop wants to provide clients with quick JPEG proofs of their EPS designs, the developer can automate the conversion with this C# snippet to create JPEG files in a specified output folder.
- * 4. When an automated email report includes vector diagrams originally saved as EPS, the code enables the developer to render those diagrams as JPEGs that embed correctly in the email body.
- * 5. When a cloud service receives user‑uploaded EPS files and stores them in a database, the developer can use this code to transform the EPS into a JPEG format suitable for thumbnails and quick retrieval.
+ * 1. When a developer must convert a vector EPS file stored on disk into a web‑ready JPEG image using C# and Aspose.Imaging for quick preview or publishing.
+ * 2. When an automated build script needs to batch‑process EPS logos from a source directory and generate JPEG thumbnails for a content management system.
+ * 3. When a desktop application requires on‑the‑fly conversion of user‑uploaded EPS graphics to JPEG format to display them in a Windows Forms UI.
+ * 4. When a server‑side service validates the existence of an EPS asset, creates the necessary output folder, and saves the image as JPEG for downstream image‑processing pipelines.
+ * 5. When a troubleshooting tool logs errors while loading an EPS file and attempts to export it to JPEG to verify that the Aspose.Imaging conversion pipeline is functioning correctly.
  */

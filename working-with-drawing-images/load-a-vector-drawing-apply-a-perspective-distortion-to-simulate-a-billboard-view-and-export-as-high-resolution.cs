@@ -3,52 +3,46 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Images\input.svg";
-            string outputPath = @"C:\Images\output.png";
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the vector image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG save options with high resolution
-                var pngOptions = new PngOptions();
+                SvgImage svgImage = (SvgImage)image;
 
-                // Set up vector rasterization options
-                var rasterOptions = new VectorRasterizationOptions
+                // Set high-resolution rasterization options
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
-                    // Define a large page size for high‑resolution output
-                    PageSize = new Size(3000, 2000),
-
-                    // Optional: set background color
+                    PageSize = svgImage.Size,
                     BackgroundColor = Color.White,
-
-                    // Placeholder for perspective distortion.
-                    // If Aspose.Imaging provides a Transform or Perspective matrix,
-                    // it would be applied here, e.g.:
-                    // Transform = new Matrix3x2(...);
+                    SmoothingMode = SmoothingMode.AntiAlias,
+                    // Increase scale for higher resolution (e.g., 2x)
+                    ScaleX = 2.0f,
+                    ScaleY = 2.0f
                 };
 
-                pngOptions.VectorRasterizationOptions = rasterOptions;
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                // Save the rasterized image as PNG
-                image.Save(outputPath, pngOptions);
+                svgImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -60,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a marketing application needs to generate a high‑resolution PNG of an SVG logo that appears as if it were printed on a slanted billboard, developers can load the SVG, apply a perspective transform, and rasterize it at 3000×2000 pixels.
- * 2. When an e‑learning platform wants to create printable course slides from vector diagrams with realistic 3‑D tilt effects, the code can load the SVG, distort it to simulate a viewing angle, and export a crisp PNG for PDF compilation.
- * 3. When a real‑estate website needs to preview property signage by projecting a vector graphic onto a building façade image, developers can use this routine to apply perspective distortion and produce a high‑resolution PNG overlay.
- * 4. When a digital signage system must pre‑render SVG advertisements for large outdoor screens, the code enables loading the vector asset, warping it to match the screen’s perspective, and saving a high‑quality PNG for fast playback.
- * 5. When a game development tool requires converting SVG UI elements into texture maps that mimic a billboard perspective, the snippet loads the SVG, applies the transform, and outputs a high‑resolution PNG suitable for the game engine.
+ * 1. When a developer needs to convert an SVG logo or icon into a high‑resolution PNG for print‑ready marketing materials, this C# code using Aspose.Imaging can rasterize the vector at 2× scale and preserve anti‑aliasing.
+ * 2. When a web application must generate sharp PNG thumbnails from user‑uploaded SVG files on the fly, the example shows how to load the SVG, set rasterization options, and save the result efficiently.
+ * 3. When a desktop utility has to batch‑process vector drawings into PNG assets with a white background for UI design, the code demonstrates the required file‑format handling and scaling in .NET.
+ * 4. When an e‑learning platform wants to embed scalable SVG diagrams as high‑quality PNG images in PDF reports, this snippet illustrates how to control page size, background color, and resolution during conversion.
+ * 5. When a CI/CD pipeline needs to verify that SVG assets render correctly as PNGs at double resolution before deployment, the example provides a repeatable C# workflow using Aspose.Imaging’s rasterization options.
  */

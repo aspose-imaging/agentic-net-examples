@@ -11,6 +11,7 @@ class Program
     {
         string inputPath = "input.bmp";
         string outputPath = "output.bmp";
+        float opacity = 0.5f;
 
         try
         {
@@ -24,32 +25,24 @@ class Program
 
             using (var image = Image.Load(inputPath))
             {
-                var bmpImage = (BmpImage)image;
-                var graphics = new Graphics(bmpImage);
-
-                string watermarkText = "Sample Watermark";
-                float opacity = 0.5f;
-                int margin = 10;
-
-                using (var brush = new SolidBrush())
+                using (var brush = new SolidBrush(Color.White))
                 {
-                    brush.Color = Color.White;
                     brush.Opacity = opacity;
 
-                    var font = new Font("Arial", 24);
+                    string watermarkText = "Sample Watermark";
+                    Font font = new Font("Arial", 24);
 
-                    var layoutArea = new SizeF(bmpImage.Width, bmpImage.Height);
-                    var format = new StringFormat();
-                    var textSize = graphics.MeasureString(watermarkText, font, layoutArea, format);
+                    Graphics graphics = new Graphics(image);
 
-                    float x = bmpImage.Width - textSize.Width - margin;
-                    float y = bmpImage.Height - textSize.Height - margin;
+                    var textSize = graphics.MeasureString(watermarkText, font, new SizeF(image.Width, image.Height), null);
+                    float margin = 10f;
+                    float x = image.Width - textSize.Width - margin;
+                    float y = image.Height - textSize.Height - margin;
 
                     graphics.DrawString(watermarkText, font, brush, new PointF(x, y));
-                }
 
-                var bmpOptions = new BmpOptions();
-                bmpImage.Save(outputPath, bmpOptions);
+                    image.Save(outputPath, new BmpOptions());
+                }
             }
         }
         catch (Exception ex)
@@ -61,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed a semi‑transparent copyright watermark onto BMP screenshots using C# before sending them to clients.
- * 2. When an application must automatically add a “Confidential” textual watermark with configurable opacity to scanned BMP documents to deter unauthorized distribution.
- * 3. When a game studio wants to tag BMP texture assets with version numbers in the lower‑right corner during the build pipeline, using Aspose.Imaging for .NET.
- * 4. When a batch‑processing tool has to place a customizable brand name watermark on BMP product images for e‑commerce listings, controlling the opacity and margin via code.
- * 5. When a security system requires adding a timestamp watermark to BMP surveillance frames at the bottom‑right, with adjustable opacity to keep the overlay readable yet unobtrusive.
+ * 1. Use this code to add a semi‑transparent text watermark to a BMP image in a C# application using Aspose.Imaging before publishing the image online.
+ * 2. Use this code to embed a copyright notice in the bottom‑right corner of scanned BMP documents, adjusting the brush opacity for legal compliance.
+ * 3. Use this code to generate watermarked BMP thumbnails for a desktop C# app that displays user‑uploaded images, ensuring the watermark remains readable at any size.
+ * 4. Use this code to prepare BMP assets for a game, adding a developer‑defined label with configurable opacity to each sprite using Aspose.Imaging graphics.
+ * 5. Use this code to automate batch processing of BMP screenshots, applying a faint brand logo at the corner with adjustable opacity via a SolidBrush.
  */

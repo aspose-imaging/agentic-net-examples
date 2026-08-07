@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.tif";
-        string outputPath = @"C:\Images\output.tif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.tif";
+            string outputPath = @"C:\Images\output.tif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,22 +26,28 @@ class Program
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Align DPI for raster images
-                if (image is RasterImage raster)
+                // Align DPI for TIFF images using the built‑in helper
+                if (image is TiffImage tiffImg)
                 {
-                    // If horizontal and vertical DPI differ, make them equal
-                    if (raster.HorizontalResolution != raster.VerticalResolution)
+                    tiffImg.AlignResolutions();
+                }
+                // For other raster images, make horizontal and vertical DPI equal
+                else if (image is RasterImage rasterImg)
+                {
+                    double hDpi = rasterImg.HorizontalResolution;
+                    double vDpi = rasterImg.VerticalResolution;
+
+                    if (Math.Abs(hDpi - vDpi) > 0.001)
                     {
-                        // Use the current horizontal DPI for both axes (could also use average)
-                        double dpi = raster.HorizontalResolution;
-                        raster.SetResolution(dpi, dpi);
+                        double avgDpi = (hDpi + vDpi) / 2.0;
+                        rasterImg.SetResolution(avgDpi, avgDpi);
                     }
                 }
 
-                // For TIFF-specific images, also call AlignResolutions if available
-                if (image is TiffImage tiffImage)
+                // Example correction filter applied after DPI alignment
+                if (image is RasterImage ri)
                 {
-                    tiffImage.AlignResolutions();
+                    ri.Grayscale();
                 }
 
                 // Save the processed image
@@ -57,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application processes scanned TIFF documents and must ensure that the horizontal and vertical DPI are identical before applying sharpening or noise‑reduction filters so the output prints at the correct size.
- * 2. When a batch image conversion tool uses Aspose.Imaging to normalize resolution of mixed‑resolution JPEG or PNG files before resizing them for a web gallery, preventing distortion caused by mismatched DPI.
- * 3. When a medical imaging system imports raster DICOM images converted to TIFF and needs to align DPI values to maintain accurate scaling for diagnostic measurements prior to applying contrast enhancement.
- * 4. When a desktop publishing workflow receives raster images from various sources and must synchronize DPI across the image before applying color correction filters to guarantee consistent layout dimensions in the final PDF.
- * 5. When an automated archival script processes legacy TIFF files with inconsistent DPI metadata and aligns the resolutions before running de‑skew or despeckle filters to preserve the original aspect ratio during long‑term storage.
+ * 1. When converting scanned TIFF documents to a standardized PDF, a developer can align horizontal and vertical DPI before applying grayscale or other correction filters to ensure consistent scaling across all pages.
+ * 2. When preparing satellite imagery in JPEG or PNG format for GIS analysis, aligning the DPI first guarantees accurate distance measurements after applying contrast‑enhancement filters.
+ * 3. When building a batch‑processing tool that normalizes product photos for an e‑commerce site, the code can equalize DPI before resizing and applying color‑correction filters to keep every image the same physical size.
+ * 4. When integrating a medical‑imaging workflow that receives DICOM‑converted TIFF scans, aligning resolutions before denoising filters ensures diagnostic measurements are not distorted.
+ * 5. When creating an archival pipeline for historical photographs, setting matching horizontal and vertical DPI before applying restoration filters preserves the original aspect ratio and print dimensions.
  */

@@ -9,11 +9,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hard‑coded input and output file paths
             string inputPath = @"C:\Images\multipage.tif";
             string outputPath = @"C:\Images\page2.png";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,14 +26,25 @@ class Program
             // Load the multipage TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG options to export only the second page (index 1)
-                PngOptions pngOptions = new PngOptions
-                {
-                    MultiPageOptions = new MultiPageOptions(new int[] { 1 })
-                };
+                // Cast to IMultipageImage to access page information
+                IMultipageImage multipage = image as IMultipageImage;
 
-                // Save the selected page as a PNG file
-                image.Save(outputPath, pngOptions);
+                // Check that the image has at least two pages
+                if (multipage != null && multipage.PageCount > 1)
+                {
+                    // Prepare PNG save options
+                    PngOptions pngOptions = new PngOptions();
+
+                    // Export only the second page (index 1)
+                    pngOptions.MultiPageOptions = new MultiPageOptions(new int[] { 1 });
+
+                    // Save the selected page as PNG
+                    image.Save(outputPath, pngOptions);
+                }
+                else
+                {
+                    Console.Error.WriteLine("The input image does not contain a second page.");
+                }
             }
         }
         catch (Exception ex)
@@ -45,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system stores patient scans as multipage TIFFs and needs to extract the second slice as a PNG for quick preview in a web portal.
- * 2. When a document management workflow receives scanned contracts as multipage TIFF files and must generate a PNG thumbnail of the second page for indexing in a search engine.
- * 3. When a GIS application captures satellite imagery in a multipage TIFF and wants to convert only the second band to PNG for analysis in a C# data pipeline.
- * 4. When an e‑commerce platform receives product catalogs as multipage TIFFs and needs to display the second page as a PNG image on a mobile app.
- * 5. When an archival system processes historical newspapers stored as multipage TIFFs and extracts the second page as a PNG for OCR processing in a .NET service.
+ * 1. When a developer needs to extract the second page of a multi‑page TIFF (such as a scanned invoice) and convert it to a PNG for web display.
+ * 2. When an application must generate a lossless PNG thumbnail of a specific page in a multi‑page medical TIFF image.
+ * 3. When a batch process has to isolate a particular frame from a multi‑page fax document and save it as a PNG for archival purposes.
+ * 4. When a reporting tool requires converting only the second page of a multi‑page engineering drawing TIFF into a PNG to embed in a PDF report.
+ * 5. When a migration script must programmatically convert a selected page of a multi‑page TIFF archive to PNG for compatibility with a mobile app.
  */

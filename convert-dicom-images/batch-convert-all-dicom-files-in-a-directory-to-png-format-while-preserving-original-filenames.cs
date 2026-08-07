@@ -26,23 +26,22 @@ class Program
                     return;
                 }
 
-                // Load the DICOM image
-                using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+                // Build the output PNG path preserving the original file name
+                string outputPath = Path.Combine(
+                    outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".png");
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the DICOM image from a file stream
+                using (Stream stream = File.OpenRead(inputPath))
+                using (DicomImage dicomImage = new DicomImage(stream))
                 {
-                    // Iterate through each page (handles single- and multi-page DICOM files)
-                    foreach (DicomPage page in dicomImage.DicomPages)
-                    {
-                        // Build the output PNG file name preserving the original name
-                        string baseName = Path.GetFileNameWithoutExtension(inputPath);
-                        string outputFileName = $"{baseName}.{page.Index}.png";
-                        string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                        // Ensure the output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the page as PNG
-                        page.Save(outputPath, new PngOptions());
-                    }
+                    // If the DICOM image has multiple pages, convert the first page.
+                    // Adjust as needed for multi‑page handling.
+                    var firstPage = dicomImage.DicomPages[0];
+                    firstPage.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -55,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology software needs to export a batch of DICOM scans to PNG files for integration with web‑based viewers or reporting tools.
- * 2. When a medical research team wants to convert all DICOM images in a folder to PNG while preserving original filenames for easy correlation with patient data.
- * 3. When an imaging pipeline must generate thumbnail PNGs from multi‑frame DICOM files for a PACS archive index.
- * 4. When a hospital IT department automates nightly conversion of newly received DICOM studies to PNG to feed a machine‑learning model that only accepts standard image formats.
- * 5. When a developer builds a cross‑platform C# utility that processes a directory of DICOM files and saves each page as a separate PNG for use in electronic health record (EHR) systems.
+ * 1. When a radiology department needs to export a whole folder of DICOM scans to PNG files for inclusion in patient reports or web portals.
+ * 2. When a medical imaging researcher wants to preprocess a dataset by converting all DICOM images in a directory to PNG format for use with machine‑learning libraries that accept only common raster formats.
+ * 3. When a hospital IT team automates the migration of legacy DICOM archives to a cloud storage solution that only supports PNG thumbnails for quick preview.
+ * 4. When a developer builds a C# desktop utility that batch converts DICOM files to PNG while preserving original filenames to maintain traceability between source scans and generated images.
+ * 5. When a quality‑control engineer needs to generate visual PNG copies of DICOM images from a scanner output folder to verify image integrity without opening specialized DICOM viewers.
  */

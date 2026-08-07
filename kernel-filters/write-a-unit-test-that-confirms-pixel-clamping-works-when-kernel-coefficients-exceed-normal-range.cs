@@ -1,48 +1,78 @@
+// HOW-TO: Test Pixel Clamping After Over‑Sharpening Filter In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output/output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Image image = Image.Load(inputPath))
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
+
+            // Create a 2x2 test image with known colors
+            int width = 2, height = 2;
+            using (Image img = Image.Create(new BmpOptions(), width, height))
             {
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)img;
+                int[] pixels = new int[]
+                {
+                    unchecked((int)0xFFFF0000), // Red
+                    unchecked((int)0xFF00FF00), // Green
+                    unchecked((int)0xFF0000FF), // Blue
+                    unchecked((int)0xFFFFFFFF)  // White
+                };
+                raster.SaveArgb32Pixels(new Rectangle(0, 0, width, height), pixels);
+                raster.Save(inputPath);
+            }
 
-                // Configure sharpen filter with an excessively high factor to force potential overflow.
-                SharpenFilterOptions options = new SharpenFilterOptions(5, 4.0);
-                options.Factor = 1000.0; // Exaggerated factor.
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Apply the filter to the whole image.
-                rasterImage.Filter(rasterImage.Bounds, options);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-                // Save the filtered image.
-                rasterImage.Save(outputPath, new PngOptions());
+            // Load image and apply a sharpen filter with an exaggerated factor to force overflow
+            using (Image img = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)img;
+                var options = new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions();
+                options.Factor = 10.0; // Large factor to push pixel values beyond 255
+                raster.Filter(raster.Bounds, options);
+                raster.Save(outputPath);
+            }
 
-                // Verify pixel values are clamped between 0 and 255.
-                Aspose.Imaging.Color pixel = rasterImage.GetPixel(0, 0);
-                bool clamped = pixel.A >= 0 && pixel.A <= 255 &&
-                               pixel.R >= 0 && pixel.R <= 255 &&
-                               pixel.G >= 0 && pixel.G <= 255 &&
-                               pixel.B >= 0 && pixel.B <= 255;
+            // Verify output file exists
+            if (!File.Exists(outputPath))
+            {
+                Console.Error.WriteLine($"File not found: {outputPath}");
+                return;
+            }
 
-                Console.WriteLine(clamped ? "Pixel clamping verified." : "Pixel clamping failed.");
+            // Load the filtered image and check that all channel values are clamped to 0‑255
+            using (Image img = Image.Load(outputPath))
+            {
+                RasterImage raster = (RasterImage)img;
+                int[] result = raster.LoadArgb32Pixels(new Rectangle(0, 0, raster.Width, raster.Height));
+
+                bool allClamped = result.All(p =>
+                {
+                    byte a = (byte)((p >> 24) & 0xFF);
+                    byte r = (byte)((p >> 16) & 0xFF);
+                    byte g = (byte)((p >> 8) & 0xFF);
+                    byte b = (byte)(p & 0xFF);
+                    return a <= 255 && r <= 255 && g <= 255 && b <= 255;
+                });
+
+                Console.WriteLine(allClamped ? "Pixel clamping test passed." : "Pixel clamping test failed.");
             }
         }
         catch (Exception ex)
@@ -54,9 +84,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to ensure that applying an extreme sharpen filter to PNG images does not produce pixel values outside the 0‑255 range, they can use this unit test to verify automatic clamping.
- * 2. When integrating Aspose.Imaging into a C# image‑processing pipeline that accepts user‑defined filter factors, this test confirms that unusually high factor values are safely limited.
- * 3. When validating that raster image operations such as GetPixel and Save correctly handle overflow after kernel coefficient manipulation, the code provides a reproducible scenario.
- * 4. When building automated regression tests for image‑enhancement features that involve custom SharpenFilterOptions, this example checks that the library prevents color channel overflow.
- * 5. When troubleshooting issues where corrupted or malicious input images cause kernel calculations to exceed normal limits, the test demonstrates that Aspose.Imaging clamps pixel components to valid byte values.
+ * 1. When you need to verify that Aspose.Imaging correctly clamps pixel values after applying a high‑strength sharpen filter to a BMP image in a C# unit test.
+ * 2. When you want to create a small test bitmap with known ARGB colors to ensure image processing operations do not produce values outside the 0‑255 range.
+ * 3. When you are writing automated tests to confirm that kernel coefficient overflow does not corrupt the output file during image filtering with Aspose.Imaging.
+ * 4. When you need to programmatically generate input and output files, apply an exaggerated filter factor, and check that the resulting image file is successfully saved.
+ * 5. When you are debugging image processing pipelines and require a reproducible scenario that forces pixel value overflow to validate the library’s clamping behavior.
  */

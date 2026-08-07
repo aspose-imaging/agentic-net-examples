@@ -1,48 +1,38 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageLoadOptions;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Get all DNG files in the input directory
-            string[] dngFiles = Directory.GetFiles(inputDir, "*.dng");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-            foreach (string inputPath in dngFiles)
+            string[] files = Directory.GetFiles(inputDirectory, "*.dng");
+            foreach (var inputPath in files)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare output path with .jpg extension
-                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
-
-                // Ensure output directory exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load DNG image with default load options
-                using (Image image = Image.Load(inputPath, new DngLoadOptions()))
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Set JPEG save options with quality 85
-                    JpegOptions jpegOptions = new JpegOptions
-                    {
-                        Quality = 85
-                    };
-
-                    // Save as JPEG
-                    image.Save(outputPath, jpegOptions);
+                    var dngImage = (Aspose.Imaging.FileFormats.Dng.DngImage)image;
+                    var jpegOptions = new JpegOptions { Quality = 85 };
+                    dngImage.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -55,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer needs to quickly convert a folder of raw DNG files into web‑ready JPEGs at 85 % quality using C# and Aspose.Imaging.
- * 2. When a digital asset management system must automate nightly batch processing of newly uploaded DNG images into compressed JPEGs for faster preview loading.
- * 3. When a mobile app backend has to transform raw camera captures (DNG) into smaller JPEG thumbnails with a specific quality setting before storing them in cloud storage.
- * 4. When an e‑commerce platform wants to standardize product photos by converting raw DNG product shots to JPEGs with consistent 85 % quality to reduce bandwidth usage.
- * 5. When a scientific imaging workflow requires exporting raw DNG microscope images to JPEG format for inclusion in reports while preserving visual fidelity via a defined quality level.
+ * 1. When a photographer needs to prepare a web‑ready gallery by converting raw DNG files from a shoot into compressed JPEGs with a quality setting of 85 % using C# and Aspose.Imaging.
+ * 2. When a mobile‑app backend must batch‑process uploaded raw DNG images from users and store them as smaller JPEG files for faster download and display.
+ * 3. When an e‑commerce platform wants to automate the conversion of high‑resolution product photos captured in DNG format to JPEG thumbnails while preserving visual fidelity at 85 % quality.
+ * 4. When a digital archiving system requires a scheduled job that scans a folder of DNG scans, converts each to JPEG, and saves them to an output directory using Aspose.Imaging’s JpegOptions.
+ * 5. When a scientific imaging workflow needs to transform raw DNG microscope images into JPEGs for inclusion in reports, ensuring consistent compression level across all files.
  */

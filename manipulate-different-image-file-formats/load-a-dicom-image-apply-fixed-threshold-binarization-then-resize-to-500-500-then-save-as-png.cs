@@ -1,8 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging;
 
 class Program
 {
@@ -24,19 +25,19 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the DICOM image, apply binarization, resize, and save as PNG
+            // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage to access DICOM‑specific methods
+                // Cast to DicomImage to access DICOM-specific methods
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Apply fixed‑threshold binarization (threshold value 127)
+                // Apply fixed threshold binarization (threshold value 127)
                 dicomImage.BinarizeFixed(127);
 
-                // Resize to 500×500 using bilinear resampling
-                dicomImage.Resize(500, 500, ResizeType.BilinearResample);
+                // Resize to 500x500 using nearest neighbour resampling
+                dicomImage.Resize(500, 500, ResizeType.NearestNeighbourResample);
 
-                // Save the processed image as PNG
+                // Save as PNG
                 dicomImage.Save(outputPath, new PngOptions());
             }
         }
@@ -49,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application must convert a DICOM X‑ray scan to a high‑contrast black‑and‑white PNG thumbnail of 500×500 pixels for quick preview in a web portal.
- * 2. When a radiology workflow needs to extract a DICOM image, apply fixed‑threshold binarization at 127 to highlight bone structures, and then downscale it for inclusion in a PDF report.
- * 3. When a healthcare data‑analysis tool requires batch processing of DICOM files into PNG format with uniform size and binary contrast to feed a machine‑learning model.
- * 4. When a hospital’s PACS integration script must generate standardized PNG icons from DICOM studies for display on mobile devices, ensuring consistent resolution and binary image quality.
- * 5. When a developer is building a C# utility that sanitizes patient imaging data by converting DICOM images to binarized PNGs of 500×500 pixels before archiving them in a secure file system.
+ * 1. When a radiology web portal needs to show high‑contrast PNG thumbnails of DICOM scans, developers can load the DICOM, apply a fixed‑threshold binarization, resize to 500 × 500, and save as PNG.
+ * 2. When preparing training data for a medical image machine‑learning model, a developer can use this C# code with Aspose.Imaging to convert DICOM files into binary 500 × 500 PNG images.
+ * 3. When generating printable reports that require simplified black‑and‑white versions of DICOM images, this snippet lets a .NET application binarize, resize, and export the image as a PNG.
+ * 4. When integrating a hospital PACS system with a third‑party viewer that only supports PNG, developers can transform DICOM images into 500 × 500 binary PNGs by applying fixed‑threshold binarization using Aspose.Imaging for .NET.
+ * 5. When building a mobile health app that displays compact, high‑contrast thumbnails of DICOM X‑ray images, this code provides a quick way to load, binarize, resize to 500 × 500, and save the result as a PNG.
  */

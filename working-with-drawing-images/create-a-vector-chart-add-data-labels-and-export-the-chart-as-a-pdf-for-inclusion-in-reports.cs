@@ -2,61 +2,72 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "chart.svg";
-        string outputPath = "chart.pdf";
-
-        // Create a simple SVG vector chart with data labels
-        string svgContent = @"<svg width='500' height='300' xmlns='http://www.w3.org/2000/svg'>
-  <rect x='50' y='200' width='80' height='80' fill='#4CAF50' />
-  <text x='90' y='195' font-family='Arial' font-size='14' text-anchor='middle'>80</text>
-  <rect x='150' y='150' width='80' height='130' fill='#2196F3' />
-  <text x='190' y='145' font-family='Arial' font-size='14' text-anchor='middle'>130</text>
-  <rect x='250' y='100' width='80' height='180' fill='#FF9800' />
-  <text x='290' y='95' font-family='Arial' font-size='14' text-anchor='middle'>180</text>
-  <rect x='350' y='50' width='80' height='230' fill='#9C27B0' />
-  <text x='390' y='45' font-family='Arial' font-size='14' text-anchor='middle'>230</text>
-  <line x1='40' y1='250' x2='460' y2='250' stroke='black' />
-  <line x1='40' y1='250' x2='40' y2='20' stroke='black' />
-</svg>";
-
-        // Write SVG content to the input file
-        File.WriteAllText(inputPath, svgContent);
-
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            // Output PDF path (hard‑coded)
+            string outputPath = @"C:\Temp\chart.pdf";
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG vector image
-            using (Image image = Image.Load(inputPath))
+            // Create a raster image that will hold the chart drawing
+            using (Image image = Image.Create(new PngOptions(), 600, 400))
             {
-                // Prepare PDF export options
-                PdfOptions pdfOptions = new PdfOptions();
+                // Initialize Graphics for drawing
+                Graphics graphics = new Graphics(image);
 
-                // Configure vector rasterization options for PDF conversion
-                pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                // Clear background
+                graphics.Clear(Aspose.Imaging.Color.White);
+
+                // Define pens and brushes
+                Pen axisPen = new Pen(Aspose.Imaging.Color.Black, 2);
+                Pen barPen = new Pen(Aspose.Imaging.Color.Blue, 1);
+                using (SolidBrush barBrush = new SolidBrush())
                 {
-                    BackgroundColor = Color.White,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
-                    Positioning = PositioningTypes.DefinedByDocument
-                };
+                    barBrush.Color = Aspose.Imaging.Color.Blue;
+                    barBrush.Opacity = 100;
 
-                // Save the vector image as PDF
+                    // Draw X and Y axes
+                    graphics.DrawLine(axisPen, new Point(50, 350), new Point(550, 350)); // X‑axis
+                    graphics.DrawLine(axisPen, new Point(50, 350), new Point(50, 50));   // Y‑axis
+
+                    // Sample data for the chart
+                    int[] values = { 120, 80, 150, 60, 200 };
+                    string[] labels = { "A", "B", "C", "D", "E" };
+                    int barWidth = 60;
+                    int spacing = 20;
+                    int maxVal = 200; // maximum value for scaling
+
+                    // Draw bars and data labels
+                    for (int i = 0; i < values.Length; i++)
+                    {
+                        int barHeight = (int)((values[i] / (float)maxVal) * 250);
+                        int x = 70 + i * (barWidth + spacing);
+                        int y = 350 - barHeight;
+
+                        // Bar rectangle
+                        Rectangle barRect = new Rectangle(x, y, barWidth, barHeight);
+                        graphics.FillRectangle(barBrush, barRect);
+                        graphics.DrawRectangle(barPen, barRect);
+
+                        // Data label above each bar
+                        Font labelFont = new Font("Arial", 12);
+                        string valueText = values[i].ToString();
+                        graphics.DrawString(valueText, labelFont, barBrush, new PointF(x + barWidth / 2 - 10, y - 20));
+
+                        // Category label below each bar
+                        graphics.DrawString(labels[i], labelFont, barBrush, new PointF(x + barWidth / 2 - 5, 360));
+                    }
+                }
+
+                // Save the drawn image as PDF
+                PdfOptions pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -69,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a financial analyst needs to generate a sales bar chart in SVG, add data labels, and embed it as a PDF in a quarterly report using C# and Aspose.Imaging.
- * 2. When a marketing team wants to automate the creation of product performance graphics, convert them from vector SVG to PDF for inclusion in PowerPoint presentations.
- * 3. When an engineering dashboard requires dynamic generation of SVG schematics with measurement labels that are then saved as PDF files for archival documentation.
- * 4. When a SaaS platform must provide downloadable PDF invoices that contain vector charts of usage statistics generated from SVG templates.
- * 5. When a scientific research application needs to programmatically produce labeled SVG plots of experimental data and export them as high‑resolution PDF figures for journal submissions.
+ * 1. When a developer must programmatically draw a bar chart with data labels using Aspose.Imaging in C# and export it as a PDF for inclusion in a quarterly sales performance report.
+ * 2. When a financial application needs to create a PNG‑based vector‑style chart of KPI values, add readable labels, and embed the chart in a PDF audit document.
+ * 3. When an inventory management system requires generating a visual stock‑level chart on the fly, labeling each bar, and saving the result as a PDF for distribution to warehouse supervisors.
+ * 4. When an education platform wants to produce a PDF report card that contains a custom‑drawn bar chart of student test scores with labeled axes using Aspose.Imaging graphics.
+ * 5. When a project‑tracking tool needs to render a progress‑status bar chart in C#, annotate each milestone, and export the chart as a PDF to be attached to weekly status emails.
  */

@@ -8,32 +8,33 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths (preserve original filename)
+        // Hard‑coded input and output paths (preserve original filename)
         string inputPath = @"C:\Project\templates\sample.png";
         string outputPath = @"C:\Project\templates\sample.png";
 
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG save options with a filter type (e.g., Adaptive)
+                // Configure PNG save options (example: use Adaptive filter)
                 PngOptions saveOptions = new PngOptions
                 {
-                    FilterType = PngFilterType.Adaptive
+                    FilterType = PngFilterType.Adaptive,
+                    // Additional options can be set here if needed
                 };
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the filtered image back to the templates folder, preserving the filename
+                // Save the image back to the templates folder, preserving the filename
                 image.Save(outputPath, saveOptions);
             }
         }
@@ -46,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to apply an Adaptive PNG filter to template images before publishing them on a website while preserving the original filenames.
- * 2. When an automated build script must compress PNG assets in a project's templates directory without changing their names to keep references intact.
- * 3. When a content management system updates its graphic templates by re‑saving PNG files with optimized filter settings using Aspose.Imaging for .NET.
- * 4. When a batch image processing tool processes user‑uploaded PNG logos stored in a templates folder and saves the filtered versions back to the same location.
- * 5. When a desktop application regenerates design mockups by loading PNG templates, applying a filter for better compression, and overwriting the original files to maintain version consistency.
+ * 1. When a web application needs to automatically optimize PNG assets in its templates directory by applying an adaptive filter before deployment.
+ * 2. When a desktop publishing tool must re‑save user‑edited PNG templates with lossless compression settings while keeping the original file names.
+ * 3. When a batch processing script updates product catalog images stored in a templates folder, ensuring each PNG is filtered and overwritten in place.
+ * 4. When a CI/CD pipeline validates and normalizes PNG resources in a project's template folder to meet branding guidelines without changing file paths.
+ * 5. When a content management system programmatically refreshes cached PNG thumbnails by re‑saving them with Aspose.Imaging filter options while preserving filenames.
  */

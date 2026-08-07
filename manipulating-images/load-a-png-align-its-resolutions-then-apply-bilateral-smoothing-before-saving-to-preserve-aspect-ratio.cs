@@ -1,19 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.png";
+            string outputPath = @"C:\temp\output.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,30 +21,27 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to PngImage for PNG‑specific members
+                // Cast to PngImage to access resolution properties
                 PngImage pngImage = (PngImage)image;
 
-                // Align horizontal and vertical resolutions (make them equal)
-                double hRes = pngImage.HorizontalResolution;
-                double vRes = pngImage.VerticalResolution;
-                if (hRes != vRes)
-                {
-                    // Set both resolutions to the horizontal value (or any desired value)
-                    pngImage.SetResolution(hRes, hRes);
-                }
+                // Align horizontal and vertical resolutions (e.g., set both to 96 DPI)
+                pngImage.SetResolution(96.0, 96.0);
 
-                // Apply bilateral smoothing filter to the entire image
+                // Cast to RasterImage for filtering operations
                 RasterImage rasterImage = (RasterImage)pngImage;
-                rasterImage.Filter(rasterImage.Bounds, new BilateralSmoothingFilterOptions(5));
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Apply bilateral smoothing filter with a kernel size of 5
+                var filterOptions = new BilateralSmoothingFilterOptions(5);
+                rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
                 // Save the processed image
-                pngImage.Save(outputPath);
+                rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -56,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application must standardize the DPI of uploaded PNG icons before displaying them on high‑resolution screens, a developer can use this code to align horizontal and vertical resolutions and smooth the image without distorting its aspect ratio.
- * 2. When an e‑commerce platform needs to preprocess product photos stored as PNG files to ensure consistent print quality, the code can equalize the image’s resolution and apply bilateral smoothing to reduce noise while keeping edges sharp.
- * 3. When a desktop publishing tool imports user‑provided PNG graphics and must preserve their original proportions while removing compression artifacts, this snippet aligns the resolutions and runs a bilateral smoothing filter before saving.
- * 4. When a scientific imaging workflow requires converting scanned PNG microscopy images to a uniform DPI for accurate measurements, the developer can employ this code to set matching resolutions and denoise the image without altering its aspect ratio.
- * 5. When a mobile game engine loads PNG textures and wants to guarantee that the texture’s horizontal and vertical DPI are identical and that the texture is smoothed to avoid visual jitter, this example provides the necessary C# steps using Aspose.Imaging.
+ * 1. When a developer needs to standardize the DPI of user‑uploaded PNG icons before displaying them in a Windows desktop application, they can load the PNG, set both horizontal and vertical resolutions to 96 DPI, apply bilateral smoothing to reduce noise, and save the result.
+ * 2. When preparing PNG screenshots for inclusion in a PDF report, a developer can align the image resolution to match the document’s DPI, use bilateral smoothing to soften compression artifacts, and preserve the original aspect ratio during saving.
+ * 3. When an e‑commerce site processes product photos in PNG format, a developer can ensure consistent print‑ready resolution, apply bilateral smoothing to smooth edges without blurring details, and output the cleaned image for catalog generation.
+ * 4. When a medical imaging system receives PNG scans from various devices, a developer can normalize the resolution, apply bilateral smoothing to reduce high‑frequency noise while keeping anatomical structures sharp, and store the processed image for further analysis.
+ * 5. When creating a batch job that optimizes PNG assets for a mobile game, a developer can load each image, set a uniform DPI, use bilateral smoothing to improve visual quality on small screens, and save the file while maintaining its original aspect ratio.
  */

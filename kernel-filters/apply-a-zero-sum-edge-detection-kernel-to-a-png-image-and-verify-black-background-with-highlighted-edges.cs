@@ -1,16 +1,18 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input\\sample.png";
-        string outputPath = "output\\edge_detected.png";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -19,23 +21,32 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
                 double[,] kernel = new double[,]
                 {
-                    { 0, -1, 0 },
-                    { -1, 4, -1 },
-                    { 0, -1, 0 }
+                    { -1, -1, -1 },
+                    { -1, 8, -1 },
+                    { -1, -1, -1 }
                 };
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
 
-                raster.Filter(raster.Bounds, filterOptions);
+                int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
+                int topLeftPixel = pixels[0];
+                if ((topLeftPixel & 0xFFFFFF) != 0)
+                {
+                    Console.WriteLine("Verification failed: background pixel is not black.");
+                }
+                else
+                {
+                    Console.WriteLine("Verification passed: background is black.");
+                }
 
-                var pngOptions = new PngOptions();
-                raster.Save(outputPath, pngOptions);
+                PngOptions options = new PngOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -47,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract the outlines of objects in a PNG photograph for CAD preprocessing, they can apply the zero‑sum edge detection kernel using Aspose.Imaging’s convolution filter to produce a black background image with highlighted edges.
- * 2. When building a document‑scanning workflow that must emphasize text boundaries before OCR, the code can run a Laplacian‑style edge detection on scanned PNG pages and save the result for downstream analysis.
- * 3. When creating visual assets for a game where only the silhouette of sprites is required, a developer can use this C# snippet to convert PNG sprites into black‑background edge maps for quick collision‑mask generation.
- * 4. When implementing a quality‑control tool that flags missing or blurred edges in product photos, the edge detection filter applied to PNG files helps automatically highlight problematic regions for inspection.
- * 5. When integrating an image‑processing microservice that needs to return a simplified edge representation of user‑uploaded PNG images, this code demonstrates how to load, filter, and save the processed image using Aspose.Imaging in .NET.
+ * 1. When a developer needs to highlight the edges of objects in a PNG photograph for a computer‑vision preprocessing step, they can use Aspose.Imaging’s ConvolutionFilterOptions with a zero‑sum kernel to produce a black background with white edge outlines.
+ * 2. When building an automated quality‑control pipeline that checks scanned documents for proper edge detection, the code can apply the kernel and verify that the top‑left pixel remains black, confirming the background was correctly set.
+ * 3. When creating visual effects for a web application that requires converting a colored PNG into a stylized line‑art version, the zero‑sum edge detection filter in C# quickly generates the effect while preserving the original image dimensions.
+ * 4. When integrating image analysis into a .NET desktop tool that must export processed PNG files, developers can use this snippet to apply the convolution filter and save the result with Aspose.Imaging’s PngOptions.
+ * 5. When troubleshooting image‑processing algorithms and needing a reproducible way to confirm that the convolution operation produces a black background with highlighted edges, the verification step in the code provides an immediate pass/fail check.
  */

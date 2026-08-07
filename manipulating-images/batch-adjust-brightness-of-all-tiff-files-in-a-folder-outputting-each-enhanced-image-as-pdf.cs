@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
@@ -14,17 +15,15 @@ class Program
             string inputFolder = @"C:\Images\Input";
             string outputFolder = @"C:\Images\Output";
 
-            // Ensure the output directory exists
+            // Ensure the output directory exists (will also handle subfolders)
             Directory.CreateDirectory(outputFolder);
 
             // Get all TIFF files in the input folder
-            string[] tiffFiles = Directory.GetFiles(inputFolder, "*.tif");
-            string[] tiffFilesUpper = Directory.GetFiles(inputFolder, "*.tiff");
-            string[] allFiles = new string[tiffFiles.Length + tiffFilesUpper.Length];
-            tiffFiles.CopyTo(allFiles, 0);
-            tiffFilesUpper.CopyTo(allFiles, tiffFiles.Length);
+            var tiffFiles = Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly)
+                                     .Where(f => f.EndsWith(".tif", StringComparison.OrdinalIgnoreCase) ||
+                                                 f.EndsWith(".tiff", StringComparison.OrdinalIgnoreCase));
 
-            foreach (string inputPath in allFiles)
+            foreach (var inputPath in tiffFiles)
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -33,9 +32,9 @@ class Program
                     return;
                 }
 
-                // Determine output PDF path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".pdf");
+                // Build the output PDF path (same file name, .pdf extension)
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
 
                 // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -63,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system needs to enhance the visibility of scanned X‑ray TIFF files and archive them as searchable PDF reports for patient records.
- * 2. When a publishing house processes a large collection of scanned manuscript pages in TIFF format, brightens them for readability, and converts each page to PDF for digital distribution.
- * 3. When a construction company digitizes site survey drawings stored as TIFF images, adjusts the brightness to highlight details, and saves them as PDF files for inclusion in project documentation.
- * 4. When an archival project receives batches of historical photographs in TIFF, applies a uniform brightness boost to improve visual quality, and exports the results as PDF for online exhibition.
- * 5. When a legal firm receives scanned contracts as TIFF files, needs to standardize their brightness for consistent review, and converts each contract to PDF for secure electronic filing.
+ * 1. When a medical imaging department needs to improve the visibility of scanned X‑ray TIFF files and archive them as searchable PDF reports.
+ * 2. When a publishing house wants to brighten scanned manuscript pages stored as TIFF and generate PDF proofs for editorial review.
+ * 3. When a construction firm must enhance aerial survey TIFF images for better contrast before converting them to PDF for client presentations.
+ * 4. When a government archive needs to batch‑process historical TIFF photographs, increase their brightness, and store the results as PDF for digital preservation.
+ * 5. When an e‑commerce platform processes product catalog TIFF scans, adjusts brightness for consistent appearance, and creates PDF catalogs for distribution.
  */

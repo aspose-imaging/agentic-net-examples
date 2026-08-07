@@ -7,40 +7,51 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input image path
-        string inputPath = @"c:\temp\sample.png";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Sigma values to apply
-        double[] sigmaValues = { 0.5, 1.5, 2.5 };
-
         try
         {
-            foreach (double sigma in sigmaValues)
-            {
-                // Construct output path for each sigma
-                string outputPath = $@"c:\temp\sample.GaussianBlur_{sigma}.png";
+            // Hardcoded input path
+            string inputPath = @"C:\Images\sample.png";
 
-                // Ensure the output directory exists
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Sigma values to test
+            double[] sigmas = new double[] { 0.5, 1.5, 2.5 };
+            int kernelSize = 5; // Gaussian kernel size (must be odd)
+
+            // Apply Gaussian blur for each sigma
+            for (int i = 0; i < sigmas.Length; i++)
+            {
+                double sigma = sigmas[i];
+                string outputPath = $@"C:\Images\sample.GaussianBlur_{sigma}.png";
+
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image
+                // Load image, apply filter, and save
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to RasterImage to access filtering
                     RasterImage rasterImage = (RasterImage)image;
-
-                    // Apply Gaussian blur with a kernel size of 5 and the current sigma
-                    rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, sigma));
-
-                    // Save the filtered image
+                    var options = new GaussianBlurFilterOptions(kernelSize, sigma);
+                    rasterImage.Filter(rasterImage.Bounds, options);
                     rasterImage.Save(outputPath);
+                }
+
+                Console.WriteLine($"Saved blurred image (sigma={sigma}) to {outputPath}");
+            }
+
+            // Simple comparison: report file sizes for each result
+            foreach (double sigma in sigmas)
+            {
+                string path = $@"C:\Images\sample.GaussianBlur_{sigma}.png";
+                if (File.Exists(path))
+                {
+                    long size = new FileInfo(path).Length;
+                    Console.WriteLine($"Sigma {sigma}: file size = {size} bytes");
                 }
             }
         }
@@ -53,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate PNG thumbnails with varying levels of softness for a photo‑gallery website, they can use this C# Aspose.Imaging code to apply Gaussian blur with sigma 0.5, 1.5, and 2.5 and compare the visual results.
- * 2. When preparing training data for a computer‑vision model, a developer can use the code to create multiple blurred versions of the same image to augment the dataset and test the model’s robustness to different blur intensities.
- * 3. When building a document‑scanning application that must reduce noise while preserving text edges, a developer can experiment with sigma 0.5, 1.5, and 2.5 using Aspose.Imaging’s GaussianBlurFilterOptions to find the optimal blur strength before saving the output as PNG.
- * 4. When implementing a visual‑effects pipeline for a Windows desktop app, a developer can run this code to compare how a 5‑pixel kernel with low, medium, and high sigma values affects the perceived smoothness of UI icons stored in PNG format.
- * 5. When creating a before‑and‑after comparison tool for marketing materials, a developer can use the sample to automatically generate three blurred copies of a source image, each with a different sigma, and save them to a folder for side‑by‑side review.
+ * 1. When a developer needs to generate multiple blurred PNG versions for responsive web design, they can use Aspose.Imaging for .NET to apply Gaussian blur with sigma values 0.5, 1.5, and 2.5 and compare the resulting file sizes.
+ * 2. When testing the visual impact of different Gaussian kernel sigma settings on a raster image, a C# program can load a sample.png, apply GaussianBlurFilterOptions with kernelSize 5 and varying sigma, and save each output for side‑by‑side review.
+ * 3. When optimizing image assets for mobile apps, a developer can run this code to create low‑sigma (0.5) and high‑sigma (2.5) blur variants, then use the file‑size report to decide which version balances visual quality and bandwidth.
+ * 4. When building an automated preprocessing pipeline that requires consistent blur strength across a batch of images, the loop over sigma values demonstrates how to programmatically apply and store multiple Gaussian blur filters using Aspose.Imaging.
+ * 5. When evaluating how different sigma values affect PNG compression ratios, the script’s final size comparison lets a developer quickly see the correlation between blur intensity and output file size in a .NET environment.
  */

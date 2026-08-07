@@ -2,40 +2,40 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Define output path
-            string outputPath = @"output\canvas.png";
+            // Hardcoded output path
+            string outputPath = @"C:\temp\ellipse.png";
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a file source bound to the output path
-            Source fileSource = new FileCreateSource(outputPath, false);
+            // Set up PNG options (no source needed for creating a new image)
+            var pngOptions = new PngOptions();
 
-            // Set PNG options with the file source
-            PngOptions pngOptions = new PngOptions
-            {
-                Source = fileSource
-            };
-
-            // Create a new image canvas of 800x600 pixels
+            // Create a new image with the desired canvas size (800x600)
             using (Image image = Image.Create(pngOptions, 800, 600))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
+                // Initialize graphics object for drawing
+                var graphics = new Graphics(image);
 
-                // Draw a red ellipse
-                graphics.DrawEllipse(new Pen(Color.Red, 2), new Rectangle(100, 100, 600, 400));
+                // Optional: clear the canvas with a background color
+                graphics.Clear(Color.White);
 
-                // Save the image (bound to the file source)
-                image.Save();
+                // Define a red pen with a thickness of 2 pixels
+                var redPen = new Pen(Color.Red, 2);
+
+                // Draw an ellipse bounded by the specified rectangle
+                // Rectangle(x, y, width, height)
+                graphics.DrawEllipse(redPen, new Rectangle(100, 100, 600, 400));
+
+                // Save the image to the output path
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -47,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a placeholder image for a web page that requires a red ellipse as a visual cue, a developer can use this code to create an 800 × 600 PNG on the fly.
- * 2. When automating the production of printable marketing assets that need a red elliptical badge on a fixed‑size canvas, this C# snippet creates the PNG without manual design tools.
- * 3. When building a reporting tool that embeds a red ellipse diagram into PDF or HTML reports, the code provides a quick way to render the shape as an image file.
- * 4. When testing image‑processing pipelines that expect an 800 × 600 PNG with a known red ellipse, developers can generate the test image programmatically using Aspose.Imaging.
- * 5. When creating dynamic thumbnails for a gallery where each thumbnail must contain a red ellipse overlay, this example shows how to draw and save the overlay as a PNG in C#.
+ * 1. When generating a PNG placeholder image with a red ellipse on an 800 × 600 canvas for web UI mockups.
+ * 2. When creating a custom report background in C# that requires an 800 × 600 drawing surface with a red ellipse overlay using Aspose.Imaging.
+ * 3. When automating the production of printable marketing flyers that need a white PNG canvas with a centered red ellipse drawn via the graphics API.
+ * 4. When developing a game asset pipeline that programmatically draws a red ellipse onto texture files to visualize hit‑area boundaries.
+ * 5. When building a diagnostic tool that saves a PNG screenshot with a highlighted red ellipse to indicate a region of interest.
  */

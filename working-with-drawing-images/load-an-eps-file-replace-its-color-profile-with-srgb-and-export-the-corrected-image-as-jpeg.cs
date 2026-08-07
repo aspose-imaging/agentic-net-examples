@@ -1,32 +1,32 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main()
     {
+        // Hard‑coded paths
+        string inputPath = "input.eps";
+        string outputPath = "output.jpg";
+        string srgbProfilePath = "sRGB.icc";
+
         try
         {
-            // Hardcoded paths
-            string inputPath = "input.eps";
-            string outputPath = "output.jpg";
-            string iccProfilePath = "sRGB.icc";
-
-            // Validate input EPS file
+            // Verify input EPS file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Validate ICC profile file
-            if (!File.Exists(iccProfilePath))
+            // Verify sRGB ICC profile exists
+            if (!File.Exists(srgbProfilePath))
             {
-                Console.Error.WriteLine($"File not found: {iccProfilePath}");
+                Console.Error.WriteLine($"File not found: {srgbProfilePath}");
                 return;
             }
 
@@ -34,16 +34,14 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load EPS image
-            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            using (var epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Load sRGB ICC profile
-                using (FileStream iccStream = File.OpenRead(iccProfilePath))
+                // Prepare JPEG save options with sRGB profile
+                var jpegOptions = new JpegOptions();
+
+                using (var srgbStream = File.OpenRead(srgbProfilePath))
                 {
-                    // Configure JPEG save options with the sRGB profile
-                    JpegOptions jpegOptions = new JpegOptions
-                    {
-                        RgbColorProfile = new StreamSource(iccStream)
-                    };
+                    jpegOptions.RgbColorProfile = new StreamSource(srgbStream);
 
                     // Save as JPEG
                     epsImage.Save(outputPath, jpegOptions);
@@ -59,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop receives EPS artwork with an unknown or non‑standard ICC profile and must deliver web‑ready JPEGs in the universal sRGB color space.
- * 2. When a digital asset management system needs to ingest vector EPS files, normalize their color profiles to sRGB, and generate thumbnail JPEG previews for quick browsing.
- * 3. When an e‑commerce platform converts supplier‑provided EPS logos to sRGB JPEG images to ensure consistent color rendering across browsers and mobile devices.
- * 4. When a marketing automation tool batch‑processes EPS banners, replaces their embedded color profiles with the sRGB profile, and saves them as JPEGs for email campaigns.
- * 5. When a scientific visualization pipeline exports EPS charts, applies the sRGB ICC profile for accurate on‑screen colors, and outputs JPEG files for inclusion in reports.
+ * 1. When a web developer needs to convert a print‑ready EPS logo to a web‑friendly JPEG while ensuring the colors match the sRGB profile for consistent display across browsers.
+ * 2. When a digital asset manager must batch‑process EPS artwork from a designer, replace its embedded color profile with the standard sRGB ICC profile, and save the results as JPEGs for inclusion in a product catalog.
+ * 3. When an e‑commerce platform requires converting vendor‑supplied EPS product illustrations to JPEG thumbnails with accurate sRGB colors to prevent color shifts on consumer devices.
+ * 4. When a publishing workflow automates the preparation of EPS cover art for online preview, applying an sRGB profile before exporting to JPEG to maintain color fidelity on mobile readers.
+ * 5. When a software engineer integrates a C# service that validates the existence of an EPS file and an sRGB ICC file, then replaces the EPS’s color profile and outputs a JPEG for archival or sharing purposes.
  */

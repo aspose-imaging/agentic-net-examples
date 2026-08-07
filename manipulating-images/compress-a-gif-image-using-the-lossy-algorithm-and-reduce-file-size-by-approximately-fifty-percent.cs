@@ -7,42 +7,42 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.gif";
+        string outputPath = @"C:\temp\output.lossy.gif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.gif";
-            string outputPath = @"C:\temp\output.lossy.gif";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the source GIF image
+            // Load the original GIF image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure GIF options for lossy compression
-                GifOptions saveOptions = new GifOptions
+                // Configure lossy GIF options
+                var saveOptions = new GifOptions
                 {
                     // Recommended value for good lossy compression
                     MaxDiff = 80,
-                    // Optional: enable palette correction for better quality
+                    // Improves visual quality by correcting the palette
                     DoPaletteCorrection = true
                 };
 
                 // Save the image with lossy compression
                 image.Save(outputPath, saveOptions);
+                Console.WriteLine($"Compressed GIF saved to {outputPath}");
             }
-
-            Console.WriteLine("Lossy GIF saved successfully.");
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -51,8 +51,8 @@ class Program
 /*
  * Real-World Use Cases:
  * 1. When a web developer needs to reduce the bandwidth of animated GIFs for faster page loads, they can use this C# code with Aspose.Imaging to apply lossy compression and halve the file size.
- * 2. When an e‑commerce platform wants to store product animation previews in a limited database space, the code can compress GIFs using the MaxDiff setting to achieve approximately 50 % size reduction.
- * 3. When a mobile app generates user‑uploaded GIF stickers and must stay under a size quota, developers can call this routine to perform lossy GIF compression in .NET before sending the file to the server.
- * 4. When a digital marketing agency automates the preparation of email campaign assets, they can use the sample to shrink large GIF banners while preserving visual quality with palette correction.
- * 5. When a content management system needs to batch‑process legacy GIF files for archival, the code provides a straightforward C# solution to compress each image using Aspose.Imaging’s GifOptions.
+ * 2. When an email marketing system must attach animated GIFs without exceeding attachment limits, the code can compress the GIF using the MaxDiff setting and palette correction to stay within size constraints.
+ * 3. When a mobile app that displays user‑generated GIF stickers must conserve device storage, developers can run this routine to shrink each GIF by about fifty percent before saving it locally.
+ * 4. When a content management platform automatically optimizes uploaded media, the code can be integrated to lossy‑compress GIFs on the server side using Aspose.Imaging’s GifOptions.
+ * 5. When a social media scheduler needs to upload animated GIFs to platforms that impose strict file‑size limits, this C# snippet provides a quick way to compress the images while preserving visual quality.
  */

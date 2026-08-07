@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -9,25 +10,31 @@ class Program
     {
         try
         {
-            string outputPath = @"C:\temp\output.bmp";
+            string outputPath = @"C:\temp\outline.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            BmpOptions bmpOptions = new BmpOptions
+            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
             {
-                Source = new FileCreateSource(outputPath, false)
-            };
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.Source = new StreamSource(stream);
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 300, 300))
-            {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                int width = 400;
+                int height = 300;
 
-                Aspose.Imaging.Pen blackPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 10);
-                graphics.DrawLine(blackPen, 50, 50, 250, 250);
+                using (Image image = Image.Create(bmpOptions, width, height))
+                {
+                    Graphics graphics = new Graphics(image);
 
-                Aspose.Imaging.Pen whitePen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.White, 2);
-                graphics.DrawLine(whitePen, 50, 50, 250, 250);
+                    int x1 = 50, y1 = 50, x2 = 350, y2 = 250;
 
-                image.Save();
+                    Pen blackPen = new Pen(Color.Black, 10);
+                    graphics.DrawLine(blackPen, new Point(x1, y1), new Point(x2, y2));
+
+                    Pen whitePen = new Pen(Color.White, 4);
+                    graphics.DrawLine(whitePen, new Point(x1, y1), new Point(x2, y2));
+
+                    image.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -39,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP thumbnail with a highlighted diagonal line for a document preview.
- * 2. When a C# application must create a simple vector‑based watermark by drawing a thick black line with a white outline on a bitmap.
- * 3. When an image processing service has to produce a high‑contrast guide line for calibrating scanning equipment using Aspose.Imaging.
- * 4. When a game UI requires a static BMP asset that shows a bold line with a contrasting edge for a level‑map overlay.
- * 5. When a reporting tool needs to embed a BMP diagram with a double‑stroked line to emphasize a trend line in generated PDFs.
+ * 1. When a developer needs to programmatically create a BMP image and draw a thick black line with a thin white outline using Aspose.Imaging’s Image.Create and Graphics classes for a simple diagram in a Windows desktop app.
+ * 2. When generating printable schematics where a 10‑pixel black line outlined by a 4‑pixel white stroke improves contrast on monochrome printers, leveraging C# Pen objects and BMP output.
+ * 3. When producing thumbnail previews that highlight edges by drawing an outlined line on a bitmap using Aspose.Imaging for .NET, C# streams, and the Graphics.DrawLine method.
+ * 4. When adding a decorative border to a bitmap in a batch‑processing script that writes the BMP file via FileStream, BmpOptions, and draws the outline with black and white Pen objects.
+ * 5. When building a custom UI control that requires dynamic drawing of outlined lines on a BMP canvas for visual feedback, using Aspose.Imaging’s Graphics, Pen, and Image.Save operations.
  */

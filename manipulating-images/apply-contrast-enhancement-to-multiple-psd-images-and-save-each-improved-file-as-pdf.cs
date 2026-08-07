@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
@@ -10,27 +11,46 @@ class Program
     {
         try
         {
+            // Define input and output directories
             string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
             string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
-            Directory.CreateDirectory(outputDirectory);
-            string[] files = Directory.GetFiles(inputDirectory, "*.psd");
-            foreach (string inputPath in files)
+
+            // Get all PSD files in the input directory
+            string[] psdFiles = Directory.GetFiles(inputDirectory, "*.psd");
+
+            foreach (string inputPath in psdFiles)
             {
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+                // Prepare output path with .pdf extension
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+                // Load PSD image
+                using (Image image = Image.Load(inputPath))
                 {
+                    // Cast to RasterImage for adjustment
+                    RasterImage raster = (RasterImage)image;
+                    if (!raster.IsCached)
+                    {
+                        raster.CacheData();
+                    }
+
+                    // Apply contrast enhancement (example value: 30)
                     raster.AdjustContrast(30f);
-                    PdfOptions pdfOptions = new PdfOptions();
-                    raster.Save(outputPath, pdfOptions);
+
+                    // Save as PDF
+                    using (PdfOptions pdfOptions = new PdfOptions())
+                    {
+                        image.Save(outputPath, pdfOptions);
+                    }
                 }
             }
         }
@@ -43,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design studio needs to batch‑process client PSD mockups, increase their contrast for better print quality, and archive the results as searchable PDF files using C# and Aspose.Imaging.
- * 2. When an e‑learning platform automatically converts a collection of Photoshop PSD lesson slides into high‑contrast PDF handouts for offline viewing.
- * 3. When a marketing department wants to enhance the visual impact of product PSD assets and generate PDF brochures in one automated run with .NET.
- * 4. When a digital archiving system must normalize contrast across thousands of PSD artwork files before storing them as PDF documents for long‑term preservation.
- * 5. When a web service receives uploaded PSD files, applies a 30‑point contrast boost, and returns the processed images as PDF reports via an ASP.NET API.
+ * 1. When a design studio needs to batch‑process client PSD mockups, boost their contrast for better print quality, and deliver the results as PDF portfolios.
+ * 2. When an e‑learning platform converts layered Photoshop course slides into high‑contrast PDFs for clearer on‑screen viewing.
+ * 3. When a marketing team automates the preparation of product catalog pages stored as PSD files, enhancing contrast to meet brand guidelines before exporting to PDF for distribution.
+ * 4. When a legal firm archives scanned PSD documents, applies contrast adjustment to improve legibility, and stores them as searchable PDF files.
+ * 5. When a photography workflow tool processes PSD files from a shoot, increases contrast to highlight details, and saves each image as a PDF for client review.
  */

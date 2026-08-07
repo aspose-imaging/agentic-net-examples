@@ -9,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
+        string inputPath = "input\\sample.png";
+        string outputPath = "output\\result.png";
 
         try
         {
@@ -24,37 +24,30 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image into a MemoryStream
+            // Load the PNG file into a MemoryStream
+            using (FileStream fileStream = File.OpenRead(inputPath))
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                using (FileStream fileStream = File.OpenRead(inputPath))
-                {
-                    fileStream.CopyTo(memoryStream);
-                }
+                fileStream.CopyTo(memoryStream);
+                memoryStream.Position = 0; // reset for reading
 
-                // Reset position for loading the image
-                memoryStream.Position = 0;
-
-                // Load image from the stream
+                // Load image from the MemoryStream
                 using (Image image = Image.Load(memoryStream))
                 {
-                    // Flip vertically
+                    // Flip the image vertically
                     image.RotateFlip(RotateFlipType.RotateNoneFlipY);
 
-                    // Prepare stream for saving (clear previous data)
-                    memoryStream.SetLength(0);
-                    memoryStream.Position = 0;
+                    // Write the transformed image back to the same MemoryStream
+                    memoryStream.SetLength(0);          // clear existing data
+                    memoryStream.Position = 0;          // reset position
+                    image.Save(memoryStream, new PngOptions());
 
-                    // Save the modified image back into the same stream
-                    PngOptions saveOptions = new PngOptions();
-                    image.Save(memoryStream, saveOptions);
-                }
-
-                // Write the processed stream to the output file
-                memoryStream.Position = 0;
-                using (FileStream outFile = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                {
-                    memoryStream.CopyTo(outFile);
+                    // Save the resulting stream to the output file
+                    memoryStream.Position = 0; // ensure we read from the beginning
+                    using (FileStream outFile = File.Open(outputPath, FileMode.Create, FileAccess.Write))
+                    {
+                        memoryStream.CopyTo(outFile);
+                    }
                 }
             }
         }
@@ -67,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service receives a PNG upload from a user and needs to flip the image vertically in memory before saving it to storage, this code loads the PNG from a MemoryStream, applies RotateFlip, and writes it back without creating temporary files.
- * 2. When a desktop application processes scanned PNG documents that are upside down, it can use this code to load the image into a MemoryStream, flip it vertically, and save the corrected image back to the same stream for faster I/O.
- * 3. When a batch job reads PNG image blobs from a database, flips each image vertically, and writes the transformed data back into the original stream for downstream processing, this pattern provides an efficient in‑memory solution.
- * 4. When an image‑processing API receives a PNG image via a network stream and must return a vertically mirrored version, the code demonstrates how to load, rotate‑flip, and re‑save the image entirely within a MemoryStream.
- * 5. When writing unit tests to verify that Aspose.Imaging’s RotateFlipType.RotateNoneFlipY correctly flips PNG images, developers can use this code to load the image, apply the vertical flip, and save the result back to the same stream for assertion.
+ * 1. When a web service receives a PNG uploaded by a user and needs to display it upside‑down for a mirror‑effect preview without writing temporary files, a developer can load the image into a MemoryStream, flip it vertically with Aspose.Imaging, and return the modified stream.
+ * 2. When generating printable labels that require the graphic to be inverted because the printer feeds paper from the opposite side, the code can read the PNG into a MemoryStream, apply a vertical flip, and save it back for the printing pipeline.
+ * 3. When building a mobile app that captures screenshots, stores them in memory, and needs to correct orientation caused by device rotation, a developer can use this pattern to flip the PNG vertically in‑place before uploading.
+ * 4. When creating an automated batch process that reads PNG assets from a database BLOB, applies a vertical mirror transformation, and writes the result back to the same BLOB field, the MemoryStream approach avoids extra disk I/O.
+ * 5. When implementing a server‑side image‑editing API that accepts PNG data via a stream, performs a vertical flip for artistic effects, and streams the result back to the client, this code demonstrates the required C# and Aspose.Imaging steps.
  */

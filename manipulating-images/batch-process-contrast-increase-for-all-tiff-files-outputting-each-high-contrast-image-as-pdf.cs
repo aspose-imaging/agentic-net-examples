@@ -10,47 +10,45 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output directories
+            // Hardcoded input and output directories
             string inputDirectory = @"C:\Images\Input";
             string outputDirectory = @"C:\Images\Output";
 
-            // Ensure the output directory exists (will also handle subfolders)
-            Directory.CreateDirectory(outputDirectory);
-
             // Get all TIFF files in the input directory
-            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.*", SearchOption.TopDirectoryOnly);
-            foreach (string filePath in tiffFiles)
-            {
-                // Process only .tif and .tiff extensions
-                string extension = Path.GetExtension(filePath).ToLowerInvariant();
-                if (extension != ".tif" && extension != ".tiff")
-                    continue;
+            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
+            // Also include *.tiff files
+            string[] tiffFilesAlt = Directory.GetFiles(inputDirectory, "*.tiff");
+            string[] allTiffFiles = new string[tiffFiles.Length + tiffFilesAlt.Length];
+            tiffFiles.CopyTo(allTiffFiles, 0);
+            tiffFilesAlt.CopyTo(allTiffFiles, tiffFiles.Length);
 
-                // Verify the input file exists
-                if (!File.Exists(filePath))
+            foreach (string inputPath in allTiffFiles)
+            {
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load the TIFF image
-                using (Image image = Image.Load(filePath))
+                // Build output PDF path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the TIFF image, adjust contrast, and save as PDF
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to TiffImage to access AdjustContrast
                     TiffImage tiffImage = (TiffImage)image;
 
-                    // Increase contrast (value in range [-100, 100])
+                    // Increase contrast by 50 (range -100 to 100)
                     tiffImage.AdjustContrast(50f);
 
-                    // Build the output PDF path (same file name, .pdf extension)
-                    string outputFileName = Path.GetFileNameWithoutExtension(filePath) + ".pdf";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                    // Ensure the output directory for this file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save as PDF using PdfOptions
-                    tiffImage.Save(outputPath, new PdfOptions());
+                    // Save as PDF using default PDF options
+                    PdfOptions pdfOptions = new PdfOptions();
+                    tiffImage.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -63,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system needs to batch‑convert scanned radiology TIFF files into high‑contrast PDFs for easier review by clinicians.
- * 2. When an archival project must enhance the readability of historical document scans stored as TIFFs and generate searchable PDF versions for a digital library.
- * 3. When a printing workflow requires automatically increasing the contrast of product catalog TIFF images before creating PDF proofs for quality control.
- * 4. When a legal firm wants to preprocess large sets of TIFF‑based evidence photos by boosting contrast and packaging them as PDFs for courtroom presentation.
- * 5. When a GIS application needs to prepare satellite TIFF tiles with improved contrast and export them as PDFs for inclusion in mapping reports.
+ * 1. When a medical imaging department needs to batch‑convert scanned DICOM‑derived TIFF radiographs into high‑contrast PDF reports for easier review and archiving.
+ * 2. When a legal firm must process thousands of scanned contract pages stored as TIFF files, boost their readability by increasing contrast, and generate searchable PDF documents for case management.
+ * 3. When a publishing house automates the preparation of legacy manuscript scans in TIFF format, enhancing contrast to improve OCR accuracy before saving each page as a PDF for digital distribution.
+ * 4. When a construction company wants to quickly improve the visibility of blueprint scans saved as TIFF files and bundle them into PDF files for on‑site tablet viewing.
+ * 5. When a government agency archives historical maps stored as TIFF images, applies a uniform contrast enhancement, and converts them to PDF to ensure consistent presentation across public portals.
  */

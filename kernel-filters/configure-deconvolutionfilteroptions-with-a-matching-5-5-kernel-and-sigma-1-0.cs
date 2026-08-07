@@ -7,35 +7,30 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.png";
-        string outputPath = "output.png";
+        string inputPath = "input/input.png";
+        string outputPath = "output/output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
-                // Apply Deconvolution filter with 5x5 kernel and sigma 1.0
-                raster.Filter(
-                    raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 1.0)
-                );
+                // Configure Deconvolution filter with 5x5 kernel and sigma 1.0
+                var deconvOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions();
+                deconvOptions.Size = 5;   // 5x5 kernel
+                deconvOptions.Sigma = 1.0; // sigma value
 
-                // Save the result as PNG
+                raster.Filter(raster.Bounds, deconvOptions);
                 raster.Save(outputPath, new PngOptions());
             }
         }
@@ -48,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to restore sharpness in a blurred PNG photograph by applying a 5×5 deconvolution filter with sigma 1.0 using Aspose.Imaging in C#.
- * 2. When a C# application must automatically enhance scanned documents saved as PNG files by reducing motion blur before OCR processing.
- * 3. When an image‑processing service requires batch deblurring of PNG assets uploaded by users, using a fixed 5×5 kernel and sigma 1.0 for consistent results.
- * 4. When a developer wants to integrate a simple deconvolution step into a .NET workflow that loads an image, applies a Gauss‑Wiener filter, and saves the cleaned output as PNG.
- * 5. When a desktop utility needs to improve the visual quality of low‑light PNG images by applying a 5×5 deconvolution filter with sigma 1.0 without manually adjusting parameters.
+ * 1. When a developer needs to sharpen a scanned document PNG by reducing blur caused by camera shake, they can apply a 5×5 Gauss‑Wiener deconvolution filter with sigma 1.0 before saving the image.
+ * 2. When processing medical X‑ray PNG files that contain subtle noise, using a 5×5 kernel and sigma 1.0 deconvolution helps enhance edge details while preserving diagnostic information.
+ * 3. When preparing product photos for an e‑commerce website, a C# routine can deblur PNG images with a 5×5 deconvolution filter (sigma 1.0) to improve visual clarity without over‑sharpening.
+ * 4. When restoring old scanned photographs stored as PNG, applying a 5×5 Gauss‑Wiener filter with sigma 1.0 in Aspose.Imaging can reduce motion blur and make the image look cleaner.
+ * 5. When building an automated image‑processing pipeline that receives PNG uploads, developers can use the 5×5 kernel and sigma 1.0 deconvolution filter to standardize sharpness across all incoming files.
  */

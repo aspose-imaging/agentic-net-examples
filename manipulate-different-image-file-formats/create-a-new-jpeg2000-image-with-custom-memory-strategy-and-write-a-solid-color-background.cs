@@ -9,32 +9,28 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded output path
+        string outputPath = @"C:\Temp\output.jp2";
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Output file path (hard‑coded)
-            string outputPath = "output.jp2";
+            // Create JPEG2000 options with a custom memory buffer size (in MB)
+            Jpeg2000Options createOptions = new Jpeg2000Options();
+            createOptions.BufferSizeHint = 64; // Example: 64 MB buffer
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Create JPEG2000 options with a custom memory buffer hint
-            Jpeg2000Options options = new Jpeg2000Options();
-            options.BufferSizeHint = 10; // example value (in MB)
-
-            // Create a new JPEG2000 image of 200x200 pixels using the options
-            using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(200, 200, options))
+            // Create a new JPEG2000 image with the specified size and options
+            using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(200, 200, createOptions))
             {
-                // Obtain a graphics object for drawing
+                // Draw a solid color background
                 Graphics graphics = new Graphics(jpeg2000Image);
+                SolidBrush brush = new SolidBrush(Color.Blue);
+                graphics.FillRectangle(brush, jpeg2000Image.Bounds);
 
-                // Fill the entire image with a solid blue color
-                using (SolidBrush brush = new SolidBrush(Color.Blue))
-                {
-                    graphics.FillRectangle(brush, jpeg2000Image.Bounds);
-                }
-
-                // Save the image to the specified path using the same options
-                jpeg2000Image.Save(outputPath, options);
+                // Save the image to the output path
+                jpeg2000Image.Save(outputPath, new Jpeg2000Options());
             }
         }
         catch (Exception ex)
@@ -46,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a JPEG2000 file with a solid‑color background for a medical imaging workflow that requires low memory consumption, they can use this code to create a 200×200 blue image with a custom BufferSizeHint.
- * 2. When an application must produce placeholder images in JPEG2000 format for a web service that streams large image tiles, this snippet shows how to pre‑allocate memory and fill the tile with a uniform color.
- * 3. When a reporting tool has to embed a simple colored JPEG2000 logo into PDF documents without loading external assets, the code demonstrates creating the logo on the fly using Aspose.Imaging’s Graphics and SolidBrush classes.
- * 4. When a batch‑processing script needs to initialize a blank JPEG2000 canvas before adding vector graphics or annotations, the example provides a quick way to set up the canvas with a known background color and controlled memory usage.
- * 5. When a developer is testing the performance impact of different BufferSizeHint values while rendering JPEG2000 images, this example offers a reproducible scenario that creates and saves a solid‑color image for benchmarking.
+ * 1. When a developer needs to generate a high‑resolution JPEG2000 placeholder image with a uniform background for a web‑based document viewer while controlling memory usage.
+ * 2. When an application must create a JPEG2000 thumbnail of a specific size for a medical imaging system and wants to pre‑allocate a 64 MB buffer to avoid runtime memory spikes.
+ * 3. When a batch‑processing service creates blank JPEG2000 canvases with a solid color fill for later overlay of satellite data, using Aspose.Imaging in C#.
+ * 4. When a reporting tool programmatically produces JPEG2000 charts with a colored background and requires explicit buffer size hints to run efficiently on limited‑resource servers.
+ * 5. When a digital archiving solution needs to initialize empty JPEG2000 files with a predefined background color before embedding scanned documents, leveraging custom memory strategy in .NET.
  */

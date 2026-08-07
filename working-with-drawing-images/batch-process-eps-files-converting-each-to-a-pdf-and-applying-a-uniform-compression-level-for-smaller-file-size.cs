@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,46 +11,47 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputEps";
-            string outputDirectory = @"C:\OutputPdf";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
-            // Get all EPS files in the input directory
-            string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
-
-            foreach (string inputPath in epsFiles)
+            // Hard‑coded list of EPS files to process
+            string[] inputFiles = new string[]
             {
-                // Verify input file exists
+                @"C:\Images\sample1.eps",
+                @"C:\Images\sample2.eps"
+            };
+
+            foreach (string inputPath in inputFiles)
+            {
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue; // skip to next file
                 }
 
-                // Build output PDF path (same file name with .pdf extension)
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                // Build the output PDF path (same folder, .pdf extension)
+                string outputPath = Path.ChangeExtension(inputPath, ".pdf");
 
-                // Ensure the directory for the output file exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the EPS image
-                using (var image = (EpsImage)Image.Load(inputPath))
+                using (EpsImage image = (EpsImage)Image.Load(inputPath))
                 {
                     // Configure PDF options with uniform compression
                     var pdfOptions = new PdfOptions
                     {
                         PdfCoreOptions = new PdfCoreOptions
                         {
-                            Compression = PdfImageCompressionOptions.Flate // Uniform compression for smaller size
+                            Compression = PdfImageCompressionOptions.Flate
+                            // Optional: set compliance if required
+                            // PdfCompliance = PdfComplianceVersion.PdfA1b
                         }
                     };
 
-                    // Save as PDF
+                    // Save the image as PDF
                     image.Save(outputPath, pdfOptions);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -62,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design studio must convert dozens of EPS logo files into PDF portfolios while applying uniform Flate compression to reduce download size.
- * 2. When an engineering firm needs to automate the transformation of EPS schematics into compressed PDFs for inclusion in digital manuals.
- * 3. When a marketing department wants to batch‑process EPS advertisements into PDF format for email campaigns, ensuring each PDF is optimally compressed for faster delivery.
- * 4. When a legal office requires a script to turn EPS evidence images into PDF documents with consistent compression to meet file‑size limits for electronic filing.
- * 5. When a cloud‑based document management system must ingest a folder of EPS assets and store them as compressed PDFs for archival and quick preview.
+ * 1. When a publishing workflow requires converting a batch of vector EPS artwork into searchable PDF documents while applying Flate compression to reduce file size.
+ * 2. When an e‑commerce platform needs to automatically transform product design EPS files into PDF catalogs for customers, ensuring consistent compression across all files.
+ * 3. When a legal document management system must archive engineering drawings originally stored as EPS by converting them to PDF/A‑compatible PDFs with uniform compression for long‑term storage.
+ * 4. When a desktop application processes user‑uploaded EPS logos and generates compressed PDF previews for quick download without manual intervention.
+ * 5. When a CI/CD pipeline for a print‑on‑demand service needs to validate and compress multiple EPS files into PDFs as part of the build step to guarantee size limits before printing.
  */

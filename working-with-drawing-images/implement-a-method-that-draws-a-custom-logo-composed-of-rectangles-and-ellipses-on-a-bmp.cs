@@ -3,51 +3,53 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded output path for the BMP logo
+        string outputPath = @"C:\temp\custom_logo.bmp";
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Output file path for the BMP logo
-            string outputPath = @"c:\temp\logo.bmp";
+            // Configure BMP options with a file source bound to the output path
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set BMP options (24 bits per pixel)
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
-            };
-
-            // Create a 400x400 BMP image
+            // Create a 400x400 image canvas
             using (Image image = Image.Create(bmpOptions, 400, 400))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Clear background with white color
+                // Clear background to white
                 graphics.Clear(Color.White);
 
-                // Pen for drawing outlines
-                Pen pen = new Pen(Color.DarkBlue, 4);
+                // Draw outer rectangle border
+                graphics.DrawRectangle(new Pen(Color.Black, 5), new Rectangle(10, 10, 380, 380));
 
-                // Draw outer rectangle
-                graphics.DrawRectangle(pen, 50, 50, 300, 300);
+                // Fill inner rectangle with light blue
+                using (SolidBrush rectBrush = new SolidBrush(Color.LightBlue))
+                {
+                    graphics.FillRectangle(rectBrush, new Rectangle(50, 50, 300, 300));
+                }
 
-                // Draw inner rectangle
-                graphics.DrawRectangle(pen, 100, 100, 200, 200);
+                // Draw a dark blue ellipse outline
+                graphics.DrawEllipse(new Pen(Color.DarkBlue, 3), new Rectangle(100, 100, 200, 200));
 
-                // Draw a centered ellipse inside the inner rectangle
-                graphics.DrawEllipse(pen, new Rectangle(100, 100, 200, 200));
+                // Fill a smaller yellow ellipse inside
+                using (SolidBrush ellipseBrush = new SolidBrush(Color.Yellow))
+                {
+                    graphics.FillEllipse(ellipseBrush, new Rectangle(150, 150, 100, 100));
+                }
 
-                // Draw a smaller ellipse at the top-left corner
-                graphics.DrawEllipse(pen, 70, 70, 80, 80);
-
-                // Save the image (file is already bound to the source)
+                // Save the image (bound to the file source)
                 image.Save();
             }
         }
@@ -60,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a simple company badge or watermark as a 24‑bit BMP file programmatically using C# and Aspose.Imaging.
- * 2. When an application must create placeholder graphics for UI mockups, such as a logo made of rectangles and ellipses, without relying on external design tools.
- * 3. When a batch process has to produce printable BMP assets for legacy hardware that only accepts bitmap images with specific dimensions and color depth.
- * 4. When a reporting service wants to embed a dynamically drawn emblem into exported BMP charts or dashboards generated on the fly.
- * 5. When a game or simulation requires runtime generation of simple vector‑based icons saved as BMP files for quick loading in low‑memory environments.
+ * 1. When a developer needs to generate a simple company logo as a 24‑bit BMP file using C# and Aspose.Imaging by programmatically drawing rectangles and ellipses.
+ * 2. When an application must create placeholder images with geometric shapes for testing image processing pipelines that expect BMP format and Graphics drawing operations.
+ * 3. When a reporting tool requires dynamic generation of badge icons with colored borders and inner shapes without relying on external image assets, using SolidBrush and Pen objects.
+ * 4. When a desktop utility needs to export custom graphics, such as a stylized emblem, directly to a file system path with FileCreateSource and BmpOptions.
+ * 5. When a developer wants to automate the production of printable symbols or watermarks composed of rectangles and ellipses for batch processing in .NET.
  */

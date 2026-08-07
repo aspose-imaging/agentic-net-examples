@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,23 +10,14 @@ class Program
     {
         try
         {
-            string inputDirectory = "InputSvgs";
-            string outputDirectory = "OutputPngs";
+            string inputFolder = @"C:\InputSvgs";
+            string outputFolder = @"C:\OutputPngs";
 
-            if (!Directory.Exists(inputDirectory))
-            {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add SVG files and rerun.");
-                return;
-            }
+            Directory.CreateDirectory(outputFolder);
 
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            string[] svgFiles = Directory.GetFiles(inputFolder, "*.svg");
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
-            foreach (string inputPath in files)
+            foreach (string inputPath in svgFiles)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -34,22 +25,15 @@ class Program
                     continue;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileName + ".png");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    var options = new PngOptions
-                    {
-                        VectorRasterizationOptions = new SvgRasterizationOptions
-                        {
-                            PageSize = image.Size
-                        }
-                    };
-                    image.Save(outputPath, options);
+                    image.Save(outputPath, new PngOptions());
                 }
-
-                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -61,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically convert a large collection of SVG icons into high‑quality 32‑bit PNG files for use on a website, they can use this C# batch‑processing code with Aspose.Imaging.
- * 2. When a build script must generate platform‑specific PNG assets from designer‑provided SVG files during continuous integration, this code provides a reliable way to rasterize the vectors and save them with correct dimensions.
- * 3. When a desktop application requires runtime conversion of user‑uploaded SVG graphics to PNG format for preview or printing, the example shows how to load, rasterize, and export each image using Aspose.Imaging in .NET.
- * 4. When a mobile app development team needs to create a set of PNG icons at exact pixel sizes from a master SVG library, the code demonstrates how to preserve the original SVG size while exporting to 32‑bit PNG.
- * 5. When an automated documentation generator must embed SVG diagrams as PNG images in PDF reports, this snippet can batch‑process the SVG files and produce PNG outputs compatible with the reporting engine.
+ * 1. When a developer needs to convert a large collection of SVG icons stored in a folder into high‑quality 32‑bit PNG files for use in a web application, they can use this batch conversion code.
+ * 2. When an automated build pipeline must generate raster PNG assets from source SVG graphics to ensure compatibility with legacy browsers, the script can process all files in one step.
+ * 3. When a design team exports vector icons from a design tool and wants a quick C# utility to create PNG thumbnails for documentation or UI mockups, this code handles the folder‑to‑folder conversion.
+ * 4. When a desktop application requires runtime conversion of user‑provided SVG files into PNG images for printing or PDF embedding, the loop can load each SVG and save it as a PNG on demand.
+ * 5. When a CI/CD process needs to validate that every SVG asset in a repository can be successfully rasterized without errors, the try‑catch block logs missing or corrupt files while converting them to PNG.
  */

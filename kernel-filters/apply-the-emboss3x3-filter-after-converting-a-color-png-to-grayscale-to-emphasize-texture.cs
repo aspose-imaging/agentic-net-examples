@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
 
@@ -12,10 +13,10 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input/sample.png";
-            string outputPath = "Output/sample_embossed.png";
+            string inputPath = "Input\\sample.png";
+            string outputPath = "Output\\sample_embossed.png";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -37,11 +38,9 @@ class Program
                 // Apply Emboss3x3 filter
                 raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-                // Save the processed image as PNG
-                using (PngOptions options = new PngOptions())
-                {
-                    raster.Save(outputPath, options);
-                }
+                // Save the result as PNG
+                PngOptions saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to convert a color PNG into a high‑contrast grayscale image and highlight surface details for a product catalog, they can use this code to apply the Emboss3x3 convolution filter.
- * 2. When building a C# desktop application that prepares scanned documents for OCR by emphasizing texture and removing color, the code shows how to load a PNG, grayscale it, and emboss it with Aspose.Imaging.
- * 3. When creating a web service that generates stylized thumbnails of user‑uploaded PNG photos, the developer can employ this snippet to produce a grayscale embossed preview that stands out visually.
- * 4. When automating a batch process that converts color PNG assets into grayscale textures for a game engine, the code demonstrates how to apply the Emboss3x3 filter to enhance depth perception.
- * 5. When developing a scientific imaging tool that needs to accentuate fine grain patterns in PNG microscopy images, the example provides the exact C# steps to grayscale the image and apply a 3×3 emboss convolution using Aspose.Imaging.
+ * 1. When a developer needs to generate a stylized preview of a product photo by converting a color PNG to grayscale and applying an Emboss3x3 filter to highlight surface texture for an e‑commerce catalog.
+ * 2. When a C# application must preprocess scanned PNG documents, turning them into grayscale and embossing them to enhance fine details before optical character recognition (OCR).
+ * 3. When a game asset pipeline requires converting colorful PNG textures to grayscale and adding an emboss effect to create height‑map‑like visuals for terrain shading.
+ * 4. When a medical imaging tool needs to emphasize subtle patterns in grayscale PNG X‑ray images by applying a convolution Emboss3x3 filter for better visual analysis.
+ * 5. When an automated reporting system generates embossed grayscale PNG charts to give printed reports a tactile‑look feel without using additional graphic software.
  */

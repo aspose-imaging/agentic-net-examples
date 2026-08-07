@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -9,33 +10,62 @@ class Program
     {
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output\\result.png";
+            // Hardcoded input and output paths
+            string backgroundPath = "background.jpg";
+            string overlayPath = "overlay.png";
+            string outputPath = "output.png";
 
-            if (!File.Exists(inputPath))
+            // Validate input files
+            if (!File.Exists(backgroundPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {backgroundPath}");
+                return;
+            }
+            if (!File.Exists(overlayPath))
+            {
+                Console.Error.WriteLine($"File not found: {overlayPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage background = (RasterImage)Image.Load(inputPath))
+            // Load background image into a memory stream
+            using (FileStream bgFileStream = File.OpenRead(backgroundPath))
+            using (MemoryStream bgMemoryStream = new MemoryStream())
             {
-                PngOptions overlayOptions = new PngOptions();
-                using (RasterImage overlay = (RasterImage)Image.Create(overlayOptions, 100, 100))
+                bgFileStream.CopyTo(bgMemoryStream);
+                bgMemoryStream.Position = 0;
+
+                // Load overlay image into a memory stream
+                using (FileStream ovFileStream = File.OpenRead(overlayPath))
+                using (MemoryStream ovMemoryStream = new MemoryStream())
                 {
-                    Color[] redPixels = new Color[100 * 100];
-                    for (int i = 0; i < redPixels.Length; i++)
+                    ovFileStream.CopyTo(ovMemoryStream);
+                    ovMemoryStream.Position = 0;
+
+                    // Load images from streams
+                    using (RasterImage background = (RasterImage)Image.Load(bgMemoryStream))
+                    using (RasterImage overlay = (RasterImage)Image.Load(ovMemoryStream))
                     {
-                        redPixels[i] = Color.Red;
+                        // Apply alpha blending (50% opacity)
+                        background.Blend(new Point(0, 0), overlay, 128);
+
+                        // Save blended image to output stream
+                        using (MemoryStream outputMemoryStream = new MemoryStream())
+                        {
+                            PngOptions pngOptions = new PngOptions();
+                            background.Save(outputMemoryStream, pngOptions);
+                            outputMemoryStream.Position = 0;
+
+                            // Write output stream to file
+                            using (FileStream outFileStream = new FileStream(outputPath, FileMode.Create))
+                            {
+                                outputMemoryStream.CopyTo(outFileStream);
+                            }
+                        }
                     }
-                    overlay.SavePixels(overlay.Bounds, redPixels);
-
-                    background.Blend(new Point(0, 0), overlay, 128);
                 }
-
-                background.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -47,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to overlay a semi‑transparent logo onto a PNG background image loaded from a stream and save the composited result to another stream for web delivery.
- * 2. When an application must programmatically generate a colored watermark (e.g., a red square) and blend it with an existing raster image using an alpha value of 128 before exporting to PNG.
- * 3. When a service processes uploaded user images, applies an alpha‑blended overlay to indicate a status badge, and writes the final image to a response stream without touching the file system.
- * 4. When a desktop tool creates a preview thumbnail by loading a source PNG into a RasterImage, blending a custom overlay, and streaming the output PNG to a memory buffer for further processing.
- * 5. When a batch job reads PNG files, adds a semi‑transparent overlay for branding, and writes the blended images directly to a network stream for storage in a cloud bucket.
+ * 1. When a web application needs to dynamically watermark a JPEG photo with a semi‑transparent PNG logo before sending it to the client, developers can load both images into memory streams, blend them with 50 % opacity, and stream the result back.
+ * 2. When generating product thumbnails that combine a base image with a promotional overlay (e.g., “Sale” badge) on the fly, the code lets you read the files into MemoryStream, apply alpha blending, and write the composited PNG to a response stream.
+ * 3. When an email service creates personalized newsletters and must embed a background picture with a translucent banner image, this approach uses Aspose.Imaging to blend the PNG overlay onto the JPEG background entirely in memory without temporary files.
+ * 4. When a desktop utility merges a user‑selected foreground PNG onto a scanned JPEG document, the developer can load both files into streams, blend them at 50 % opacity, and save the combined image to another stream for further processing.
+ * 5. When a cloud function processes uploaded images to add a semi‑transparent frame or border stored as a PNG overlay, the snippet demonstrates how to read the source and overlay from streams, perform alpha blending, and output the final PNG to a storage stream.
  */

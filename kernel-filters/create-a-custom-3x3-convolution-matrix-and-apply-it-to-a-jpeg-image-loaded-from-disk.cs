@@ -1,19 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.ImageOptions;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
             string inputPath = "input.jpg";
-            string outputPath = "output.jpg";
+            string outputPath = "output\\output.jpg";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,28 +23,27 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load JPEG image
-            using (JpegImage image = (JpegImage)Image.Load(inputPath))
+            // Load the JPEG image
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
-                RasterImage raster = (RasterImage)image;
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Define a custom 3x3 convolution kernel (sharpen example)
+                // Define a custom 3x3 convolution kernel (edge detection example)
                 double[,] kernel = new double[3, 3]
                 {
-                    { 0, -1, 0 },
-                    { -1, 5, -1 },
-                    { 0, -1, 0 }
+                    { -1, -1, -1 },
+                    { -1,  8, -1 },
+                    { -1, -1, -1 }
                 };
 
-                // Create filter options with the custom kernel
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                // Apply the custom convolution filter to the entire image
+                rasterImage.Filter(
+                    rasterImage.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
 
-                // Apply the filter to the entire image
-                raster.Filter(raster.Bounds, filterOptions);
-
-                // Save the processed image
-                image.Save(outputPath);
+                // Save the processed image as JPEG
+                JpegOptions jpegOptions = new JpegOptions();
+                rasterImage.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -56,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically sharpen a JPEG photograph in a .NET application using Aspose.Imaging’s custom 3×3 convolution filter.
- * 2. When an e‑commerce platform wants to automatically enhance uploaded product JPEG images by applying a custom kernel to improve visual clarity.
- * 3. When a desktop utility must batch‑process scanned JPEG documents to emphasize edges before OCR, using C# and Aspose.Imaging’s raster filter.
- * 4. When a server‑side service stores user‑generated JPEGs and requires on‑the‑fly image sharpening to reduce blur without relying on external tools.
- * 5. When a scientific imaging application needs to apply a custom convolution matrix to JPEG microscopy images for feature detection within a .NET workflow.
+ * 1. When a developer needs to detect edges in a JPEG photograph by applying a custom 3x3 convolution matrix for computer‑vision preprocessing.
+ * 2. When an application must enhance the contrast of scanned documents by running an edge‑detection filter on raster images loaded from disk.
+ * 3. When a photo‑editing tool requires applying a user‑defined convolution kernel to batch‑process JPEG files and save the results with specific JpegOptions.
+ * 4. When a C# service processes incoming image uploads and needs to perform real‑time edge detection before storing the processed JPEG in a server folder.
+ * 5. When a developer wants to experiment with custom image filters in Aspose.Imaging by loading a JPEG, applying a 3x3 kernel, and saving the transformed image to a new directory.
  */

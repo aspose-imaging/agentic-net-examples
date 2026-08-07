@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -10,7 +10,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output\\result.png";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -18,22 +18,29 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
 
             using (Image image = Image.Load(inputPath))
             {
-                if (image is IMultipageImage multipageImage)
+                IMultipageImage multipage = image as IMultipageImage;
+                if (multipage != null)
                 {
-                    foreach (Image page in multipageImage.Pages)
+                    for (int i = 0; i < multipage.PageCount; i++)
                     {
-                        if (page is RasterImage rasterPage)
+                        RasterImage page = multipage.Pages[i] as RasterImage;
+                        if (page != null)
                         {
-                            rasterPage.Filter(
-                                rasterPage.Bounds,
-                                new MotionWienerFilterOptions(5, 1.0, 90.0));
+                            page.Filter(page.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(5, 1.0, 90.0));
                         }
                     }
                 }
+
+                PngOptions saveOptions = new PngOptions();
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -45,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add a vertical motion blur effect to every frame of a multi‑page PNG (such as an animated scan) before publishing, this code iterates through each page, applies a size‑5 blur at a 90° angle, and saves the result.
- * 2. When processing a multi‑page PNG invoice that contains scanned pages, a developer can use this code to uniformly blur sensitive information on each page with a motion blur filter before archiving.
- * 3. When creating a stylized slideshow of PNG images where each slide should appear as if captured with camera shake, this C# snippet applies a consistent motion blur across all pages of the multi‑page PNG.
- * 4. When preparing a multi‑page PNG sprite sheet for a game and needing to simulate motion on every sprite, a developer can run this code to apply a 5‑pixel, 90‑degree motion blur to each raster page automatically.
- * 5. When automating the preprocessing of multi‑page PNG medical scans to reduce visual noise by adding a directional blur, this example shows how to loop through each page, apply the filter, and store the processed file.
+ * 1. When a developer needs to apply a vertical motion blur effect to every frame of a multi‑page PNG (such as an animated PNG) before saving it as a new PNG file using C# and Aspose.Imaging.
+ * 2. When an image‑processing pipeline must automatically enhance scanned document pages stored in a multi‑page PNG by adding a size‑5, 90‑degree motion blur to reduce scanning artifacts with Aspose.Imaging’s MotionWienerFilterOptions.
+ * 3. When a graphics application requires batch processing of layered PNG assets, applying a consistent motion blur filter across all layers (pages) in C# and then exporting the result with PngOptions.
+ * 4. When a developer is building a server‑side service that receives multi‑page PNG uploads, needs to uniformly blur each page for privacy or artistic effect, and must save the modified image using Aspose.Imaging’s Image.Load and Save methods.
+ * 5. When a .NET utility must iterate through each page of a multi‑page PNG, apply a 5‑pixel motion blur at a 90‑degree angle to simulate camera movement, and output the processed image while preserving the original PNG format.
  */

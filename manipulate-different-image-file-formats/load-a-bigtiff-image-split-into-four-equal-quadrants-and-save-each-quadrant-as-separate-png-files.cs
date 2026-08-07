@@ -2,61 +2,63 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
+        // Wrap the whole logic in a try-catch to handle unexpected errors gracefully
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\big.tif";
-            string outputDir = @"C:\Images\output";
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Images\bigimage.tif";
 
-            // Verify input file exists
+            string outputPathTopLeft     = @"C:\Images\quadrant_0.png";
+            string outputPathTopRight    = @"C:\Images\quadrant_1.png";
+            string outputPathBottomLeft  = @"C:\Images\quadrant_2.png";
+            string outputPathBottomRight = @"C:\Images\quadrant_3.png";
+
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
-
-            // Load the BigTIFF image
+            // Load the BigTIFF image using Aspose.Imaging.Image.Load (the standard load rule)
             using (Image image = Image.Load(inputPath))
             {
-                // Determine quadrant dimensions
-                int halfWidth = image.Width / 2;
+                // Determine half dimensions for quadrant calculation
+                int halfWidth  = image.Width / 2;
                 int halfHeight = image.Height / 2;
 
-                // Define bounds for each quadrant
-                var quadrants = new[]
-                {
-                    new { Name = "quadrant1.png", Bounds = new Rectangle(0, 0, halfWidth, halfHeight) },                     // Top‑Left
-                    new { Name = "quadrant2.png", Bounds = new Rectangle(halfWidth, 0, halfWidth, halfHeight) },            // Top‑Right
-                    new { Name = "quadrant3.png", Bounds = new Rectangle(0, halfHeight, halfWidth, halfHeight) },          // Bottom‑Left
-                    new { Name = "quadrant4.png", Bounds = new Rectangle(halfWidth, halfHeight, halfWidth, halfHeight) }   // Bottom‑Right
-                };
+                // Define the four quadrant rectangles
+                var rectTopLeft     = new Rectangle(0, 0, halfWidth, halfHeight);
+                var rectTopRight    = new Rectangle(halfWidth, 0, halfWidth, halfHeight);
+                var rectBottomLeft  = new Rectangle(0, halfHeight, halfWidth, halfHeight);
+                var rectBottomRight = new Rectangle(halfWidth, halfHeight, halfWidth, halfHeight);
 
-                // Prepare PNG save options
+                // Prepare PNG save options (default options are sufficient)
                 var pngOptions = new PngOptions();
 
-                // Save each quadrant
-                foreach (var q in quadrants)
-                {
-                    string outputPath = Path.Combine(outputDir, q.Name);
-                    // Ensure the directory for this output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Ensure output directories exist before each save
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPathTopLeft) ?? ".");
+                image.Save(outputPathTopLeft, pngOptions, rectTopLeft);
 
-                    // Save the specified region to a PNG file
-                    image.Save(outputPath, pngOptions, q.Bounds);
-                }
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPathTopRight) ?? ".");
+                image.Save(outputPathTopRight, pngOptions, rectTopRight);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPathBottomLeft) ?? ".");
+                image.Save(outputPathBottomLeft, pngOptions, rectBottomLeft);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPathBottomRight) ?? ".");
+                image.Save(outputPathBottomRight, pngOptions, rectBottomRight);
             }
         }
         catch (Exception ex)
         {
+            // Output any runtime exception message without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -64,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a GIS analyst needs to preview sections of a massive satellite BigTIFF raster by extracting four equal quadrants as lightweight PNG thumbnails for a web map.
- * 2. When a medical imaging system must break a high‑resolution pathology slide stored as BigTIFF into four smaller PNG tiles to display on a tablet without loading the full image.
- * 3. When a digital archivist wants to archive portions of a large scanned manuscript by saving each quadrant as separate PNG files for easier metadata tagging.
- * 4. When a printing workflow requires splitting a large‑format advertisement BigTIFF into four printable PNG sections to feed into separate print heads.
- * 5. When a machine‑learning pipeline needs to feed smaller PNG patches from a BigTIFF training image into a model, extracting the four quadrants to increase data diversity.
+ * 1. When a GIS analyst needs to break a massive BigTIFF satellite image into four smaller PNG tiles for faster web map rendering.
+ * 2. When a medical imaging system must extract the four quadrants of a high‑resolution pathology slide stored as a BigTIFF and save them as PNGs for separate diagnostic review.
+ * 3. When a digital archivist wants to split a large scanned manuscript saved in BigTIFF format into equal quadrants to create manageable PNG previews for online browsing.
+ * 4. When a game developer has a huge texture atlas in BigTIFF format and needs to divide it into four PNG quadrants to feed into the engine’s asset pipeline.
+ * 5. When an e‑commerce platform processes large product photographs stored as BigTIFF and needs to generate four PNG sections for targeted zoom‑in sections on the product page.
  */

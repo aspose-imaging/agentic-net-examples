@@ -11,7 +11,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output.png";
+            string outputPath = @"C:\Images\output_median.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,19 +20,18 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering methods
+                // Cast to RasterImage to use filtering capabilities
                 RasterImage rasterImage = (RasterImage)image;
 
-                // TODO: Perform background removal here if required
-                // Example placeholder: rasterImage.RemoveBackground();
+                // TODO: Insert background removal logic here if required
 
-                // Apply median filter with kernel size 3
+                // Apply a median filter with kernel size 3 to the whole image
                 rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(3));
 
                 // Save the processed image
@@ -48,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to clean up scanned PNG documents by removing the background and smoothing speckles before performing OCR.
- * 2. When an e‑commerce platform automatically processes product PNG images to eliminate noisy edges after background removal for a consistent catalog appearance.
- * 3. When a medical imaging application must reduce salt‑and‑pepper noise in PNG microscopy images after isolating the specimen from the slide background.
- * 4. When a game developer prepares PNG sprite sheets, stripping the background and applying a 3×3 median filter to ensure smooth animation frames.
- * 5. When a photo‑editing tool offers a batch operation that loads PNG files, removes the background, and applies a median filter with kernel size 3 to improve visual quality before saving.
+ * 1. When a developer needs to clean up scanned PNG documents by removing stray specks after extracting the foreground, they can use this code to apply a 3‑pixel median filter with Aspose.Imaging in C#.
+ * 2. When preparing product photos for an e‑commerce site, a programmer can remove the background and then smooth minor color noise in the resulting PNG using the median filter demonstrated above.
+ * 3. When converting hand‑drawn PNG sketches into a polished digital asset, the code helps smooth jagged edges caused by background subtraction by applying a 3×3 median filter.
+ * 4. When building an automated receipt‑processing pipeline, developers can load the PNG receipt, strip the background, and reduce isolated pixel artifacts with the median filter before OCR.
+ * 5. When creating a batch‑processing tool for medical imaging PNG files, the sample shows how to eliminate tiny background remnants after segmentation by applying a median filter with a kernel size of three.
  */

@@ -8,20 +8,21 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.bmp";
-        string outputPath = @"C:\Images\sample_progressive.jpg";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\sample_progressive.jpg";
 
+        // Ensure any runtime exception is reported cleanly
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
@@ -31,10 +32,10 @@ class Program
                 JpegOptions saveOptions = new JpegOptions
                 {
                     // Set progressive compression mode
-                    CompressionType = JpegCompressionMode.Progressive,
+                    CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
                     // Optional: set quality (1-100)
                     Quality = 90,
-                    // Preserve resolution
+                    // Preserve resolution (optional)
                     ResolutionSettings = new ResolutionSetting(96.0, 96.0),
                     ResolutionUnit = ResolutionUnit.Inch
                 };
@@ -42,12 +43,6 @@ class Program
                 // Save the image using the configured options
                 image.Save(outputPath, saveOptions);
             }
-
-            // Report file sizes to observe reduction
-            FileInfo originalInfo = new FileInfo(inputPath);
-            FileInfo compressedInfo = new FileInfo(outputPath);
-            Console.WriteLine($"Original size: {originalInfo.Length} bytes");
-            Console.WriteLine($"Compressed (progressive) size: {compressedInfo.Length} bytes");
         }
         catch (Exception ex)
         {
@@ -58,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating web‑optimized product photos, a developer can convert high‑resolution BMPs to progressive JPEGs with Aspose.Imaging to reduce download size while preserving visual quality.
- * 2. When building an email‑attachment service, a developer may need to shrink image payloads by saving attachments as progressive JPEGs to meet size limits.
- * 3. When creating a digital asset pipeline for a publishing platform, a developer can use progressive JPEG compression to lower storage costs and improve page‑load speed.
- * 4. When implementing a mobile app that uploads user‑generated screenshots, a developer can convert BMP screenshots to progressive JPEGs to minimize bandwidth usage.
- * 5. When preparing archival images for an online gallery, a developer can apply progressive JPEG compression to achieve smaller file sizes without sacrificing resolution and then compare original and compressed sizes programmatically.
+ * 1. A developer uses this code to convert high‑resolution BMP screenshots to progressive JPEGs for faster page loads on a website, reducing file size while maintaining visual quality.
+ * 2. When building an email marketing system, a programmer applies progressive JPEG compression to attached product images to keep email payloads small and ensure quick rendering in mail clients.
+ * 3. A mobile app developer generates progressive JPEG thumbnails from user‑uploaded photos to save bandwidth and storage on devices with limited resources.
+ * 4. In a digital asset management workflow, a C# service employs Aspose.Imaging to re‑encode archival BMP files as progressive JPEGs, achieving lower storage costs without losing detail.
+ * 5. A content management system (CMS) plugin automatically converts uploaded BMP graphics to progressive JPEG format using JpegOptions, optimizing images for SEO and improving page‑rank‑friendly load times.
  */

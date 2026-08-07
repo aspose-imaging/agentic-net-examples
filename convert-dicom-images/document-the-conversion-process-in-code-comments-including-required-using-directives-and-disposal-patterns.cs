@@ -8,36 +8,35 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Wrap the entire processing logic in a try-catch block to handle unexpected errors gracefully.
+        // Hardcoded input and output paths
+        string inputPath = Path.Combine("Input", "sample.jpg");
+        string outputPath = Path.Combine("Output", "sample.tif");
+
         try
         {
-            // Hardcoded input and output file paths (relative to the application directory).
-            string inputPath = "Input/sample.jpg";
-            string outputPath = "Output/sample.tif";
-
-            // Verify that the input file exists; if not, report and exit.
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists before attempting to save the file.
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image. The using statement ensures the image is disposed properly.
+            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Create TIFF export options. Here we use the default TIFF format.
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-                // Save the image in TIFF format using the specified options.
-                image.Save(outputPath, tiffOptions);
+                // Configure TIFF save options (using default format)
+                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+                {
+                    // Save the image as a TIFF file
+                    image.Save(outputPath, tiffOptions);
+                }
             }
         }
         catch (Exception ex)
         {
-            // Output any runtime exception message without crashing the application.
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -45,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive photographic assets in a lossless, industry‑standard format, they can convert JPEG files to TIFF using Aspose.Imaging for .NET.
- * 2. When a medical imaging application requires images to be stored as multi‑page TIFFs for compatibility with DICOM workflows, this code can be adapted to batch‑convert source JPEG scans.
- * 3. When a printing service must supply high‑resolution TIFF files to printers that do not accept JPEG, the conversion routine ensures the correct file format and color fidelity.
- * 4. When a document management system ingests user‑uploaded JPEG pictures but stores all documents as TIFF for long‑term preservation, developers can use this snippet to perform the format change on upload.
- * 5. When an e‑commerce platform generates product catalogs that need TIFF images for offline publishing or archival, the code provides a simple way to transform web‑optimized JPEGs into print‑ready TIFFs.
+ * 1. When a developer needs to convert user‑uploaded JPEG photos to lossless TIFF files for archival storage using C# and Aspose.Imaging.
+ * 2. When an application must ensure that image files are saved in a format compatible with printing workflows, such as converting JPEG to TIFF before sending to a print service.
+ * 3. When a document management system requires batch conversion of JPEG scans to TIFF files, and the code provides a simple per‑file conversion pattern.
+ * 4. When a medical imaging solution needs to transform diagnostic JPEG images into TIFF format to meet regulatory compliance and preserve image fidelity.
+ * 5. When a web service processes incoming image payloads and must store them as TIFF files on disk while handling missing files and directory creation gracefully.
  */

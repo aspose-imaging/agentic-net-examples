@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.html";
+        string outputPath = "output.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Temp\canvas.html";
-            string outputPath = @"C:\Temp\Result\canvas.jpg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,15 +23,26 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image from a file stream
+            // Load the HTML5 Canvas image from a file stream
             using (FileStream inputStream = File.OpenRead(inputPath))
             {
+                // Optional: verify that the stream can be loaded as an image
+                if (!Image.CanLoad(inputStream))
+                {
+                    Console.Error.WriteLine($"Cannot load image from: {inputPath}");
+                    return;
+                }
+
+                // Reset stream position after CanLoad check
+                inputStream.Position = 0;
+
+                // Load the image
                 using (Image image = Image.Load(inputStream))
                 {
-                    // Set JPEG save options (default settings)
-                    JpegOptions jpegOptions = new JpegOptions();
+                    // Prepare JPEG save options (default settings)
+                    var jpegOptions = new JpegOptions();
 
-                    // Save the image as JPEG
+                    // Save the image as JPEG to the specified output path
                     image.Save(outputPath, jpegOptions);
                 }
             }
@@ -45,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application generates charts on an HTML5 Canvas and needs to archive them as JPEG files on the server using C# and Aspose.Imaging.
- * 2. When a desktop utility processes user‑uploaded canvas.html files and converts them to JPEG thumbnails for preview in a file manager.
- * 3. When an automated reporting tool reads HTML5 Canvas images from a network share via a stream and saves them as JPEGs for inclusion in PDF reports.
- * 4. When a migration script converts legacy HTML5 Canvas assets stored in a database BLOB into JPEG files for a content management system.
- * 5. When a background service validates the existence of a canvas.html file, loads it from a stream, and stores a compressed JPEG version to reduce storage costs.
+ * 1. When a web application generates dynamic graphics on an HTML5 Canvas and needs to store them as JPEG files on the server using C# and Aspose.Imaging.
+ * 2. When a desktop utility processes uploaded HTML5 Canvas files from a file stream and converts them to JPEG for archival or printing purposes.
+ * 3. When an automated batch job scans a folder of .html canvas exports, validates each file, and saves them as JPEG images with default compression settings via Aspose.Imaging in .NET.
+ * 4. When a content management system receives canvas snapshots from browsers, loads them from a stream, and creates JPEG thumbnails for fast preview in a gallery.
+ * 5. When a developer wants to ensure the output directory exists, verify the input HTML5 Canvas can be loaded, and then convert the canvas to a JPEG using Image.Load and JpegOptions in a try‑catch block.
  */

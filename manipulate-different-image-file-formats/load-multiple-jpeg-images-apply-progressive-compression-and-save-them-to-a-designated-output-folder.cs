@@ -8,15 +8,14 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputFolder = @"C:\Images\Input";
+        string outputFolder = @"C:\Images\Output";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = @"C:\Images\Input";
-            string outputFolder = @"C:\Images\Output";
-
-            // Retrieve all JPEG files from the input folder
+            // Get all JPEG files in the input folder
             string[] inputFiles = Directory.GetFiles(inputFolder, "*.jpg");
-
             foreach (string inputPath in inputFiles)
             {
                 // Verify that the input file exists
@@ -26,31 +25,28 @@ class Program
                     return;
                 }
 
-                // Build the corresponding output file path
-                string fileName = Path.GetFileName(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileName);
+                // Prepare the output file path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_prog.jpg";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
 
-                // Ensure the output directory exists (unconditional per requirement)
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image
+                // Load the image, apply progressive JPEG compression, and save
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Configure progressive JPEG save options
                     JpegOptions saveOptions = new JpegOptions
                     {
                         CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
-                        Quality = 100
+                        Quality = 100 // Adjust quality as needed (1-100)
                     };
 
-                    // Save the image with the specified options
                     image.Save(outputPath, saveOptions);
                 }
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -58,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑process a folder of JPEG photos to create progressive JPEGs for faster web page loading using C# and Aspose.Imaging.
- * 2. When an e‑commerce platform must convert product images to progressive JPEG format to improve perceived loading speed on mobile browsers while preserving full quality.
- * 3. When a digital asset management system requires automated conversion of legacy JPEG files into progressive JPEGs for efficient storage and streaming in a .NET application.
- * 4. When a content delivery pipeline needs to generate progressive JPEG versions of marketing banners before uploading them to a CDN, using Image.Load and JpegOptions in C#.
- * 5. When a photo‑sharing website wants to re‑encode user‑uploaded JPEGs as progressive JPEGs in bulk to reduce bandwidth consumption without changing the original filenames, leveraging Aspose.Imaging’s JPEG compression mode.
+ * 1. When a developer needs to batch‑convert a folder of JPEG photos into progressive JPEGs to reduce page load times for a website, this code can automate the process using Aspose.Imaging for .NET.
+ * 2. When an e‑commerce platform must generate progressive JPEG thumbnails for product images to improve perceived loading speed on mobile devices, the sample shows how to load, compress, and save them in C#.
+ * 3. When a digital asset management system requires re‑encoding existing JPEG assets with progressive compression to meet archival standards, the code demonstrates bulk processing with JpegOptions.
+ * 4. When a photo‑sharing app wants to shrink bandwidth usage by converting user‑uploaded JPEGs to progressive format while preserving quality, this example illustrates the necessary file‑system and image‑processing steps.
+ * 5. When a developer is preparing a set of marketing banners for email campaigns and needs to ensure they are saved as progressive JPEGs for better compatibility with email clients, the snippet provides a ready‑to‑use C# solution.
  */

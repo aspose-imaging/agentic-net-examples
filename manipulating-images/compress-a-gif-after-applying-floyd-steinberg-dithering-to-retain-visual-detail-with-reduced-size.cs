@@ -9,9 +9,10 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.gif";
-        string outputPath = @"C:\temp\output_compressed.gif";
+        string inputPath = @"c:\temp\input.gif";
+        string outputPath = @"c:\temp\output.gif";
 
+        // Ensure any runtime exception is reported without crashing
         try
         {
             // Verify input file exists
@@ -21,28 +22,28 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to GifImage to access GIF‑specific methods
                 GifImage gifImage = (GifImage)image;
 
-                // Apply Floyd‑Steinberg dithering with an 8‑bit palette (256 colors)
-                gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
+                // Apply Floyd‑Steinberg dithering with a 4‑bit palette (16 colors)
+                gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 4, null);
 
-                // Configure GIF saving options for lossy compression
-                var saveOptions = new GifOptions
+                // Prepare GIF save options with lossy compression
+                GifOptions saveOptions = new GifOptions
                 {
                     // Enable palette correction for better visual quality
                     DoPaletteCorrection = true,
-                    // Set maximum pixel difference to trigger lossy compression (recommended 80)
+                    // Recommended lossy compression level
                     MaxDiff = 80
                 };
 
-                // Save the processed image with compression
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the processed GIF using the specified options
                 gifImage.Save(outputPath, saveOptions);
             }
         }
@@ -55,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce the file size of an animated GIF for faster web page loading while preserving visual detail, they can apply Floyd‑Steinberg dithering and lossy compression using Aspose.Imaging in C#.
- * 2. When preparing GIF assets for email newsletters where attachment size limits apply, this code lets you shrink the GIF by dithering to an 8‑bit palette and setting a MaxDiff threshold.
- * 3. When optimizing GIFs for mobile apps to minimize bandwidth consumption, a developer can use the example to apply palette correction and lossy compression before saving the image.
- * 4. When converting high‑resolution GIFs from a design tool into lightweight versions for social media sharing, the code demonstrates how to load, dither, and compress the GIF in a .NET environment.
- * 5. When building an automated image‑processing pipeline that archives GIFs with reduced storage cost, this snippet shows how to programmatically apply Floyd‑Steinberg dithering and configure GifOptions for efficient C# processing.
+ * 1. When a web developer wants to reduce the bandwidth of animated GIFs on a website while preserving visual detail, they can apply Floyd‑Steinberg dithering and lossy GIF compression using Aspose.Imaging for .NET.
+ * 2. When a mobile app needs to bundle animated icons that must stay under a strict file‑size limit, the code can shrink the GIF by dithering to a 4‑bit palette and setting MaxDiff for controlled quality loss.
+ * 3. When an e‑learning platform generates slide‑show animations from high‑resolution source GIFs, this routine ensures the output GIFs load faster by compressing them without noticeable color banding.
+ * 4. When a digital marketing tool creates personalized GIF banners from user‑uploaded images, the developer can use the sample to automatically optimize each GIF for email delivery.
+ * 5. When a game developer packages animated UI elements in a Unity project and wants to keep the asset bundle size low, they can run this code to dither and compress the GIFs before importing them.
  */

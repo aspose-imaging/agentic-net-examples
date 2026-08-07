@@ -1,5 +1,8 @@
 using System;
 using System.IO;
+using System.Linq;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -8,11 +11,11 @@ class Program
         try
         {
             // Hardcoded paths
-            string inputPath = "input.png";
+            string inputPath = "sample.png";
+            string outputMedianPath = "output_median.png";
             string outputSharpenPath = "output_sharpen.png";
-            string outputGaussianPath = "output_gaussian.png";
 
-            // Verify input exists
+            // Input validation
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -20,52 +23,42 @@ class Program
             }
 
             // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(outputSharpenPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputGaussianPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputMedianPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputSharpenPath) ?? ".");
 
-            // ---------- Sharpen Filter ----------
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            // Apply Median filter
+            using (Image image = Image.Load(inputPath))
             {
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+                raster.Save(outputMedianPath);
+            }
+
+            // Apply Sharpen filter
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
                 raster.Save(outputSharpenPath);
             }
 
-            // ---------- Gaussian Blur Filter ----------
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
-            {
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-                raster.Save(outputGaussianPath);
-            }
-
-            // Compute SHA256 hashes
-            string ComputeHash(string filePath)
-            {
-                using (var sha = System.Security.Cryptography.SHA256.Create())
-                {
-                    byte[] hashBytes = sha.ComputeHash(File.ReadAllBytes(filePath));
-                    return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
-                }
-            }
-
-            string sharpenHash = ComputeHash(outputSharpenPath);
-            string gaussianHash = ComputeHash(outputGaussianPath);
-
-            // Expected hash values (replace with actual expected hashes)
-            const string expectedSharpenHash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
-            const string expectedGaussianHash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
-
-            // Compare and report
-            if (sharpenHash == expectedSharpenHash)
-                Console.WriteLine("Sharpen filter output matches expected hash.");
+            // Compute simple hash for Median output
+            long medianHash = File.ReadAllBytes(outputMedianPath)
+                                 .Aggregate(0L, (acc, b) => acc * 31 + b);
+            long expectedMedianHash = 1234567890L; // replace with actual expected value
+            if (medianHash != expectedMedianHash)
+                Console.WriteLine($"Median filter hash mismatch: {medianHash}");
             else
+                Console.WriteLine("Median filter output matches expected hash.");
+
+            // Compute simple hash for Sharpen output
+            long sharpenHash = File.ReadAllBytes(outputSharpenPath)
+                                  .Aggregate(0L, (acc, b) => acc * 31 + b);
+            long expectedSharpenHash = 987654321L; // replace with actual expected value
+            if (sharpenHash != expectedSharpenHash)
                 Console.WriteLine($"Sharpen filter hash mismatch: {sharpenHash}");
-
-            if (gaussianHash == expectedGaussianHash)
-                Console.WriteLine("Gaussian blur filter output matches expected hash.");
             else
-                Console.WriteLine($"Gaussian blur filter hash mismatch: {gaussianHash}");
+                Console.WriteLine("Sharpen filter output matches expected hash.");
         }
         catch (Exception ex)
         {
@@ -76,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create an automated integration test that verifies the Aspose.Imaging sharpen filter produces the exact same PNG output across different build environments by comparing SHA‑256 hashes.
- * 2. When a CI/CD pipeline must confirm that a recent upgrade of Aspose.Imaging does not change the visual result of a Gaussian blur operation on a PNG file, using hash comparison as a regression guard.
- * 3. When a quality‑assurance team wants to ensure that image preprocessing for a machine‑learning model consistently applies both sharpening and blur filters before training, and they validate the processed images with cryptographic hashes.
- * 4. When a developer is building a cross‑platform image‑processing service that must guarantee identical PNG outputs for sharpened and blurred assets, and they use integration tests with SHA‑256 to detect any deviation.
- * 5. When a software vendor needs to certify that their document‑to‑image conversion workflow applies the correct filter settings (radius 5, sigma 4.0) and produces reproducible PNG results, verified by comparing expected hash values in automated tests.
+ * 1. When a developer needs to verify that applying a 5‑pixel Median filter to a PNG image using Aspose.Imaging produces a consistent output across builds, they can run an integration test that saves the filtered image and compares its hash to an expected value.
+ * 2. When a CI pipeline must ensure that the Sharpen filter with radius 5 and strength 4.0 does not introduce regressions in raster image processing, the test can generate “output_sharpen.png” and validate its hash against a known checksum.
+ * 3. When a team wants to confirm that file‑system handling (checking file existence, creating output directories) works correctly together with image loading and saving in a .NET application, they can use this code as an integration test scenario.
+ * 4. When quality assurance requires automated verification that both Median and Sharpen filters produce identical results on the same source image after code refactoring, the hash comparison approach provides a quick, language‑agnostic validation.
+ * 5. When a developer is building a cross‑platform image‑processing service and needs to guarantee that the binary output of filtered PNG files remains unchanged after deployment, they can embed this hash‑based test into their unit‑test suite.
  */

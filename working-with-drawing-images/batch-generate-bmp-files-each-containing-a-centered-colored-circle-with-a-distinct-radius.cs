@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
@@ -11,51 +12,48 @@ class Program
     {
         try
         {
-            // Define image dimensions
+            // Output folder for generated BMP files
+            string outputFolder = @"C:\Temp\Circles";
+            Directory.CreateDirectory(outputFolder);
+
             int canvasWidth = 200;
             int canvasHeight = 200;
 
-            // Define radii and corresponding colors for each BMP
-            int[] radii = new int[] { 20, 40, 60 };
-            Color[] colors = new Color[] { Color.Red, Color.Green, Color.Blue };
+            // Define distinct radii and corresponding colors
+            var radii = new List<int> { 20, 40, 60 };
+            var colors = new List<Color> { Color.Red, Color.Green, Color.Blue };
 
-            for (int i = 0; i < radii.Length; i++)
+            for (int i = 0; i < radii.Count; i++)
             {
                 int radius = radii[i];
                 Color fillColor = colors[i];
 
-                // Output file path (hardcoded)
-                string outputPath = $"output_{radius}.bmp";
+                string outputPath = Path.Combine(outputFolder, $"circle_{radius}.bmp");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-                // Create BMP options with bound file source
+                // Create BMP options with bound output file
                 BmpOptions bmpOptions = new BmpOptions();
                 bmpOptions.Source = new FileCreateSource(outputPath, false);
-                bmpOptions.BitsPerPixel = 24;
 
-                // Create the image canvas bound to the output file
-                using (Image canvas = Image.Create(bmpOptions, canvasWidth, canvasHeight))
+                using (Image image = Image.Create(bmpOptions, canvasWidth, canvasHeight))
                 {
-                    // Clear background to white
-                    Graphics graphics = new Graphics(canvas);
+                    Graphics graphics = new Graphics(image);
                     graphics.Clear(Color.White);
 
-                    // Calculate centered rectangle for the circle
+                    // Calculate rectangle that bounds the centered circle
+                    int centerX = canvasWidth / 2;
+                    int centerY = canvasHeight / 2;
+                    int rectX = centerX - radius;
+                    int rectY = centerY - radius;
                     int diameter = radius * 2;
-                    int offsetX = (canvasWidth - diameter) / 2;
-                    int offsetY = (canvasHeight - diameter) / 2;
-                    Rectangle circleBounds = new Rectangle(offsetX, offsetY, diameter, diameter);
 
-                    // Fill the circle with the specified color
                     using (SolidBrush brush = new SolidBrush(fillColor))
                     {
-                        graphics.FillEllipse(brush, circleBounds);
+                        graphics.FillEllipse(brush, new Rectangle(rectX, rectY, diameter, diameter));
                     }
 
                     // Save the bound image
-                    canvas.Save();
+                    image.Save();
                 }
             }
         }
@@ -68,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a set of BMP icons representing status indicators (e.g., low, medium, high) with different colored circles for a Windows desktop application.
- * 2. When a game developer wants to generate placeholder sprite sheets in BMP format containing centered colored circles of varying radii for testing collision detection logic.
- * 3. When an automation script must produce printable BMP markers with specific radii and colors for labeling components on a PCB layout.
- * 4. When a data‑visualization tool requires pre‑rendered BMP symbols of different sizes and hues to annotate points on a static map image.
- * 5. When a quality‑control system needs to batch create BMP test patterns with centered circles to verify scanner calibration across multiple resolutions.
+ * 1. When a developer needs to create a set of placeholder icons in BMP format for a Windows desktop application, each showing a centered colored circle of different size to represent status levels.
+ * 2. When generating test images for automated visual regression testing of image processing pipelines, using C# and Aspose.Imaging to produce BMP files with circles of varying radii and colors.
+ * 3. When preparing sample assets for a tutorial on drawing shapes with the Aspose.Imaging Graphics API, requiring multiple BMP files that illustrate how FillEllipse works with different radii and fill colors.
+ * 4. When building a batch job that creates printable calibration targets in BMP format, where each target is a centered colored circle of a specific radius to verify printer scaling.
+ * 5. When exporting data points as simple visual markers in BMP files for integration with legacy systems that only accept bitmap images, using C# to draw circles of distinct sizes and colors for each data category.
  */

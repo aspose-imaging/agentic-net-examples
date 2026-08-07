@@ -8,11 +8,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "template.png";
+        string outputPath = "output/output.png";
+
         try
         {
-            string inputPath = "input/template.png";
-            string outputPath = "output/result.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,28 +27,29 @@ class Program
 
                 double[,] kernel = new double[,]
                 {
-                    { 0, 1, 0 },
-                    { 1, 4, 1 },
-                    { 0, 1, 0 }
+                    { 0, -1, 0 },
+                    { -1, 5, -1 },
+                    { 0, -1, 0 }
                 };
 
                 double sum = 0;
-                foreach (double v in kernel) sum += v;
-                if (sum != 0)
+                foreach (double v in kernel)
+                    sum += v;
+                if (sum == 0) sum = 1;
+
+                double[,] normalizedKernel = new double[3, 3];
+                for (int i = 0; i < 3; i++)
                 {
-                    for (int i = 0; i < kernel.GetLength(0); i++)
+                    for (int j = 0; j < 3; j++)
                     {
-                        for (int j = 0; j < kernel.GetLength(1); j++)
-                        {
-                            kernel[i, j] /= sum;
-                        }
+                        normalizedKernel[i, j] = kernel[i, j] / sum;
                     }
                 }
 
-                ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel, 1.0, 0);
+                var filterOptions = new ConvolutionFilterOptions(normalizedKernel, 1.0, 0);
                 raster.Filter(raster.Bounds, filterOptions);
 
-                PngOptions saveOptions = new PngOptions();
+                var saveOptions = new PngOptions();
                 raster.Save(outputPath, saveOptions);
             }
         }
@@ -61,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to sharpen a PNG template by applying a custom normalized convolution kernel before embedding it in a web page, this C# Aspose.Imaging code provides a quick solution.
- * 2. When an e‑commerce platform wants to enhance product label images by applying a consistent blur‑sharpen filter to PNG assets during batch processing, the code can be used to load, filter, and save each image.
- * 3. When a medical imaging application must preprocess PNG scans with a custom edge‑enhancement kernel to improve visual clarity before analysis, the example demonstrates how to normalize the kernel and apply it with Aspose.Imaging.
- * 4. When a game developer wants to dynamically adjust the visual style of UI icons stored as PNG files by applying a custom convolution filter at runtime, this snippet shows the necessary C# operations.
- * 5. When an automated reporting tool generates PNG charts and needs to apply a uniform smoothing filter to reduce noise before exporting the final image, the code illustrates the complete load‑filter‑save workflow.
+ * 1. When a developer needs to sharpen a PNG logo by applying a custom convolution kernel to enhance edges before embedding it in a web page.
+ * 2. When an e‑commerce platform wants to automatically improve product thumbnail clarity by loading a PNG template, normalizing a sharpening filter, and saving the processed image.
+ * 3. When a desktop application generates printable certificates and must apply a custom image filter to the background PNG to ensure crisp text rendering.
+ * 4. When a game developer preprocesses sprite sheets in PNG format, applying a normalized convolution filter to boost contrast without altering the file size.
+ * 5. When a medical imaging tool prepares PNG scans for analysis by applying a custom kernel to emphasize details while preserving the original dimensions.
  */

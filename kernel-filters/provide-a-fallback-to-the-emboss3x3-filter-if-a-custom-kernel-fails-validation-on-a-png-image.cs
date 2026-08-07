@@ -13,7 +13,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output\\result.png";
+            string outputPath = "output.png";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -28,31 +28,42 @@ class Program
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage for filtering
                 RasterImage raster = (RasterImage)image;
 
-                // Attempt to apply a custom convolution kernel
+                // Define a custom 3x3 kernel (example)
                 double[,] customKernel = new double[,]
                 {
-                    { 0, -1, 0 },
-                    { -1, 5, -1 },
-                    { 0, -1, 0 }
+                    { -1, 0, 1 },
+                    { -2, 0, 2 },
+                    { -1, 0, 1 }
                 };
 
+                bool customApplied = false;
+
+                // Attempt to apply the custom kernel
                 try
                 {
-                    var customOptions = new ConvolutionFilterOptions(customKernel);
-                    raster.Filter(raster.Bounds, customOptions);
+                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(customKernel));
+                    customApplied = true;
                 }
                 catch (Exception)
                 {
-                    // Fallback to built‑in Emboss3x3 filter if custom kernel fails
-                    var fallbackOptions = new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3);
-                    raster.Filter(raster.Bounds, fallbackOptions);
+                    // Fallback to Emboss3x3 filter if custom kernel fails
+                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
                 }
 
-                // Save the processed image as PNG
-                var saveOptions = new PngOptions();
-                raster.Save(outputPath, saveOptions);
+                // Prepare PNG save options
+                PngOptions options = new PngOptions
+                {
+                    // Example: set maximum compression
+                    CompressionLevel = 9,
+                    // Use adaptive filter for better compression
+                    FilterType = Aspose.Imaging.FileFormats.Png.PngFilterType.Adaptive
+                };
+
+                // Save the processed image
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -64,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photo‑editing desktop app lets users upload a PNG and apply a custom sharpening kernel, but the kernel dimensions are invalid, the code automatically falls back to the built‑in Emboss3x3 filter to ensure the image is still processed.
- * 2. When an automated batch‑processing service reads PNG files from a folder and attempts to enhance them with a user‑defined convolution matrix, the fallback guarantees that each file is saved even if the matrix fails validation.
- * 3. When a web API receives a PNG payload and tries to apply a custom edge‑detection kernel, the fallback to Emboss3x3 prevents the request from failing due to malformed kernel data.
- * 4. When a mobile‑to‑desktop synchronization tool converts PNG screenshots and attempts to apply a custom contrast‑boost kernel, the code ensures a graceful fallback to Emboss3x3 if the kernel is out of the allowed value range.
- * 5. When a scientific imaging pipeline processes PNG microscopy images with a custom convolution filter for noise reduction, the fallback to Emboss3x3 maintains workflow continuity when the custom kernel does not meet Aspose.Imaging validation rules.
+ * 1. When a web application needs to apply a user‑defined edge‑detecting convolution to uploaded PNG photos but must guarantee a result even if the kernel is invalid, the code falls back to the built‑in Emboss3x3 filter.
+ * 2. When an automated batch job processes thousands of PNG assets and a custom sharpening kernel may be corrupted, the fallback ensures each image still receives a visual enhancement without stopping the pipeline.
+ * 3. When a desktop C# tool lets designers experiment with custom 3×3 kernels on PNG graphics, the fallback to Emboss3x3 provides a safe preview when the entered matrix fails Aspose.Imaging validation.
+ * 4. When a server‑side image‑processing service validates incoming kernel data for security and, upon rejection, needs to return a consistently embossed PNG to maintain UI layout.
+ * 5. When integrating Aspose.Imaging into a CI/CD workflow that applies custom convolution filters to PNG screenshots, the fallback guarantees the build does not fail if the kernel definition is malformed.
  */

@@ -1,33 +1,29 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    // Simple progress reporter that writes percentage to console
-    class ConsoleProgress : IProgress<double>
-    {
-        public void Report(double value)
-        {
-            Console.WriteLine($"Progress: {value:0.##}%");
-        }
-    }
-
     static void Main()
     {
         // Hardcoded input and output directories
-        string inputDirectory = @"C:\DicomInput";
-        string outputDirectory = @"C:\PngOutput";
+        string inputDirectory = @"C:\InputDicom";
+        string outputDirectory = @"C:\OutputPng";
 
-        // Create progress reporter
-        var progress = new ConsoleProgress();
+        // Progress reporter that writes percentage to console
+        IProgress<double> progress = new Progress<double>(p =>
+        {
+            Console.WriteLine($"Progress: {p:F2}%");
+        });
 
         try
         {
             // Get all DICOM files in the input directory
             string[] dicomFiles = Directory.GetFiles(inputDirectory, "*.dcm");
+
             int totalFiles = dicomFiles.Length;
             if (totalFiles == 0)
             {
@@ -39,38 +35,38 @@ class Program
             {
                 string inputPath = dicomFiles[i];
 
-                // Verify input file exists
+                // Input file existence check
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load DICOM image from file stream
-                using (FileStream stream = File.OpenRead(inputPath))
-                using (DicomImage dicomImage = new DicomImage(stream))
+                // Load the DICOM image
+                using (var dicomImage = (DicomImage)Image.Load(inputPath))
                 {
                     // Process each page of the DICOM image
-                    foreach (DicomPage page in dicomImage.DicomPages)
+                    foreach (var dicomPage in dicomImage.DicomPages)
                     {
-                        // Build output PNG file path
-                        string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}.{page.Index}.png";
+                        // Build output file name: originalname_pageIndex.png
+                        string baseName = Path.GetFileNameWithoutExtension(inputPath);
+                        string outputFileName = $"{baseName}_{dicomPage.Index}.png";
                         string outputPath = Path.Combine(outputDirectory, outputFileName);
 
                         // Ensure output directory exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                         // Save page as PNG
-                        page.Save(outputPath, new PngOptions());
+                        dicomPage.Save(outputPath, new PngOptions());
                     }
                 }
 
                 // Report progress after each file
-                double percent = ((i + 1) / (double)totalFiles) * 100.0;
+                double percent = ((i + 1) * 100.0) / totalFiles;
                 progress.Report(percent);
             }
 
-            Console.WriteLine("Batch conversion completed successfully.");
+            Console.WriteLine("Batch conversion completed.");
         }
         catch (Exception ex)
         {
@@ -81,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology department needs to convert a large batch of DICOM scans into PNG thumbnails for quick web preview, the code can process each file and report conversion progress.
- * 2. When a medical research project must archive thousands of DICOM images as lossless PNG files while monitoring the operation’s status in the console, this example provides a ready‑to‑use solution.
- * 3. When a healthcare IT team wants to automate nightly conversion of DICOM files from a PACS folder to PNG for downstream analytics and needs real‑time percentage feedback, the IProgress implementation handles it.
- * 4. When a developer builds a desktop utility that lets users select an input folder of DICOM images and outputs PNGs with page numbers, the progress reporter keeps users informed about the batch processing.
- * 5. When integrating Aspose.Imaging into a C# workflow that extracts each DICOM page and saves it as a separate PNG file, the code’s progress reporting helps detect stalls or errors during large‑scale image conversion.
+ * 1. When a medical imaging application must batch‑convert DICOM scans to PNG thumbnails for web preview and display conversion progress to the user.
+ * 2. When a radiology research pipeline needs to export multi‑frame DICOM series as individual PNG files for machine‑learning preprocessing while providing real‑time percentage feedback.
+ * 3. When a hospital IT system automates nightly archiving of DICOM studies to PNG format for integration with electronic health record viewers and requires monitoring of the batch status.
+ * 4. When a diagnostic device manufacturer builds a C# utility that extracts each DICOM page, saves it as a PNG with the page index, and reports progress to a console or UI logger.
+ * 5. When a cloud‑based image processing service processes incoming DICOM files, converts them to PNG for downstream analysis, and uses IProgress<double> to update a progress bar in a monitoring dashboard.
  */

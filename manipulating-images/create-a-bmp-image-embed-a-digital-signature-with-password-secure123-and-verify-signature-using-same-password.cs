@@ -1,9 +1,7 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,30 +9,36 @@ class Program
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = "output.bmp";
+            // Define output path (ensure it includes a directory)
+            string outputPath = "output\\signed.bmp";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a file source bound to the output path
-            Source source = new FileCreateSource(outputPath, false);
-
-            // BMP save options with the source
-            BmpOptions options = new BmpOptions() { Source = source };
-
-            // Create a 200x200 BMP canvas (minimum size requirement)
-            using (RasterImage canvas = (RasterImage)Image.Create(options, 200, 200))
+            // Create a BMP image of size 200x200 (minimum for digital signature)
+            using (BmpImage bmpImage = new BmpImage(200, 200))
             {
-                // Embed digital signature with the specified password
-                canvas.EmbedDigitalSignature("Secure123");
+                // Fill the image with a simple gradient
+                int width = bmpImage.Width;
+                int height = bmpImage.Height;
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        int hue = (255 * x) / width;
+                        bmpImage.SetPixel(x, y, Color.FromArgb(255, hue, 0, 0));
+                    }
+                }
 
-                // Save the bound image
-                canvas.Save();
+                // Embed digital signature with password "Secure123"
+                bmpImage.EmbedDigitalSignature("Secure123");
 
-                // Verify the digital signature using the same password
-                bool isSigned = canvas.IsDigitalSigned("Secure123");
-                Console.WriteLine($"Signature valid: {isSigned}");
+                // Verify the signature using the same password
+                bool isSigned = bmpImage.IsDigitalSigned("Secure123");
+                Console.WriteLine($"Digital signature embedded: {isSigned}");
+
+                // Save the signed BMP image
+                bmpImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -46,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must generate a BMP thumbnail for a document management system and ensure its authenticity by embedding a password‑protected digital signature.
- * 2. When an application needs to create a secure BMP watermark for legal contracts, embedding a signature that can be later verified with the same password.
- * 3. When a C# service produces BMP icons for software installers and wants to prevent tampering by signing the image with a known passphrase.
- * 4. When a forensic tool requires generating a BMP evidence image and embedding a digital signature to guarantee chain‑of‑custody integrity.
- * 5. When a desktop utility saves user‑drawn BMP graphics and needs to later confirm that the file has not been altered by checking the embedded signature with the original password.
+ * 1. When a developer needs to generate a BMP thumbnail for a document management system and ensure its authenticity by embedding a password‑protected digital signature using Aspose.Imaging for .NET.
+ * 2. When a C# application must create a simple gradient BMP image for a UI preview and protect it against tampering by adding and later verifying a digital signature with a known password.
+ * 3. When an automated reporting tool has to produce BMP charts that can be validated later by auditors, embedding a secure signature with the password “Secure123” and checking it before distribution.
+ * 4. When a software solution stores BMP icons in a shared folder and wants to guarantee that only authorized users can confirm the image’s integrity by verifying the embedded digital signature in C#.
+ * 5. When a developer is building a compliance‑focused image processing pipeline that creates BMP files, embeds a password‑protected digital signature, and programmatically verifies the signature before archiving the files.
  */

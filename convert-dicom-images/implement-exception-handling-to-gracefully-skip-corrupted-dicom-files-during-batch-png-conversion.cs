@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.CoreExceptions.ImageFormats;
 
 class Program
@@ -9,49 +10,55 @@ class Program
     static void Main()
     {
         // Hardcoded input and output directories
-        string inputDir = @"C:\InputDicom";
-        string outputDir = @"C:\OutputPng";
+        string inputDirectory = @"C:\InputDicom";
+        string outputDirectory = @"C:\OutputPng";
 
         try
         {
-            // Get all DICOM files in the input directory
-            string[] dicomFiles = Directory.GetFiles(inputDir, "*.dcm");
+            // Ensure the base output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-            foreach (string inputPath in dicomFiles)
+            // Process each DICOM file in the input directory
+            foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.dcm"))
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
-
-                // Build output PNG path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".png");
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 try
                 {
-                    // Load DICOM image and save as PNG
-                    using (Image image = Image.Load(inputPath))
+                    // Load the DICOM image
+                    using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
                     {
-                        image.Save(outputPath, new PngOptions());
+                        int pageIndex = 0;
+                        // Convert each page to PNG
+                        foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                        {
+                            string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{pageIndex}.png";
+                            string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                            // Ensure the output directory exists
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                            // Save the page as PNG
+                            dicomPage.Save(outputPath, new PngOptions());
+
+                            pageIndex++;
+                        }
                     }
                 }
-                catch (DicomImageException)
+                catch (DicomImageException ex)
                 {
-                    // Skip corrupted DICOM files
-                    Console.Error.WriteLine($"Skipping corrupted DICOM file: {inputPath}");
-                    continue;
+                    // Skip corrupted DICOM files gracefully
+                    Console.Error.WriteLine($"Skipping corrupted DICOM file: {inputPath}. Reason: {ex.Message}");
                 }
                 catch (Exception ex)
                 {
-                    // Log other errors and continue with next file
-                    Console.Error.WriteLine($"Error processing {inputPath}: {ex.Message}");
-                    continue;
+                    // Log any other errors for this file and continue
+                    Console.Error.WriteLine($"Error processing file {inputPath}: {ex.Message}");
                 }
             }
         }
@@ -65,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a hospital IT team needs to batch‑convert thousands of patient DICOM scans to PNG thumbnails for an electronic health record portal while automatically skipping any corrupted files.
- * 2. When a research laboratory automates the preprocessing of radiology images for a machine‑learning pipeline, converting DICOM to PNG and ensuring that unreadable scans do not stop the workflow.
- * 3. When a medical‑imaging startup creates a C# desktop utility that generates PNG previews of DICOM studies using Aspose.Imaging and must handle DicomImageException to keep the conversion running.
- * 4. When a radiology PACS migration script exports legacy DICOM archives to PNG for cloud storage, requiring exception handling to continue processing despite damaged files.
- * 5. When a quality‑control engineer runs a batch conversion job that logs and skips corrupted DICOM files, guaranteeing a complete conversion report without manual intervention.
+ * 1. When a hospital IT team needs to batch‑convert thousands of DICOM scans to PNG for a web‑based viewer while automatically skipping any corrupted DICOM files that would otherwise halt the process.
+ * 2. When a research lab processes multi‑frame DICOM series from MRI studies and wants each frame saved as a separate PNG image, gracefully ignoring unreadable files to keep the analysis pipeline running.
+ * 3. When a medical imaging startup runs an automated nightly job that extracts thumbnail PNGs from a directory of DICOM files for a PACS dashboard, and must handle occasional file corruption without manual intervention.
+ * 4. When a radiology department creates a backup script that converts archived DICOM files to lossless PNGs for long‑term storage, while logging and skipping any files that raise a DicomImageException.
+ * 5. When a cloud‑based image‑processing service ingests user‑uploaded DICOM files, converts each page to PNG for downstream AI analysis, and needs to continue processing the batch even if some uploads are corrupted.
  */

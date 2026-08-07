@@ -1,41 +1,94 @@
+// HOW-TO: Create PDF Chart with Axes from Data Points in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Temp\diagram.svg";
-            string outputPath = @"C:\Temp\diagram.pdf";
+            // Output PDF path
+            string outputPath = "Output/diagram.pdf";
 
-            // Ensure the directory for the input file exists and write SVG content
-            Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
-            string svgContent = GenerateSvgDiagram();
-            File.WriteAllText(inputPath, svgContent, Encoding.UTF8);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Canvas size
+            int width = 600;
+            int height = 400;
+
+            // Sample data points
+            double[] data = { 10, 20, 15, 30, 25 };
+
+            // Margins
+            int leftMargin = 50;
+            int rightMargin = 20;
+            int topMargin = 20;
+            int bottomMargin = 50;
+
+            // Determine scaling
+            double minY = double.MaxValue;
+            double maxY = double.MinValue;
+            foreach (double v in data)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                if (v < minY) minY = v;
+                if (v > maxY) maxY = v;
             }
+            double yRange = maxY - minY;
+            if (yRange == 0) yRange = 1; // avoid division by zero
 
-            // Load the SVG as an Aspose.Imaging image
-            using (Image image = Image.Load(inputPath))
+            double plotHeight = height - topMargin - bottomMargin;
+            double plotWidth = width - leftMargin - rightMargin;
+            double xStep = plotWidth / (data.Length - 1);
+            double yScale = plotHeight / yRange;
+
+            // Create a raster image (PNG) as canvas
+            PngOptions pngOptions = new PngOptions();
+            using (Image image = Image.Create(pngOptions, width, height))
             {
-                // Prepare PDF export options
+                // Initialize graphics
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
+
+                // Draw axes
+                Pen axisPen = new Pen(Color.Black, 2);
+                // X axis
+                graphics.DrawLine(axisPen,
+                    new Point(leftMargin, height - bottomMargin),
+                    new Point(width - rightMargin, height - bottomMargin));
+                // Y axis
+                graphics.DrawLine(axisPen,
+                    new Point(leftMargin, topMargin),
+                    new Point(leftMargin, height - bottomMargin));
+
+                // Draw data line
+                Pen dataPen = new Pen(Color.Blue, 2);
+                for (int i = 0; i < data.Length - 1; i++)
+                {
+                    int x1 = leftMargin + (int)(i * xStep);
+                    int y1 = topMargin + (int)((maxY - data[i]) * yScale);
+                    int x2 = leftMargin + (int)((i + 1) * xStep);
+                    int y2 = topMargin + (int)((maxY - data[i + 1]) * yScale);
+                    graphics.DrawLine(dataPen, new Point(x1, y1), new Point(x2, y2));
+                }
+
+                // Draw axis labels
+                Font labelFont = new Font("Arial", 12);
+                using (SolidBrush textBrush = new SolidBrush())
+                {
+                    textBrush.Color = Color.Black;
+                    // X axis label
+                    graphics.DrawString("X Axis", labelFont, textBrush, new Point(width / 2, height - bottomMargin + 20));
+                    // Y axis label (rotated not required, simple placement)
+                    graphics.DrawString("Y Axis", labelFont, textBrush, new Point(leftMargin - 40, topMargin - 10));
+                }
+
+                // Save as PDF
                 PdfOptions pdfOptions = new PdfOptions();
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -44,62 +97,13 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    // Generates a simple SVG diagram with data points, axes, and labels
-    static string GenerateSvgDiagram()
-    {
-        // Example data points
-        var points = new (double X, double Y)[]
-        {
-            (10, 80), (30, 60), (50, 70), (70, 40), (90, 50)
-        };
-
-        // SVG canvas size
-        int width = 200;
-        int height = 200;
-        int margin = 20;
-
-        var sb = new StringBuilder();
-        sb.AppendLine($"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{width}\" height=\"{height}\">");
-
-        // Draw axes
-        sb.AppendLine($"  <line x1=\"{margin}\" y1=\"{height - margin}\" x2=\"{width - margin}\" y2=\"{height - margin}\" stroke=\"black\"/>"); // X axis
-        sb.AppendLine($"  <line x1=\"{margin}\" y1=\"{margin}\" x2=\"{margin}\" y2=\"{height - margin}\" stroke=\"black\"/>"); // Y axis
-
-        // Axis labels
-        sb.AppendLine($"  <text x=\"{width / 2}\" y=\"{height - 5}\" font-size=\"12\" text-anchor=\"middle\">X Axis</text>");
-        sb.AppendLine($"  <text x=\"5\" y=\"{height / 2}\" font-size=\"12\" transform=\"rotate(-90 5,{height / 2})\" text-anchor=\"middle\">Y Axis</text>");
-
-        // Plot points and connect them with lines
-        sb.AppendLine("  <polyline fill=\"none\" stroke=\"blue\" stroke-width=\"2\" points=\"");
-        foreach (var p in points)
-        {
-            // Transform data coordinates to SVG coordinates
-            double svgX = margin + p.X * (width - 2 * margin) / 100.0;
-            double svgY = height - margin - p.Y * (height - 2 * margin) / 100.0;
-            sb.Append($"{svgX},{svgY} ");
-        }
-        sb.AppendLine("\">");
-        sb.AppendLine("  </polyline>");
-
-        // Draw individual points
-        foreach (var p in points)
-        {
-            double svgX = margin + p.X * (width - 2 * margin) / 100.0;
-            double svgY = height - margin - p.Y * (height - 2 * margin) / 100.0;
-            sb.AppendLine($"  <circle cx=\"{svgX}\" cy=\"{svgY}\" r=\"3\" fill=\"red\"/>");
-        }
-
-        sb.AppendLine("</svg>");
-        return sb.ToString();
-    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a financial analyst needs to generate a vector chart of stock price trends from raw data points, embed axis labels, and export it as a PDF for inclusion in quarterly reports using C# and Aspose.Imaging.
- * 2. When a manufacturing engineer wants to visualize sensor measurements on a calibrated graph, create an SVG diagram with labeled axes, and automatically convert it to a PDF for quality‑control documentation.
- * 3. When a healthcare application must produce patient vital‑sign charts from numeric readings, add descriptive axis titles, and save the result as a PDF for electronic medical records using Aspose.Imaging for .NET.
- * 4. When a marketing team requires a scalable infographic of campaign performance metrics, generate the SVG plot with data points and axis labels in C#, then convert it to a PDF for printable presentations.
- * 5. When an academic researcher needs to programmatically create a scientific plot of experimental data, label the axes, and distribute the figure as a PDF in a research paper, this code provides a straightforward solution.
+ * 1. When you need to programmatically generate a line chart from data points and export it as a PDF using Aspose.Imaging for .NET.
+ * 2. When you want to visualize sensor measurements or financial figures in a PDF document without relying on external charting libraries, using C# and Aspose.Imaging.
+ * 3. When an automated reporting system must create printable diagrams with custom margins, axis scaling, and PDF output based on dynamic data arrays.
+ * 4. When you need to embed a generated chart into a PDF invoice or analytics dashboard created on the server side with Aspose.Imaging.
+ * 5. When you are building a C# console application that produces PDF graphics for regulatory compliance or archival purposes using Aspose.Imaging.
  */

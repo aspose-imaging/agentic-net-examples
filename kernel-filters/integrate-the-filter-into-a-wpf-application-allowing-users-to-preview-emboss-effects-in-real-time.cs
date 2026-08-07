@@ -10,8 +10,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.png";
-            string outputPath = @"C:\Images\output_emboss.png";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,18 +23,21 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image and cast to RasterImage
+            // Load the image and apply emboss filter
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Apply a sharpen filter as an approximation of emboss effect
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
+                // Create emboss filter options using the predefined kernel
+                var embossOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                    Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3);
 
-                // Save the processed image as PNG
-                rasterImage.Save(outputPath, new PngOptions());
+                // Apply the filter to the whole image
+                raster.Filter(raster.Bounds, embossOptions);
+
+                // Save the result as PNG
+                var saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to let users load a PNG file in a WPF photo editor and instantly see an emboss‑like effect applied to the raster image.
- * 2. When a desktop application needs to validate that the selected image exists, create the output folder, and apply a sharpen filter as a fast approximation of emboss before saving the result.
- * 3. When building a batch‑processing tool that programmatically loads images, applies the Aspose.Imaging FilterOptions.SharpenFilterOptions to simulate emboss, and writes the transformed PNG to a predefined directory.
- * 4. When implementing a real‑time preview pane in a WPF UI that calls Image.Load, casts to RasterImage, and uses rasterImage.Filter with bounds to render the emboss effect without blocking the UI thread.
- * 5. When troubleshooting image‑processing pipelines, a developer uses this code to confirm that the Aspose.Imaging sharpen filter correctly modifies the pixel data and produces a visible emboss effect in the saved PNG file.
+ * 1. When a developer needs to add a classic emboss effect to user‑uploaded PNG files in a desktop .NET application, they can use this code to load, filter, and save the image with Aspose.Imaging.
+ * 2. When a photo‑editing tool requires real‑time preview of a 3×3 emboss convolution filter on raster images, the snippet shows how to apply the filter to the entire bitmap and write the result back to disk.
+ * 3. When an automated batch‑processing service must verify the existence of source images, create missing output folders, and apply a predefined emboss kernel before exporting PNG assets, this example provides the necessary file‑system checks and filter call.
+ * 4. When a WPF application needs to demonstrate C# image‑processing operations such as loading an image, casting to RasterImage, and using Aspose.Imaging’s ConvolutionFilterOptions to achieve a raised‑relief look, the code illustrates the complete workflow.
+ * 5. When a developer wants to ensure exception handling around image loading, filtering, and saving while working with PNG format and Aspose.Imaging’s PngOptions, the sample shows the try‑catch pattern for robust error reporting.
  */

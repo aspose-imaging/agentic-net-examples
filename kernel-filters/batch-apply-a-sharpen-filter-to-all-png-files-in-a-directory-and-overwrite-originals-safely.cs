@@ -7,7 +7,7 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded directory containing PNG files
+        // Hardcoded input directory containing PNG files
         string inputDirectory = "C:\\Images\\";
 
         try
@@ -30,15 +30,13 @@ class Program
                     // Cast to RasterImage to access filtering
                     RasterImage rasterImage = (RasterImage)image;
 
-                    // Apply sharpen filter with kernel size 5 and sigma 4.0
-                    rasterImage.Filter(
-                        rasterImage.Bounds,
-                        new SharpenFilterOptions(5, 4.0));
+                    // Apply sharpen filter (kernel size 5, sigma 4.0) to the whole image
+                    rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
                     // Ensure the output directory exists (unconditional)
                     Directory.CreateDirectory(Path.GetDirectoryName(filePath));
 
-                    // Overwrite the original file with the processed image
+                    // Overwrite the original file with the filtered image
                     rasterImage.Save(filePath);
                 }
             }
@@ -52,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically enhance the visual clarity of a large collection of product photos stored as PNG files before uploading them to an e‑commerce website.
- * 2. When a desktop application must improve the sharpness of scanned PNG documents in a folder to make text more readable for OCR processing.
- * 3. When a game asset pipeline requires batch sharpening of PNG textures to highlight details without manually editing each file.
- * 4. When a photo‑editing tool offers a one‑click “sharpen all” feature that processes every PNG in a user‑selected directory and safely overwrites the originals.
- * 5. When a server‑side script prepares PNG screenshots for a reporting dashboard by applying a consistent sharpen filter to all images in a directory.
+ * 1. When a developer needs to automatically enhance the visual sharpness of a large collection of PNG assets—such as product photos for an e‑commerce site—by applying a sharpen filter and saving the results back to the original files.
+ * 2. When a batch image‑processing pipeline must prepare PNG screenshots for documentation by increasing edge contrast without creating duplicate files, using C# and Aspose.Imaging’s SharpenFilterOptions.
+ * 3. When a content‑management system imports user‑uploaded PNG graphics and the backend must improve clarity in place before publishing, leveraging Directory.GetFiles and RasterImage.Filter.
+ * 4. When a desktop application needs to clean up a folder of scanned PNG diagrams, applying a 5‑pixel kernel sharpen filter to each file and overwriting the originals safely.
+ * 5. When an automated build script for a game’s UI assets must ensure all PNG textures are sharpened for better on‑screen detail, using Aspose.Imaging’s raster image filtering in a C# loop.
  */

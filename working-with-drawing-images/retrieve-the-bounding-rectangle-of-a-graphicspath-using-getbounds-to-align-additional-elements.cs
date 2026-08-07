@@ -9,46 +9,48 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded output path
+        string outputPath = @"C:\temp\GraphicsPathBounds.png";
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Define output path
-            string outputPath = @"c:\temp\output.bmp";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set up BMP options with a file source
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            // Set up PNG options with a bound file source
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
 
             // Create a new image canvas
-            using (Image image = Image.Create(bmpOptions, 500, 500))
+            using (Image image = Image.Create(pngOptions, 500, 500))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                // Build a graphics path with some shapes
+                // Create a graphics path with a rectangle shape
                 GraphicsPath path = new GraphicsPath();
                 Figure figure = new Figure();
-                figure.AddShape(new RectangleShape(new RectangleF(100f, 80f, 200f, 150f)));
-                figure.AddShape(new EllipseShape(new RectangleF(150f, 120f, 100f, 80f)));
+                figure.AddShape(new RectangleShape(new RectangleF(100f, 80f, 250f, 150f)));
                 path.AddFigure(figure);
 
                 // Retrieve the bounding rectangle of the path
-                // Using an identity matrix for transformation
-                var bounds = path.GetBounds(new Matrix());
+                RectangleF boundsF = path.GetBounds(new Matrix());
+
+                // Convert to integer rectangle for drawing
+                Rectangle boundsRect = new Rectangle(
+                    (int)boundsF.X,
+                    (int)boundsF.Y,
+                    (int)boundsF.Width,
+                    (int)boundsF.Height);
 
                 // Draw the original path
                 graphics.DrawPath(new Pen(Color.Black, 2), path);
 
-                // Align a rectangle around the bounds
-                graphics.DrawRectangle(
-                    new Pen(Color.Red, 2),
-                    new Rectangle((int)bounds.X, (int)bounds.Y, (int)bounds.Width, (int)bounds.Height));
+                // Draw a red rectangle around the bounds
+                graphics.DrawRectangle(new Pen(Color.Red, 2), boundsRect);
 
-                // Save the image (output file already bound to the source)
+                // Save the image (output path already bound)
                 image.Save();
             }
         }
@@ -61,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a BMP report that overlays a red border around a complex shape composed of rectangles and ellipses, a developer can use GetBounds to determine the exact outer limits for the border.
- * 2. When creating a printable label in C# where a logo defined by a GraphicsPath must be centered within a fixed-size canvas, GetBounds provides the coordinates needed to align the logo precisely.
- * 3. When developing a diagram editor that needs to snap additional annotation boxes to the edges of a drawn path, the bounding rectangle returned by GetBounds lets the program position those boxes automatically.
- * 4. When exporting a composite vector drawing to a raster image and wanting to add a watermark that fits tightly around the drawing, GetBounds helps calculate the area to place the watermark without covering the artwork.
- * 5. When implementing automated UI testing that verifies visual elements by drawing shapes and then checking their extents, GetBounds allows the test to compare the expected bounding box against the actual rendered size.
+ * 1. When a developer wants to automatically draw a red border around any custom GraphicsPath (such as a rectangle, ellipse, or complex shape) to highlight its extents before saving the image as a PNG.
+ * 2. When generating dynamic reports where chart elements or annotations must be positioned relative to the exact bounds of a drawn shape using Aspose.Imaging’s GetBounds method.
+ * 3. When creating a thumbnail generator that needs to crop or pad an image based on the bounding rectangle of vector graphics drawn on a 500×500 canvas.
+ * 4. When implementing collision detection or layout validation in a C# graphics editor by retrieving the path’s bounding rectangle and comparing it with other objects.
+ * 5. When adding interactive hotspots or tooltips to a raster image by calculating the precise rectangle of a shape and then drawing a visible marker around it.
  */

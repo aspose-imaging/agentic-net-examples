@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageLoadOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,7 +11,7 @@ class Program
         try
         {
             // Hardcoded paths
-            string inputPath = @"C:\temp\input.cmx";
+            string inputPath = @"C:\temp\sample.cmx";
             string outputPath = @"C:\temp\output.jpg";
             string configPath = @"C:\temp\config.txt";
 
@@ -23,25 +22,37 @@ class Program
                 return;
             }
 
-            // Verify config file exists (optional, default quality will be used if missing)
-            int quality = 90; // default quality
-            if (File.Exists(configPath))
+            // Verify configuration file exists
+            if (!File.Exists(configPath))
             {
-                string text = File.ReadAllText(configPath).Trim();
-                if (int.TryParse(text, out int parsed) && parsed >= 1 && parsed <= 100)
+                Console.Error.WriteLine($"File not found: {configPath}");
+                return;
+            }
+
+            // Read quality setting from configuration file (expects an integer)
+            int quality = 75; // default fallback
+            try
+            {
+                string qualityText = File.ReadAllText(configPath).Trim();
+                if (!int.TryParse(qualityText, out quality))
                 {
-                    quality = parsed;
+                    Console.Error.WriteLine($"Invalid quality value in config: '{qualityText}'. Using default {quality}.");
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error reading config: {ex.Message}. Using default quality {quality}.");
             }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load CMX image with specific load options
-            using (Image image = Image.Load(inputPath, new CmxLoadOptions()))
+            var loadOptions = new CmxLoadOptions();
+            using (Image image = Image.Load(inputPath, loadOptions))
             {
                 // Prepare JPEG save options with custom quality
-                JpegOptions jpegOptions = new JpegOptions
+                var jpegOptions = new JpegOptions
                 {
                     Quality = quality
                 };
@@ -59,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop needs to batch‑convert legacy CorelDRAW CMX files to web‑ready JPEGs while preserving a client‑specified compression quality stored in a configuration file.
- * 2. When an automated document‑processing pipeline must read CMX artwork from a shared folder, apply a configurable JPEG quality, and save the results to a designated output directory.
- * 3. When a Windows service has to validate the existence of source CMX files, read a numeric quality value from a text configuration, and generate JPEG thumbnails for preview screens.
- * 4. When a migration tool needs to load CMX images using Aspose.Imaging’s CmxLoadOptions, set the JPEG compression level dynamically, and ensure the target folder is created before saving.
- * 5. When troubleshooting image conversion errors, a developer wants a try‑catch block that logs missing files or invalid quality settings while converting CMX to JPEG with a custom quality parameter.
+ * 1. When a .NET application must convert legacy CorelDRAW CMX files to web‑friendly JPEG images while allowing the JPEG compression quality to be adjusted via a configuration file.
+ * 2. When an automated document‑processing pipeline needs to read a user‑defined quality value from a text config and apply it while saving CMX artwork as JPEG for email attachments.
+ * 3. When a Windows service processes incoming CMX graphics and stores them as JPEG thumbnails, using Aspose.Imaging in C# and reading the desired quality from a settings file.
+ * 4. When a desktop utility offers end‑users the ability to batch‑convert CMX drawings to JPEG with a configurable compression level stored in a simple config.txt.
+ * 5. When a server‑side API receives CMX uploads and must return JPEG previews, using Aspose.Imaging’s CmxLoadOptions and JpegOptions with a quality parameter read from configuration.
  */

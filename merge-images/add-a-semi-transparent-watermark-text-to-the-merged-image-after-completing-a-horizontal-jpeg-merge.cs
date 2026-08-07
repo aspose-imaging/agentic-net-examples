@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -14,59 +14,52 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
+            string[] inputPaths = { "image1.jpg", "image2.jpg", "image3.jpg" };
             string outputPath = "merged_output.jpg";
 
             // Validate input files
-            foreach (string path in inputPaths)
+            foreach (string inputPath in inputPaths)
             {
-                if (!File.Exists(path))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {path}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
             }
 
             // Ensure output directory exists
             string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-                Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(outputDir);
 
-            // Collect sizes of all images
-            List<Size> sizes = new List<Size>();
-            foreach (string path in inputPaths)
+            // Collect dimensions
+            List<(int width, int height)> dims = new List<(int, int)>();
+            foreach (string inputPath in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                using (RasterImage img = (RasterImage)Image.Load(inputPath))
                 {
-                    sizes.Add(new Size(img.Width, img.Height));
+                    dims.Add((img.Width, img.Height));
                 }
             }
 
-            // Calculate canvas dimensions for horizontal merge
-            int canvasWidth = 0;
-            int canvasHeight = 0;
-            foreach (Size sz in sizes)
+            // Calculate canvas size for horizontal merge
+            int totalWidth = 0;
+            int maxHeight = 0;
+            foreach (var d in dims)
             {
-                canvasWidth += sz.Width;
-                if (sz.Height > canvasHeight) canvasHeight = sz.Height;
+                totalWidth += d.width;
+                if (d.height > maxHeight) maxHeight = d.height;
             }
 
-            // Create output file source and JPEG options
-            Source fileSource = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                Source = fileSource,
-                Quality = 90
-            };
-
-            // Create canvas bound to the output file
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            // Create JPEG canvas bound to output file
+            Source src = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = src, Quality = 90 };
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
             {
                 // Merge images horizontally
                 int offsetX = 0;
-                foreach (string path in inputPaths)
+                foreach (string inputPath in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
                     {
                         Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
@@ -76,10 +69,15 @@ class Program
 
                 // Add semi‑transparent watermark text
                 Graphics graphics = new Graphics(canvas);
-                Font font = new Font("Arial", 36);
-                SolidBrush brush = new SolidBrush(Color.FromArgb(128, 255, 255, 255)); // 50% transparent white
-                PointF position = new PointF(canvasWidth - 250, canvasHeight - 50); // bottom‑right corner
-                graphics.DrawString("Watermark", font, brush, position);
+                Aspose.Imaging.Color watermarkColor = Aspose.Imaging.Color.FromArgb(128, 255, 255, 255); // 50% opacity white
+                using (SolidBrush brush = new SolidBrush(watermarkColor))
+                {
+                    Font font = new Font("Arial", 48);
+                    // Position watermark near bottom‑right corner
+                    int x = canvas.Width - 300;
+                    int y = canvas.Height - 60;
+                    graphics.DrawString("Watermark", font, brush, new Point(x, y));
+                }
 
                 // Save the bound image
                 canvas.Save();
@@ -94,9 +92,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer wants to combine multiple product photos into a single horizontal banner and embed a semi‑transparent brand logo as a watermark before publishing online.
- * 2. When an e‑commerce platform needs to merge several catalog images side‑by‑side and add a faint copyright notice to protect the images from unauthorized reuse.
- * 3. When a marketing team creates a composite promotional JPEG for social media and wants to overlay a translucent campaign tagline across the merged image.
- * 4. When a document management system automatically stitches scanned pages horizontally and applies a light watermark with the company name for compliance auditing.
- * 5. When a real‑estate website merges property interior shots into a panoramic view and adds a semi‑transparent “Sample” watermark to indicate preview status before the final purchase.
+ * 1. When a marketing team needs to combine product photos side‑by‑side into a single JPEG banner and embed a semi‑transparent brand logo or copyright text to protect the assets.
+ * 2. When an e‑commerce platform generates a horizontal collage of multiple product images and wants to overlay a faint promotional tagline so the watermark remains visible without obscuring details.
+ * 3. When a real‑estate portal merges interior and exterior photos of a property into one JPEG panorama and adds a translucent “Confidential – For Internal Use” watermark for secure sharing.
+ * 4. When a photo‑journalist creates a side‑by‑side comparison of before‑and‑after shots and applies a low‑opacity watermark to credit the photographer while preserving image clarity.
+ * 5. When a document management system automatically stitches scanned pages into a single JPEG strip and appends a semi‑transparent “Company Confidential” text to enforce data protection policies.
  */

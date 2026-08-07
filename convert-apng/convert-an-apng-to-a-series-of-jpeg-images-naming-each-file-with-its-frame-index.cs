@@ -2,17 +2,16 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Input APNG file (relative path)
-            string inputPath = "Input\\animation.apng";
+            // Hardcoded input path
+            string inputPath = "input.apng";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,24 +20,28 @@ class Program
                 return;
             }
 
-            // Output directory for JPEG frames
-            string outputDirectory = "Output";
-            Directory.CreateDirectory(outputDirectory);
-
             // Load the APNG image
-            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Iterate through each frame
+                // Cast to ApngImage to access frames
+                ApngImage apng = image as ApngImage;
+                if (apng == null)
+                {
+                    Console.Error.WriteLine("The loaded image is not an APNG.");
+                    return;
+                }
+
+                // Iterate through each frame (page) and save as JPEG
                 for (int i = 0; i < apng.PageCount; i++)
                 {
-                    // Get the frame as ApngFrame
-                    using (ApngFrame frame = (ApngFrame)apng.Pages[i])
+                    // Get the current frame as a RasterImage
+                    using (RasterImage frame = (RasterImage)apng.Pages[i])
                     {
-                        // Build output file path with frame index
-                        string outputPath = Path.Combine(outputDirectory, $"frame_{i}.jpg");
+                        // Construct output file name with frame index
+                        string outputPath = $"frame_{i}.jpg";
 
                         // Ensure the output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
                         // Save the frame as JPEG
                         frame.Save(outputPath, new JpegOptions());
@@ -55,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each frame from an animated PNG (APNG) and store them as separate JPEG files for use in a web gallery or thumbnail preview, this code provides a straightforward C# solution using Aspose.Imaging.
- * 2. When a video editing pipeline requires converting animation frames from an APNG into JPEG images to be imported into a timeline or compositing tool, the code can automate the frame‑by‑frame extraction in .NET.
- * 3. When an e‑commerce platform wants to generate product image sequences from an APNG animation and save them as JPEGs with indexed filenames for SEO‑friendly URLs, this snippet handles the conversion efficiently.
- * 4. When a mobile app backend must preprocess user‑uploaded APNG stickers by splitting them into individual JPEG frames for caching or offline display, the provided C# example demonstrates how to achieve it with Aspose.Imaging.
- * 5. When a data‑analysis script needs to analyze each frame of an APNG by converting them to JPEG format for pixel‑level processing in machine‑learning models, this code extracts and names the frames automatically.
+ * 1. When a developer needs to extract each frame from an animated PNG (APNG) and store them as separate JPEG files for compatibility with browsers that only support static JPEG images.
+ * 2. When a video processing pipeline requires converting an APNG sprite sheet into individual JPEG frames to create a thumbnail gallery.
+ * 3. When an e‑learning platform wants to break down an animated illustration into frame‑by‑frame JPEG images for step‑by‑step instructional content.
+ * 4. When a content management system must archive each animation frame as a lossily compressed JPEG to reduce storage size while preserving frame order.
+ * 5. When a game developer wants to import APNG character animations into a Unity project by saving each frame as a JPEG asset with an indexed filename.
  */

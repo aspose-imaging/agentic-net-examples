@@ -1,34 +1,45 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string outputPath = "output\\filled_rectangle.png";
         try
         {
+            // Output file path (hard‑coded)
+            string outputPath = @"C:\temp\output.png";
+
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Create a new PNG image (300 × 200 pixels)
             PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 200, 200))
+            using (Image image = Image.Create(pngOptions, 300, 200))
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                // Obtain a Graphics object for drawing
+                Graphics graphics = new Graphics(image);
 
-                using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Blue))
-                {
-                    graphics.FillRectangle(brush, new Aspose.Imaging.Rectangle(20, 20, 160, 160));
-                }
+                // Rectangle parameters
+                int x = 50;
+                int y = 30;
+                int width = 200;
+                int height = 120;
 
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 5);
-                graphics.DrawRectangle(pen, new Aspose.Imaging.Rectangle(20, 20, 160, 160));
+                // Fill the rectangle with solid blue
+                SolidBrush blueBrush = new SolidBrush(Color.Blue);
+                graphics.FillRectangle(blueBrush, x, y, width, height);
 
-                image.Save();
+                // Outline the rectangle with a thick black pen (5 px)
+                Pen blackPen = new Pen(Color.Black, 5);
+                graphics.DrawRectangle(blackPen, x, y, width, height);
+
+                // Save the resulting image
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -40,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PNG badge with a solid blue background and a thick black border for a web dashboard, this code creates the image using Aspose.Imaging, SolidBrush and Pen.
- * 2. When creating a placeholder image for a UI component that requires a filled rectangle with a specific color and outline thickness, the example shows how to draw and save a 200×200 PNG using C# and Aspose.Imaging.
- * 3. When producing a printable label in C# where the main area is a blue rectangle highlighted by a bold black frame, the code demonstrates filling and outlining the shape with SolidBrush and Pen.
- * 4. When automating the creation of a simple thumbnail that visually separates content sections using a colored rectangle with a contrasting border, this snippet uses Aspose.Imaging.Graphics to draw and save the PNG.
- * 5. When writing documentation or tutorials that need a clear example of basic drawing primitives such as FillRectangle and DrawRectangle with SolidBrush and Pen, the code provides a ready‑to‑run C# solution.
+ * 1. When a developer needs to generate a PNG placeholder image with a colored region highlighted by a thick border for UI mock‑ups, they can use Aspose.Imaging to fill a blue rectangle with SolidBrush and outline it with a 5 px black Pen.
+ * 2. When creating printable reports that require a colored banner rendered as an image, the code can produce a 300 × 200 PNG with a solid blue rectangle and a bold black outline using C# Graphics.
+ * 3. When building a web service that returns dynamically generated thumbnails with a highlighted selection area, the developer can employ Aspose.Imaging to draw a filled blue rectangle and frame it with a thick black pen.
+ * 4. When implementing a simple image‑based watermark that emphasizes a region of interest, the code demonstrates how to overlay a solid blue rectangle and a black border onto a PNG using Aspose.Imaging’s FillRectangle and DrawRectangle methods.
+ * 5. When developing a diagnostic tool that visualizes bounding boxes around detected objects in an image, the snippet shows how to render each box as a blue‑filled rectangle with a thick black outline in a PNG file.
  */

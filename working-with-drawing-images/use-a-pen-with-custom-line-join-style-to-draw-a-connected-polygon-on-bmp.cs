@@ -8,46 +8,43 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded output path
+        // Hardcoded paths
         string outputPath = @"C:\temp\polygon.bmp";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Set up BMP options with a file source bound to the output path
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Set up BMP options with a file source
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a new image canvas (500x500)
-            using (Image image = Image.Create(bmpOptions, 500, 500))
+            // Create a 400x400 BMP image
+            using (Image image = Image.Create(bmpOptions, 400, 400))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
-
-                // Clear background
                 graphics.Clear(Color.White);
 
                 // Create a pen with custom line join style
                 Pen pen = new Pen(Color.Blue, 5f);
-                pen.LineJoin = LineJoin.Round; // Custom line join
+                pen.LineJoin = LineJoin.Round; // Custom join style
 
-                // Define polygon points (a simple pentagon)
-                Point[] polygonPoints = new Point[]
+                // Define polygon points
+                Point[] points = new Point[]
                 {
-                    new Point(250, 100),
-                    new Point(350, 200),
-                    new Point(300, 350),
-                    new Point(200, 350),
-                    new Point(150, 200)
+                    new Point(50, 50),
+                    new Point(350, 50),
+                    new Point(350, 350),
+                    new Point(50, 350)
                 };
 
-                // Draw the connected polygon
-                graphics.DrawPolygon(pen, polygonPoints);
+                // Draw the polygon
+                graphics.DrawPolygon(pen, points);
 
-                // Save the image (output path already bound)
+                // Save the image (file is already bound via FileCreateSource)
                 image.Save();
             }
         }
@@ -60,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a high‑resolution BMP map overlay with smooth polygon edges for a GIS application, they can use this code to draw a pentagon with a round line join.
- * 2. When creating printable engineering diagrams in C# where the outlines must have consistent thickness and rounded corners, this snippet shows how to render a polygon onto a 24‑bit BMP file using Aspose.Imaging.
- * 3. When building a custom badge or logo generator that outputs BMP images for legacy systems, the code demonstrates how to draw a connected shape with a blue pen and custom line join style.
- * 4. When a game developer wants to pre‑render static terrain features as BMP textures with anti‑aliased polygon borders, they can employ this example to produce the assets programmatically.
- * 5. When automating the production of certification stamps that require a precise polygon shape with rounded joins in a BMP file, this code provides a straightforward way to create and save the image.
+ * 1. When a developer needs to generate a 400 × 400 BMP file with a blue polygon whose corners are smoothly connected using a round line join for use in a Windows desktop UI.
+ * 2. When an application must programmatically create a printable bitmap badge and require precise control over line thickness and join style to ensure the polygon border looks consistent across printers.
+ * 3. When a reporting tool has to embed a simple vector‑style shape into a BMP chart and the developer wants to use Aspose.Imaging’s Pen object to set a custom LineJoin for aesthetic corners.
+ * 4. When an automated image‑processing pipeline needs to add a rectangular outline to a blank canvas and must guarantee the output file is saved directly to a specified path without intermediate streams.
+ * 5. When a game‑level editor written in C# must export level boundaries as a BMP image and wants to use the DrawPolygon method with a round join to avoid sharp angles that could cause visual artifacts.
  */

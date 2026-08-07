@@ -1,39 +1,42 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "sample.cmx";
+        // Hardcoded input and output paths
+        string inputPath = "input.cmx";
         string outputPath = "output.jpg";
 
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
+            // Load CMX image
+            using (CmxImage cmx = (CmxImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                cmx.HasBackgroundColor = true;
-                cmx.BackgroundColor = Color.White; // custom background color
+                // Set custom background color for transparent regions
+                cmx.BackgroundColor = Aspose.Imaging.Color.White; // Change to desired color
 
-                Source source = new FileCreateSource(outputPath, false);
+                // Configure JPEG options
                 JpegOptions jpegOptions = new JpegOptions
                 {
-                    Source = source,
                     Quality = 100
                 };
 
+                // Save as JPEG
                 cmx.Save(outputPath, jpegOptions);
             }
         }
@@ -46,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed legacy CorelDRAW CMX artwork into a web page that only supports JPEG images, they can use this code to convert the CMX file to a high‑quality JPEG while applying a white background to replace transparent areas and prevent visual artifacts.
- * 2. When an automated document‑processing pipeline receives CMX files from external partners and must generate thumbnail previews in JPEG format for a content management system, the code provides a reliable way to perform the conversion and set a custom background color for any transparent regions.
- * 3. When a desktop application that creates printable reports must include vector graphics originally saved as CMX, the developer can convert them to JPEG with a specified background (e.g., white or corporate brand color) to ensure consistent appearance on printers that do not support CMX transparency.
- * 4. When a batch‑conversion utility needs to migrate a large archive of CMX assets to JPEG for archival storage while preserving visual fidelity, this snippet shows how to load each CMX image, assign a background color, and save it with maximum JPEG quality.
- * 5. When integrating Aspose.Imaging into a C# service that receives user‑uploaded CMX files and returns a JPEG preview for mobile devices, the code demonstrates how to handle missing files, create the output directory, and replace transparent pixels with a chosen background to avoid unwanted artifacts.
+ * 1. When a developer needs to convert legacy CorelDRAW CMX files to JPEG for web publishing while ensuring transparent areas are filled with a specific background color to prevent visual artifacts.
+ * 2. When an automated image processing pipeline must batch‑process CMX drawings and output high‑quality JPEGs with a white (or any chosen) background for consistent appearance across browsers.
+ * 3. When integrating a document management system that stores CMX assets, and the application must generate preview thumbnails in JPEG format with a defined background to avoid empty or black corners.
+ * 4. When migrating a legacy design archive to a modern format, and the migration tool must replace CMX transparency with a solid color during conversion to JPEG to maintain brand colors.
+ * 5. When building a C# desktop utility that allows users to select a CMX file and export it as a JPEG with a custom background, ensuring the resulting image meets print‑ready quality standards.
  */

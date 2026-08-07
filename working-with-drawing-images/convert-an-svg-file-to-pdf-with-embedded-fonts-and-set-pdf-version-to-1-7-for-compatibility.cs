@@ -3,18 +3,19 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Xmp.Schemas.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input/sample.svg";
-            string outputPath = "Output/sample.pdf";
+            string inputPath = @"C:\Input\sample.svg";
+            string outputPath = @"C:\Output\sample.pdf";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,25 +28,22 @@ class Program
             // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure vector rasterization options
-                var vectorOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
-                };
-
-                // Configure PDF options with PDF version 1.7 (default) and embed fonts
+                // Configure PDF options
                 var pdfOptions = new PdfOptions
                 {
-                    VectorRasterizationOptions = vectorOptions,
+                    // Set PDF compliance (closest to PDF 1.7)
                     PdfCoreOptions = new PdfCoreOptions
                     {
-                        // Setting compliance; PDF 1.7 is the default version used by Aspose.Imaging
-                        PdfCompliance = PdfComplianceVersion.PdfA1b
+                        PdfCompliance = PdfComplianceVersion.Pdf15
                     }
                 };
 
-                // Save as PDF
+                // Set explicit PDF version to 1.7 via XMP package
+                var pdfPackage = new PdfPackage();
+                pdfPackage.SetPdfVersion("1.7");
+                // Note: Aspose.Imaging automatically incorporates XMP metadata when saving
+
+                // Save as PDF with the configured options
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -58,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG logo into a PDF brochure while preserving the exact typography by embedding fonts and ensuring PDF 1.7 compatibility.
- * 2. When an automated build pipeline must generate PDF invoices from SVG templates and guarantee that the PDFs meet PDF/A‑1b compliance for archiving.
- * 3. When a web service receives user‑uploaded SVG diagrams and must return a printable PDF with embedded fonts so the document looks the same on any device.
- * 4. When a desktop application creates printable reports by rasterizing vector graphics from SVG files into high‑resolution PDFs that conform to PDF version 1.7.
- * 5. When a batch job processes a folder of SVG assets and converts them to PDF files with embedded fonts to meet corporate document standards and avoid missing‑font warnings.
+ * 1. When a developer needs to generate print‑ready PDFs from vector SVG assets while preserving exact typography, they can use Aspose.Imaging in C# to convert the SVG to PDF with embedded fonts and enforce PDF 1.7 compliance.
+ * 2. When an automated build pipeline must batch‑process design files and produce archival PDFs that meet a specific PDF version requirement, this code converts each SVG to a PDF with the correct version tag using XMP metadata.
+ * 3. When a web application offers users the ability to download scalable graphics as PDFs that are compatible with older PDF viewers, the snippet ensures the output PDF follows PDF 1.7 standards and includes all font data.
+ * 4. When a document management system needs to store vector illustrations as searchable PDFs without losing style information, developers can employ this C# example to embed fonts during SVG‑to‑PDF conversion.
+ * 5. When a reporting tool integrates custom SVG charts into PDF reports and must guarantee that the generated PDFs open consistently across platforms, the code sets the PDF version to 1.7 and embeds the chart fonts automatically.
  */

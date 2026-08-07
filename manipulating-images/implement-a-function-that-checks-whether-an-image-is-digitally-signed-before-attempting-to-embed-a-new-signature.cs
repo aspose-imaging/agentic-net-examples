@@ -1,64 +1,55 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.CoreExceptions;
 
 class Program
 {
-    // Checks if the image at inputPath is digitally signed.
-    // If not, embeds a digital signature using the provided password and saves to outputPath.
-    static void CheckAndEmbedSignature(string inputPath, string outputPath, string password)
-    {
-        // Load the image (supports raster, cached, and multipage images)
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage to access digital signature methods
-            RasterImage rasterImage = image as RasterImage;
-            if (rasterImage == null)
-            {
-                Console.Error.WriteLine("Unsupported image format for digital signature.");
-                return;
-            }
-
-            // Fast check whether the image is already signed
-            bool isSigned = rasterImage.IsDigitalSigned(password);
-            if (isSigned)
-            {
-                Console.WriteLine("Image is already digitally signed. No action taken.");
-            }
-            else
-            {
-                // Embed the digital signature
-                rasterImage.EmbedDigitalSignature(password);
-                Console.WriteLine("Digital signature embedded.");
-            }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Save the (potentially modified) image
-            rasterImage.Save(outputPath);
-        }
-    }
-
     static void Main()
     {
-        // Hardcoded paths (modify as needed)
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.png";
-        string password = "mySecretPassword";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+        string password = "myPassword";
 
         try
         {
-            CheckAndEmbedSignature(inputPath, outputPath, password);
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the image using Aspose.Imaging
+            using (Image image = Image.Load(inputPath))
+            {
+                // Cast to RasterImage to access digital signature methods
+                if (image is RasterImage rasterImage)
+                {
+                    // Check if the image is already digitally signed
+                    bool isSigned = rasterImage.IsDigitalSigned(password);
+
+                    if (isSigned)
+                    {
+                        Console.WriteLine("Image is already digitally signed. No action taken.");
+                    }
+                    else
+                    {
+                        // Embed a new digital signature
+                        rasterImage.EmbedDigitalSignature(password);
+                        // Save the modified image
+                        rasterImage.Save(outputPath);
+                        Console.WriteLine($"Digital signature embedded and image saved to {outputPath}");
+                    }
+                }
+                else
+                {
+                    Console.Error.WriteLine("Loaded image does not support digital signature operations.");
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -69,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a healthcare application needs to verify that a DICOM image hasn't been tampered with before adding a new digital signature for audit compliance.
- * 2. When a document management system processes PNG or JPEG files and must ensure they are unsigned before embedding a password‑protected signature to guarantee authenticity.
- * 3. When a batch image conversion tool loads cached or multipage TIFF files and checks for existing signatures to avoid duplicate signing and preserve file integrity.
- * 4. When a secure photo‑sharing service validates that uploaded images are not already signed before applying its own digital signature to enforce ownership rights.
- * 5. When a regulatory reporting solution programmatically loads raster images, checks for a digital signature using a password, and only embeds a new signature if none is present to meet legal signing requirements.
+ * 1. When a C# application must verify that a PNG file uploaded by a user hasn't already been digitally signed before adding a new signature for compliance auditing.
+ * 2. When an automated workflow processes scanned documents and needs to ensure each image is unsigned before embedding a password‑protected digital signature using Aspose.Imaging.
+ * 3. When a secure image storage service wants to prevent duplicate signatures by checking the IsDigitalSigned flag on a RasterImage before saving the signed version.
+ * 4. When a desktop utility that batch‑processes PNG assets must skip images that already contain a digital signature to avoid corrupting existing authentication data.
+ * 5. When integrating image authentication into a .NET API, developers use this code to confirm an image is unsigned before calling EmbedDigitalSignature to protect the file with a password.
  */

@@ -1,50 +1,44 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.emf";
+        string outputPath = "output\\cropped.png";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.emf";
-            string outputPath = "output.png";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to EmfImage to access vector-specific methods
+                // Cast to EmfImage to access EMF-specific methods
                 EmfImage emfImage = (EmfImage)image;
 
-                // Define crop rectangle (example integer bounds)
-                int x = 10;
-                int y = 10;
-                int width = 200;
-                int height = 150;
-                Rectangle cropRect = new Rectangle(x, y, width, height);
+                // Crop rectangle: x, y, width, height (example values)
+                int cropX = 50;
+                int cropY = 50;
+                int cropWidth = 200;
+                int cropHeight = 150;
+                emfImage.Crop(cropX, cropY, cropWidth, cropHeight);
 
-                // Perform cropping
-                emfImage.Crop(cropRect);
-
-                // Prepare PNG save options
-                PngOptions pngOptions = new PngOptions();
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Save the cropped image as PNG
-                emfImage.Save(outputPath, pngOptions);
+                emfImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -56,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract a specific region from a Windows Metafile (EMF) and deliver it as a web‑friendly PNG thumbnail for a document preview page.
- * 2. When an application must convert legacy vector diagrams stored as EMF files into raster PNG assets while trimming away margins to fit a fixed‑size UI component.
- * 3. When a reporting tool generates charts in EMF format and the developer wants to crop the chart area to remove legends before embedding the result in an email as a PNG image.
- * 4. When a batch processing script has to automate the conversion of EMF icons to PNG sprites, cropping each icon to a uniform width and height for use in a mobile app.
- * 5. When a GIS system stores map overlays as EMF files and the developer needs to isolate a particular map section, crop it with integer coordinates, and save it as a PNG for printing or sharing.
+ * 1. When a developer needs to extract a specific region from a Windows Metafile (EMF) and deliver it as a web‑friendly PNG for a reporting dashboard, they can use this code to load, crop with integer coordinates, and save the result.
+ * 2. When an application must convert legacy vector graphics stored in EMF files into raster PNG thumbnails of defined size for preview panes, this snippet shows how to perform the crop and conversion in C# with Aspose.Imaging.
+ * 3. When a document‑generation system has to isolate a logo or diagram inside an EMF file and embed the cropped PNG into PDF invoices, the code demonstrates the required loading, integer‑based cropping, and PNG saving steps.
+ * 4. When a batch‑processing tool processes a folder of EMF assets and needs to remove unwanted margins by cropping to exact pixel bounds before archiving them as PNG images, this example provides the necessary C# workflow.
+ * 5. When a GIS or CAD integration needs to display a selected portion of an EMF map as a PNG overlay on a web map, the developer can employ this code to load the EMF, crop using integer coordinates, and output the PNG.
  */

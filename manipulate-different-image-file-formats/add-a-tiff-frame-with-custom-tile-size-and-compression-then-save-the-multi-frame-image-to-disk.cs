@@ -1,6 +1,6 @@
+// HOW-TO: Create Multi‑Frame TIFF from Multiple PNG Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
@@ -12,43 +12,48 @@ class Program
     {
         try
         {
-            // Output path (hard‑coded)
-            string outputPath = "output\\multi.tif";
-
-            // Ensure output directory exists
+            // Output file path
+            string outputPath = "C:\\Temp\\multi_frame.tif";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Options for the first frame
-            TiffOptions options1 = new TiffOptions(TiffExpectedFormat.Default);
-            options1.BitsPerSample = new ushort[] { 8, 8, 8 };
-            options1.Photometric = TiffPhotometrics.Rgb;
-            options1.Compression = TiffCompressions.Lzw;
-            options1.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-
-            // Create first frame (200x200) and fill with blue
-            int width = 200;
-            int height = 200;
-            TiffFrame frame1 = new TiffFrame(options1, width, height);
-            int[] bluePixels = Enumerable.Repeat(Aspose.Imaging.Color.Blue.ToArgb(), width * height).ToArray();
-            ((RasterImage)frame1).SaveArgb32Pixels(frame1.Bounds, bluePixels);
-
-            // Options for the second frame
-            TiffOptions options2 = new TiffOptions(TiffExpectedFormat.Default);
-            options2.BitsPerSample = new ushort[] { 8, 8, 8 };
-            options2.Photometric = TiffPhotometrics.Rgb;
-            options2.Compression = TiffCompressions.AdobeDeflate;
-            options2.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-
-            // Create second frame (200x200) and fill with green
-            TiffFrame frame2 = new TiffFrame(options2, width, height);
-            int[] greenPixels = Enumerable.Repeat(Aspose.Imaging.Color.Green.ToArgb(), width * height).ToArray();
-            ((RasterImage)frame2).SaveArgb32Pixels(frame2.Bounds, greenPixels);
-
-            // Assemble multi‑frame TIFF
-            using (TiffImage tiffImage = new TiffImage(frame1))
+            // Input file paths
+            string inputPath1 = "C:\\Temp\\frame1.png";
+            if (!File.Exists(inputPath1))
             {
-                tiffImage.AddFrame(frame2);
-                tiffImage.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath1}");
+                return;
+            }
+
+            string inputPath2 = "C:\\Temp\\frame2.png";
+            if (!File.Exists(inputPath2))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath2}");
+                return;
+            }
+
+            // Load input images
+            using (RasterImage img1 = (RasterImage)Image.Load(inputPath1))
+            using (RasterImage img2 = (RasterImage)Image.Load(inputPath2))
+            {
+                int width = img1.Width;
+                int height = img1.Height;
+
+                // Create TIFF options
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                // Create multi-frame TIFF
+                using (TiffImage tiff = (TiffImage)Image.Create(tiffOptions, width, height))
+                {
+                    // First frame
+                    tiff.SavePixels(tiff.Bounds, img1.LoadPixels(img1.Bounds));
+
+                    // Add second frame
+                    tiff.AddFrame(new TiffFrame(tiffOptions, width, height));
+                    tiff.Frames[1].SavePixels(tiff.Frames[1].Bounds, img2.LoadPixels(img2.Bounds));
+
+                    // Save the TIFF file
+                    tiff.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)
@@ -60,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a multi‑page TIFF archive for scanned invoices, this code lets them add each page as a separate frame, set custom tile sizes, and apply LZW or Adobe Deflate compression to minimize storage while preserving image quality.
- * 2. When building a GIS tool that exports satellite imagery as a tiled TIFF stack, the snippet enables creation of individual frames with specific compression settings, ensuring efficient handling of large raster datasets.
- * 3. When creating a medical imaging pipeline that stores DICOM‑converted slides as a multi‑frame TIFF, developers can use this example to assign per‑frame compression and tile dimensions, maintaining high‑resolution color fidelity for each slice.
- * 4. When preparing print‑ready artwork that consists of multiple layers, a developer can assemble the layers into a tiled TIFF with chosen compression algorithms before converting the file to PDF for lossless printing.
- * 5. When implementing a document‑management system that bundles several scanned pages into a single TIFF file, this code allows C# developers to programmatically add each page as a frame, control tile size for faster rendering, and select the optimal compression per page.
+ * 1. When you need to combine several PNG scans into a single multi‑page TIFF document for archival or printing.
+ * 2. When an application must generate a multi‑frame TIFF on the fly from user‑uploaded images using C# and Aspose.Imaging.
+ * 3. When you want to produce a TIFF file that can be opened as separate pages in viewers like Adobe Acrobat or Windows Photo Viewer.
+ * 4. When you need to programmatically assemble a multi‑page TIFF for fax transmission or medical imaging workflows.
+ * 5. When you are building a batch process that converts a set of PNG files into a multi‑frame TIFF for efficient storage and distribution.
  */

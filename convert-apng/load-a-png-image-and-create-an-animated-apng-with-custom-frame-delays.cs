@@ -12,42 +12,52 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.apng";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
+            // Load the source PNG image
             using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
+                // Define custom frame delays (in milliseconds)
+                int[] frameDelays = new int[] { 100, 200, 300, 400 };
+
+                // Create APNG options with desired settings
                 ApngOptions createOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100,
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    NumPlays = 0 // infinite looping
+                    DefaultFrameTime = 100, // fallback default
+                    ColorType = PngColorType.TruecolorWithAlpha
                 };
 
+                // Create the APNG image canvas
                 using (ApngImage apngImage = (ApngImage)Image.Create(
                     createOptions,
                     sourceImage.Width,
                     sourceImage.Height))
                 {
+                    // Remove the initial placeholder frame
                     apngImage.RemoveAllFrames();
 
-                    int totalFrames = 5;
-                    for (int i = 0; i < totalFrames; i++)
+                    // Add frames with custom delays
+                    foreach (int delay in frameDelays)
                     {
                         apngImage.AddFrame(sourceImage);
-                        ApngFrame frame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
-                        frame.FrameTime = (int)(100 + i * 50); // custom delay per frame
+                        ApngFrame lastFrame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
+                        lastFrame.FrameTime = delay;
                     }
 
+                    // Save the animated APNG (output path already bound via FileCreateSource)
                     apngImage.Save();
                 }
             }
@@ -61,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to generate an animated APNG from a single PNG logo to display a loading spinner with gradually increasing frame delays on a web dashboard.
- * 2. When an e‑learning platform needs to create step‑by‑step tutorial animations by duplicating a base PNG and assigning custom frame times to highlight each instruction.
- * 3. When a mobile game developer wants to produce a looping character idle animation by reusing a high‑resolution PNG sprite and setting different frame delays for smoother motion.
- * 4. When a marketing team requires a promotional banner that cycles through the same product image with varying pause durations, using C# and Aspose.Imaging to output an APNG file.
- * 5. When an IoT device UI must show a status indicator that repeats indefinitely, and the developer uses the code to convert a PNG status icon into an APNG with infinite looping and per‑frame timing control.
+ * 1. When a developer wants to convert a static PNG logo into a looping animated APNG banner with precise timing for each frame in a C# web application.
+ * 2. When an e‑learning platform needs to generate step‑by‑step tutorial animations from a single PNG diagram by adding custom frame delays using Aspose.Imaging for .NET.
+ * 3. When a mobile game developer must create lightweight animated sprites from a base PNG asset, controlling the display duration of each sprite frame with C# code.
+ * 4. When a marketing automation tool has to produce personalized animated product previews by reusing a source PNG and specifying different frame intervals for each promotional variant.
+ * 5. When a desktop reporting solution requires embedding an animated APNG chart that shows data changes over time, with each frame’s delay tuned for smooth visual transitions.
  */

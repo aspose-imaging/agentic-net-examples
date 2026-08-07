@@ -30,35 +30,36 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Determine canvas size (horizontal merge)
-            int totalWidth = 0;
-            int maxHeight = 0;
-            const int loadBufferHint = 50; // MB
-
+            // Load each image to collect sizes (memory‑limited loading)
+            var sizes = new List<Size>();
+            var loadOptions = new LoadOptions { BufferSizeHint = 50 };
             foreach (string path in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path, new LoadOptions { BufferSizeHint = loadBufferHint }))
+                using (RasterImage img = (RasterImage)Image.Load(path, loadOptions))
                 {
-                    totalWidth += img.Width;
-                    if (img.Height > maxHeight)
-                        maxHeight = img.Height;
+                    sizes.Add(img.Size);
                 }
             }
 
-            // Create output JPEG canvas with bound source
-            Source outSource = new FileCreateSource(outputPath, false);
+            // Calculate canvas dimensions for horizontal merge
+            int newWidth = sizes.Sum(s => s.Width);
+            int newHeight = sizes.Max(s => s.Height);
+
+            // Prepare output canvas with JPEG options
+            Source src = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions
             {
-                Source = outSource,
-                Quality = 90
+                Source = src,
+                Quality = 90,
+                BufferSizeHint = 50
             };
 
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
                 int offsetX = 0;
                 foreach (string path in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path, new LoadOptions { BufferSizeHint = loadBufferHint }))
+                    using (RasterImage img = (RasterImage)Image.Load(path, loadOptions))
                     {
                         Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
@@ -79,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to combine multiple user‑uploaded JPEG photos into a single panoramic image without exhausting server memory, developers can use this code with ImageLoadOptions.BufferSizeHint to limit memory usage during the horizontal merge.
- * 2. When a desktop photo‑collage application must stitch together high‑resolution JPEG files into a wide‑format print layout on machines with limited RAM, the example shows how to load each image with a buffer hint and create a merged JPEG canvas.
- * 3. When an automated batch‑processing script generates composite product images from several JPEG assets for an e‑commerce catalog, using ImageLoadOptions helps keep the process scalable by controlling memory consumption while merging images side‑by‑side.
- * 4. When a mobile‑oriented backend service creates side‑by‑side comparison images from uploaded JPEG screenshots, the code demonstrates how to safely load each source image with a memory buffer limit before assembling the final JPEG output.
- * 5. When a digital signage system needs to concatenate multiple advertisement JPEGs into a single wide banner on a low‑end Windows server, developers can apply the shown ImageLoadOptions technique to merge the images horizontally while staying within the server’s memory constraints.
+ * 1. When a web service must stitch several high‑resolution JPEG product images into a single horizontal banner while running on a low‑memory VM, this code uses ImageLoadOptions with BufferSizeHint to limit RAM consumption during loading.
+ * 2. When an automated reporting tool needs to merge daily scanned JPEG receipts side‑by‑side into one file without exhausting server memory, the example demonstrates how to load each image with a memory‑friendly buffer and create a combined JpegImage.
+ * 3. When a mobile‑backend API creates a panoramic view from user‑uploaded JPEG photos on a device‑restricted server, the BufferSizeHint option ensures each RasterImage is loaded efficiently before the horizontal merge.
+ * 4. When a batch‑processing job consolidates multiple JPEG thumbnails into a single wide catalog image on a shared hosting environment, the code shows how to calculate canvas size and merge images while keeping memory usage low.
+ * 5. When an e‑commerce platform generates a combined promotional JPEG banner from several promotional images on a container with limited RAM, the example illustrates using JpegOptions and LoadOptions to safely load and merge the files horizontally.
  */

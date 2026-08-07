@@ -9,11 +9,11 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = @"C:\temp\input.bmp";
             string outputPath = @"C:\temp\output.pdf";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,11 +26,13 @@ class Program
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF export options
-                var pdfOptions = new PdfOptions
+                // Set up PDF export options
+                PdfOptions pdfOptions = new PdfOptions
                 {
-                    // Preserve the original DPI resolution of the BMP image
-                    UseOriginalImageResolution = true
+                    // Preserve the original DPI resolution
+                    UseOriginalImageResolution = true,
+                    // No multipage handling needed for a single BMP
+                    MultiPageOptions = null
                 };
 
                 // Save the image as a single‑page PDF
@@ -46,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a high‑resolution BMP scan of an engineering drawing into a single‑page PDF for distribution while preserving the original DPI.
- * 2. When a Windows desktop application must generate printable PDFs from BMP screenshots captured in C# without losing image clarity.
- * 3. When an automated batch job has to archive BMP medical images as PDF documents, keeping the diagnostic resolution intact for compliance.
- * 4. When a document management system requires embedding BMP product photos into PDF catalogs, ensuring the images retain their native resolution.
- * 5. When a C# service integrates Aspose.Imaging to transform BMP map files into PDF pages for GIS reporting, maintaining accurate scale and detail.
+ * 1. When a developer needs to convert a high‑resolution BMP scan of a signed contract into a PDF for electronic archiving while preserving the original DPI.
+ * 2. When a C# application must generate a single‑page PDF report that embeds a BMP diagram created by a legacy imaging system without losing image quality.
+ * 3. When an automated document workflow requires batch processing of BMP screenshots into PDF files for compliance auditing, ensuring each page retains its original resolution.
+ * 4. When a Windows service exports BMP medical images (e.g., X‑ray scans) to PDF for integration with a healthcare records system that only accepts PDF format.
+ * 5. When a desktop utility needs to embed a BMP logo into a PDF brochure page, keeping the exact pixel density for print‑ready output.
  */

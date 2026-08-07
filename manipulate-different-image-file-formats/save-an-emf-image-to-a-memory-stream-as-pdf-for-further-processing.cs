@@ -9,10 +9,10 @@ class Program
     {
         try
         {
-            // Hard‑coded input path
-            string inputPath = "C:\\temp\\input.emf";
+            // Hardcoded input path
+            string inputPath = @"C:\Temp\input.emf";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,7 +22,7 @@ class Program
             // Load the EMF image
             using (Image emfImage = Image.Load(inputPath))
             {
-                // Create PDF save options
+                // Prepare PDF save options (default settings)
                 var pdfOptions = new PdfOptions();
 
                 // Save the image to a memory stream as PDF
@@ -31,7 +31,7 @@ class Program
                     emfImage.Save(pdfStream, pdfOptions);
 
                     // The PDF data is now in pdfStream; further processing can be done here
-                    Console.WriteLine($"PDF saved to memory stream, length = {pdfStream.Length} bytes");
+                    Console.WriteLine($"PDF saved to memory stream, size = {pdfStream.Length} bytes");
                 }
             }
         }
@@ -44,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# web API must convert uploaded EMF vector graphics to PDF on the fly without writing temporary files, this code streams the PDF directly for immediate response.
- * 2. When generating a PDF report that includes EMF charts, developers can use this snippet to embed the chart as a PDF page via a MemoryStream before merging with other documents.
- * 3. When an application needs to attach a PDF version of an EMF logo to an email, the code creates the PDF in memory so it can be added to the email attachment collection without disk I/O.
- * 4. When a background service processes batch EMF files and sends the resulting PDFs to a document management system via a REST API, the MemoryStream output enables seamless binary upload.
- * 5. When performing server‑side printing of EMF drawings, the code converts the image to PDF in memory, allowing the PDF data to be sent directly to a printer driver or print queue.
+ * 1. When a developer needs to convert an EMF vector diagram into a PDF document in C# and send the PDF bytes directly from a memory stream without creating a temporary file.
+ * 2. When an application generates PDF reports from EMF charts and streams the PDF data to a web API for immediate processing.
+ * 3. When a server‑side service receives uploaded EMF logos, uses Aspose.Imaging to save them as PDF streams, and stores the resulting bytes in a database.
+ * 4. When a background job creates PDF thumbnails from EMF drawings and passes the memory stream to a PDF rendering library for further manipulation.
+ * 5. When a cloud function transforms EMF files into PDF streams for subsequent encryption or digital signing without writing to disk.
  */

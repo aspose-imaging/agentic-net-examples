@@ -1,10 +1,8 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -23,18 +21,9 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                var delays = new List<int>();
-                foreach (var page in apng.Pages)
-                {
-                    var frame = (ApngFrame)page;
-                    delays.Add(frame.FrameTime);
-                }
-
-                var gifOptions = new GifOptions();
-
-                apng.Save(outputPath, gifOptions);
+                image.Save(outputPath, new GifOptions());
             }
         }
         catch (Exception ex)
@@ -46,9 +35,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to convert animated PNG (APNG) assets into GIFs for browsers that only support GIF animation while preserving the original frame timing via comment extensions.
- * 2. When a mobile app team wants to generate lightweight GIF previews from high‑resolution APNG files for email attachments, using C# and Aspose.Imaging to embed the frame delay data for accurate playback.
- * 3. When an e‑learning platform must batch‑process course illustrations stored as APNGs into GIFs for legacy LMS systems, ensuring each frame’s display duration is retained in the GIF metadata.
- * 4. When a digital marketing agency automates the creation of social‑media GIFs from product animation APNGs, leveraging Aspose.Imaging for .NET to keep the original animation speed encoded in the GIF comment block.
- * 5. When a game developer exports character sprite animations from APNG to GIF for documentation purposes, using C# code to embed frame delay information so reviewers see the exact timing of each animation frame.
+ * 1. When a developer needs to convert animated PNG (APNG) assets into GIFs for compatibility with legacy browsers while preserving the original frame timing via GIF comment extensions.
+ * 2. When an e‑commerce platform wants to display product animations on email newsletters that only support GIF, and must embed the APNG frame delay information in the GIF comment to synchronize playback.
+ * 3. When a mobile game developer exports character animation sequences from APNG to GIF for use in social media sharing, ensuring the original animation speed is retained through the GIF comment extension.
+ * 4. When a content management system automatically processes user‑uploaded APNG stickers and converts them to GIFs for use in chat applications that read frame delay from the GIF comment block.
+ * 5. When a digital marketing tool generates animated banners by converting APNG templates to GIFs and embeds the frame delay metadata in the GIF comment to allow downstream tools to adjust animation speed accurately.
  */

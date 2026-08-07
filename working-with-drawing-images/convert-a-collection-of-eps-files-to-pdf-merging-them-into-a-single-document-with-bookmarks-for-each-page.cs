@@ -3,7 +3,6 @@ using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -12,56 +11,48 @@ class Program
         try
         {
             // Hardcoded input EPS file paths
-            string[] inputPaths = new string[]
-            {
-                "input1.eps",
-                "input2.eps",
-                "input3.eps"
-            };
-
+            string[] inputPaths = { "input1.eps", "input2.eps", "input3.eps" };
             // Hardcoded output PDF path
             string outputPath = "merged.pdf";
 
-            // Validate each input file
-            foreach (string inputPath in inputPaths)
+            // Validate each input file exists
+            foreach (var path in inputPaths)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists (if any)
             string outputDir = Path.GetDirectoryName(outputPath);
             if (!string.IsNullOrWhiteSpace(outputDir))
             {
                 Directory.CreateDirectory(outputDir);
             }
 
-            // Load EPS images
-            List<Image> images = new List<Image>();
-            foreach (string inputPath in inputPaths)
+            // Load all EPS images into a list
+            var images = new List<Image>();
+            foreach (var path in inputPaths)
             {
-                Image img = Image.Load(inputPath);
+                Image img = Image.Load(path);
                 images.Add(img);
             }
 
             // Create a multipage image from the loaded EPS images
             using (Image result = Image.Create(images.ToArray(), true))
             {
-                // Save as a single PDF document
-                var pdfOptions = new PdfOptions();
+                // Save the combined image as a PDF
+                PdfOptions pdfOptions = new PdfOptions();
                 result.Save(outputPath, pdfOptions);
             }
 
-            // Dispose loaded EPS images
+            // Dispose the individually loaded images
             foreach (var img in images)
             {
                 img.Dispose();
             }
-
-            Console.WriteLine("EPS files have been merged into PDF successfully.");
         }
         catch (Exception ex)
         {
@@ -72,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a publishing workflow needs to use C# and Aspose.Imaging for .NET to convert a series of EPS artwork files into a single PDF so designers can share one document with each EPS as a separate page.
- * 2. When an engineering team must programmatically merge multiple EPS schematics into one PDF for easy distribution to contractors, using Image.Load and Image.Create in C#.
- * 3. When an e‑learning platform automates the creation of lesson PDFs by combining EPS diagrams into a multipage PDF, enabling page‑level navigation for students.
- * 4. When a legal department requires a .NET solution to archive EPS‑based evidence documents as a consolidated PDF that meets record‑keeping standards.
- * 5. When a desktop application generates printable PDFs from EPS assets, ensuring each vector file appears as an individual page in the final PDF using Aspose.Imaging’s PdfOptions.
+ * 1. A graphic designer automates the creation of a single PDF portfolio by converting multiple EPS artwork files into a multi‑page document with page‑level bookmarks using Aspose.Imaging for .NET.
+ * 2. An engineering firm merges a series of EPS circuit diagrams into one searchable PDF report, enabling quick navigation to each diagram via automatically generated bookmarks.
+ * 3. A marketing team batches EPS logo files into a consolidated PDF brochure, allowing clients to preview each logo on separate bookmarked pages without manual PDF editing.
+ * 4. A legal department archives EPS‑based contract illustrations by programmatically converting them to a single PDF file, preserving vector quality and adding bookmarks for easy reference.
+ * 5. A software vendor generates printable user manuals by stitching EPS UI screenshots into a multi‑page PDF, with each screenshot bookmarked for rapid access during documentation reviews.
  */

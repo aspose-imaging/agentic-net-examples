@@ -10,30 +10,25 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"c:\temp\sample.tif";
-            string outputPath = @"c:\temp\sample.AdjustGamma.png";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\sample.tif";
+            string outputPath = @"C:\temp\sample.AdjustGamma.png";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TIFF image
+            // Load the TIFF image, apply gamma correction, and save as PNG
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to TiffImage to access AdjustGamma
                 TiffImage tiffImage = (TiffImage)image;
-
-                // Apply gamma correction with coefficient 1.2
                 tiffImage.AdjustGamma(1.2f);
-
-                // Save the result as PNG
                 tiffImage.Save(outputPath, new PngOptions());
             }
         }
@@ -46,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to enhance the visual contrast of high‑resolution scanned TIFF files before embedding them in a web portal, they can apply a gamma correction of 1.2 and save the result as a lightweight PNG using Aspose.Imaging for .NET.
- * 2. When an automated document‑processing pipeline must normalize the brightness of incoming TIFF images from a scanner and produce PNG thumbnails for preview, the code can adjust gamma and perform the format conversion in C#.
- * 3. When a medical‑imaging application requires subtle brightening of DICOM‑derived TIFF scans to improve readability for clinicians, developers can use the AdjustGamma method and export the adjusted image as PNG for integration with UI components.
- * 4. When a batch‑processing script has to prepare archival TIFF photographs for an online gallery by applying consistent gamma correction and converting them to PNG for browser compatibility, this C# snippet provides a concise solution.
- * 5. When a desktop utility needs to correct underexposed TIFF screenshots from legacy software and output them as PNG files for sharing, developers can leverage Aspose.Imaging’s AdjustGamma function with a 1.2 factor.
+ * 1. When a developer needs to convert a high‑resolution TIFF scan of a document to a web‑friendly PNG while brightening the image with a gamma of 1.2.
+ * 2. When an imaging application must preprocess satellite TIFF imagery by applying gamma correction before saving it as PNG for downstream analysis.
+ * 3. When a medical imaging system requires adjusting the contrast of a TIFF X‑ray image using gamma 1.2 and exporting it as PNG for inclusion in patient reports.
+ * 4. When a photo‑editing tool automates the workflow of loading a TIFF photograph, applying a 1.2 gamma boost, and saving the result as a PNG for faster loading in browsers.
+ * 5. When a batch‑processing script needs to verify the existence of a TIFF file, apply gamma correction, and generate a PNG thumbnail for a digital asset management catalog.
  */

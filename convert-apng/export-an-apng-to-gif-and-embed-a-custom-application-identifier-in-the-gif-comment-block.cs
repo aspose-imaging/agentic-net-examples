@@ -9,8 +9,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\animation.apng";
-            string outputPath = "Output\\animation.gif";
+            string inputPath = "input.apng";
+            string outputPath = "output/output.gif";
 
             if (!File.Exists(inputPath))
             {
@@ -20,10 +20,10 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image apngImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                var gifOptions = new GifOptions();
-                apngImage.Save(outputPath, gifOptions);
+                GifOptions options = new GifOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -35,9 +35,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to convert animated PNGs created by a design tool into GIFs for compatibility with older browsers while tagging the file with the application name for tracking.
- * 2. When a mobile app generates APNG stickers and must export them as GIFs for messaging platforms that only accept GIFs, embedding a custom identifier to trace the source app.
- * 3. When an e‑learning platform converts animated instructional graphics from APNG to GIF to embed in PowerPoint slides, adding a comment block that records the content management system version.
- * 4. When a marketing automation system processes user‑uploaded APNG banners and converts them to GIFs for email newsletters, inserting a custom application ID in the GIF metadata for analytics.
- * 5. When a game developer exports in‑game animated icons from APNG to GIF for use in a legacy UI engine, and includes a comment with the game engine’s build number for debugging.
+ * 1. When a developer needs to convert animated PNG (APNG) files into GIF format to ensure compatibility with legacy browsers while preserving the animation frames.
+ * 2. When an application must embed a custom application identifier in the GIF comment block for tracking the source tool that generated the image.
+ * 3. When a game studio batch‑processes sprite animations stored as APNGs into GIFs that can be displayed on older consoles supporting only GIF animation.
+ * 4. When a marketing platform automatically creates shareable GIFs from user‑uploaded APNGs and adds a brand‑specific comment tag for proper attribution.
+ * 5. When an e‑learning system converts instructional APNG diagrams to GIFs for email delivery and includes a version code in the GIF comment to manage content updates.
  */

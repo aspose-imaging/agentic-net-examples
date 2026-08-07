@@ -11,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.jpg";
-            string outputPath = "C:\\temp\\output_lzw.tif";
+            string inputPath = @"C:\temp\input.jpg";
+            string outputPath = @"C:\temp\output_lzw.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,19 +27,25 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure TIFF options for LZW compression
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.Compression = TiffCompressions.Lzw;
-                tiffOptions.Predictor = TiffPredictor.Horizontal; // improves LZW compression
-                tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-                tiffOptions.Photometric = TiffPhotometrics.Rgb;
-                tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+                // Configure TIFF save options with LZW compression
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    Compression = TiffCompressions.Lzw,
+                    // Optional predictor to improve compression for continuous-tone images
+                    Predictor = TiffPredictor.Horizontal,
+                    // Preserve original color model
+                    Photometric = Aspose.Imaging.FileFormats.Tiff.Enums.TiffPhotometrics.Rgb,
+                    // Store color components in a single plane
+                    PlanarConfiguration = Aspose.Imaging.FileFormats.Tiff.Enums.TiffPlanarConfigs.Contiguous,
+                    // 8 bits per sample for each color component
+                    BitsPerSample = new ushort[] { 8, 8, 8 }
+                };
 
-                // Save the image as TIFF with the specified options
+                // Save the image as TIFF with LZW compression
                 image.Save(outputPath, tiffOptions);
             }
 
-            // Verify file size reduction
+            // Compare file sizes to verify reduction
             long originalSize = new FileInfo(inputPath).Length;
             long compressedSize = new FileInfo(outputPath).Length;
 
@@ -48,11 +54,11 @@ class Program
 
             if (compressedSize < originalSize)
             {
-                Console.WriteLine("File size reduced after LZW compression.");
+                Console.WriteLine("File size reduction achieved.");
             }
             else
             {
-                Console.WriteLine("No size reduction observed.");
+                Console.WriteLine("No size reduction detected.");
             }
         }
         catch (Exception ex)
@@ -64,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert high‑resolution JPEG photographs to TIFF files with LZW compression to reduce storage space for archival in a digital asset management system.
- * 2. When building a C# application that processes scanned documents and must save them as compressed TIFF images to meet email attachment size limits.
- * 3. When creating a medical imaging workflow that stores patient X‑ray images as TIFF with lossless LZW compression to ensure image integrity while minimizing disk usage.
- * 4. When developing a batch image‑conversion tool that verifies the file size reduction after saving PNG or JPEG files as LZW‑compressed TIFF for long‑term backup.
- * 5. When optimizing web‑ready image assets by converting source images to TIFF with LZW compression and programmatically confirming the compressed file is smaller before uploading to a content delivery network.
+ * 1. When a developer needs to archive high‑resolution photographs as TIFF files with lossless LZW compression to reduce storage space while preserving image quality.
+ * 2. When a medical imaging application must convert JPEG scans to TIFF with LZW compression to meet DICOM compliance and verify that the file size is smaller than the original.
+ * 3. When a document management system requires batch conversion of user‑uploaded JPEGs to TIFF with LZW compression and needs to log the size savings for reporting.
+ * 4. When a GIS tool converts satellite imagery from JPEG to TIFF using LZW compression to ensure efficient disk usage and checks the reduction before publishing.
+ * 5. When a print‑ready workflow transforms source images to TIFF with LZW compression to maintain color fidelity and confirms the compressed file fits within printer memory limits.
  */

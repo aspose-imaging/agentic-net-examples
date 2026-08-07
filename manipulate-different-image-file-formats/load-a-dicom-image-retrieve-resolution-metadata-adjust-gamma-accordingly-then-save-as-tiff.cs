@@ -2,45 +2,38 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.dcm";
-        string outputPath = "output.tif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string outputPath = "output.tiff";
 
         try
         {
-            // Load the DICOM image
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage for DICOM-specific operations
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Retrieve resolution metadata
                 double horizontalResolution = dicomImage.HorizontalResolution;
                 double verticalResolution = dicomImage.VerticalResolution;
 
-                // Adjust gamma based on resolution (example logic)
-                float gamma = (horizontalResolution > 300 || verticalResolution > 300) ? 1.2f : 1.0f;
+                float gamma = (float)((horizontalResolution + verticalResolution) / 200.0);
+                if (gamma <= 0) gamma = 1.0f;
+
                 dicomImage.AdjustGamma(gamma);
 
-                // Save the adjusted image as TIFF
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 dicomImage.Save(outputPath, tiffOptions);
             }
@@ -54,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. A radiology software developer needs to convert high‑resolution DICOM scans to TIFF for archival systems while automatically brightening images with a gamma boost when the scan resolution exceeds 300 dpi.
- * 2. A medical research application must load DICOM ultrasound files, detect their pixel density, apply a resolution‑based gamma correction, and export the results as TIFF for compatibility with image analysis tools.
- * 3. An electronic health record (EHR) integration service uses this code to ingest DICOM X‑ray images, adjust their visual contrast according to horizontal or vertical resolution, and store the processed images as TIFF for display on web portals.
- * 4. A telemedicine platform processes incoming DICOM CT images, applies a gamma tweak when the images are captured at high resolution, and saves them as TIFF to ensure consistent rendering across different client devices.
- * 5. A healthcare data migration script reads DICOM mammography files, evaluates their DPI, performs a conditional gamma adjustment, and writes the output as TIFF to meet the target system’s file‑format requirements.
+ * 1. When a medical imaging application needs to convert DICOM scans to TIFF for archival while preserving resolution‑based gamma correction.
+ * 2. When a radiology workflow requires extracting horizontal and vertical resolution metadata from a DICOM file to dynamically adjust image brightness before saving as a TIFF for reporting.
+ * 3. When a healthcare data integration service must validate the existence of a DICOM file, read its resolution, apply gamma correction, and output a TIFF compatible with PACS viewers.
+ * 4. When a C# developer builds a batch‑processing tool that reads DICOM images, computes gamma from resolution values, and stores the adjusted images as TIFF files for downstream analysis.
+ * 5. When a diagnostic imaging platform needs to ensure that converted TIFF images retain proper visual contrast by using resolution‑derived gamma adjustment during the DICOM‑to‑TIFF conversion.
  */

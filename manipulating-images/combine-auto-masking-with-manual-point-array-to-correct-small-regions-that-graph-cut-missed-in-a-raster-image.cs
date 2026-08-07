@@ -12,11 +12,11 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output.png";
+
         try
         {
-            string inputPath = "input.jpg";
-            string outputPath = "output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -41,10 +41,12 @@ class Program
                     BackgroundReplacementColor = Color.Transparent
                 };
 
-                using (MaskingResult maskingResult = new ImageMasking(image).Decompose(autoOptions))
-                using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
+                using (MaskingResult result = new ImageMasking(image).Decompose(autoOptions))
                 {
-                    foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    using (RasterImage foreground = (RasterImage)result[1].GetImage())
+                    {
+                        foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
+                    }
                 }
 
                 if (File.Exists("temp_auto.png"))
@@ -62,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically remove the background of product photos in JPEG format, then fine‑tune small edge artifacts with a manual point array before exporting a transparent PNG for e‑commerce listings.
- * 2. When an image‑processing pipeline must extract foreground objects from scanned documents, apply Graph Cut auto‑masking, and manually correct missed regions to produce a clean PNG with an alpha channel for OCR preprocessing.
- * 3. When a mobile app generates user avatars by auto‑segmenting portrait photos, then uses a point‑based mask to fix hair strands that Graph Cut missed, saving the result as a true‑color PNG with transparency.
- * 4. When a digital‑art workflow requires batch processing of JPEG illustrations, automatically separating characters with Graph Cut and manually adjusting tiny details like accessories via point coordinates before saving as PNG for compositing.
- * 5. When a developer integrates Aspose.Imaging into a content‑management system to auto‑mask backgrounds of uploaded images, then applies a custom point array to patch small holes left by the algorithm, delivering a transparent PNG for web publishing.
+ * 1. When a developer needs to automatically remove the background from a high‑resolution product photograph (JPEG) but must manually refine tiny hair strands or logo details that the Graph Cut algorithm missed, they can combine auto‑masking with a point array to produce a clean PNG with an alpha channel.
+ * 2. When processing scanned archival documents where the auto‑masking separates text from the paper background but leaves small ink specks unmasked, a developer can add manual points to the mask to ensure those specks are removed before saving the result as a transparent PNG.
+ * 3. When creating assets for a mobile game, a developer may use auto‑masking to extract a character sprite from a JPEG background and then use a manual point array to fix missed pixels around the character’s edges, resulting in a PNG with smooth feathered edges.
+ * 4. When preparing medical imaging slides for analysis, a developer can apply Graph Cut auto‑masking to isolate tissue regions and then manually add points to correct small gaps in the mask, ensuring accurate segmentation before exporting to PNG.
+ * 5. When building an AR application that overlays virtual objects onto real‑world scenes, a developer can auto‑mask the foreground from a camera‑captured JPEG and manually adjust the mask with point coordinates to capture fine details like wires or thin objects, producing a transparent PNG for seamless compositing.
  */

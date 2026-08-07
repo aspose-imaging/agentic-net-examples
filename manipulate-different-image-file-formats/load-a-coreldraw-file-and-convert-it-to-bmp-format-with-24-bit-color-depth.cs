@@ -1,40 +1,49 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"input.cdr";
-        string outputPath = @"output\converted.bmp";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/sample.bmp";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (CdrImage cdrImage = (CdrImage)Aspose.Imaging.Image.Load(inputPath))
+            // Load the CDR vector image
+            using (Image image = Image.Load(inputPath))
             {
-                var bmpOptions = new BmpOptions
+                // Configure BMP options with 24‑bit color depth
+                BmpOptions bmpOptions = new BmpOptions
                 {
                     BitsPerPixel = 24,
+                    // Set up vector rasterization to render the vector image to raster
                     VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        PageWidth = cdrImage.Width,
-                        PageHeight = cdrImage.Height,
-                        BackgroundColor = Aspose.Imaging.Color.White
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
                     }
                 };
 
-                cdrImage.Save(outputPath, bmpOptions);
+                // Save the rasterized image as BMP
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to batch‑convert legacy CorelDRAW (.cdr) artwork into 24‑bit BMP files for printing workflows that require uncompressed raster images.
- * 2. When an automated build pipeline must generate Windows‑compatible bitmap thumbnails from CDR source files for inclusion in a documentation portal.
- * 3. When a legacy desktop application only supports BMP input, a developer can use this code to rasterize vector CDR graphics at their original dimensions with a white background.
- * 4. When a content management system stores vector assets in CorelDRAW format but needs to serve them as BMP images to devices that lack vector rendering capabilities.
- * 5. When a migration script has to preserve the exact color depth of original designs while converting CDR files to BMP for archival storage in a .NET environment.
+ * 1. When a desktop publishing workflow requires converting legacy CorelDRAW (CDR) vector artwork into a 24‑bit BMP file for inclusion in a Windows‑based print catalog, a developer can use this code to rasterize and save the image.
+ * 2. When an automated document processing system needs to generate high‑resolution bitmap thumbnails of CDR designs for preview in a web portal, the code provides a C# solution that loads the CDR file and outputs a 24‑bit BMP.
+ * 3. When a legacy engineering application only accepts BMP images with 24‑bit color depth, developers can employ this snippet to import CorelDRAW schematics and convert them to the required format.
+ * 4. When a batch conversion utility must ensure consistent background color and page dimensions while transforming multiple CDR files to BMP for archival storage, the code demonstrates how to configure VectorRasterizationOptions in Aspose.Imaging.
+ * 5. When a game development pipeline needs to import vector assets created in CorelDRAW and rasterize them to 24‑bit BMP textures for use in DirectX rendering, this C# example shows the necessary steps.
  */

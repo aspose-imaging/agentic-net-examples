@@ -1,8 +1,9 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -21,18 +22,18 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                if (!tiffImage.IsCached)
-                    tiffImage.CacheData();
-
-                Graphics graphics = new Graphics(tiffImage.ActiveFrame);
-                using (SolidBrush brush = new SolidBrush(Color.Red))
+                RasterImage raster = image as RasterImage;
+                if (raster != null)
                 {
-                    graphics.FillRectangle(brush, tiffImage.ActiveFrame.Bounds);
+                    Graphics graphics = new Graphics(raster);
+                    SolidBrush brush = new SolidBrush(Color.Red);
+                    graphics.FillRectangle(brush, new Rectangle(10, 10, 100, 100));
                 }
 
-                tiffImage.Save(outputPath);
+                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -44,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system needs to annotate a diagnostic TIFF scan with a red overlay and overwrite the original file on the server.
- * 2. When a document management workflow must apply a watermark to multi‑page TIFF invoices and save the updated file back to the same location without creating a duplicate.
- * 3. When a GIS application programmatically highlights a region in a satellite TIFF raster and overwrites the existing file to keep the dataset current.
- * 4. When an archival tool processes scanned TIFF photographs, adds a color‑corrected rectangle, and saves the changes in place to preserve the original file name.
- * 5. When a batch processing script updates TIFF thumbnails in a digital asset library and uses Image.Save with overwrite enabled to replace each original image efficiently.
+ * 1. When a developer needs to programmatically add a red highlight rectangle to a scanned TIFF invoice and overwrite the original file for downstream accounting systems.
+ * 2. When a medical imaging application must annotate a TIFF X‑ray by drawing a colored region and save the modified image back to disk without creating a duplicate file.
+ * 3. When an engineering workflow requires stamping a TIFF blueprint with a warning box using C# graphics and then overwriting the source file for version control.
+ * 4. When a document management system wants to batch‑process multi‑page TIFF files, draw a marker on each page, and replace the existing files to conserve storage.
+ * 5. When a GIS tool needs to overlay a red rectangle on a TIFF satellite tile and save the updated tile using Aspose.Imaging’s Image.Save with overwrite enabled for immediate map rendering.
  */

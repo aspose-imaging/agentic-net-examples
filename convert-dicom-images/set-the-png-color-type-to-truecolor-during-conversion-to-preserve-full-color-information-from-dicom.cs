@@ -2,18 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.dcm";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "input.png";
-            string outputPath = "output.dcm";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,17 +24,17 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            // Load the DICOM image
+            using (Image dicomImage = Image.Load(inputPath))
             {
-                // Set DICOM options to preserve truecolor (RGB 24‑bit)
-                var dicomOptions = new DicomOptions
+                // Set PNG options with Truecolor to preserve full color information
+                var pngOptions = new PngOptions
                 {
-                    ColorType = ColorType.Rgb24Bit
+                    ColorType = PngColorType.Truecolor
                 };
 
-                // Save as DICOM using the specified options
-                image.Save(outputPath, dicomOptions);
+                // Save as PNG using the specified options
+                dicomImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. A radiology software developer needs to convert high‑resolution PNG scans of pathology slides to DICOM while preserving the full 24‑bit RGB color data for accurate diagnostic review.
- * 2. When building a C# medical imaging archive, a programmer uses this code to ensure that color‑rich PNG photographs of surgical procedures are stored in DICOM format without losing truecolor information.
- * 3. A healthcare IT team integrates Aspose.Imaging to transform PNG dermatology images into DICOM files, requiring truecolor preservation to maintain skin tone details for AI‑driven analysis.
- * 4. In a telemedicine application, developers convert patient‑submitted PNG images of wound healing into DICOM, setting the color type to Rgb24Bit so clinicians can view the exact color gradients remotely.
- * 5. A research project that aggregates PNG microscopy images into a DICOM dataset relies on this conversion code to keep the original truecolor fidelity for quantitative image processing.
+ * 1. When a medical imaging system needs to export DICOM scans as high‑fidelity PNG files for patient reports, using truecolor PNG preserves the full color depth and diagnostic detail.
+ * 2. When a radiology research pipeline converts DICOM images to PNG for machine‑learning preprocessing, truecolor ensures the original pixel values remain intact for accurate model training.
+ * 3. When a hospital PACS integration generates PNG thumbnails for a web portal, setting the PNG color type to truecolor retains the subtle grayscale or color nuances of the source DICOM.
+ * 4. When a telemedicine platform shares DICOM images with external specialists via email, converting them to truecolor PNG provides a universally viewable format without losing visual information.
+ * 5. When a healthcare mobile app downloads DICOM files and saves them locally as PNG for offline viewing, truecolor PNG guarantees the on‑device viewer displays the image with the same color fidelity as the original DICOM.
  */

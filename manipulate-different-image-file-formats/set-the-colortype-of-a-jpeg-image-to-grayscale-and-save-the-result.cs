@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample.bmp";
-        string outputPath = @"c:\temp\sample.grayscale.jpg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.jpg";
+            string outputPath = @"C:\temp\output_grayscale.jpg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,16 +24,16 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure JPEG save options with Grayscale color mode
-            JpegOptions saveOptions = new JpegOptions
-            {
-                ColorType = JpegCompressionColorMode.Grayscale
-            };
-
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Save the image as JPEG using the configured options
+                // Configure JPEG save options with Grayscale color type
+                JpegOptions saveOptions = new JpegOptions
+                {
+                    ColorType = JpegCompressionColorMode.Grayscale
+                };
+
+                // Save the image as a grayscale JPEG
                 image.Save(outputPath, saveOptions);
             }
         }
@@ -46,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a high‑resolution BMP scan of a document into a smaller grayscale JPEG for faster web loading and reduced storage.
- * 2. When an application must generate printable black‑and‑white thumbnails from color images to meet PDF/A compliance requirements.
- * 3. When a photo‑processing service wants to strip color information from user‑uploaded pictures to create uniform grayscale assets for a gallery.
- * 4. When a batch‑processing script has to prepare medical imaging files in JPEG format with Grayscale color mode for compatibility with legacy diagnostic software.
- * 5. When a C# desktop tool must ensure that archived screenshots are saved as grayscale JPEGs to minimize file size while preserving visual detail.
+ * 1. When a developer needs to convert a color JPEG photo to a smaller grayscale JPEG for faster web page loading.
+ * 2. When an image processing pipeline must generate black‑and‑white thumbnails from user‑uploaded JPEGs using C# and Aspose.Imaging.
+ * 3. When a medical imaging application requires storing scanned documents as grayscale JPEGs to reduce file size while preserving diagnostic detail.
+ * 4. When a batch job processes product catalog images and needs to standardize them to grayscale JPEG format for consistent printing output.
+ * 5. When a developer wants to comply with a legacy system that only accepts grayscale JPEG files and must convert existing color images programmatically.
  */

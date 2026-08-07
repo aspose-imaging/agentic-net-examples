@@ -8,34 +8,43 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\input\sample.dcm";
-        string outputPath = @"C:\output\sample.png";
+        // Hardcoded input DICOM file path and output folder path
+        string inputPath = @"C:\temp\input.dcm";
+        string outputFolder = @"C:\temp\output\";
 
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load DICOM image from file stream
+            // Open the DICOM file as a stream
             using (Stream stream = File.OpenRead(inputPath))
-            using (DicomImage dicomImage = new DicomImage(stream))
             {
-                // If the DICOM file has multiple pages, save the first one.
-                // Otherwise, save the single page.
-                var dicomPage = dicomImage.DicomPages[0];
-                dicomPage.Save(outputPath, new PngOptions());
+                // Load the DICOM image from the stream
+                using (DicomImage dicomImage = new DicomImage(stream))
+                {
+                    // Iterate through each page in the DICOM image
+                    foreach (var dicomPage in dicomImage.DicomPages)
+                    {
+                        // Build the output PNG file path for the current page
+                        string outputPath = Path.Combine(outputFolder, $"page_{dicomPage.Index}.png");
+
+                        // Ensure the output directory exists before saving
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the page as a PNG image
+                        dicomPage.Save(outputPath, new PngOptions());
+                    }
+                }
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -43,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application must convert DICOM scans to PNG thumbnails for web preview, a developer can use this command‑line tool to read the .dcm file and output a .png image.
- * 2. When integrating radiology workflow automation, a developer needs to extract the first frame of a multi‑page DICOM series and save it as a PNG for inclusion in patient reports.
- * 3. When building a batch processing script that archives diagnostic images in a universal format, a developer can invoke this utility to transform each DICOM file into a PNG file stored in a designated folder.
- * 4. When a hospital’s PACS system requires a lightweight image for mobile devices, a developer can employ this code to convert the DICOM file to a PNG that can be displayed on smartphones.
- * 5. When performing image analysis with third‑party libraries that only support PNG, a developer can use this tool to convert incoming DICOM files to PNG before feeding them into the analysis pipeline.
+ * 1. When a radiology department needs to export DICOM scans as PNG files for inclusion in patient reports or presentations.
+ * 2. When a medical imaging researcher wants to batch‑convert DICOM image series to PNG for use in machine‑learning pipelines written in C#.
+ * 3. When a hospital IT team must provide a simple command‑line utility to extract individual DICOM frames as PNGs for integration with electronic health record systems.
+ * 4. When a developer is building a cross‑platform diagnostic web app and needs to pre‑process DICOM files into PNG thumbnails on a Windows server.
+ * 5. When a quality‑control engineer requires automated conversion of DICOM files to PNG to compare visual output against reference images during software testing.
  */

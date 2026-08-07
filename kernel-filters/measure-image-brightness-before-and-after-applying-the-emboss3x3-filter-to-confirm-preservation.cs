@@ -2,6 +2,9 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -10,7 +13,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output.png";
+            string outputPath = "output_emboss.png";
 
             if (!File.Exists(inputPath))
             {
@@ -23,10 +26,6 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
-                if (!raster.IsCached)
-                {
-                    raster.CacheData();
-                }
 
                 // Measure brightness before filter
                 int[] pixelsBefore = raster.GetDefaultArgb32Pixels(raster.Bounds);
@@ -42,9 +41,7 @@ class Program
                 Console.WriteLine($"Average brightness before: {avgBrightnessBefore}");
 
                 // Apply Emboss3x3 filter
-                raster.Filter(raster.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
-                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
                 // Measure brightness after filter
                 int[] pixelsAfter = raster.GetDefaultArgb32Pixels(raster.Bounds);
@@ -60,7 +57,8 @@ class Program
                 Console.WriteLine($"Average brightness after: {avgBrightnessAfter}");
 
                 // Save the filtered image
-                raster.Save(outputPath, new PngOptions());
+                var options = new PngOptions();
+                raster.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -72,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to verify that applying an Emboss3x3 convolution filter to a PNG image does not unintentionally darken or brighten the picture, they can use this code to compute average brightness before and after the filter.
- * 2. When building an automated image‑processing pipeline in C# that applies artistic effects while preserving overall exposure, the sample shows how to load a raster image, cache data, and compare brightness metrics.
- * 3. When creating a quality‑control test for a photo‑editing application that supports multiple file formats such as PNG, JPEG, or BMP, this snippet demonstrates measuring pixel luminance to ensure the emboss effect maintains visual consistency.
- * 4. When debugging a custom filter implementation in Aspose.Imaging for .NET and needing a quick way to log the average RGB brightness of the source and filtered images, the code provides a straightforward console output.
- * 5. When generating documentation or tutorials that illustrate the impact of convolution filters on image luminance, developers can reuse this example to show how to retrieve ARGB32 pixels, calculate mean brightness, and confirm the filter’s effect on a raster image.
+ * 1. When a developer wants to verify that applying the Aspose.Imaging ConvolutionFilter.Emboss3x3 to a PNG image does not unintentionally alter the overall brightness, they can use this code to measure average brightness before and after the filter.
+ * 2. When building an automated image‑processing pipeline in C# that applies artistic effects while maintaining consistent visual exposure across a batch of raster images, this snippet helps compare brightness levels pre‑ and post‑emboss.
+ * 3. When creating a quality‑control test for a photo‑editing application that uses Aspose.Imaging to generate embossed thumbnails, the code provides a simple way to assert that the emboss operation preserves the original image’s luminance.
+ * 4. When troubleshooting a client’s complaint that embossed PNG files appear too dark, a developer can run this example to calculate and log the average brightness, confirming whether the filter itself is responsible.
+ * 5. When documenting a tutorial on convolution filters in Aspose.Imaging for .NET, the example demonstrates how to load an image, apply the Emboss3x3 filter, and programmatically compare brightness to illustrate that the effect is primarily edge‑enhancement rather than exposure change.
  */

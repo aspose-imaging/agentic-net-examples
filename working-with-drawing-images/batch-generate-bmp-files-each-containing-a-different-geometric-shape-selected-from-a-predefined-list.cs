@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -13,84 +12,70 @@ class Program
         {
             // Output directory for generated BMP files
             string outputDir = @"C:\Temp\Shapes";
+            Directory.CreateDirectory(outputDir);
 
-            // List of geometric shapes to generate
-            var shapes = new[] { "Rectangle", "Ellipse", "Line", "Arc", "Pie", "Polygon" };
+            // Canvas dimensions
+            int canvasWidth = 500;
+            int canvasHeight = 500;
 
-            int canvasWidth = 200;
-            int canvasHeight = 200;
+            // List of shapes to draw
+            string[] shapeNames = new string[] { "Rectangle", "Ellipse", "Line", "Polygon", "Pie", "Arc" };
 
-            foreach (var shape in shapes)
+            foreach (string shape in shapeNames)
             {
-                // Define output file path for the current shape
-                string outputPath = Path.Combine(outputDir, $"{shape}.bmp");
+                // Output file path for the current shape
+                string outputPath = Path.Combine(outputDir, shape + ".bmp");
 
-                // Ensure the output directory exists
+                // Ensure the output directory exists (rule 3)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Configure BMP options with a file create source
-                BmpOptions bmpOptions = new BmpOptions
-                {
-                    BitsPerPixel = 24,
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                // Configure BMP options and bind to the output file
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.BitsPerPixel = 24;
+                Source source = new FileCreateSource(outputPath, false);
+                bmpOptions.Source = source;
 
-                // Create a bound BMP image canvas
-                using (Image image = Image.Create(bmpOptions, canvasWidth, canvasHeight))
+                // Create the canvas image
+                using (Image canvas = Image.Create(bmpOptions, canvasWidth, canvasHeight))
                 {
                     // Initialize graphics for drawing
-                    Graphics graphics = new Graphics(image);
+                    Graphics graphics = new Graphics(canvas);
                     graphics.Clear(Color.White);
 
-                    // Common pen for outlines
-                    Pen pen = new Pen(Color.Black, 2);
+                    // Common pen for drawing shapes
+                    Pen pen = new Pen(Color.Black, 3);
 
-                    // Solid brush for fills (only SolidBrush is supported for FillXXX)
-                    using (SolidBrush brush = new SolidBrush(Color.LightBlue))
+                    // Draw the selected shape
+                    switch (shape)
                     {
-                        switch (shape)
-                        {
-                            case "Rectangle":
-                                graphics.FillRectangle(brush, 10, 10, canvasWidth - 20, canvasHeight - 20);
-                                graphics.DrawRectangle(pen, 10, 10, canvasWidth - 20, canvasHeight - 20);
-                                break;
-                            case "Ellipse":
-                                graphics.FillEllipse(brush, 10, 10, canvasWidth - 20, canvasHeight - 20);
-                                graphics.DrawEllipse(pen, 10, 10, canvasWidth - 20, canvasHeight - 20);
-                                break;
-                            case "Line":
-                                graphics.DrawLine(pen, 10, 10, canvasWidth - 10, canvasHeight - 10);
-                                break;
-                            case "Arc":
-                                {
-                                    Rectangle rect = new Rectangle(20, 20, canvasWidth - 40, canvasHeight - 40);
-                                    graphics.DrawArc(pen, rect, 0, 180);
-                                }
-                                break;
-                            case "Pie":
-                                {
-                                    Rectangle rect = new Rectangle(20, 20, canvasWidth - 40, canvasHeight - 40);
-                                    graphics.FillPie(brush, rect, 0, 90);
-                                    graphics.DrawPie(pen, rect, 0, 90);
-                                }
-                                break;
-                            case "Polygon":
-                                {
-                                    Point[] points = new Point[]
-                                    {
-                                        new Point(10, canvasHeight - 10),
-                                        new Point(canvasWidth / 2, 10),
-                                        new Point(canvasWidth - 10, canvasHeight - 10)
-                                    };
-                                    graphics.FillPolygon(brush, points);
-                                    graphics.DrawPolygon(pen, points);
-                                }
-                                break;
-                        }
+                        case "Rectangle":
+                            graphics.DrawRectangle(pen, new Rectangle(50, 50, 400, 300));
+                            break;
+                        case "Ellipse":
+                            graphics.DrawEllipse(pen, new Rectangle(50, 50, 400, 300));
+                            break;
+                        case "Line":
+                            graphics.DrawLine(pen, new Point(50, 50), new Point(450, 450));
+                            break;
+                        case "Polygon":
+                            graphics.DrawPolygon(pen, new[]
+                            {
+                                new Point(250, 50),
+                                new Point(450, 250),
+                                new Point(250, 450),
+                                new Point(50, 250)
+                            });
+                            break;
+                        case "Pie":
+                            graphics.DrawPie(pen, new Rectangle(100, 100, 300, 300), 0, 120);
+                            break;
+                        case "Arc":
+                            graphics.DrawArc(pen, new Rectangle(100, 100, 300, 300), 0, 120);
+                            break;
                     }
 
-                    // Save the bound image
-                    image.Save();
+                    // Save the canvas (output is already bound to the file)
+                    canvas.Save();
                 }
             }
         }
@@ -103,9 +88,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a set of sample BMP icons showing basic geometric shapes for testing image rendering pipelines in a .NET application.
- * 2. When an automated documentation generator must embed placeholder graphics of rectangles, ellipses, and other shapes into help files without manually drawing each image.
- * 3. When a quality‑control tool requires pre‑generated BMP test patterns to verify that a printer driver correctly handles different drawing primitives.
- * 4. When a game‑development team wants to quickly produce bitmap assets for UI elements such as buttons or health bars by programmatically drawing shapes with Aspose.Imaging.
- * 5. When a data‑visualization library needs to supply example BMP files illustrating how to use the Graphics, Pen, and SolidBrush classes for drawing shapes in C#.
+ * 1. When a developer needs to automatically generate a set of BMP icons that each display a different geometric shape for use in a Windows desktop application's toolbar.
+ * 2. When a testing team requires a batch of sample BMP images containing predefined shapes to validate image processing algorithms such as shape detection or edge detection in C#.
+ * 3. When a documentation generator must create visual examples of drawing primitives (rectangle, ellipse, line, polygon, pie, arc) in BMP format to illustrate Aspose.Imaging graphics capabilities.
+ * 4. When an e‑learning platform wants to programmatically produce lesson assets showing basic geometric figures in 24‑bit BMP files for inclusion in interactive quizzes.
+ * 5. When a game developer needs to pre‑render simple shape sprites as BMP files to be loaded quickly at runtime without relying on external design tools.
  */

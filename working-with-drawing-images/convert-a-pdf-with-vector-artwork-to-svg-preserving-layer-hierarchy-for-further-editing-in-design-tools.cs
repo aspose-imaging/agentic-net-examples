@@ -9,48 +9,47 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
+            // Hard‑coded input and output paths
             string inputPath = @"C:\Input\sample.pdf";
-            string outputPath = @"C:\Output\sample.pdf.svg";
+            string outputPath = @"C:\Output\sample.svg";
 
-            // Verify that the input PDF exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PDF (vector image) using Aspose.Imaging
+            // Load the PDF document
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options for SVG output
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    // Preserve the original page size
-                    PageSize = image.Size
-                };
-
-                // Configure SVG save options
+                // Configure SVG export options
                 var svgOptions = new SvgOptions
                 {
                     // Render text as shapes to keep editability
                     TextAsShapes = true,
-                    // Apply the rasterization settings defined above
-                    VectorRasterizationOptions = rasterOptions,
-                    // Keep original metadata (optional, but helps preserve layers)
-                    KeepMetadata = true
+                    // Set page size based on the source image
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    }
                 };
 
-                // Save the PDF as an SVG file, preserving layer hierarchy
+                // If the PDF has multiple pages, export only the first page
+                if (image is IMultipageImage multipage && multipage.PageCount > 1)
+                {
+                    svgOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, 1));
+                }
+
+                // Save as SVG, preserving vector layers
                 image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -58,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a multi‑page PDF containing vector graphics into editable SVG files while preserving the original layer hierarchy for further editing in tools like Adobe Illustrator or Inkscape.
- * 2. When an automated build pipeline must generate scalable SVG assets from PDF design documents to embed in web applications without losing vector quality.
- * 3. When a C# service processes uploaded PDF brochures and outputs SVG versions so that marketing teams can modify individual layers in a design editor.
- * 4. When a desktop utility has to batch‑convert engineering drawings stored as PDF into SVG while keeping text as shapes for precise typography editing.
- * 5. When a document management system requires extracting vector artwork from PDFs and storing them as SVGs with metadata intact for searchable archival.
+ * 1. When a developer needs to convert a multi‑page PDF containing vector graphics into an editable SVG file while preserving the original layer hierarchy for use in design tools like Adobe Illustrator.
+ * 2. When an automated workflow must extract the first page of a PDF brochure and generate an SVG where all text is rendered as shapes to keep the typography editable in downstream editing.
+ * 3. When a C# application has to batch‑process PDF assets from a file system, ensuring the output SVG matches the source page size and retains vector fidelity for responsive web graphics.
+ * 4. When a .NET service integrates Aspose.Imaging to transform client‑uploaded PDFs into scalable SVGs that can be further manipulated via CSS or JavaScript without rasterizing the artwork.
+ * 5. When a developer wants to validate the existence of input PDF files, create the necessary output directories, and safely export vector layers to SVG using SvgOptions and MultiPageOptions in a try‑catch block.
  */

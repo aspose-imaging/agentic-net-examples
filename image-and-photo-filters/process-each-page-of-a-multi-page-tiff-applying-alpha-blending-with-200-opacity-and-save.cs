@@ -1,20 +1,23 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.tif";
+            string outputPath = "output.tif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,35 +27,29 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the multi‑page TIFF
-            using (Image img = Image.Load(inputPath))
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                TiffImage tiff = (TiffImage)img;
-
-                // Process each frame
-                for (int i = 0; i < tiff.Frames.Length; i++)
+                foreach (var frame in tiff.Frames)
                 {
-                    // Set the current frame as active
-                    tiff.ActiveFrame = tiff.Frames[i];
+                    tiff.ActiveFrame = frame;
 
-                    // Load all pixels of the active frame
-                    Aspose.Imaging.Color[] pixels = tiff.LoadPixels(tiff.ActiveFrame.Bounds);
-
-                    // Apply opacity of 200 (out of 255) to each pixel
-                    for (int p = 0; p < pixels.Length; p++)
+                    // Create an overlay image filled with white color
+                    using (RasterImage overlay = (RasterImage)Image.Create(
+                        new BmpOptions { Source = new StreamSource(new MemoryStream()) },
+                        frame.Width,
+                        frame.Height))
                     {
-                        Aspose.Imaging.Color c = pixels[p];
-                        // Blend existing alpha with target opacity
-                        byte newAlpha = (byte)Math.Min(255, (c.A * 200) / 255);
-                        pixels[p] = Aspose.Imaging.Color.FromArgb(newAlpha, c.R, c.G, c.B);
-                    }
+                        var whitePixels = Enumerable.Repeat(Aspose.Imaging.Color.White, frame.Width * frame.Height).ToArray();
+                        overlay.SavePixels(new Rectangle(0, 0, frame.Width, frame.Height), whitePixels);
 
-                    // Save the modified pixels back to the frame
-                    tiff.SavePixels(tiff.ActiveFrame.Bounds, pixels);
+                        // Blend the overlay onto the current frame with opacity 200
+                        ((RasterImage)frame).Blend(new Point(0, 0), overlay, 200);
+                    }
                 }
 
-                // Save the processed TIFF to the output path
-                tiff.Save(outputPath);
+                // Save the modified multi‑page TIFF
+                var saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiff.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -64,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add a semi‑transparent watermark to every page of a multi‑page TIFF document before archiving it, this C# Aspose.Imaging code can apply a uniform 200‑out‑of‑255 opacity across all frames.
- * 2. When a medical imaging application must reduce the opacity of scanned radiology TIFF frames to blend with a background color for better visualization, the code processes each page and adjusts the alpha channel accordingly.
- * 3. When a GIS system has to prepare multi‑page satellite TIFF tiles with consistent 200/255 opacity for overlay on a map canvas, the example demonstrates how to iterate through frames and apply the required alpha blending.
- * 4. When an e‑commerce platform wants to uniformly dim all pages of a product catalog TIFF so that promotional text can be overlaid later, this snippet shows how to modify each frame’s alpha values using C# and Aspose.Imaging.
- * 5. When a digital archiving workflow requires adjusting the alpha channel of each TIFF page to meet a publishing standard that mandates 78% opacity, the code provides a straightforward way to process and save the multi‑page TIFF with the desired opacity.
+ * 1. When a developer needs to add a semi‑transparent white watermark to every page of a multi‑page TIFF for printing or archival purposes, they can use this C# Aspose.Imaging code to blend a white overlay with 200 opacity onto each frame.
+ * 2. When a developer must normalize the brightness of each scanned page in a multi‑page TIFF, blending a white overlay with 200 opacity using Aspose.Imaging ensures a consistent lightening effect across all frames.
+ * 3. When a developer prepares a multi‑page TIFF for PDF conversion and requires a uniform background, the code applies alpha blending with 200 opacity to each frame to achieve consistent visual appearance.
+ * 4. When a developer implements a document processing pipeline that applies a light white tint to every page of a multi‑page TIFF to meet branding guidelines, this C# example blends a white overlay at 200 opacity on each raster image.
+ * 5. When a developer needs to adjust the opacity level of each frame in a multi‑page TIFF before sending it to a third‑party imaging service that expects a specific alpha value, the Aspose.Imaging blend operation with opacity 200 provides the required transformation.
  */

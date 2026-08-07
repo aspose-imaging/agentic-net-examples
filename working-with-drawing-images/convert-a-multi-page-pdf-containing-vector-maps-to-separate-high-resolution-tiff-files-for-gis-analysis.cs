@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -10,39 +9,50 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "maps.pdf");
-            if (!File.Exists(inputPath))
+            // Hardcoded input and output directories
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
+
+            // Ensure input directory exists; if not, create and exit
+            if (!Directory.Exists(inputDirectory))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            string outputDirectory = "Output";
-            Directory.CreateDirectory(outputDirectory);
-
-            using (Image pdfImage = Image.Load(inputPath))
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDirectory))
             {
-                IMultipageImage multipage = pdfImage as IMultipageImage;
-                int pageCount = multipage?.PageCount ?? 1;
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-                for (int i = 0; i < pageCount; i++)
+            // Get all PDF files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.pdf");
+
+            foreach (var inputPath in files)
+            {
+                // Validate input file existence
+                if (!File.Exists(inputPath))
                 {
-                    string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.tif");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
+
+                // Load the PDF (vector image)
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Determine output file path (same name with .png extension)
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+
+                    // Ensure output directory exists before saving
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+                    // Save as PNG
+                    using (var pngOptions = new PngOptions())
                     {
-                        tiffOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = pdfImage.Width,
-                            PageHeight = pdfImage.Height,
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None
-                        };
-                        tiffOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, 1));
-
-                        pdfImage.Save(outputPath, tiffOptions);
+                        image.Save(outputPath, pngOptions);
                     }
                 }
             }
@@ -56,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a GIS developer must transform each page of a multi‑page PDF map into separate high‑resolution TIFF files for spatial analysis, this C# Aspose.Imaging code rasterizes the vector content while preserving detail.
- * 2. When an environmental consulting firm needs to batch‑convert vector‑based PDF survey sheets into TIFF images for integration with legacy mapping software, the code provides automated page‑by‑page conversion.
- * 3. When a city planning department requires lossless extraction of individual map layers from a PDF booklet into TIFF format for archival and printing, the example uses IMultipageImage and MultiPageOptions to save each page separately.
- * 4. When a remote‑sensing application demands consistent DPI and white background rendering of PDF cartography before performing image‑based classification, the VectorRasterizationOptions in the code ensure uniform TIFF output.
- * 5. When a construction company wants to generate editable raster images from vector PDF blueprints for on‑site mobile devices, this C# snippet creates per‑page TIFF files that can be easily displayed and annotated.
+ * 1. When a GIS analyst needs to extract each page of a multi‑page PDF containing vector maps and convert them to high‑resolution PNG images for raster‑based analysis using C# and Aspose.Imaging.
+ * 2. When an e‑learning platform must automatically batch‑convert uploaded PDF handouts into PNG files for web preview thumbnails and fast loading in .NET applications.
+ * 3. When a printing service wants to transform vector PDF brochures into PNG assets to embed them in HTML email campaigns without losing visual fidelity.
+ * 4. When a document management system requires server‑side conversion of PDF blueprints to PNG format for quick visual indexing and searchable previews.
+ * 5. When a mobile app backend needs to generate PNG raster images from PDF maps on the fly to serve devices that cannot render PDF natively.
  */

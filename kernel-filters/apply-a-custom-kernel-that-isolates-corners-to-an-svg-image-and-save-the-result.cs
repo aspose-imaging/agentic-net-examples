@@ -2,72 +2,62 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
+
+        // Check input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.svg";
-            string outputPath = @"C:\Images\output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the SVG image
             using (Image svgImage = Image.Load(inputPath))
             {
-                // Create rasterization options for SVG
-                var rasterOptions = new SvgRasterizationOptions
+                // Rasterize SVG to PNG in memory
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    PageWidth = svgImage.Width,
-                    PageHeight = svgImage.Height,
-                    BackgroundColor = Color.White
-                };
-
-                // Save the rasterized SVG to a temporary PNG file
-                string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp_raster.png");
-                Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
-
-                var pngSaveOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
-                svgImage.Save(tempPngPath, pngSaveOptions);
-
-                // Load the rasterized PNG for filtering
-                using (Image rasterImg = Image.Load(tempPngPath))
-                {
-                    var raster = (RasterImage)rasterImg;
-
-                    // Define a custom kernel that isolates corners (edge detection)
-                    double[,] kernel = new double[,]
+                    PngOptions pngOptions = new PngOptions();
+                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                     {
-                        { -1, -1, -1 },
-                        { -1,  8, -1 },
-                        { -1, -1, -1 }
+                        PageSize = svgImage.Size
                     };
+                    pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                    // Apply convolution filter with the custom kernel
-                    raster.Filter(raster.Bounds,
-                        new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                    // Save the filtered image to the final output path
-                    raster.Save(outputPath, new PngOptions());
-                }
+                    // Load the rasterized image as RasterImage
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    {
+                        // Define a custom kernel that isolates corners
+                        double[,] kernel = new double[,]
+                        {
+                            { 1, 0, 1 },
+                            { 0, 0, 0 },
+                            { 1, 0, 1 }
+                        };
 
-                // Clean up temporary file
-                if (File.Exists(tempPngPath))
-                {
-                    File.Delete(tempPngPath);
+                        // Apply convolution filter with the custom kernel
+                        ConvolutionFilterOptions convOptions = new ConvolutionFilterOptions(kernel);
+                        raster.Filter(raster.Bounds, convOptions);
+
+                        // Save the filtered raster image as PNG
+                        raster.Save(outputPath, new PngOptions());
+                    }
                 }
             }
         }
@@ -80,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract and highlight the corner features of a vector logo stored as an SVG for use in a thumbnail preview, they can rasterize the SVG, apply a corner‑detecting kernel, and save the result as a PNG.
- * 2. When creating a printable brochure that requires sharp corner emphasis on SVG icons, a C# routine can isolate those corners with a custom convolution filter before exporting to a high‑resolution PNG.
- * 3. When building an automated quality‑control tool that flags poorly defined corners in SVG diagrams, the code can rasterize each file, run the corner‑isolation kernel, and store the processed image for visual inspection.
- * 4. When generating stylized map markers where only the corner outlines of SVG shapes should be visible, developers can apply the custom kernel to isolate corners and output the markers as PNG assets.
- * 5. When developing a web service that converts user‑uploaded SVG illustrations into edge‑enhanced PNGs for faster loading, the custom corner detection filter ensures the most prominent corners are retained in the final image.
+ * 1. When a developer needs to preprocess vector icons by highlighting only their corner points for a computer‑vision feature‑extraction pipeline, they can rasterize the SVG with Aspose.Imaging, apply a custom corner‑isolating convolution kernel, and save the result as a PNG.
+ * 2. When an e‑commerce platform wants to generate thumbnail previews that emphasize product logo corners for better visual distinction, the code can convert SVG logos to raster images, filter out non‑corner areas, and store the output in PNG format.
+ * 3. When a UI designer requires a quick way to create edge‑aware masks from SVG assets for overlay effects, they can use the custom kernel to isolate corners, producing a PNG mask that can be composited in the application.
+ * 4. When a machine‑learning team prepares training data by extracting corner features from scalable diagrams, the code rasterizes each SVG, applies the corner‑detecting filter, and saves the processed images for model ingestion.
+ * 5. When a developer builds an automated quality‑control tool that flags SVG files with missing or malformed corners, they can run this routine to isolate corners, compare the output PNG against expected patterns, and report anomalies.
  */

@@ -1,36 +1,40 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            string outputPath = @"c:\temp\output.bmp";
+            string outputPath = @"C:\Temp\output.bmp";
+
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.BitsPerPixel = 24;
-            FileCreateSource src = new FileCreateSource(outputPath, false);
-            bmpOptions.Source = src;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 500, 500))
+            using (Image canvas = Image.Create(bmpOptions, 400, 300))
             {
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
-                graphics.Clear(Aspose.Imaging.Color.Wheat);
+                Graphics graphics = new Graphics(canvas);
+                graphics.Clear(Color.White);
 
-                Aspose.Imaging.Pen bluePen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 5);
-                graphics.DrawRectangle(bluePen, new Aspose.Imaging.Rectangle(50, 50, 200, 200));
+                Pen blackPen = new Pen(Color.Black, 2);
+                graphics.DrawRectangle(blackPen, new Rectangle(50, 50, 300, 200));
 
-                graphics.Clip = new Aspose.Imaging.Region(new Aspose.Imaging.Rectangle(100, 100, 150, 150));
+                graphics.Clip = new Region(new Rectangle(100, 100, 200, 100));
 
-                Aspose.Imaging.Pen redPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 5);
-                graphics.DrawRectangle(redPen, new Aspose.Imaging.Rectangle(80, 80, 300, 300));
+                using (SolidBrush redBrush = new SolidBrush(Color.Red))
+                {
+                    graphics.FillRectangle(redBrush, new Rectangle(80, 80, 250, 150));
+                }
 
-                image.Save();
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -42,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP file and draw a highlighted area while preventing drawing outside a specific region, such as creating a printable form template with a bounded signature box.
- * 2. When an application must overlay graphics on an existing bitmap and clip subsequent drawing to a defined rectangle, for example adding watermarks that should only appear within a logo area.
- * 3. When building a UI component that visualizes selection boundaries by drawing a rectangle and then restricting further drawing to the selected region, like a cropping tool preview in a photo editor.
- * 4. When generating diagnostic images that show both an outer boundary and an inner clipped region to illustrate clipping behavior for debugging graphics pipelines in C#.
- * 5. When creating a custom badge or label in BMP format where the outer frame is drawn first and inner decorative elements are confined to a specific area using Graphics.SetClip.
+ * 1. When a developer needs to generate a 24‑bit BMP report thumbnail that highlights a specific area by drawing a rectangle border and filling only the clipped region with a color.
+ * 2. When creating a printable form template in C# where a rectangular outline is drawn and subsequent background filling is limited to a defined clipping region using Graphics.SetClip.
+ * 3. When building a simple image‑masking tool that restricts drawing operations to a designated rectangle to prevent overwriting surrounding graphics in a BMP file.
+ * 4. When producing a UI mock‑up that demonstrates how a selected area of a bitmap can be emphasized by clipping later drawing commands to that area.
+ * 5. When automating the generation of annotated screenshots where a red overlay is applied only inside a predefined rectangle to draw attention to a specific UI element.
  */

@@ -7,13 +7,13 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = "sample.dcm";
+        string outputPath = "sample.png";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "sample.dcm";
-            string outputPath = "sample.png";
-
-            // Verify that the input file exists
+            // Verify that the input DICOM file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -38,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert DICOM scans to PNG thumbnails for quick preview in a web portal.
- * 2. When a radiology workflow requires exporting DICOM files to PNG format for inclusion in patient reports or presentations.
- * 3. When a healthcare data integration service must transform DICOM images into PNG to store them in a non‑medical image repository.
- * 4. When a desktop utility needs to batch‑process DICOM files and save them as PNGs for compatibility with standard image viewers.
- * 5. When a diagnostic software needs to load a DICOM image and instantly save it as PNG to perform further image analysis using generic PNG libraries.
+ * 1. When a radiology software needs to display DICOM scans on a web page, a developer can use this code to convert the DICOM file to a PNG image for browser compatibility.
+ * 2. When a healthcare data pipeline requires archiving diagnostic images as lossless PNG files for long‑term storage, the code enables a quick C# conversion from DICOM to PNG in a single API call.
+ * 3. When a medical research application must generate thumbnail previews of DICOM studies for a gallery view, the developer can load the DICOM and save it as PNG using Aspose.Imaging.
+ * 4. When an electronic health record (EHR) system needs to embed patient imaging into PDF reports, the code provides a simple way to transform the DICOM image into a PNG that can be inserted into the document.
+ * 5. When a cross‑platform mobile app consumes imaging data and requires a universally supported format, a C# backend can use this snippet to convert incoming DICOM files to PNG before sending them to the client.
  */

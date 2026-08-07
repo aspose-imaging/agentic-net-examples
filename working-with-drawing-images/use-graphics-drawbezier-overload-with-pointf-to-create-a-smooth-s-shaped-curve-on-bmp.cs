@@ -2,45 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\temp\s_curve.bmp";
+            // Output file path
+            string outputPath = "output\\s_curve.bmp";
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a BMP image with desired dimensions
-            BmpOptions bmpOptions = new BmpOptions
+            // Create BMP options with a stream source
+            using (FileStream outStream = new FileStream(outputPath, FileMode.Create))
             {
-                BitsPerPixel = 24
-            };
-            using (Image image = Image.Create(bmpOptions, 500, 500))
-            {
-                // Initialize graphics surface
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.Source = new StreamSource(outStream);
 
-                // Define pen for drawing
-                Pen pen = new Pen(Color.Blue, 2);
+                // Create a 500x500 image canvas
+                using (Image image = Image.Create(bmpOptions, 500, 500))
+                {
+                    // Initialize graphics for drawing
+                    Graphics graphics = new Graphics(image);
+                    graphics.Clear(Color.White);
 
-                // Define points for an S‑shaped Bézier curve
-                PointF pt1 = new PointF(50, 250);   // start point
-                PointF pt2 = new PointF(150, 50);   // first control point
-                PointF pt3 = new PointF(350, 450);  // second control point
-                PointF pt4 = new PointF(450, 250);  // end point
+                    // Define points for an S‑shaped Bezier curve
+                    PointF pt1 = new PointF(100, 400);
+                    PointF pt2 = new PointF(150, 100);
+                    PointF pt3 = new PointF(350, 300);
+                    PointF pt4 = new PointF(400, 50);
 
-                // Draw the Bézier curve using PointF overload
-                graphics.DrawBezier(pen, pt1, pt2, pt3, pt4);
+                    // Draw the curve
+                    Pen pen = new Pen(Color.Blue, 3);
+                    graphics.DrawBezier(pen, pt1, pt2, pt3, pt4);
 
-                // Save the image to the specified path
-                image.Save(outputPath);
+                    // Save the image (stream is already bound)
+                    image.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -52,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP signature stamp with a smooth S‑shaped curve for branding in a desktop C# application using Aspose.Imaging.
- * 2. When creating custom vector‑based icons in a .NET tool that must be drawn with Graphics.DrawBezier and saved as BMP files without relying on external graphic editors.
- * 3. When programmatically drawing flow‑chart connectors that require an S‑curve to improve readability in automatically generated diagrams using PointF coordinates.
- * 4. When producing test images that contain precise Bézier paths to validate image‑processing algorithms such as edge detection in Aspose.Imaging for .NET.
- * 5. When building a C# utility that renders smooth curve overlays on scanned documents and saves the result as a BMP for compatibility with legacy systems.
+ * 1. When a developer needs to generate a printable signature line with a smooth S‑shaped curve in a BMP file for a PDF form.
+ * 2. When creating custom UI icons or buttons that require an elegant S‑curve drawn directly onto a 500×500 bitmap using C# and Aspose.Imaging.
+ * 3. When producing a flow‑chart diagram where the connector between two process boxes is represented by an S‑shaped Bezier curve saved as a BMP image.
+ * 4. When rendering a stylized road or river path on a map thumbnail, using PointF coordinates to draw a smooth S‑curve and exporting it as a BMP for web display.
+ * 5. When automating the generation of decorative header graphics for reports, drawing an S‑shaped curve with a blue pen onto a BMP canvas before embedding it into a document.
  */

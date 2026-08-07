@@ -2,16 +2,16 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
-            string inputPath = "Images/sample.png";
-            string outputPath = "Output/filtered.png";
+            string inputPath = "sample.webp";
+            string outputPath = "output.webp";
 
             if (!File.Exists(inputPath))
             {
@@ -19,15 +19,15 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
-                var pngOptions = new PngOptions();
-                raster.Save(outputPath, pngOptions);
+                var options = new WebPOptions();
+                image.Save(outputPath, options);
             }
+
+            Console.WriteLine($"Image saved to {outputPath}");
         }
         catch (Exception ex)
         {
@@ -38,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to accept a user‑uploaded PNG, apply a sharpen filter using Aspose.Imaging’s SharpenFilterOptions, and send the processed image back as a FileResult in an ASP.NET Core MVC controller.
- * 2. When an e‑commerce site wants to dynamically enhance product photos on‑the‑fly (e.g., increase edge contrast) and deliver the sharpened PNG directly to the browser without storing a temporary file.
- * 3. When a content‑management system must generate a high‑quality preview of a PNG after applying a custom sharpening strength and return it as a downloadable FileResult for editors.
- * 4. When a reporting dashboard requires real‑time image processing of PNG charts—sharpening them for better readability—and streams the result as a FileResult to the client.
- * 5. When a mobile‑backend API needs to receive a PNG payload, perform server‑side sharpening with Aspose.Imaging, and respond with the filtered image as a FileResult for the mobile app to display.
+ * 1. When a web application needs to convert uploaded WebP images to a standardized format and stream the processed file back to the browser as a FileResult in an ASP.NET Core MVC action.
+ * 2. When an e‑commerce site wants to apply server‑side compression to product photos and deliver the optimized WebP image directly to the client without storing a temporary file.
+ * 3. When a content management system must generate thumbnails on the fly from original WebP assets and return them as downloadable files via a controller endpoint.
+ * 4. When a mobile backend API has to resize or re‑encode user‑submitted WebP pictures and send the transformed image back as an HTTP response using FileResult.
+ * 5. When a reporting dashboard requires on‑demand conversion of legacy image formats to WebP and needs to serve the resulting file through an ASP.NET Core MVC controller for immediate preview.
  */

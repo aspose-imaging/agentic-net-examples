@@ -1,19 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input\\sample.gif";
-        string outputPath = "output\\deskewed.gif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input\\skewed.gif";
+            string outputPath = "output\\deskewed.gif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,20 +21,17 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load GIF image
-            using (Image image = Image.Load(inputPath))
+            // Load the GIF image
+            using (GifImage image = (GifImage)Image.Load(inputPath))
             {
-                // Cast to GifImage to access GIF-specific methods
-                GifImage gif = (GifImage)image;
+                // Deskew the image: normalize angle without resizing, using white background
+                image.NormalizeAngle(false, Color.White);
 
-                // Deskew the image
-                gif.NormalizeAngle();
-
-                // Save the corrected GIF using GifOptions
-                gif.Save(outputPath, new GifOptions());
+                // Save the corrected image as GIF
+                image.Save(outputPath, new GifOptions());
             }
         }
         catch (Exception ex)
@@ -46,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application receives scanned animated GIF receipts that are slightly rotated and needs to automatically deskew them before displaying to users.
- * 2. When an e‑learning platform processes teacher‑uploaded GIF diagrams captured at an angle and must normalize the image orientation for consistent playback.
- * 3. When a digital archiving system imports legacy GIF animations from scanned documents and requires angle correction to improve OCR accuracy.
- * 4. When a mobile app generates animated GIF memes from user photos and wants to straighten tilted frames using C# and Aspose.Imaging before sharing.
- * 5. When a batch processing script cleans up a folder of animated GIF logos that were scanned crooked, applying NormalizeAngle and saving the corrected files.
+ * 1. When a web application receives user‑uploaded animated GIFs that were scanned or captured at an angle, a developer can use this code to deskew the GIF and store a corrected version for display.
+ * 2. When an e‑commerce platform needs to automatically straighten product animation GIFs before adding them to the catalog, the code can normalize the angle without resizing the frames.
+ * 3. When a digital marketing tool generates GIF banners from scanned artwork and must ensure the graphics are level, a developer can apply the NormalizeAngle method in C# to produce a clean output GIF.
+ * 4. When a mobile game server processes player‑submitted GIF avatars that may be tilted, this snippet can deskew the image and save it with Aspose.Imaging GifOptions for consistent rendering.
+ * 5. When an archival system digitizes old animated GIFs from paper copies and wants to correct skew while preserving the original palette, the code provides a simple C# solution to load, deskew, and re‑save the GIF.
  */

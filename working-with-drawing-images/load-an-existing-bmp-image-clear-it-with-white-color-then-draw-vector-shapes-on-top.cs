@@ -2,59 +2,58 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\temp\input.bmp";
         string outputPath = @"C:\temp\output.bmp";
 
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image as a RasterImage
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            // Load the existing BMP image
+            using (Image image = Image.Load(inputPath))
             {
                 // Create a Graphics instance for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Clear the canvas with white color
+                // Clear the image with white color
                 graphics.Clear(Color.White);
 
-                // Draw a red rectangle
-                Pen redPen = new Pen(Color.Red, 3);
-                graphics.DrawRectangle(redPen, new Rectangle(50, 50, 200, 150));
+                // Draw a black rectangle
+                graphics.DrawRectangle(new Pen(Color.Black, 2), new Rectangle(50, 50, 200, 150));
 
-                // Draw a blue ellipse
-                Pen bluePen = new Pen(Color.Blue, 2);
-                graphics.DrawEllipse(bluePen, new Rectangle(300, 100, 150, 100));
+                // Draw a red ellipse
+                graphics.DrawEllipse(new Pen(Color.Red, 2), new Rectangle(300, 100, 150, 100));
 
-                // Draw a green line
-                Pen greenPen = new Pen(Color.Green, 4);
-                graphics.DrawLine(greenPen, new Point(100, 300), new Point(400, 350));
+                // Draw a blue line
+                graphics.DrawLine(new Pen(Color.Blue, 3), new Point(100, 300), new Point(400, 350));
 
-                // Fill a yellow circle using a SolidBrush
-                using (SolidBrush yellowBrush = new SolidBrush())
+                // Draw a green polygon
+                graphics.DrawPolygon(new Pen(Color.Green, 2), new[]
                 {
-                    yellowBrush.Color = Color.Yellow;
-                    graphics.FillEllipse(yellowBrush, new Rectangle(200, 250, 80, 80));
-                }
+                    new Point(200, 200),
+                    new Point(250, 250),
+                    new Point(200, 300),
+                    new Point(150, 250)
+                });
 
                 // Save the modified image as BMP
-                BmpOptions bmpOptions = new BmpOptions();
-                image.Save(outputPath, bmpOptions);
+                BmpOptions saveOptions = new BmpOptions();
+                saveOptions.BitsPerPixel = 24;
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -66,9 +65,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a clean white BMP canvas and overlay vector graphics such as rectangles, ellipses, and lines for a printable report or diagram.
- * 2. When an application must programmatically add branding elements like colored shapes to an existing BMP image before saving it for use in a Windows desktop UI.
- * 3. When a batch image processing tool has to clear old pixel data and redraw geometric annotations on BMP files for GIS or CAD workflows.
- * 4. When a developer wants to create a simple thumbnail preview by loading a BMP, clearing it, and drawing custom shapes to illustrate layout placeholders in a WPF application.
- * 5. When an automated testing framework needs to generate BMP screenshots with overlaid shapes to verify rendering accuracy of graphics components.
+ * 1. When you need to create a printable BMP report template by loading an existing BMP file, clearing it to white, and drawing vector shapes like rectangles, ellipses, lines, and polygons with Aspose.Imaging for .NET in C#.
+ * 2. When you want to programmatically add annotation graphics to a scanned BMP image—such as highlighting areas with a red ellipse or marking points with a blue line—by clearing the canvas and redrawing shapes using the Aspose.Imaging Graphics API.
+ * 3. When building a simple diagram editor that starts from a BMP canvas, resets the background to white, and lets users draw basic geometric primitives (rectangle, ellipse, line, polygon) through C# code with Aspose.Imaging.
+ * 4. When generating custom BMP icons or UI assets where you need to start with a blank white image, then programmatically render geometric shapes with specific colors and pen widths using Aspose.Imaging for .NET.
+ * 5. When automating the preparation of BMP assets for machine‑vision tests, requiring a clean white background and precise vector overlays (e.g., a green polygon as a region of interest) created via C# and the Aspose.Imaging Graphics class.
  */

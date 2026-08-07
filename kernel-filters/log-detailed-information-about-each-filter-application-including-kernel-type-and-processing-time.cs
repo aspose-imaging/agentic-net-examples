@@ -1,52 +1,59 @@
 using System;
 using System.IO;
-using System.Diagnostics;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample.png";
-        string outputPath = @"c:\temp\sample.SharpenFilter.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the image
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPathGaussian = "output\\gaussian.png";
+            string outputPathSharpen = "output\\sharpen.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathGaussian));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPathSharpen));
+
+            // Apply Gaussian blur filter
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Create sharpen filter options (kernel size 5, sigma 4.0)
+                var start = DateTime.Now;
+                var gaussianOptions = new GaussianBlurFilterOptions(5, 4.0);
+                raster.Filter(raster.Bounds, gaussianOptions);
+                var elapsed = DateTime.Now - start;
+
+                Console.WriteLine($"Applied GaussianBlurFilterOptions: Kernel={gaussianOptions.Kernel.GetType().Name}, Time={elapsed.TotalMilliseconds} ms");
+
+                raster.Save(outputPathGaussian, new PngOptions());
+            }
+
+            // Apply Sharpen filter
+            using (Image image = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)image;
+
+                var start = DateTime.Now;
                 var sharpenOptions = new SharpenFilterOptions(5, 4.0);
+                raster.Filter(raster.Bounds, sharpenOptions);
+                var elapsed = DateTime.Now - start;
 
-                // Log kernel type
-                Console.WriteLine($"Applying filter: {sharpenOptions.GetType().Name}");
+                Console.WriteLine($"Applied SharpenFilterOptions: Kernel={sharpenOptions.Kernel.GetType().Name}, Time={elapsed.TotalMilliseconds} ms");
 
-                // Measure processing time
-                Stopwatch sw = Stopwatch.StartNew();
-
-                // Apply filter to the whole image
-                rasterImage.Filter(rasterImage.Bounds, sharpenOptions);
-
-                sw.Stop();
-                Console.WriteLine($"Filter applied in {sw.ElapsedMilliseconds} ms");
-
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                raster.Save(outputPathSharpen, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -58,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically sharpen PNG images in a batch processing pipeline and log the filter type and execution time for performance monitoring.
- * 2. When building a desktop C# application that enhances scanned documents by applying a 5‑pixel sharpen filter and records processing duration to display progress to users.
- * 3. When creating a server‑side image service that receives image files, applies a custom SharpenFilterOptions (kernel size 5, sigma 4.0) and logs kernel details for audit trails.
- * 4. When troubleshooting image quality issues in a .NET workflow and needs to compare before‑and‑after results while measuring how long the filter takes on different image resolutions.
- * 5. When integrating Aspose.Imaging into an automated CI/CD test that validates that PNG assets are sharpened correctly and that the filter execution stays within acceptable time limits.
+ * 1. When a web application needs to automatically enhance uploaded PNG photos by applying a Gaussian blur and record the kernel type and processing time for performance monitoring.
+ * 2. When a desktop batch‑processing tool must sharpen a series of images and log each filter’s kernel class and execution duration to generate audit reports.
+ * 3. When a mobile backend service processes user‑submitted screenshots, applies both blur and sharpen filters, and stores the timing data to optimize server resources.
+ * 4. When a digital asset management system integrates Aspose.Imaging to preprocess images and requires detailed console output of filter kernels for debugging image quality issues.
+ * 5. When a CI/CD pipeline validates image‑processing code by measuring how long Gaussian and Sharpen filters take on sample PNG files and logs the kernel information for regression testing.
  */

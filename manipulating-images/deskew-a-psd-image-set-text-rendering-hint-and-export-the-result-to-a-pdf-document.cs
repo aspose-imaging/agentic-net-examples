@@ -2,45 +2,64 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input/sample.psd";
+        string outputPath = "Output/result.pdf";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "Input\\sample.psd";
-            string outputPath = "Output\\result.pdf";
-
-            if (!File.Exists(inputPath))
+            // Load the PSD image
+            using (Image psdImage = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Save to a temporary TIFF for deskewing
+                string tempTiffPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.tif");
+                Directory.CreateDirectory(Path.GetDirectoryName(tempTiffPath));
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
-            {
-                if (image is TiffImage tiffImage)
+                using (var tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
                 {
-                    tiffImage.NormalizeAngle(false, Color.White);
+                    psdImage.Save(tempTiffPath, tiffOptions);
                 }
 
-                using (PdfOptions pdfOptions = new PdfOptions())
+                // Load the temporary TIFF and deskew
+                using (Image tiffImage = Image.Load(tempTiffPath))
                 {
-                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    };
+                    ((TiffImage)tiffImage).NormalizeAngle(false, Color.White);
 
-                    image.Save(outputPath, pdfOptions);
+                    // Prepare PDF options with text rendering hint
+                    using (var pdfOptions = new PdfOptions())
+                    {
+                        pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = tiffImage.Width,
+                            PageHeight = tiffImage.Height,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
+                        };
+
+                        tiffImage.Save(outputPath, pdfOptions);
+                    }
+                }
+
+                // Optionally delete the temporary TIFF file
+                if (File.Exists(tempTiffPath))
+                {
+                    File.Delete(tempTiffPath);
                 }
             }
         }
@@ -53,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically deskew a Photoshop PSD image, apply a single‑bit text rendering hint, and export a clean PDF for archival or client review, this code provides a ready‑to‑use solution.
- * 2. When a workflow requires converting tilted PSD layers into PDF documents with a white background and no smoothing to preserve sharp text edges, the example shows how to achieve it using Aspose.Imaging for .NET.
- * 3. When an application must programmatically correct the angle of a scanned PSD file, normalize it with TiffImage.NormalizeAngle, and then save the result as a PDF with exact page dimensions, this snippet demonstrates the required steps.
- * 4. When generating printable PDFs from PSD assets where text must be rendered with TextRenderingHint.SingleBitPerPixel to ensure crisp typography, developers can use this code to set the rasterization options accordingly.
- * 5. When integrating image processing into a C# service that receives PSD files, deskews them, and returns PDF reports without any anti‑aliasing, the provided example illustrates the complete load‑process‑save pipeline using Aspose.Imaging.
+ * 1. When a graphic designer needs to correct the orientation of a scanned Photoshop PSD file and deliver a clean, deskewed PDF to a client.
+ * 2. When an e‑learning platform automatically converts uploaded PSD lesson slides into PDF handouts while applying a single‑bit‑per‑pixel text rendering hint for crisp on‑screen readability.
+ * 3. When a printing service batch‑processes PSD artwork, normalizes its angle via an intermediate TIFF, and generates PDF proofs with a white background and no smoothing to meet exact print specifications.
+ * 4. When a document management system ingests PSD files, removes any skew, and stores them as searchable PDF documents with consistent page dimensions and preserved text quality.
+ * 5. When a legal firm receives PSD evidence, needs to deskew the image, preserve precise text rendering, and export the result to PDF for secure archival and review.
  */

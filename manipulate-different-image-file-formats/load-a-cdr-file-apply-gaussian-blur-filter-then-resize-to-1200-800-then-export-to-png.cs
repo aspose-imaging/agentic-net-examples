@@ -1,19 +1,20 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.cdr";
+        string tempPngPath = @"C:\Images\temp.png";
+        string outputPath = @"C:\Images\result.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.cdr";
-            string outputPath = @"C:\Images\output.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,24 +26,29 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CDR file
-            using (Image image = Image.Load(inputPath))
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply raster operations
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
-                {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
-                    return;
-                }
+                // Export the first page (or whole image) to a temporary PNG
+                cdrImage.Save(tempPngPath);
+            }
 
-                // Apply Gaussian blur filter to the entire image
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+            // Load the temporary PNG as a raster image
+            using (RasterImage rasterImage = (RasterImage)Image.Load(tempPngPath))
+            {
+                // Apply Gaussian blur filter (radius 5, sigma 4.0) to the entire image
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Resize to 1200x800 using default resampling
-                raster.Resize(1200, 800);
+                // Resize to 1200x800 using the default resampling method
+                rasterImage.Resize(1200, 800);
 
-                // Save as PNG
-                raster.Save(outputPath, new PngOptions());
+                // Save the final image as PNG
+                rasterImage.Save(outputPath);
+            }
+
+            // Optionally delete the temporary PNG
+            if (File.Exists(tempPngPath))
+            {
+                File.Delete(tempPngPath);
             }
         }
         catch (Exception ex)
@@ -54,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert CorelDRAW (CDR) artwork into a web‑ready PNG thumbnail with a soft focus effect, they can load the CDR, apply a Gaussian blur, resize to 1200×800, and save using Aspose.Imaging for .NET.
- * 2. When an e‑commerce platform must generate blurred background images from vendor‑provided CDR files for product detail pages, this C# code loads the vector file, blurs it, resizes it, and exports a PNG for fast browser rendering.
- * 3. When a marketing automation script has to batch‑process CDR logos into uniformly sized PNG assets with a subtle blur for use in email newsletters, the code demonstrates the required image loading, filtering, resizing, and saving steps.
- * 4. When a desktop publishing tool needs to preview CorelDRAW designs as low‑resolution PNG previews with a Gaussian blur to protect intellectual property, the example shows how to perform the conversion in C#.
- * 5. When a content management system must ingest client‑supplied CDR files, apply a blur for privacy compliance, resize them to 1200×800 for consistency, and store them as PNG files, this Aspose.Imaging workflow provides the solution.
+ * 1. When a developer needs to convert a CorelDRAW (CDR) design into a web‑ready PNG thumbnail with a soft blur effect and a fixed 1200×800 size for an online portfolio.
+ * 2. When an e‑commerce platform must automatically generate blurred preview images from supplier‑provided CDR files before displaying them at a standard resolution on product pages.
+ * 3. When a marketing automation script has to batch‑process CDR artwork, apply a Gaussian blur to hide sensitive details, resize it, and store the result as PNG for email campaigns.
+ * 4. When a content management system imports legacy CDR graphics, applies a blur filter for visual consistency, resizes them to fit a responsive layout, and saves them as PNG for browser delivery.
+ * 5. When a desktop application needs to read a CDR file, create a temporary raster PNG, apply a Gaussian blur, resize to 1200×800, and output the final PNG for printing or digital signage.
  */

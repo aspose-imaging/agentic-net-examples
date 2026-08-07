@@ -4,38 +4,45 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded output path
-        string outputPath = @"c:\temp\output.bmp";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Hardcoded paths
+        string outputPath = @"C:\temp\output.bmp";
 
         try
         {
-            // Set BMP options and bind to the output file
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a 500x500 image
-            using (Image image = Image.Create(bmpOptions, 500, 500))
+            // Set BMP options (24 bits per pixel)
+            var bmpOptions = new BmpOptions
             {
-                // Initialize graphics for the image
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                BitsPerPixel = 24,
+                Source = new FileCreateSource(outputPath, false)
+            };
 
-                // Fill a rectangle with a solid brush
-                using (SolidBrush brush = new SolidBrush(Color.Blue))
-                {
-                    graphics.FillRectangle(brush, new Rectangle(100, 100, 300, 200));
-                }
+            int width = 500;
+            int height = 500;
 
-                // Save the image (output is already bound to the file)
+            // Create a new BMP image
+            using (Image image = Image.Create(bmpOptions, width, height))
+            {
+                // Initialize graphics object for drawing
+                var graphics = new Graphics(image);
+
+                // Draw a black rectangle border
+                graphics.DrawRectangle(new Pen(Color.Black, 1), 0, 0, width, height);
+
+                // Fill an inner rectangle with solid red brush
+                var fillBrush = new SolidBrush(Color.Red);
+                var fillRect = new Rectangle(10, 10, width - 20, height - 20);
+                graphics.FillRectangle(fillBrush, fillRect);
+
+                // Save the image (writes to the FileCreateSource)
                 image.Save();
             }
         }
@@ -48,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically generate a BMP file in C# and draw a solid‑colored rectangle for a simple diagram or placeholder image.
- * 2. When an application must create a 500×500 bitmap thumbnail and fill a region with a specific color using Aspose.Imaging’s Graphics.FillRectangle and SolidBrush.
- * 3. When a reporting tool requires embedding a blue rectangle into a white background BMP to highlight a section of a generated chart.
- * 4. When a Windows service automates the production of custom‑size BMP assets for UI skins, needing to clear the canvas and fill a rectangle with a solid brush.
- * 5. When a batch process creates printable BMP graphics for signage, using Aspose.Imaging to set BitsPerPixel, clear the image, and fill a rectangle with a chosen color.
+ * 1. When a developer needs to programmatically create a 24‑bit BMP thumbnail with a solid‑filled rectangle for a legacy Windows application that only supports BMP files.
+ * 2. When an automated reporting tool must generate a simple rectangular badge image in C# using Aspose.Imaging, drawing a border and filling it with a solid color for inclusion in PDF reports.
+ * 3. When a game asset pipeline requires creating placeholder texture files in BMP format with a solid‑filled rectangle to test rendering pipelines before final art is available.
+ * 4. When a document management system needs to add a visual indicator by generating a BMP image with a solid‑colored rectangle overlay to denote document status.
+ * 5. When a batch image conversion utility must produce BMP icons with a uniform background color by drawing and filling a rectangle in C# with Aspose.Imaging’s Graphics API.
  */

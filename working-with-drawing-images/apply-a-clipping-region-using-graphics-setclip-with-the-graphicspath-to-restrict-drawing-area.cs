@@ -10,41 +10,26 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"c:\temp\input.png";
-        string outputPath = @"c:\temp\output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            using (Image image = Image.Load(inputPath))
+            string outputPath = "clipped_output.png";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
+            using (Image image = Image.Create(pngOptions, 400, 400))
             {
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
-
+                graphics.Clear(Color.LightGray);
                 GraphicsPath clipPath = new GraphicsPath();
                 Figure clipFigure = new Figure();
-                clipFigure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
+                clipFigure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 300f, 300f)));
                 clipPath.AddFigure(clipFigure);
-
-                Region clipRegion = new Region(clipPath);
-                graphics.Clip = clipRegion;
-
-                using (SolidBrush brush = new SolidBrush())
+                graphics.Clip = new Region(clipPath);
+                graphics.DrawRectangle(new Pen(Color.Red, 5), new Rectangle(0, 0, 400, 400));
+                using (SolidBrush brush = new SolidBrush(Color.Blue))
                 {
-                    brush.Color = Color.Red;
-                    brush.Opacity = 100;
-                    graphics.FillRectangle(brush, new Rectangle(0, 0, 300, 300));
+                    graphics.FillEllipse(brush, new RectangleF(0f, 0f, 400f, 400f));
                 }
-
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new FileCreateSource(outputPath, false);
                 image.Save();
             }
         }
@@ -57,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PNG thumbnail where only a specific rectangular area of the source image is filled with a solid color, they can use Graphics.SetClip with a GraphicsPath to limit the drawing to that region.
- * 2. When creating a watermark that should appear only inside a defined shape (e.g., a rectangle) on a PNG file, the clipping region ensures the watermark paint does not spill outside the intended bounds.
- * 3. When preparing a printable image where background fill must be confined to a custom region to meet branding guidelines, the code demonstrates how to restrict the fill operation using a Region built from a GraphicsPath.
- * 4. When implementing a custom cropping tool that fills the selected area with a preview color before the user confirms the crop, the SetClip method can be used to apply the fill only inside the selected rectangle.
- * 5. When developing an image‑processing pipeline that needs to overlay a solid red rectangle on top of an existing PNG but only within a specific area to highlight a region of interest, the clipping region created by GraphicsPath provides precise control over the overlay.
+ * 1. When generating a PNG thumbnail where only a central square should contain the image content, a developer can use Graphics.SetClip with a GraphicsPath to limit drawing to that region and prevent overflow.
+ * 2. When creating a custom badge or logo that requires a circular pattern confined inside a rectangular border, the clipping region ensures the ellipse is drawn only within the defined rectangle.
+ * 3. When producing printable PDFs or raster images that need a watermark applied only to a specific area, the code demonstrates how to restrict the fill operation to a clipping path using Aspose.Imaging for .NET.
+ * 4. When building a UI component that renders a progress ring but must not draw outside the component’s bounds, the SetClip method with a GraphicsPath can enforce the drawing limits in a 400×400 PNG canvas.
+ * 5. When developing an image processing pipeline that overlays colored shapes on a background while preserving a transparent margin, the clipping region defined by a GraphicsPath guarantees that the overlay respects the margin.
  */

@@ -2,41 +2,40 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.bmp";
+        string outputPath = "output/resized_signed.bmp";
+
+        // Check input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.bmp";
-            string outputPath = "output.bmp";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists (null‑safe)
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-                Directory.CreateDirectory(outputDir);
-
-            // Load BMP as a raster image
+            // Load BMP image as RasterImage
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Resize using Bicubic (CubicConvolution) interpolation
-                int newWidth = 800;   // example width
-                int newHeight = 600;  // example height
+                // Resize using Bicubic (CubicConvolution) algorithm
+                int newWidth = image.Width / 2;   // example new size
+                int newHeight = image.Height / 2;
                 image.Resize(newWidth, newHeight, ResizeType.CubicConvolution);
 
                 // Embed digital signature with a 10‑character password
-                image.EmbedDigitalSignature("Password10");
+                image.EmbedDigitalSignature("TenCharPwd");
 
-                // Save the result as BMP
+                // Save the processed image as BMP
                 image.Save(outputPath, new BmpOptions());
             }
         }
@@ -49,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application must generate a high‑quality thumbnail of a large BMP screenshot for a product catalog, it can resize the image with Bicubic (CubicConvolution) interpolation and embed a 10‑character password‑protected digital signature for security.
- * 2. When an automated archiving system needs to downsize scanned BMP drawings to a standard 800×600 size for faster retrieval while adding a tamper‑evident digital signature, this C# code provides the solution.
- * 3. When a medical imaging workflow requires converting large BMP radiology images to a smaller resolution for web viewing and must guarantee image integrity with a password‑secured digital signature, developers can use this snippet.
- * 4. When a game developer wants to preprocess BMP texture assets to a uniform resolution using bicubic interpolation and lock the assets with a short password‑protected digital signature before packaging, the example code fulfills that need.
- * 5. When a compliance‑focused financial reporting tool must resize BMP charts to fit a fixed‑size PDF page and embed a 10‑character password digital signature to meet audit‑trail requirements, this routine can be integrated.
+ * 1. When a desktop application needs to generate smaller BMP thumbnails for faster preview while protecting the image with a password‑protected digital signature.
+ * 2. When an automated batch job processes scanned BMP documents, halves their dimensions using Bicubic interpolation, and embeds a ten‑character password to ensure authenticity.
+ * 3. When a medical imaging system must reduce the size of BMP X‑ray images for storage efficiency and embed a secure signature to comply with data integrity regulations.
+ * 4. When a game development pipeline resizes BMP textures to fit lower‑resolution assets and adds a digital signature to prevent tampering.
+ * 5. When a document management system converts high‑resolution BMP scans to smaller, signed BMP files before uploading them to a secure server.
  */

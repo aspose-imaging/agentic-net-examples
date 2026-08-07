@@ -3,51 +3,47 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded output path
-        string outputPath = @"C:\temp\styled_outline.png";
+        string outputPath = @"C:\temp\styled_path.png";
 
         try
         {
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up PNG options with a file create source
-            PngOptions pngOptions = new PngOptions
-            {
-                Source = new FileCreateSource(outputPath, false)
-            };
+            // Set up PNG options with a bound file source
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a new image (500x500 pixels)
+            // Create a 500x500 image
             using (Image image = Image.Create(pngOptions, 500, 500))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                // Build a graphics path (a simple rectangle in this case)
-                GraphicsPath graphicsPath = new GraphicsPath();
+                // Build a graphics path with a rectangle shape
+                GraphicsPath path = new GraphicsPath();
                 Figure figure = new Figure();
                 figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 400f, 400f)));
-                graphicsPath.AddFigure(figure);
+                path.AddFigure(figure);
 
                 // Create a custom pen with dash style
-                Pen dashPen = new Pen(Color.Blue, 5f);
-                dashPen.DashStyle = DashStyle.Dash; // Use a predefined dash style
-                // Optional: define a custom dash pattern
-                // dashPen.DashPattern = new float[] { 10f, 5f };
+                Pen pen = new Pen(Color.Blue, 5f);
+                pen.DashStyle = DashStyle.Dash; // Dashed line
+                // Optional custom dash pattern:
+                // pen.DashPattern = new float[] { 10f, 5f };
 
                 // Draw the path using the custom pen
-                graphics.DrawPath(dashPen, graphicsPath);
+                graphics.DrawPath(pen, path);
 
-                // Save the image to the specified output path
+                // Save the image (file is already bound via FileCreateSource)
                 image.Save();
             }
         }
@@ -60,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically generate a PNG image with a blue dashed rectangular border for inclusion in a PDF report or web thumbnail, this code provides the required Graphics.DrawPath and custom Pen implementation.
- * 2. When creating custom UI icons in a C# Windows Forms or WPF application that require a stylized dashed outline around shapes, the example shows how to use Aspose.Imaging to draw the outline.
- * 3. When producing map overlays where region boundaries must be highlighted with a dashed line, the code demonstrates drawing a dashed rectangle using GraphicsPath and a Pen with DashStyle.
- * 4. When automating the addition of a visible selection frame to scanned documents before saving them as PNG files, the snippet illustrates how to clear the canvas, draw a dashed outline, and save the result.
- * 5. When batch‑processing product photos to add a consistent blue dashed frame for an e‑commerce catalog, this C# example shows how to create the PNG, apply the custom dash pattern, and save the image.
+ * 1. When generating printable PDF reports that need a highlighted dashed border around charts, a developer can use this code to create a PNG with a blue dashed rectangle that can be embedded in the document.
+ * 2. When building a web application that displays thumbnail previews of uploaded images with a stylized outline to indicate selection, this snippet can draw a dashed border around the thumbnail and save it as a PNG.
+ * 3. When creating automated UI test screenshots that require a visual cue around a specific control area, developers can employ the custom Pen and Graphics.DrawPath to overlay a dashed rectangle on the captured image.
+ * 4. When producing map tiles where certain zones must be marked with a distinct dashed perimeter, the code can generate 500×500 PNG tiles with a blue dashed outline for those zones.
+ * 5. When designing a desktop tool that annotates scanned documents with non‑intrusive dashed frames, this example shows how to draw and save the annotation directly to a PNG file using Aspose.Imaging for .NET.
  */

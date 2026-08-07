@@ -2,38 +2,39 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.tif";
-        string outputPath = "Output/result.pdf";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            string inputPath = "Input/sample.tif";
+            string outputPath = "Output/result.pdf";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                // Adjust brightness
-                TiffImage tiffImage = (TiffImage)image;
-                tiffImage.AdjustBrightness(50);
-
-                // Apply Gaussian blur
                 RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions { Radius = 5 });
+                raster.AdjustBrightness(50);
 
-                // Save as PDF
+                GaussianBlurFilterOptions blurOptions = new GaussianBlurFilterOptions
+                {
+                    Radius = 5,
+                    Sigma = 2.0f
+                };
+                raster.Filter(raster.Bounds, blurOptions);
+
                 using (PdfOptions pdfOptions = new PdfOptions())
                 {
                     image.Save(outputPath, pdfOptions);
@@ -49,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to preprocess scanned TIFF documents by increasing brightness, applying a Gaussian blur to reduce noise, and then exporting the result as a PDF for archiving or sharing.
- * 2. When an application must convert medical imaging TIFF files to PDF while enhancing visibility with brightness adjustment and smoothing details with a Gaussian blur filter.
- * 3. When a batch job processes high‑resolution TIFF photographs, uniformly brightens them, softens edges with a Gaussian blur, and saves each image as a PDF portfolio for client review.
- * 4. When a document management system requires on‑the‑fly transformation of uploaded TIFF scans, adjusting brightness, applying a blur to obscure sensitive details, and outputting the final image as a PDF for secure distribution.
- * 5. When a reporting tool generates PDF reports that embed TIFF charts and the developer wants to programmatically boost the chart’s brightness and apply a Gaussian blur before embedding to ensure consistent visual quality.
+ * 1. When a medical imaging system needs to enhance the contrast of a high‑resolution TIFF scan, apply a soft blur to reduce noise, and archive the result as a searchable PDF for patient records.
+ * 2. When a publishing workflow must convert scanned book pages in TIFF format, brighten faded text, smooth artifacts with a Gaussian blur, and output a print‑ready PDF.
+ * 3. When an e‑commerce platform processes product catalog TIFF images, increases brightness for better visibility, applies a subtle blur to hide imperfections, and generates PDF brochures for distribution.
+ * 4. When a legal firm digitizes signed documents stored as TIFF files, adjusts brightness to make signatures clearer, uses Gaussian blur to obscure background details, and saves the final document as a PDF for court filing.
+ * 5. When an archival software batch‑processes historical photographs in TIFF, boosts brightness to restore faded colors, applies Gaussian blur to soften grain, and creates PDF portfolios for easy viewing.
  */

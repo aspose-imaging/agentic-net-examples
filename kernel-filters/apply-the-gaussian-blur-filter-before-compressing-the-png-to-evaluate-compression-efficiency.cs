@@ -12,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\sample.png";
-            string outputPath = "C:\\temp\\sample_blurred_compressed.png";
+            string inputPath = "input.png";
+            string outputPath = "output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,29 +22,29 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
+            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply filters
+                // Cast to RasterImage to access filtering capabilities
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur (size 5, sigma 4.0) to the whole image
+                // Apply Gaussian blur (kernel size 5, sigma 4.0) to the whole image
                 rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Configure PNG compression options
+                // Configure PNG compression options (maximum compression)
                 PngOptions pngOptions = new PngOptions
                 {
-                    CompressionLevel = 9,                                   // Max compression
-                    FilterType = PngFilterType.Adaptive,                     // Best filter for compression
-                    Progressive = true,                                      // Enable progressive loading
-                    ColorType = PngColorType.TruecolorWithAlpha,             // Preserve alpha channel
-                    BitDepth = 8                                             // Standard bit depth
+                    CompressionLevel = 9,
+                    // Optional: choose a filter type for better compression
+                    // FilterType = PngFilterType.Adaptive,
+                    // Optional: enable progressive loading
+                    // Progressive = true
                 };
 
-                // Save the processed image with the specified options
+                // Save the processed image with compression
                 rasterImage.Save(outputPath, pngOptions);
             }
         }
@@ -57,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to evaluate how applying a Gaussian blur filter to a PNG image influences the file size after saving with maximum compression (level 9) using Aspose.Imaging in C#.
- * 2. When creating web‑ready thumbnails that require a smooth blur effect before being saved as progressive, true‑color PNGs with adaptive filtering for optimal bandwidth usage.
- * 3. When testing the impact of image preprocessing on lossless PNG compression efficiency for a mobile application that must minimize data transfer.
- * 4. When preparing confidential medical or satellite images for secure transmission by obscuring details with a Gaussian blur while preserving alpha transparency in a true‑color PNG.
- * 5. When benchmarking Aspose.Imaging’s filter‑and‑save pipeline by applying a 5‑pixel Gaussian blur (sigma 4.0) and measuring the resulting PNG compression ratio in a C# automation script.
+ * 1. When a web developer wants to test how much a Gaussian‑blurred PNG can be reduced in size before uploading it to a content‑delivery network, they can use this C# code with Aspose.Imaging to apply the blur and save the image with maximum compression.
+ * 2. When a mobile app team needs to generate low‑bandwidth preview thumbnails by smoothing the original PNG and then compressing it at level 9, this example shows the exact steps in .NET.
+ * 3. When a data‑science pipeline evaluates the trade‑off between visual quality loss from a Gaussian blur and file‑size savings in PNG format, the code demonstrates how to automate the process in C#.
+ * 4. When an e‑commerce platform wants to pre‑process product photos with a subtle blur to hide sensitive details and then store them as highly compressed PNGs, this snippet provides the required filter and compression settings.
+ * 5. When a QA engineer is benchmarking Aspose.Imaging’s PNG compression efficiency on blurred images to compare against other libraries, the sample illustrates loading, filtering, and saving the image using C#.
  */

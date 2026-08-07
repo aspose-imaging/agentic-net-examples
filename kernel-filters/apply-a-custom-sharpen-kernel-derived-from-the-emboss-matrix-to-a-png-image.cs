@@ -1,8 +1,10 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,7 +13,7 @@ class Program
         try
         {
             string inputPath = "input.png";
-            string outputPath = "output/output.png";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -25,11 +27,14 @@ class Program
             {
                 RasterImage raster = (RasterImage)image;
 
-                var kernel = ConvolutionFilter.Emboss3x3;
-                var options = new ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
-                raster.Filter(raster.Bounds, options);
-                raster.Save(outputPath);
+                PngOptions saveOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -41,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to enhance the visual contrast of a PNG product photo before uploading it to an e‑commerce site, they can apply the custom sharpen kernel derived from the emboss matrix to make details pop.
- * 2. When preparing PNG screenshots for a user manual, a developer can use this code to sharpen edges and improve readability of UI elements.
- * 3. When processing scanned PNG documents for archival, applying the emboss‑based sharpen filter helps highlight text and line art without introducing excessive noise.
- * 4. When generating stylized thumbnail previews of PNG images for a gallery, a developer can run the custom convolution to add a subtle embossed sharpening effect that draws viewer attention.
- * 5. When preprocessing PNG images for a computer‑vision pipeline, a developer can sharpen subtle features with the emboss‑derived kernel to improve feature detection accuracy.
+ * 1. When a developer wants to enhance the edge details of product photos in a PNG catalog by applying a custom sharpen kernel derived from an emboss matrix using Aspose.Imaging in C#.
+ * 2. When a web application needs to preprocess user‑uploaded PNG avatars to make them appear more crisp by applying a convolution filter that combines emboss and sharpening effects.
+ * 3. When an automated build pipeline must generate sharpened PNG assets from original designs for high‑resolution displays, using the ConvolutionFilter.Emboss3x3 option in Aspose.Imaging.
+ * 4. When a desktop utility converts scanned PNG documents into clearer images by applying a custom sharpen kernel based on the emboss matrix before saving the result.
+ * 5. When a game developer prepares PNG texture maps with enhanced contrast and detail by applying a convolution‑based sharpen filter derived from emboss in a C# tool.
  */

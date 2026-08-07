@@ -9,66 +9,64 @@ class Program
     {
         try
         {
-            // Define paths
-            string outputDir = "output";
-            string bmpPath = Path.Combine(outputDir, "original.bmp");
-            string signedPath = Path.Combine(outputDir, "signed.bmp");
+            // Define output path
+            string outputPath = "output.bmp";
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(bmpPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(signedPath));
-
-            // Create a BMP image (200x200)
-            int width = 200;
-            int height = 200;
-            using (BmpImage bmpImage = new BmpImage(width, height))
+            // Create a BMP image 100x100 pixels
+            using (var bmpImage = new BmpImage(100, 100))
             {
-                for (int y = 0; y < height; y++)
+                // Fill with a simple red gradient
+                for (int y = 0; y < bmpImage.Height; y++)
                 {
-                    for (int x = 0; x < width; x++)
+                    for (int x = 0; x < bmpImage.Width; x++)
                     {
-                        int hue = (255 * x) / width;
-                        bmpImage.SetPixel(x, y, Aspose.Imaging.Color.FromArgb(255, hue, 0, 0));
+                        int hue = (255 * x) / bmpImage.Width;
+                        bmpImage.SetPixel(x, y, Color.FromArgb(255, hue, 0, 0));
                     }
                 }
-                bmpImage.Save(bmpPath);
+
+                // Embed digital signature with a valid password
+                string validPassword = "secure123";
+                bmpImage.EmbedDigitalSignature(validPassword);
+
+                // Ensure output directory exists
+                string outDir = Path.GetDirectoryName(outputPath);
+                if (!string.IsNullOrEmpty(outDir))
+                    Directory.CreateDirectory(outDir);
+
+                // Save the BMP image
+                bmpImage.Save(outputPath);
             }
 
-            // Verify the created image exists before loading
-            if (!File.Exists(bmpPath))
+            // Verify the file exists
+            if (!File.Exists(outputPath))
             {
-                Console.Error.WriteLine($"File not found: {bmpPath}");
+                Console.Error.WriteLine($"File not found: {outputPath}");
                 return;
             }
 
-            // Embed a digital signature with a valid password
-            string validPassword = "secure123";
-            using (Image img = Image.Load(bmpPath))
+            // Load the saved image
+            using (var loadedImage = Image.Load(outputPath))
             {
-                RasterImage raster = (RasterImage)img;
-                raster.EmbedDigitalSignature(validPassword);
-                raster.Save(signedPath);
-            }
+                var raster = (RasterImage)loadedImage;
 
-            // Verify the signed image exists before loading
-            if (!File.Exists(signedPath))
-            {
-                Console.Error.WriteLine($"File not found: {signedPath}");
-                return;
-            }
-
-            // Attempt to embed with an invalid password and handle the expected exception
-            using (Image img2 = Image.Load(signedPath))
-            {
-                RasterImage raster2 = (RasterImage)img2;
+                // Attempt to embed with an invalid password to trigger error handling
                 try
                 {
-                    raster2.EmbedDigitalSignature("123");
+                    raster.EmbedDigitalSignature("123");
                 }
                 catch (Aspose.Imaging.CoreExceptions.ImageException ex)
                 {
                     Console.WriteLine($"HANDLED: {ex.Message}");
                 }
+
+                // Check signature with wrong password
+                bool isSignedWrong = raster.IsDigitalSigned("123");
+                Console.WriteLine($"Is signed with wrong password: {isSignedWrong}");
+
+                // Check signature with correct password
+                bool isSignedCorrect = raster.IsDigitalSigned("secure123");
+                Console.WriteLine($"Is signed with correct password: {isSignedCorrect}");
             }
         }
         catch (Exception ex)
@@ -80,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP thumbnail for a document management system and protect it with a digital signature to ensure authenticity.
- * 2. When an application must embed a cryptographic signature into a raster image using Aspose.Imaging for .NET to comply with regulatory audit trails.
- * 3. When a software solution creates a custom BMP graphic, signs it with a password, and later validates that an incorrect password triggers a controlled exception for robust error handling.
- * 4. When a C# program automates the creation of color‑gradient BMP files and secures them with a password‑protected digital signature before distributing them to external partners.
- * 5. When a developer wants to test the failure path of the EmbedDigitalSignature method by intentionally using a wrong password to confirm that the library returns the expected error response.
+ * 1. When a developer needs to generate a BMP thumbnail for a document and protect it with a digital signature to ensure authenticity.
+ * 2. When an application must embed a secure hash into a BMP image for tamper‑evidence and later verify that the signature cannot be altered with an incorrect password.
+ * 3. When building a workflow that creates custom gradient BMP graphics for branding and requires password‑protected signing to comply with corporate security policies.
+ * 4. When testing the error‑handling path of Aspose.Imaging’s EmbedDigitalSignature method by intentionally using a wrong password after saving the image.
+ * 5. When integrating BMP image generation into a C# service that stores signed images on disk and needs to confirm that loading the file and re‑signing with an invalid password throws a predictable ImageException.
  */

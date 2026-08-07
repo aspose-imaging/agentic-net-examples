@@ -2,60 +2,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string outputPath = "output.bmp";
+
         try
         {
-            // Output BMP file path
-            string outputPath = "output\\wave.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Canvas size
             int width = 800;
             int height = 200;
 
-            // BMP options
-            BmpOptions bmpOptions = new BmpOptions();
-
-            // Create the image canvas
             using (Image image = Image.Create(bmpOptions, width, height))
             {
-                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                // Pen for the wave
                 Pen pen = new Pen(Color.Blue, 2);
-
-                // Points defining a series of cubic Bezier curves (wave pattern)
-                Point[] points = new Point[]
+                int segmentWidth = 100;
+                for (int x = 0; x < width; x += segmentWidth)
                 {
-                    new Point(0, 100),
-                    new Point(100, 0),
-                    new Point(200, 200),
-                    new Point(300, 100),
+                    int x1 = x;
+                    int y1 = height / 2;
 
-                    new Point(300, 100),
-                    new Point(400, 0),
-                    new Point(500, 200),
-                    new Point(600, 100),
+                    int x2 = x + segmentWidth / 4;
+                    int y2 = (x / segmentWidth) % 2 == 0 ? height / 2 - 50 : height / 2 + 50;
 
-                    new Point(600, 100),
-                    new Point(700, 0),
-                    new Point(800, 200),
-                    new Point(800, 100)
-                };
+                    int x3 = x + 3 * segmentWidth / 4;
+                    int y3 = y2;
 
-                // Draw the connected Bezier curves
-                graphics.DrawBeziers(pen, points);
+                    int x4 = Math.Min(x + segmentWidth, width);
+                    int y4 = height / 2;
 
-                // Save the BMP image
-                image.Save(outputPath, bmpOptions);
+                    graphics.DrawBezier(pen,
+                        new Point(x1, y1),
+                        new Point(x2, y2),
+                        new Point(x3, y3),
+                        new Point(x4, y4));
+                }
+
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -67,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically create a BMP file with a blue wave pattern using Aspose.Imaging’s Graphics.DrawBeziers method for a Windows desktop UI.
- * 2. When converting audio amplitude data into a visual waveform by drawing sequential cubic Bezier curves on a BMP canvas for inclusion in technical reports.
- * 3. When generating a decorative header image in BMP format with a smooth wave separator that can be embedded in PDF or HTML documents.
- * 4. When producing large‑size test images to evaluate the rendering speed and memory usage of Aspose.Imaging’s C# drawing operations on an 800×200 canvas.
- * 5. When automating the creation of BMP assets for a game’s UI, such as a wavy progress bar background, by drawing connected Bezier curves with a Pen object.
+ * 1. When a developer wants to generate a BMP file that visualizes a sinusoidal wave using Bezier curves for a scientific data report.
+ * 2. When an application needs to create a lightweight, device‑independent bitmap header for a custom UI element that displays a blue wave pattern as a background.
+ * 3. When a .NET service must programmatically produce a series of smooth waveforms in a BMP image for embedding in email newsletters without relying on external graphics libraries.
+ * 4. When an engineering tool requires automated drawing of repetitive wave‑like patterns on a bitmap to simulate signal oscillations for documentation screenshots.
+ * 5. When a game developer needs to pre‑render a scrolling wave texture as a BMP asset using Aspose.Imaging’s Graphics.DrawBezier method for later use in the game engine.
  */

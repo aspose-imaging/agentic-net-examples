@@ -11,49 +11,52 @@ class Program
         try
         {
             // Hardcoded input DjVu files
-            string[] inputFiles = new string[]
-            {
-                @"C:\Data\doc1.djvu",
-                @"C:\Data\doc2.djvu"
+            string[] inputPaths = {
+                @"C:\Data\sample1.djvu",
+                @"C:\Data\sample2.djvu"
             };
 
-            // Pages to include in the PDF (example: pages 1, 2, 3)
-            int[] pagesToConvert = new int[] { 1, 2, 3 };
+            // Hardcoded output directory
+            string outputDirectory = @"C:\Data\ConvertedPdf";
 
-            foreach (var inputPath in inputFiles)
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Define page range to convert (e.g., pages 1 to 3)
+            int[] pagesToConvert = { 1, 2, 3 };
+            var multiPageOptions = new DjvuMultiPageOptions(pagesToConvert);
+
+            // Low‑memory load options (1 MB buffer)
+            var loadOptions = new LoadOptions
             {
-                // Verify input file exists
+                BufferSizeHint = 1 * 1024 * 1024
+            };
+
+            foreach (string inputPath in inputPaths)
+            {
+                // Input file existence check
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output PDF path
-                string outputPath = Path.ChangeExtension(inputPath, ".pdf");
-                // Ensure output directory exists
+                // Prepare output PDF path
+                string outputPath = Path.Combine(outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+
+                // Ensure output directory exists (already created above, but follow rule)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Configure low‑memory loading (1 MB buffer)
-                LoadOptions loadOptions = new LoadOptions
-                {
-                    BufferSizeHint = 1 * 1024 * 1024
-                };
-
-                // Load DjVu document with the specified load options
+                // Load DjVu document with low‑memory strategy
                 using (FileStream stream = File.OpenRead(inputPath))
                 using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
                 {
-                    // Define page range options for the conversion
-                    DjvuMultiPageOptions multiPageOptions = new DjvuMultiPageOptions(pagesToConvert);
-
-                    // Set up PDF saving options with the selected pages
-                    PdfOptions pdfOptions = new PdfOptions
+                    // Save selected pages to PDF
+                    var pdfOptions = new PdfOptions
                     {
                         MultiPageOptions = multiPageOptions
                     };
-
-                    // Save selected pages as a PDF file
                     djvuImage.Save(outputPath, pdfOptions);
                 }
             }
@@ -67,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a document‑management system must batch‑process large DjVu archives on a server with limited RAM, a developer can use this code to load each file with a 1 MB buffer, extract only the required pages, and save them as PDF.
- * 2. When an e‑learning platform needs to generate printable PDFs from selected pages of scanned lecture notes stored as DjVu files, this snippet lets a C# service load the files efficiently and output the chosen pages as a PDF.
- * 3. When a legal‑tech application has to convert specific pages of multiple multi‑page DjVu contracts into PDF for client review while avoiding out‑of‑memory errors, the low‑memory loading and page‑range options in this code are ideal.
- * 4. When a desktop utility must allow users to pick a few pages from several DjVu manuals and combine them into separate PDF files without consuming much memory, a developer can implement the shown approach.
- * 5. When an automated archival workflow needs to extract only the cover and index pages from many DjVu documents and store them as PDFs on a low‑resource build server, this code provides the necessary page‑selection and memory‑efficient loading.
+ * 1. When a document management system must batch‑convert large DjVu archives to PDF while only extracting the first three pages to save storage and processing time, developers can use this low‑memory loading strategy.
+ * 2. When a legal firm needs to generate PDF excerpts from multiple multi‑page DjVu case files on a workstation with limited RAM, the code enables selective page conversion without loading entire documents.
+ * 3. When an e‑learning platform automatically prepares printable PDFs from uploaded DjVu lecture notes, converting only the introductory pages for preview, this approach efficiently handles several files in one run.
+ * 4. When a cloud‑based microservice processes user‑submitted DjVu scans and must return a PDF containing specific pages while keeping memory usage under control, the example demonstrates the required C# workflow.
+ * 5. When a desktop application offers a “Export selected pages” feature for DjVu comics, allowing users to choose page ranges and generate PDFs without exhausting system resources, the code provides the necessary implementation.
  */

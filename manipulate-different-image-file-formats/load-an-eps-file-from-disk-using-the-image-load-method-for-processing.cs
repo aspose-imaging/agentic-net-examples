@@ -2,17 +2,18 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "sample.eps";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.eps";
-            string outputPath = @"C:\Images\output.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,14 +21,19 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the EPS image
-            using (Image image = Image.Load(inputPath))
+            // Load EPS image with default load options
+            var loadOptions = new EpsLoadOptions();
+            using (Image image = Image.Load(inputPath, loadOptions))
             {
-                // Save the loaded image as PNG
-                image.Save(outputPath, new PngOptions());
+                // Example processing: output basic info
+                Console.WriteLine($"Loaded EPS image. Width: {image.Width}, Height: {image.Height}");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                // Save the image as PNG
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -39,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert vector EPS artwork into a raster PNG for web display using C# and Aspose.Imaging.
- * 2. When an automated batch job must read EPS files from a folder, validate their existence, and generate PNG thumbnails for a digital asset management system.
- * 3. When a Windows desktop application has to load an EPS logo, apply image processing, and save it as a PNG to embed in a PDF report.
- * 4. When a server‑side service processes user‑uploaded EPS files, loads them with Image.Load, and stores the resulting PNG in a cloud storage bucket.
- * 5. When a migration script reads legacy EPS graphics from a legacy file system and converts them to PNG format for compatibility with modern applications.
+ * 1. When a developer needs to convert an EPS vector file to a PNG raster image for web display, they can use Image.Load with EpsLoadOptions and save with PngOptions.
+ * 2. When a developer wants to verify that an EPS file exists on disk and retrieve its width and height before performing further image processing, this code provides a simple C# solution.
+ * 3. When a developer automates a batch job in a .NET build pipeline to transform multiple EPS logos into PNGs, the Image.Load and Save pattern can be applied repeatedly.
+ * 4. When a developer extracts basic metadata such as dimensions from an EPS file to generate thumbnail previews, the loaded Image object supplies the required information.
+ * 5. When a developer integrates EPS to PNG conversion into a desktop application that previews vector graphics, this code demonstrates the necessary C# operations and file‑format handling.
  */

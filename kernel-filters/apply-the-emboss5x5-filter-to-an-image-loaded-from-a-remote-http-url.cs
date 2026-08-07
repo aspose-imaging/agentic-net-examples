@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
@@ -11,34 +12,38 @@ class Program
     {
         try
         {
-            string inputPath = "input.jpg";
-            string outputPath = "output/output.jpg";
+            // Input URL and temporary local path
+            string inputUrl = "http://example.com/sample.jpg";
+            string tempInputPath = "temp_input.jpg";
 
-            if (!File.Exists(inputPath))
+            // Download the image from the URL to a temporary file
+            using (var webClient = new System.Net.WebClient())
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                webClient.DownloadFile(inputUrl, tempInputPath);
+            }
+
+            // Verify the temporary file exists
+            if (!File.Exists(tempInputPath))
+            {
+                Console.Error.WriteLine($"File not found: {tempInputPath}");
                 return;
             }
 
+            // Output path
+            string outputPath = "output_embossed.jpg";
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            // Create JPEG options with bound output source
+            Source outputSource = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = outputSource, Quality = 100 };
+
+            // Load the image, apply Emboss5x5 filter, and save
+            using (RasterImage rasterImage = (RasterImage)Image.Load(tempInputPath))
             {
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-
-                double[,] kernel = ConvolutionFilter.Emboss5x5;
-                var filterOptions = new ConvolutionFilterOptions(kernel);
-
-                raster.Filter(raster.Bounds, filterOptions);
-
-                var source = new FileCreateSource(outputPath, false);
-                var jpegOptions = new JpegOptions
-                {
-                    Source = source,
-                    Quality = 90
-                };
-
-                raster.Save(outputPath, jpegOptions);
+                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss5x5));
+                rasterImage.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -50,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to generate stylized thumbnails of user‑uploaded photos hosted on a CDN, a developer can download the JPEG via HTTP, apply Aspose.Imaging’s Emboss5x5 convolution filter in C#, and save the result for display.
- * 2. When an e‑commerce platform wants to add a tactile “embossed” preview to product images fetched from external supplier URLs, the code can load the remote image, run the 5×5 emboss filter, and store the processed JPEG for the product gallery.
- * 3. When a social‑media analytics tool creates visual reports that highlight texture differences in images sourced from public APIs, a developer can pull each image over HTTP, apply the Emboss5x5 filter with Aspose.Imaging, and embed the output in PDF or HTML dashboards.
- * 4. When a digital signage system retrieves promotional banners from a remote server and needs to give them a raised‑edge effect without manual editing, the C# routine can fetch the image, apply the convolution emboss filter, and output a high‑quality JPEG for the display controller.
- * 5. When a mobile app backend processes user‑profile pictures stored on cloud storage to add a subtle embossed watermark before caching, the server‑side code can download the image via its URL, run the Emboss5x5 filter using Aspose.Imaging, and save the enhanced JPEG for fast delivery.
+ * 1. When a developer needs to download a JPEG image from a remote URL, apply the Emboss5x5 convolution filter, and save the enhanced picture locally for further processing.
+ * 2. When building a .NET web application that automatically creates stylized product thumbnails by fetching images from external URLs, embossing them, and storing the high‑quality results in a CDN.
+ * 3. When writing a batch image‑processing script that retrieves pictures from an API, adds depth with the Emboss5x5 filter, and outputs JPEG files ready for print catalogs.
+ * 4. When integrating Aspose.Imaging into a Windows service that monitors a feed of image URLs, applies edge‑enhancement via the Emboss5x5 convolution, and archives the processed images for compliance.
+ * 5. When developing a desktop utility that lets users enter an image URL, instantly preview an embossed version, and save the result with configurable JPEG quality using C# and Aspose.Imaging.
  */

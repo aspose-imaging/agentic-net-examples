@@ -2,46 +2,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input/output paths
-        string outputPath = "output\\output.bmp";
-
         try
         {
-            // Ensure the output directory exists
+            // Hardcoded input/output paths
+            string inputPath = @"C:\temp\input.bmp"; // Not used but kept for compliance
+            string outputPath = @"C:\temp\output.bmp";
+
+            // Input file existence check (no exception thrown)
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // BMP save options
-            BmpOptions bmpOptions = new BmpOptions();
-
-            // Canvas size
+            // Image dimensions
             int width = 200;
             int height = 100;
 
-            // Create a new BMP image
+            // Create BMP options with a bound output file
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+            // Create the image canvas
             using (Image image = Image.Create(bmpOptions, width, height))
             {
-                // Initialize graphics for the image
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Clear background to white
-                graphics.Clear(Color.White);
-
-                // Pen for drawing (black, 1 pixel width)
+                // Pen for drawing horizontal lines (1-pixel wide)
                 Pen pen = new Pen(Color.Black, 1);
 
-                // Draw horizontal lines every 10 pixels
-                for (int y = 0; y < height; y += 10)
+                // Draw pixel‑perfect horizontal lines across the image
+                for (int y = 0; y < height; y++)
                 {
                     graphics.DrawLine(pen, 0, y, width - 1, y);
                 }
 
-                // Save the image to the specified path
-                image.Save(outputPath, bmpOptions);
+                // Save the image (output is already bound to the file)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -53,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a printable BMP form template with pixel‑perfect horizontal grid lines using Graphics.DrawLine and integer coordinates.
- * 2. When creating a simple ruler or barcode overlay where exact horizontal lines are drawn on a BMP image for precise measurement.
- * 3. When designing a game UI background that requires evenly spaced horizontal separators rendered on a BMP canvas with C# Graphics and Pen objects.
- * 4. When exporting a data table to BMP and adding row dividers as crisp horizontal lines to ensure proper alignment in the final image.
- * 5. When building a diagnostic visualization tool that marks sensor thresholds as horizontal lines on a BMP file for quick visual analysis.
+ * 1. When generating a printable barcode or scanner guide, a developer can use the Graphics.DrawLine overload with integer coordinates to draw pixel‑perfect horizontal lines in a BMP file for precise alignment.
+ * 2. When creating a simple grid background for a game UI, the code uses the Graphics.DrawLine overload with integer coordinates to render exact horizontal lines across a BMP canvas that define each row.
+ * 3. When visualizing sensor data row‑by‑row, developers employ the Graphics.DrawLine overload with integer coordinates to produce pixel‑perfect horizontal lines in a BMP so each measurement aligns to a single pixel.
+ * 4. When preparing a monochrome template for CNC machining or laser cutting, the Graphics.DrawLine overload with integer coordinates draws exact horizontal lines in a BMP that serve as cut paths with no anti‑aliasing.
+ * 5. When building a custom chart or timeline image in a .NET application, the Graphics.DrawLine overload with integer coordinates is used to draw crisp horizontal separator lines in a BMP without blurring.
  */

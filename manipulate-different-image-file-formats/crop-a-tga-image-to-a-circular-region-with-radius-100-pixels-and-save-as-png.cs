@@ -9,10 +9,10 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.tga";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = @"C:\Images\sample.tga";
+        string outputPath = @"C:\Images\sample_cropped.png";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,26 +24,22 @@ class Program
 
         try
         {
-            // Load the TGA image as a RasterImage
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            // Load the TGA image as a raster image
+            using (RasterImage rasterImage = (RasterImage)Image.Load(inputPath))
             {
-                // Define circle parameters (centered in the image, radius 100)
-                int radius = 100;
-                int centerX = image.Width / 2;
-                int centerY = image.Height / 2;
+                // Determine the center of the image
+                int centerX = rasterImage.Width / 2;
+                int centerY = rasterImage.Height / 2;
+                int radius = 100; // Desired radius
 
-                // Create a circular mask
-                CircleMask mask = new CircleMask(centerX, centerY, radius);
+                // Create a circular mask with the specified center and radius
+                var circleMask = new CircleMask(centerX, centerY, radius);
 
-                // Apply the mask to the image (makes pixels outside the circle transparent)
-                mask.ApplyTo(image);
+                // Apply the mask to the raster image (makes pixels outside the circle transparent)
+                circleMask.ApplyTo(rasterImage);
 
-                // Crop to the bounding rectangle of the circle
-                Rectangle cropRect = new Rectangle(centerX - radius, centerY - radius, radius * 2, radius * 2);
-                image.Crop(cropRect);
-
-                // Save the result as PNG
-                image.Save(outputPath, new PngOptions());
+                // Save the resulting image as PNG
+                rasterImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -55,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a game developer needs to convert legacy TGA sprite sheets into circular PNG icons for UI overlays, they can use this code to mask and crop the image.
- * 2. When a graphics pipeline requires generating round thumbnails from high‑resolution TGA textures for product catalogs, the snippet creates a transparent PNG thumbnail of a fixed 100‑pixel radius.
- * 3. When an e‑learning platform wants to display circular profile pictures derived from TGA assets, this C# routine masks the image and saves it as a web‑friendly PNG.
- * 4. When a scientific visualization tool must extract a circular region of interest from a TGA microscopy image and export it as a lossless PNG for publication, the code performs the cropping and format conversion.
- * 5. When a desktop application needs to batch‑process TGA logos into circular PNG badges with a consistent radius for branding, this example shows the necessary Aspose.Imaging operations.
+ * 1. When a game developer needs to extract a circular avatar from a high‑resolution TGA sprite sheet and export it as a transparent PNG for use in UI overlays.
+ * 2. When a graphics pipeline requires converting legacy TGA textures into PNG thumbnails with a fixed 100‑pixel radius circular crop for preview generation.
+ * 3. When an e‑commerce platform wants to display product logos stored as TGA files as round icons on a web page, needing C# code that masks and saves them as PNG with transparency.
+ * 4. When a scientific imaging application must isolate a circular region of interest from a TGA microscopy image and store the result as a lossless PNG for further analysis.
+ * 5. When a mobile app developer needs to create circular profile pictures from TGA assets, using Aspose.Imaging’s CircleMask in C# to produce PNG files that retain transparent backgrounds.
  */

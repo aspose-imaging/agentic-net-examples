@@ -6,38 +6,35 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Output BMP file path
-            string outputPath = @"c:\temp\output_inset.bmp";
+            string outputPath = @"C:\temp\output.bmp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure BMP options
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
-            };
+            // Set up BMP options with a file create source
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a 200x200 BMP image
+            // Create a new image with the specified options
             using (Image image = Image.Create(bmpOptions, 200, 200))
             {
-                // Initialize graphics object
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
 
-                // Create a pen with inset alignment
-                Pen pen = new Pen(Color.Black, 10);
+                // Create a pen, set its alignment to Inset
+                Pen pen = new Pen(Color.Blue, 10);
                 pen.Alignment = PenAlignment.Inset;
 
-                // Draw a rectangle to observe border positioning
-                graphics.DrawRectangle(pen, 20, 20, 160, 160);
+                // Draw a rectangle using the inset-aligned pen
+                graphics.DrawRectangle(pen, new Rectangle(20, 20, 160, 160));
 
-                // Save the image
+                // Save the image (output path already bound to the source)
                 image.Save();
             }
         }
@@ -50,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a printable BMP report with a black border that stays completely inside the page margins, they can use PenAlignment.Inset to keep the rectangle’s stroke within the defined area.
- * 2. When creating UI mock‑ups for a Windows desktop application, a programmer can draw inset‑aligned rectangles on a 24‑bit BMP to simulate button outlines that remain inside the control’s bounds.
- * 3. When preparing assets for a legacy embedded system that only supports BMP files, using an inset pen guarantees that the border thickness is accounted for within the image dimensions, preventing clipping on low‑resolution displays.
- * 4. When automating the production of certification seals where the outer ring must be fully contained within a fixed 200 × 200 BMP canvas, PenAlignment.Inset ensures the ring’s 10‑pixel stroke stays inside the seal’s perimeter.
- * 5. When testing image‑processing pipelines that crop or resize BMP images, drawing an inset‑aligned rectangle provides a reliable visual reference that remains unchanged after subsequent transformations.
+ * 1. When a developer needs to generate a BMP thumbnail with a precisely positioned inner border for a UI icon, they can set PenAlignment.Inset and draw a rectangle to ensure the border stays inside the image edges.
+ * 2. When creating printable labels in a .NET application where the border must not be clipped by the page margin, using an inset‑aligned pen on a 24‑bit BMP guarantees the stroke is fully visible.
+ * 3. When building a diagnostic tool that visualizes image dimensions by drawing a rectangle inside a BMP canvas, the inset pen alignment helps display the exact content area without overlapping the outer pixels.
+ * 4. When implementing a custom watermark that requires a thick frame to appear completely within a BMP graphic, setting Pen.Alignment = PenAlignment.Inset ensures the frame does not extend beyond the intended region.
+ * 5. When generating test images for automated UI testing that need a consistent inner border thickness on BMP files, using PenAlignment.Inset with Graphics.DrawRectangle provides repeatable border positioning across runs.
  */

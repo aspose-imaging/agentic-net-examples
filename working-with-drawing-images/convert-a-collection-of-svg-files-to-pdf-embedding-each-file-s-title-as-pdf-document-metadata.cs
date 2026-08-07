@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
@@ -10,11 +11,10 @@ class Program
     {
         try
         {
-            // Hardcoded relative input and output directories
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure input directory exists
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -22,41 +22,35 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            // Get all SVG files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (string inputPath in files)
+            foreach (var filePath in files)
             {
-                // Validate input file existence
+                if (!filePath.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                string inputPath = filePath;
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Derive output PDF path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-
-                // Ensure output directory for this file exists
+                string outputFileName = Path.ChangeExtension(Path.GetFileName(inputPath), ".pdf");
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load SVG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Prepare PDF options with metadata
                     using (PdfOptions pdfOptions = new PdfOptions())
                     {
                         pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
-                        pdfOptions.PdfDocumentInfo.Title = fileNameWithoutExt; // Use file name as title
-
-                        // Save as PDF
+                        pdfOptions.PdfDocumentInfo.Title = Path.GetFileNameWithoutExtension(inputPath);
                         image.Save(outputPath, pdfOptions);
                     }
                 }
@@ -71,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a library of SVG icons into searchable PDF catalogs, embedding each icon’s title as PDF metadata for easy indexing.
- * 2. When an e‑learning platform must generate printable course handouts from SVG diagrams, automatically adding the diagram title to the PDF document properties.
- * 3. When a marketing team wants to create a PDF portfolio of vector artwork stored as SVG files, with each artwork’s title stored in the PDF metadata for client reference.
- * 4. When a compliance system requires archival of SVG‑based schematics as PDFs, preserving the original file name as the PDF title metadata for audit trails.
- * 5. When a reporting tool needs to export SVG charts to PDF reports, embedding the chart title in the PDF document info so downstream tools can display it in document summaries.
+ * 1. When a developer needs to batch‑convert a library of SVG icons into searchable PDF catalogs, preserving each icon’s name as the PDF title metadata.
+ * 2. When an automated build pipeline must generate printable PDF reports from SVG diagrams and embed the diagram name as the document title for easier indexing.
+ * 3. When a web service offers users the ability to download their SVG artwork as PDF files, and the service must set the PDF metadata title to match the original file name.
+ * 4. When a document management system imports SVG assets and requires each PDF version to carry the original SVG filename in the PDF document info for compliance tracking.
+ * 5. When a desktop utility processes a folder of SVG floor plans, converting them to PDF while using the floor plan’s filename as the PDF title to aid search and retrieval.
  */

@@ -3,76 +3,63 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded output path
-            string outputPath = @"C:\Temp\gauge.bmp";
+            // Output BMP file path (hard‑coded)
+            string outputPath = @"C:\temp\gauge.bmp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set BMP creation options
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            // Create a file source bound to the output path
+            Source fileSource = new FileCreateSource(outputPath, false);
 
-            // Create a BMP canvas (width: 400, height: 200)
-            using (Image image = Image.Create(bmpOptions, 400, 200))
+            // Configure BMP options with the file source
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = fileSource;
+
+            // Define canvas size (width x height)
+            int canvasWidth = 400;
+            int canvasHeight = 200;
+
+            // Create the BMP canvas (output is already bound to the file source)
+            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, canvasWidth, canvasHeight))
             {
                 // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
+                Graphics graphics = new Graphics(canvas);
+
+                // Clear background to white
                 graphics.Clear(Color.White);
 
-                // Gauge parameters
-                int centerX = 200;
-                int centerY = 200;
-                int radiusOuter = 180;
-                int radiusInner = 150;
-
-                // Outer semi‑circular arc (0° to 180°)
+                // Define pens for arcs
                 Pen outerPen = new Pen(Color.Black, 4);
-                graphics.DrawArc(
-                    outerPen,
-                    new Rectangle(centerX - radiusOuter, centerY - radiusOuter, radiusOuter * 2, radiusOuter * 2),
-                    0,
-                    180);
-
-                // Inner semi‑circular arc
                 Pen innerPen = new Pen(Color.Gray, 2);
-                graphics.DrawArc(
-                    innerPen,
-                    new Rectangle(centerX - radiusInner, centerY - radiusInner, radiusInner * 2, radiusInner * 2),
-                    0,
-                    180);
+                Pen tickPen = new Pen(Color.DarkBlue, 1);
 
-                // Tick marks every 10 degrees
-                Pen tickPen = new Pen(Color.Black, 2);
-                for (int angle = 0; angle <= 180; angle += 10)
+                // Draw outer semi‑circular arc (full gauge outline)
+                // Rectangle defines the bounding ellipse; start at 180°, sweep -180° to draw the top half
+                graphics.DrawArc(outerPen, new Rectangle(10, 10, canvasWidth - 20, canvasWidth - 20), 180, -180);
+
+                // Draw inner semi‑circular arc (inner boundary)
+                graphics.DrawArc(innerPen, new Rectangle(30, 30, canvasWidth - 60, canvasWidth - 60), 180, -180);
+
+                // Draw tick marks as short arcs along the gauge
+                int tickCount = 10;
+                for (int i = 0; i <= tickCount; i++)
                 {
-                    double rad = angle * Math.PI / 180.0;
-                    int xOuter = centerX + (int)(radiusOuter * Math.Cos(rad));
-                    int yOuter = centerY - (int)(radiusOuter * Math.Sin(rad));
-                    int xInner = centerX + (int)(radiusInner * Math.Cos(rad));
-                    int yInner = centerY - (int)(radiusInner * Math.Sin(rad));
-                    graphics.DrawLine(tickPen, xInner, yInner, xOuter, yOuter);
+                    // Calculate angle for each tick (evenly spaced across 180°)
+                    float angle = 180f - (i * 180f / tickCount);
+                    // Small arc length for tick (5° sweep)
+                    graphics.DrawArc(tickPen, new Rectangle(50, 50, canvasWidth - 100, canvasWidth - 100), angle, -5);
                 }
 
-                // Needle pointing at 75 degrees
-                Pen needlePen = new Pen(Color.Red, 3);
-                int needleLength = radiusInner - 20;
-                double needleRad = 75 * Math.PI / 180.0;
-                int xNeedle = centerX + (int)(needleLength * Math.Cos(needleRad));
-                int yNeedle = centerY - (int)(needleLength * Math.Sin(needleRad));
-                graphics.DrawLine(needlePen, centerX, centerY, xNeedle, yNeedle);
-
-                // Save the image (output path already bound to the source)
-                image.Save();
+                // Save the bound image (no path needed)
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -84,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP image of a semi‑circular gauge for a Windows desktop dashboard widget using C# and Aspose.Imaging.
- * 2. When a C# backend service must create a static gauge graphic on the fly to embed in PDF or HTML reports generated with Aspose libraries.
- * 3. When an IoT monitoring application requires a lightweight BMP gauge indicator that can be rendered programmatically without external image files.
- * 4. When a legacy SCADA system expects a BMP gauge image with precise arc and tick‑mark geometry that can be refreshed automatically via Aspose.Imaging.
- * 5. When a developer wants to export a custom semi‑circular gauge illustration as a BMP file for printing on labels, manuals, or other documentation.
+ * 1. When a developer needs to generate a BMP image of a semi‑circular gauge for an industrial equipment dashboard using C# and Aspose.Imaging.
+ * 2. When a developer wants to create a lightweight BMP file that visualizes speedometer‑style tick marks for an automotive telemetry system.
+ * 3. When a developer must produce a printable BMP gauge indicator for a medical device manual that requires precise arc drawing and custom pen colors.
+ * 4. When a developer is building a Windows Forms application that dynamically renders a BMP gauge overlay to show real‑time sensor values without relying on external graphics libraries.
+ * 5. When a developer needs to export a BMP gauge diagram with outer and inner arcs for inclusion in a PDF report generated by a .NET reporting tool.
  */

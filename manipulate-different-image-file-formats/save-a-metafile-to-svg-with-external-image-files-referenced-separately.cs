@@ -4,49 +4,39 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
-class ExternalResourceKeeper : SvgResourceKeeperCallback
+class MySvgResourceKeeperCallback : SvgResourceKeeperCallback
 {
-    private readonly string _svgPath;
+    private readonly string _outputPath;
 
-    public ExternalResourceKeeper(string svgPath)
+    public MySvgResourceKeeperCallback(string outputPath)
     {
-        _svgPath = svgPath;
+        _outputPath = outputPath;
     }
 
-    // Save image resources as external files and return a relative path
     public override string OnImageResourceReady(byte[] imageData, SvgImageType imageType,
         string suggestedFileName, ref bool useEmbeddedImage)
     {
-        // Force external storage
+        // Force external image file
         useEmbeddedImage = false;
 
-        // Create a folder named "resources" next to the SVG file
-        string resourcesDir = Path.Combine(Path.GetDirectoryName(_svgPath) ?? string.Empty, "resources");
+        // Determine folder for external resources relative to the SVG output
+        string resourcesDir = Path.Combine(Path.GetDirectoryName(_outputPath) ?? string.Empty, "resources");
         Directory.CreateDirectory(resourcesDir);
 
-        // Write the image data to a file
-        string resourceFilePath = Path.Combine(resourcesDir, suggestedFileName);
-        File.WriteAllBytes(resourceFilePath, imageData);
+        // Save the image data to a file
+        string filePath = Path.Combine(resourcesDir, suggestedFileName);
+        File.WriteAllBytes(filePath, imageData);
 
-        // Return a relative path that will be used inside the SVG
-        return $"resources/{suggestedFileName}";
+        // Return the relative path that will be used inside the SVG
+        string relativePath = Path.Combine("resources", suggestedFileName);
+        // Use forward slashes for SVG compatibility
+        return relativePath.Replace('\\', '/');
     }
 
-    // Called when the SVG document is ready; write it to the target location
     public override string OnSvgDocumentReady(byte[] htmlData, string suggestedFileName)
     {
-        // Ensure the directory exists
-        string dir = Path.GetDirectoryName(suggestedFileName);
-        if (!string.IsNullOrEmpty(dir))
-        {
-            Directory.CreateDirectory(dir);
-        }
-
-        // Write the SVG data
-        File.WriteAllBytes(suggestedFileName, htmlData);
-
-        // Return the path that was used
-        return suggestedFileName;
+        // No special handling needed for the SVG document itself
+        return null;
     }
 }
 
@@ -54,39 +44,36 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.emf";
         string outputPath = @"C:\Images\output.svg";
 
-        // Verify the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
-
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+
             // Load the metafile
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG export options
+                // Configure SVG export options with external resource handling
                 var svgOptions = new SvgOptions
                 {
-                    // Use the custom callback to store external resources
-                    Callback = new ExternalResourceKeeper(outputPath),
-
-                    // Set rasterization options (page size matches the source image)
+                    Callback = new MySvgResourceKeeperCallback(outputPath),
                     VectorRasterizationOptions = new SvgRasterizationOptions
                     {
                         PageSize = image.Size
                     }
                 };
 
-                // Save as SVG; external images will be written by the callback
+                // Save as SVG with external images
                 image.Save(outputPath, svgOptions);
             }
         }
@@ -99,9 +86,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert Windows Metafile (EMF) graphics into scalable SVG files while storing embedded bitmap resources as separate image files for efficient web delivery.
- * 2. When an application must generate SVG assets for a design system and keep large raster images in a “resources” folder to reduce SVG size and improve browser caching.
- * 3. When a reporting tool exports charts as EMF and then transforms them into SVG for interactive dashboards, requiring external PNG/JPEG resources to be referenced via relative paths.
- * 4. When a document conversion service processes legacy vector files and wants to preserve image fidelity by saving the SVG with external image files that can be edited independently.
- * 5. When a CI/CD pipeline automates asset preparation for responsive web pages, converting EMF logos to SVG and separating image resources so designers can replace them without modifying the SVG markup.
+ * 1. When a developer needs to convert Windows Metafile (EMF) graphics into scalable SVG files for web publishing while keeping large raster elements as separate image resources to reduce SVG file size.
+ * 2. When an application must generate SVG assets for responsive design and wants external PNG or JPEG resources stored in a dedicated folder to enable caching and independent updates.
+ * 3. When a reporting tool exports charts as EMF and must embed them in SVG dashboards, separating bitmap images to comply with SVG security policies that disallow embedded base64 data.
+ * 4. When a document conversion service processes legacy vector drawings and needs to preserve original image quality by saving embedded bitmap parts as external files referenced via relative paths.
+ * 5. When a CI/CD pipeline automates asset preparation for a mobile app, converting EMF icons to SVG while storing their raster components as external resources to meet app bundle size constraints.
  */

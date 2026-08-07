@@ -11,17 +11,20 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\vector.svg";
-        string outputPath = @"C:\Images\output.jpg";
+        string outputPath = @"C:\Images\Resized\vector_resized.jpg";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
             // Load the vector image
             using (Image image = Image.Load(inputPath))
             {
@@ -38,7 +41,7 @@ class Program
                 int newWidth = (int)(image.Width * scale);
                 int newHeight = (int)(image.Height * scale);
 
-                // Resize using a high‑quality resample method
+                // Resize using a high‑quality resampling method
                 image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
                 // Prepare JPEG save options with 90% quality
@@ -49,9 +52,6 @@ class Program
                     ResolutionUnit = ResolutionUnit.Inch,
                     ResolutionSettings = new ResolutionSetting(96.0, 96.0)
                 };
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Save the resized image as JPEG
                 image.Save(outputPath, jpegOptions);
@@ -66,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate thumbnail previews of user‑uploaded SVG logos for product listings, it can use this C# code to resize the vector while preserving aspect ratio and save a 90 % quality JPEG for fast browser rendering.
- * 2. When an e‑commerce platform must convert scalable vector graphics of product diagrams into printable JPEG images at a maximum size of 800×600 pixels, the code ensures the images are down‑scaled without distortion and retain high visual fidelity.
- * 3. When a content management system automatically creates responsive images for blog posts from SVG illustrations, developers can employ this snippet to produce optimized JPEGs that fit within layout constraints while maintaining the original proportions.
- * 4. When a desktop reporting tool needs to embed company branding SVG files into PDF reports as raster images, the code resizes the vectors to the required dimensions and exports them as high‑quality JPEGs for consistent appearance across devices.
- * 5. When a mobile app backend processes vector icons uploaded by designers and must deliver them as compressed JPEG assets for low‑bandwidth networks, this C# routine resizes the SVGs, keeps the aspect ratio, and saves them with 90 % quality to balance size and clarity.
+ * 1. When a web application needs to generate thumbnail previews of user‑uploaded SVG logos for product listings, it can use this C# code with Aspose.Imaging to resize the vector while preserving aspect ratio and save a 90 % quality JPEG for fast browser rendering.
+ * 2. When an e‑commerce platform must create printable catalog images from designer‑provided vector artwork, the code can downscale the SVG to fit catalog dimensions and export a high‑quality JPEG suitable for print workflows.
+ * 3. When a content management system automatically converts scalable icons into raster images for email newsletters, this snippet ensures the icons are resized proportionally and saved as JPEGs with consistent compression.
+ * 4. When a mobile app backend prepares responsive images from SVG assets for different device screen sizes, the code resizes the vector without distortion and outputs a JPEG with 90 % quality to balance visual fidelity and bandwidth.
+ * 5. When a digital signage solution needs to pre‑process SVG graphics into JPEG files that match specific display resolutions, the example provides a reliable way to maintain aspect ratio and achieve high‑quality raster output in C#.
  */

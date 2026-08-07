@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -13,81 +12,64 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output locations
-            string inputDirectory = "Input";
-            string outputPath = "Output/merged.jpg";
+            // Hardcoded input and output paths
+            string[] inputPaths = { "image1.jpg", "image2.jpg", "image3.jpg" };
+            string outputPath = "output/merged.jpg";
 
-            // Ensure input directory exists (create if missing)
-            if (!Directory.Exists(inputDirectory))
+            // Validate input files
+            foreach (string path in inputPaths)
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add JPEG files and rerun.");
-                return;
-            }
-
-            // Ensure output directory exists (create if missing)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Gather JPEG files from the input directory
-            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.jpg");
-            if (inputFiles.Length == 0)
-            {
-                Console.WriteLine("No JPEG files found in the input directory.");
-                return;
-            }
-
-            // Verify each input file exists
-            foreach (string file in inputFiles)
-            {
-                if (!File.Exists(file))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {file}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
             }
 
-            // Collect sizes of all images
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Collect image sizes
             List<Size> sizes = new List<Size>();
-            foreach (string file in inputFiles)
+            foreach (string path in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(file))
+                using (RasterImage img = (RasterImage)Image.Load(path))
                 {
                     sizes.Add(img.Size);
                 }
             }
 
-            // Calculate canvas dimensions (horizontal layout, vertical centering)
-            int canvasWidth = sizes.Sum(s => s.Width);
-            int canvasHeight = sizes.Max(s => s.Height);
-
-            // Prepare JPEG options with bound output source
-            JpegOptions jpegOptions = new JpegOptions
+            // Calculate canvas dimensions for horizontal merge
+            int canvasWidth = 0;
+            int canvasHeight = 0;
+            foreach (var sz in sizes)
             {
-                Source = new FileCreateSource(outputPath, false),
-                Quality = 100
-            };
+                canvasWidth += sz.Width;
+                if (sz.Height > canvasHeight) canvasHeight = sz.Height;
+            }
 
-            // Create the canvas image
+            // Create output source and JPEG options
+            FileCreateSource source = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
+
+            // Create bound JPEG canvas
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetX = 0;
-                foreach (string file in inputFiles)
+                foreach (string path in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(file))
+                    using (RasterImage img = (RasterImage)Image.Load(path))
                     {
-                        // Center the image vertically on the canvas
-                        int offsetY = (canvasHeight - img.Height) / 2;
+                        int offsetY = (canvasHeight - img.Height) / 2; // Center vertically
                         Rectangle bounds = new Rectangle(offsetX, offsetY, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
 
-                // Save the bound canvas (no path needed because source is already set)
+                // Save the bound image
                 canvas.Save();
             }
-
-            Console.WriteLine($"Merged image saved to: {outputPath}");
         }
         catch (Exception ex)
         {
@@ -98,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a single JPEG banner that combines multiple product photos side‑by‑side with each picture vertically centered on a common canvas for an e‑commerce catalog.
- * 2. When an application must create a social‑media collage where user‑uploaded JPEG images are stitched horizontally and centered to maintain a balanced layout before posting to Instagram or Facebook.
- * 3. When a reporting tool has to produce a printable photo strip PDF where individual JPEG snapshots are merged into one horizontally aligned image with vertical centering to ensure consistent margins.
- * 4. When a game developer wants to build a sprite sheet from separate JPEG assets, aligning each sprite in the middle of its column while concatenating them horizontally for efficient texture loading.
- * 5. When an email‑marketing system needs to embed a single merged JPEG containing several promotional images side‑by‑side, each centered vertically, to reduce the number of HTTP requests and improve load speed.
+ * 1. When a developer needs to generate a single side‑by‑side product catalog page by centering multiple JPEG product photos on a horizontal canvas using Aspose.Imaging for .NET.
+ * 2. When an e‑commerce site wants to create a combined promotional banner that aligns different‑size JPEG banners centrally in a horizontal layout with C# and Aspose.Imaging.
+ * 3. When a photo‑sharing app must stitch user‑uploaded JPEG snapshots into a balanced panoramic strip, ensuring each image is vertically centered on the canvas via Aspose.Imaging image processing.
+ * 4. When a reporting tool has to embed several JPEG charts side by side in a PDF export, first merging them horizontally with centered alignment using C# and Aspose.Imaging before PDF conversion.
+ * 5. When a digital signage system prepares a rotating slideshow that combines multiple JPEG advertisements into a single horizontally aligned image, centering each asset on the canvas with Aspose.Imaging for .NET.
  */

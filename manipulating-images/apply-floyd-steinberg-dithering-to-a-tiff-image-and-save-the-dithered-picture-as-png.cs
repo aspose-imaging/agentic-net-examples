@@ -8,26 +8,26 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"c:\temp\sample.tif";
+        string outputPath = @"c:\temp\sample.FloydSteinbergDithering1.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"c:\temp\sample.tif";
-            string outputPath = @"c:\temp\sample.FloydSteinbergDithering1.png";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to TiffImage to access Dither method
+                // Cast to TiffImage to access the Dither method
                 TiffImage tiffImage = (TiffImage)image;
 
                 // Apply Floyd‑Steinberg dithering with a 1‑bit palette
@@ -39,7 +39,7 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
+            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -47,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert high‑resolution 1‑bit TIFF scans of engineering drawings into smaller PNG files while preserving visual detail using Floyd‑Steinberg dithering.
- * 2. When an application must generate web‑friendly PNG thumbnails from legacy TIFF photographs and wants to reduce banding artifacts by applying dithering in C#.
- * 3. When a document‑management system imports multi‑page TIFF archives and requires each page to be saved as a dithered PNG for faster preview rendering.
- * 4. When a game‑asset pipeline processes TIFF textures and needs to create low‑color PNG sprites with Floyd‑Steinberg dithering to maintain contrast on limited palettes.
- * 5. When a medical‑imaging tool exports TIFF X‑ray images to PNG format for patient portals and uses dithering to improve readability on standard monitors.
+ * 1. When a developer needs to convert high‑resolution multi‑page TIFF scans into compact 1‑bit black‑and‑white PNGs for web preview, they can apply Floyd‑Steinberg dithering with Aspose.Imaging for .NET.
+ * 2. When preparing archival documents for e‑ink devices, a programmer can load a TIFF, dither it to a 1‑bit palette using the Floyd‑Steinberg algorithm, and save the result as a PNG.
+ * 3. When optimizing scanned engineering drawings for faster loading in a C# desktop application, the code can reduce color depth via Floyd‑Steinberg dithering and output a PNG file.
+ * 4. When generating printable line‑art thumbnails from large TIFF images, a developer can use Aspose.Imaging to apply Floyd‑Steinberg dithering and store the output as a PNG for consistent rendering.
+ * 5. When building an automated batch‑processing pipeline that converts TIFF receipts into low‑size PNGs with high visual fidelity, the Floyd‑Steinberg dithering method ensures the 1‑bit PNG retains detail.
  */

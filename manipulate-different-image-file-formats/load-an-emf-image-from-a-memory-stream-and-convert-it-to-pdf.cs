@@ -8,8 +8,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\input.emf";
-        string outputPath = @"C:\Temp\output.pdf";
+        string inputPath = "input.emf";
+        string outputPath = "output.pdf";
 
         try
         {
@@ -25,11 +25,12 @@ class Program
 
             // Load EMF image from a memory stream
             byte[] emfBytes = File.ReadAllBytes(inputPath);
-            using (MemoryStream ms = new MemoryStream(emfBytes))
-            using (Image emfImage = Image.Load(ms))
+            using (var memoryStream = new MemoryStream(emfBytes))
+            using (Image emfImage = Image.Load(memoryStream))
             {
-                // Save as PDF using default PDF options
-                emfImage.Save(outputPath, new PdfOptions());
+                // Convert to PDF using PdfOptions
+                var pdfOptions = new PdfOptions();
+                emfImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -41,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically convert legacy Windows Metafile (EMF) graphics stored in a file system or database into PDF documents for reporting or archiving.
- * 2. When an application must generate printable PDFs from vector‑based EMF logos or diagrams that are received as byte arrays over a network stream.
- * 3. When a batch‑processing service reads EMF files from a shared folder, loads them via a MemoryStream, and saves them as PDF to comply with document‑exchange standards.
- * 4. When a C# web API accepts uploaded EMF images, validates the file, and returns a PDF version without writing temporary files to disk.
- * 5. When a developer integrates Aspose.Imaging into a Windows service that monitors a directory, converts any new EMF files to PDF, and stores the results in a separate output folder.
+ * 1. When a developer must create a printable PDF version of a vector‑based EMF chart that is received as a byte array from a web service, they can load the EMF image from a MemoryStream and save it as a PDF file.
+ * 2. When an application needs to batch‑convert legacy EMF icons stored on disk into PDF assets for inclusion in documentation, this code reads each EMF, streams it into memory, and outputs a PDF using Aspose.Imaging.
+ * 3. When a Windows desktop tool has to embed a user‑drawn EMF diagram into a PDF invoice without writing intermediate files, the MemoryStream approach allows direct conversion from the in‑memory image to PDF.
+ * 4. When a cloud‑based microservice processes uploaded EMF files and returns a PDF preview to the client, loading the EMF from a MemoryStream ensures efficient, stateless handling before saving the PDF response.
+ * 5. When a migration script needs to archive EMF graphics from an old file repository into PDF format for long‑term storage, this code streams each EMF into memory and converts it to PDF with a single call to Aspose.Imaging.
  */

@@ -2,18 +2,19 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\vector.svg";
-            string outputPath = @"C:\Images\output.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,38 +22,29 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the vector image (SVG, CDR, etc.)
-            using (Image image = Image.Load(inputPath))
+            // Load the SVG image
+            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
             {
-                // Configure PNG export options
-                var pngOptions = new PngOptions
+                // Configure rasterization options with anti-aliasing
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
-                    // 16‑bit per channel depth for high‑quality output
+                    PageSize = svgImage.Size,
+                    SmoothingMode = SmoothingMode.AntiAlias,
+                    TextRenderingHint = TextRenderingHint.AntiAlias
+                };
+
+                // Configure PNG options with 16-bit depth
+                PngOptions pngOptions = new PngOptions
+                {
                     BitDepth = 16,
-                    // Truecolor with alpha supports 16‑bit depth
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    // Optional: enable progressive PNG
-                    Progressive = true
+                    VectorRasterizationOptions = rasterOptions
                 };
 
-                // Set up vector rasterization options with anti‑aliasing
-                var rasterOptions = new VectorRasterizationOptions
-                {
-                    // Apply anti‑aliasing to lines, curves and filled areas
-                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
-                    // Apply anti‑aliasing to text rendering
-                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias,
-                    // Use the original image size for rasterization
-                    PageSize = image.Size
-                };
-
-                pngOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Save the rasterized image as PNG
-                image.Save(outputPath, pngOptions);
+                // Save the rasterized PNG
+                svgImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -64,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG logo to a print‑ready PNG with smooth edges, using anti‑aliasing and 16‑bit color depth for high‑quality output.
- * 2. When a web application must generate retina‑ready PNG thumbnails from vector icons on the fly, preserving crisp lines and text through vector rasterization with anti‑aliasing.
- * 3. When a desktop utility processes CAD or CDR vector drawings and exports them as lossless PNGs with truecolor and alpha channels for archival or sharing.
- * 4. When an automated build pipeline creates progressive PNG assets from vector sources, applying 16‑bit per channel depth and anti‑aliasing to reduce file size while retaining image fidelity.
- * 5. When a reporting system needs to embed vector diagrams into PDFs by first rasterizing them to high‑quality PNGs with anti‑aliased text and shapes.
+ * 1. When a developer needs to convert an SVG logo into a high‑resolution PNG for print media while preserving smooth edges with anti‑aliasing and 16‑bit color depth using Aspose.Imaging for .NET.
+ * 2. When a web application must generate retina‑ready PNG thumbnails from vector illustrations on the fly, ensuring crisp rendering by applying SmoothingMode.AntiAlias and TextRenderingHint.AntiAlias.
+ * 3. When a desktop tool has to batch‑process SVG icons into 16‑bit PNG assets for a UI theme, requiring precise color depth control and vector rasterization options in C#.
+ * 4. When an e‑learning platform wants to embed scalable diagrams as PNG images with accurate color fidelity and anti‑aliased text for PDF export, using Aspose.Imaging’s SvgRasterizationOptions.
+ * 5. When a GIS system needs to render complex SVG maps as high‑quality PNG layers with 16‑bit depth to maintain gradient detail and smooth lines before overlaying them on satellite imagery.
  */

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -9,34 +10,32 @@ class Program
     {
         try
         {
-            // Input PSD file (relative path)
+            // Hardcoded input and output paths
             string inputPath = "Input/sample.psd";
+            string outputPath = "Output/output.pdf";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Output PDF file (relative path)
-            string outputPath = "Output/dimmed.pdf";
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PSD image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for pixel manipulation
+                // Cast to RasterImage to adjust brightness
                 RasterImage raster = (RasterImage)image;
-                if (!raster.IsCached)
-                {
-                    raster.CacheData();
-                }
-
                 // Decrease brightness by 15 levels
                 raster.AdjustBrightness(-15);
 
-                // Save the adjusted image as PDF
+                // Prepare PDF options
                 using (PdfOptions pdfOptions = new PdfOptions())
                 {
+                    // Save the adjusted image as PDF
                     image.Save(outputPath, pdfOptions);
                 }
             }
@@ -50,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to automatically dim a Photoshop PSD mockup by fifteen brightness levels before generating a client‑ready PDF portfolio.
- * 2. When a web service processes uploaded PSD files, reduces their brightness to meet brand guidelines, and returns the result as a PDF document.
- * 3. When an automated build pipeline converts dark‑theme PSD assets into printable PDF handouts with consistent reduced brightness.
- * 4. When a digital archiving tool batch‑processes legacy PSD scans, lowers their brightness to improve readability, and stores them in PDF format for long‑term preservation.
- * 5. When a Windows desktop application lets users adjust the brightness of a PSD image programmatically and export the edited version directly to PDF for sharing.
+ * 1. When a developer needs to dim a Photoshop PSD file by fifteen brightness levels before converting it to a PDF for consistent printing or archival.
+ * 2. When an automated workflow must batch‑process PSD assets, reduce their brightness to meet brand guidelines, and generate PDF previews for client review.
+ * 3. When a web application uploads user‑provided PSD designs, applies a subtle darkening effect to improve on‑screen readability, and then serves the result as a PDF document.
+ * 4. When a digital publishing system has to adjust the exposure of layered PSD artwork to match a printed catalog’s visual style and export the final page as a PDF.
+ * 5. When a C# utility needs to verify that a PSD image exists, safely adjust its brightness, and reliably save the modified image in PDF format using Aspose.Imaging for .NET.
  */

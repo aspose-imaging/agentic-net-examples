@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -23,8 +23,7 @@ class Program
             // Get JPEG files from the input directory
             string[] imageFiles = Directory.GetFiles(inputDirectory, "*.jpg");
 
-            // Collect sizes of all images
-            List<Size> sizes = new List<Size>();
+            // Validate each input file
             foreach (string filePath in imageFiles)
             {
                 if (!File.Exists(filePath))
@@ -32,29 +31,28 @@ class Program
                     Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
+            }
 
+            // Collect sizes of all images
+            List<Size> sizes = new List<Size>();
+            foreach (string filePath in imageFiles)
+            {
                 using (RasterImage img = (RasterImage)Image.Load(filePath))
                 {
                     sizes.Add(img.Size);
                 }
             }
 
-            if (sizes.Count == 0)
-            {
-                Console.WriteLine("No JPEG files found to merge.");
-                return;
-            }
-
             // Calculate canvas dimensions for horizontal merge
-            int canvasWidth = sizes.Sum(s => s.Width);
-            int canvasHeight = sizes.Max(s => s.Height);
+            int newWidth = sizes.Sum(s => s.Width);
+            int newHeight = sizes.Max(s => s.Height);
 
-            // Create JPEG canvas with specified options
+            // Create JPEG canvas
             Source source = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 90 };
-
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
+                // Merge images horizontally
                 int offsetX = 0;
                 foreach (string filePath in imageFiles)
                 {
@@ -66,7 +64,7 @@ class Program
                     }
                 }
 
-                // Save the merged image (bound image)
+                // Save the merged image
                 canvas.Save();
             }
         }
@@ -79,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a product catalog thumbnail that shows several product photos side‑by‑side in a single JPEG for an e‑commerce website.
- * 2. When generating a before‑and‑after comparison image for a medical imaging report by stitching two JPEG scans horizontally.
- * 3. When building a social media collage that combines user‑uploaded JPEG pictures into one wide image for a marketing campaign.
- * 4. When preparing a printable banner that requires multiple JPEG graphics to be merged horizontally into a single high‑quality JPEG file.
- * 5. When automating the creation of a timeline infographic where each event’s JPEG icon is placed next to the previous one in a single image.
+ * 1. When creating a product catalog thumbnail that stitches several product photos side‑by‑side into one JPEG for faster web loading.
+ * 2. When generating a panoramic view from a series of sequential camera shots by horizontally concatenating JPEG images in a C# application using Aspose.Imaging.
+ * 3. When building an email newsletter that needs a single banner image composed of multiple promotional JPEGs merged on a horizontal canvas.
+ * 4. When preparing a printable contact sheet where a photographer wants all selected JPEG files arranged in one row for quick review.
+ * 5. When automating a batch process that consolidates scanned document pages saved as JPEGs into a single wide image for archival or OCR preprocessing.
  */

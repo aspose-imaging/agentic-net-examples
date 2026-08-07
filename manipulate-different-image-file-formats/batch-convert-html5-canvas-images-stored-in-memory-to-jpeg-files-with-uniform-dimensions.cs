@@ -1,8 +1,10 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -10,46 +12,61 @@ class Program
     {
         try
         {
-            const string inputDirectory = "Input";
-            const string outputDirectory = "Output";
+            // Uniform output dimensions
+            int targetWidth = 800;
+            int targetHeight = 600;
 
-            if (!Directory.Exists(inputDirectory))
+            // Input HTML5 Canvas files (stored on disk for this example)
+            List<string> inputPaths = new List<string>
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+                "canvas1.html",
+                "canvas2.html"
+            };
 
-            if (!Directory.Exists(outputDirectory))
+            // Output directory
+            string outputDirectory = "Output";
+            Directory.CreateDirectory(outputDirectory);
+
+            int index = 0;
+            foreach (string inputPath in inputPaths)
             {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory);
-
-            const int targetWidth = 800;
-            const int targetHeight = 600;
-
-            foreach (string inputPath in files)
-            {
+                // Input file existence check
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
+                // Read the canvas data into memory
+                byte[] canvasData = File.ReadAllBytes(inputPath);
+
+                // Define output file path
+                string outputPath = Path.Combine(outputDirectory, $"image_{index}.jpg");
+
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+                using (MemoryStream memoryStream = new MemoryStream(canvasData))
                 {
-                    raster.Resize(targetWidth, targetHeight, ResizeType.NearestNeighbourResample);
-                    using (JpegOptions options = new JpegOptions())
+                    using (RasterImage image = (RasterImage)Image.Load(memoryStream))
                     {
-                        options.Quality = 90;
-                        raster.Save(outputPath, options);
+                        // Resize to uniform dimensions
+                        image.Resize(targetWidth, targetHeight, ResizeType.NearestNeighbourResample);
+
+                        // JPEG save options with bound source
+                        Source source = new FileCreateSource(outputPath, false);
+                        JpegOptions jpegOptions = new JpegOptions
+                        {
+                            Source = source,
+                            Quality = 90
+                        };
+
+                        // Save the image as JPEG
+                        image.Save(outputPath, jpegOptions);
                     }
                 }
+
+                index++;
             }
         }
         catch (Exception ex)
@@ -61,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to export a collection of HTML5 Canvas drawings that are stored as in‑memory image files into standardized 800 × 600 JPEG files for archival or reporting purposes.
- * 2. When an e‑learning platform generates student sketches on a canvas and must batch‑process them into JPEG thumbnails of uniform size before uploading to a content‑delivery network.
- * 3. When a digital signage system receives canvas snapshots from multiple kiosks and requires a C# routine to resize and convert them to high‑quality JPEGs for consistent display on screens.
- * 4. When a marketing automation tool collects canvas‑based banner drafts and needs to convert the batch to JPEG format with a fixed resolution for email campaign assets.
- * 5. When a document management workflow extracts canvas images from HTML reports and must batch‑convert them to JPEG with a set width and height to ensure they fit into PDF templates.
+ * 1. When a web application needs to archive user‑drawn HTML5 Canvas sketches as uniformly sized JPEG thumbnails for a gallery view.
+ * 2. When an e‑learning platform converts in‑memory Canvas diagrams into JPEG assets of fixed width and height for inclusion in PDF course materials.
+ * 3. When a reporting tool batch processes Canvas‑based charts stored as HTML files and generates JPEG images that fit a predefined layout in a dashboard.
+ * 4. When a mobile backend receives Canvas image data via API, resizes it to 800×600 pixels, and saves it as JPEG files for efficient storage and delivery.
+ * 5. When a content management system migrates legacy Canvas illustrations to JPEG format with consistent dimensions to ensure compatibility with legacy browsers.
  */

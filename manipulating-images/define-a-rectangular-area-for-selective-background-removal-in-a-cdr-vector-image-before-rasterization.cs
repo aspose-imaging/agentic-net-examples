@@ -7,43 +7,65 @@ using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.cdr";
-        string outputPath = "output.png";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.cdr";
+        string outputPath = @"C:\Images\output_cropped.png";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
+            // Load the CDR vector image
             using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Define the rectangular area for selective background removal
-                var selectionRect = new Rectangle(100, 100, 300, 200);
-                cdrImage.Crop(selectionRect);
-
-                // Remove background from the cropped area
-                cdrImage.RemoveBackground();
-
-                // Prepare PNG options with transparent background
-                var pngOptions = new PngOptions
+                // Set up rasterization options (default constructor)
+                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    VectorRasterizationOptions = new CdrRasterizationOptions
-                    {
-                        BackgroundColor = Color.Transparent,
-                        PageSize = cdrImage.Size
-                    }
+                    // Example: set background to white (optional)
+                    BackgroundColor = Color.White
                 };
 
-                // Save the rasterized image
-                cdrImage.Save(outputPath, pngOptions);
+                // Configure PNG save options with the rasterization settings
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Temporary rasterized file path
+                string tempRasterPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp_raster.png");
+                Directory.CreateDirectory(Path.GetDirectoryName(tempRasterPath));
+
+                // Rasterize the vector image to a PNG file
+                cdrImage.Save(tempRasterPath, pngOptions);
+
+                // Load the rasterized PNG for cropping
+                using (RasterImage rasterImage = (RasterImage)Image.Load(tempRasterPath))
+                {
+                    // Define the rectangular area to keep (x, y, width, height)
+                    Rectangle cropArea = new Rectangle(100, 100, 300, 200);
+
+                    // Crop the image to the defined area
+                    rasterImage.Crop(cropArea);
+
+                    // Save the cropped image to the final output path
+                    rasterImage.Save(outputPath);
+                }
+
+                // Clean up temporary raster file
+                if (File.Exists(tempRasterPath))
+                {
+                    File.Delete(tempRasterPath);
+                }
             }
         }
         catch (Exception ex)
@@ -55,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract a specific portion of a CorelDRAW (CDR) illustration, remove its background, and save it as a transparent PNG for web publishing.
- * 2. When an e‑commerce system must generate product thumbnails by cropping a defined rectangle from a CDR file, stripping the background, and exporting the result as a PNG with an alpha channel.
- * 3. When a marketing automation tool has to prepare logo assets by selecting a rectangular area in a CDR vector image, making the background transparent, and rasterizing it to a PNG for email campaigns.
- * 4. When a desktop publishing workflow requires isolating a diagram region inside a CDR file, removing its background, and exporting the cropped area as a high‑quality PNG for inclusion in PDF reports.
- * 5. When a mobile app needs to dynamically render a portion of a CDR vector graphic with a transparent background, using C# cropping and background removal before saving the rasterized image as PNG.
+ * 1. When a developer needs to extract a logo or emblem from a CorelDRAW (CDR) vector file and save it as a PNG with a white background, this code rasterizes the vector and crops the defined rectangle to isolate the logo.
+ * 2. When an e‑commerce platform wants to generate product thumbnails by removing the surrounding background from a CDR design and keeping only the product area, the code provides selective rasterization and cropping.
+ * 3. When a marketing team requires a high‑resolution PNG of a specific diagram section from a multi‑page CDR file for a presentation, the code lets developers define the rectangle to capture that section after rasterization.
+ * 4. When a content management system must convert a CDR illustration into a web‑ready PNG while discarding unwanted margins, the code uses CdrRasterizationOptions and a crop rectangle to achieve clean output.
+ * 5. When an automated workflow needs to batch‑process CDR files to isolate and export only the central artwork for printing, this code demonstrates how to rasterize the vector, set a background color, and crop the area of interest.
  */

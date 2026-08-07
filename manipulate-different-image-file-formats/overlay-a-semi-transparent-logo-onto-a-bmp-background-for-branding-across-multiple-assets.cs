@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -11,49 +10,50 @@ class Program
     {
         try
         {
-            // Input files
+            // Paths (hard‑coded)
             string logoPath = "logo.png";
-            string[] backgroundPaths = { "background1.bmp", "background2.bmp" };
+            string[] backgroundPaths = { "bg1.bmp", "bg2.bmp", "bg3.bmp" };
+            string outputDirectory = "output";
 
-            // Verify logo exists
+            // Validate logo file
             if (!File.Exists(logoPath))
             {
                 Console.Error.WriteLine($"File not found: {logoPath}");
                 return;
             }
 
-            foreach (string bgPath in backgroundPaths)
+            // Load the semi‑transparent logo once
+            using (RasterImage logo = (RasterImage)Image.Load(logoPath))
             {
-                // Verify background exists
-                if (!File.Exists(bgPath))
+                // Process each background image
+                foreach (string bgPath in backgroundPaths)
                 {
-                    Console.Error.WriteLine($"File not found: {bgPath}");
-                    return;
-                }
-
-                // Prepare output path
-                string outputPath = Path.Combine("output", Path.GetFileNameWithoutExtension(bgPath) + "_branded.bmp");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Load background and logo images
-                using (RasterImage background = (RasterImage)Image.Load(bgPath))
-                using (RasterImage logo = (RasterImage)Image.Load(logoPath))
-                {
-                    // Create output canvas bound to file
-                    Source source = new FileCreateSource(outputPath, false);
-                    BmpOptions bmpOptions = new BmpOptions() { Source = source };
-                    using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, background.Width, background.Height))
+                    // Validate background file
+                    if (!File.Exists(bgPath))
                     {
-                        // Draw background
-                        canvas.SaveArgb32Pixels(new Rectangle(0, 0, background.Width, background.Height),
-                            background.LoadArgb32Pixels(background.Bounds));
+                        Console.Error.WriteLine($"File not found: {bgPath}");
+                        return;
+                    }
 
-                        // Draw logo at top-left corner
-                        canvas.SaveArgb32Pixels(new Rectangle(0, 0, logo.Width, logo.Height),
-                            logo.LoadArgb32Pixels(logo.Bounds));
+                    // Prepare output path
+                    string outputPath = Path.Combine(outputDirectory,
+                        Path.GetFileNameWithoutExtension(bgPath) + "_branded.bmp");
 
-                        // Save the composed image
-                        canvas.Save();
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Load background BMP
+                    using (RasterImage background = (RasterImage)Image.Load(bgPath))
+                    {
+                        // Overlay logo at (0,0) with 50% opacity (128 out of 255)
+                        background.Blend(new Point(0, 0), logo, 128);
+
+                        // Save the result as BMP
+                        BmpOptions bmpOptions = new BmpOptions
+                        {
+                            Source = new FileCreateSource(outputPath, false)
+                        };
+                        background.Save(outputPath, bmpOptions);
                     }
                 }
             }
@@ -67,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to brand a collection of BMP assets with a semi‑transparent PNG logo for consistent corporate identity across marketing materials.
- * 2. When an application must automatically add a watermark logo to scanned BMP documents before archiving them in a document management system.
- * 3. When a game engine requires overlaying a transparent PNG badge onto BMP texture atlases during the build pipeline to indicate version or copyright information.
- * 4. When a batch‑processing tool has to place a company logo on the top‑left corner of multiple BMP product images before uploading them to an e‑commerce platform.
- * 5. When a reporting service generates BMP charts and needs to embed a semi‑transparent logo onto each chart image for compliance with branding guidelines.
+ * 1. When a marketing team wants to automatically brand a batch of BMP product images with a semi‑transparent PNG logo using C# and Aspose.Imaging.
+ * 2. When a software vendor needs to embed a watermark logo onto legacy BMP screenshots before distributing them to customers.
+ * 3. When an e‑commerce platform must add a corporate logo to multiple background images during a nightly build pipeline with .NET image processing.
+ * 4. When a game developer wants to overlay a transparent logo onto BMP textures for in‑game branding without altering the original files.
+ * 5. When a document management system requires batch processing of scanned BMP pages to include a semi‑transparent logo for compliance purposes.
  */

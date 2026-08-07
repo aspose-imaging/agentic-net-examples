@@ -8,49 +8,55 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output\\vignette.png";
+
         try
         {
-            string inputPath = "input.svg";
-            string tempPath = "temp.png";
-            string outputPath = "output.png";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPath));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Rasterize SVG to PNG
             using (Image svgImage = Image.Load(inputPath))
             {
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = svgImage.Size
+                    PageSize = svgImage.Size,
+                    BackgroundColor = Color.White,
+                    SmoothingMode = SmoothingMode.AntiAlias
                 };
-                PngOptions pngOptions = new PngOptions
+
+                var pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
-                svgImage.Save(tempPath, pngOptions);
-            }
 
-            // Load rasterized image and apply custom soft‑edge kernel
-            using (Image rasterImg = Image.Load(tempPath))
-            {
-                RasterImage raster = (RasterImage)rasterImg;
-
-                double[,] kernel = new double[,]
+                using (var ms = new MemoryStream())
                 {
-                    { 1, 2, 1 },
-                    { 2, 4, 2 },
-                    { 1, 2, 1 }
-                };
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
-                raster.Save(outputPath, new PngOptions());
+                    using (Image rasterImg = Image.Load(ms))
+                    {
+                        RasterImage raster = (RasterImage)rasterImg;
+
+                        double[,] kernel = new double[,]
+                        {
+                            { 0.5, 0.75, 0.5 },
+                            { 0.75, 1.0, 0.75 },
+                            { 0.5, 0.75, 0.5 }
+                        };
+
+                        var convOptions = new ConvolutionFilterOptions(kernel);
+                        raster.Filter(raster.Bounds, convOptions);
+
+                        raster.Save(outputPath, new PngOptions());
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -62,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer wants to add a subtle vignette effect to a company logo stored as an SVG before embedding it in a marketing email, they can rasterize the SVG to PNG and apply a custom soft‑edge convolution kernel using Aspose.Imaging for .NET.
- * 2. When a mobile app needs to generate thumbnail previews of user‑uploaded SVG illustrations with a softened border for a polished UI, the code can convert the SVG to a raster image and apply the soft‑edge filter in C#.
- * 3. When an e‑learning platform requires consistent visual styling by adding a gentle vignette to SVG diagrams that are later displayed as PNGs in course materials, this approach automates the rasterization and edge‑softening process.
- * 4. When a desktop publishing tool must batch‑process SVG icons to create PNG assets with a smooth fade‑out around the edges for use in UI skins, the code provides a repeatable way to rasterize and filter each file.
- * 5. When a game developer needs to pre‑render SVG textures with a soft border to avoid harsh clipping when composited in the game engine, they can use this Aspose.Imaging workflow to produce PNGs with a vignette effect.
+ * 1. When a web developer wants to generate thumbnail PNGs from SVG icons with a subtle vignette to improve visual focus in a product catalog.
+ * 2. When a desktop application needs to batch‑process SVG logos into high‑resolution PNG assets with a soft‑edge kernel to create a professional fade‑out border for printed brochures.
+ * 3. When an e‑learning platform automatically converts SVG diagrams to PNG images with a vignette effect to reduce glare and guide the learner’s attention to the central content.
+ * 4. When a mobile game engine imports vector assets and applies a custom convolution filter to add a soft vignette before saving them as PNG textures for better in‑game aesthetics.
+ * 5. When a marketing automation script rasterizes SVG banners, applies a soft‑edge kernel via Aspose.Imaging’s ConvolutionFilterOptions, and saves the result as PNG to ensure consistent vignette styling across email campaigns.
  */

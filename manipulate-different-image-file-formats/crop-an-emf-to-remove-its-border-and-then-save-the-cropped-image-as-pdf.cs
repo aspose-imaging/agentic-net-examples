@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
@@ -27,25 +28,22 @@ class Program
             // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to EmfImage to access cropping
-                EmfImage emfImage = image as EmfImage;
-                if (emfImage == null)
+                // Cast to EmfImage to access cropping functionality
+                EmfImage emfImage = (EmfImage)image;
+
+                // Define a rectangle that removes a 10‑pixel border from each side
+                int border = 10;
+                int cropX = border;
+                int cropY = border;
+                int cropWidth = emfImage.Width - 2 * border;
+                int cropHeight = emfImage.Height - 2 * border;
+
+                // Ensure the rectangle is valid
+                if (cropWidth > 0 && cropHeight > 0)
                 {
-                    Console.Error.WriteLine("The loaded file is not a valid EMF image.");
-                    return;
+                    var cropRect = new Rectangle(cropX, cropY, cropWidth, cropHeight);
+                    emfImage.Crop(cropRect);
                 }
-
-                // Determine the cropping rectangle (remove a 10‑pixel border on each side)
-                var bounds = emfImage.Bounds;
-                int margin = 10;
-                var cropRect = new Rectangle(
-                    bounds.X + margin,
-                    bounds.Y + margin,
-                    Math.Max(0, bounds.Width - 2 * margin),
-                    Math.Max(0, bounds.Height - 2 * margin));
-
-                // Perform cropping
-                emfImage.Crop(cropRect);
 
                 // Save the cropped image as PDF
                 var pdfOptions = new PdfOptions();
@@ -61,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to remove unwanted white space around a vector graphic stored in an EMF file before embedding it in a PDF report.
- * 2. When an application must automatically trim a fixed‑pixel border from scanned EMF diagrams and generate a PDF for distribution.
- * 3. When a batch‑processing tool has to convert legacy EMF logos into PDF while ensuring the logo edges are tightly cropped.
- * 4. When a C# service creates printable PDFs from EMF drawings and must eliminate extra margins to meet page layout requirements.
- * 5. When a document‑generation workflow requires converting cropped EMF illustrations to PDF to preserve vector quality for downstream editing.
+ * 1. When a developer needs to strip unwanted white space from a vector‑based EMF diagram before embedding it in a PDF report.
+ * 2. When an application must automatically convert legacy Windows Metafile (EMF) logos into PDF thumbnails without the surrounding border.
+ * 3. When a batch‑processing tool has to prepare EMF drawings for printing by cropping the edges and saving them as PDF for a print‑ready workflow.
+ * 4. When a document‑generation service requires clean‑cropped EMF illustrations to be merged into PDF invoices or contracts.
+ * 5. When a migration script converts archived EMF assets to searchable PDF files while removing extra margins to improve layout consistency.
  */

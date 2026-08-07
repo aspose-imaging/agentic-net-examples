@@ -4,49 +4,55 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.PathResources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
-
-            if (!Directory.Exists(inputDirectory))
+            // Hardcoded collection of input image paths
+            string[] inputPaths = new string[]
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
+                @"C:\Images\image1.tif",
+                @"C:\Images\image2.tif",
+                @"C:\Images\image3.tif"
+            };
 
-            if (!Directory.Exists(outputDirectory))
+            foreach (var inputPath in inputPaths)
             {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory);
-
-            foreach (string inputPath in files)
-            {
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+                // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
-                    if (image is RasterImage rasterImage)
+                    // Preserve vector data if the source is a TIFF with path resources
+                    TiffImage tiff = image as TiffImage;
+                    var pathResources = tiff?.ActiveFrame?.PathResources?.ToArray();
+
+                    // Apply the 3x3 sharpen filter to raster images
+                    RasterImage raster = image as RasterImage;
+                    if (raster != null)
                     {
-                        rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Sharpen3x3));
+                        raster.Filter(raster.Bounds,
+                            new ConvolutionFilterOptions(ConvolutionFilter.Sharpen3x3));
                     }
 
-                    PngOptions pngOptions = new PngOptions();
+                    // Determine output path (same name with .png extension)
+                    string outputPath = Path.ChangeExtension(inputPath, ".png");
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the processed image as PNG, preserving any vector data present
+                    var pngOptions = new PngOptions();
                     image.Save(outputPath, pngOptions);
                 }
             }
@@ -60,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑process a folder of vector‑based drawing files (e.g., SVG, EMF, WMF) in a C# application, sharpen each image with a 3×3 convolution filter, and save the results as PNG while keeping the original vector information intact.
- * 2. When an automated build pipeline must enhance the visual clarity of engineering schematics before publishing them to a web portal, applying Aspose.Imaging’s Sharpen3x3 filter to every source drawing and exporting the output as high‑quality PNG files.
- * 3. When a desktop utility is required to prepare a collection of scanned technical drawings for OCR or annotation tools, using the ConvolutionFilterOptions to improve edge definition and then converting the images to PNG format with Aspose.Imaging for .NET.
- * 4. When a SaaS platform offers on‑the‑fly image sharpening for user‑uploaded vector graphics, iterating through the uploaded files, applying the Sharpen3x3 filter, and delivering PNG previews that retain the original vector data.
- * 5. When a legacy CAD system exports drawings as raster images and a developer needs to programmatically re‑sharpen and re‑encode them as PNGs in a .NET service, leveraging Aspose.Imaging’s raster image filtering and PNGOptions to maintain scalability and quality.
+ * 1. When a developer needs to batch‑process a set of multi‑page TIFF drawings, sharpen each raster layer with a 3×3 convolution filter, and export them as PNG files while keeping any embedded vector paths for later editing.
+ * 2. When an engineering application must improve the visual clarity of scanned schematics stored as TIFF, apply a Sharpen3x3 filter to each image and save the result as PNG for web preview without losing the original vector data.
+ * 3. When a GIS tool converts high‑resolution TIFF maps to lightweight PNG tiles, it can use this code to enhance raster details with a sharpen filter and preserve path resources for scalable rendering.
+ * 4. When an automated build pipeline generates product documentation, it can iterate over source TIFF illustrations, sharpen them, and output PNG assets that retain vector outlines for accessibility tools.
+ * 5. When a medical imaging system needs to prepare diagnostic TIFF slides for AI analysis, the code can sharpen the raster content, keep vector annotations, and export the images as PNG for downstream processing.
  */

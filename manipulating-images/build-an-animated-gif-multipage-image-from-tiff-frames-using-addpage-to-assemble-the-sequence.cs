@@ -1,15 +1,15 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.FileFormats.Gif.Blocks;
-using Aspose.Imaging.FileFormats.Tiff;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded paths
         string inputPath = @"c:\temp\input.tif";
         string outputPath = @"c:\temp\output.gif";
 
@@ -21,9 +21,6 @@ class Program
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the multi‑frame TIFF image
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
@@ -37,14 +34,17 @@ class Program
                     return;
                 }
 
-                // Create the GIF image using the first frame
-                using (GifImage gifImage = new GifImage(new GifFrameBlock(frames[0] as RasterImage)))
+                // Create the GIF image using the first frame as the initial block
+                using (GifImage gifImage = new GifImage(new GifFrameBlock(frames[0])))
                 {
-                    // Add remaining frames as pages
+                    // Append remaining frames to the GIF
                     for (int i = 1; i < frames.Length; i++)
                     {
-                        gifImage.AddPage(frames[i] as RasterImage);
+                        gifImage.AddPage(frames[i]);
                     }
+
+                    // Ensure output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save the animated GIF
                     gifImage.Save(outputPath);
@@ -60,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a multi‑page scanned TIFF document into an animated GIF for quick web preview using Aspose.Imaging for .NET.
- * 2. When a developer wants to create a looping weather animation by turning sequential satellite‑image TIFF frames into a GIF with C# AddPage calls.
- * 3. When a developer builds an e‑commerce email campaign that displays a product‑photo slideshow by assembling TIFF frames into an animated GIF.
- * 4. When a developer designs a medical imaging viewer that summarizes a series of TIFF scans as an animated GIF for rapid patient assessment.
- * 5. When a developer automates the generation of animated GIFs from multi‑page TIFF reports to embed in PowerPoint presentations.
+ * 1. When a developer needs to convert a multi‑frame TIFF scan of a document into an animated GIF for web preview, they can use this code to extract each TIFF frame and assemble it with AddPage.
+ * 2. When building a slideshow of satellite imagery stored as TIFF layers and wanting to deliver it as a lightweight animated GIF for mobile apps, this example shows how to load the TIFF, iterate frames, and save the GIF.
+ * 3. When creating an animated product catalog where each product view is saved as a separate TIFF page, the code demonstrates how to merge those pages into a single GIF animation using Aspose.Imaging for .NET.
+ * 4. When automating the generation of GIF thumbnails from multi‑page medical scans (e.g., DICOM exported as TIFF) for quick visual inspection, the snippet illustrates loading the TIFF, adding each frame with AddPage, and saving the result.
+ * 5. When a developer needs to batch‑process archival TIFF files and produce animated GIFs for email newsletters, this sample provides the C# workflow to read TIFF frames, assemble them into a GIF, and handle file‑system checks.
  */

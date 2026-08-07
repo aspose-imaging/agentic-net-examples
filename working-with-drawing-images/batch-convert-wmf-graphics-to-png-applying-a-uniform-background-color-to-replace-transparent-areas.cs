@@ -2,56 +2,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\Images\Input";
+            string outputFolder = @"C:\Images\Output";
 
-            if (!Directory.Exists(inputDirectory))
+            // List of WMF files to process
+            string[] files = new[] { "image1.wmf", "image2.wmf", "image3.wmf" };
+
+            foreach (var fileName in files)
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
-                return;
-            }
-
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.wmf");
-
-            foreach (var inputPath in files)
-            {
+                // Build full input path and verify existence
+                string inputPath = Path.Combine(inputFolder, fileName);
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                // Build full output path and ensure directory exists
+                string outputPath = Path.Combine(outputFolder, Path.ChangeExtension(fileName, ".png"));
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Aspose.Imaging.FileFormats.Wmf.WmfImage wmfImage = (Aspose.Imaging.FileFormats.Wmf.WmfImage)Image.Load(inputPath))
+                // Load WMF image
+                using (Image image = Image.Load(inputPath))
                 {
-                    var pngOptions = new PngOptions
+                    // Configure rasterization options with a uniform background color
+                    var rasterOptions = new WmfRasterizationOptions
                     {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        VectorRasterizationOptions = new WmfRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageSize = wmfImage.Size
-                        }
+                        PageSize = image.Size,
+                        BackgroundColor = Aspose.Imaging.Color.White // replace transparent areas with white
                     };
 
-                    wmfImage.Save(outputPath, pngOptions);
+                    // Set PNG save options and attach rasterization options
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions
+                    };
+
+                    // Save as PNG
+                    image.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -64,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert legacy WMF vector files into web‑ready PNG images and replace any transparent areas with a solid background color, this code provides a ready‑to‑use solution.
- * 2. When an application must generate thumbnail previews of WMF diagrams for a gallery or report and require consistent background shading, the code automates the conversion and background fill.
- * 3. When a migration project moves assets from a Windows Metafile library to a cross‑platform PNG format while preserving visual fidelity and eliminating transparency, this snippet handles the bulk processing.
- * 4. When a document‑generation system imports WMF icons and needs to embed them as PNGs with a uniform color backdrop for PDF or HTML output, the code performs the necessary rasterization.
- * 5. When a CI/CD pipeline needs to validate that all WMF assets in a repository are convertible to PNG with a predefined background for quality assurance, this script can be integrated to process the files automatically.
+ * 1. When a developer needs to batch convert legacy WMF vector graphics to PNG raster images for web display while ensuring any transparent regions are filled with a solid background color.
+ * 2. When an application must automatically process a folder of Windows Metafile (WMF) files and generate PNG thumbnails with a uniform white background for use in a product catalog.
+ * 3. When a reporting tool has to embed WMF charts into PDF or HTML reports that only support PNG images, requiring conversion and background color replacement in C#.
+ * 4. When a migration script moves old WMF icons into a modern mobile app that expects PNG assets, and the code must replace transparent areas with a specific color to match the app’s theme.
+ * 5. When a CI/CD pipeline needs to validate and convert WMF assets to PNG during build time, applying a consistent background to avoid rendering issues in downstream image processing steps.
  */

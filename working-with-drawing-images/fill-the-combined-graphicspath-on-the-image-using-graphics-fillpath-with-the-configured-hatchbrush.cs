@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
 
@@ -9,51 +10,50 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = @"C:\temp\input.png";
-        string outputPath = @"C:\temp\output.png";
-
         try
         {
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+            // Output file path
+            string outputPath = "output.png";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            // Set up PNG options with a file create source
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
+
+            // Create a new image canvas
+            using (Image image = Image.Create(pngOptions, 500, 500))
             {
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                // First figure with rectangle and ellipse
+                // First figure with a rectangle shape
                 Figure figure1 = new Figure();
                 figure1.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
-                figure1.AddShape(new EllipseShape(new RectangleF(100f, 100f, 150f, 150f)));
 
-                // Second figure with a pie shape
+                // Second figure with an ellipse shape
                 Figure figure2 = new Figure();
-                figure2.AddShape(new PieShape(new RectangleF(150f, 150f, 200f, 200f), 0f, 90f));
+                figure2.AddShape(new EllipseShape(new RectangleF(150f, 150f, 200f, 200f)));
 
-                // Combine figures into a single GraphicsPath
+                // Combine figures into a single graphics path
                 GraphicsPath combinedPath = new GraphicsPath();
                 combinedPath.AddFigures(new[] { figure1, figure2 });
 
-                // Configure HatchBrush
+                // Configure a hatch brush
                 using (HatchBrush hatchBrush = new HatchBrush())
                 {
-                    hatchBrush.BackgroundColor = Color.White;
                     hatchBrush.ForegroundColor = Color.Blue;
-                    // Optional: set hatch style if needed
-                    // hatchBrush.HatchStyle = Aspose.Imaging.Brushes.HatchStyle.Cross;
+                    hatchBrush.BackgroundColor = Color.Yellow;
+                    hatchBrush.HatchStyle = HatchStyle.Horizontal;
 
-                    // Fill the combined path
+                    // Fill the combined path with the hatch brush
                     graphics.FillPath(hatchBrush, combinedPath);
                 }
 
-                // Save the modified image as PNG
-                PngOptions pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                // Save the image (file is already bound to the output path)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -65,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to overlay a patterned watermark composed of multiple shapes (rectangle, ellipse, pie) onto a PNG or JPEG image for branding purposes.
- * 2. When generating custom map annotations where combined geometric regions need to be filled with a hatch pattern to distinguish zones on a raster map.
- * 3. When creating printable reports that require shaded diagram elements, such as highlighted sections in engineering schematics, using a HatchBrush on a combined GraphicsPath.
- * 4. When building a UI that dynamically renders complex icons with cross‑hatched fills, allowing the shapes to be defined programmatically and saved as PNG for web use.
- * 5. When automating the preparation of marketing assets that need a blue‑on‑white hatch fill applied to multiple overlapping shapes to achieve a consistent visual style across images.
+ * 1. When a developer wants to generate a PNG badge that combines a rectangular logo and an elliptical background with a blue‑on‑yellow hatch pattern for branding assets.
+ * 2. When creating printable shipping labels in C# where overlapping shapes need to be filled with a hatch brush to indicate hazardous material zones.
+ * 3. When building a web service that returns dynamically generated PNG icons with combined geometric shapes for UI elements, using Aspose.Imaging’s GraphicsPath and FillPath.
+ * 4. When producing technical diagrams in a desktop application where a rectangle and an ellipse must be merged and filled with a horizontal hatch to highlight a specific region.
+ * 5. When automating the creation of patterned background textures for game assets, combining multiple shapes into a single path and filling them with a configurable HatchBrush in .NET.
  */

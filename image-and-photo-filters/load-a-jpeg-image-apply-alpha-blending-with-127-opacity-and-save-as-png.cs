@@ -1,43 +1,45 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
         string inputPath = "input.jpg";
         string outputPath = "output.png";
 
+        // Validate input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Load the JPEG image as a raster image
+            using (RasterImage jpegImage = (RasterImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Prepare PNG creation options with a bound file source
+                Source fileSource = new FileCreateSource(outputPath, false);
+                PngOptions pngOptions = new PngOptions() { Source = fileSource };
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the JPEG image
-            using (JpegImage jpegImage = new JpegImage(inputPath))
-            {
-                // Create a blank PNG image with the same dimensions
-                PngOptions pngCreateOptions = new PngOptions();
-                using (RasterImage pngImage = (RasterImage)Image.Create(pngCreateOptions, jpegImage.Width, jpegImage.Height))
+                // Create a blank PNG canvas with the same dimensions as the JPEG
+                using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, jpegImage.Width, jpegImage.Height))
                 {
-                    // Blend the JPEG onto the PNG with 127 (≈50%) opacity
-                    // Origin (0,0) means top‑left corner
-                    pngImage.Blend(new Aspose.Imaging.Point(0, 0), jpegImage, 127);
+                    // Blend the JPEG onto the canvas with 127 (≈50%) opacity
+                    canvas.Blend(new Point(0, 0), jpegImage, 127);
 
-                    // Save the result as PNG
-                    pngImage.Save(outputPath, new PngOptions());
+                    // Save the bound canvas to the output PNG file
+                    canvas.Save();
                 }
             }
         }
@@ -50,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to overlay a semi‑transparent JPEG watermark onto a transparent PNG background for dynamic image generation.
- * 2. When a desktop application must convert high‑resolution JPEG photos to PNG format while preserving 50 % opacity for preview thumbnails.
- * 3. When an e‑commerce platform wants to display product images with a faded background effect by blending JPEGs into PNG canvases at 127 opacity.
- * 4. When a reporting tool generates charts as JPEGs and needs to embed them into PNG‑based PDF assets with partial transparency.
- * 5. When a mobile app processes user‑uploaded JPEG avatars and creates PNG avatars with reduced opacity for UI overlay effects.
+ * 1. When a developer needs to overlay a JPEG photograph onto a transparent PNG canvas with 50% opacity to create watermarked thumbnails.
+ * 2. When an e‑commerce platform wants to convert product JPEG images into semi‑transparent PNGs for layered UI composition in a C# web application.
+ * 3. When a mobile app generates PNG assets with blended JPEG logos to achieve consistent opacity across different screen resolutions using Aspose.Imaging for .NET.
+ * 4. When a digital publishing workflow requires converting high‑resolution JPEG scans into PNG files with reduced opacity for use in PDF overlays.
+ * 5. When a game developer prepares sprite sheets by loading JPEG textures, applying 127‑level alpha blending, and saving them as PNGs for better alpha channel support.
  */

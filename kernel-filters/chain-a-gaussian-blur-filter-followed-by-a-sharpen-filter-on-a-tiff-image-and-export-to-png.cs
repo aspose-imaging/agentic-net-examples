@@ -1,20 +1,20 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\Images\input.tif";
+        string outputPath = @"C:\Images\output.png";
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\input.tif";
-            string outputPath = @"C:\Images\output.png";
-
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -51,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce noise in a high‑resolution TIFF scan, sharpen edge detail, and then export the result as a PNG for web display.
- * 2. When an application must preprocess scanned documents by applying a Gaussian blur to smooth artifacts, followed by a sharpen filter to improve readability, before saving as PNG.
- * 3. When a batch‑processing tool prepares TIFF photographs for e‑commerce catalogs by softening background grain, enhancing product edges, and generating PNG thumbnails.
- * 4. When a medical‑imaging system applies a blur‑then‑sharpen pipeline to TIFF images derived from DICOM files to improve visual contrast and then delivers the images as PNG for reporting.
- * 5. When a GIS application cleans up satellite TIFF tiles with a Gaussian blur, sharpens terrain features, and outputs PNG tiles for fast rendering in a web map.
+ * 1. When a developer needs to reduce noise in a high‑resolution scanned TIFF document, apply a Gaussian blur followed by a sharpen filter, and then convert it to a web‑friendly PNG for display in a browser.
+ * 2. When building a C# batch‑processing tool that prepares archival TIFF images for an online gallery, the code can smooth the image, enhance edges, and export the result as PNG.
+ * 3. When integrating Aspose.Imaging into a medical imaging workflow to preprocess TIFF X‑ray scans—softening grainy areas with Gaussian blur, sharpening diagnostic details, and saving as PNG for electronic health records.
+ * 4. When creating a document‑conversion service that receives multi‑page TIFF files, applies a blur‑then‑sharpen effect to improve visual quality, and returns a single PNG thumbnail to the client.
+ * 5. When developing a C# desktop application that lets users clean up scanned receipts (TIFF), automatically applies a blur‑sharpen sequence to improve readability, and saves the cleaned image as PNG for OCR processing.
  */

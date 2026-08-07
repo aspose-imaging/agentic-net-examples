@@ -2,18 +2,20 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.drawing";
-            string outputPath = "output.png";
-
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,27 +25,25 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the drawing image and cast to RasterImage
+            // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage to access filtering capabilities
+                RasterImage rasterImage = (RasterImage)image;
 
                 // Define a vertical edge detection kernel (Sobel operator)
-                double[,] kernel = new double[,]
+                double[,] verticalKernel = new double[,]
                 {
                     { -1, 0, 1 },
                     { -2, 0, 2 },
                     { -1, 0, 1 }
                 };
 
-                // Apply the custom convolution filter to the entire image
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
-
-                // Prepare PNG save options
-                PngOptions pngOptions = new PngOptions();
+                // Apply the custom convolution filter using the kernel
+                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(verticalKernel));
 
                 // Save the processed image as PNG
-                image.Save(outputPath, pngOptions);
+                rasterImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -55,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD application needs to generate a high‑contrast preview of a drawing file by emphasizing vertical edges before exporting it as a PNG thumbnail.
- * 2. When an engineering portal automatically highlights vertical structural lines in technical drawings using a Sobel kernel and saves the result as a lossless PNG for quick web viewing.
- * 3. When a document management system processes scanned schematics, applies a vertical edge detection filter to improve clarity, and stores the enhanced image as a PNG for archival.
- * 4. When a GIS tool converts vector map drawings to raster, accentuates vertical road boundaries with a custom convolution filter, and outputs the image as a PNG overlay.
- * 5. When a manufacturing quality‑control dashboard extracts vertical edge features from machine‑generated drawing files to create sharp PNG images for defect analysis.
+ * 1. When a developer needs to extract vertical edges from a scanned engineering drawing and save the result as a PNG for further analysis.
+ * 2. When an application must preprocess blueprint images by applying a Sobel vertical kernel to highlight structural lines before feeding them into a CAD recognition engine.
+ * 3. When a C# service processes user‑uploaded PNG drawings, applies a custom convolution filter to emphasize vertical features, and stores the enhanced image for quality‑control review.
+ * 4. When a batch job converts legacy PNG schematics to edge‑enhanced PNGs using Aspose.Imaging’s RasterImage filtering to improve visual clarity in documentation.
+ * 5. When a desktop tool loads a drawing, detects vertical edges with a convolution filter, and saves the output as a PNG to be displayed in a web viewer that requires high‑contrast line art.
  */

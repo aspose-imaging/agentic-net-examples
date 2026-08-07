@@ -3,61 +3,57 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.png";
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
 
-        // Verify input file exists
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
             // Load the SVG image
-            using (Image svgImage = Image.Load(inputPath))
+            using (SvgImage svgImage = new SvgImage(inputPath))
             {
-                // Set up rasterization options for converting SVG to raster format
-                var rasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = svgImage.Size
-                };
+                // Set up rasterization options for SVG -> raster conversion
+                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions();
 
-                // Configure PNG save options with the rasterization settings
-                var pngOptions = new PngOptions
+                // Prepare PNG save options that include the rasterization settings
+                PngOptions pngOptions = new PngOptions
                 {
                     VectorRasterizationOptions = rasterizationOptions
                 };
 
                 // Rasterize SVG into a memory stream
-                using (var memoryStream = new MemoryStream())
+                using (MemoryStream rasterStream = new MemoryStream())
                 {
-                    svgImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0; // Reset stream position for reading
+                    svgImage.Save(rasterStream, pngOptions);
+                    rasterStream.Position = 0;
 
-                    // Load the rasterized image
-                    using (Image rasterImage = Image.Load(memoryStream))
+                    // Load the rasterized image as a RasterImage to apply filters
+                    using (RasterImage rasterImage = (RasterImage)Image.Load(rasterStream))
                     {
-                        var raster = (RasterImage)rasterImage;
+                        // Apply Gaussian blur filter (radius 5, sigma 4.0)
+                        rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                        // Apply Gaussian blur filter
-                        raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                        // Apply Gauss-Wiener deconvolution filter (radius 5, sigma 4.0)
+                        rasterImage.Filter(rasterImage.Bounds, new GaussWienerFilterOptions(5, 4.0));
 
-                        // Apply Gauss-Wiener deconvolution filter
-                        raster.Filter(raster.Bounds, new GaussWienerFilterOptions(5, 4.0));
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save the processed image to the output path
-                        raster.Save(outputPath);
+                        // Save the processed image
+                        rasterImage.Save(outputPath);
                     }
                 }
             }
@@ -71,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate a softened logo from an SVG and then sharpen it to remove rendering artifacts before serving it as a PNG thumbnail.
- * 2. When an e‑commerce platform wants to create product badge overlays from vector SVGs, apply a gentle blur for visual depth, and then deconvolve to retain crisp edges in the final PNG.
- * 3. When a scientific reporting tool converts SVG diagrams to raster images, uses Gaussian blur to reduce noise and Gauss‑Wiener deconvolution to enhance detail for high‑resolution PDF export.
- * 4. When a mobile game engine imports SVG assets, applies blur for a motion‑blur effect and deconvolution to correct the blur, then saves the result as a PNG for fast texture loading.
- * 5. When an automated branding pipeline processes corporate SVG icons, applies blur to match a design style and deconvolution to preserve legibility before storing the PNG in a CDN.
+ * 1. When a developer needs to convert an SVG logo to a high‑resolution PNG while smoothing and sharpening the image for web display.
+ * 2. When a graphics pipeline requires applying a Gaussian blur followed by Gauss‑Wiener deconvolution to reduce noise in vector‑based diagrams before embedding them in a PDF.
+ * 3. When an e‑learning platform wants to preprocess SVG illustrations into PNG thumbnails with controlled blur and de‑blur effects using C# and Aspose.Imaging.
+ * 4. When a UI designer automates the generation of blurred background assets from SVG icons, then restores edge detail with deconvolution for mobile app themes.
+ * 5. When a data‑visualization tool programmatically rasterizes SVG charts to PNG and applies blur and deconvolution filters to enhance visual clarity in printed reports.
  */

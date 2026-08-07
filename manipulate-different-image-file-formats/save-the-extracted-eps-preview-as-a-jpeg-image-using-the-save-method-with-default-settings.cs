@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -36,7 +35,7 @@ class Program
                         return;
                     }
 
-                    // Save preview as JPEG using default settings
+                    // Save preview as JPEG with default settings
                     preview.Save(outputPath);
                 }
             }
@@ -50,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate thumbnail JPEGs from uploaded EPS vector files for quick preview in a product catalog.
- * 2. When a desktop publishing workflow converts EPS artwork previews to JPEGs to embed in PDF reports without rendering the full vector content.
- * 3. When an automated batch job extracts the embedded preview from EPS logos and saves them as JPEG images for use in email newsletters.
- * 4. When a mobile app backend receives EPS files and must provide a low‑resolution JPEG snapshot for display on low‑bandwidth devices.
- * 5. When a document management system validates EPS files by extracting their preview image and storing it as a JPEG thumbnail for search indexing.
+ * 1. When a web application needs to display a thumbnail of an uploaded EPS logo without rendering the full vector, a developer can extract the EPS preview and save it as a JPEG for fast browser rendering.
+ * 2. When generating product catalogs that include vector artwork, a developer can convert the EPS preview to JPEG to embed low‑resolution images in PDF or HTML pages.
+ * 3. When building an automated email system that attaches a preview of a designer's EPS file, a developer can use this code to create a JPEG attachment that most email clients can display.
+ * 4. When migrating legacy design assets to a content management system that only accepts raster formats, a developer can extract the EPS preview and store it as a JPEG for indexing and search.
+ * 5. When creating a batch processing script that validates incoming EPS files by checking their preview images, a developer can save the preview as JPEG to compare against expected visual standards.
  */

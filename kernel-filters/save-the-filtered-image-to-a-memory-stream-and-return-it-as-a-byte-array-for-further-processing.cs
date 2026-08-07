@@ -2,64 +2,58 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
+    // Hard‑coded paths – no argument validation
+    private const string InputPath = @"C:\temp\sample.bmp";
+    private const string OutputPath = @"C:\temp\output.png";
+
     static void Main()
     {
-        // Hardcoded input path
-        string inputPath = @"C:\temp\sample.bmp";
-
         try
         {
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            // Verify input file exists
+            if (!File.Exists(InputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {InputPath}");
                 return;
             }
 
-            // Process the image and obtain the filtered image as a byte array
-            byte[] imageBytes = GetFilteredImageBytes(inputPath);
+            // Ensure output directory exists (even though we save to a stream)
+            Directory.CreateDirectory(Path.GetDirectoryName(OutputPath));
 
-            // Example usage of the resulting byte array
-            Console.WriteLine($"Filtered image byte array length: {imageBytes.Length}");
+            // Process the image and obtain the result as a byte array
+            byte[] result = ProcessImageToByteArray(InputPath);
+
+            // Example usage: write the size of the resulting byte array
+            Console.WriteLine($"Resulting image byte array length: {result.Length}");
         }
         catch (Exception ex)
         {
-            // Any unexpected error is reported without crashing the program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
 
-    /// <summary>
-    /// Loads an image, applies a simple filter (BinarizeOtsu for BMP images),
-    /// saves the result to a memory stream using PNG format, and returns the
-    /// image data as a byte array.
-    /// </summary>
-    /// <param name="inputPath">Full path to the source image file.</param>
-    /// <returns>Byte array containing the filtered image.</returns>
-    static byte[] GetFilteredImageBytes(string inputPath)
+    // Loads the image, applies a simple filter, saves to a MemoryStream and returns the bytes
+    private static byte[] ProcessImageToByteArray(string inputPath)
     {
-        // Load the image from the specified file
+        // Load the source image
         using (Image image = Image.Load(inputPath))
         {
-            // If the image is a BMP, apply a binarization filter
-            if (image is BmpImage bmpImage)
-            {
-                bmpImage.BinarizeOtsu();
-            }
+            // Example filter – rotate the image 180 degrees
+            image.RotateFlip(RotateFlipType.Rotate180FlipNone);
 
-            // Define PNG save options (default settings are sufficient here)
+            // Prepare PNG save options (default settings are sufficient)
             PngOptions pngOptions = new PngOptions();
 
             // Save the processed image to a memory stream
-            using (MemoryStream stream = new MemoryStream())
+            using (MemoryStream ms = new MemoryStream())
             {
-                image.Save(stream, pngOptions);
-                // Return the stream contents as a byte array
-                return stream.ToArray();
+                image.Save(ms, pngOptions);
+                // Return the underlying byte array
+                return ms.ToArray();
             }
         }
     }
@@ -67,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web API receives a BMP file, applies Otsu binarization, and needs to return the processed PNG image as a byte array for client download.
- * 2. When a document management system generates on‑the‑fly thumbnails, it can filter the source BMP, convert it to PNG, and store the resulting byte array in a database BLOB.
- * 3. When a microservice sends a filtered image through a message queue, the method provides a PNG byte array that can be serialized and transmitted without creating temporary files.
- * 4. When an application composes an email with an inline image, it can embed the binarized PNG byte array directly as an attachment from memory.
- * 5. When a background worker prepares images for OCR, it uses the code to produce a PNG byte array of the binarized BMP, which the OCR engine consumes as an in‑memory stream.
+ * 1. When a web API receives a BMP file, rotates it 180° using Aspose.Imaging, and needs to return the processed PNG as a byte array without writing to disk.
+ * 2. When a background service creates rotated PNG thumbnails from legacy bitmap images and stores the resulting byte arrays directly in a database.
+ * 3. When a desktop C# application wants to preview a rotated image in memory before allowing the user to save the PNG file to a chosen location.
+ * 4. When a cloud function converts uploaded BMP files to PNG format, applies a rotation filter, and streams the byte array to an image‑recognition pipeline that consumes raw bytes.
+ * 5. When a unit test verifies that the image‑processing routine correctly rotates a BMP and produces a PNG byte array of the expected size, avoiding temporary file I/O.
  */

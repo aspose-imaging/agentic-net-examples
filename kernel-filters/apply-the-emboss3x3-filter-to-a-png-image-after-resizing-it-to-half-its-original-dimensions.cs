@@ -7,33 +7,37 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output file paths
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "Output\\output.png";
-
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            // Load the PNG image as a RasterImage
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Resize to half of original dimensions
+                // Resize to half of the original dimensions
                 image.Resize(image.Width / 2, image.Height / 2);
 
-                // Apply Emboss3x3 filter
-                RasterImage raster = (RasterImage)image;
-                var kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3;
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
-                raster.Filter(raster.Bounds, filterOptions);
+                // Apply Emboss3x3 filter using convolution filter options
+                image.Filter(
+                    image.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
 
-                // Save the result as PNG
+                // Save the processed image as PNG
                 var pngOptions = new PngOptions();
-                raster.Save(outputPath, pngOptions);
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -45,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate smaller, stylized thumbnails of user‑uploaded PNG photos, a developer can use this C# code with Aspose.Imaging to resize the image to half size and apply the Emboss3x3 convolution filter before saving.
- * 2. When an e‑commerce platform wants to display product images with a subtle embossed effect while reducing bandwidth, a developer can employ the Aspose.Imaging Resize and Emboss3x3 filter on PNG files in a .NET service.
- * 3. When a desktop utility creates printable PNG assets with a vintage embossed look, a C# developer can call this code to shrink the original image and apply the Emboss3x3 filter in one pass.
- * 4. When an automated batch‑processing script must prepare PNG graphics for mobile devices by halving their dimensions and adding a depth‑enhancing emboss effect, the Aspose.Imaging filter pipeline shown can be integrated into the .NET workflow.
- * 5. When a content management system needs to store optimized PNG images that are both smaller and visually enhanced with a 3×3 emboss convolution, a developer can implement this code to resize and filter the images on upload.
+ * 1. When creating thumbnail previews for a web gallery and want a stylized embossed effect on the reduced‑size PNG images using C# and Aspose.Imaging.
+ * 2. When generating printable product labels that must be half the original resolution but still retain a textured look by applying the Emboss3x3 convolution filter to the PNG.
+ * 3. When developing a mobile app that downloads high‑resolution PNG assets, resizes them to save bandwidth, and enhances visual depth with an emboss filter before displaying them.
+ * 4. When automating a batch process that prepares PNG icons for a UI theme, scaling them down to 50 % and adding an emboss effect to improve their perceived sharpness.
+ * 5. When building a document conversion pipeline that converts source PNG diagrams to smaller, embossed PNGs for inclusion in PDF reports using Aspose.Imaging in .NET.
  */

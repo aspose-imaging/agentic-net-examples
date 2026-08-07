@@ -8,39 +8,45 @@ class Program
     {
         try
         {
-            // Hardcoded input path
-            string inputPath = @"C:\Images\sample.jpg";
+            // Hard‑coded input and output paths
+            string inputPath = "input.jpg";
+            string outputPath = "output/result.txt";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure the output directory exists before any possible save operation
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access digital signature methods
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
+                // Cast to RasterImage to access digital‑signature methods
+                RasterImage rasterImage = image as RasterImage;
+                if (rasterImage == null)
                 {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    Console.Error.WriteLine("Loaded image does not support digital signature analysis.");
                     return;
                 }
 
-                // Check if the image is digitally signed (using empty password)
-                bool isSigned = raster.IsDigitalSigned(string.Empty);
-
-                // Analyze the confidence percentage of the digital signature
-                int confidence = raster.AnalyzePercentageDigitalSignature(string.Empty);
+                // Analyze the digital signature confidence percentage.
+                // An empty password is used when no specific password is known.
+                int confidence = rasterImage.AnalyzePercentageDigitalSignature(string.Empty);
 
                 // Output the result to the console
-                Console.WriteLine($"Digital signature confidence: {confidence}% (Signed: {isSigned})");
+                Console.WriteLine($"Digital signature confidence: {confidence}%");
+
+                // Also write the result to the output file
+                File.WriteAllText(outputPath, $"Digital signature confidence: {confidence}%");
             }
         }
         catch (Exception ex)
         {
+            // Catch any unexpected errors and report them
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -48,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to verify the authenticity of a JPEG file received from a client by checking its digital signature confidence percentage before processing it further.
- * 2. When an image processing pipeline must filter out unsigned or low‑confidence JPEG images to ensure only trusted assets are stored in a content management system.
- * 3. When a security‑aware application logs the digital signature confidence of uploaded product photos to detect potential tampering or forgery.
- * 4. When a batch job scans a directory of JPEG images and reports the signature confidence for each file to assist auditors in compliance verification.
- * 5. When a C# console utility needs to display whether a JPEG image is digitally signed and the confidence level, enabling developers to make runtime decisions about image usage.
+ * 1. When a C# application must verify the authenticity of a JPEG photograph received from a client by checking its digital signature confidence percentage before processing it further.
+ * 2. When an automated image ingestion pipeline needs to log the digital signature confidence of each uploaded JPEG to ensure compliance with security policies.
+ * 3. When a desktop utility for forensic analysts reads JPEG files and displays the digital signature confidence to help determine if the image has been tampered with.
+ * 4. When a batch processing script validates a collection of JPEG images by writing the signature confidence values to a text report for audit purposes.
+ * 5. When a cloud‑based service extracts metadata from JPEGs and includes the digital signature confidence percentage in the response to inform downstream image‑processing decisions.
  */

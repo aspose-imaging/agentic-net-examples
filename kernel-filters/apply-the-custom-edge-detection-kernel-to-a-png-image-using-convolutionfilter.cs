@@ -2,49 +2,40 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output/output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image as a raster image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Custom edge‑detection kernel (3x3)
                 double[,] kernel = new double[,]
                 {
                     { -1, -1, -1 },
-                    { -1,  8, -1 },
+                    { -1, 8, -1 },
                     { -1, -1, -1 }
                 };
 
-                // Create convolution filter options (factor = 1.0, bias = 0)
-                ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel, 1.0, 0);
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 0);
 
-                // Apply the convolution filter to the entire image
                 raster.Filter(raster.Bounds, filterOptions);
 
-                // Save the processed image as PNG
-                PngOptions saveOptions = new PngOptions();
+                var saveOptions = new PngOptions();
                 raster.Save(outputPath, saveOptions);
             }
         }
@@ -57,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to highlight object boundaries in PNG screenshots for documentation generation, they can apply the custom edge‑detection kernel with Aspose.Imaging’s ConvolutionFilter.
- * 2. When building a C# desktop application that extracts structural features from scanned engineering drawings saved as PNG, the code can be used to detect edges before further analysis.
- * 3. When creating an automated pipeline that converts medical imaging PNG slices into edge‑enhanced versions for visual inspection, the convolution filter provides a fast C# solution.
- * 4. When developing a web service that generates stylized thumbnails of PNG graphics by emphasizing outlines, the edge‑detection filter can be applied server‑side with Aspose.Imaging.
- * 5. When implementing a quality‑control tool that flags blurry PNG product photos by comparing edge intensity after applying the custom kernel, the code offers a straightforward C# approach.
+ * 1. When a developer needs to highlight the outlines of objects in a PNG photograph for a computer‑vision preprocessing step, they can apply the custom edge‑detection kernel using Aspose.Imaging’s ConvolutionFilter in C#.
+ * 2. When building a web service that generates printable line‑art versions of user‑uploaded PNG graphics, the code can be used to convert the image to a high‑contrast edge map before saving the result.
+ * 3. When creating an automated quality‑control pipeline that flags blurry product images, the edge‑detection filter helps measure edge strength in PNG files by processing them with Aspose.Imaging’s raster filter options.
+ * 4. When integrating a desktop application that visualizes architectural floor plans as sharp outlines, developers can run this C# snippet to apply a Laplacian kernel to PNG scans and store the enhanced output.
+ * 5. When developing a batch‑processing tool that prepares PNG assets for OCR by emphasizing edges, the ConvolutionFilterOptions with a custom kernel can be applied to each raster image before feeding it to the OCR engine.
  */

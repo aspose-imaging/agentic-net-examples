@@ -1,61 +1,82 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded paths
-        string inputPath = "input.webp";
-        string outputPath = "output.apng";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.webp";
+            string outputPath = "output.apng";
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the animated WebP image
-            using (Image webpImage = Image.Load(inputPath))
+            using (WebPImage webp = (WebPImage)Image.Load(inputPath))
             {
                 // Cast to multipage interface to access frames
-                var multipage = webpImage as Aspose.Imaging.IMultipageImage;
+                IMultipageImage multipage = webp as IMultipageImage;
                 if (multipage == null || multipage.PageCount == 0)
                 {
-                    Console.Error.WriteLine("The input image does not contain animation frames.");
+                    Console.Error.WriteLine("The WebP image does not contain any frames.");
                     return;
                 }
 
-                // Create an APNG image with the same dimensions
-                var createOptions = new ApngOptions();
-                using (ApngImage apngImage = (ApngImage)Image.Create(
-                    createOptions,
-                    webpImage.Width,
-                    webpImage.Height))
+                // Extract frames as RasterImage objects
+                List<RasterImage> frames = new List<RasterImage>();
+                for (int i = 0; i < multipage.PageCount; i++)
+                {
+                    // Each page is a RasterImage in WebPImage
+                    frames.Add((RasterImage)multipage.Pages[i]);
+                }
+
+                // Reorder frames (example: reverse order)
+                List<RasterImage> reorderedFrames = frames.AsEnumerable().Reverse().ToList();
+
+                // Prepare APNG creation options
+                ApngOptions apngOptions = new ApngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false),
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    DefaultFrameTime = 100 // default duration in ms
+                };
+
+                // Use dimensions of the first frame for the canvas
+                int width = reorderedFrames[0].Width;
+                int height = reorderedFrames[0].Height;
+
+                // Create APNG image bound to the output file
+                using (ApngImage apng = (ApngImage)Image.Create(apngOptions, width, height))
                 {
                     // Remove the default single frame
-                    apngImage.RemoveAllFrames();
+                    apng.RemoveAllFrames();
 
-                    // Example reordering: reverse the frame order
-                    for (int i = multipage.PageCount - 1; i >= 0; i--)
+                    // Add frames in the new order
+                    foreach (RasterImage frame in reorderedFrames)
                     {
-                        // Each page is a RasterImage; add it as a new frame
-                        var frame = (RasterImage)multipage.Pages[i];
-                        apngImage.AddFrame(frame);
+                        apng.AddFrame(frame);
                     }
 
-                    // Save the reordered animation as APNG
-                    apngImage.Save(outputPath, new ApngOptions());
+                    // Save the APNG (output path is already bound via FileCreateSource)
+                    apng.Save();
                 }
             }
         }
@@ -68,9 +89,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a mobile app needs to convert an animated WebP sticker into an APNG for iOS compatibility while reversing the animation sequence.
- * 2. When a game developer wants to import a WebP sprite animation, flip the frame order for a reverse playback effect, and export it as an APNG to use in a Unity UI.
- * 3. When an e‑learning platform must transform user‑uploaded animated WebP tutorials into APNG files with reversed steps for a “rewind” demonstration.
- * 4. When a marketing automation script has to batch‑process animated WebP banners, reorder the frames to create a looping reverse animation, and save them as APNGs for email newsletters.
- * 5. When a digital archivist needs to preserve animated WebP assets by converting them to the lossless APNG format and adjusting the frame order to match the original timeline.
+ * 1. When a mobile app needs to convert user‑generated animated WebP stickers into APNG format while reversing the animation sequence for a special effect, developers can use this C# code with Aspose.Imaging.
+ * 2. When an e‑learning platform wants to reorder frames of an animated WebP tutorial diagram and export it as an APNG to ensure compatibility with browsers that only support PNG animation, the code provides a straightforward solution.
+ * 3. When a game developer must generate custom achievement badges by loading an animated WebP sprite sheet, swapping the frame order, and saving it as an APNG for use in Unity, this snippet handles the conversion.
+ * 4. When a digital marketing tool needs to take an animated WebP advertisement, reverse its playback direction, and output an APNG for email campaigns that require PNG animation, the example demonstrates the required steps in C#.
+ * 5. When a content management system processes uploaded animated WebP assets, rearranges their frames to match a predefined timeline, and stores them as APNG files for archival, this Aspose.Imaging code automates the workflow.
  */

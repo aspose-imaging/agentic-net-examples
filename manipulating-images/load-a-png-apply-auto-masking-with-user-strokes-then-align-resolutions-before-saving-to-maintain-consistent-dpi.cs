@@ -1,12 +1,13 @@
+// HOW-TO: Auto Mask PNG With Transparent Background Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -27,39 +28,24 @@ class Program
 
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                AutoMaskingArgs maskArgs = new AutoMaskingArgs
+                var maskingOptions = new AutoMaskingGraphCutOptions
                 {
-                    ObjectsPoints = new Point[][]
-                    {
-                        new Point[] { new Point(30, 30), new Point(40, 30) },
-                        new Point[] { new Point(100, 100), new Point(110, 110) }
-                    }
-                };
-
-                PngOptions maskingExport = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    Source = new StreamSource(new MemoryStream())
-                };
-
-                AutoMaskingGraphCutOptions maskingOptions = new AutoMaskingGraphCutOptions
-                {
-                    CalculateDefaultStrokes = false,
-                    FeatheringRadius = 3,
+                    CalculateDefaultStrokes = true,
+                    FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
                     Method = SegmentationMethod.GraphCut,
                     Decompose = false,
-                    ExportOptions = maskingExport,
-                    Args = maskArgs,
+                    ExportOptions = new PngOptions
+                    {
+                        ColorType = PngColorType.TruecolorWithAlpha,
+                        Source = new StreamSource(new MemoryStream())
+                    },
                     BackgroundReplacementColor = Color.Transparent
                 };
 
-                ImageMasking masking = new ImageMasking(image);
-                using (MaskingResult results = masking.Decompose(maskingOptions))
+                using (MaskingResult results = new ImageMasking(image).Decompose(maskingOptions))
+                using (RasterImage foreground = (RasterImage)results[1].GetImage())
                 {
-                    using (RasterImage foreground = (RasterImage)results[1].GetImage())
-                    {
-                        foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
-                    }
+                    foreground.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                 }
             }
         }
@@ -72,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to remove background objects from a high‑resolution PNG in a C# application and preserve the original DPI for print‑ready output, they can use this Aspose.Imaging auto‑masking code.
- * 2. When an e‑commerce platform must automatically isolate product photos from user‑provided PNGs using custom foreground strokes while keeping the image’s resolution consistent across thumbnails, this code provides the solution.
- * 3. When a medical imaging system requires precise segmentation of regions in PNG scans based on clinician‑drawn points and must export the result with a transparent background at the same DPI as the source, the example demonstrates how to achieve it.
- * 4. When a desktop publishing tool needs to batch‑process PNG assets, apply graph‑cut masking with feathered edges, and align the output resolution to match the original document’s DPI, developers can implement the shown workflow.
- * 5. When a mobile app backend must generate cut‑out PNG stickers from user‑uploaded images, using auto‑masking with user strokes and ensuring the saved PNG retains the original image’s DPI for consistent scaling, this code can be integrated.
+ * 1. When you need to remove the background from a product photo stored as PNG and keep the original resolution for e‑commerce listings.
+ * 2. When you want to programmatically isolate a foreground object in a scanned PNG diagram while preserving the alpha channel for further compositing.
+ * 3. When an application must automatically generate cut‑out images from user‑uploaded PNGs without manual selection, maintaining consistent DPI for print output.
+ * 4. When you are building a batch process that converts PNGs with complex edges into transparent PNGs using graph‑cut segmentation in C#.
+ * 5. When you need to integrate Aspose.Imaging auto‑masking into a workflow that requires the output PNG to retain its original size and resolution for GIS or mapping overlays.
  */

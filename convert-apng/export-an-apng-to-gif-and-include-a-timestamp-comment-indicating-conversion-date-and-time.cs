@@ -22,8 +22,7 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                var gifOptions = new GifOptions();
-                image.Save(outputPath, gifOptions);
+                image.Save(outputPath, new GifOptions());
             }
         }
         catch (Exception ex)
@@ -35,9 +34,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to convert animated PNG (APNG) assets to GIF for compatibility with older browsers while embedding a timestamp comment that records the conversion date and time.
- * 2. When a mobile app team wants to generate GIF previews of user‑uploaded APNG stickers and include a metadata comment to track when the conversion was performed.
- * 3. When an e‑learning platform automates the transformation of APNG tutorial animations into GIFs for email newsletters and adds a timestamp comment for audit logging.
- * 4. When a digital marketing analyst batch‑processes APNG campaign banners into GIFs for social media ads and needs a conversion timestamp comment to synchronize publishing schedules.
- * 5. When a desktop publishing software integrates Aspose.Imaging to allow designers to export APNG illustrations as GIFs with an embedded comment showing the exact date and time of conversion for version control.
+ * 1. When a web developer needs to convert animated PNG (APNG) assets to widely supported GIF files for legacy browsers while embedding a conversion timestamp comment for audit trails.
+ * 2. When a mobile app team wants to preprocess user‑uploaded APNG stickers into GIFs to reduce file size and add a date‑time comment for version tracking.
+ * 3. When an e‑learning platform automates the generation of animated tutorials, converting APNG slides to GIFs and stamping the conversion date to comply with content management policies.
+ * 4. When a digital marketing agency prepares campaign graphics, converting high‑color‑depth APNG banners to GIFs for email newsletters and including a timestamp comment to verify when the assets were produced.
+ * 5. When a game developer extracts in‑game APNG animations and converts them to GIFs for documentation, adding a conversion timestamp comment to synchronize with build logs.
  */

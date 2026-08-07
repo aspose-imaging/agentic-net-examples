@@ -2,8 +2,9 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -12,7 +13,8 @@ class Program
         try
         {
             string inputPath = "input.svg";
-            string outputPath = "output.png";
+            string intermediatePath = "temp\\intermediate.png";
+            string outputPath = "output\\filtered.png";
 
             if (!File.Exists(inputPath))
             {
@@ -20,40 +22,46 @@ class Program
                 return;
             }
 
+            Directory.CreateDirectory(Path.GetDirectoryName(intermediatePath));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            // Rasterize SVG to PNG
+            using (Image svgImage = Image.Load(inputPath))
             {
-                using (MemoryStream ms = new MemoryStream())
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    PngOptions pngOptions = new PngOptions();
-                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-                    rasterOptions.PageSize = image.Size;
-                    pngOptions.VectorRasterizationOptions = rasterOptions;
+                    PageSize = ((Aspose.Imaging.FileFormats.Svg.SvgImage)svgImage).Size
+                };
 
-                    image.Save(ms, pngOptions);
-                    ms.Position = 0;
+                var pngSaveOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                    using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
+                svgImage.Save(intermediatePath, pngSaveOptions);
+            }
+
+            // Load raster PNG and apply reduced emboss filter
+            using (Image rasterImage = Image.Load(intermediatePath))
+            {
+                RasterImage raster = (RasterImage)rasterImage;
+
+                double[,] originalKernel = ConvolutionFilter.Emboss5x5;
+                double factor = 0.5;
+                int size = originalKernel.GetLength(0);
+                double[,] kernel = new double[size, size];
+
+                for (int i = 0; i < size; i++)
+                {
+                    for (int j = 0; j < size; j++)
                     {
-                        double[,] emboss = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss5x5;
-                        double scaleFactor = 0.5;
-                        int rows = emboss.GetLength(0);
-                        int cols = emboss.GetLength(1);
-                        double[,] kernel = new double[rows, cols];
-                        for (int i = 0; i < rows; i++)
-                        {
-                            for (int j = 0; j < cols; j++)
-                            {
-                                kernel[i, j] = emboss[i, j] * scaleFactor;
-                            }
-                        }
-
-                        rasterImage.Filter(rasterImage.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
-
-                        rasterImage.Save(outputPath, new PngOptions());
+                        kernel[i, j] = originalKernel[i, j] * factor;
                     }
                 }
+
+                var filterOptions = new ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, filterOptions);
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -65,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to generate a PNG thumbnail from an SVG logo and apply a subtle emboss effect to give the image a slight 3‑D look without overwhelming the design.
- * 2. When a web application needs to render user‑uploaded SVG illustrations as PNGs with reduced emboss intensity for consistent visual styling across browsers.
- * 3. When an e‑learning platform converts SVG diagrams to PNG assets and requires a gentle emboss filter to enhance edge definition while preserving readability.
- * 4. When a reporting tool creates PNG charts from SVG vectors and wants to apply a low‑strength emboss kernel to add depth without distorting the chart data.
- * 5. When a mobile app preprocesses SVG icons into PNG sprites and uses a scaled‑down emboss convolution to improve visual appeal on high‑resolution screens.
+ * 1. When a developer wants to create a subtle embossed effect on a company logo stored as SVG before publishing it as a PNG on a website.
+ * 2. When an e‑learning platform needs to convert vector illustrations to raster images with a reduced emboss filter to improve readability on low‑resolution screens.
+ * 3. When a mobile app generates thumbnails from user‑uploaded SVG icons and applies a light emboss to add depth without overwhelming the UI.
+ * 4. When a print‑ready PDF workflow requires rasterizing SVG diagrams to PNG with a softened emboss effect to meet branding guidelines.
+ * 5. When a digital signage system automatically processes SVG artwork, applies a mild emboss filter, and saves the result as PNG for fast rendering on displays.
  */

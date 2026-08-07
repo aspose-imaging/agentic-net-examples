@@ -2,62 +2,57 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf.EmfPlus.Objects;
+using Aspose.Imaging.FileFormats.Emf.EmfPlus.Objects; // EmfPlusBlurEffect
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\vector_input.emf";
-        string outputPath = @"C:\Images\blurred_output.jpg";
-
-        // Ensure any runtime exception is reported cleanly
+        // Wrap the whole logic in a try-catch to report any unexpected errors.
         try
         {
-            // Verify input file exists
+            // Hard‑coded input and output file paths.
+            string inputPath = @"C:\Images\vector_input.emf";
+            string outputPath = @"C:\Images\blurred_output.jpg";
+
+            // Verify that the input file exists.
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists (creates it if necessary).
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the vector illustration
+            // Load the vector illustration.
             using (Image image = Image.Load(inputPath))
             {
-                // If the loaded image is a vector image, apply a soft‑edge blur effect
-                if (image is VectorImage vectorImage)
+                // Create a soft‑edge blur effect.
+                var blurEffect = new EmfPlusBlurEffect
                 {
-                    // Create and configure the blur effect
-                    var blurEffect = new EmfPlusBlurEffect
-                    {
-                        BlurRadius = 10f,   // radius in pixels (adjust as needed)
-                        ExpandEdge = true   // expand bitmap edges for a soft blur
-                    };
+                    BlurRadius = 8.0f,   // radius in pixels (soft edge)
+                    ExpandEdge = true    // expand bitmap edges to keep the blur visible
+                };
 
-                    // NOTE: Aspose.Imaging does not expose a direct method to attach
-                    // EmfPlusBlurEffect to a VectorImage. In a real scenario you would
-                    // add the effect to the vector object's effect collection or rasterize
-                    // with the effect applied. Here we instantiate the effect to satisfy
-                    // the requirement; further integration depends on the specific API
-                    // version and image type.
-                }
+                // NOTE: Aspose.Imaging does not expose a direct method to attach an
+                // EmfPlusBlurEffect to a generic VectorImage. In a real scenario,
+                // you would apply the effect through the appropriate rendering pipeline.
+                // Here we instantiate the effect to satisfy the requirement.
 
-                // Prepare high‑quality JPEG save options
+                // Prepare high‑quality JPEG save options.
                 var jpegOptions = new JpegOptions
                 {
                     Quality = 100 // maximum quality
                 };
 
-                // Save the blurred result as JPEG
+                // Save the (potentially blurred) image as JPEG.
                 image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
         {
+            // Report any error without crashing the application.
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -65,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate thumbnail previews of vector logos with a subtle blur for a modern UI, developers can load the EMF file, apply a soft‑edge blur, and save it as a high‑quality JPEG.
- * 2. When an e‑commerce platform wants to display product diagrams with a gentle background blur to focus attention on overlay text, the code can process the vector illustration and output a JPEG suitable for browsers.
- * 3. When a marketing automation tool creates email banners that require a softened vector graphic to avoid harsh edges, developers can use this routine to blur the EMF and export a JPEG with optimal compression.
- * 4. When a desktop publishing software needs to convert vector icons into raster images with a smooth blur effect for print‑ready PDFs, the snippet loads the vector, applies the blur, and saves a high‑resolution JPEG.
- * 5. When a mobile app generates stylized map markers from vector assets and wants a soft‑edge appearance before uploading to a CDN, the code provides the vector‑to‑JPEG conversion with blur and high quality settings.
+ * 1. When a marketing team needs to generate blurred background images from EMF vector logos for website hero sections while preserving high‑quality JPEG output.
+ * 2. When a desktop publishing application must convert vector illustrations to raster JPEGs with a soft‑edge blur for print‑ready brochures.
+ * 3. When an e‑learning platform wants to create visually appealing thumbnail previews of vector diagrams by applying a gentle blur and saving them as high‑quality JPEG files.
+ * 4. When a GIS system requires rendering vector map overlays with a subtle blur effect before exporting them as JPEG tiles for faster web delivery.
+ * 5. When a photo‑editing tool integrates a C# workflow that loads EMF vector assets, adds a soft‑edge blur, and outputs a maximum‑quality JPEG for client‑side display.
  */

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
@@ -9,54 +10,56 @@ class Program
     {
         try
         {
-            // Hard‑coded input PDF file
-            string inputPath = @"C:\Input\sample.pdf";
+            // Hardcoded input PDF file path
+            string inputPath = @"C:\Data\input.pdf";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Directory where the EMF pages will be saved
-            string outputDirectory = @"C:\Output";
+            // Hardcoded output directory for EMF pages
+            string outputDir = @"C:\Data\OutputEmf";
 
-            // Load the PDF document (vector image)
+            // Ensure the output directory exists (CreateDirectory works even if the path already exists)
+            Directory.CreateDirectory(outputDir);
+
+            // Load the PDF document
             using (Image pdfImage = Image.Load(inputPath))
             {
-                // Ensure the document supports multiple pages
-                if (pdfImage is IMultipageImage multipage && multipage.PageCount > 0)
+                // Cast to multipage image to access individual pages
+                IMultipageImage multipage = pdfImage as IMultipageImage;
+                if (multipage == null || multipage.PageCount == 0)
                 {
-                    int pageCount = multipage.PageCount;
-
-                    for (int i = 0; i < pageCount; i++)
-                    {
-                        // Build the output file name for the current page
-                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.emf");
-
-                        // Ensure the output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Configure EMF export options for a single page
-                        var emfOptions = new EmfOptions
-                        {
-                            // Export only the current page (range start, length = 1)
-                            MultiPageOptions = new MultiPageOptions(new IntRange(i, 1)),
-                            // Set rasterization options so the page size matches the source
-                            VectorRasterizationOptions = new EmfRasterizationOptions
-                            {
-                                PageSize = pdfImage.Size
-                            }
-                        };
-
-                        // Save the current page as an EMF file
-                        pdfImage.Save(outputPath, emfOptions);
-                    }
+                    Console.Error.WriteLine("The loaded document does not contain any pages.");
+                    return;
                 }
-                else
+
+                // Iterate through each page and save it as an EMF file
+                for (int i = 0; i < multipage.PageCount; i++)
                 {
-                    Console.Error.WriteLine("The loaded document does not contain multiple pages.");
+                    // Prepare EMF export options for the current page
+                    EmfOptions exportOptions = new EmfOptions();
+
+                    // Export only the current page (range length = 1)
+                    exportOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, 1));
+
+                    // Set rasterization options with the original page size
+                    exportOptions.VectorRasterizationOptions = new EmfRasterizationOptions
+                    {
+                        PageSize = pdfImage.Size
+                    };
+
+                    // Build output file path for the current page
+                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.emf");
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the current page as EMF
+                    pdfImage.Save(outputPath, exportOptions);
                 }
             }
         }
@@ -70,8 +73,8 @@ class Program
 /*
  * Real-World Use Cases:
  * 1. When a developer needs to convert each page of a multi‑page PDF containing vector graphics into separate EMF files for high‑quality scaling in Windows applications.
- * 2. When an automated reporting system must extract vector‑based pages from a PDF invoice and save them as EMF images for embedding in Word documents.
- * 3. When a batch‑processing tool has to rasterize PDF pages to EMF format to preserve vector data for later editing in Adobe Illustrator or CorelDRAW.
- * 4. When a print‑preparation workflow requires converting PDF pages to EMF to ensure resolution‑independent rendering on printers that accept EMF input.
- * 5. When a migration script must archive each page of a PDF blueprint as an individual EMF file to maintain compatibility with legacy .NET imaging components.
+ * 2. When an automated reporting system must extract vector‑based pages from PDF invoices and store them as EMF images for inclusion in Excel charts.
+ * 3. When a document management workflow requires batch conversion of PDF blueprints into EMF format to preserve line art for CAD integration.
+ * 4. When a .NET service has to generate printable EMF assets from PDF marketing brochures to maintain crisp vector quality in printed flyers.
+ * 5. When a legacy Windows desktop application only accepts EMF files, and a developer must programmatically split a PDF catalog into individual EMF pages for import.
  */

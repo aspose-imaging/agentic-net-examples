@@ -6,43 +6,44 @@ using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\sample.cmx";
-            string outputPath = @"C:\temp\sample.svg";
+            string inputPath = "input/input.cmx";
+            string outputPath = "output/output.svg";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CMX image
-            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
+                CmxImage cmxImage = (CmxImage)image;
+
                 // Configure SVG save options
                 SvgOptions svgOptions = new SvgOptions
                 {
-                    // Render text as vector shapes to preserve appearance
-                    TextAsShapes = true,
-                    // Set CMX-specific rasterization options
-                    VectorRasterizationOptions = new CmxRasterizationOptions
-                    {
-                        // Use the source image size for the SVG page size
-                        PageSize = cmxImage.Size,
-                        // Optional: set a background color
-                        BackgroundColor = Color.White
-                    }
+                    TextAsShapes = true // Preserve text as vector shapes
                 };
 
-                // Save the image as SVG
+                // Set up CMX rasterization options to retain vector data
+                CmxRasterizationOptions rasterOptions = new CmxRasterizationOptions
+                {
+                    PageSize = cmxImage.Size
+                };
+
+                svgOptions.VectorRasterizationOptions = rasterOptions;
+
+                // Save as SVG
                 cmxImage.Save(outputPath, svgOptions);
             }
         }
@@ -55,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD engineer needs to embed legacy CorelDRAW CMX drawings into a web page that only supports SVG, they can use this code to convert the CMX file while preserving vector shapes and text.
- * 2. When a document management system must archive design assets in a resolution‑independent format, developers can run this conversion to store CMX files as SVG with text rendered as shapes.
- * 3. When a print‑to‑PDF workflow requires an intermediate SVG representation of a CMX illustration to apply further transformations, the code provides a reliable C# method to generate that SVG.
- * 4. When a mobile app needs to display CMX graphics on devices that lack CorelDRAW support, the conversion to SVG ensures the vector artwork and text appear correctly on any screen.
- * 5. When a batch processing script must standardize a collection of CMX assets for a branding portal, this snippet automates the conversion to SVG while keeping the original layout and colors.
+ * 1. When a developer needs to convert legacy CorelDRAW CMX files to modern SVG format while preserving vector shapes and text as scalable paths for web display.
+ * 2. When an application must batch‑process engineering diagrams stored as CMX and output them as SVG for integration into HTML5 dashboards without losing vector fidelity.
+ * 3. When a document‑management system requires automated conversion of CMX artwork to SVG so that search engines can index the vector content and maintain searchable text.
+ * 4. When a C# service needs to generate printable SVG assets from CMX source files, ensuring text is saved as shapes to avoid font‑dependency issues.
+ * 5. When a graphics pipeline has to import CMX drawings and export them as SVG using Aspose.Imaging, preserving exact page size and vector data for downstream CAD tools.
  */

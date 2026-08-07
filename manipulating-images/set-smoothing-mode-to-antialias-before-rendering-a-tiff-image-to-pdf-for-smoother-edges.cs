@@ -2,41 +2,46 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.tif";
-        string outputPath = @"C:\temp\output.pdf";
-
         try
         {
-            // Verify input file exists
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\temp\input.tif";
+            string outputPath = @"C:\temp\output.pdf";
+
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TIFF image
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            using (Image tiffImage = Image.Load(inputPath))
             {
-                // Prepare PDF save options with anti-aliasing
+                // Configure PDF export options with anti‑aliasing
                 PdfOptions pdfOptions = new PdfOptions
                 {
                     VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        SmoothingMode = SmoothingMode.AntiAlias
+                        // Enable smoother edges
+                        SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
+                        // Match the PDF page size to the source image dimensions
+                        PageSize = new SizeF(tiffImage.Width, tiffImage.Height)
                     }
                 };
 
-                // Save the image as PDF
+                // Save the image as PDF using the configured options
                 tiffImage.Save(outputPath, pdfOptions);
             }
         }
@@ -49,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a high‑resolution TIFF scan of architectural drawings into a PDF and wants smooth vector edges for professional printing, they set SmoothingMode.AntiAlias before saving.
- * 2. When a medical imaging application must export DICOM‑derived TIFF images to PDF reports with clear, anti‑aliased contours for accurate diagnosis review, this code ensures the rendering quality.
- * 3. When a document management system processes scanned TIFF invoices and generates PDF files that must display crisp text and graphics on screen, applying anti‑aliasing prevents jagged edges.
- * 4. When a GIS tool transforms large geospatial TIFF raster layers into PDF maps and requires smooth boundary lines for better visual analysis, the smoothing mode is enabled during rasterization.
- * 5. When a publishing workflow converts multi‑page TIFF artwork into PDF brochures and needs the final PDF to retain smooth curves and fine details for digital distribution, the code sets the anti‑aliasing option before saving.
+ * 1. When converting scanned engineering drawings stored as TIFF files to PDF for client review, a developer uses this code to apply AntiAlias smoothing so that fine lines and curves appear crisp and free of jagged edges.
+ * 2. When generating printable PDF catalogs from high‑resolution product photos saved as TIFF, the AntiAlias smoothing mode ensures the images retain smooth borders and professional visual quality.
+ * 3. When automating the archival of medical imaging reports that include TIFF‑based diagrams, the code renders them to PDF with anti‑aliasing to preserve diagnostic detail without pixelation.
+ * 4. When creating PDF invoices that embed TIFF‑formatted company logos, developers enable SmoothingMode.AntiAlias to keep the logo’s edges smooth and visually appealing on any device.
+ * 5. When building a batch conversion tool that transforms large batches of TIFF maps into PDF for GIS analysts, the anti‑alias setting guarantees that map lines and symbols render with clean, smooth edges.
  */

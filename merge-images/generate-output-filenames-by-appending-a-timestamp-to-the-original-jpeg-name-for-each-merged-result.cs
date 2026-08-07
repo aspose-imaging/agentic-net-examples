@@ -13,16 +13,9 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG files
-            string[] inputPaths = new string[]
-            {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
-            };
+            string[] inputPaths = new[] { "input1.jpg", "input2.jpg", "input3.jpg" };
 
-            // Validate input files
-            foreach (string inputPath in inputPaths)
+            foreach (var inputPath in inputPaths)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -31,39 +24,33 @@ class Program
                 }
             }
 
-            // Collect image sizes
             List<Size> sizes = new List<Size>();
-            foreach (string inputPath in inputPaths)
+            foreach (var path in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                using (RasterImage img = (RasterImage)Image.Load(path))
                 {
                     sizes.Add(img.Size);
                 }
             }
 
-            // Calculate canvas dimensions (horizontal merge)
             int newWidth = sizes.Sum(s => s.Width);
             int newHeight = sizes.Max(s => s.Height);
 
-            // Generate output filename with timestamp
-            string firstNameWithoutExt = Path.GetFileNameWithoutExtension(inputPaths[0]);
             string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-            string outputFileName = $"{firstNameWithoutExt}_{timestamp}.jpg";
-            string outputPath = Path.Combine(Path.GetDirectoryName(inputPaths[0]) ?? "", outputFileName);
+            string baseName = Path.GetFileNameWithoutExtension(inputPaths[0]);
+            string outputPath = Path.Combine("Output", $"{baseName}_{timestamp}.jpg");
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create JPEG canvas bound to the output file
             Source source = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 90 };
 
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
                 int offsetX = 0;
-                foreach (string inputPath in inputPaths)
+                foreach (var path in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                    using (RasterImage img = (RasterImage)Image.Load(path))
                     {
                         Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
@@ -71,7 +58,6 @@ class Program
                     }
                 }
 
-                // Save the bound image
                 canvas.Save();
             }
         }
@@ -84,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a time‑stamped composite JPEG of product photos for daily inventory reports.
- * 2. When an automated image‑processing pipeline must merge user‑uploaded screenshots and store each result with a unique filename to avoid overwriting previous builds.
- * 3. When a web service generates side‑by‑side before‑and‑after medical images and requires the output file name to include the exact processing time for audit trails.
- * 4. When a desktop application combines multiple scanned documents into a single JPEG and uses a timestamped name to keep a chronological archive of merged files.
- * 5. When a scheduled batch job concatenates security camera snapshots and saves the merged image with a timestamp to simplify log correlation and retrieval.
+ * 1. When a developer needs to combine multiple product photos into a single panoramic JPEG for an e‑commerce catalog and keep each version uniquely identified by a timestamped filename.
+ * 2. When an automated reporting tool must stitch together daily screenshot images into one JPEG report and store it with a time‑stamped name to avoid overwriting previous reports.
+ * 3. When a photo‑management application wants to merge user‑selected images into a collage and generate an output file whose name includes the current date and time for easy sorting.
+ * 4. When a batch‑processing script processes scanned document pages, merges them horizontally into a single JPEG, and saves the result with a timestamp to track processing order.
+ * 5. When a content‑delivery pipeline creates a composite banner image from several source JPEGs and needs a unique, time‑based filename for cache‑busting on web servers.
  */

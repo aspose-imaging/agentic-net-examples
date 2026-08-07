@@ -7,41 +7,42 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = @"C:\InputGifs";
-        string outputDirectory = @"C:\OutputWebp";
-
         try
         {
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\InputGifs";
+            string outputDirectory = @"C:\OutputWebp";
+
             // Get all GIF files in the input directory
             string[] gifFiles = Directory.GetFiles(inputDirectory, "*.gif");
 
             foreach (string inputPath in gifFiles)
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build output path with .webp extension
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".webp");
+                // Determine output path with .webp extension
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".webp";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure output directory exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the GIF image (may contain multiple frames)
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Configure WebP options to preserve animation frames
+                    // Configure WebP options (preserve animation frames)
                     var webpOptions = new WebPOptions
                     {
-                        // Include all pages/frames; null means no page range restriction
-                        MultiPageOptions = null,
-                        // Example settings – adjust as needed
+                        // Example settings; adjust as needed
                         Lossless = false,
-                        Quality = 80
+                        Quality = 80,
+                        // Ensure all pages (frames) are exported
+                        MultiPageOptions = null
                     };
 
                     // Save as animated WebP
@@ -58,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy collection of animated GIF advertisements to modern, smaller WebP files for faster web page load times while preserving the original animation sequence.
- * 2. When a mobile app team wants to batch convert user‑uploaded GIF stickers into animated WebP to reduce bandwidth usage without losing frame order.
- * 3. When an e‑learning platform must transform a library of animated tutorial GIFs into WebP for compatibility with browsers that support animated WebP, ensuring each step appears in the correct order.
- * 4. When a digital marketing system automatically processes daily GIF email campaign assets and stores them as WebP to improve email size limits while keeping the animation intact.
- * 5. When a game developer prepares sprite animations stored as GIFs for use in a WebGL game, converting them to animated WebP to maintain frame timing and order while optimizing file size.
+ * 1. When a web developer needs to reduce page load time by converting a folder of animated GIF advertisements into smaller animated WebP files while preserving the original frame sequence.
+ * 2. When an e‑learning platform wants to batch‑process course illustration GIFs into high‑quality WebP assets for mobile apps using C# and Aspose.Imaging.
+ * 3. When a digital marketing agency automates the migration of legacy GIF banners to WebP to improve SEO and support modern browsers without losing animation order.
+ * 4. When a game studio prepares sprite animations stored as GIFs for inclusion in a Unity project by converting them to animated WebP with consistent frame timing via .NET code.
+ * 5. When a content management system integrates a scheduled job that scans an upload directory, converts every new animated GIF to lossily compressed WebP, and saves the results while keeping the original animation frames intact.
  */

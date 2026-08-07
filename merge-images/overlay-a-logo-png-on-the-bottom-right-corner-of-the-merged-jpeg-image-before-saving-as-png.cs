@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
@@ -12,15 +11,12 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG files to merge
-            string[] inputPaths = new string[]
-            {
-                @"C:\Images\input1.jpg",
-                @"C:\Images\input2.jpg",
-                @"C:\Images\input3.jpg"
-            };
+            // Hardcoded input and output paths
+            string[] inputPaths = { "input1.jpg", "input2.jpg" };
+            string logoPath = "logo.png";
+            string outputPath = "output/merged.png";
 
-            // Validate each input file exists
+            // Validate input files
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -29,17 +25,11 @@ class Program
                     return;
                 }
             }
-
-            // Hardcoded logo PNG path
-            string logoPath = @"C:\Images\logo.png";
             if (!File.Exists(logoPath))
             {
                 Console.Error.WriteLine($"File not found: {logoPath}");
                 return;
             }
-
-            // Hardcoded output PNG path
-            string outputPath = @"C:\Images\merged_with_logo.png";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -54,13 +44,18 @@ class Program
                 }
             }
 
-            // Calculate canvas dimensions for horizontal stitching
-            int canvasWidth = sizes.Sum(s => s.Width);
-            int canvasHeight = sizes.Max(s => s.Height);
+            // Calculate canvas dimensions (horizontal merge)
+            int canvasWidth = 0;
+            int canvasHeight = 0;
+            foreach (Size sz in sizes)
+            {
+                canvasWidth += sz.Width;
+                if (sz.Height > canvasHeight) canvasHeight = sz.Height;
+            }
 
-            // Create PNG canvas bound to the output file
-            Source fileSource = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions() { Source = fileSource };
+            // Create bound PNG canvas
+            Source src = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions() { Source = src };
             using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
             {
                 // Merge input images side by side
@@ -75,21 +70,16 @@ class Program
                     }
                 }
 
-                // Load logo image
+                // Overlay logo at bottom‑right corner
                 using (RasterImage logo = (RasterImage)Image.Load(logoPath))
                 {
-                    // Determine bottom‑right position
                     int posX = canvas.Width - logo.Width;
                     int posY = canvas.Height - logo.Height;
-                    if (posX < 0) posX = 0;
-                    if (posY < 0) posY = 0;
-
-                    // Draw logo onto canvas
-                    Graphics graphics = new Graphics(canvas);
-                    graphics.DrawImage(logo, new Point(posX, posY));
+                    Rectangle logoBounds = new Rectangle(posX, posY, logo.Width, logo.Height);
+                    canvas.SaveArgb32Pixels(logoBounds, logo.LoadArgb32Pixels(logo.Bounds));
                 }
 
-                // Save the final image (canvas is already bound to outputPath)
+                // Save the bound image
                 canvas.Save();
             }
         }
@@ -102,9 +92,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a marketing automation system needs to combine several product photos (JPEG) into a single banner and brand the result with a company logo (PNG) in the bottom‑right corner before publishing as a PNG file.
- * 2. When an e‑commerce platform generates a composite image of multiple item thumbnails and wants to embed a transparent PNG watermark logo at the corner to protect copyright before storing the final PNG.
- * 3. When a reporting tool stitches together scanned JPEG pages into one overview image and adds a corporate logo PNG at the lower‑right to identify the report source before exporting as PNG.
- * 4. When a social‑media scheduler creates a horizontal collage of event photos (JPEG) and automatically places a sponsor’s logo PNG in the bottom‑right to meet branding guidelines before uploading the PNG.
- * 5. When a digital signage application merges several advertisement JPEGs into a single slide and overlays a PNG logo at the corner to ensure consistent branding across all displayed PNG assets.
+ * 1. When a developer needs to create a product catalog thumbnail by stitching multiple JPEG photos side‑by‑side and adding the company’s PNG logo in the bottom‑right corner before exporting as a PNG for web display.
+ * 2. When an e‑commerce platform wants to generate promotional banners that combine several JPEG advertisements into one image and brand them with a transparent PNG logo overlay at the lower‑right edge.
+ * 3. When a photo‑sharing app must merge user‑uploaded JPEG snapshots into a single collage and automatically watermark the collage with a PNG logo positioned at the bottom‑right before saving as PNG for sharing.
+ * 4. When a marketing automation script prepares email newsletters by concatenating multiple JPEG images of offers and appends the corporate PNG logo in the bottom‑right corner to ensure brand consistency in the final PNG attachment.
+ * 5. When a digital signage system assembles multiple JPEG slides into one widescreen image and overlays a transparent PNG sponsor logo at the bottom‑right before rendering the output as a PNG file for display.
  */

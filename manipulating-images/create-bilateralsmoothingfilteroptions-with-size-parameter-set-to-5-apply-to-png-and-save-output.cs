@@ -7,24 +7,23 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.png";
-        string outputPath = @"C:\Images\sample.BilateralSmoothingFilter.png";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.png";
+            string outputPath = @"C:\Images\sample.BilateralSmoothingFilter.png";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
+            // Load the image, apply bilateral smoothing filter, and save
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to RasterImage to access filtering functionality
@@ -33,13 +32,12 @@ class Program
                 // Apply bilateral smoothing filter with kernel size 5
                 rasterImage.Filter(rasterImage.Bounds, new BilateralSmoothingFilterOptions(5));
 
-                // Save the processed image
+                // Save the processed image as PNG
                 rasterImage.Save(outputPath);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -47,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce noise in a scanned PNG diagram while preserving sharp edges for a medical imaging web portal.
- * 2. When a C# application must preprocess user‑uploaded PNG avatars to smooth skin tones without blurring facial features before storing them in a cloud database.
- * 3. When an automated batch job processes PNG screenshots from UI tests, applying a bilateral smoothing filter of size 5 to improve visual consistency for reporting dashboards.
- * 4. When a photo‑editing tool built with Aspose.Imaging for .NET offers a “soft‑focus” effect on PNG files, using the BilateralSmoothingFilterOptions to maintain edge detail.
- * 5. When a developer integrates image preprocessing into a machine‑learning pipeline, applying bilateral smoothing to PNG training images to reduce sensor noise while keeping object boundaries intact.
+ * 1. When a developer needs to reduce noise in a scanned PNG document while preserving edges for OCR preprocessing, they can apply a bilateral smoothing filter with size 5 and save the cleaned image.
+ * 2. When building a web service that automatically optimizes user‑uploaded PNG avatars, the code can smooth the image to remove compression artifacts before storing the result.
+ * 3. When creating a desktop application that prepares PNG screenshots for printing, a bilateral smoothing filter with a kernel size of 5 can be used to improve visual quality without blurring important details.
+ * 4. When integrating image processing into a C# batch job that processes a folder of PNG assets for a game, the filter can be applied to each image to achieve consistent noise reduction across the asset pipeline.
+ * 5. When developing a medical imaging tool that visualizes PNG‑encoded microscopy slides, applying bilateral smoothing with size 5 helps enhance tissue structures while keeping edges sharp for accurate analysis.
  */

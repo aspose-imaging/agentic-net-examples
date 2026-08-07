@@ -3,56 +3,42 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the PNG image as a raster image
             using (Image image = Image.Load(inputPath))
             {
                 RasterImage raster = (RasterImage)image;
 
-                // Create a 5x5 averaging kernel (each element = 1/25)
                 double[,] kernel = new double[5, 5];
-                for (int y = 0; y < 5; y++)
+                for (int i = 0; i < 5; i++)
                 {
-                    for (int x = 0; x < 5; x++)
+                    for (int j = 0; j < 5; j++)
                     {
-                        kernel[y, x] = 1.0 / 25.0;
+                        kernel[i, j] = 1.0 / 25.0;
                     }
                 }
 
-                // Apply the custom convolution filter (smoothing)
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+                var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                raster.Filter(raster.Bounds, convOptions);
 
-                // Prepare PNG save options
-                PngOptions options = new PngOptions
-                {
-                    ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.TruecolorWithAlpha,
-                    BitDepth = 8,
-                    Source = new FileCreateSource(outputPath, false)
-                };
-
-                // Save the processed image
-                raster.Save(outputPath, options);
+                var pngOptions = new PngOptions();
+                raster.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -64,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce noise in a PNG photograph by applying a 5x5 averaging convolution filter in C# using Aspose.Imaging.
- * 2. When a web application must preprocess user‑uploaded PNG avatars to smooth edges before storing them on the server.
- * 3. When a batch job processes scanned PNG documents to create a uniform, softened appearance for better OCR accuracy.
- * 4. When a game developer wants to generate a blurred background texture from a PNG asset by applying a custom kernel with Aspose.Imaging.
- * 5. When an image‑analysis pipeline requires a simple smoothing step on PNG images to normalize pixel values before further processing.
+ * 1. When a developer needs to reduce noise in a scanned PNG document before performing OCR, they can use this 5x5 averaging kernel to smooth the image.
+ * 2. When preparing product photos for an e‑commerce website, a C# application can apply the convolution filter to soften harsh edges in PNG files.
+ * 3. When creating a thumbnail generator that must preserve PNG transparency while removing grainy artifacts, the code can be used to apply a uniform blur.
+ * 4. When building a batch image‑processing pipeline that normalizes lighting across a series of PNG screenshots, the 5x5 average filter helps even out pixel intensity variations.
+ * 5. When implementing a custom pre‑processing step for computer‑vision analysis on PNG images, developers can use this code to apply a simple smoothing filter to improve detection accuracy.
  */

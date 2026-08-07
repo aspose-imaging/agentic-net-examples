@@ -1,58 +1,51 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Watermark;
+using Aspose.Imaging.Watermark.Options;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.jpg";
-        string outputPathCaf = "output_caf.jpg";
-        string outputPathTelea = "output_telea.jpg";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directories exist
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPathCaf));
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPathTelea));
+        string outputCafPath = "output/output_caf.jpg";
+        string outputTeleaPath = "output/output_telea.jpg";
 
         try
         {
-            // Load the JPEG image
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
             using (var image = Image.Load(inputPath))
             {
                 var jpegImage = (JpegImage)image;
 
-                // Define the mask (ellipse in this example)
                 var mask = new GraphicsPath();
                 var figure = new Figure();
-                figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 150)));
+                figure.AddShape(new EllipseShape(new RectangleF(50, 50, 100, 100)));
                 mask.AddFigure(figure);
 
-                // Content‑aware fill removal with two painting attempts
-                var cafOptions = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
+                var cafOptions = new ContentAwareFillWatermarkOptions(mask)
                 {
                     MaxPaintingAttempts = 2
                 };
-                using (var cafResult = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(jpegImage, cafOptions))
+                using (var cafResult = WatermarkRemover.PaintOver(jpegImage, cafOptions))
                 {
-                    cafResult.Save(outputPathCaf);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputCafPath));
+                    cafResult.Save(outputCafPath);
                 }
 
-                // Telea algorithm removal
-                var teleaOptions = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
-                using (var teleaResult = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(jpegImage, teleaOptions))
+                var teleaOptions = new TeleaWatermarkOptions(mask);
+                using (var teleaResult = WatermarkRemover.PaintOver(jpegImage, teleaOptions))
                 {
-                    teleaResult.Save(outputPathTelea);
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputTeleaPath));
+                    teleaResult.Save(outputTeleaPath);
                 }
             }
         }
@@ -65,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically remove a circular logo or watermark from a JPEG photo in a C# application while preserving surrounding details, they can use the content‑aware fill removal with two painting attempts provided by Aspose.Imaging.
- * 2. When a batch‑processing tool must compare the visual quality of Aspose.Imaging’s content‑aware fill algorithm against the classic Telea inpainting method for JPEG images, this code demonstrates how to generate both results for side‑by‑side evaluation.
- * 3. When an e‑commerce platform wants to clean product images by erasing elliptical price tags from JPEG files without manual editing, the code shows how to define an ellipse mask and apply content‑aware fill removal in .NET.
- * 4. When a digital forensics analyst needs to test whether a JPEG’s hidden watermark can be reliably removed using Aspose.Imaging’s WatermarkRemover and then verify the outcome with the Telea algorithm, this snippet provides the necessary steps.
- * 5. When a photo‑editing SaaS service aims to offer an API endpoint that restores damaged JPEG areas using two painting attempts for better results and also provides an alternative Telea‑based option, the example illustrates the required C# implementation.
+ * 1. When a developer needs to automatically erase a circular logo or watermark from a JPEG photo and wants to limit the content‑aware fill to two painting attempts before comparing it with another inpainting method.
+ * 2. When an e‑commerce platform must clean product images by removing brand marks using Aspose.Imaging’s ContentAwareFill algorithm with a custom mask and then evaluate the visual quality against the Telea watermark‑removal technique.
+ * 3. When a digital archivist wants to restore scanned historical photographs by programmatically painting over unwanted stamps in C# and compare the results of two different watermark‑removal algorithms.
+ * 4. When a mobile‑app backend processes user‑uploaded JPEGs and needs to generate two versions—one using content‑aware fill with a maximum of two attempts and another using the Telea algorithm—to decide which approach preserves image detail best.
+ * 5. When a developer is building an automated batch job that removes elliptical watermarks from JPEG files, saves the content‑aware fill output and the Telea output to separate folders, and later runs a quality‑assessment step.
  */

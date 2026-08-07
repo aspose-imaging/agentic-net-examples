@@ -26,27 +26,22 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-
-            foreach (string inputPath in files)
+            string inputPath = Path.Combine(inputDirectory, "sample.png");
+            if (!File.Exists(inputPath))
             {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
-                {
-                    using (PdfOptions pdfOptions = new PdfOptions())
-                    {
-                        image.Save(outputPath, pdfOptions);
-                    }
-                }
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
+
+            string outputPath = Path.Combine(outputDirectory, "sample.pdf");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                image.Save(outputPath, new PdfOptions());
+            }
+
+            Console.WriteLine($"Converted {inputPath} to {outputPath}");
         }
         catch (Exception ex)
         {
@@ -57,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automate the batch conversion of a folder of SVG vector graphics into PDF documents for easy distribution to clients.
- * 2. When a company wants to generate printable PDFs from design assets stored as SVG files as part of a nightly build pipeline using C# and Aspose.Imaging.
- * 3. When an application must transform user‑uploaded SVG illustrations into PDF files for archival in a document management system without manual intervention.
- * 4. When a developer is building a command‑line tool that reads all image files from an input directory, converts each to PDF, and saves them to an output folder for compliance reporting.
- * 5. When a .NET service needs to process a collection of mixed‑format graphics (including SVG) and produce PDF versions for inclusion in automated email attachments.
+ * 1. When a publishing system must archive a collection of SVG graphics as PDF/A‑2b documents with embedded ICC profiles to guarantee color consistency and long‑term preservation.
+ * 2. When an e‑commerce platform needs to batch‑convert designer‑provided SVG logos into PDF/A‑2b files that meet archival standards and retain accurate colors via ICC profiles.
+ * 3. When a regulatory compliance tool requires transforming SVG schematics into PDF/A‑2b reports with embedded ICC color profiles to satisfy industry‑mandated color management rules.
+ * 4. When a digital asset management (DAM) solution automates the ingestion of SVG artwork and stores each file as a PDF/A‑2b document with an ICC profile for consistent rendering in downstream workflows.
+ * 5. When a medical imaging application embeds SVG anatomical diagrams into PDF/A‑2b case files, preserving exact colors through ICC profiles for reliable diagnostic review.
  */
