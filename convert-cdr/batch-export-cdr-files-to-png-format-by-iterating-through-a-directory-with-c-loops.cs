@@ -8,18 +8,18 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = @"C:\InputCdr";
-        string outputDirectory = @"C:\OutputPng";
-
         try
         {
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\InputCdr";
+            string outputDirectory = @"C:\OutputPng";
+
             // Get all CDR files in the input directory
             string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
 
             foreach (string inputPath in cdrFiles)
             {
-                // Verify that the input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -29,27 +29,23 @@ class Program
                 // Load the CDR image
                 using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
                 {
-                    // Ensure all pages are cached to avoid repeated I/O
+                    // Ensure all pages are cached to avoid lazy loading during save
                     cdrImage.CacheData();
-
-                    // Iterate through each page of the CDR document
-                    for (int i = 0; i < cdrImage.PageCount; i++)
+                    foreach (CdrImagePage page in cdrImage.Pages)
                     {
-                        // Retrieve the specific page
-                        CdrImagePage page = (CdrImagePage)cdrImage.Pages[i];
+                        page.CacheData();
 
-                        // Build the output PNG file path
-                        string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + $"_page{i}.png";
-                        string outputPath = Path.Combine(outputDirectory, outputFileName);
+                        // Build output file name for each page
+                        string outputFileName = Path.Combine(
+                            outputDirectory,
+                            $"{Path.GetFileNameWithoutExtension(inputPath)}_page{page.PageNumber}.png");
 
                         // Ensure the output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputFileName));
 
-                        // Define PNG save options (default options are sufficient)
+                        // Save the page as PNG
                         PngOptions pngOptions = new PngOptions();
-
-                        // Save the page as a PNG image
-                        page.Save(outputPath, pngOptions);
+                        page.Save(outputFileName, pngOptions);
                     }
                 }
             }
@@ -63,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design studio needs to convert a large collection of CorelDRAW (CDR) files into web‑ready PNG thumbnails for an online portfolio, they can use this C# batch export loop.
- * 2. When an automated build pipeline must generate PNG previews of each page in multi‑page CDR documents for quality‑assurance reporting, the code iterates through the input folder and saves each page as a separate PNG.
- * 3. When a document management system has to migrate legacy CDR assets to a PNG format that browsers support, developers can run this Aspose.Imaging C# script to process all files in a directory at once.
- * 4. When a print‑to‑screen workflow requires extracting every page of a CDR file and storing them as high‑resolution PNG images for downstream raster processing, the loop with CdrImagePage.Save handles the conversion.
- * 5. When a batch‑processing tool needs to ensure that output folders exist and convert each CDR file’s pages to PNG without manual intervention, this code provides the necessary file‑system checks and image‑format conversion in C#.
+ * 1. When a design studio needs to convert a batch of CorelDRAW (.cdr) artwork files into PNG thumbnails for a web gallery, they can use this C# loop to process each file and each page.
+ * 2. When an automated build pipeline must generate PNG previews of multi‑page CDR documents for documentation or QA, the code iterates through a directory and saves each page as a separate PNG.
+ * 3. When a migration project moves legacy CDR assets to a PNG‑based asset management system, developers can run this script to bulk export every CDR file and its pages to PNG files.
+ * 4. When a cloud service receives uploaded CDR files and must provide downloadable PNG versions for end‑users, the code demonstrates how to load, cache, and save each page in C#.
+ * 5. When a batch‑processing tool needs to create high‑resolution PNG sprites from a collection of CDR source files for game development, this loop automates the conversion of each page to PNG.
  */

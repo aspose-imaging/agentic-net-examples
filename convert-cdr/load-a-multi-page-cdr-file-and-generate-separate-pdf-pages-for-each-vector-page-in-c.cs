@@ -1,57 +1,61 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input CDR file path
-            string inputPath = "input\\sample.cdr";
+            string inputPath = @"C:\temp\sample.cdr";
+            // Hardcoded output directory for PDF pages
+            string outputDir = @"C:\temp\output";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Output directory for PDF pages
-            string outputDir = "output";
+            // Ensure the output directory exists
             Directory.CreateDirectory(outputDir);
 
             // Load the multi‑page CDR image
-            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            using (CdrImage image = (CdrImage)Image.Load(inputPath))
             {
-                // Cache the whole document to avoid repeated loading
-                cdr.CacheData();
+                // Cache all pages to avoid repeated data loading
+                foreach (CdrImagePage page in image.Pages)
+                {
+                    page.CacheData();
+                }
 
                 int pageIndex = 0;
-                foreach (CdrImagePage page in cdr.Pages)
+                // Iterate through each page and save as an individual PDF
+                foreach (CdrImagePage page in image.Pages)
                 {
-                    // Ensure the page data is cached
-                    page.CacheData();
-
-                    // Build output PDF path for the current page
+                    // Build output file path for the current page
                     string outputPath = Path.Combine(outputDir, $"page_{pageIndex}.pdf");
 
-                    // Ensure the output directory exists
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Configure PDF options with appropriate rasterization settings
+                    // Configure PDF export options
                     PdfOptions pdfOptions = new PdfOptions();
                     CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                     {
-                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = Aspose.Imaging.SmoothingMode.None,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None,
                         PageWidth = page.Width,
                         PageHeight = page.Height
                     };
                     pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                    // Save the current page as a separate PDF file
+                    // Save the current page as a PDF file
                     page.Save(outputPath, pdfOptions);
                     pageIndex++;
                 }
@@ -66,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to convert each vector page of a multi‑page CorelDRAW (CDR) file into individual PDF documents for client review, they can use this C# Aspose.Imaging code.
- * 2. When an automated publishing workflow must extract every page from a CDR brochure and save them as separate PDF pages for batch printing, the example provides the required rasterization and file handling.
- * 3. When a web service receives uploaded multi‑page CDR files and must deliver each page as a standalone PDF for downstream processing, developers can employ this code to load, cache, and export the pages.
- * 4. When a document management system needs to archive each vector layer of a multi‑page CDR illustration as a separate searchable PDF, the C# snippet shows how to set PDF options and preserve page dimensions.
- * 5. When a QA tool validates the visual fidelity of each page in a CDR project by comparing generated PDFs against reference images, this Aspose.Imaging routine supplies the per‑page PDF conversion needed for the tests.
+ * 1. When a design studio needs to use Aspose.Imaging for .NET to convert each page of a multi‑page CorelDRAW (CDR) file into separate PDF documents for client review or printing.
+ * 2. When an automated document workflow must extract vector pages from a CDR archive and save them as individual PDFs for downstream processing such as OCR, archiving, or digital signatures.
+ * 3. When a web service generates downloadable PDF previews of each page of a multi‑page CDR file uploaded by users, preserving the original page dimensions and rasterization settings.
+ * 4. When a batch conversion tool processes a directory of CDR files and creates one PDF per page to integrate with a PDF‑based publishing pipeline that requires page‑by‑page assets.
+ * 5. When a quality‑control script validates the rasterization options of each CDR page by exporting them to PDFs and comparing the output against design specifications.
  */

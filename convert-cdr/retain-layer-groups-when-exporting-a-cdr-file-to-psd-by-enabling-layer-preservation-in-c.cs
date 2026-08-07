@@ -2,40 +2,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.cdr";
-        string outputPath = "Output/sample.psd";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = Path.Combine("Input", "sample.cdr");
+            string outputPath = Path.Combine("Output", "sample.psd");
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            // Load the CDR file
+            using (Image image = Image.Load(inputPath))
             {
-                using (PsdOptions psdOptions = new PsdOptions())
-                {
-                    psdOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = cdr.Width,
-                        PageHeight = cdr.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    };
+                // Prepare PSD export options with layer preservation
+                PsdOptions psdOptions = new PsdOptions();
 
-                    cdr.Save(outputPath, psdOptions);
-                }
+                // Set vector rasterization options for proper size and rendering
+                psdOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None
+                };
+
+                // Enable layer groups by using separate layers composition mode
+                psdOptions.VectorizationOptions = new PsdVectorizationOptions
+                {
+                    VectorDataCompositionMode = VectorDataCompositionMode.SeparateLayers
+                };
+
+                // Save as PSD preserving layers
+                image.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to convert a CorelDRAW (CDR) file into an Adobe Photoshop (PSD) file while keeping the original layer groups intact for further editing in Photoshop.
- * 2. When an automated build pipeline processes batch CDR assets and must preserve vector layers and groups during conversion to PSD for downstream compositing.
- * 3. When a web application allows users to upload CDR logos and returns a PSD version that retains editable layers for branding teams.
- * 4. When a digital asset management system migrates legacy CDR artwork to PSD format and requires layer preservation to maintain editability without manual recreation.
- * 5. When a C# desktop tool generates print‑ready PSD files from CDR source files, ensuring that each layer group remains separate for color‑separation workflows.
+ * 1. When a developer must convert CorelDRAW .cdr files to Photoshop .psd format in a C# application while preserving the original layer groups for post‑conversion editing.
+ * 2. When an automated workflow needs to export vector‑rich CDR artwork to PSD with separate layers so designers can adjust colors and effects in Adobe Photoshop without losing structure.
+ * 3. When a SaaS platform offers users the ability to upload .cdr designs and download editable .psd files, requiring Aspose.Imaging to retain vector layers and groups during the conversion.
+ * 4. When a batch processing script processes multiple CorelDRAW files and must maintain each object's hierarchy in the resulting PSD to support downstream image processing pipelines.
+ * 5. When integrating a .NET service that generates printable assets, and the service must export CDR graphics to PSD while keeping vector data as separate layers for precise rasterization control.
  */

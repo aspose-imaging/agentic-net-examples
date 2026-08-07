@@ -1,43 +1,48 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "sample.cdr";
-        string outputPath = "sample.png";
-
         try
         {
+            // Define input and output paths
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/sample.png";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            // Load the CDR image
+            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions
+                // Configure PNG options with maximum compression
+                using (PngOptions pngOptions = new PngOptions())
                 {
-                    PngCompressionLevel = PngCompressionLevel.ZipLevel9
-                };
+                    pngOptions.CompressionLevel = 9; // Max compression
 
-                if (image is Aspose.Imaging.VectorImage)
-                {
-                    pngOptions.VectorRasterizationOptions = new CdrRasterizationOptions
+                    // Set vector rasterization options to match the source size
+                    pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
+                        BackgroundColor = Color.White,
+                        PageWidth = cdr.Width,
+                        PageHeight = cdr.Height
                     };
-                }
 
-                image.Save(outputPath, pngOptions);
+                    // Save as PNG
+                    cdr.Save(outputPath, pngOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -49,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a high‑quality PNG thumbnail of a CorelDRAW (CDR) illustration for a web gallery while minimizing file size, they can use this code to load the CDR, rasterize it, and save with maximum PNG compression.
- * 2. When an e‑commerce platform must convert vendor‑supplied CDR product drawings into compressed PNG images for fast page loads, this snippet automates the conversion and applies ZipLevel9 compression.
- * 3. When a document‑management system requires archiving vector artwork from CDR files as lossless PNGs with the smallest possible footprint, the code loads the vector image, sets PngCompressionLevel to ZipLevel9, and saves the result.
- * 4. When a mobile app needs to display CDR‑based icons as PNG assets without exceeding bandwidth limits, developers can employ this routine to rasterize each page at its original dimensions and compress the PNG to the maximum level.
- * 5. When a batch‑processing tool must convert a folder of CorelDRAW files into PNGs for printing previews while ensuring the output files are as small as possible, this example shows how to programmatically load, rasterize, and save each file with maximum PNG compression in C#.
+ * 1. When a graphic designer needs to archive CorelDRAW (CDR) artwork as the smallest possible PNG files for web delivery, a developer can use this code to convert and apply maximum compression.
+ * 2. When an e‑commerce platform must generate lightweight product thumbnails from CDR source files to improve page load speed, the code provides C# conversion with high‑compression PNG output.
+ * 3. When a document management system automatically extracts vector drawings from CDR files and stores them as lossless PNGs with minimal storage footprint, this snippet handles the conversion and sets the compression level to 9.
+ * 4. When a batch processing job needs to convert a large library of CorelDRAW drawings to PNG while preserving exact dimensions and applying maximum compression to reduce cloud storage costs, the example demonstrates the required Aspose.Imaging C# workflow.
+ * 5. When a mobile app backend must serve PNG previews of CDR designs with the smallest possible file size to conserve bandwidth, developers can employ this code to rasterize the vector image and enforce the highest PNG compression.
  */

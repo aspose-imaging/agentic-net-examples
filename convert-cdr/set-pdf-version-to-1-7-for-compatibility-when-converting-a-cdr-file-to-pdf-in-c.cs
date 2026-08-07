@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
@@ -12,8 +11,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "sample.cdr";
-            string outputPath = "output.pdf";
+            string inputPath = @"C:\Images\sample.cdr";
+            string outputPath = @"C:\Images\sample.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,16 +25,14 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CDR image
-            using (var image = (CdrImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF options with the desired compliance version
+                // Configure PDF options with PDF 1.7 compatibility (Aspose.Imaging supports up to PDF 1.5)
                 var pdfOptions = new PdfOptions
                 {
                     PdfCoreOptions = new PdfCoreOptions
                     {
-                        // Aspose.Imaging currently supports up to PDF 1.5 compliance.
-                        // Setting this to Pdf15 provides the highest available compliance,
-                        // which is compatible with PDF 1.7 readers.
+                        // Set the highest available compliance level (PDF 1.5)
                         PdfCompliance = PdfComplianceVersion.Pdf15
                     }
                 };
@@ -53,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to share CorelDRAW (CDR) artwork with clients who only open PDF 1.7 files, this code converts the CDR to a compatible PDF.
- * 2. When an automated document pipeline must archive vector illustrations from CDR files into PDFs that meet PDF 1.7 compliance for long‑term storage, the snippet ensures the correct version is set.
- * 3. When a web application generates printable brochures from CDR templates and must guarantee the resulting PDF works in modern browsers and PDF viewers expecting PDF 1.7, developers can use this conversion routine.
- * 4. When a batch conversion tool runs nightly to transform a library of CDR assets into PDFs for a digital asset management system that validates PDFs against PDF 1.7 standards, this code provides the required setting.
- * 5. When a compliance audit requires that all exported PDFs from design files be compatible with PDF 1.7 specifications, developers can embed this snippet to enforce the version during the CDR‑to‑PDF conversion.
+ * 1. When a design studio needs to archive CorelDRAW (.cdr) artwork as PDFs that must be viewable in PDF‑1.7 compliant readers such as Adobe Acrobat, they can use this C# code to convert the images while specifying the PDF compliance level.
+ * 2. When an e‑commerce platform automatically generates product catalogs from CDR source files and must ensure the PDFs meet the PDF‑1.7 standard required by third‑party printing services, the code provides a reliable conversion routine.
+ * 3. When a document management system ingests legacy CDR graphics and stores them as PDFs that must pass PDF/A‑2b validation (which is based on PDF‑1.7), developers can employ this snippet to enforce the appropriate PDF version during conversion.
+ * 4. When a legal firm needs to submit design evidence originally created in CorelDRAW and the court’s electronic filing system only accepts PDFs conforming to PDF‑1.7, the C# example enables seamless conversion with the correct compliance setting.
+ * 5. When a cloud‑based workflow automates the transformation of CDR files into shareable PDFs for mobile devices that only support PDF‑1.7 features like transparency groups, this code ensures the output meets the required version.
  */

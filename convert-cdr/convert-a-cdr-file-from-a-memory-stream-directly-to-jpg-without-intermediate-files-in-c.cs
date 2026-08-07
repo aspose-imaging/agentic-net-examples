@@ -8,41 +8,42 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "Input/sample.cdr";
+        string outputPath = "Output/sample.jpg";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "Input/sample.cdr";
-            string outputPath = "Output/sample.jpg";
-
-            if (!File.Exists(inputPath))
+            // Load CDR image from memory stream
+            byte[] cdrData = File.ReadAllBytes(inputPath);
+            using (MemoryStream memoryStream = new MemoryStream(cdrData))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
-            {
-                CdrImage cdrImage = image as CdrImage;
-                if (cdrImage == null)
+                using (CdrImage cdrImage = new CdrImage(memoryStream, new LoadOptions()))
                 {
-                    Console.Error.WriteLine("Failed to load CDR image.");
-                    return;
-                }
-
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    VectorRasterizationOptions = new CdrRasterizationOptions
+                    // Configure JPEG export options with vector rasterization settings
+                    JpegOptions jpegOptions = new JpegOptions
                     {
-                        BackgroundColor = Color.White,
-                        PageWidth = cdrImage.Width,
-                        PageHeight = cdrImage.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    }
-                };
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Aspose.Imaging.Color.White,
+                            PageWidth = cdrImage.Width,
+                            PageHeight = cdrImage.Height
+                        }
+                    };
 
-                image.Save(outputPath, jpegOptions);
+                    // Save directly to JPEG without intermediate files
+                    cdrImage.Save(outputPath, jpegOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -54,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application receives a CorelDRAW (CDR) file as an uploaded memory stream and needs to generate a JPEG preview for display without writing temporary files to disk.
- * 2. When a background service processes a queue of CDR documents stored in a database BLOB column and converts each to a JPEG image for archival or reporting purposes using Aspose.Imaging in C#.
- * 3. When an email automation system must attach a JPEG snapshot of a CDR design that was created in‑memory, ensuring the conversion happens entirely in RAM to improve performance and security.
- * 4. When a cloud‑based document management platform wants to provide on‑the‑fly thumbnail generation for CDR files stored in Azure Blob Storage, converting the stream directly to JPEG to reduce storage costs.
- * 5. When a desktop application allows users to drag‑and‑drop CDR files into a UI component and instantly renders a JPEG version for quick visual feedback without creating intermediate files on the user's machine.
+ * 1. When a web API receives a CorelDRAW (.cdr) file upload and needs to generate a JPEG preview for the user directly from a memory stream, avoiding any temporary files on the server.
+ * 2. When a desktop application reads CDR images stored as BLOBs in a database and must export them as high‑resolution JPEGs for printable reports without writing intermediate files to disk.
+ * 3. When an automated email service creates a JPEG thumbnail of an attached CDR document from a memory stream to embed in the email body, reducing I/O overhead.
+ * 4. When a cloud function processes user‑submitted CDR artwork and converts it to JPEG for display in a mobile app, keeping the entire conversion in memory for better scalability.
+ * 5. When a document management system streams CDR files from a network share and generates on‑the‑fly JPEG previews for indexing and search, eliminating the need for intermediate storage.
  */
