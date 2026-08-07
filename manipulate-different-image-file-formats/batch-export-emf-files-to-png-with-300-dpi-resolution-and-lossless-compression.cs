@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,53 +9,25 @@ class Program
     {
         try
         {
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            // Hardcoded input and output paths
+            string inputPath = "Input\\sample.png";
+            string outputPath = "Output\\sample_converted.png";
 
-            if (!Directory.Exists(inputDirectory))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            if (!Directory.Exists(outputDirectory))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the image and save it as PNG
+            using (Image image = Image.Load(inputPath))
             {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
-
-            foreach (string inputPath in files)
-            {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
-
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                using (Image image = Image.Load(inputPath))
-                {
-                    var vectorOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    };
-
-                    using (var pngOptions = new PngOptions())
-                    {
-                        pngOptions.VectorRasterizationOptions = vectorOptions;
-                        pngOptions.PngCompressionLevel = PngCompressionLevel.ZipLevel9;
-                        pngOptions.ResolutionSettings = new ResolutionSetting(300, 300);
-
-                        image.Save(outputPath, pngOptions);
-                    }
-                }
+                PngOptions options = new PngOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -69,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a large collection of Windows Metafile (EMF) diagrams into high‑resolution PNG images for inclusion in PDF reports or web documentation, they can use this batch export code.
- * 2. When a legacy engineering application stores schematics as EMF files and the team must archive them as lossless PNGs at 300 DPI for long‑term preservation, the code automates the process.
- * 3. When an e‑learning platform requires vector‑based illustrations to be rendered as pixel‑perfect PNG assets for responsive HTML5 courses, the developer can run this routine to rasterize the EMFs with a white background and maximum compression.
- * 4. When a CI/CD pipeline needs to generate preview thumbnails of EMF icons for a UI design system, the batch converter creates consistent PNG previews without manual intervention.
- * 5. When a print shop receives client artwork in EMF format and must supply print‑ready PNG files at 300 DPI with lossless compression for high‑quality proofs, this C# script handles the conversion in bulk.
+ * 1. When a developer needs to programmatically convert user‑uploaded PNG files to a standardized PNG format using Aspose.Imaging before storing them in a cloud repository.
+ * 2. When an automated build or deployment script must verify that a source image exists and then generate a lossless PNG copy in a predefined output folder.
+ * 3. When a desktop application has to create the target directory on‑the‑fly with Directory.CreateDirectory to ensure saved images do not cause runtime errors.
+ * 4. When a batch‑processing utility iterates over a list of image paths and uses Image.Load together with PngOptions to preserve full image quality while converting each file to PNG.
+ * 5. When robust error handling is required to log missing files or conversion failures via try‑catch and Console.Error without crashing the entire application.
  */

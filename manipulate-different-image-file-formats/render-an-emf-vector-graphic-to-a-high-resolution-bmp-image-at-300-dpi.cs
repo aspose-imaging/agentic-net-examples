@@ -2,16 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
 
-public class Program
+class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.emf";
+        string outputPath = "output.bmp";
+
         try
         {
-            string inputPath = "input.emf";
-            string outputPath = "output.bmp";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,15 +23,15 @@ public class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                EmfRasterizationOptions vectorOptions = new EmfRasterizationOptions
+                var rasterOptions = new EmfRasterizationOptions
                 {
-                    PageSize = image.Size,
-                    BackgroundColor = Color.White
+                    PageWidth = image.Width,
+                    PageHeight = image.Height
                 };
 
-                BmpOptions bmpOptions = new BmpOptions
+                var bmpOptions = new BmpOptions
                 {
-                    VectorRasterizationOptions = vectorOptions,
+                    VectorRasterizationOptions = rasterOptions,
                     ResolutionSettings = new ResolutionSetting(300, 300)
                 };
 
@@ -46,9 +47,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert Windows Metafile (EMF) vector logos into 300‑dpi BMP files for high‑quality print catalogs.
- * 2. When an application must generate rasterized BMP thumbnails of EMF diagrams for legacy systems that only support bitmap images.
- * 3. When a reporting tool has to embed EMF charts into PDF documents that require embedded BMP images at printer‑ready resolution.
- * 4. When a batch‑processing service automates the migration of EMF icons to 300‑dpi BMP assets for use in a Windows desktop application with fixed‑size bitmap resources.
- * 5. When a document management system needs to preview EMF drawings as high‑resolution BMP previews on a web portal that cannot render vector formats.
+ * 1. When a developer needs to convert Windows Metafile (EMF) vector diagrams into high‑resolution BMP files for printing on a 300 DPI printer, they can use this code.
+ * 2. When an application must generate pixel‑perfect thumbnails of EMF icons for inclusion in a legacy Windows application that only supports BMP images, this rasterization approach is required.
+ * 3. When a reporting tool exports charts as EMF and the downstream system expects bitmap images with precise DPI settings for PDF embedding, the code provides the needed conversion.
+ * 4. When a GIS or CAD system stores map overlays in EMF format but a client device only accepts BMP at 300 DPI for display on high‑resolution monitors, developers can employ this snippet.
+ * 5. When an automated batch process needs to archive vector graphics from a design workflow as BMP files with consistent 300 DPI resolution for compliance and archival standards, this solution fulfills the requirement.
  */

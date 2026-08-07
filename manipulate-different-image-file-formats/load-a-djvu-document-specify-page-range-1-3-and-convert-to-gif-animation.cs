@@ -3,38 +3,39 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Temp\sample.djvu";
-            string outputPath = @"C:\Temp\output.gif";
+            string inputPath = "Input/sample.djvu";
+            string outputPath = "Output/animation.gif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DjVu document from a file stream
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
+            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
             {
-                // Configure GIF options to export pages 1‑3 (zero‑based indexes 0,1,2)
+                if (djvuImage.PageCount < 3)
+                {
+                    Console.Error.WriteLine("DjVu document does not contain at least 3 pages.");
+                    return;
+                }
+
                 var gifOptions = new GifOptions
                 {
-                    MultiPageOptions = new DjvuMultiPageOptions(new int[] { 0, 1, 2 })
+                    MultiPageOptions = new MultiPageOptions(new IntRange(0, 2))
                 };
 
-                // Save as animated GIF
                 djvuImage.Save(outputPath, gifOptions);
             }
         }
@@ -47,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract the first three pages of a DjVu document and embed them as an animated GIF for a web‑page preview using Aspose.Imaging in C#.
- * 2. When an application must convert a multi‑page DjVu file into a lightweight GIF animation to attach to an email or instant‑message without requiring a DjVu viewer.
- * 3. When a digital archive system wants to generate a quick animated thumbnail of pages 1‑3 of a DjVu manuscript for catalog browsing in a .NET environment.
- * 4. When a mobile app requires converting selected DjVu slides into an animated GIF so users can view them offline on devices that only support GIF playback.
- * 5. When a reporting tool needs to transform pages 1‑3 of a scanned DjVu report into an animated GIF for inclusion in a PDF or PowerPoint presentation.
+ * 1. When a developer needs to extract the first three pages of a multi‑page DjVu document and create a lightweight animated GIF for embedding in a web page.
+ * 2. When an application must convert scanned DjVu pages of a technical manual into a GIF animation to provide a quick preview in a mobile app.
+ * 3. When a document‑management system requires generating a GIF slideshow from the initial pages of a DjVu file for email attachment previews.
+ * 4. When a digital publishing workflow automates the transformation of DjVu e‑books into animated GIFs to showcase sample content on a product catalog.
+ * 5. When a C# utility needs to validate the presence of at least three pages in a DjVu file and then save those pages as a GIF animation for archival or sharing purposes.
  */

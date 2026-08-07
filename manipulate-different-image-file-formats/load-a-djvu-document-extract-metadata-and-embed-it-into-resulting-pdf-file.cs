@@ -22,11 +22,11 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
                 using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    djvuImage.Save(outputPath, pdfOptions);
+                    djvu.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -39,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert scanned archival DjVu documents into searchable PDF files while preserving the original metadata for compliance reporting.
- * 2. When an application must batch‑process legal case files stored as DjVu and generate PDF versions that retain author, creation date, and title information for e‑discovery.
- * 3. When a digital library platform wants to serve users PDFs instead of DjVu but still keep the embedded metadata for cataloging and indexing purposes.
- * 4. When a document management system requires on‑the‑fly conversion of DjVu blueprints to PDF with metadata intact to integrate with existing PDF workflow tools.
- * 5. When a C# service automates the migration of legacy DjVu manuals to PDF format, ensuring that the original metadata is embedded for future search and retrieval.
+ * 1. When a developer needs to convert archived DjVu documents into searchable PDF files while preserving metadata for legal or archival purposes.
+ * 2. When an application must batch‑process scanned books stored as DjVu images and generate PDF outputs for distribution to end users.
+ * 3. When a workflow requires extracting image data from a DjVu file and embedding it into a PDF to integrate with existing PDF‑based reporting tools.
+ * 4. When a developer wants to automate the migration of legacy DjVu technical manuals into PDF format for easier viewing on modern devices.
+ * 5. When a system must validate the existence of a DjVu source file, create the necessary output directory, and safely convert it to PDF using Aspose.Imaging in a C# environment.
  */

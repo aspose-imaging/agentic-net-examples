@@ -1,9 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -22,10 +21,10 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (var image = (EpsImage)Image.Load(inputPath))
+            using (EpsImage image = (EpsImage)Image.Load(inputPath))
             {
                 int newWidth = 2000;
-                int newHeight = (int)Math.Round((double)image.Height * newWidth / image.Width);
+                int newHeight = (int)((double)image.Height / image.Width * newWidth);
                 image.Resize(newWidth, newHeight);
 
                 var pdfOptions = new PdfOptions();
@@ -42,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# developer using Aspose.Imaging for .NET must convert a vector EPS logo to a PDF/A‑2b compliant PDF for long‑term archiving while scaling the image to a 2000‑pixel width.
- * 2. When an automated .NET workflow needs to resize large EPS illustrations to a standard width before generating PDF reports that meet PDF/A‑2b compliance for regulatory submission.
- * 3. When a desktop application written in C# has to batch‑process EPS files, shrink them to a 2000‑pixel width, and export them as PDF/A‑2b files for consistent printing across different devices.
- * 4. When a content management system built on .NET must ensure uploaded EPS graphics are resized for web preview and saved as PDF/A‑2b PDFs to preserve visual fidelity and meet accessibility standards.
- * 5. When a developer integrates Aspose.Imaging into a C# service that prepares marketing assets by resizing EPS images to a fixed width and delivering PDF/A‑2b compliant PDFs for client delivery.
+ * 1. When a publishing workflow requires converting high‑resolution EPS artwork to a PDF/A‑2b compliant document for archival, a developer can resize the EPS to 2000 px wide and save it as PDF using Aspose.Imaging in C#.
+ * 2. When an e‑commerce platform needs to generate print‑ready product catalogs from vector EPS logos, the code can downscale the image to a manageable width and export it to a PDF that meets PDF/A‑2b standards.
+ * 3. When a legal document management system must embed vector graphics while ensuring long‑term preservation, developers use this snippet to resize EPS diagrams and store them as PDF/A‑2b files.
+ * 4. When a desktop application automates batch processing of engineering drawings, it can apply the 2000‑pixel resize and convert each EPS to a PDF/A‑2b compliant file for easy sharing.
+ * 5. When a marketing automation script prepares promotional PDFs from EPS source files and needs to keep file size low without losing quality, the code resizes the EPS and outputs a PDF/A‑2b compliant version.
  */

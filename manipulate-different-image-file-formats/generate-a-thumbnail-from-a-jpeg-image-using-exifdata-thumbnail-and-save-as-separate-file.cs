@@ -2,42 +2,44 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "thumbnail.jpg";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.jpg";
-            string outputPath = "thumbnail.jpg";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the JPEG image
             using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
             {
-                // Retrieve the EXIF thumbnail (RasterImage)
-                RasterImage thumbnail = jpegImage.ExifData?.Thumbnail;
-                if (thumbnail == null)
+                // Get the EXIF thumbnail (RasterImage)
+                RasterImage thumb = jpegImage.ExifData.Thumbnail;
+
+                if (thumb == null)
                 {
-                    Console.Error.WriteLine("No EXIF thumbnail found in the image.");
+                    Console.Error.WriteLine("No thumbnail found in EXIF data.");
                     return;
                 }
 
-                // Save the thumbnail as a separate JPEG file
-                var jpegOptions = new JpegOptions();
-                thumbnail.Save(outputPath, jpegOptions);
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the thumbnail as a separate file
+                using (thumb)
+                {
+                    thumb.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)
@@ -49,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photo‑sharing web app needs to quickly display preview images without re‑encoding the original JPEG, a developer can extract the embedded EXIF thumbnail and save it as a separate JPEG file.
- * 2. When a digital asset management system imports large batches of photos and wants to generate low‑resolution previews for its UI, the code can pull the EXIF thumbnail to avoid costly full‑size image processing.
- * 3. When a mobile app syncs images to the cloud and must upload a small preview for bandwidth‑limited connections, extracting the EXIF thumbnail provides an instant thumbnail file.
- * 4. When a desktop photo organizer wants to create a thumbnail cache for fast folder browsing, using the EXIF thumbnail extraction saves time compared to resizing the original image.
- * 5. When a forensic analysis tool needs to verify that an image contains an embedded thumbnail before further processing, the code can read the EXIF thumbnail and store it as a separate JPEG for inspection.
+ * 1. When building a photo‑gallery web application that needs fast preview images, a developer can extract the JPEG’s embedded EXIF thumbnail and save it as a separate JPEG file using Aspose.Imaging for .NET.
+ * 2. When creating a desktop photo organizer that generates folder thumbnails for Windows Explorer, the code can read the JPEG’s ExifData.Thumbnail and write a small thumbnail.jpg to improve folder preview performance.
+ * 3. When developing a digital asset management system that indexes images and stores low‑resolution previews for search results, extracting the EXIF thumbnail with C# and Aspose.Imaging provides an efficient way to generate those previews.
+ * 4. When implementing a batch‑processing script that validates image metadata and needs to archive the original thumbnail for compliance or forensic purposes, this snippet saves the embedded raster thumbnail as a separate file.
+ * 5. When optimizing a mobile app’s image‑upload workflow by sending only the EXIF thumbnail to the server for quick visual confirmation, the developer can use this code to extract and save the thumbnail before uploading.
  */

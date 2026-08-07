@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output_thumbnail.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "sample.jpg";
-            string outputPath = "output.txt";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,47 +21,57 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the JPEG image
             using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
             {
                 // Original image dimensions
                 int originalWidth = jpegImage.Width;
                 int originalHeight = jpegImage.Height;
+                Console.WriteLine($"Original image size: {originalWidth}x{originalHeight}");
 
-                // Access EXIF data and thumbnail
-                JpegExifData jpegExif = jpegImage.ExifData as JpegExifData;
-                if (jpegExif?.Thumbnail == null)
+                // Access EXIF data
+                JpegExifData exifData = jpegImage.ExifData as JpegExifData;
+                if (exifData == null)
                 {
-                    Console.WriteLine("No EXIF thumbnail present.");
+                    Console.WriteLine("No EXIF data found.");
+                    return;
+                }
+
+                // Retrieve the thumbnail
+                RasterImage thumbnail = exifData.Thumbnail;
+                if (thumbnail == null)
+                {
+                    Console.WriteLine("No thumbnail present in EXIF data.");
+                    return;
+                }
+
+                // Thumbnail dimensions
+                int thumbWidth = thumbnail.Width;
+                int thumbHeight = thumbnail.Height;
+                Console.WriteLine($"Thumbnail size: {thumbWidth}x{thumbHeight}");
+
+                // Compare areas
+                long originalArea = (long)originalWidth * originalHeight;
+                long thumbArea = (long)thumbWidth * thumbHeight;
+                if (thumbArea > originalArea)
+                {
+                    Console.WriteLine("Thumbnail is larger than the original image (by area).");
+                }
+                else if (thumbArea == originalArea)
+                {
+                    Console.WriteLine("Thumbnail and original image have the same area.");
                 }
                 else
                 {
-                    RasterImage thumbnail = jpegExif.Thumbnail;
-                    int thumbWidth = thumbnail.Width;
-                    int thumbHeight = thumbnail.Height;
-
-                    // Output sizes
-                    Console.WriteLine($"Original image size: {originalWidth}x{originalHeight}");
-                    Console.WriteLine($"Thumbnail size: {thumbWidth}x{thumbHeight}");
-
-                    // Compare dimensions
-                    if (thumbWidth < originalWidth && thumbHeight < originalHeight)
-                    {
-                        Console.WriteLine("Thumbnail is smaller than the original image.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Thumbnail is not smaller than the original image.");
-                    }
-
-                    // Write comparison result to output file
-                    File.WriteAllText(outputPath,
-                        $"Original: {originalWidth}x{originalHeight}{Environment.NewLine}" +
-                        $"Thumbnail: {thumbWidth}x{thumbHeight}{Environment.NewLine}");
+                    Console.WriteLine("Thumbnail is smaller than the original image (by area).");
                 }
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the thumbnail to a file
+                thumbnail.Save(outputPath);
+                Console.WriteLine($"Thumbnail saved to: {outputPath}");
             }
         }
         catch (Exception ex)
@@ -73,9 +83,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building a photo‑gallery web app that generates preview images, a developer can use this code to read the embedded EXIF thumbnail of a JPEG and verify it is smaller than the full‑size image before displaying it as a quick preview.
- * 2. When creating a digital asset management system that validates image metadata, a developer can extract the EXIF thumbnail and compare its dimensions to the original to ensure the thumbnail complies with size constraints.
- * 3. When optimizing storage for a mobile app that syncs photos, a developer can read the JPEG’s EXIF thumbnail and check if it is already sufficiently reduced, avoiding unnecessary re‑encoding of a smaller preview.
- * 4. When implementing a forensic analysis tool that examines image authenticity, a developer can retrieve the EXIF thumbnail and compare its size to the main image to detect mismatched or tampered thumbnails.
- * 5. When developing a batch‑processing script that logs image information, a developer can use this code to output both the original JPEG dimensions and its EXIF thumbnail dimensions to a text file for reporting purposes.
+ * 1. A photo‑management app extracts the EXIF thumbnail from JPEG files to quickly generate preview grids and checks if the thumbnail dimensions are smaller than the full‑size image before displaying it.
+ * 2. An e‑commerce platform validates product images by reading the embedded EXIF thumbnail and ensuring it is not larger than the original to prevent oversized thumbnails from slowing down page loads.
+ * 3. A digital asset workflow script reads the JPEG EXIF thumbnail to create a low‑resolution fallback and compares its area to the original image to decide whether to keep or replace the thumbnail.
+ * 4. A mobile‑first website uses C# to load JPEG EXIF data, retrieve the thumbnail, and verify that the thumbnail’s pixel count is less than the original before serving it to bandwidth‑constrained devices.
+ * 5. An archival tool audits a collection of JPEG photographs, extracts each EXIF thumbnail, and flags any files where the thumbnail size exceeds the original image size, indicating possible corruption or mis‑embedding.
  */

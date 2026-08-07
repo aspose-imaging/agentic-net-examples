@@ -2,45 +2,35 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg2000;
 
-public class Program
+class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/source.png";
-        string outputPath = "Output/result.jp2";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the bitmap source as a raster image
-            using (Image image = Image.Load(inputPath))
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\source.bmp";
+            string outputPath = "C:\\temp\\output.jp2";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the bitmap source
+            using (Image sourceImage = Image.Load(inputPath))
+            {
                 // Configure JPEG2000 options for lossless compression (default)
-                Jpeg2000Options options = new Jpeg2000Options
-                {
-                    Irreversible = false // lossless DWT 5-3
-                };
+                Jpeg2000Options options = new Jpeg2000Options();
 
-                // Create JPEG2000 image from the raster source
-                using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(raster))
-                {
-                    // Save the JPEG2000 image with the specified options
-                    jpeg2000Image.Save(outputPath, options);
-                }
+                // Save as JPEG2000 using the configured options
+                sourceImage.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -52,9 +42,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive high‑resolution PNG graphics as lossless JPEG2000 files for long‑term storage using C# and Aspose.Imaging, this code converts the bitmap to a JP2 image without quality loss.
- * 2. When an application must prepare medical or scientific images for secure transmission in a format that supports lossless compression, the snippet creates a JPEG2000 file from a raster source while preserving diagnostic detail.
- * 3. When a GIS system requires converting satellite PNG tiles into JPEG2000 to reduce file size without sacrificing spatial accuracy, the example demonstrates the C# workflow for lossless DWT compression.
- * 4. When a digital asset management platform needs to generate web‑ready, losslessly compressed JPEG2000 previews from user‑uploaded PNGs, this code provides a straightforward conversion pipeline.
- * 5. When a developer is building a batch processing tool that normalizes various bitmap formats into a single lossless JPEG2000 archive for compliance reporting, the sample shows how to load, configure, and save the images in .NET.
+ * 1. When a developer needs to convert legacy BMP files to a compact, lossless JPEG2000 format for archival storage while preserving pixel fidelity.
+ * 2. When an application must generate JPEG2000 images from bitmap assets to meet medical imaging standards that require lossless compression.
+ * 3. When a batch processing tool has to ensure that scanned documents are saved as JPEG2000 files to reduce disk usage without sacrificing quality.
+ * 4. When a C# service needs to prepare high‑resolution graphics for web delivery using JPEG2000’s lossless mode to maintain exact colors for branding assets.
+ * 5. When a developer wants to integrate Aspose.Imaging into a workflow that validates input files, creates missing directories, and saves the image as a JPEG2000 file with default lossless settings.
  */

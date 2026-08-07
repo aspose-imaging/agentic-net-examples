@@ -12,56 +12,46 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.jpg";
-            string outputPath = "output.jpg";
+            string inputPath = "Input/sample.jpg";
+            string outputPath = "Output/sample_geotagged.jpg";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the JPEG image
             using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                var exif = image.ExifData;
+                var exif = image.ExifData as Aspose.Imaging.Exif.JpegExifData;
                 if (exif == null)
                 {
-                    Console.Error.WriteLine("EXIF data not present in the image.");
-                    return;
+                    exif = new Aspose.Imaging.Exif.JpegExifData();
                 }
 
-                // Set GPS latitude and longitude tags (degrees, minutes, seconds)
                 exif.GPSLatitude = new TiffRational[]
                 {
-                    new TiffRational(37, 1), // degrees
-                    new TiffRational(0, 1),  // minutes
-                    new TiffRational(0, 1)   // seconds
+                    new TiffRational(37, 1),
+                    new TiffRational(48, 1),
+                    new TiffRational(30, 1)
                 };
                 exif.GPSLatitudeRef = "N";
 
                 exif.GPSLongitude = new TiffRational[]
                 {
-                    new TiffRational(122, 1), // degrees
-                    new TiffRational(0, 1),   // minutes
-                    new TiffRational(0, 1)    // seconds
+                    new TiffRational(122, 1),
+                    new TiffRational(24, 1),
+                    new TiffRational(0, 1)
                 };
                 exif.GPSLongitudeRef = "W";
 
-                // Prepare JPEG save options with updated EXIF data
-                JpegOptions saveOptions = new JpegOptions
-                {
-                    ExifData = exif,
-                    Source = new FileCreateSource(outputPath, false)
-                };
+                image.ExifData = exif;
 
-                // Save the image with the new EXIF GPS information
-                image.Save(outputPath, saveOptions);
+                var jpegOptions = new JpegOptions();
+                jpegOptions.Source = new FileCreateSource(outputPath, false);
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -73,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to write GPS latitude and longitude EXIF tags into a JPEG image using C# and Aspose.Imaging for drone‑collected mapping data.
- * 2. When a developer wants to geotag user‑uploaded travel photos by setting the EXIF GPSLatitude and GPSLongitude fields in a JPEG file with Aspose.Imaging.
- * 3. When a developer must embed precise latitude/longitude metadata into scanned JPEG documents before importing them into a GIS system using Aspose.Imaging’s EXIF API.
- * 4. When a developer is building a real‑estate web application that adds location EXIF data to property JPEG images so they can be displayed on interactive maps.
- * 5. When a developer creates a C# photo‑organizer utility that writes GPS coordinates to JPEG EXIF metadata to enable location‑based sorting and searching.
+ * 1. When a developer needs to embed GPS latitude and longitude EXIF tags into a JPEG image using C# and Aspose.Imaging for geotagging before publishing to a mapping service.
+ * 2. When an application must programmatically add precise GPS coordinates to drone‑captured JPEG files so they can be sorted and displayed on geographic information system (GIS) platforms.
+ * 3. When a photo‑organizing tool requires inserting latitude/longitude reference tags into existing JPEG images via Aspose.Imaging’s JpegExifData class to enable location‑based searches.
+ * 4. When a real‑estate website wants to automatically tag property photos with accurate GPS EXIF data using C# so the listings appear correctly on interactive maps.
+ * 5. When a mobile synchronization service processes user‑taken JPEGs and needs to ensure each file contains valid EXIF GPSLatitudeRef and GPSLongitudeRef tags for downstream analytics.
  */

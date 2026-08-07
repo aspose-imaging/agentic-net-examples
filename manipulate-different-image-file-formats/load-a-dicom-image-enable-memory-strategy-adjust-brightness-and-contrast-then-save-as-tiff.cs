@@ -9,37 +9,27 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "Input/sample.dcm";
         string outputPath = "Output/output.tif";
 
-        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Load DICOM image
-            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+            var loadOptions = new LoadOptions { BufferSizeHint = 256 * 1024 };
+            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath, loadOptions))
             {
-                // Adjust brightness (range -255 to 255)
                 dicomImage.AdjustBrightness(30);
-
-                // Adjust contrast (range -100 to 100)
                 dicomImage.AdjustContrast(20f);
 
-                // Prepare TIFF save options
-                using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
-                {
-                    // Save the processed image as TIFF
-                    dicomImage.Save(outputPath, tiffOptions);
-                }
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                dicomImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -51,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert DICOM scans to TIFF for archival while adjusting brightness and contrast to improve visual quality.
- * 2. When a radiology workflow requires batch processing of DICOM files in C# using Aspose.Imaging to apply brightness/contrast corrections before sending them to a PACS system that only accepts TIFF.
- * 3. When a healthcare research tool must load large DICOM images, modify their visual parameters, and save them as TIFF with efficient memory usage to avoid out‑of‑memory errors.
- * 4. When a desktop utility lets users preview DICOM X‑ray images, enhance them by tweaking brightness and contrast, and export the result as a standard TIFF file for inclusion in reports.
- * 5. When an integration service converts DICOM images received from imaging devices into TIFF format for downstream image analysis pipelines that expect TIFF input and require consistent brightness and contrast settings.
+ * 1. When a medical imaging application needs to convert DICOM scans to TIFF for archival while adjusting brightness and contrast to improve visual quality, a developer can use this code.
+ * 2. When a radiology workflow requires batch processing of large DICOM files on limited memory by enabling a buffer size hint and then exporting them as TIFF for compatibility with PACS viewers, this snippet is applicable.
+ * 3. When a healthcare research project wants to preprocess DICOM images in C# by enhancing contrast and brightness before feeding them into analysis tools that only accept TIFF format, the code provides a solution.
+ * 4. When a hospital IT system must generate printable TIFF copies of DICOM X‑ray images with standardized brightness and contrast settings while ensuring efficient memory usage, developers can implement this approach.
+ * 5. When a diagnostic software needs to load a DICOM image, apply image processing adjustments, and save the result as a high‑resolution TIFF for integration with third‑party reporting software, this example demonstrates the required steps.
  */

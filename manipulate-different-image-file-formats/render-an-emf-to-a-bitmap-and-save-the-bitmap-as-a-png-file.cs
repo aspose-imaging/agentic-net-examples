@@ -14,31 +14,33 @@ class Program
             string inputPath = @"C:\Images\input.emf";
             string outputPath = @"C:\Images\output.png";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EMF image
-            using (Image emfImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG save options with vector rasterization for EMF
-                var pngOptions = new PngOptions
+                // Prepare rasterization options for vector to bitmap conversion
+                var rasterizationOptions = new EmfRasterizationOptions
                 {
-                    VectorRasterizationOptions = new EmfRasterizationOptions
-                    {
-                        PageSize = emfImage.Size,
-                        BackgroundColor = Color.White // optional background
-                    }
+                    PageSize = image.Size // Use the original image size
                 };
 
-                // Save as PNG
-                emfImage.Save(outputPath, pngOptions);
+                // Prepare PNG save options and attach rasterization settings
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Save the rendered bitmap as PNG
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -50,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a Windows desktop application needs to display legacy vector graphics (EMF files) on a web page, a developer can convert the EMF to a PNG bitmap using Aspose.Imaging for .NET.
- * 2. When generating PDF reports that embed high‑resolution thumbnails of vector diagrams, a developer can rasterize the EMF to a PNG image to ensure consistent rendering across platforms.
- * 3. When an automated document‑conversion service receives EMF attachments and must store them as web‑friendly PNG files for indexing and preview, this code provides the necessary C# conversion.
- * 4. When a batch‑processing job must create printable PNG assets from a collection of EMF logos while preserving background color and dimensions, the Aspose.Imaging rasterization options simplify the task.
- * 5. When a mobile app backend needs to serve EMF icons to iOS and Android devices that only support raster images, developers can use this snippet to convert the EMF to PNG on the server side.
+ * 1. When a developer needs to convert legacy Windows Metafile (EMF) graphics into web‑friendly PNG images for display in browsers.
+ * 2. When an automated reporting tool must embed vector charts stored as EMF into PDF or HTML reports that only accept raster PNG files.
+ * 3. When a desktop application generates printable diagrams as EMF and then creates thumbnail previews in PNG for file explorers or UI galleries.
+ * 4. When a batch processing script has to migrate a folder of EMF assets to PNG to reduce file size and improve compatibility with mobile devices.
+ * 5. When a cloud service receives user‑uploaded EMF logos and must rasterize them to PNG before storing them in an image CDN.
  */

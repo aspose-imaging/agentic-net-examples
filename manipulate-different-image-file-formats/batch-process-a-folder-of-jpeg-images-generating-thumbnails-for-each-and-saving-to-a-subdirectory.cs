@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -11,19 +10,22 @@ class Program
         try
         {
             string baseDir = Directory.GetCurrentDirectory();
-            string inputDir = Path.Combine(baseDir, "Input");
-            string outputDir = Path.Combine(baseDir, "Output");
-            string thumbDir = Path.Combine(outputDir, "Thumbnails");
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Ensure input and output directories exist
-            Directory.CreateDirectory(inputDir);
-            Directory.CreateDirectory(thumbDir);
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            string[] files = Directory.GetFiles(inputDir, "*.*", SearchOption.TopDirectoryOnly)
-                .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                            f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
-                .ToArray();
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
 
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
             foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
@@ -32,41 +34,28 @@ class Program
                     return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(thumbDir, fileName + ".jpg");
+                string extension = Path.GetExtension(inputPath);
+                if (!extension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) &&
+                    !extension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
 
-                // Ensure the output directory exists
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + "_thumb.jpg");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (RasterImage image = (RasterImage)Image.Load(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    if (!image.IsCached) image.CacheData();
+                    int thumbWidth = 150;
+                    int thumbHeight = 150;
+                    image.Resize(thumbWidth, thumbHeight, ResizeType.NearestNeighbourResample);
 
-                    // Create thumbnail preserving aspect ratio, max dimension 150
-                    const int maxSize = 150;
-                    int width = image.Width;
-                    int height = image.Height;
-                    double ratio = (double)width / height;
-                    int thumbWidth, thumbHeight;
+                    JpegOptions jpegOptions = new JpegOptions();
+                    jpegOptions.Quality = 80;
 
-                    if (width >= height)
-                    {
-                        thumbWidth = maxSize;
-                        thumbHeight = (int)(maxSize / ratio);
-                    }
-                    else
-                    {
-                        thumbHeight = maxSize;
-                        thumbWidth = (int)(maxSize * ratio);
-                    }
-
-                    image.Resize(thumbWidth, thumbHeight);
-
-                    using (JpegOptions jpegOptions = new JpegOptions())
-                    {
-                        jpegOptions.Quality = 90;
-                        image.Save(outputPath, jpegOptions);
-                    }
+                    image.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -79,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate web‑ready thumbnail previews for a large batch of JPEG or JPEG‑2000 photos stored in a folder, this C# Aspose.Imaging code creates 150‑pixel thumbnails while preserving aspect ratio and saves them to an Output/Thumbnails subdirectory.
- * 2. When an e‑commerce platform must display product image previews on category pages, the code can batch‑process the original high‑resolution JPEG assets and produce uniformly sized thumbnails for faster page loads.
- * 3. When a content management system imports user‑uploaded JPEG images and requires low‑resolution preview files for the admin dashboard, this snippet automates the thumbnail creation and organizes them in a dedicated folder.
- * 4. When a digital asset management tool needs to sync a local photo archive with a cloud service that only accepts small thumbnail files, the program quickly converts each JPEG in the Input folder to a cached RasterImage and writes the scaled‑down versions to Output/Thumbnails.
- * 5. When a Windows desktop application must display a scrollable gallery of images from a directory, the code can pre‑generate the required JPEG thumbnails to improve UI responsiveness and reduce memory usage.
+ * 1. When an e‑commerce site needs to create small preview images for thousands of product photos stored as JPEG files, a developer can use this code to batch‑process the folder and generate 150 × 150 thumbnails in an Output subdirectory.
+ * 2. When a digital asset management system must provide quick visual indexes for user‑uploaded JPEG pictures, the snippet can be run nightly to resize each image and store thumbnail versions alongside the originals.
+ * 3. When a content‑management workflow requires automatically creating thumbnail previews for blog post images before publishing, the code can scan the Input folder, resize the JPEGs, and save the thumbnails to a separate Output folder.
+ * 4. When a mobile app backend needs to reduce bandwidth by serving low‑resolution JPEG thumbnails for gallery views, a developer can employ this batch processing routine to pre‑generate the thumbnails on the server.
+ * 5. When a photo‑sharing platform wants to generate consistent square thumbnails for user‑profile pictures stored as JPEGs, this C# example using Aspose.Imaging can resize and save each thumbnail in a dedicated Output directory.
  */

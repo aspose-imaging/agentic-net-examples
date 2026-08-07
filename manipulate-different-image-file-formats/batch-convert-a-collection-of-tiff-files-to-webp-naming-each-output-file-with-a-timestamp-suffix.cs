@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -9,17 +10,18 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\Input";
-            string outputDirectory = @"C:\Images\Output";
+            // Hardcoded input TIFF files
+            string[] inputPaths = new string[]
+            {
+                @"C:\Images\sample1.tif",
+                @"C:\Images\sample2.tif",
+                @"C:\Images\sample3.tif"
+            };
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            // Output directory for WebP files
+            string outputDirectory = @"C:\Images\WebP";
 
-            // Get all TIFF files in the input directory
-            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
-
-            foreach (string inputPath in tiffFiles)
+            foreach (string inputPath in inputPaths)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -32,17 +34,16 @@ class Program
                 using (Image image = Image.Load(inputPath))
                 {
                     // Build output file name with timestamp suffix
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                     string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                     string outputFileName = $"{fileNameWithoutExt}_{timestamp}.webp";
                     string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                    // Ensure the directory for the output file exists
+                    // Ensure output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save as WebP using default options
-                    WebPOptions webpOptions = new WebPOptions();
-                    image.Save(outputPath, webpOptions);
+                    // Save as WebP
+                    image.Save(outputPath, new WebPOptions());
                 }
             }
         }
@@ -55,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy archive of TIFF scans to the modern WebP format for faster web delivery while preserving unique timestamps for version tracking.
- * 2. When an automated nightly job must convert newly added TIFF documents in a folder to WebP images and store them with timestamped filenames to avoid overwriting previous exports.
- * 3. When a digital asset management system requires batch processing of high‑resolution TIFF photos into WebP thumbnails, appending a timestamp to each file to maintain audit trails.
- * 4. When a Windows service processes scanned invoices saved as TIFF files and saves them as WebP files with a timestamp suffix for compliance and easy retrieval.
- * 5. When a C# application needs to generate web‑ready WebP versions of a batch of medical imaging TIFF files, ensuring each output file has a unique timestamp to prevent naming collisions.
+ * 1. When a web developer needs to compress a batch of high‑resolution TIFF scans into smaller WebP files for faster page loads while preserving unique timestamps for version control.
+ * 2. When an e‑commerce platform automates the conversion of product catalog TIFF images to WebP format and appends a timestamp to avoid cache conflicts during nightly uploads.
+ * 3. When a digital archiving system processes scanned documents in TIFF, converts them to WebP for web preview, and uses the timestamp suffix to track when each file was generated.
+ * 4. When a photo‑editing application offers a one‑click export feature that transforms multiple TIFF photos into WebP thumbnails, naming each output with a precise timestamp for easy sorting.
+ * 5. When a content management workflow batches legacy TIFF assets into WebP for mobile optimization and adds a timestamp to each filename to ensure unique identifiers across deployments.
  */

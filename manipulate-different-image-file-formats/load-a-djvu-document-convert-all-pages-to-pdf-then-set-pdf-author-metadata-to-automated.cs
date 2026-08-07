@@ -8,27 +8,28 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input\\sample.djvu";
+        string outputPath = "Output\\output.pdf";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.djvu";
-            string outputPath = "Output/output.pdf";
-
-            if (!File.Exists(inputPath))
+            using (Aspose.Imaging.FileFormats.Djvu.DjvuImage djvu = (Aspose.Imaging.FileFormats.Djvu.DjvuImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                var pdfOptions = new PdfOptions
+                {
+                    MultiPageOptions = new DjvuMultiPageOptions(),
+                    PdfDocumentInfo = new PdfDocumentInfo { Author = "Automated" }
+                };
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (Aspose.Imaging.FileFormats.Djvu.DjvuImage djvuImage = new Aspose.Imaging.FileFormats.Djvu.DjvuImage(stream))
-            {
-                PdfOptions pdfOptions = new PdfOptions();
-                pdfOptions.MultiPageOptions = new DjvuMultiPageOptions(); // export all pages
-                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo { Author = "Automated" };
-
-                djvuImage.Save(outputPath, pdfOptions);
+                djvu.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -40,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an archival system receives scanned documents in DjVu format and must generate searchable multi‑page PDFs with a consistent author tag for compliance reporting.
- * 2. When a batch‑processing service needs to convert user‑uploaded DjVu ebooks into PDF files while automatically embedding the author metadata as "Automated" for downstream indexing.
- * 3. When a document‑management workflow requires converting multi‑page DjVu blueprints to PDF portfolios and setting the PDF author field to identify the conversion script.
- * 4. When a legal‑tech application must transform DjVu case files into PDF format for court submission, ensuring the PDF metadata records the automated processing source.
- * 5. When a cloud‑based image‑processing API offers a C# endpoint that takes DjVu input, outputs a single PDF containing all pages, and adds the author metadata to track automated conversions.
+ * 1. When a company needs to batch‑convert archived DjVu scans of historical documents into searchable PDF files and automatically set the PDF author metadata to “Automated” for consistent cataloging.
+ * 2. When an engineering team wants to generate PDF reports from multi‑page DjVu technical drawings in a C# application while embedding author information for compliance tracking.
+ * 3. When a digital library migrates its DjVu e‑books to PDF format using Aspose.Imaging for .NET and requires uniform author metadata for library management systems.
+ * 4. When a server‑side service receives DjVu files, converts each page to a single PDF document, and tags the PDF with the author “Automated” to integrate with downstream workflow automation.
+ * 5. When a desktop utility processes DjVu invoices, converts them to PDF, and embeds the author metadata to indicate the files were produced by an automated process.
  */

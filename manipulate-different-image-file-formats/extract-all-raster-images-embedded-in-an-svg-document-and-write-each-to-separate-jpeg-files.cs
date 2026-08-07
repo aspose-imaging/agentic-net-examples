@@ -10,44 +10,45 @@ class Program
     {
         try
         {
-            // Hard‑coded input SVG path
+            // Hardcoded input SVG file path
             string inputPath = "input.svg";
 
-            // Verify the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the SVG (or any vector) image
+            // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to VectorImage to access embedded raster images
+                // Cast to VectorImage to access embedded images
                 var vectorImage = image as VectorImage;
                 if (vectorImage == null)
                 {
-                    Console.Error.WriteLine("Loaded image is not a vector image.");
+                    Console.Error.WriteLine("The loaded file is not a vector image.");
                     return;
                 }
 
                 // Retrieve embedded raster images
                 EmbeddedImage[] embeddedImages = vectorImage.GetEmbeddedImages();
-
                 int index = 0;
-                foreach (var embedded in embeddedImages)
+
+                foreach (EmbeddedImage embedded in embeddedImages)
                 {
-                    // Build output JPEG file name
-                    string outputPath = $"image{index}.jpg";
+                    // Construct output JPEG file name
+                    string outputFileName = $"image{index}.jpg";
 
-                    // Ensure the output directory exists (handles null for current directory)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                    // Ensure the output directory exists
+                    string outputDir = Path.GetDirectoryName(outputFileName);
+                    Directory.CreateDirectory(outputDir ?? string.Empty);
 
-                    // Save each embedded image as JPEG
+                    // Save the embedded image as JPEG
                     using (embedded)
                     {
                         var jpegOptions = new JpegOptions();
-                        embedded.Image.Save(outputPath, jpegOptions);
+                        embedded.Image.Save(outputFileName, jpegOptions);
                     }
 
                     index++;
@@ -56,7 +57,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -64,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to extract and convert raster graphics embedded in an SVG logo into separate JPEG files for use in email newsletters.
- * 2. When a desktop publishing tool must isolate bitmap images from a complex SVG illustration to generate low‑resolution previews for quick loading.
- * 3. When a mobile app processes SVG assets and requires each embedded PNG or BMP to be saved as JPEG to meet platform‑specific image format constraints.
- * 4. When an automated build pipeline extracts raster images from SVG icons to create thumbnail JPEGs for a product catalog.
- * 5. When a digital asset management system needs to catalog and store each raster component of an SVG file as an individual JPEG for easier searching and reuse.
+ * 1. When a developer needs to extract raster images embedded in an SVG file and save each as a separate JPEG for use in web galleries or thumbnails.
+ * 2. When converting vector‑based SVG assets that contain logos or photos into individual JPEG files for inclusion in email newsletters or marketing materials.
+ * 3. When processing SVG icons that embed raster graphics and the application must generate high‑resolution JPEG previews for a content management system.
+ * 4. When migrating legacy design files that store embedded PNG or BMP images inside SVGs and the developer must separate them into standalone JPEG files for archival.
+ * 5. When building an automated pipeline that scans SVG documents, extracts any embedded raster images, and stores them as JPEGs for downstream image analysis or machine‑learning models.
  */

@@ -8,32 +8,34 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.jpg";
-        string outputPath = @"C:\Images\sample.cmyk.jpg";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the source JPEG image
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.jpg";
+            string outputPath = @"C:\Images\output_cmyk.jpg";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG save options for CMYK color type
+                // Prepare JPEG save options with CMYK color type
                 JpegOptions saveOptions = new JpegOptions
                 {
-                    ColorType = JpegCompressionColorMode.Cmyk
+                    ColorType = JpegCompressionColorMode.Cmyk,
+                    // Optional: preserve quality
+                    Quality = 100
                 };
 
-                // Save the image with CMYK conversion
+                // Save the image as CMYK JPEG
                 image.Save(outputPath, saveOptions);
             }
         }
@@ -46,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a printing workflow requires converting RGB JPEG files to CMYK before sending them to a commercial press, a developer can use this code to load the JPEG, change its ColorType to CMYK, and save the result for accurate color reproduction.
- * 2. When validating that a third‑party design tool correctly exports images in CMYK color space, a developer can run this snippet to load the exported JPEG, force a CMYK conversion with Aspose.Imaging, and compare the saved file against the original.
- * 3. When building a batch‑processing service that prepares web‑ready images for color‑managed PDF generation, a developer can employ this code to convert each JPEG to CMYK and verify the conversion before embedding the image.
- * 4. When troubleshooting color shift issues in a digital asset management system, a developer can use this example to reload a problematic JPEG, apply a CMYK color mode via JpegOptions, and save it to confirm whether the conversion resolves the problem.
- * 5. When creating an automated test suite for a graphics pipeline that must ensure CMYK output compliance, a developer can leverage this snippet to programmatically load a sample JPEG, convert it to CMYK, and save it for comparison with expected results.
+ * 1. When preparing print‑ready marketing materials, a developer can load a JPEG, convert it to CMYK, and save it to ensure colors match the printing press.
+ * 2. When migrating a web‑based photo gallery to a workflow that requires CMYK images for offline catalogs, the code can be used to batch‑convert JPEGs to the correct color space.
+ * 3. When integrating a digital asset management system that must store images in CMYK for consistent color reproduction across devices, this snippet shows how to perform the conversion in C# with Aspose.Imaging.
+ * 4. When validating that a third‑party image processing pipeline preserves color fidelity, a developer can use the example to load a JPEG, change its ColorType to CMYK, and compare the output.
+ * 5. When automating a pre‑press quality check that requires all JPEG files to be saved with 100 % quality in CMYK, the code provides a straightforward way to enforce those settings programmatically.
  */

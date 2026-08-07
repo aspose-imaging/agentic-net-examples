@@ -1,19 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.tif";
+        string outputPath = @"C:\Images\output.webp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.tif";
-            string outputPath = "output.webp";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,21 +25,27 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TIFF image
-            using (Image image = Image.Load(inputPath))
+            using (Image tiffImage = Image.Load(inputPath))
             {
                 // Cast to TiffImage to access resolution properties
-                TiffImage tiff = (TiffImage)image;
+                TiffImage tiff = (TiffImage)tiffImage;
+
+                // Retrieve horizontal and vertical DPI
                 double dpiX = tiff.HorizontalResolution;
                 double dpiY = tiff.VerticalResolution;
 
-                // Apply the same resolution (optional, ensures it is set)
+                // Apply the same resolution (explicitly) before saving
                 tiff.SetResolution(dpiX, dpiY);
 
                 // Prepare WebP save options
-                WebPOptions webpOptions = new WebPOptions();
+                WebPOptions webpOptions = new WebPOptions
+                {
+                    // Example: keep lossless; adjust as needed
+                    Lossless = true
+                };
 
-                // Save as WebP preserving the resolution metadata
-                image.Save(outputPath, webpOptions);
+                // Save as WebP with the same resolution metadata
+                tiff.Save(outputPath, webpOptions);
             }
         }
         catch (Exception ex)
@@ -51,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert high‑resolution scanned TIFF documents to WebP for web delivery while preserving the original DPI settings, this code can be used.
- * 2. When a photo‑editing application must retain the physical size information of a TIFF image after exporting it as a WebP file, the snippet extracts and re‑applies the resolution metadata.
- * 3. When an e‑commerce platform wants to generate lightweight WebP thumbnails from product TIFF images without losing print‑ready resolution data, the example shows how to do it in C# with Aspose.Imaging.
- * 4. When a GIS or mapping tool processes georeferenced TIFF raster data and needs to keep the pixel‑per‑inch metadata intact in a WebP export, this code provides the necessary steps.
- * 5. When a digital asset management system automates batch conversion of archival TIFF files to WebP while ensuring the stored resolution values remain accurate for downstream workflows, the code demonstrates the required operations.
+ * 1. When a web application must convert high‑resolution TIFF scans to WebP for faster page loads while preserving the original DPI metadata for accurate print scaling.
+ * 2. When a digital asset management system needs to ingest TIFF photographs, extract their horizontal and vertical resolution, and store them as lossless WebP files with the same resolution for consistent downstream processing.
+ * 3. When an e‑commerce platform automates the generation of product thumbnails by converting supplier‑provided TIFF images to WebP while keeping the original DPI to ensure size‑aware display on high‑density screens.
+ * 4. When a medical imaging workflow requires converting diagnostic TIFF slides to WebP for secure web viewing, retaining the exact resolution metadata to maintain measurement fidelity.
+ * 5. When a GIS (Geographic Information System) tool batch‑processes georeferenced TIFF maps into WebP format, embedding the original DPI so that map scales remain correct in web‑based viewers.
  */

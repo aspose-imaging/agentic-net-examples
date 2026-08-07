@@ -9,11 +9,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.bmp";
-            string outputPath = @"C:\Images\output.jpg";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\input.bmp";
+            string outputPath = @"C:\temp\output.jpg";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -29,11 +29,10 @@ class Program
                 // Configure JPEG save options with quality 85
                 JpegOptions saveOptions = new JpegOptions
                 {
-                    Quality = 85,
-                    BitsPerChannel = 8 // preserve standard 8‑bit per channel
+                    Quality = 85
                 };
 
-                // Save as JPEG preserving original dimensions
+                // Save the image as JPEG, preserving original dimensions
                 image.Save(outputPath, saveOptions);
             }
         }
@@ -46,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to reduce the file size of user‑uploaded BMP screenshots for web display while keeping the original width and height, a developer can use this code to convert them to JPEG with quality 85.
- * 2. When an automated batch‑processing service must archive legacy BMP assets into a more storage‑efficient JPEG format without altering image dimensions, the snippet provides the required C# conversion.
- * 3. When a photo‑editing tool exports edited BMP layers to a final JPEG output for sharing on social media, the code ensures the dimensions stay the same and the compression quality is set to 85.
- * 4. When a document‑generation system embeds images and requires all pictures to be in JPEG to meet PDF/A compliance, the developer can convert each BMP using this routine while preserving size.
- * 5. When a game‑modding utility prepares texture files by converting BMP textures to JPEG to improve loading speed, the example shows how to perform the conversion in .NET with a fixed quality level.
+ * 1. When a desktop application needs to batch‑convert legacy BMP screenshots to smaller JPEG files for email attachments while keeping the original width and height and using a quality setting of 85.
+ * 2. When a web service written in C# must receive user‑uploaded BMP images, compress them to JPEG with a controlled quality level, and store them in a file system without altering their dimensions.
+ * 3. When an automated build script has to generate preview thumbnails from BMP assets by saving them as JPEGs at 85 % quality to reduce storage costs while preserving the exact pixel size.
+ * 4. When a migration tool moves image data from an old Windows application that saved BMP files to a modern platform that requires JPEG format, ensuring the images retain their original resolution and a consistent quality factor.
+ * 5. When a reporting engine creates charts as BMP files and then needs to embed them in PDF reports as JPEGs, using Aspose.Imaging in C# to convert the format with quality 85 and unchanged dimensions.
  */

@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -10,16 +9,19 @@ class Program
     {
         try
         {
-            // Hardcoded list of TIFF files to convert
+            // Hardcoded list of TIFF input files
             string[] inputPaths = new string[]
             {
-                @"C:\Images\Input\image1.tif",
-                @"C:\Images\Input\image2.tif",
-                @"C:\Images\Input\image3.tif"
+                @"C:\Images\Input1.tif",
+                @"C:\Images\Input2.tif",
+                @"C:\Images\Input3.tif"
             };
 
-            // Output directory (hardcoded)
-            string outputDirectory = @"C:\Images\Output";
+            // Hardcoded output directory
+            string outputDirectory = @"C:\Images\WebPOutput";
+
+            // Ensure the output directory exists once (unconditional as per rule)
+            Directory.CreateDirectory(outputDirectory);
 
             foreach (string inputPath in inputPaths)
             {
@@ -30,21 +32,23 @@ class Program
                     return;
                 }
 
-                // Determine output path with .webp extension
-                string outputPath = Path.Combine(
-                    outputDirectory,
+                // Build output path with .webp extension
+                string outputPath = Path.Combine(outputDirectory,
                     Path.GetFileNameWithoutExtension(inputPath) + ".webp");
 
-                // Ensure output directory exists
+                // Ensure the directory for the output file exists (unconditional)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the TIFF image and save as WebP with quality 90
+                // Load the TIFF image
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Set WebP options with quality 90
                     var webpOptions = new WebPOptions
                     {
                         Quality = 90
                     };
+
+                    // Save as WebP
                     image.Save(outputPath, webpOptions);
                 }
 
@@ -61,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy archive of TIFF photographs to the modern WebP format to reduce storage size while preserving visual quality at 90% using C# and Aspose.Imaging.
- * 2. When an e‑commerce platform must batch‑convert product catalog TIFF images to WebP for faster web page loading and SEO‑friendly image delivery.
- * 3. When a medical imaging application requires automated conversion of scanned TIFF radiology images to WebP for efficient transmission to remote diagnostic tools.
- * 4. When a content management system needs to process a predefined list of TIFF assets nightly, saving them as WebP with consistent quality and logging each conversion result.
- * 5. When a developer builds a Windows service that validates the existence of TIFF files, creates the output directory, and converts them to WebP with Aspose.Imaging while handling errors gracefully.
+ * 1. When a developer needs to batch‑convert a collection of high‑resolution TIFF scans to WebP images with a quality setting of 90 for faster web loading, this code provides a simple C# solution.
+ * 2. When an e‑commerce platform must automatically generate lightweight WebP thumbnails from product TIFF photos stored on a server, the script can process each file and log the results.
+ * 3. When a digital archiving system requires periodic conversion of TIFF documents to WebP to reduce storage costs while maintaining visual fidelity, the code handles the file existence checks and directory creation.
+ * 4. When a content management workflow demands that newly uploaded TIFF assets be instantly transformed into WebP format for responsive design, this C# loop performs the conversion and reports success.
+ * 5. When a developer is building a command‑line utility to migrate legacy TIFF image libraries to modern WebP format with consistent quality and error handling, the example demonstrates the necessary image loading, option setting, and logging steps.
  */

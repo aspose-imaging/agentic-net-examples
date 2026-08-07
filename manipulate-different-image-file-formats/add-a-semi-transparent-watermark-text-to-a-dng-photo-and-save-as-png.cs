@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dng;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Brushes;
 
 class Program
@@ -25,22 +24,23 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                DngImage dngImage = (DngImage)image;
+                DngImage dng = (DngImage)image;
 
                 // Create graphics for drawing
-                Graphics graphics = new Graphics(dngImage);
+                Graphics graphics = new Graphics(dng);
 
-                // Semi‑transparent white brush
-                var brush = new SolidBrush(Aspose.Imaging.Color.FromArgb(128, 255, 255, 255));
+                // Define semi‑transparent brush
+                SolidBrush brush = new SolidBrush();
+                brush.Color = Color.FromArgb(128, 255, 255, 255); // 50% transparent white
 
-                // Font for watermark text
-                var font = new Font("Arial", 48);
+                // Define font
+                Font font = new Font("Arial", 48);
 
-                // Draw watermark text at position (10,10)
-                graphics.DrawString("Watermark", font, brush, new PointF(10, 10));
+                // Draw watermark text
+                graphics.DrawString("Watermark", font, brush, new Point(50, 50));
 
                 // Save as PNG
-                dngImage.Save(outputPath, new PngOptions());
+                dng.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -52,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer wants to embed a semi‑transparent copyright notice into raw DNG files before publishing them as PNGs for web galleries.
- * 2. When an e‑commerce platform needs to protect product photos captured in DNG format by adding a translucent watermark and converting them to PNG for faster page loads.
- * 3. When a mobile app developer processes user‑uploaded raw images, applies a branding overlay, and saves the result as a PNG for sharing on social media.
- * 4. When a digital archivist converts high‑resolution DNG scans to PNG while embedding a faint watermark to indicate the source repository.
- * 5. When a print‑on‑demand service adds a low‑opacity text label to raw camera files and outputs PNGs for preview generation in a C# ASP.NET application.
+ * 1. When a photographer wants to protect raw DNG files by adding a semi‑transparent watermark before publishing them as PNGs on a website.
+ * 2. When an e‑commerce platform needs to overlay copyright text on high‑resolution raw images (DNG) and deliver them as lightweight PNG thumbnails.
+ * 3. When a mobile app backend processes user‑uploaded raw photos, adds branding with a translucent text layer, and stores the result in PNG format for faster loading.
+ * 4. When a digital asset management system must batch‑process DNG files to embed a 50% transparent watermark and convert them to PNG for archival and preview purposes.
+ * 5. When a developer integrates Aspose.Imaging in a C# workflow to ensure raw camera images are watermarked and saved as PNGs for compliance with licensing requirements.
  */

@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
@@ -20,28 +19,28 @@ class Program
 
             foreach (string inputPath in webpFiles)
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build output path with same filename but .tif extension
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".tif";
-                string outputPath = Path.Combine(outputDir, outputFileName);
+                // Build the output file path with .tiff extension
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".tiff");
 
-                // Ensure output directory exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load WebP image and save as TIFF
-                using (WebPImage webPImage = new WebPImage(inputPath))
+                // Load the WebP image and save as TIFF
+                using (Image image = Image.Load(inputPath))
                 {
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    webPImage.Save(outputPath, tiffOptions);
+                    var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    image.Save(outputPath, tiffOptions);
                 }
 
-                // Preserve timestamps from the original file
+                // Preserve original timestamps
                 DateTime creationTime = File.GetCreationTime(inputPath);
                 DateTime lastWriteTime = File.GetLastWriteTime(inputPath);
                 DateTime lastAccessTime = File.GetLastAccessTime(inputPath);
@@ -60,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy web gallery that stores images as WebP into a TIFF‑based archival system while keeping original filenames and file timestamps intact.
- * 2. When an automated build pipeline must batch‑convert user‑uploaded WebP screenshots to lossless TIFF files for downstream PDF generation or printing workflows.
- * 3. When a medical imaging application requires converting a folder of WebP scans to TIFF to comply with DICOM‑compatible tools, preserving creation and modification dates for audit trails.
- * 4. When a cloud‑based image processing service needs to normalize incoming WebP assets to TIFF before applying further analysis, ensuring the output files retain the source timestamps for synchronization.
- * 5. When a Windows desktop utility is built to cleanly archive project assets by converting all WebP assets in a directory to TIFF while maintaining the original file names and file system timestamps for version control.
+ * 1. When a developer needs to migrate a collection of WebP product photos to high‑resolution TIFF files for archival storage while keeping the original filenames and file timestamps intact.
+ * 2. When an imaging pipeline must convert user‑uploaded WebP screenshots into TIFF format for compatibility with legacy printing software that only accepts TIFF, preserving metadata such as creation and modification dates.
+ * 3. When a digital asset management system requires batch processing of WebP assets into TIFF to support lossless editing in Photoshop, and the process must retain the original file timestamps for audit trails.
+ * 4. When a medical imaging application has to transform WebP scans into TIFF for integration with DICOM viewers, ensuring that each file’s name and timestamps remain unchanged for regulatory compliance.
+ * 5. When a cloud‑based backup service needs to synchronize a folder of WebP images to a TIFF‑only repository, using C# to automate the conversion while preserving the original file timestamps for version control.
  */

@@ -1,19 +1,19 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.tif";
+        string outputPath = @"c:\temp\output.tif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.tif";
-            string outputPath = "output.tif";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,17 +27,17 @@ class Program
             // Load the multipage TIFF image
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Process pages one at a time to save memory
+                // Set page exporting action to process each page individually
+                // This releases page resources after each page is saved, reducing memory usage
                 tiffImage.PageExportingAction = delegate (int index, Image page)
                 {
-                    // Example per‑page operation (rotate each page 90°)
+                    // Example operation on each page (rotate 90 degrees)
                     ((RasterImage)page).Rotate(90);
-
-                    // Force garbage collection to release resources of the processed page
+                    // Force garbage collection to free memory from previous pages
                     GC.Collect();
                 };
 
-                // Save the processed image
+                // Save the image using default sequential export mode
                 tiffImage.Save(outputPath);
             }
         }
@@ -50,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to rotate each page of a large multi‑page TIFF document on a server with limited RAM, they can use sequential export to process pages one at a time and avoid out‑of‑memory errors.
- * 2. When an automated document‑archiving system must apply per‑page transformations (e.g., watermarks or orientation fixes) to high‑resolution TIFF scans without loading the entire file into memory, this code provides a memory‑efficient solution.
- * 3. When a desktop application processes gigabyte‑size medical imaging TIFF stacks and must ensure the UI remains responsive, processing pages sequentially with Aspose.Imaging reduces the memory footprint.
- * 4. When a cloud‑based microservice receives multi‑page TIFF uploads and needs to re‑encode them while preserving page order, using the PageExportingAction in sequential mode allows safe, low‑memory conversion.
- * 5. When a batch job converts legacy multi‑page TIFF invoices to a standardized format and must run on a CI/CD agent with strict memory limits, this approach processes each page individually to stay within resource constraints.
+ * 1. When a developer needs to rotate every page of a large multipage TIFF (e.g., scanned contracts) on a server with limited RAM, they can use this code to process pages sequentially and keep memory usage low.
+ * 2. When an automated document‑archiving workflow must convert incoming multi‑page TIFF files to a new orientation before storing them in a cloud repository, the sequential export mode prevents out‑of‑memory errors.
+ * 3. When a desktop application that previews high‑resolution medical scans must apply a 90‑degree rotation to each frame of a multi‑page TIFF without loading the entire image into memory, this approach is ideal.
+ * 4. When a batch‑processing script has to apply the same image operation (such as rotation) to thousands of TIFF pages in a print‑preparation pipeline, processing one page at a time reduces the application's footprint.
+ * 5. When a web service receives user‑uploaded multi‑page TIFFs and needs to re‑save them after a transformation while ensuring the service stays responsive on modest hardware, the page‑by‑page export strategy provides the necessary memory efficiency.
  */

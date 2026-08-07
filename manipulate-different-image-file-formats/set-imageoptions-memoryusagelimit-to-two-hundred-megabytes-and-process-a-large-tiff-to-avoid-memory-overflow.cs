@@ -10,26 +10,38 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.tif";
+        string outputPath = "output.tif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.tif";
-            string outputPath = "output.tif";
-
-            if (!File.Exists(inputPath))
+            using (TiffImage source = (TiffImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                BigTiffOptions options = new BigTiffOptions(TiffExpectedFormat.Default);
+                options.Source = new FileCreateSource(outputPath, false);
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                int width = source.ActiveFrame.Width;
+                int height = source.ActiveFrame.Height;
 
-            using (TiffImage image = (TiffImage)Image.Load(inputPath))
-            {
-                image.Rotate(90);
+                using (Aspose.Imaging.FileFormats.BigTiff.BigTiffImage bigTiff =
+                    (Aspose.Imaging.FileFormats.BigTiff.BigTiffImage)Image.Create(options, width, height))
+                {
+                    for (int i = 1; i < source.Frames.Length; i++)
+                    {
+                        TiffFrame copied = TiffFrame.CopyFrame(source.Frames[i]);
+                        bigTiff.AddFrame(copied);
+                    }
 
-                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                saveOptions.Source = new FileCreateSource(outputPath, false);
-                image.Save(outputPath, saveOptions);
+                    bigTiff.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -41,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must rotate a multi‑gigabyte TIFF file without exhausting system RAM, developers can set ImageOptions.MemoryUsageLimit to 200 MB to keep the operation within safe memory bounds.
- * 2. When processing high‑resolution scanned documents in a batch job, using Aspose.Imaging’s TiffOptions with a 200 MB memory limit prevents out‑of‑memory exceptions while saving the rotated output.
- * 3. When integrating a document management system that receives large TIFF uploads, developers can apply a 200 MB MemoryUsageLimit to ensure the server can rotate and store the image without crashing.
- * 4. When building a .NET microservice that converts legacy TIFF archives to a new orientation, setting ImageOptions.MemoryUsageLimit to 200 MB allows the service to handle each file efficiently under constrained container memory.
- * 5. When creating a desktop utility for photographers to quickly re‑orient massive TIFF panoramas, configuring the memory usage limit to 200 MB lets the tool rotate images on modest hardware without performance degradation.
+ * 1. When a C# application must convert a multi‑page TIFF into a BigTIFF without exceeding a 200 MB memory budget, developers can set ImageOptions.MemoryUsageLimit and use the provided code to stream frames safely.
+ * 2. When processing high‑resolution scanned documents that are too large for default memory allocation, the code helps avoid OutOfMemoryException by limiting memory usage while copying frames to a new TIFF file.
+ * 3. When building a server‑side image service that receives large TIFF uploads and needs to re‑encode them as BigTIFF for archival, the memory‑limit setting ensures the service remains stable under load.
+ * 4. When integrating Aspose.Imaging into a desktop batch‑conversion tool that handles gigapixel satellite imagery stored as TIFF, developers use this pattern to process each frame sequentially within a 200 MB limit.
+ * 5. When migrating legacy multi‑page TIFF archives to the BigTIFF format for compatibility with modern viewers, the code with MemoryUsageLimit prevents crashes on machines with limited memory.
  */

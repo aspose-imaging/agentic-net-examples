@@ -7,13 +7,13 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output file paths
-        string inputPath = "input.eps";
-        string outputPath = "output.png";
-
         try
         {
-            // Verify that the EPS source file exists
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\source.eps";
+            string outputPath = @"C:\Images\ResizedResult.png";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,23 +24,22 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EPS image
-            using (var image = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Calculate double size based on original dimensions
+                // Calculate double size
                 int newWidth = image.Width * 2;
                 int newHeight = image.Height * 2;
 
-                // Resize using a high‑quality resampling method
-                image.Resize(newWidth, newHeight, ResizeType.HighQualityResample);
+                // Resize using a high‑quality interpolation method
+                image.Resize(newWidth, newHeight, ResizeType.Mitchell);
 
-                // Save as a high‑resolution PNG
+                // Save as high‑resolution PNG
                 var pngOptions = new PngOptions();
                 image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -48,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a vector EPS logo to a high‑resolution PNG for use on a retina display, they can double its size and export it with Aspose.Imaging.
- * 2. When preparing print‑ready artwork that must be scaled up from an EPS source before being embedded in a PDF, this code resizes the image and saves it as a lossless PNG.
- * 3. When a web application must generate zoomable product thumbnails from EPS files, the code doubles the dimensions and outputs a high‑quality PNG for smooth scaling.
- * 4. When migrating legacy EPS assets to a modern asset pipeline that only accepts PNG, developers can use this snippet to upscale and preserve detail during conversion.
- * 5. When an e‑learning platform requires high‑resolution PNG screenshots of EPS diagrams for offline viewing, the code resizes the vector and saves it with Aspose.Imaging’s high‑quality resampling.
+ * 1. When a developer needs to double the size of a vector EPS logo for printing and export it as a high‑resolution PNG for web use.
+ * 2. When an application must convert legacy EPS artwork into a larger PNG thumbnail while preserving quality using Aspose.Imaging in C#.
+ * 3. When a batch process has to upscale EPS diagrams for inclusion in a PowerPoint presentation and save them as PNG files.
+ * 4. When a graphics pipeline requires resizing EPS schematics to double dimensions before embedding them in a PDF report as PNG images.
+ * 5. When a .NET service must validate the existence of an EPS file, enlarge it, and deliver a high‑resolution PNG to a client‑side viewer.
  */

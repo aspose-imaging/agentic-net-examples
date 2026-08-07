@@ -1,34 +1,47 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "input.djvu";
+            // Hardcoded input and output paths
+            string inputPath = "sample.djvu";
+            string outputFolder = "output";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            using (Stream stream = File.OpenRead(inputPath))
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputFolder);
+
+            // Configure BMP options with 32 bits per pixel
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 32;
+
+            // Load the DjVu document from a file stream
+            using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                foreach (DjvuPage page in djvuImage.Pages)
+                // Iterate through each page and save as BMP
+                foreach (var pageObj in djvuImage.Pages)
                 {
-                    string outputPath = Path.Combine("output", $"page_{page.PageNumber}.bmp");
+                    DjvuPage page = (DjvuPage)pageObj;
+                    string outputPath = Path.Combine(outputFolder, $"page_{page.PageNumber}.bmp");
+
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    BmpOptions bmpOptions = new BmpOptions();
-                    bmpOptions.BitsPerPixel = 32;
-
+                    // Save the page using the specified BMP options
                     page.Save(outputPath, bmpOptions);
                 }
             }
@@ -42,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each page of a multi‑page DjVu document and save them as high‑color‑depth 32‑bit BMP files for archival or printing purposes.
- * 2. When an application must convert scanned DjVu files into BMP images to feed legacy Windows graphics tools that only accept BMP input.
- * 3. When a batch‑processing service has to read DjVu files from a stream, apply custom BmpOptions with 32 bits per pixel, and generate separate BMP files for each page for downstream OCR processing.
- * 4. When a digital library system wants to provide thumbnail previews of DjVu pages by converting them to BMP format with full color fidelity using Aspose.Imaging for .NET.
- * 5. When a developer is implementing a file‑format migration tool that reads DjVu documents, iterates through all pages, and saves them as BMP images with a specified BitsPerPixel setting to ensure consistent image quality across platforms.
+ * 1. When a developer needs to extract each page of a multi‑page DjVu document and save them as high‑color‑depth BMP files for archival or printing purposes.
+ * 2. When an application must batch‑convert scanned DjVu files into 32‑bit BMP images to preserve transparency and color fidelity before further image analysis.
+ * 3. When a .NET service processes user‑uploaded DjVu files and generates separate BMP thumbnails with 32 bits per pixel for display in a web gallery.
+ * 4. When a legacy system only accepts BMP images, requiring a C# routine that reads DjVu pages and outputs them using Aspose.Imaging’s BmpOptions with a 32‑bpp setting.
+ * 5. When a developer wants to automate the migration of DjVu‑based documentation into BMP format while ensuring each page is saved in a dedicated output folder for downstream processing.
  */

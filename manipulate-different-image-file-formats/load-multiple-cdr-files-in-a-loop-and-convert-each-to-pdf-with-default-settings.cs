@@ -3,6 +3,7 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
@@ -10,46 +11,67 @@ class Program
     {
         try
         {
-            // Hardcoded list of CDR files to convert
-            string[] inputFiles = new string[]
+            // Hardcoded input and output directories
+            string inputDir = @"C:\InputCdr";
+            string outputDir = @"C:\OutputPdf";
+
+            // List of CDR files to process
+            string[] cdrFiles = new string[]
             {
-                @"C:\Input\sample1.cdr",
-                @"C:\Input\sample2.cdr",
-                @"C:\Input\sample3.cdr"
+                "file1.cdr",
+                "file2.cdr",
+                "file3.cdr"
             };
 
-            foreach (string inputPath in inputFiles)
+            foreach (var fileName in cdrFiles)
             {
+                string inputPath = Path.Combine(inputDir, fileName);
+
                 // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Determine output PDF path (same folder, same name with .pdf extension)
-                string outputPath = Path.ChangeExtension(inputPath, ".pdf");
+                // Base output PDF path (one PDF per page if multi‑page)
+                string baseOutputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".pdf");
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(baseOutputPath));
 
                 // Load the CDR image
                 using (CdrImage image = (CdrImage)Image.Load(inputPath))
                 {
-                    // Use the first page of the CDR document
-                    CdrImagePage page = (CdrImagePage)image.Pages[0];
+                    // Iterate through all pages
+                    for (int i = 0; i < image.Pages.Length; i++)
+                    {
+                        var page = (CdrImagePage)image.Pages[i];
 
-                    // Set up PDF options with default rasterization settings
-                    PdfOptions pdfOptions = new PdfOptions();
-                    CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions();
-                    pdfOptions.VectorRasterizationOptions = rasterOptions;
+                        // Configure PDF options with rasterization settings matching the page size
+                        PdfOptions pdfOptions = new PdfOptions();
+                        CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions()
+                        {
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None,
+                            PageWidth = page.Width,
+                            PageHeight = page.Height
+                        };
+                        pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                    // Match PDF page size to the source page size
-                    pdfOptions.VectorRasterizationOptions.PageWidth = page.Width;
-                    pdfOptions.VectorRasterizationOptions.PageHeight = page.Height;
+                        // Determine output path for the current page
+                        string pageOutputPath = baseOutputPath;
+                        if (image.Pages.Length > 1)
+                        {
+                            string dir = Path.GetDirectoryName(baseOutputPath);
+                            string nameWithoutExt = Path.GetFileNameWithoutExtension(baseOutputPath);
+                            pageOutputPath = Path.Combine(dir, $"{nameWithoutExt}_page{i}.pdf");
+                            Directory.CreateDirectory(Path.GetDirectoryName(pageOutputPath));
+                        }
 
-                    // Save the page as PDF
-                    page.Save(outputPath, pdfOptions);
+                        // Save the page as PDF
+                        page.Save(pageOutputPath, pdfOptions);
+                    }
                 }
             }
         }
@@ -62,9 +84,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design studio needs to batch‑convert multiple CorelDRAW (.cdr) artwork files to PDF for client review, they can use this C# loop with Aspose.Imaging to generate PDFs with the original page dimensions.
- * 2. When an automated build pipeline must create printable PDFs from a set of CDR assets before publishing them to a documentation portal, the code loads each CDR, rasterizes the first page, and saves a PDF using default settings.
- * 3. When a Windows service processes incoming CDR files from a shared folder and needs to archive them as PDF for long‑term storage, the example shows how to verify file existence, create output directories, and perform the conversion in .NET.
- * 4. When a migration script moves legacy CorelDRAW graphics to a PDF‑based workflow, developers can loop through an array of CDR paths, apply Aspose.Imaging rasterization options, and output PDFs that preserve the original page size.
- * 5. When a QA automation test validates that exported PDFs match the dimensions of source CDR pages, the snippet demonstrates loading each CDR, extracting the first page, and saving it as a PDF with matching width and height using C# and Aspose.Imaging.
+ * 1. When a design studio needs to batch‑convert a collection of CorelDRAW (.cdr) artwork files into searchable PDF portfolios for client review.
+ * 2. When an automated build pipeline must generate PDF documentation from multiple CDR source files to include in a software release package.
+ * 3. When a legal department requires converting multi‑page CDR drawings into separate PDF pages for archiving and e‑discovery compliance.
+ * 4. When a cloud‑based conversion service processes user‑uploaded CDR files in a loop and outputs PDFs to a shared output folder for downstream processing.
+ * 5. When a desktop utility needs to scan a directory of CDR graphics, verify each file’s existence, and produce PDF versions with default rasterization settings for printing.
  */

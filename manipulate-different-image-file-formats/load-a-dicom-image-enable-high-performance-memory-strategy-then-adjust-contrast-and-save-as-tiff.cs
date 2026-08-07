@@ -10,40 +10,31 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.dcm";
+        string outputPath = "output.tif";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.dcm";
-            string outputPath = "output.tif";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (Stream stream = File.OpenRead(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                LoadOptions loadOptions = new LoadOptions();
+                loadOptions.BufferSizeHint = 1024 * 1024; // 1 MB buffer for high‑performance memory usage
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
+                {
+                    dicomImage.AdjustContrast(50f); // Adjust contrast
 
-            // Configure high‑performance memory strategy
-            LoadOptions loadOptions = new LoadOptions
-            {
-                BufferSizeHint = 256 * 1024 // 256 KB buffer size
-            };
-
-            // Load DICOM image using a file stream and the load options
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DicomImage dicomImage = new DicomImage(stream, loadOptions))
-            {
-                // Adjust contrast (value range: -100 to 100)
-                dicomImage.AdjustContrast(50f);
-
-                // Prepare TIFF save options
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-
-                // Save the adjusted image as TIFF
-                dicomImage.Save(outputPath, tiffOptions);
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    dicomImage.Save(outputPath, tiffOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -55,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application must convert DICOM scans to TIFF files for long‑term storage while boosting contrast and using a high‑performance memory strategy in C#.
- * 2. When a radiology workflow needs to batch‑process large DICOM images, apply a contrast boost, and export them as TIFFs for compatibility with legacy analysis tools.
- * 3. When a healthcare IT system integrates Aspose.Imaging to read DICOM files from a file stream, enhance visibility of details, and save the result as a TIFF for reporting purposes.
- * 4. When a developer builds a diagnostic viewer that loads high‑resolution DICOM images with optimized buffering, adjusts contrast on the fly, and outputs TIFFs for sharing with clinicians.
- * 5. When a PACS migration script must efficiently read DICOM files, improve image contrast, and generate TIFF copies for archival archives using .NET and Aspose.Imaging.
+ * 1. When a radiology software needs to convert DICOM scans to TIFF for archival while preserving image quality and adjusting contrast, this code can be used.
+ * 2. When a healthcare IT system must process large DICOM files on limited‑memory servers and export them as TIFF for integration with PACS, the high‑performance buffer strategy helps.
+ * 3. When a research application requires batch conversion of DICOM images to TIFF with standardized contrast enhancement for analysis in MATLAB, this snippet provides the needed steps.
+ * 4. When a medical imaging web service needs to load a DICOM image, apply a contrast boost, and return a TIFF file to browsers without loading the entire image into memory, the code demonstrates the approach.
+ * 5. When a diagnostic device developer wants to implement C# code that reads DICOM, tweaks contrast for better visibility, and saves the result as a TIFF file for downstream reporting, this example is applicable.
  */

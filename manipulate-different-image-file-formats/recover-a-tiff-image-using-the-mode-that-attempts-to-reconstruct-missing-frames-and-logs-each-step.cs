@@ -7,13 +7,13 @@ using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\corrupted.tif";
-        string outputPath = @"C:\Images\recovered.tif";
+        string inputPath = @"C:\temp\corrupted.tif";
+        string outputPath = @"C:\temp\recovered.tif";
 
-        // Input file existence check
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,50 +25,30 @@ class Program
 
         try
         {
-            // Load the TIFF image
-            using (TiffImage sourceImage = (TiffImage)Image.Load(inputPath))
+            Console.WriteLine("Loading TIFF with recovery mode...");
+
+            // Configure load options to attempt reconstruction of missing frames
+            var loadOptions = new LoadOptions
             {
-                Console.WriteLine($"Loaded TIFF image. Frame count: {sourceImage.Frames.Length}");
+                DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
+                DataBackgroundColor = Color.White
+            };
 
-                // Prepare a list to hold recovered frames
-                var recoveredFrames = new System.Collections.Generic.List<TiffFrame>();
+            // Load the image with the specified recovery options
+            using (Image image = Image.Load(inputPath, loadOptions))
+            {
+                // Log basic image information
+                var tiffImage = image as TiffImage;
+                int frameCount = tiffImage != null ? tiffImage.Frames.Length : 0;
+                Console.WriteLine($"Image loaded. Width: {image.Width}, Height: {image.Height}, Frames: {frameCount}");
 
-                // Iterate through existing frames
-                for (int i = 0; i < sourceImage.Frames.Length; i++)
-                {
-                    TiffFrame frame = sourceImage.Frames[i];
-                    if (frame == null)
-                    {
-                        // Reconstruct missing frame with a blank placeholder
-                        Console.WriteLine($"Frame {i} is missing. Reconstructing placeholder.");
+                // Prepare TIFF save options
+                var saveOptions = new TiffOptions(TiffExpectedFormat.Default);
 
-                        var placeholderOptions = new TiffOptions(TiffExpectedFormat.Default)
-                        {
-                            BitsPerSample = new ushort[] { 8, 8, 8 },
-                            Photometric = TiffPhotometrics.Rgb,
-                            Compression = TiffCompressions.None,
-                            PlanarConfiguration = TiffPlanarConfigs.Contiguous
-                        };
-
-                        // Use source image dimensions for placeholder size
-                        TiffFrame placeholder = new TiffFrame(placeholderOptions, sourceImage.Width, sourceImage.Height);
-                        recoveredFrames.Add(placeholder);
-                    }
-                    else
-                    {
-                        // Preserve existing frame
-                        Console.WriteLine($"Preserving frame {i}.");
-                        recoveredFrames.Add(frame);
-                    }
-                }
-
-                // Create a new TIFF image from the recovered frames
-                using (TiffImage recoveredImage = new TiffImage(recoveredFrames.ToArray()))
-                {
-                    // Save the recovered image
-                    recoveredImage.Save(outputPath);
-                    Console.WriteLine($"Recovered TIFF saved to: {outputPath}");
-                }
+                Console.WriteLine("Saving recovered TIFF...");
+                // Save the recovered image
+                image.Save(outputPath, saveOptions);
+                Console.WriteLine("Save completed.");
             }
         }
         catch (Exception ex)
@@ -80,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a digital archivist needs to restore a multi‑page TIFF scanned from old paper records that became corrupted during transfer, this code can load the file, detect missing pages, create placeholder frames, and save a recovered TIFF while logging each step.
- * 2. When a medical imaging system receives a DICOM‑exported TIFF series with missing slices due to network interruptions, a developer can use this routine to reconstruct the absent slices with blank placeholders and keep a detailed console log for audit.
- * 3. When a satellite‑image processing pipeline encounters a multi‑band TIFF where some bands are lost because of storage failures, the code can rebuild the missing frames, preserve the image dimensions, and output a usable TIFF for further analysis.
- * 4. When a publishing workflow must repair a multi‑page TIFF brochure that lost pages after being compressed with an incompatible tool, the snippet can automatically detect the gaps, insert placeholder pages, and generate a complete TIFF for the print shop.
- * 5. When a forensic analyst needs to examine a corrupted TIFF evidence file and must maintain a step‑by‑step record of the recovery process, this example provides C# image loading, frame reconstruction, and console logging to ensure traceability.
+ * 1. When a medical imaging system receives a corrupted multi‑page TIFF scan and needs to reconstruct missing frames using Aspose.Imaging’s DataRecoveryMode.
+ * 2. When a document management application must automatically repair scanned TIFF files with broken IFD entries before archiving them with C#.
+ * 3. When a satellite‑image processing pipeline encounters partially downloaded TIFF tiles and wants to recover them with a white background for further analysis.
+ * 4. When a digital archiving service needs to validate and restore old TIFF photographs that have lost frames due to media degradation, using the ConsistentRecover mode in Aspose.Imaging for .NET.
+ * 5. When a print‑shop workflow script has to load a corrupted multi‑frame TIFF, log its dimensions and frame count, and save a clean version for downstream printing equipment.
  */

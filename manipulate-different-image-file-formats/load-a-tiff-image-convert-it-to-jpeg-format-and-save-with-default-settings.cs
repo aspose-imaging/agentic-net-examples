@@ -39,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert scanned TIFF documents to JPEG for faster web preview, they can use this code to load each .tif file and save it as a .jpg with default compression.
- * 2. When integrating a legacy medical imaging system that outputs TIFF files, a C# application can employ this snippet to transform the images into JPEG format for display in modern browsers.
- * 3. When an automated report generator creates high‑resolution TIFF charts, the code can be used to convert those charts to JPEG to reduce file size before emailing the report.
- * 4. When a digital asset management tool receives user‑uploaded TIFF photos, the developer can apply this routine to store a JPEG thumbnail version for quick browsing.
- * 5. When migrating a file archive from a Windows server, this example lets a developer read each TIFF file and save it as JPEG to ensure compatibility with mobile devices.
+ * 1. When a developer needs to batch‑convert scanned TIFF documents to JPEG for web preview using C# and Aspose.Imaging.
+ * 2. When an application must reduce storage costs by loading a high‑resolution TIFF image and saving it as a JPEG with default compression via Image.Load and JpegOptions.
+ * 3. When a legacy system outputs TIFF files and a modern .NET service has to deliver them as JPEG to browsers, requiring file existence checks and directory creation.
+ * 4. When a photo‑management tool imports TIFF photos and stores them as JPEG for mobile compatibility, leveraging Aspose.Imaging's Image.Save method.
+ * 5. When an automated workflow validates the presence of a TIFF file, ensures the output folder exists, and converts the image to JPEG using C# and Aspose.Imaging default settings.
  */

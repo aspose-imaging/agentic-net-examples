@@ -8,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input DjVu file and output directory
+        string inputPath = @"C:\temp\sample.djvu";
+        string outputDir = @"C:\temp\output";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.djvu";
-            string outputDirectory = @"C:\temp\output";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,32 +21,33 @@ class Program
                 return;
             }
 
-            // Open the DjVu file stream
-            using (FileStream stream = File.OpenRead(inputPath))
+            // Open the DjVu file as a stream and load it
+            using (Stream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Load the DjVu document
-                using (DjvuImage djvuImage = new DjvuImage(stream))
+                // Iterate through all pages
+                foreach (DjvuPage djvuPage in djvuImage.Pages)
                 {
-                    // Iterate through pages and process pages 10 to 15 inclusive
-                    foreach (DjvuPage djvuPage in djvuImage.Pages)
-                    {
-                        if (djvuPage.PageNumber >= 10 && djvuPage.PageNumber <= 15)
-                        {
-                            // Build output file path
-                            string outputPath = Path.Combine(outputDirectory, $"page_{djvuPage.PageNumber}.png");
+                    int pageNumber = djvuPage.PageNumber;
 
-                            // Ensure the output directory exists
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Process only pages 10 through 15
+                    if (pageNumber < 10 || pageNumber > 15)
+                        continue;
 
-                            // Save the page as PNG
-                            djvuPage.Save(outputPath, new PngOptions());
-                        }
-                    }
+                    // Build output file path
+                    string outputPath = Path.Combine(outputDir, $"page_{pageNumber}.png");
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the page as PNG
+                    djvuPage.Save(outputPath, new PngOptions());
                 }
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -54,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract pages 10‑15 from a multi‑page DjVu file and generate PNG thumbnails for an online document viewer, they can use this code.
- * 2. When a legal firm wants to convert specific pages of scanned case files stored as DjVu into high‑resolution PNGs for inclusion in a PDF report, this snippet provides the needed C# solution.
- * 3. When an e‑learning platform must batch‑process selected chapters of DjVu textbooks into PNG images for mobile app consumption, the code demonstrates how to load the DjVu document and save the chosen page range.
- * 4. When a digital archiving system requires automated conversion of a DjVu archive’s pages 10‑15 into PNG format for OCR preprocessing, the example shows the necessary Aspose.Imaging operations.
- * 5. When a developer is building a Windows service that monitors a folder for new DjVu uploads and needs to convert a defined page interval to PNG files for downstream image analysis, this code illustrates the required steps.
+ * 1. When a developer needs to extract and convert specific pages (10‑15) from a multi‑page DjVu document into high‑quality PNG images for web preview or thumbnail generation.
+ * 2. When an application must programmatically batch‑process scanned books stored as DjVu files, converting only a subset of pages to PNG for inclusion in an e‑learning platform.
+ * 3. When a digital archiving system requires converting selected DjVu pages to PNG to preserve visual fidelity while enabling compatibility with standard image viewers.
+ * 4. When a document management workflow automates the creation of printable PNG assets from particular DjVu pages for legal or publishing purposes.
+ * 5. When a C# service needs to validate the existence of a DjVu file, load it via Aspose.Imaging, and save pages 10‑15 as PNG files for downstream image analysis or OCR processing.
  */

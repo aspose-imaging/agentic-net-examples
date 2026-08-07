@@ -2,67 +2,53 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded paths
+        string inputTiffPath = "input.tif";
+        string additionalImagePath = "frame.png";
+        string outputPath = "output.tif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputTiffPath = "input.tif";
-            string inputPngPath = "frame.png";
-            string outputPath = "output.tif";
-
-            // Validate input TIFF file existence
+            // Validate input TIFF file
             if (!File.Exists(inputTiffPath))
             {
                 Console.Error.WriteLine($"File not found: {inputTiffPath}");
                 return;
             }
 
-            // Validate input PNG file existence
-            if (!File.Exists(inputPngPath))
+            // Validate additional image file
+            if (!File.Exists(additionalImagePath))
             {
-                Console.Error.WriteLine($"File not found: {inputPngPath}");
+                Console.Error.WriteLine($"File not found: {additionalImagePath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
             // Load the existing TIFF image from a stream
-            using (FileStream tiffFileStream = new FileStream(inputTiffPath, FileMode.Open, FileAccess.Read))
-            using (MemoryStream tiffMemoryStream = new MemoryStream())
+            using (FileStream tiffStream = new FileStream(inputTiffPath, FileMode.Open, FileAccess.Read))
+            using (TiffImage tiffImage = (TiffImage)Image.Load(tiffStream))
             {
-                tiffFileStream.CopyTo(tiffMemoryStream);
-                tiffMemoryStream.Position = 0;
-
-                using (TiffImage tiffImage = (TiffImage)Image.Load(tiffMemoryStream))
+                // Load the additional image (e.g., PNG) from a stream
+                using (FileStream imgStream = new FileStream(additionalImagePath, FileMode.Open, FileAccess.Read))
+                using (RasterImage rasterImage = (RasterImage)Image.Load(imgStream))
                 {
-                    // Load the additional PNG image from a stream
-                    using (FileStream pngFileStream = new FileStream(inputPngPath, FileMode.Open, FileAccess.Read))
-                    using (MemoryStream pngMemoryStream = new MemoryStream())
-                    {
-                        pngFileStream.CopyTo(pngMemoryStream);
-                        pngMemoryStream.Position = 0;
+                    // Create a TiffFrame from the raster image
+                    TiffFrame newFrame = new TiffFrame(rasterImage);
 
-                        using (RasterImage pngImage = (RasterImage)Image.Load(pngMemoryStream))
-                        {
-                            // Create a new TIFF frame from the PNG raster image
-                            TiffFrame newFrame = new TiffFrame(pngImage);
-
-                            // Add the new frame to the TIFF image
-                            tiffImage.AddFrame(newFrame);
-                        }
-                    }
-
-                    // Save the updated TIFF image to the output path
-                    tiffImage.Save(outputPath);
+                    // Add the new frame to the TIFF image
+                    tiffImage.AddFrame(newFrame);
                 }
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                // Save the modified TIFF image
+                tiffImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -74,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system needs to append a diagnostic PNG overlay as a new page to an existing multi‑page TIFF scan stored in a database stream.
- * 2. When a document management workflow must merge a scanned PDF page saved as TIFF with a company logo PNG before archiving the combined multi‑frame TIFF.
- * 3. When a GIS application wants to add a satellite image PNG as an additional layer to a multi‑page TIFF map that is being processed from a network stream.
- * 4. When an e‑commerce platform generates a product catalog TIFF and needs to insert a promotional banner PNG as an extra frame without writing intermediate files to disk.
- * 5. When a digital archiving tool reads a TIFF file from a memory stream and programmatically appends a thumbnail PNG to create a searchable multi‑frame TIFF for long‑term storage.
+ * 1. When a developer needs to merge a scanned TIFF document with a PNG logo to create a multi‑page TIFF archive for long‑term storage.
+ * 2. When an application must programmatically append a dynamically generated PNG chart to an existing TIFF image without creating temporary files.
+ * 3. When a batch‑processing service reads TIFF files from a network stream and adds watermark PNG frames before saving the final TIFF.
+ * 4. When a document management system receives TIFF attachments via a web API and needs to attach a signature PNG as an additional frame using C# and Aspose.Imaging.
+ * 5. When a photo‑editing tool loads a multi‑page TIFF from a memory stream and inserts a thumbnail PNG as a new frame to produce a composite TIFF for printing.
  */

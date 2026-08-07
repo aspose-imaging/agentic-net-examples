@@ -3,18 +3,17 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.tif";
-        string outputDirectory = @"C:\temp\output";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.tif";
+            string outputDirectory = @"C:\temp\output";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,20 +21,23 @@ class Program
                 return;
             }
 
-            // Load the multi‑page TIFF image
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            // Load the multi‑page TIFF
+            using (Image image = Image.Load(inputPath))
             {
-                // Iterate through each frame (page) of the TIFF
-                for (int i = 0; i < tiffImage.Frames.Length; i++)
+                // Cast to TiffImage to access frames
+                TiffImage tiffImage = (TiffImage)image;
+                TiffFrame[] frames = tiffImage.Frames;
+
+                for (int i = 0; i < frames.Length; i++)
                 {
-                    // Build output file path using page number (1‑based)
+                    // Build output file path with page number
                     string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.webp");
 
                     // Ensure the output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the current frame as a WebP image
-                    tiffImage.Frames[i].Save(outputPath, new WebPOptions());
+                    // Save the current frame as WebP
+                    frames[i].Save(outputPath, new WebPOptions());
                 }
             }
         }
@@ -48,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each frame of a multi‑page TIFF scan and save them as lightweight WebP images for faster web page loading.
- * 2. When an application must convert scanned document pages stored in TIFF format into individual, page‑numbered WebP files for use in a mobile app’s image gallery.
- * 3. When a batch‑processing service has to generate WebP thumbnails from each page of a multi‑page TIFF to display in a PDF preview component.
- * 4. When a cloud‑based image pipeline requires converting every frame of a TIFF into separate WebP files to reduce storage costs while preserving the original page order.
- * 5. When a legacy system stores medical imaging reports as multi‑page TIFFs and needs to output each page as a WebP image for modern web‑based viewers.
+ * 1. When a developer needs to extract each page of a multi‑page TIFF scan and generate lightweight WebP files for faster web delivery, they can use this code to save each frame as “page_1.webp”, “page_2.webp”, etc.
+ * 2. When building a document‑management system that stores scanned PDFs as TIFF and must provide thumbnail previews in a modern browser‑compatible format, this snippet converts each TIFF page to a WebP thumbnail with sequential naming.
+ * 3. When creating an automated batch job that archives medical imaging records stored in multi‑page TIFF and wants to reduce storage costs by converting each page to lossless WebP while preserving page order, the code performs the conversion and naming automatically.
+ * 4. When developing a digital publishing workflow that receives multi‑page TIFF artwork and needs to supply individual WebP assets for responsive design layouts, this example extracts frames and saves them with page numbers for easy reference.
+ * 5. When integrating Aspose.Imaging into a C# application that processes scanned invoices saved as multi‑page TIFF and must send each page as a separate WebP image to a third‑party API, the program handles loading, frame iteration, and numbered output files.
  */

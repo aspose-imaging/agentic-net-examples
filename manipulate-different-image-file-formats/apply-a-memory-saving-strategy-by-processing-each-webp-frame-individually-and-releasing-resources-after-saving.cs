@@ -11,11 +11,9 @@ class Program
     {
         try
         {
-            // Hardcoded input WebP file path
+            // Hardcoded input and output paths
             string inputPath = "input.webp";
-
-            // Directory where individual frames will be saved
-            string outputDirectory = "frames";
+            string outputDirectory = "output";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -24,27 +22,31 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(outputDirectory);
 
-            // Load the animated WebP image
-            using (WebPImage webp = new WebPImage(inputPath))
+            // Load the WebP image
+            using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                int frameCount = webp.PageCount;
-
-                // Process each frame separately
-                for (int i = 0; i < frameCount; i++)
+                // Cast to multipage interface to get page count
+                var multipage = webPImage as IMultipageImage;
+                if (multipage == null || multipage.PageCount == 0)
                 {
-                    // Extract the current frame as a raster image
-                    using (RasterImage frame = (RasterImage)webp.Pages[i])
+                    Console.Error.WriteLine("No frames found in the WebP image.");
+                    return;
+                }
+
+                // Process each frame individually
+                for (int i = 0; i < multipage.PageCount; i++)
+                {
+                    string outputPath = Path.Combine(outputDirectory, $"frame_{i}.png");
+
+                    // Ensure the directory for this frame exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Extract the frame as a RasterImage and save it
+                    using (RasterImage frame = (RasterImage)webPImage.Pages[i])
                     {
-                        // Build output path for the current frame
-                        string outputPath = Path.Combine(outputDirectory, $"frame_{i}.png");
-
-                        // Ensure the directory for this frame exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the frame as a PNG image
                         frame.Save(outputPath, new PngOptions());
                     }
                 }
@@ -59,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an application needs to extract each frame from an animated WebP file and save them as separate PNG images while minimizing memory usage.
- * 2. When a server‑side image processing service must convert animated WebP advertisements into individual PNG frames for further analysis without loading the entire animation into memory.
- * 3. When a desktop utility has to generate thumbnail previews for each frame of a WebP animation and must release resources after each save to avoid out‑of‑memory errors.
- * 4. When a batch‑processing script processes large collections of animated WebP assets and needs to store each frame as a lossless PNG for archival or editing purposes.
- * 5. When a game development pipeline requires converting animated WebP sprites into separate PNG frames for sprite sheet creation while ensuring each frame is disposed promptly.
+ * 1. When an application must extract every frame from an animated WebP file and save them as PNG thumbnails while keeping memory usage low, this code can be used.
+ * 2. When a server‑side C# service needs to convert a large multi‑frame WebP animation into individual PNG images for downstream processing without loading the entire animation into memory, the example applies.
+ * 3. When a developer is building a content‑management system that must generate PNG previews of each frame of user‑uploaded animated WebP graphics while ensuring resources are released after each save, this pattern is appropriate.
+ * 4. When a batch‑processing tool has to split an animated WebP into separate PNG assets for use in mobile apps that only support static PNGs, processing frames one by one prevents out‑of‑memory errors.
+ * 5. When an image‑analysis pipeline requires reading each frame of a WebP animation, performing per‑frame analysis, and then discarding the frame to keep the .NET process lightweight, this code demonstrates the required workflow.
  */

@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
@@ -11,7 +13,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Images\sample.bmp";
-            string outputPath = @"C:\Images\sample_converted.webp";
+            string outputPath = @"C:\Images\Converted\sample.webp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,7 +26,7 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load BMP image
-            using (Image image = Image.Load(inputPath))
+            using (BmpImage bmpImage = new BmpImage(inputPath))
             {
                 // Save as WebP with quality 80 (lossy)
                 var webpOptions = new WebPOptions
@@ -32,20 +34,24 @@ class Program
                     Lossless = false,
                     Quality = 80f
                 };
-                image.Save(outputPath, webpOptions);
+                bmpImage.Save(outputPath, webpOptions);
             }
 
-            // Compare file sizes
-            long originalSize = new FileInfo(inputPath).Length;
-            long webpSize = new FileInfo(outputPath).Length;
+            // Verify file size reduction
+            long inputSize = new FileInfo(inputPath).Length;
+            long outputSize = new FileInfo(outputPath).Length;
 
-            Console.WriteLine($"Original BMP size: {originalSize} bytes");
-            Console.WriteLine($"Converted WebP size: {webpSize} bytes");
+            Console.WriteLine($"Input BMP size:  {inputSize} bytes");
+            Console.WriteLine($"Output WebP size: {outputSize} bytes");
 
-            if (webpSize < originalSize)
-                Console.WriteLine("File size reduced after conversion.");
+            if (outputSize < inputSize)
+            {
+                Console.WriteLine("File size reduction verified.");
+            }
             else
-                Console.WriteLine("File size not reduced after conversion.");
+            {
+                Console.WriteLine("No size reduction detected.");
+            }
         }
         catch (Exception ex)
         {
@@ -56,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce storage costs by converting legacy BMP assets to smaller WebP files with controlled quality in a .NET application.
- * 2. When an e‑commerce platform must generate web‑optimized product images from high‑resolution BMP scans to improve page load speed while verifying that the conversion actually shrinks the file size.
- * 3. When a Windows desktop utility automates batch processing of scanned documents, converting each BMP to lossy WebP at 80 % quality and logging the size savings for audit purposes.
- * 4. When a game developer wants to replace uncompressed BMP textures with compressed WebP equivalents in a C# pipeline and ensure the new assets are lighter than the originals.
- * 5. When a content management system integrates Aspose.Imaging to migrate legacy BMP graphics to modern WebP format, using C# code to confirm that the conversion yields a smaller file before publishing.
+ * 1. When a developer needs to reduce the storage footprint of legacy BMP assets by converting them to lossy WebP with a quality setting of 80 using C# and Aspose.Imaging.
+ * 2. When an e‑commerce platform must generate web‑optimized product images from high‑resolution BMP files to improve page load speed while preserving acceptable visual quality.
+ * 3. When a desktop application automates batch processing of scanned BMP documents and wants to verify that each conversion to WebP actually shrinks the file size before uploading.
+ * 4. When a game developer wants to replace uncompressed BMP textures with smaller WebP equivalents in a .NET pipeline to meet mobile device memory constraints.
+ * 5. When a content management system needs to validate that a newly uploaded BMP image can be safely stored as a WebP file with 80 % quality without increasing the file size.
  */

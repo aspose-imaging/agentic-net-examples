@@ -1,41 +1,40 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input and output file paths
         string inputPath = "input.eps";
         string outputPath = "output.pdf";
 
-        // Input file existence check
+        // Verify that the input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
+        // Ensure the output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
         try
         {
-            // Load EPS image
+            // Load the EPS image
             using (EpsImage image = (EpsImage)Image.Load(inputPath))
             {
-                // Calculate new height to preserve aspect ratio for width = 2000
-                int newWidth = 2000;
-                int newHeight = (int)Math.Round((double)image.Height * newWidth / image.Width);
+                // Calculate new height to preserve aspect ratio
+                int newHeight = (int)Math.Round((double)image.Height * 2000 / image.Width);
 
-                // Resize the image
-                image.Resize(newWidth, newHeight);
+                // Resize the image to the required width (2000 px) and computed height
+                image.Resize(2000, newHeight, ResizeType.LanczosResample);
 
-                // Prepare PDF options with PDF/A-1b compliance
+                // Prepare PDF export options with PDF/A-1b compliance
                 var pdfOptions = new PdfOptions
                 {
                     PdfCoreOptions = new PdfCoreOptions
@@ -44,7 +43,7 @@ class Program
                     }
                 };
 
-                // Save as PDF
+                // Save the resized image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -57,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must convert a vector EPS logo to a PDF/A‑1b compliant file for archival purposes while scaling it to a fixed width of 2000 pixels to fit a print layout.
- * 2. When a C# application needs to resize an EPS‑based engineering diagram to a standard web‑ready width and export it as a PDF that meets PDF/A‑1b compliance for regulatory submission.
- * 3. When an automated workflow processes incoming EPS artwork, resizes it to 2000 px wide to maintain consistent branding, and saves it as a PDF/A‑1b document for distribution to clients.
- * 4. When a document management system imports EPS files, adjusts their dimensions for screen viewing, and stores them as PDF/A‑1b files to ensure long‑term accessibility and legal validity.
- * 5. When a batch‑processing tool prepares EPS marketing assets for digital publishing by resizing them to 2000 pixels in width and converting them to PDF/A‑1b compliant PDFs for cross‑platform compatibility.
+ * 1. When a developer needs to convert a vector EPS artwork into a PDF/A‑1b compliant document for archival while ensuring the output fits a 2000‑pixel width for consistent printing.
+ * 2. When an automated publishing pipeline must resize high‑resolution EPS logos to a standard width before embedding them in PDF reports that must meet PDF/A‑1b compliance for legal submission.
+ * 3. When a web service processes user‑uploaded EPS files, scales them to a fixed 2000‑pixel width to reduce file size, and returns a PDF/A‑1b file suitable for long‑term storage.
+ * 4. When a desktop application generates printable PDFs from EPS diagrams, preserving aspect ratio and applying Lanczos resampling to maintain image quality while complying with PDF/A‑1b standards.
+ * 5. When a batch job iterates over a collection of EPS files, resizes each to a uniform 2000‑pixel width and saves them as PDF/A‑1b PDFs for inclusion in a searchable digital archive.
  */

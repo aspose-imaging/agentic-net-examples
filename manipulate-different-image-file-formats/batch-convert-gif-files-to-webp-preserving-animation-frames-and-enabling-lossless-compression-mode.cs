@@ -7,17 +7,17 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputFolder = @"C:\Images\GifInput";
-        string outputFolder = @"C:\Images\WebpOutput";
-
         try
         {
-            // Ensure the output directory exists (creates if missing)
-            Directory.CreateDirectory(outputFolder);
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\InputGifs";
+            string outputDirectory = @"C:\OutputWebp";
 
-            // Process each GIF file in the input folder
-            foreach (string inputPath in Directory.GetFiles(inputFolder, "*.gif"))
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Process each GIF file in the input directory
+            foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.gif"))
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -26,24 +26,24 @@ class Program
                     continue;
                 }
 
-                // Build the corresponding output path with .webp extension
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".webp";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
+                // Build the output WebP file path
+                string outputPath = Path.Combine(outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".webp");
 
-                // Ensure the directory for the output file exists
+                // Ensure the output directory exists (unconditional as required)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the GIF (including animation frames)
+                // Load the GIF image (preserves animation frames)
                 using (Image image = Image.Load(inputPath))
                 {
                     // Configure WebP options for lossless compression
                     var webpOptions = new WebPOptions
                     {
                         Lossless = true,
-                        Quality = 100 // maximum quality for lossless
+                        Quality = 100 // Quality is ignored for lossless but set for completeness
                     };
 
-                    // Save as animated WebP preserving frames
+                    // Save as animated WebP
                     image.Save(outputPath, webpOptions);
                 }
 
@@ -59,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a batch of animated GIFs to lossless WebP for faster web delivery while preserving all animation frames.
- * 2. When a developer wants to automate the migration of legacy GIF assets in a content management system to modern WebP format using C# and Aspose.Imaging to reduce bandwidth usage.
- * 3. When a developer is building a desktop tool that processes user‑uploaded GIFs and saves them as high‑quality lossless WebP files for archival purposes.
- * 4. When a developer must generate WebP versions of GIF advertisements for an ad‑network, ensuring the animation sequence remains intact and the compression is lossless.
- * 5. When a developer needs to integrate a scheduled job that scans a folder of GIF animations and outputs corresponding WebP files with maximum quality for use in mobile apps.
+ * 1. When a developer needs to reduce page load times by converting a folder of animated GIF advertisements into lossless WebP files for faster web delivery.
+ * 2. When an e‑commerce platform wants to preserve product animation frames while migrating legacy GIF assets to WebP to improve SEO image performance.
+ * 3. When a mobile app team automates the batch conversion of user‑generated GIF stickers into lossless WebP to save storage space without losing animation quality.
+ * 4. When a digital marketing agency prepares a large collection of animated GIF banners for email campaigns and requires lossless WebP conversion using C# and Aspose.Imaging.
+ * 5. When a game developer needs to convert animated GIF UI elements into lossless WebP sprites in bulk to maintain visual fidelity while optimizing asset size.
  */

@@ -6,11 +6,11 @@ using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input.djvu";
-        string outputFolder = "output";
+        string inputPath = "Input/sample.djvu";
+        string outputPath = "Output/pages_3_7.gif";
 
         // Input file existence check
         if (!File.Exists(inputPath))
@@ -20,35 +20,30 @@ class Program
         }
 
         // Ensure output directory exists
-        Directory.CreateDirectory(outputFolder);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Enable memory optimization via LoadOptions (e.g., 1 MB buffer)
-            LoadOptions loadOptions = new LoadOptions
-            {
-                BufferSizeHint = 1 * 1024 * 1024 // 1 MB
-            };
-
-            // Open the DjVu file stream
+            // Open the DjVu file with memory optimization
             using (FileStream stream = File.OpenRead(inputPath))
-            // Load DjVu image with memory optimization
-            using (DjvuImage djvuImage = new DjvuImage(stream, loadOptions))
             {
-                // Iterate through pages and convert pages 3‑7 to GIF
-                foreach (DjvuPage page in djvuImage.Pages)
+                LoadOptions loadOptions = new LoadOptions();
+                loadOptions.BufferSizeHint = 1 * 1024 * 1024; // 1 MB buffer
+
+                using (DjvuImage djvuImage = new DjvuImage(stream, loadOptions))
                 {
-                    int pageNumber = page.PageNumber;
-                    if (pageNumber >= 3 && pageNumber <= 7)
+                    // Define page range 3‑7 (inclusive)
+                    int[] pages = new int[] { 3, 4, 5, 6, 7 };
+                    DjvuMultiPageOptions multiPageOptions = new DjvuMultiPageOptions(pages);
+
+                    // Set GIF save options with the specified page range
+                    GifOptions gifOptions = new GifOptions
                     {
-                        string outputPath = Path.Combine(outputFolder, $"page{pageNumber}.gif");
+                        MultiPageOptions = multiPageOptions
+                    };
 
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the page as GIF
-                        page.Save(outputPath, new GifOptions());
-                    }
+                    // Save the selected pages as a GIF
+                    djvuImage.Save(outputPath, gifOptions);
                 }
             }
         }
@@ -61,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract a subset of pages (e.g., pages 3‑7) from a large DjVu document and save them as lightweight GIF images while keeping memory usage low.
- * 2. When an application processes scanned books in DjVu format and must generate static GIF previews for specific chapters without loading the entire file into memory.
- * 3. When a web service converts selected DjVu pages to GIF for thumbnail generation, using C# LoadOptions to limit buffer size and avoid out‑of‑memory errors.
- * 4. When a digital archiving tool needs to batch‑export a range of DjVu pages to GIF for compatibility with legacy systems, employing Aspose.Imaging’s memory‑optimized loading.
- * 5. When a desktop utility extracts pages 3‑7 from a multi‑page DjVu file and saves them as GIF files for easy sharing, while ensuring the process runs efficiently on low‑RAM machines.
+ * 1. When a developer needs to extract pages 3‑7 from a multi‑page DjVu document and save them as an animated GIF for quick web preview.
+ * 2. When an application must load a large DjVu file with memory‑optimized buffering before converting a specific page range to a lightweight GIF format.
+ * 3. When an automated workflow generates GIF thumbnails of selected DjVu pages (e.g., 3‑7) to embed in email newsletters or reports.
+ * 4. When a document management system provides end‑users with a fast GIF preview of a subset of pages from a scanned DjVu archive without loading the entire file into memory.
+ * 5. When a C# service programmatically reads a DjVu file, selects pages 3‑7, and saves them as a single GIF to ensure compatibility with browsers that do not support DjVu.
  */

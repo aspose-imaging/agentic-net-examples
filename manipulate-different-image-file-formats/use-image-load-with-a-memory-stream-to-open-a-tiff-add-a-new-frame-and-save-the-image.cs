@@ -9,36 +9,31 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tif";
+        string inputPath = "C:\\temp\\input.tif";
+        string outputPath = "C:\\temp\\output.tif";
+
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        string outputPath = "output.tif";
-        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Load the TIFF image from a memory stream
-            byte[] fileBytes = File.ReadAllBytes(inputPath);
-            using (MemoryStream inputStream = new MemoryStream(fileBytes))
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputStream))
+            byte[] data = File.ReadAllBytes(inputPath);
+            using (MemoryStream ms = new MemoryStream(data))
             {
-                // Create a new blank frame with the same dimensions as the original image
-                int width = tiffImage.Width;
-                int height = tiffImage.Height;
-                TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-                TiffFrame newFrame = new TiffFrame(frameOptions, width, height);
-
-                // Add the new frame to the TIFF image
-                tiffImage.AddFrame(newFrame);
-
-                // Save the modified TIFF image
-                tiffImage.Save(outputPath);
+                using (TiffImage tiffImage = (TiffImage)Image.Load(ms))
+                {
+                    var frameOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    using (TiffFrame newFrame = new TiffFrame(frameOptions, tiffImage.Width, tiffImage.Height))
+                    {
+                        tiffImage.AddFrame(newFrame);
+                        tiffImage.Save(outputPath);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -50,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically add a blank page to an existing multi‑page TIFF document (e.g., for scanned contracts) using C# and Aspose.Imaging’s Image.Load from a MemoryStream.
- * 2. When an application must manipulate TIFF files received as byte arrays from a web service, insert an additional frame, and then store the updated file on disk.
- * 3. When a batch‑processing tool has to open large TIFF images in memory to avoid file locks, append a new image layer, and save the result without altering the original dimensions.
- * 4. When a medical imaging system requires adding a placeholder frame to a DICOM‑converted TIFF series before further annotation, using Aspose.Imaging’s TiffFrame and TiffOptions classes.
- * 5. When a document‑management workflow needs to combine existing TIFF pages with a newly generated blank page for signatures, loading the source via a MemoryStream and saving the combined TIFF with C#.
+ * 1. When a developer needs to read a multi‑page TIFF from a byte array, add an extra blank frame, and save the updated image to disk using Aspose.Imaging for .NET.
+ * 2. When an application receives a scanned document as a memory stream, must append a cover page as a new TIFF frame, and then write the combined file as a .tif.
+ * 3. When a service processes uploaded TIFF images entirely in memory to avoid temporary files, adds an additional frame, and persists the result with Image.Save.
+ * 4. When a batch job loads existing TIFF files stored as blobs in a database, inserts a metadata frame for OCR information, and writes the modified TIFF back to the file system.
+ * 5. When a cloud function reads a TIFF from an HTTP request body, appends an extra page for a signature, and returns the updated image as a downloadable .tif file.
  */

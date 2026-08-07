@@ -13,7 +13,7 @@ class Program
             string inputFolder = @"C:\InputEmf";
             string outputFolder = @"C:\OutputPdf";
 
-            // Ensure the output directory exists
+            // Ensure the output directory exists (rule for each output path will also call this)
             Directory.CreateDirectory(outputFolder);
 
             // Get all EMF files in the input folder
@@ -21,7 +21,7 @@ class Program
 
             foreach (string inputPath in emfFiles)
             {
-                // Verify the input file exists
+                // Verify the input file exists (rule)
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -32,14 +32,14 @@ class Program
                 string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
                 string outputPath = Path.Combine(outputFolder, outputFileName);
 
-                // Ensure the directory for the output file exists
+                // Ensure the output directory exists (rule)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EMF image and save it as PDF
+                // Load the EMF image
                 using (Image image = Image.Load(inputPath))
                 {
-                    PdfOptions pdfOptions = new PdfOptions();
-                    image.Save(outputPath, pdfOptions);
+                    // Save as PDF using PdfOptions
+                    image.Save(outputPath, new PdfOptions());
                 }
             }
         }
@@ -52,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy collection of Windows Metafile (EMF) graphics to PDF for easier distribution and printing, they can use this batch conversion code.
- * 2. When an automated build pipeline must generate PDF documentation from EMF diagrams stored in a source folder, the script can process all files in one step.
- * 3. When a web application must serve vector images as PDF downloads to clients without requiring client‑side rendering of EMF files, this code can pre‑convert the assets.
- * 4. When a company archives engineering schematics originally saved as EMF and wants to store them in a searchable PDF repository, the batch converter handles the bulk transformation.
- * 5. When a desktop utility needs to validate that every EMF file in a directory can be opened and saved as a PDF for quality‑assurance testing, the example provides a simple C# loop to perform the check.
+ * 1. When a developer needs to batch convert a folder of Windows Metafile (EMF) diagrams created by a reporting engine into separate PDF documents for easy sharing and archival using C# and Aspose.Imaging.
+ * 2. When a software solution must automatically transform vector‑based EMF assets from a design repository into PDF files for inclusion in client‑facing PDFs or print‑ready packages.
+ * 3. When an application has to process incoming EMF files from a scanner or export routine and generate individual PDF files for compliance reporting without manual intervention.
+ * 4. When a migration tool must convert legacy EMF icons stored on a server into PDF format to integrate with a modern web portal that only supports PDF rendering.
+ * 5. When a background service needs to monitor a directory, load each EMF image, and save it as a PDF using Aspose.Imaging’s PdfOptions to support document management workflows.
  */
