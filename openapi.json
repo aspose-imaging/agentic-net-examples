@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Aspose.Imaging Examples Generator API",
-    "version": "26.7.0",
+    "version": "26.8.0",
     "description": "REST API for the Aspose.Imaging agentic .NET examples generator. Submit tasks, run categories, poll job status and retrieve results. All 2,929 generated examples are compiler-validated C# code for Aspose.Imaging for .NET.",
     "contact": {
       "name": "Aspose.Imaging Agent",
