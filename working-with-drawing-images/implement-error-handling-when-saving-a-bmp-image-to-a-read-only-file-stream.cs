@@ -9,32 +9,35 @@ class Program
 {
     static void Main()
     {
-        // Wrap the whole logic to catch unexpected errors
+        // Hardcoded input and output paths
+        string inputPath = "input.bmp";
+        string outputPath = "readonly_output.bmp";
+
+        // Global exception handling
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\temp\sample.bmp";
-            string outputPath = @"C:\temp\readonly\output.bmp";
-
-            // Verify the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if missing)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare BMP save options (default options are sufficient for this demo)
+                // Prepare BMP save options (default)
                 BmpOptions saveOptions = new BmpOptions();
 
-                // Open a read‑only file stream to simulate a write‑protected destination
-                // The stream is opened with FileAccess.Read, so any write attempt will fail
-                using (FileStream readOnlyStream = new FileStream(outputPath, FileMode.Create, FileAccess.Read, FileShare.Read))
+                // Open the output file as a read‑only stream
+                using (FileStream readOnlyStream = new FileStream(
+                    outputPath,
+                    FileMode.OpenOrCreate,
+                    FileAccess.Read,
+                    FileShare.Read))
                 {
                     try
                     {
@@ -42,27 +45,23 @@ class Program
                         image.Save(readOnlyStream, saveOptions);
                         Console.WriteLine("Image saved successfully (unexpected).");
                     }
-                    catch (ImageSaveException ex)
+                    catch (BmpImageException bmpEx)
                     {
-                        // Handle generic image saving failures
-                        Console.Error.WriteLine($"ImageSaveException caught: {ex.Message}");
+                        Console.Error.WriteLine($"BMP image error: {bmpEx.Message}");
                     }
-                    catch (BmpImageException ex)
+                    catch (ImageSaveException saveEx)
                     {
-                        // Handle BMP‑specific saving failures
-                        Console.Error.WriteLine($"BmpImageException caught: {ex.Message}");
+                        Console.Error.WriteLine($"Image save error: {saveEx.Message}");
                     }
                     catch (Exception ex)
                     {
-                        // Fallback for any other exceptions during save
-                        Console.Error.WriteLine($"Unexpected exception during save: {ex.Message}");
+                        Console.Error.WriteLine($"General error while saving: {ex.Message}");
                     }
                 }
             }
         }
         catch (Exception ex)
         {
-            // Global error handling
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -70,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an application converts user‑uploaded BMP files and must verify that the target folder is not write‑protected before saving, this code catches the permission error.
- * 2. When a scheduled batch job processes images on a network share that may be set to read‑only, the error handling prevents the job from crashing and logs the failure.
- * 3. When a desktop utility needs to enforce security policies by attempting to write to a read‑only stream and gracefully reporting the inability to save the BMP image.
- * 4. When developers debug an image‑processing pipeline that writes BMP files to a temporary location that could be locked by another process, the try‑catch block reveals the exact ImageSaveException.
- * 5. When a cloud‑based service stores BMP outputs in a container with immutable storage settings, this pattern ensures the application detects and handles the write‑access violation.
+ * 1. When an application generates BMP thumbnails and attempts to write them to a network share that is configured as read‑only, the code can catch the save exception and log a meaningful error.
+ * 2. When a Windows service processes scanned documents and tries to overwrite a protected BMP file, the error handling prevents the service from crashing and allows fallback to an alternate folder.
+ * 3. When a desktop utility updates image metadata but the target BMP file is opened by another program in read‑only mode, the try‑catch block reports the ImageSaveException to the user.
+ * 4. When a batch conversion tool runs on a server with limited write permissions and encounters a read‑only stream for BMP output, the code captures BmpImageException to inform administrators.
+ * 5. When a cloud‑based image processing pipeline stores BMP results in a read‑only blob storage container, the exception handling ensures graceful degradation and retries with a writable stream.
  */

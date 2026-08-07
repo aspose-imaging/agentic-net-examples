@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -11,31 +11,59 @@ class Program
     {
         try
         {
-            string outputDir = "Thumbnails";
-            Directory.CreateDirectory(outputDir);
-
-            for (int i = 0; i < 100; i++)
+            string[] inputPaths = new string[]
             {
-                string outputPath = Path.Combine(outputDir, $"thumb_{i}.bmp");
+                @"C:\Images\input1.png",
+                @"C:\Images\input2.jpg",
+                @"C:\Images\input3.tif"
+            };
+
+            string[] outputPaths = new string[]
+            {
+                @"C:\Thumbnails\thumb1.bmp",
+                @"C:\Thumbnails\thumb2.bmp",
+                @"C:\Thumbnails\thumb3.bmp"
+            };
+
+            for (int i = 0; i < inputPaths.Length; i++)
+            {
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    continue;
+                }
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                Source source = new FileCreateSource(outputPath, false);
-                BmpOptions options = new BmpOptions() { Source = source };
+                // Create BMP canvas bound to output file
+                BmpOptions bmpOptions = new BmpOptions();
+                Source fileSource = new FileCreateSource(outputPath, false);
+                bmpOptions.Source = fileSource;
 
-                using (Image canvas = Image.Create(options, 100, 100))
+                using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, 100, 100))
                 {
-                    Graphics graphics = new Graphics(canvas);
+                    // Load and resize source image
+                    using (RasterImage srcImage = (RasterImage)Image.Load(inputPath))
+                    {
+                        srcImage.Resize(100, 100, ResizeType.NearestNeighbourResample);
+                        // Draw resized image onto canvas
+                        canvas.SaveArgb32Pixels(new Rectangle(0, 0, 100, 100), srcImage.LoadArgb32Pixels(srcImage.Bounds));
+                    }
 
+                    // Draw centered blue circle
+                    Graphics graphics = new Graphics(canvas);
                     int radius = 40;
                     int centerX = 50;
                     int centerY = 50;
-                    Rectangle bounds = new Rectangle(centerX - radius, centerY - radius, radius * 2, radius * 2);
+                    int left = centerX - radius;
+                    int top = centerY - radius;
+                    int diameter = radius * 2;
+                    graphics.DrawEllipse(new Pen(Color.Blue, 2), new Rectangle(left, top, diameter, diameter));
 
-                    using (SolidBrush blueBrush = new SolidBrush(Color.Blue))
-                    {
-                        graphics.FillEllipse(blueBrush, bounds);
-                    }
-
+                    // Save the bound image
                     canvas.Save();
                 }
             }
@@ -49,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically generate a batch of 100 × 100 BMP thumbnail icons with a centered blue circle for a Windows desktop application's toolbar.
- * 2. When an automated test suite must create placeholder BMP images of a fixed size to verify that image‑processing pipelines correctly handle 100 × 100 pixel graphics.
- * 3. When a content‑management system requires pre‑rendered BMP thumbnails with a simple blue circle logo to display before the actual user‑uploaded pictures are processed.
- * 4. When a game developer wants to produce a set of 100 × 100 BMP sprites containing a blue circular marker for use as minimap icons or UI elements.
- * 5. When a reporting tool needs to embed uniform 100 × 100 BMP thumbnails with a blue circle into PDF or Excel documents to illustrate data points without relying on external image assets.
+ * 1. When a developer needs to create low‑resolution BMP preview icons for a mixed set of PNG, JPEG and TIFF files to display in a Windows file‑explorer style grid, they can use this code to batch generate 100 × 100 thumbnails with a consistent blue circle overlay.
+ * 2. When an e‑learning platform wants to embed uniform 100 × 100 BMP thumbnails with a branding element (the centered blue circle) alongside course images of various formats, this snippet automates the resizing and overlay process in C#.
+ * 3. When a legacy desktop application only accepts BMP images for its thumbnail pane, developers can employ this routine to convert incoming PNG, JPG or TIF assets into 100 × 100 BMP thumbnails while adding a visual cue (blue circle) for quick identification.
+ * 4. When a content‑management system needs to pre‑process uploaded media into small BMP preview files for fast loading on low‑bandwidth devices, the code provides a batch workflow that resizes, saves as BMP, and draws a centered blue circle using Aspose.Imaging.
+ * 5. When a QA team requires a reproducible set of 100 × 100 BMP test images with a known graphic element (the blue circle) to validate image‑processing pipelines, this C# example generates the thumbnails from diverse source formats in an automated way.
  */

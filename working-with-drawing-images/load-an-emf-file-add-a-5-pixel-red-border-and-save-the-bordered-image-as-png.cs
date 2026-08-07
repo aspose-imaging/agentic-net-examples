@@ -3,47 +3,49 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.emf";
+        string outputPath = @"C:\Images\output.png";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.emf";
-            string outputPath = "output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the EMF image
-            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Set the background color to red (will fill the added border area)
-                emfImage.BackgroundColor = Color.Red;
+                // Cast to MetaImage to access canvas operations
+                var metaImage = (MetaImage)image;
 
-                // Define a 5‑pixel border
+                // Set the background color that will fill the added border area
+                metaImage.BackgroundColor = Color.Red;
+
+                // Define border thickness (5 pixels)
                 int border = 5;
 
-                // Expand the canvas to create the border
-                emfImage.ResizeCanvas(new Rectangle(
+                // Expand the canvas to create a uniform border around the original image
+                metaImage.ResizeCanvas(new Rectangle(
                     -border,                     // left offset
                     -border,                     // top offset
-                    emfImage.Width + 2 * border, // new width
-                    emfImage.Height + 2 * border // new height
+                    metaImage.Width + border * 2, // new width
+                    metaImage.Height + border * 2 // new height
                 ));
 
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 // Save the result as PNG
-                emfImage.Save(outputPath, new PngOptions());
+                metaImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -55,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a vector EMF logo into a PNG thumbnail with a consistent 5‑pixel red border for web display.
- * 2. When an application must add a colored frame to legacy EMF diagrams before embedding them in a PDF report.
- * 3. When a batch‑processing tool has to standardize the canvas size of EMF icons by expanding them with a red border and saving as PNG for UI assets.
- * 4. When a Windows service generates red‑bordered PNG previews of EMF drawings for a document management system.
- * 5. When a C# program automates the preparation of EMF charts for email newsletters by adding a red border and converting them to PNG format.
+ * 1. When a Windows desktop application needs to convert vector‑based EMF icons into PNG thumbnails with a consistent 5‑pixel red outline for UI branding.
+ * 2. When a reporting tool generates charts as EMF files and must add a red border before embedding them in PDFs or web pages as PNG images.
+ * 3. When a batch‑processing script has to prepare EMF logos for an e‑commerce site, adding a 5‑pixel red frame to meet visual guidelines and saving them as PNG for faster loading.
+ * 4. When a legacy CAD system exports drawings in EMF format and a developer wants to highlight the drawing edges with a red border before displaying the result in a WPF viewer as PNG.
+ * 5. When an automated email service attaches product diagrams originally stored as EMF, and the developer needs to add a red border for emphasis and convert them to PNG to ensure compatibility with all email clients.
  */

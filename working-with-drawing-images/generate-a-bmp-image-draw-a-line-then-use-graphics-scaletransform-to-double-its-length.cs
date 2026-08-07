@@ -2,33 +2,37 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = @"C:\temp\output.bmp";
-
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Output file path (hardcoded)
+            string outputPath = "output.bmp";
 
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Create BMP image with specified size
             BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            using (Image image = Image.Create(bmpOptions, 200, 200))
+            using (Image image = Image.Create(bmpOptions, 200, 100))
             {
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
 
-                Pen pen = new Pen(Color.Black, 2);
-                graphics.DrawLine(pen, new Point(10, 10), new Point(190, 10));
+                // Draw a black line
+                graphics.DrawLine(new Pen(Color.Black, 2), new Point(10, 50), new Point(100, 50));
 
-                graphics.ScaleTransform(2f, 1f);
-                graphics.DrawLine(pen, new Point(10, 30), new Point(190, 30));
+                // Apply horizontal scaling (double the length)
+                graphics.ScaleTransform(2.0f, 1.0f);
 
-                image.Save();
+                // Draw a red line after scaling (will appear twice as long)
+                graphics.DrawLine(new Pen(Color.Red, 2), new Point(10, 70), new Point(100, 70));
+
+                // Save the image to the output path
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -40,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP diagram with a double‑length line for a quick visual guide in a Windows desktop application, this code provides a simple way to draw and scale the line using Aspose.Imaging for .NET.
- * 2. When a C# backend must create a BMP image that illustrates measurement units with a stretched line for inclusion in a technical report, the code demonstrates how to apply Graphics.ScaleTransform to double the line’s length.
- * 3. When an automated email system requires a BMP banner where the second line is horizontally scaled to emphasize a header, this example shows how to draw and scale the line before saving the image.
- * 4. When building unit tests for graphics transformations in an Aspose.Imaging image‑processing pipeline, developers can use this code to produce a test BMP with a scaled line to verify the ScaleTransform behavior.
- * 5. When exporting a BMP sprite sheet and needing to preview how a line appears after horizontal scaling before integrating it into a game engine, this snippet creates the image and applies the scaling transformation.
+ * 1. When a developer needs to generate a BMP image with a baseline black line and a horizontally doubled red line to illustrate scaling effects in technical documentation.
+ * 2. When creating test assets for unit tests of image‑processing pipelines that require precise line positions and a known ScaleTransform applied in C#.
+ * 3. When producing a quick visual ruler where the second line is stretched to twice its original length to demonstrate measurement scaling on a bitmap.
+ * 4. When building placeholder graphics for UI mockups that show a reference line and a scaled overlay using Aspose.Imaging’s Graphics.ScaleTransform.
+ * 5. When preparing sample BMP files for a tutorial or API guide that explains how to draw lines and apply horizontal scaling with the Graphics class in .NET.
  */

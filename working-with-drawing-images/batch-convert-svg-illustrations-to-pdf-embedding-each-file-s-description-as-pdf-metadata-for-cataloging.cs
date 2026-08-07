@@ -8,65 +8,47 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string baseDir = Directory.GetCurrentDirectory();
-        string inputDirectory = Path.Combine(baseDir, "Input");
-        string outputDirectory = Path.Combine(baseDir, "Output");
-
-        // Ensure input directory exists
-        if (!Directory.Exists(inputDirectory))
-        {
-            Directory.CreateDirectory(inputDirectory);
-            Console.WriteLine($"Input directory created at: {inputDirectory}. Add SVG files and rerun.");
-            return;
-        }
-
-        // Ensure output directory exists
-        if (!Directory.Exists(outputDirectory))
-        {
-            Directory.CreateDirectory(outputDirectory);
-        }
-
-        // Get all SVG files in the input directory
-        string[] files = Directory.GetFiles(inputDirectory, "*.svg");
-
         try
         {
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
+
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
             foreach (string inputPath in files)
             {
-                // Validate input file existence
+                if (!Path.GetExtension(inputPath).Equals(".svg", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Derive output PDF path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-
-                // Ensure output directory for this file exists
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the SVG image
                 using (Image image = Image.Load(inputPath))
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    // Prepare PDF options with metadata
-                    using (PdfOptions pdfOptions = new PdfOptions())
-                    {
-                        pdfOptions.PdfDocumentInfo = new Aspose.Imaging.FileFormats.Pdf.PdfDocumentInfo
-                        {
-                            // Use the file name as the title/description
-                            Title = fileNameWithoutExt,
-                            Subject = $"Converted from {fileNameWithoutExt}.svg"
-                        };
-
-                        // Save as PDF
-                        image.Save(outputPath, pdfOptions);
-                    }
+                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                    pdfOptions.PdfDocumentInfo.Title = Path.GetFileNameWithoutExtension(inputPath);
+                    image.Save(outputPath, pdfOptions);
                 }
-
-                Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
             }
         }
         catch (Exception ex)
@@ -78,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design team needs to archive a library of vector icons as searchable PDF catalogs, a developer can use this code to batch convert SVG illustrations to PDF and store each icon’s description in the PDF metadata.
- * 2. When an e‑learning platform wants to generate printable course handouts from SVG diagrams while preserving metadata for indexing, this code enables automated conversion of multiple SVG files into PDF with embedded descriptions.
- * 3. When a marketing department must deliver client‑approved SVG artwork as PDF portfolios that include project notes, a developer can run this routine to convert and embed the notes as PDF metadata for easy retrieval.
- * 4. When a regulatory compliance system requires all SVG schematics to be stored as PDF records with descriptive metadata for audit trails, this code provides a batch conversion solution in C#.
- * 5. When a content management system needs to ingest SVG assets and create searchable PDF versions for SEO and AI indexing, the code can process the files in bulk and embed each file’s description into the PDF metadata.
+ * 1. When a design team needs to archive a library of SVG icons as searchable PDF catalogs, this C# batch converter creates PDFs with each file’s title stored in the PDF metadata.
+ * 2. When an e‑learning platform must transform SVG illustrations into printable PDF handouts while preserving descriptive titles for indexing, the code automates the conversion and metadata embedding.
+ * 3. When a marketing department wants to generate client‑ready PDF portfolios from SVG artwork and include the artwork name as the PDF document title for easy reference, this script processes the entire input folder in one run.
+ * 4. When a documentation system requires SVG diagrams to be bundled into PDF files with embedded titles for integration with document management software, the example provides a simple C# solution.
+ * 5. When a CI/CD pipeline needs to verify that all SVG assets are converted to PDF with proper metadata before release, the code can be invoked to batch‑process the assets and ensure each PDF carries the original file name as its title.
  */

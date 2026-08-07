@@ -1,64 +1,76 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.png";
+        string outputPath = @"C:\temp\output.png";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\temp\star_output.png";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Create a PNG image of size 500x500
-            var pngOptions = new PngOptions();
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
-                // Initialize graphics object
-                var graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                // Create graphics object for drawing
+                Graphics graphics = new Graphics(image);
 
-                // Define points for a 5‑pointed star
-                PointF[] starPoints = new PointF[]
+                // Create a GraphicsPath to hold the star figure
+                GraphicsPath starPath = new GraphicsPath();
+
+                // Define star points (5‑pointed star)
+                const int pointsCount = 10;
+                PointF[] starPoints = new PointF[pointsCount];
+                float centerX = image.Width / 2f;
+                float centerY = image.Height / 2f;
+                float outerRadius = Math.Min(image.Width, image.Height) * 0.4f;
+                float innerRadius = outerRadius * 0.5f;
+                double angleStep = Math.PI / 5; // 36 degrees
+
+                for (int i = 0; i < pointsCount; i++)
                 {
-                    new PointF(250f, 50f),
-                    new PointF(280f, 180f),
-                    new PointF(400f, 180f),
-                    new PointF(300f, 250f),
-                    new PointF(340f, 380f),
-                    new PointF(250f, 300f),
-                    new PointF(160f, 380f),
-                    new PointF(200f, 250f),
-                    new PointF(100f, 180f),
-                    new PointF(220f, 180f)
-                };
+                    double angle = i * angleStep - Math.PI / 2; // start at top
+                    float radius = (i % 2 == 0) ? outerRadius : innerRadius;
+                    starPoints[i] = new PointF(
+                        centerX + (float)(radius * Math.Cos(angle)),
+                        centerY + (float)(radius * Math.Sin(angle))
+                    );
+                }
 
-                // Create a closed figure containing the star polygon
-                var figure = new Figure { IsClosed = true };
-                figure.AddShape(new PolygonShape(starPoints));
+                // Build the figure with the star polygon
+                Figure starFigure = new Figure();
+                starFigure.IsClosed = true;
+                starFigure.AddShape(new PolygonShape(starPoints));
 
-                // Build a graphics path from the figure
-                var path = new GraphicsPath();
-                path.AddFigure(figure);
+                // Add the figure to the path
+                starPath.AddFigure(starFigure);
 
-                // Create a radial gradient brush based on the path
-                var brush = new PathGradientBrush(path)
-                {
-                    CenterColor = Color.Yellow,
-                    SurroundColors = new Color[] { Color.Red }
-                };
+                // Create a radial gradient brush based on the star path
+                PathGradientBrush gradientBrush = new PathGradientBrush(starPath);
+                gradientBrush.CenterColor = Color.Yellow;
+                gradientBrush.SurroundColors = new Color[] { Color.Red };
 
                 // Fill the star with the gradient brush
-                graphics.FillPath(brush, path);
+                graphics.FillPath(gradientBrush, starPath);
 
-                // Save the image
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Save the modified image
                 image.Save(outputPath);
             }
         }
@@ -71,9 +83,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a custom badge or logo for a mobile app, a developer can use this code to draw a star shape and fill it with a radial gradient to give a glossy, eye‑catching effect in a PNG file.
- * 2. When generating printable certificates or awards, the code can render a star emblem with a yellow‑to‑red gradient that scales to 500 × 500 pixels and can be saved as a high‑resolution PNG for inclusion in PDF documents.
- * 3. When building an online game’s achievement icons, a developer can programmatically produce star graphics with a radial gradient brush, ensuring consistent colors and vector‑based shapes across all platforms.
- * 4. When automating the creation of promotional email banners, the snippet can be used to add a star illustration with a smooth gradient background, then export the result as a PNG that loads quickly in webmail clients.
- * 5. When developing a data‑visualization dashboard that highlights top‑ranked items, the code can generate a star marker with a radial gradient to overlay on charts, using Aspose.Imaging’s GraphicsPath and PathGradientBrush for precise rendering.
+ * 1. When a developer needs to overlay a decorative 5‑pointed star with a smooth radial gradient onto a PNG logo for branding or watermarking purposes.
+ * 2. When an application must generate custom badge icons by drawing a star shape and applying a radial gradient brush to create a glossy, three‑dimensional effect in C# using Aspose.Imaging.
+ * 3. When a game UI requires dynamic generation of star‑shaped health or achievement symbols on the fly, and the code fills them with a radial gradient to simulate lighting.
+ * 4. When a reporting tool wants to highlight key data points on a chart by programmatically adding a star marker with a radial gradient fill to a PNG export.
+ * 5. When an e‑commerce platform needs to programmatically add a “featured‑product” star overlay with a radial gradient to product images before saving them as PNG files.
  */

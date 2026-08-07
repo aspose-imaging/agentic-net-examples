@@ -1,7 +1,10 @@
+// HOW-TO: Convert EPS to JPEG with Maximum Quality Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
@@ -19,23 +22,34 @@ class Program
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image
-            using (Image epsImage = Image.Load(inputPath))
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Save EPS as high-quality JPEG (temporary rasterization)
-                var jpegOptions = new JpegOptions
+                var rasterOptions = new EpsRasterizationOptions
                 {
-                    Quality = 100,
-                    // High-quality settings can be adjusted here
+                    PageWidth = epsImage.Width,
+                    PageHeight = epsImage.Height
                 };
-                epsImage.Save(outputPath, jpegOptions);
 
-                // Note: To apply a color inversion filter, one would typically load the
-                // rasterized image as a RasterImage, manipulate pixel data, and save again.
-                // The inversion logic is omitted for brevity.
+                using (var pngStream = new MemoryStream())
+                {
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions
+                    };
+                    epsImage.Save(pngStream, pngOptions);
+                    pngStream.Position = 0;
+
+                    using (RasterImage raster = (RasterImage)Image.Load(pngStream))
+                    {
+                        var jpegOptions = new JpegOptions
+                        {
+                            Quality = 100
+                        };
+                        raster.Save(outputPath, jpegOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -47,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop needs to generate preview thumbnails of client‑submitted EPS artwork with inverted colors for a “negative” proof, they can load the EPS, invert the palette, and save a high‑quality JPEG for quick web viewing.
- * 2. When a marketing automation system must convert vector EPS logos into dark‑mode ready images, it can rasterize the EPS, apply a color inversion filter, and output a 100‑quality JPEG for inclusion in email campaigns.
- * 3. When a scientific visualization tool requires a high‑resolution JPEG of a vector diagram with an opposite color scheme for contrast analysis, the code can load the EPS, invert the colors, and export the result at maximum JPEG quality.
- * 4. When an e‑learning platform wants to display EPS‑based diagrams as high‑definition JPEGs with inverted colors to improve readability on projector screens, developers can use this routine to process and store the images.
- * 5. When a mobile app needs to cache EPS icons as JPEG assets with a negative color effect to match a dark UI theme, the code can rasterize the EPS, perform color inversion, and save a high‑quality JPEG for fast loading.
+ * 1. When a developer needs to render a vector EPS logo as a high‑resolution JPEG for inclusion in a web page or email campaign.
+ * 2. When an automated workflow must convert EPS artwork to JPEG thumbnails while preserving maximum image quality for a digital asset management system.
+ * 3. When a C# application has to rasterize EPS files to JPEG for printing previews where the original EPS cannot be directly used.
+ * 4. When a batch process has to transform a collection of EPS design files into JPEGs for archival or backup in a format supported by most image viewers.
+ * 5. When a developer wants to programmatically generate JPEGs from EPS diagrams for use in reports or PowerPoint presentations without losing detail.
  */

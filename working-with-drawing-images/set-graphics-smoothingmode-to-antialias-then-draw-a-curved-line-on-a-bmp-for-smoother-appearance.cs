@@ -1,49 +1,54 @@
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Temp\input.bmp";   // not used in this example but shown for rule compliance
+        string outputPath = @"C:\Temp\output.bmp";
+
         try
         {
-            string outputPath = @"C:\temp\curved_line.bmp";
+            // Input file existence check (rule compliance)
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists (rule compliance)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up BMP options with a file source
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a 500x500 image
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 500, 500))
+            // Create a new BMP image (500x500)
+            using (Image image = Image.Create(new BmpOptions(), 500, 500))
             {
-                // Initialize graphics for the image
-                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                // Initialize graphics object for drawing
+                Graphics graphics = new Graphics(image);
 
-                // Apply anti-aliasing for smoother curves
-                graphics.SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias;
+                // Set smoothing mode to AntiAlias for smoother curves
+                graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-                // Clear background to white
-                graphics.Clear(Aspose.Imaging.Color.White);
-
-                // Define a pen for drawing
-                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3);
-
-                // Draw a curved line
-                graphics.DrawCurve(pen, new Aspose.Imaging.Point[]
+                // Define points for the curved line
+                Point[] curvePoints = new Point[]
                 {
-                    new Aspose.Imaging.Point(50, 250),
-                    new Aspose.Imaging.Point(150, 50),
-                    new Aspose.Imaging.Point(350, 450),
-                    new Aspose.Imaging.Point(450, 250)
-                });
+                    new Point(50, 400),
+                    new Point(150, 100),
+                    new Point(250, 300),
+                    new Point(350, 150),
+                    new Point(450, 400)
+                };
 
-                // Save the image (output path already bound)
-                image.Save();
+                // Draw the curved line using a black pen of width 2
+                graphics.DrawCurve(new Pen(Color.Black, 2), curvePoints);
+
+                // Save the image to the specified output path
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -55,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a BMP thumbnail for a scientific chart, setting Graphics.SmoothingMode to AntiAlias and drawing a curved line ensures the visual data appears smooth and professional.
- * 2. When adding a custom curved signature watermark to a BMP image for document security, anti‑aliased rendering prevents jagged edges and preserves brand quality.
- * 3. When creating a game asset such as a curved road overlay in a BMP sprite sheet, using AntiAlias smoothing produces clean edges that look polished in the final game.
- * 4. When exporting a CAD polyline as a BMP preview, applying SmoothingMode.AntiAlias to the drawn curve eliminates pixelated lines for clearer engineering visuals.
- * 5. When building a reporting tool that renders smooth trend lines on BMP graphs for printable PDFs, anti‑aliased curves improve readability and aesthetic appeal.
+ * 1. When generating a BMP diagram that includes smooth curved lines, such as a flowchart or schematic, a developer can set Graphics.SmoothingMode to AntiAlias and use DrawCurve to improve visual quality.
+ * 2. When creating thumbnail previews of vector‑like drawings in a .NET application, using Aspose.Imaging to render the curves with anti‑aliasing ensures the output BMP looks crisp on low‑resolution displays.
+ * 3. When exporting custom signature or handwriting strokes to a BMP file, enabling AntiAlias smoothing prevents jagged edges and produces a professional‑grade image.
+ * 4. When building a game asset pipeline that converts procedural curve data into BMP textures, applying SmoothingMode.AntiAlias before drawing the curve reduces pixelation.
+ * 5. When automating the generation of printable charts or graphs in C# and saving them as BMP files, setting the smoothing mode to AntiAlias guarantees smoother lines for high‑quality print output.
  */

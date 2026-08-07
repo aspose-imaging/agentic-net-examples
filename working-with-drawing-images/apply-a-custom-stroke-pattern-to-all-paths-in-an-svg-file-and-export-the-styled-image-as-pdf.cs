@@ -1,7 +1,7 @@
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageOptions;
 
 class Program
@@ -9,10 +9,10 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.pdf";
+        string inputPath = @"C:\Temp\input.svg";
+        string outputPath = @"C:\Temp\output.pdf";
 
-        // Input file existence check
+        // Ensure input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,49 +27,29 @@ class Program
             // Read original SVG content
             string svgContent = File.ReadAllText(inputPath);
 
-            // Apply a custom dash pattern to every <path> element
-            // This simple replacement adds a stroke-dasharray attribute if not present
-            // and forces a stroke color and width.
-            string modifiedSvg = System.Text.RegularExpressions.Regex.Replace(
-                svgContent,
-                @"<path([^>]*?)>",
-                m =>
-                {
-                    string attrs = m.Groups[1].Value;
-                    // Ensure stroke, stroke-width and dash pattern are set
-                    if (!attrs.Contains("stroke="))
-                        attrs += " stroke=\"black\"";
-                    if (!attrs.Contains("stroke-width="))
-                        attrs += " stroke-width=\"2\"";
-                    if (!attrs.Contains("stroke-dasharray="))
-                        attrs += " stroke-dasharray=\"5,5\"";
-                    return $"<path{attrs}>";
-                },
-                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            // Apply a custom dash pattern to all <path> elements
+            // This adds stroke-dasharray="5,5" to each path tag
+            string pattern = @"(<path\b[^>]*?)>";
+            string replacement = "$1 stroke-dasharray=\"5,5\">";
+            string modifiedSvg = Regex.Replace(svgContent, pattern, replacement, RegexOptions.IgnoreCase);
 
-            // Write the modified SVG to a temporary file
-            string tempSvgPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp_modified.svg");
+            // Save the modified SVG to a temporary file
+            string tempSvgPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".svg");
             File.WriteAllText(tempSvgPath, modifiedSvg);
 
             // Load the modified SVG using Aspose.Imaging
             using (Image image = Image.Load(tempSvgPath))
             {
-                // Prepare PDF export options with vector rasterization
-                var pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = image.Size
-                    }
-                };
-
-                // Save as PDF
+                // Save the image as PDF
+                PdfOptions pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
 
             // Clean up temporary file
             if (File.Exists(tempSvgPath))
+            {
                 File.Delete(tempSvgPath);
+            }
         }
         catch (Exception ex)
         {
@@ -80,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate printable PDFs from vector graphics and wants to emphasize outlines by adding a dashed stroke to every path in an SVG using C# and Aspose.Imaging.
- * 2. When an engineering team automates the creation of technical diagrams where consistent line styling (e.g., black 2‑pixel dashed lines) must be applied to all SVG paths before exporting to PDF for documentation.
- * 3. When a web application converts user‑uploaded SVG icons into PDF assets and requires a uniform stroke pattern to meet brand guidelines without manually editing each file.
- * 4. When a batch‑processing script processes a folder of SVG floor plans, injects a custom stroke‑dasharray attribute into each path, and saves the styled drawings as PDF reports using Aspose.Imaging for .NET.
- * 5. When a developer integrates SVG to PDF conversion into a CI/CD pipeline and needs to programmatically enforce stroke width, color, and dash pattern on all vector paths to ensure visual consistency across generated PDFs.
+ * 1. When a developer needs to add a dashed stroke pattern to every vector path in an SVG diagram and then generate a printable PDF report using C# and Aspose.Imaging.
+ * 2. When an automation script must batch‑process SVG assets, inject a custom stroke‑dasharray attribute via regular expressions, and output the styled graphics as PDF files for archival.
+ * 3. When a web application has to dynamically modify user‑uploaded SVG icons to show a patterned outline and deliver the result as a PDF download without manual editing.
+ * 4. When a CI/CD pipeline requires converting design mockups in SVG format to PDF while applying a uniform dash style to all paths for consistent branding.
+ * 5. When a desktop utility needs to validate the existence of an SVG file, apply a custom dash pattern to its paths, and export the final image as a high‑resolution PDF using Aspose.Imaging in .NET.
  */

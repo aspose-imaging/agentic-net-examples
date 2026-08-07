@@ -2,77 +2,65 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Wrap the whole logic in a try-catch to report errors without crashing
         try
         {
-            // Hard‑coded input PDF path
-            string inputPath = @"C:\Data\Maps\input.pdf";
-
-            // Verify that the input file exists
+            // Hardcoded input PDF path
+            string inputPath = "input.pdf";
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Hard‑coded output directory for the SVG pages
-            string outputDir = @"C:\Data\Maps\output_svg";
+            // Output directory for SVG files
+            string outputDir = "output";
 
-            // Ensure the output directory exists (unconditional call as required)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputDir));
-
-            // Load the PDF document (Aspose.Imaging can handle PDF as a multipage vector image)
-            using (Image pdfImage = Image.Load(inputPath))
+            // Load the PDF document
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to IMultipageImage to work with individual pages
-                IMultipageImage multipage = pdfImage as IMultipageImage;
-                if (multipage == null || multipage.PageCount == 0)
+                // Ensure the output directory exists
+                Directory.CreateDirectory(outputDir);
+
+                // Determine page count (PDF may be multipage)
+                IMultipageImage multipage = image as IMultipageImage;
+                int pageCount = multipage != null ? multipage.PageCount : 1;
+
+                // Export each page as a separate SVG file
+                for (int i = 0; i < pageCount; i++)
                 {
-                    Console.Error.WriteLine("The loaded document does not contain any pages.");
-                    return;
-                }
-
-                // Prepare common SVG save options (metadata preservation, text as shapes, etc.)
-                SvgOptions svgOptions = new SvgOptions
-                {
-                    KeepMetadata = true,          // Preserve geographic metadata
-                    TextAsShapes = true          // Render text as vector shapes
-                };
-
-                // Configure vector rasterization options (page size based on the source image)
-                // For PDF each page shares the same size, so we can reuse the size of the first page
-                svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
-                {
-                    PageSize = pdfImage.Size,
-                    BackgroundColor = Color.Transparent
-                };
-
-                // Iterate over each page and save it as an individual SVG file
-                for (int pageIndex = 0; pageIndex < multipage.PageCount; pageIndex++)
-                {
-                    // Define the range that selects only the current page
-                    svgOptions.MultiPageOptions = new MultiPageOptions(new IntRange(pageIndex, pageIndex + 1));
-
-                    // Build the output file name (e.g., page_1.svg, page_2.svg, ...)
-                    string outputPath = Path.Combine(outputDir, $"page_{pageIndex + 1}.svg");
-
-                    // Ensure the directory for the output file exists (unconditional as required)
+                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.svg");
+                    // Ensure directory for this output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the selected page as SVG
-                    pdfImage.Save(outputPath, svgOptions);
+                    // Configure SVG export options
+                    SvgOptions exportOptions = new SvgOptions();
+
+                    // Set vector rasterization options for vector sources
+                    if (image is VectorImage)
+                    {
+                        exportOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
+                        };
+                    }
+
+                    // Export only the current page
+                    exportOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, 1));
+
+                    // Save the page as SVG
+                    image.Save(outputPath, exportOptions);
                 }
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime exception
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -80,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a GIS analyst needs to extract each page of a multi‑page PDF map into separate SVG files for web‑based interactive mapping while keeping the coordinate metadata intact.
- * 2. When a mobile‑app developer wants to convert vector map PDFs into lightweight SVG assets that can be rendered on different screen sizes without losing geographic reference data.
- * 3. When a publishing workflow requires batch conversion of cartographic PDFs into per‑page SVGs so that designers can edit individual map layers in vector graphics editors while preserving the original metadata.
- * 4. When an e‑learning platform must transform PDF map resources into scalable SVG diagrams for responsive HTML5 lessons, ensuring that the embedded geospatial metadata remains available for downstream processing.
- * 5. When a data‑visualization engineer needs to programmatically split a multi‑page PDF atlas into SVG pages to feed a custom map‑tiling service that relies on preserved geographic metadata for accurate tile alignment.
+ * 1. When a GIS analyst needs to extract individual map pages from a multi‑page PDF and embed them as scalable SVG graphics in a web‑based mapping portal.
+ * 2. When a mobile app developer wants to reduce the file size of vector map assets by converting each PDF page to an SVG that can be rendered on‑the‑fly in a Xamarin.Forms UI.
+ * 3. When a data‑visualization engineer must preserve geographic metadata while converting engineering drawings stored in PDF to SVG for interactive D3.js charts.
+ * 4. When a publishing workflow requires batch conversion of cartographic PDFs into separate SVG files so that each page can be edited independently in Adobe Illustrator or Inkscape.
+ * 5. When an automated reporting system needs to programmatically generate SVG map tiles from a PDF source for inclusion in PDF‑to‑HTML conversion pipelines.
  */

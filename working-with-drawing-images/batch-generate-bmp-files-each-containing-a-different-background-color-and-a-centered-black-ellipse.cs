@@ -3,17 +3,20 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
-            string outputDir = @"C:\Temp\BatchImages";
+            // Output directory
+            string outputDir = "output";
             Directory.CreateDirectory(outputDir);
 
-            Color[] backgroundColors = new Color[]
+            // Background colors for each image
+            Color[] bgColors = new Color[]
             {
                 Color.Red,
                 Color.Green,
@@ -22,37 +25,37 @@ public class Program
                 Color.Cyan
             };
 
-            string[] fileNames = new string[]
-            {
-                "red.bmp",
-                "green.bmp",
-                "blue.bmp",
-                "yellow.bmp",
-                "cyan.bmp"
-            };
+            int width = 400;
+            int height = 400;
+            int ellipseWidth = 200;
+            int ellipseHeight = 200;
+            int ellipseX = (width - ellipseWidth) / 2;
+            int ellipseY = (height - ellipseHeight) / 2;
 
-            int canvasWidth = 500;
-            int canvasHeight = 500;
-            int ellipseWidth = 300;
-            int ellipseHeight = 300;
-
-            for (int i = 0; i < backgroundColors.Length; i++)
+            for (int i = 0; i < bgColors.Length; i++)
             {
-                string outputPath = Path.Combine(outputDir, fileNames[i]);
+                string outputPath = Path.Combine(outputDir, $"image_{i + 1}.bmp");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+                // Create BMP options with bound source
                 Source source = new FileCreateSource(outputPath, false);
                 BmpOptions options = new BmpOptions() { Source = source };
 
-                using (RasterImage canvas = (RasterImage)Image.Create(options, canvasWidth, canvasHeight))
+                using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
                 {
+                    // Initialize graphics
                     Graphics graphics = new Graphics(canvas);
-                    graphics.Clear(backgroundColors[i]);
 
-                    int offsetX = (canvas.Width - ellipseWidth) / 2;
-                    int offsetY = (canvas.Height - ellipseHeight) / 2;
-                    graphics.DrawEllipse(new Pen(Color.Black, 2), new Rectangle(offsetX, offsetY, ellipseWidth, ellipseHeight));
+                    // Set background color
+                    graphics.Clear(bgColors[i]);
 
+                    // Draw centered black ellipse
+                    using (SolidBrush blackBrush = new SolidBrush(Color.Black))
+                    {
+                        graphics.FillEllipse(blackBrush, new Rectangle(ellipseX, ellipseY, ellipseWidth, ellipseHeight));
+                    }
+
+                    // Save the bound image
                     canvas.Save();
                 }
             }
@@ -66,9 +69,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a batch of BMP files with different solid background colors and a centered black ellipse for UI mock‑ups or design previews, this C# Aspose.Imaging code automates the generation.
- * 2. When an automated testing suite requires sample bitmap images of known dimensions and shapes to validate image processing algorithms, the code can produce the required BMP assets on the fly.
- * 3. When a game developer wants to generate placeholder textures with distinct color themes and a common ellipse marker for level design prototyping, the script creates the BMP resources programmatically.
- * 4. When a documentation team must embed example images showing color variations and vector drawing capabilities of the Aspose.Imaging library, this code quickly produces the BMP illustrations.
- * 5. When a batch‑processing pipeline needs to export a series of bitmap files to a specific folder structure for downstream reporting or printing workflows, the code handles file creation, background coloring, and ellipse drawing in one loop.
+ * 1. When a developer needs to generate a set of BMP icons with different background colors and a centered black ellipse for a Windows desktop application’s theme palette.
+ * 2. When an automated build script must create test BMP images to verify image‑processing pipelines that handle solid color backgrounds and vector shapes using Aspose.Imaging for .NET.
+ * 3. When a reporting tool requires batch‑produced BMP charts where each chart uses a distinct background hue and a consistent black ellipse as a placeholder for data visualization.
+ * 4. When a game asset pipeline needs to pre‑render BMP sprites with varying background colors and a centered black ellipse to serve as collision masks or UI elements.
+ * 5. When a documentation generator wants to embed example BMP files showing how C# graphics operations like Clear and FillEllipse work with Aspose.Imaging’s RasterImage class.
  */

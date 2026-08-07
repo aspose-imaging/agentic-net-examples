@@ -2,42 +2,34 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = "output.bmp";
+
         try
         {
-            // Define output path
-            string outputPath = @"C:\temp\bordered_image.bmp";
-
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Create a source bound to the output file
-            Source source = new FileCreateSource(outputPath, false);
+            // Set up BMP creation options with bound source
+            BmpOptions options = new BmpOptions();
+            Source src = new FileCreateSource(outputPath, false);
+            options.Source = src;
 
-            // Set BMP options with the source
-            BmpOptions options = new BmpOptions() { Source = source };
+            int width = 200;
+            int height = 200;
 
-            // Define canvas size
-            int width = 800;
-            int height = 600;
-
-            // Create BMP canvas bound to the file
-            using (BmpImage canvas = (BmpImage)Image.Create(options, width, height))
+            // Create canvas bound to the output file
+            using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
             {
-                // Create graphics for drawing
+                // Draw a thick red border around the canvas
                 Graphics graphics = new Graphics(canvas);
-
-                // Define a thick red pen
-                Pen redPen = new Pen(Color.Red, 10);
-
-                // Draw rectangle border around the entire canvas
-                graphics.DrawRectangle(redPen, 0, 0, canvas.Width, canvas.Height);
+                int thickness = 10;
+                graphics.DrawRectangle(new Pen(Color.Red, thickness), 0, 0, width, height);
 
                 // Save the bound image
                 canvas.Save();
@@ -52,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP thumbnail with a visible red frame for a legacy Windows application that only accepts BMP files.
- * 2. When an automated report generator must add a thick red border to each exported BMP chart to highlight it in printed documentation.
- * 3. When a batch image processing tool creates placeholder BMP images with a colored outline to indicate missing content in a media asset pipeline.
- * 4. When a game asset pipeline requires BMP textures with a red margin to be recognized by an older engine that uses border color for collision detection.
- * 5. When a document conversion service adds a red rectangular border around BMP pages to comply with branding guidelines before merging them into a PDF.
+ * 1. When a developer needs to generate a BMP placeholder image with a thick red frame for UI mock‑ups using Aspose.Imaging in C#.
+ * 2. When an automated testing suite requires a simple bitmap file with a visible red border to validate image‑processing algorithms.
+ * 3. When a reporting tool must create printable BMP charts that are highlighted by a bold red outline to draw attention to the entire canvas.
+ * 4. When a batch job prepares sample images for a computer‑vision dataset, adding a uniform red border to each BMP to indicate the region of interest.
+ * 5. When a legacy system expects BMP assets with a decorative red edge, and the developer uses Aspose.Imaging’s RasterImage and Graphics classes to produce them programmatically.
  */

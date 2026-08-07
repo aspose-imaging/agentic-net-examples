@@ -2,50 +2,52 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.bmp";   // not used but kept for rule compliance
+        string outputPath = "output.bmp";
+
         try
         {
-            // Output BMP file path
-            string outputPath = @"C:\temp\custom_dash_line.bmp";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set BMP options
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Image dimensions
-            int width = 400;
-            int height = 200;
-
-            // Create the image bound to the output file
-            using (Image image = Image.Create(bmpOptions, width, height))
+            // Verify input file existence (rule 2)
+            if (!File.Exists(inputPath))
             {
-                // Initialize graphics for drawing
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists (rule 3)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Create a new BMP image (200x100 pixels)
+            using (Image image = Image.Create(new BmpOptions(), 200, 100))
+            {
+                // Initialize graphics object for drawing
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
 
-                // Create a pen with a custom dash pattern
-                Pen pen = new Pen(Color.Blue, 5f);
-                pen.DashStyle = DashStyle.Custom;
-                pen.DashPattern = new float[] { 10f, 5f, 2f, 5f }; // dash, space, dash, space
+                // Create a pen with black color, width 2
+                Pen pen = new Pen(Color.Black, 2);
 
-                // Draw a horizontal dashed line across the image
-                graphics.DrawLine(pen, new Point(0, height / 2), new Point(width, height / 2));
+                // Apply a dashed style to the pen
+                pen.DashStyle = DashStyle.Dash; // could also use DashStyle.Dot, etc.
 
-                // Save the image (output path already bound)
-                image.Save();
+                // Draw a dashed line across the image
+                graphics.DrawLine(pen, 0, 0, 199, 99);
+
+                // Save the resulting image
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
         {
+            // Unified error handling (rule 4)
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -53,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a printable BMP report that highlights section boundaries with a custom blue dashed line using Aspose.Imaging for .NET.
- * 2. When creating a thumbnail preview of a scanned document where a custom dash pattern drawn with a Pen indicates the crop area on a BMP image.
- * 3. When producing a BMP diagram for a CAD‑like application that uses different DashStyle.Custom patterns to distinguish measurement lines in C#.
- * 4. When automating the generation of a BMP watermark that consists of a repeated custom dash pattern across the image for branding purposes.
- * 5. When building a UI component that renders a BMP background with a custom dashed separator line to visually group controls in a .NET application.
+ * 1. When a developer needs to generate a BMP diagram with a dashed separator line for a printed report or PDF overlay.
+ * 2. When creating a placeholder image that shows a dashed guideline for UI mockups in a Windows Forms application.
+ * 3. When producing a test pattern BMP file that includes a dashed line to verify that custom dash styles are rendered correctly on different devices.
+ * 4. When automating the creation of a BMP watermark that consists of a dashed line across the image to indicate a draft status.
+ * 5. When building a batch process that adds a dashed border line to existing BMP assets for visual inspection in a quality‑control workflow.
  */

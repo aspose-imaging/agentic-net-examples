@@ -3,12 +3,13 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded output path
+        // Hardcoded input and output paths
         string outputPath = @"c:\temp\output.bmp";
 
         // Ensure output directory exists
@@ -16,30 +17,32 @@ class Program
 
         try
         {
-            // Set BMP options
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            // Set up BMP options
+            BmpOptions bmpOptions = new BmpOptions
+            {
+                BitsPerPixel = 24,
+                Source = new FileCreateSource(outputPath, false)
+            };
 
-            // Create image canvas
+            // Create a new BMP image (500x500)
             using (Image image = Image.Create(bmpOptions, 500, 500))
             {
-                // Initialize graphics
+                // Initialize graphics object
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
 
-                // Draw first rectangle
-                Pen pen1 = new Pen(Color.Blue, 3);
-                graphics.DrawRectangle(pen1, 50, 50, 200, 100);
+                // Clear background
+                graphics.Clear(Color.Wheat);
 
-                // Translate origin
-                graphics.TranslateTransform(100, 100);
+                // Draw first rectangle (black)
+                graphics.DrawRectangle(new Pen(Color.Black, 2), 50, 50, 200, 100);
 
-                // Draw second rectangle after translation
-                Pen pen2 = new Pen(Color.Red, 3);
-                graphics.DrawRectangle(pen2, 0, 0, 150, 80);
+                // Translate the origin
+                graphics.TranslateTransform(100, 50);
 
-                // Save image
+                // Draw second rectangle (red) using the translated coordinate system
+                graphics.DrawRectangle(new Pen(Color.Red, 2), 0, 0, 150, 80);
+
+                // Save changes to the file
                 image.Save();
             }
         }
@@ -52,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP image with a blue border rectangle and then overlay a red rectangle offset by 100 px using Graphics.TranslateTransform to highlight a specific area.
- * 2. When creating a printable label in C# where the first rectangle defines the label margin and the translated origin positions a second rectangle for a barcode or QR‑code region without recomputing absolute coordinates.
- * 3. When building a simple UI mock‑up that draws multiple shapes on a bitmap and uses TranslateTransform to shift the origin, making it easier to place subsequent elements relative to the first shape.
- * 4. When implementing a custom watermarking routine that draws a base rectangle on a BMP canvas and then translates the drawing surface to add a secondary rectangle as a dynamic logo placeholder.
- * 5. When developing a diagnostic tool that visualizes coordinate transformations by drawing an initial rectangle and then moving the origin to demonstrate how TranslateTransform affects later drawing commands in Aspose.Imaging for .NET.
+ * 1. When a developer needs to generate a 24‑bit BMP file with layered shapes for a printable report, they can use Aspose.Imaging for .NET to create a 500×500 image, draw a base rectangle, translate the origin, and draw a second rectangle in a different color.
+ * 2. When building a custom UI mockup where components must be positioned relative to a shifted coordinate system, this code demonstrates how to use Graphics.TranslateTransform in C# to offset drawing operations on a BMP canvas.
+ * 3. When creating a simple map legend or diagram that requires multiple overlapping rectangles with distinct offsets, the example shows how to draw one rectangle, move the origin, and draw another rectangle using Aspose.Imaging’s Graphics object.
+ * 4. When automating the production of watermark templates that need a background rectangle and a foreground rectangle positioned at a specific offset, the code illustrates how to clear the background, draw shapes, and save the result as a BMP image.
+ * 5. When testing image‑processing pipelines that involve coordinate transformations, developers can employ this snippet to verify that Aspose.Imaging correctly applies TranslateTransform before rendering additional graphics on a BMP image.
  */

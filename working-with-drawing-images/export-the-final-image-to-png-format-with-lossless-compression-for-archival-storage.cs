@@ -9,32 +9,31 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\input.bmp";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.jpg";
             string outputPath = @"C:\Images\output.png";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG export options for lossless archival storage
+                // Configure PNG export options for lossless compression
                 var pngOptions = new PngOptions
                 {
-                    // PNG is inherently lossless; setting compression level to 0 disables compression
-                    // which preserves the original data without additional processing.
+                    // Compression level 0 = no compression (still lossless)
                     PngCompressionLevel = 0
                 };
 
-                // Save the image as PNG using the specified options
+                // Save the image as PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -47,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy BMP files to PNG with lossless compression for long‑term archival in a .NET application.
- * 2. When a C# service must generate PNG assets from scanned bitmaps while preserving exact pixel data for regulatory compliance.
- * 3. When an image‑processing pipeline requires saving intermediate bitmap results as PNG to ensure no quality loss before further analysis.
- * 4. When a desktop utility has to batch‑export user‑provided BMP images to PNG for storage on a version‑controlled repository.
- * 5. When a cloud‑based document management system must store uploaded BMP images as PNG with zero compression to maintain original fidelity.
+ * 1. When a C# application must archive scanned JPEG documents by converting them to lossless PNG using Aspose.Imaging’s PngOptions for reliable long‑term storage.
+ * 2. When a web service receives user‑uploaded JPEG images and needs to preserve every pixel by saving them as PNG with zero compression via Aspose.Imaging before adding them to a digital asset library.
+ * 3. When building a forensic evidence system that requires immutable image files, developers can use this code to transform JPEG evidence into lossless PNG format with Aspose.Imaging for courtroom admissibility.
+ * 4. When generating high‑quality thumbnails in a .NET application, the code lets developers convert the source JPEG to a PNG with no compression, ensuring the thumbnail retains the original detail.
+ * 5. When a company’s compliance policy mandates all archived graphics be stored as lossless PNG, developers can employ this snippet to batch‑convert existing JPEG files using Aspose.Imaging in C#.
  */

@@ -10,39 +10,55 @@ class Program
     {
         try
         {
-            string outputPath = @"c:\temp\concentric_circles.bmp";
+            // Output file path (hard‑coded)
+            string outputPath = @"C:\temp\concentric_circles.bmp";
+
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Configure BMP options
             BmpOptions bmpOptions = new BmpOptions();
             bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
+            // Canvas size
             int width = 500;
             int height = 500;
 
+            // Create the image canvas bound to the output file
             using (Image image = Image.Create(bmpOptions, width, height))
             {
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
+
+                // Optional: clear background to white
                 graphics.Clear(Color.White);
 
+                // Center of the canvas
                 int centerX = width / 2;
                 int centerY = height / 2;
 
+                // Maximum radius (leaving a small margin)
                 int maxRadius = Math.Min(width, height) / 2 - 10;
-                int step = 20;
-                bool useRed = true;
+                int step = 20; // radius decrement step
+                bool useRed = true; // toggle color
 
+                // Draw concentric circles
                 for (int radius = maxRadius; radius > 0; radius -= step)
                 {
-                    Color penColor = useRed ? Color.Red : Color.Blue;
-                    Pen pen = new Pen(penColor, 3);
-                    int left = centerX - radius;
-                    int top = centerY - radius;
+                    Color circleColor = useRed ? Color.Red : Color.Blue;
+                    Pen pen = new Pen(circleColor, 2);
+
+                    int x = centerX - radius;
+                    int y = centerY - radius;
                     int diameter = radius * 2;
-                    graphics.DrawEllipse(pen, new Aspose.Imaging.Rectangle(left, top, diameter, diameter));
-                    useRed = !useRed;
+
+                    graphics.DrawEllipse(pen, new Rectangle(x, y, diameter, diameter));
+
+                    useRed = !useRed; // alternate color
                 }
 
+                // Save the image (output path already bound)
                 image.Save();
             }
         }
@@ -55,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically generate a 24‑bit BMP file with concentric circles for UI placeholders or to test the Aspose.Imaging rendering pipeline.
- * 2. When creating calibration patterns for printers or displays, using alternating red and blue circles drawn with Aspose.Imaging’s Graphics.DrawEllipse to verify color accuracy.
- * 3. When producing educational graphics that illustrate geometric concepts such as radius, diameter, and center point, saved directly as a BMP image via C#.
- * 4. When automating the creation of simple circular icons or badges without manual design tools, leveraging Aspose.Imaging’s Pen and Rectangle classes.
- * 5. When generating test images to benchmark the performance of Aspose.Imaging’s drawing operations (e.g., DrawEllipse) in a .NET application.
+ * 1. When a developer needs to generate a BMP file that visualizes radar range rings for a mapping application, they can use this code to draw concentric circles with alternating colors.
+ * 2. When creating printable test patterns for calibrating scanners or printers, a developer can employ this C# Aspose.Imaging snippet to produce a 500 × 500 BMP image of alternating red and blue circles.
+ * 3. When building a simple educational tool that demonstrates basic geometry concepts such as radius and diameter, a programmer can use this code to render concentric circles directly onto a bitmap.
+ * 4. When an IoT device must send a lightweight BMP thumbnail showing signal‑strength zones, the code can create the image on‑the‑fly using Aspose.Imaging’s Graphics API.
+ * 5. When a game developer wants to generate a circular health‑meter overlay as a BMP asset during a build pipeline, this example provides a quick way to draw layered circles with alternating colors.
  */

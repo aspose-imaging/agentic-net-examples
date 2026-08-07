@@ -13,14 +13,14 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputFolder = @"C:\InputEmf";
-            string outputFolder = @"C:\OutputPdf";
+            string inputFolder = @"C:\EmfInput";
+            string outputFolder = @"C:\PdfOutput";
 
-            // Validate input directory
+            // Ensure input directory exists
             if (!Directory.Exists(inputFolder))
             {
                 Directory.CreateDirectory(inputFolder);
-                Console.WriteLine($"Input directory created at: {inputFolder}. Add files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputFolder}. Add EMF files and rerun.");
                 return;
             }
 
@@ -30,44 +30,50 @@ class Program
                 Directory.CreateDirectory(outputFolder);
             }
 
-            // Get all EMF files
+            // Get all EMF files in the input folder
             string[] emfFiles = Directory.GetFiles(inputFolder, "*.emf");
 
             foreach (string inputPath in emfFiles)
             {
-                // Validate each input file
+                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
+                // Prepare output PDF path
+                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 // Load EMF image
-                using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Create graphics recorder from the EMF image
+                    // Cast to EmfImage
+                    EmfImage emfImage = (EmfImage)image;
+
+                    // Create graphics recorder from EMF
                     EmfRecorderGraphics2D graphics = EmfRecorderGraphics2D.FromEmfImage(emfImage);
 
-                    // Prepare header text with conversion date
-                    string header = $"Converted on {DateTime.Now:yyyy-MM-dd}";
-                    Font headerFont = new Font("Arial", 12);
-                    Color headerColor = Color.Black;
+                    // Prepare header text (conversion date)
+                    string headerText = DateTime.Now.ToString("yyyy-MM-dd");
 
                     // Draw header at top-left corner
-                    graphics.DrawString(header, headerFont, headerColor, 10, 10);
+                    graphics.DrawString(
+                        headerText,
+                        new Font("Arial", 12),
+                        Color.Black,
+                        10, // X position
+                        10  // Y position
+                    );
 
-                    // End recording to obtain modified EMF image
-                    using (EmfImage modifiedEmf = graphics.EndRecording())
+                    // End recording to obtain a new EMF with the header
+                    using (EmfImage annotatedEmf = graphics.EndRecording())
                     {
-                        // Prepare output PDF path
-                        string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
-
-                        // Ensure output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
                         // Save as PDF
-                        PdfOptions pdfOptions = new PdfOptions();
-                        modifiedEmf.Save(outputPath, pdfOptions);
+                        annotatedEmf.Save(outputPath, new PdfOptions());
                     }
                 }
             }
@@ -81,9 +87,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a company needs to archive a batch of vector‑based engineering drawings stored as EMF files into searchable PDF reports that include the conversion date on each page.
- * 2. When an automated build pipeline must generate PDF documentation from EMF icons and add a timestamp header for compliance auditing.
- * 3. When a legal firm converts client‑submitted EMF signatures into PDF files and wants the conversion date displayed as a header for evidentiary purposes.
- * 4. When a desktop application processes user‑uploaded EMF charts and produces PDF summaries with a date header to track when the data was transformed.
- * 5. When a cloud service batch‑processes thousands of EMF marketing assets into PDF brochures, inserting a header with the current date to ensure version control across distributed teams.
+ * 1. When a company needs to archive a batch of vector‑based EMF diagrams as searchable PDF reports and wants each page stamped with the conversion date for compliance tracking.
+ * 2. When an engineering team automates the generation of project documentation by converting daily‑exported EMF schematics into PDF files that include a header showing the date the files were processed.
+ * 3. When a legal department must submit electronic evidence, converting EMF signatures into PDFs while adding a conversion‑date header to prove the timestamp of the conversion.
+ * 4. When a medical imaging system exports patient charts as EMF files and requires a C# routine to bundle them into PDFs with a header indicating the date of conversion for record‑keeping.
+ * 5. When a publishing workflow needs to transform a collection of EMF illustrations into PDF pages and automatically prepend a header with the current date to each page for version control.
  */

@@ -10,17 +10,20 @@ class Program
     {
         try
         {
-            string outputPath = "output.png";
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            string outputPath = @"c:\temp\line.png";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             PngOptions pngOptions = new PngOptions();
             pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            using (Image image = Image.Create(pngOptions, 200, 200))
             {
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
-                graphics.DrawLine(new Pen(Color.Black, 2), new PointF(50f, 50f), new PointF(450f, 450f));
+
+                float x1 = 20f, y1 = 30f, x2 = 180f, y2 = 150f;
+                graphics.DrawLine(new Pen(Color.Black, 2), x1, y1, x2, y2);
+
                 image.Save();
             }
         }
@@ -33,9 +36,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PNG diagram with a simple black line for a report or UI placeholder, they can use Aspose.Imaging for .NET to create a 500×500 image and draw the line with Graphics.DrawLine.
- * 2. When an application must programmatically add a straight line annotation to a blank canvas for a PDF preview or thumbnail, the code shows how to use C# and Aspose.Imaging to render the line and save it as a PNG file.
- * 3. When building a custom charting component that requires drawing axis lines on a raster image, this example demonstrates creating a PNG image, clearing it to white, and drawing a line with a Pen in C#.
- * 4. When automating the creation of watermark or guide lines in a graphics workflow, developers can employ Aspose.Imaging’s Graphics object to draw precise line coordinates and output the result as a PNG.
- * 5. When testing image processing pipelines that need a known simple shape, such as a diagonal line, this code provides a reproducible way to generate a PNG file using Aspose.Imaging for .NET.
+ * 1. When a developer needs to generate a simple PNG diagram with a black line for a web report or email attachment using Aspose.Imaging for .NET.
+ * 2. When an application must programmatically create a placeholder image with a straight line to indicate a missing photo in a content management system.
+ * 3. When a C# service creates custom chart markers by drawing lines on a 200x200 canvas and saving them as PNG files for a dashboard.
+ * 4. When a developer wants to add a visual separator between UI elements by drawing a line onto an image file during automated PDF generation.
+ * 5. When a testing tool requires a deterministic PNG image with a known line geometry to validate image comparison algorithms.
  */

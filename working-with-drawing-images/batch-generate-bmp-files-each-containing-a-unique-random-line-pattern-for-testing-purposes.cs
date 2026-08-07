@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -11,43 +10,46 @@ class Program
     {
         try
         {
-            // Output directory for generated BMP files
-            string outputDir = @"C:\temp\BatchBmp";
-            Directory.CreateDirectory(outputDir);
-
-            int imageCount = 5;      // Number of images to generate
-            int width = 200;         // Canvas width
-            int height = 200;        // Canvas height
+            int imageCount = 5;          // Number of BMP files to generate
+            int width = 200;             // Canvas width
+            int height = 200;            // Canvas height
             Random rand = new Random();
 
-            for (int i = 0; i < imageCount; i++)
+            for (int i = 1; i <= imageCount; i++)
             {
-                string outputPath = Path.Combine(outputDir, $"image_{i + 1}.bmp");
-                // Ensure the output directory exists
+                // Output file path (hard‑coded)
+                string outputPath = $"Output/image_{i}.bmp";
+
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Create BMP options bound to the output file
+                // Create a bound BMP image using FileCreateSource
                 Source source = new FileCreateSource(outputPath, false);
-                BmpOptions options = new BmpOptions() { Source = source };
+                BmpOptions bmpOptions = new BmpOptions() { Source = source, BitsPerPixel = 24 };
 
-                // Create a BMP canvas
-                using (BmpImage canvas = (BmpImage)Image.Create(options, width, height))
+                using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
                 {
-                    // Draw random lines on the canvas
+                    // Draw random lines onto the canvas
                     Graphics graphics = new Graphics(canvas);
-                    int lineCount = 10;
-                    for (int l = 0; l < lineCount; l++)
+                    int lines = 10;
+                    for (int l = 0; l < lines; l++)
                     {
-                        int x1 = rand.Next(width);
-                        int y1 = rand.Next(height);
-                        int x2 = rand.Next(width);
-                        int y2 = rand.Next(height);
-                        Color lineColor = Color.FromArgb(rand.Next(256), rand.Next(256), rand.Next(256));
-                        Pen pen = new Pen(lineColor, 1);
-                        graphics.DrawLine(pen, new Point(x1, y1), new Point(x2, y2));
+                        // Random color and pen width
+                        Aspose.Imaging.Color lineColor = Aspose.Imaging.Color.FromArgb(
+                            255,
+                            rand.Next(256),
+                            rand.Next(256),
+                            rand.Next(256));
+                        Pen pen = new Pen(lineColor, rand.Next(1, 5));
+
+                        // Random start and end points
+                        Point start = new Point(rand.Next(width), rand.Next(height));
+                        Point end = new Point(rand.Next(width), rand.Next(height));
+
+                        graphics.DrawLine(pen, start, end);
                     }
 
-                    // Save the bound image
+                    // Save the bound image (no path needed)
                     canvas.Save();
                 }
             }
@@ -61,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a set of BMP test images with random line patterns to validate image rendering pipelines in a .NET application.
- * 2. When QA engineers require bulk BMP files with varied colors and line positions to stress‑test a graphics compression algorithm implemented with Aspose.Imaging for .NET.
- * 3. When a machine‑learning team wants to create synthetic training data of simple line drawings in BMP format for evaluating edge‑detection models.
- * 4. When a software vendor must produce sample BMP assets automatically for documentation or demo pages that showcase the drawing capabilities of the Aspose.Imaging Graphics class.
- * 5. When an automated build process needs to generate temporary BMP files with random line art to verify that file‑system permissions and file‑creation logic work correctly on different Windows environments.
+ * 1. When a QA engineer needs a set of sample BMP images with unpredictable line patterns to validate image rendering performance in a C# application.
+ * 2. When a developer is creating stress‑test data for a graphics pipeline that reads 24‑bit BMP files and must handle varying colors and pen widths.
+ * 3. When a machine‑learning researcher wants to generate synthetic training data of random line drawings stored as BMP files for a line‑detection algorithm.
+ * 4. When a software vendor needs to demonstrate the Aspose.Imaging API’s ability to create bound images using FileCreateSource and draw graphics with the Graphics class.
+ * 5. When an automated build script must produce placeholder BMP assets with random content to ensure downstream tools correctly process image files in a .NET CI/CD workflow.
  */

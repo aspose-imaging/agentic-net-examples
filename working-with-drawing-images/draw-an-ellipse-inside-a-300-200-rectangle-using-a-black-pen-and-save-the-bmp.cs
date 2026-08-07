@@ -6,39 +6,37 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded output path
-        string outputPath = @"c:\temp\ellipse.bmp";
-
         try
         {
-            // Ensure the output directory exists
+            // Hardcoded output path
+            string outputPath = @"c:\temp\ellipse.bmp";
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up BMP options (24‑bit colour) and assign the output source
-            var bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
-            };
+            // Set BMP options with a file source bound to the output path
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a new image (size large enough to contain the rectangle)
-            using (Image image = Image.Create(bmpOptions, 400, 300))
+            // Create a 300x200 image canvas
+            using (Image image = Image.Create(bmpOptions, 300, 200))
             {
                 // Initialize graphics for drawing
-                var graphics = new Graphics(image);
+                Graphics graphics = new Graphics(image);
 
                 // Optional: clear background to white
                 graphics.Clear(Color.White);
 
-                // Define a black pen (2‑pixel width)
-                var pen = new Pen(Color.Black, 2);
+                // Create a black pen with width 2
+                Pen pen = new Pen(Color.Black, 2);
 
-                // Draw an ellipse inside a 300 × 200 rectangle at position (50,50)
-                graphics.DrawEllipse(pen, new Rectangle(50, 50, 300, 200));
+                // Draw an ellipse inside the full rectangle (0,0,300,200)
+                graphics.DrawEllipse(pen, new Rectangle(0, 0, 300, 200));
 
-                // Save the image to the specified path
+                // Save the image (file is already bound via FileCreateSource)
                 image.Save();
             }
         }
@@ -51,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a printable report that requires a simple black‑outlined ellipse inside a defined 300 × 200 rectangle and the output must be a 24‑bit BMP for compatibility with legacy imaging systems.
- * 2. When creating a placeholder graphic for a UI mockup where an ellipse represents a button or icon within a specific rectangle and the design assets are stored as BMP files.
- * 3. When automating the production of test images for computer‑vision algorithms that need a known geometric shape drawn with a black pen on a white background in BMP format.
- * 4. When exporting diagram elements from a C# application to a BMP image for inclusion in documentation, and the element is an ellipse constrained to a 300 × 200 rectangle.
- * 5. When building a batch process that adds a black‑outlined ellipse to existing images by creating a new 400 × 300 BMP canvas, drawing the shape inside a 300 × 200 rectangle, and saving it to a file system path.
+ * 1. When a developer needs to generate a BMP thumbnail that highlights a product’s circular logo inside a fixed‑size 300 × 200 canvas for a legacy Windows application.
+ * 2. When an automated reporting tool must embed a black‑outlined ellipse into a BMP chart background to indicate a region of interest in scanned engineering diagrams.
+ * 3. When a batch‑processing script creates placeholder images for UI mockups, drawing an ellipse inside a 300 × 200 rectangle to represent a profile picture slot in a BMP asset.
+ * 4. When a medical imaging system exports a BMP overlay that marks a region of interest with a black pen ellipse on a white background for compatibility with older DICOM viewers.
+ * 5. When a game developer generates BMP sprites at runtime, using Aspose.Imaging to draw an ellipse within a 300 × 200 rectangle as a collision‑boundary visual aid.
  */

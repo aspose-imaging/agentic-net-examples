@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Shapes;
 
 class Program
 {
@@ -11,47 +10,36 @@ class Program
     {
         try
         {
-            // Output directory
             string outputDir = "Output";
             Directory.CreateDirectory(outputDir);
 
             int width = 200;
             int height = 200;
 
-            // Define the rotations/flips to apply
-            RotateFlipType[] rotateTypes = new RotateFlipType[]
+            RotateFlipType[] rotations = new RotateFlipType[]
             {
                 RotateFlipType.Rotate90FlipNone,
                 RotateFlipType.Rotate180FlipNone,
-                RotateFlipType.Rotate270FlipNone,
-                RotateFlipType.RotateNoneFlipX,
-                RotateFlipType.RotateNoneFlipY
+                RotateFlipType.Rotate270FlipNone
             };
 
-            foreach (var rotate in rotateTypes)
+            foreach (RotateFlipType rot in rotations)
             {
-                // Output file path
-                string outputPath = Path.Combine(outputDir, $"shape_{rotate}.bmp");
+                string outputPath = Path.Combine(outputDir, $"shape_{rot}.bmp");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Create BMP options with bound output file
-                BmpOptions bmpOptions = new BmpOptions();
-                bmpOptions.Source = new FileCreateSource(outputPath, false);
+                Source source = new FileCreateSource(outputPath, false);
+                BmpOptions options = new BmpOptions() { Source = source, BitsPerPixel = 24 };
 
-                // Create image canvas
-                using (Image image = Image.Create(bmpOptions, width, height))
+                using (Image canvas = Image.Create(options, width, height))
                 {
-                    // Draw a simple rectangle shape
-                    Graphics graphics = new Graphics(image);
+                    Graphics graphics = new Graphics(canvas);
                     graphics.Clear(Color.White);
                     Pen pen = new Pen(Color.Blue, 5);
                     graphics.DrawRectangle(pen, new Rectangle(50, 50, 100, 100));
 
-                    // Apply rotation/flip
-                    image.RotateFlip(rotate);
-
-                    // Save the bound image
-                    image.Save();
+                    canvas.RotateFlip(rot);
+                    canvas.Save();
                 }
             }
         }
@@ -64,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a set of sprite assets for a 2D game that requires the same shape in multiple orientations, a developer can use this code to batch‑create BMP files with rotated rectangles.
- * 2. When preparing test images for a computer‑vision algorithm that must recognize objects regardless of rotation, a developer can quickly produce BMP samples with different RotateFlip types.
- * 3. When creating printable labels or icons that need to be displayed in portrait and landscape layouts, a developer can automate the production of rotated BMP files.
- * 4. When building a batch‑processing pipeline that converts vector shapes to raster BMP thumbnails for a catalog, a developer can use this code to generate each thumbnail in several orientations.
- * 5. When developing a UI theme that includes mirrored or flipped graphics for right‑to‑left languages, a developer can generate the required BMP assets by applying RotateFlip operations in bulk.
+ * 1. When a developer needs to generate a series of BMP icons showing a logo rotated at 90°, 180°, and 270° for use in a multi‑orientation desktop application UI.
+ * 2. When an automated build process must create rotated versions of a base shape to supply test images for validating image‑processing algorithms that rely on BMP files.
+ * 3. When a game asset pipeline requires pre‑rotated sprite sheets in BMP format so that the engine can load them without runtime rotation overhead.
+ * 4. When a documentation generator wants to embed step‑by‑step visual guides, producing BMP diagrams of a shape at different angles to illustrate rotation concepts.
+ * 5. When a quality‑control tool needs to batch produce BMP samples with consistent dimensions and color depth (24‑bpp) to compare rendering results across different rotation settings.
  */

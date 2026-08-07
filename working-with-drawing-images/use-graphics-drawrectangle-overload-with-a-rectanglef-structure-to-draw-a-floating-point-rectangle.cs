@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,39 +10,43 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\temp\input.png";
+            // Hardcoded output path
             string outputPath = @"C:\temp\output.png";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
+            // Create a PNG image using a stream source
+            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
             {
-                // Create a Graphics object for drawing
-                Graphics graphics = new Graphics(image);
+                PngOptions pngOptions = new PngOptions
+                {
+                    Source = new StreamSource(stream)
+                };
 
-                // Define a floating‑point rectangle (x, y, width, height)
-                RectangleF rect = new RectangleF(50f, 50f, 200f, 150f);
+                // Create a new image of size 400x300
+                using (Image image = Image.Create(pngOptions, 400, 300))
+                {
+                    // Initialize graphics for the image
+                    Graphics graphics = new Graphics(image);
 
-                // Draw the rectangle with a red pen of width 3
-                graphics.DrawRectangle(new Pen(Color.Red, 3), rect);
+                    // Clear the background with a wheat color
+                    graphics.Clear(Color.Wheat);
 
-                // Save the modified image to the output path
-                image.Save(outputPath);
+                    // Define a floating‑point rectangle
+                    RectangleF rect = new RectangleF(50.5f, 60.5f, 200.75f, 150.25f);
+
+                    // Draw the rectangle using an orange pen of width 3
+                    Pen pen = new Pen(Color.Orange, 3);
+                    graphics.DrawRectangle(pen, rect);
+
+                    // Save the image (the stream is already linked)
+                    image.Save();
+                }
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -50,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to highlight a detected object with a sub‑pixel accurate red border on a PNG image using Aspose.Imaging’s Graphics.DrawRectangle overload with a RectangleF structure.
- * 2. When a developer wants to add a scalable annotation box to a high‑resolution JPEG photo in a C# image‑editing tool, ensuring the rectangle’s position and size are defined with floating‑point precision.
- * 3. When a developer is creating a thumbnail preview of a BMP file and must draw a precise red rectangle to indicate a region of interest for a UI overlay.
- * 4. When a developer builds an automated report that marks specific coordinates on a TIFF map image, using a floating‑point rectangle to align with geographic data.
- * 5. When a developer implements a batch process that adds a red rectangular watermark to a series of PNG assets, relying on RectangleF for exact placement across varying image dimensions.
+ * 1. When a developer needs to generate a PNG report image with precise sub‑pixel positioning of UI elements, they can use Aspose.Imaging Graphics.DrawRectangle overload with a RectangleF to draw a floating‑point rectangle.
+ * 2. When creating custom thumbnails that require anti‑aliased borders, the code shows how to draw an orange‑colored rectangle with fractional coordinates on a 400×300 image.
+ * 3. When building a CAD‑style overlay on top of a scanned document, the floating‑point rectangle lets you align measurement boxes accurately using C# and Aspose.Imaging.
+ * 4. When automating the production of marketing banners where the rectangle dimensions must be calculated dynamically (e.g., based on user input), the RectangleF overload provides the needed precision.
+ * 5. When developing a diagnostic tool that highlights regions of interest in medical PNG images, the code demonstrates how to draw a high‑resolution rectangle with a specific pen width and color using Aspose.Imaging.
  */

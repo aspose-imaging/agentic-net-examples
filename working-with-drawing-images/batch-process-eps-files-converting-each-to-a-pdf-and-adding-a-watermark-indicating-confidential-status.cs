@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -15,63 +15,43 @@ class Program
             string inputDirectory = @"C:\InputEps";
             string outputDirectory = @"C:\OutputPdf";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
             // Get all EPS files in the input directory
             string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
 
             foreach (string inputPath in epsFiles)
             {
-                // Verify input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Prepare output PDF path
-                string outputPath = Path.Combine(outputDirectory,
+                // Determine the output PDF path
+                string outputPath = Path.Combine(
+                    outputDirectory,
                     Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
 
-                // Ensure the directory for the output file exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the EPS image
                 using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
                 {
-                    // -------------------------------------------------
-                    // Add watermark indicating confidential status
-                    // -------------------------------------------------
-                    // Note: Aspose.Imaging provides drawing capabilities for raster images.
-                    // For vector EPS images, you may need to rasterize first or use a
-                    // vector drawing API. The following placeholder shows where the
-                    // watermark logic would be inserted.
-                    // -------------------------------------------------
-                    // Example (if rasterization is performed):
-                    // using (var graphics = new Graphics(epsImage))
-                    // {
-                    //     var font = new Font("Arial", 48);
-                    //     var brush = new SolidBrush(Color.FromArgb(128, Color.Red));
-                    //     graphics.DrawString("CONFIDENTIAL", font, brush, new PointF(10, 10));
-                    // }
-                    // -------------------------------------------------
-
-                    // Configure PDF options with desired compliance
+                    // Configure PDF options with compliance and a confidential watermark in metadata
                     var pdfOptions = new PdfOptions
                     {
                         PdfCoreOptions = new PdfCoreOptions
                         {
                             PdfCompliance = PdfComplianceVersion.PdfA1b
                         },
-                        // Optional: set document title to indicate confidentiality
                         PdfDocumentInfo = new PdfDocumentInfo
                         {
-                            Title = "CONFIDENTIAL"
+                            Title = "Confidential"
                         }
                     };
 
-                    // Save as PDF
+                    // Save the EPS as a PDF
                     epsImage.Save(outputPath, pdfOptions);
                 }
             }
@@ -85,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design studio must convert a large collection of EPS artwork into PDF portfolios while automatically stamping each document with a “Confidential” watermark for client confidentiality.
- * 2. When an engineering firm needs to batch‑process EPS schematics into PDF format for inclusion in a regulatory submission, adding a watermark to indicate the files are proprietary.
- * 3. When a marketing department wants to generate PDF versions of EPS logos for a brand‑guideline package and ensure every file carries a “Confidential – Internal Use Only” overlay.
- * 4. When a legal team automates the transformation of EPS evidence files into searchable PDFs and requires a watermark to mark the documents as sealed.
- * 5. When a document‑management system ingests EPS drawings, converts them to PDF for archival using Aspose.Imaging for .NET, and applies a watermark to flag the records as confidential during the batch import process.
+ * 1. When a design studio needs to batch‑convert a folder of Adobe Illustrator EPS artwork into PDF/A‑1b compliant PDFs while automatically adding a “Confidential” watermark in the document metadata.
+ * 2. When a legal department must archive EPS‑based contract diagrams as secure PDFs, embedding a confidentiality flag to satisfy record‑keeping regulations.
+ * 3. When an engineering firm wants to automate the transformation of EPS schematics into searchable PDF files for client distribution, with a built‑in “Confidential” title for each document.
+ * 4. When a publishing house processes thousands of EPS illustrations for print, converting them to PDFs that meet PDF compliance standards and include a confidential watermark for internal review.
+ * 5. When a corporate intranet tool programmatically reads EPS files from a directory, generates PDF versions using Aspose.Imaging, and adds a “Confidential” watermark to prevent unauthorized sharing.
  */

@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -10,8 +9,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/multipage.svg";
-            string outputPath = "Output/output.pdf";
+            string inputPath = "input.svg";
+            string outputPath = "output\\result.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -23,20 +22,7 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    var vectorOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    };
-                    pdfOptions.VectorRasterizationOptions = vectorOptions;
-
-                    image.Save(outputPath, pdfOptions);
-                }
+                image.Save(outputPath, new PdfOptions());
             }
         }
         catch (Exception ex)
@@ -48,9 +34,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate printable reports by converting a multi‑page SVG diagram into a single PDF while keeping the original vector quality and page sequence.
- * 2. When an e‑learning platform wants to bundle several SVG slides into one downloadable PDF for offline viewing without rasterizing the graphics.
- * 3. When a CAD tool exports multi‑page SVG schematics and a developer must combine them into a PDF portfolio that preserves exact dimensions and colors.
- * 4. When a marketing automation script creates multi‑page SVG infographics and needs to deliver them as a single PDF attachment to email campaigns.
- * 5. When a document management system ingests SVG assets and requires a C# routine to archive them as a single PDF file with preserved vector fidelity for long‑term storage.
+ * 1. When a developer needs to generate a printable PDF report from a multi‑page SVG diagram while preserving the original vector quality and page sequence.
+ * 2. When an application must convert a batch of SVG assets created by a design tool into a single PDF portfolio for easy distribution to clients.
+ * 3. When a web service receives an uploaded multi‑page SVG invoice and must return a PDF version that retains scalable graphics for compliance auditing.
+ * 4. When a desktop utility automates the transformation of SVG‑based technical drawings into a consolidated PDF handbook without rasterizing the images.
+ * 5. When a CI/CD pipeline includes a step that validates that SVG documentation can be rendered as a single PDF file with exact vector fidelity for archival purposes.
  */

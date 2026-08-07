@@ -11,32 +11,51 @@ class Program
     {
         try
         {
-            var colorInfos = new List<(Color color, string name)>
+            // Output directory for generated BMP files
+            string outputDir = @"C:\Temp\DiagonalLines";
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Define colors for diagonal lines
+            List<Color> colors = new List<Color>
             {
-                (Color.Red, "red"),
-                (Color.Green, "green"),
-                (Color.Blue, "blue"),
-                (Color.Yellow, "yellow"),
-                (Color.Magenta, "magenta")
+                Color.Red,
+                Color.Green,
+                Color.Blue,
+                Color.Yellow,
+                Color.Magenta,
+                Color.Cyan,
+                Color.Orange,
+                Color.Purple
             };
 
-            const int width = 200;
-            const int height = 200;
-            const int lineWidth = 5;
+            int width = 200;
+            int height = 200;
+            int lineThickness = 5;
 
-            foreach (var (color, name) in colorInfos)
+            for (int i = 0; i < colors.Count; i++)
             {
-                string outputPath = $"C:\\temp\\diag_{name}.bmp";
+                // Construct output file path
+                string outputPath = Path.Combine(outputDir, $"diag_{i + 1}.bmp");
 
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                Source source = new FileCreateSource(outputPath, false);
-                BmpOptions bmpOptions = new BmpOptions() { Source = source };
+                // Set up BMP options with bound file source
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.BitsPerPixel = 24;
+                bmpOptions.Source = new FileCreateSource(outputPath, false);
 
+                // Create a raster image canvas bound to the output file
                 using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
                 {
+                    // Draw a diagonal line using the specified color
                     Graphics graphics = new Graphics(canvas);
-                    graphics.DrawLine(new Pen(color, lineWidth), new Point(0, 0), new Point(canvas.Width - 1, canvas.Height - 1));
+                    Pen pen = new Pen(colors[i], lineThickness);
+                    graphics.DrawLine(pen, new Point(0, 0), new Point(canvas.Width - 1, canvas.Height - 1));
+
+                    // Save the bound image
                     canvas.Save();
                 }
             }
@@ -50,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a QA engineer needs to generate a set of BMP test images with distinct colored diagonal lines to verify that a downstream image‑processing pipeline correctly reads line colors and orientation.
- * 2. When a developer is creating sample assets for documentation that demonstrate how Aspose.Imaging’s Graphics.DrawLine method works with different Pen colors in BMP format.
- * 3. When an automated build script must produce placeholder graphics for UI components, using C# and Aspose.Imaging to create 200 × 200 BMP files with colored diagonal lines as visual markers.
- * 4. When a software vendor wants to benchmark the performance of raster image creation and saving across multiple color values by batch‑generating BMP files with varying Pen colors.
- * 5. When a teaching assistant prepares classroom material that shows how to use FileCreateSource and BmpOptions in Aspose.Imaging to programmatically create and save BMP images with simple geometric shapes.
+ * 1. When a developer needs to generate a set of BMP test images with colored diagonal lines to verify that a downstream image‑processing pipeline correctly reads 24‑bit BMP files created with Aspose.Imaging for .NET.
+ * 2. When a QA engineer wants to batch‑create sample bitmap assets for visual regression testing of UI components that render diagonal patterns in different colors.
+ * 3. When a software team is building a documentation generator that includes example BMP files showing how pen thickness and color affect line drawing in C# using Aspose.Imaging.
+ * 4. When an automation script must produce placeholder graphics for a game’s level editor, each BMP containing a unique colored diagonal line to represent different terrain types.
+ * 5. When a developer is testing file‑system permissions and folder creation logic by programmatically writing multiple BMP files to a temporary directory using FileCreateSource and RasterImage.
  */

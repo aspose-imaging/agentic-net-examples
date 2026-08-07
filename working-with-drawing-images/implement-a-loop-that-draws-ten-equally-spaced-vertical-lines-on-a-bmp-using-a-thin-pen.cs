@@ -6,44 +6,46 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string outputPath = @"C:\temp\output.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Set up BMP options with a file source
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            // Hardcoded output path
+            string outputPath = @"C:\temp\vertical_lines.bmp";
 
-            int width = 500;
-            int height = 500;
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create the image canvas
-            using (Image image = Image.Create(bmpOptions, width, height))
+            int imageWidth = 500;
+            int imageHeight = 500;
+            int lineCount = 10;
+            int spacing = imageWidth / (lineCount + 1);
+
+            // Set BMP creation options
+            BmpOptions bmpOptions = new BmpOptions
             {
-                // Initialize graphics for drawing
+                BitsPerPixel = 24,
+                Source = new FileCreateSource(outputPath, false)
+            };
+
+            // Create the BMP image
+            using (Image image = Image.Create(bmpOptions, imageWidth, imageHeight))
+            {
+                // Initialize graphics object
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                graphics.Clear(Color.White); // optional background
 
                 // Thin black pen
                 Pen pen = new Pen(Color.Black, 1);
 
                 // Draw ten equally spaced vertical lines
-                int lineCount = 10;
-                int spacing = width / (lineCount + 1);
                 for (int i = 1; i <= lineCount; i++)
                 {
                     int x = i * spacing;
-                    graphics.DrawLine(pen, x, 0, x, height);
+                    graphics.DrawLine(pen, x, 0, x, imageHeight);
                 }
 
-                // Save the image (file is already bound to the source)
+                // Save the image
                 image.Save();
             }
         }
@@ -56,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a simple BMP template with evenly spaced vertical guide lines for a UI layout mock‑up using Aspose.Imaging for .NET.
- * 2. When creating a printable barcode or ruler image where ten vertical markers must be drawn at regular intervals on a 24‑bit BMP file.
- * 3. When producing a test pattern image to verify image processing pipelines, such as edge detection, by drawing thin black lines on a white background in C#.
- * 4. When automating the generation of column separators for a spreadsheet export that is saved as a BMP image using Aspose.Imaging’s Graphics API.
- * 5. When building a lightweight diagram or chart that requires equally spaced vertical lines as a background grid in a BMP image created programmatically.
+ * 1. When generating a printable grid overlay for a 500 × 500 pixel BMP template in a C# desktop application, a developer can use this code to draw ten equally spaced vertical lines with a thin black pen.
+ * 2. When creating a simple barcode‑like reference image for testing image‑processing algorithms, the loop produces evenly spaced vertical strokes on a 24‑bit BMP using Aspose.Imaging.
+ * 3. When preparing a background for a UI mockup that requires evenly spaced separators, the code draws vertical lines on a BMP file that can be loaded later in a .NET form.
+ * 4. When automating the production of calibration charts for a scanner, a developer can employ this snippet to render ten vertical markers on a BMP image with precise spacing.
+ * 5. When building a teaching example that demonstrates the use of Graphics, Pen, and DrawLine methods in Aspose.Imaging for .NET, the loop provides a clear visual of ten vertical lines on a white BMP canvas.
  */

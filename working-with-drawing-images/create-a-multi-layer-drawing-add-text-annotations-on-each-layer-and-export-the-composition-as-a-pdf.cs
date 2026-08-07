@@ -2,10 +2,8 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -13,45 +11,24 @@ class Program
     {
         try
         {
-            string outputPdfPath = "Output/composition.pdf";
-            string tempPngPath = "Output/temp.png";
+            string outputPath = "output/output.pdf";
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            Source pngSource = new FileCreateSource(tempPngPath, false);
-            PngOptions pngOptions = new PngOptions() { Source = pngSource };
+            int width = 800;
+            int height = 600;
 
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, 800, 600))
+            PngOptions pngOptions = new PngOptions();
+            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, width, height))
             {
                 Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Color.White);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Layer 1: rectangle and annotation
-                Pen pen1 = new Pen(Color.Blue, 3);
-                graphics.DrawRectangle(pen1, new Rectangle(50, 50, 300, 200));
-                using (SolidBrush brush1 = new SolidBrush())
-                {
-                    brush1.Color = Color.Blue;
-                    brush1.Opacity = 100;
-                    Font font1 = new Font("Arial", 24);
-                    graphics.DrawString("Layer 1", font1, brush1, new PointF(60, 60));
-                }
+                Pen pen = new Pen(Aspose.Imaging.Color.Blue, 5);
+                graphics.DrawRectangle(pen, new Rectangle(100, 100, 200, 150));
 
-                // Layer 2: ellipse and annotation
-                Pen pen2 = new Pen(Color.Red, 3);
-                graphics.DrawEllipse(pen2, new Rectangle(400, 100, 250, 250));
-                using (SolidBrush brush2 = new SolidBrush())
-                {
-                    brush2.Color = Color.Red;
-                    brush2.Opacity = 100;
-                    Font font2 = new Font("Arial", 24);
-                    graphics.DrawString("Layer 2", font2, brush2, new PointF(410, 110));
-                }
-
-                using (PdfOptions pdfOptions = new PdfOptions())
-                {
-                    canvas.Save(outputPdfPath, pdfOptions);
-                }
+                PdfOptions pdfOptions = new PdfOptions();
+                canvas.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -63,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a multi‑layer technical diagram with separate shapes and labels in C# and deliver it as a searchable PDF using Aspose.Imaging.
- * 2. When an application must programmatically create a marketing brochure page that combines colored shapes and promotional text on distinct layers and export the final composition to PDF for printing.
- * 3. When a reporting tool has to embed annotated floor‑plan graphics—such as rooms drawn as rectangles and circles with layer‑specific captions—into a PDF report generated on the fly.
- * 4. When a document‑automation service requires converting dynamically drawn PNG canvases with layered annotations into PDF files for archival or e‑signature workflows.
- * 5. When a developer wants to produce printable certificates that overlay decorative shapes and personalized text on separate layers and save the result as a high‑resolution PDF using Aspose.Imaging for .NET.
+ * 1. When a developer needs to generate a multi‑layer PDF map where each layer is drawn on a raster canvas and labeled with text annotations using Aspose.Imaging for .NET.
+ * 2. When an automated reporting system must create a PDF diagram that combines separate graphic layers—such as a background grid, highlighted region, and descriptive labels—by drawing on a PNG raster image and exporting with PdfOptions.
+ * 3. When a desktop application wants to produce a printable PDF certificate that includes a drawn border, a logo layer, and personalized name and date text placed on distinct layers using C# graphics operations.
+ * 4. When a web API needs to return a PDF brochure that contains layered illustrations (e.g., product silhouette, feature callouts, and caption text) created on a raster image and saved as PDF with Aspose.Imaging.
+ * 5. When a document‑generation workflow requires assembling a PDF flyer by stacking multiple graphic layers—each with its own text annotation—on a white canvas before converting the raster image to PDF.
  */

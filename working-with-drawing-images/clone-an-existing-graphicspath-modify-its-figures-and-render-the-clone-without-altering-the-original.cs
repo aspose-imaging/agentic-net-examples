@@ -7,52 +7,48 @@ using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\temp\GraphicsPathCloneOutput.bmp";
-
         try
         {
-            // Ensure the output directory exists
+            // Hardcoded output path
+            string outputPath = @"c:\temp\output.png";
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a new BMP image
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
-            };
+            // Create PNG options with a FileCreateSource bound to the output file
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            using (Image image = Image.Create(bmpOptions, 500, 500))
+            // Create a new image canvas (500x500)
+            using (Image image = Image.Create(pngOptions, 500, 500))
             {
-                // Initialize graphics surface
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.Wheat);
+                graphics.Clear(Color.White);
 
-                // Build the original GraphicsPath
+                // ----- Original GraphicsPath -----
                 GraphicsPath originalPath = new GraphicsPath();
+                Figure originalFigure = new Figure();
+                originalFigure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
+                originalPath.AddFigure(originalFigure);
 
-                // Figure 1: a rectangle
-                Figure rectFigure = new Figure();
-                rectFigure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
-                originalPath.AddFigure(rectFigure);
-
-                // Draw the original path in black
+                // Draw the original path with a black pen
                 graphics.DrawPath(new Pen(Color.Black, 2), originalPath);
 
-                // Deep clone the original path
+                // ----- Clone and modify -----
                 GraphicsPath clonedPath = originalPath.DeepClone();
 
-                // Modify the clone by adding an ellipse figure
-                Figure ellipseFigure = new Figure();
-                ellipseFigure.AddShape(new EllipseShape(new RectangleF(150f, 150f, 200f, 200f)));
-                clonedPath.AddFigure(ellipseFigure);
+                // Add an additional ellipse to the cloned path
+                Figure extraFigure = new Figure();
+                extraFigure.AddShape(new EllipseShape(new RectangleF(150f, 150f, 100f, 100f)));
+                clonedPath.AddFigure(extraFigure);
 
-                // Draw the cloned (modified) path in red
+                // Draw the cloned (modified) path with a red pen
                 graphics.DrawPath(new Pen(Color.Red, 2), clonedPath);
 
-                // Save the image
+                // Save the image (the output file is already bound to the source)
                 image.Save();
             }
         }
@@ -65,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a printable BMP report that needs a fixed rectangle base shape while dynamically adding extra figures such as ellipses without altering the original GraphicsPath.
- * 2. When creating UI thumbnails where the original vector outline is cloned and modified for different theme colors, preserving the source path for reuse across multiple images.
- * 3. When building a CAD‑style application that must keep the original blueprint path intact while allowing users to experiment with additional geometry on a cloned GraphicsPath.
- * 4. When producing layered game assets where the background shape remains static and a deep‑cloned path is drawn in a different color to visualize hit‑boxes or effects.
- * 5. When automating batch image processing that appends watermarks or signatures to existing vector paths on a BMP canvas, ensuring the original path data stays unchanged.
+ * 1. When generating a printable PDF report that needs a base shape such as a logo rectangle and an overlay highlight like a red ellipse without changing the original logo geometry.
+ * 2. When creating a UI thumbnail where the original vector icon must stay unchanged while a temporary selection ring is drawn around it for preview.
+ * 3. When building a map visualization that reuses a country border path but adds a semi‑transparent overlay for a selected region without affecting the master border data.
+ * 4. When producing a CAD drawing where the original component outline is cloned to add measurement annotations (ellipse) for a design review, preserving the original model.
+ * 5. When developing a game asset pipeline that clones a sprite’s collision path to draw debugging guides (red ellipse) on the same canvas while keeping the original collision shape intact.
  */

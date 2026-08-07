@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -10,42 +9,38 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string inputDir = Path.Combine(Directory.GetCurrentDirectory(), "Input");
+            string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Output");
 
-            string[] files = Directory.GetFiles(inputDirectory);
-            foreach (string inputPath in files)
+            if (!Directory.Exists(inputDir))
+            {
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            string[] files = Directory.GetFiles(inputDir, "*.*", SearchOption.TopDirectoryOnly);
+            foreach (var inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName + ".pdf");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
-                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    pdfOptions.PdfCoreOptions = new PdfCoreOptions
-                    {
-                        PdfCompliance = PdfComplianceVersion.PdfA1b
-                    };
-
-                    if (image is VectorImage)
-                    {
-                        pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height,
-                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                            SmoothingMode = SmoothingMode.None
-                        };
-                    }
-
-                    image.Save(outputPath, pdfOptions);
+                    image.Save(outputPath, new PdfOptions());
                 }
             }
         }
@@ -58,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a directory of SVG, EPS, or AI vector graphics into PDF/A‑1b compliant PDFs with embedded fonts and a PDF version of 1.6 for long‑term archival.
- * 2. When an automated build or CI pipeline must process multiple vector image files and generate PDFs that preserve the original page size, white background, and exact dimensions for regulatory reporting.
- * 3. When a web service receives user‑uploaded vector drawings and must render each as a PDF with consistent rasterization options, such as SingleBitPerPixel text rendering and no smoothing, for high‑quality printing.
- * 4. When a desktop application needs to export a collection of design assets to PDF while ensuring the PDF version is set to 1.6 and the fonts are embedded to avoid missing‑glyph issues on client machines.
- * 5. When a document management system requires converting various vector image formats to PDFs with uniform PDF core options and vector rasterization settings to guarantee consistent viewing across different PDF viewers.
+ * 1. When a design studio needs to automatically convert a folder of SVG or EPS illustrations into PDF files that preserve the original typography by embedding fonts and comply with PDF 1.6 for client delivery.
+ * 2. When an e‑learning platform must generate printable PDF handouts from a batch of vector diagrams stored in AI or WMF format, ensuring the PDFs are version‑compatible with older viewers.
+ * 3. When a legal document automation system has to transform vector‑based court exhibits into searchable PDFs with embedded fonts to meet filing standards and maintain visual fidelity.
+ * 4. When a marketing department wants to mass‑export brand assets such as icons and logos from various vector formats to PDF for inclusion in brochures, while guaranteeing the PDFs use PDF 1.6 and contain all required fonts.
+ * 5. When a cloud‑based image processing service offers an API that receives a zip of vector files and returns PDFs with embedded fonts, using C# and Aspose.Imaging to process the batch efficiently.
  */

@@ -2,22 +2,19 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.emf";
-            string outputDir = "output";
-            int dpiX = 300;
-            int dpiY = 300;
+            string inputPath = @"C:\Input\multi.emf";
+            string outputDirectory = @"C:\Output";
 
-            // Validate input file
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,41 +22,46 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(outputDirectory);
 
             // Load the EMF document
             using (Image image = Image.Load(inputPath))
             {
-                // Determine page count (default to 1 if not multipage)
-                IMultipageImage multipage = image as IMultipageImage;
-                int pageCount = multipage?.PageCount ?? 1;
-
-                for (int i = 0; i < pageCount; i++)
+                // Check if the loaded image supports multiple pages
+                if (image is IMultipageImage multipageImage)
                 {
-                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.tif");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    int pageCount = multipageImage.PageCount;
 
-                    // Prepare TIFF save options
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    tiffOptions.ResolutionSettings = new ResolutionSetting(dpiX, dpiY);
-
-                    // Rasterize vector content if applicable
-                    if (image is VectorImage)
+                    for (int i = 0; i < pageCount; i++)
                     {
-                        VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
+                        // Build output file path for the current page
+                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.tif");
+
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Configure TIFF save options
+                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                         {
-                            BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height
+                            // Example: use LZW compression
+                            Compression = TiffCompressions.Lzw,
+
+                            // Set high resolution (e.g., 300 DPI)
+                            ResolutionSettings = new ResolutionSetting(300, 300)
                         };
-                        tiffOptions.VectorRasterizationOptions = vectorOptions;
+
+                        // Restrict saving to the current page only
+                        var multiPageOpts = new MultiPageOptions();
+                        multiPageOpts.Pages = new int[] { i };
+                        tiffOptions.MultiPageOptions = multiPageOpts;
+
+                        // Save the current page as a separate TIFF file
+                        image.Save(outputPath, tiffOptions);
                     }
-
-                    // Export only the current page
-                    tiffOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
-
-                    // Save the page as a separate TIFF file
-                    image.Save(outputPath, tiffOptions);
+                }
+                else
+                {
+                    Console.Error.WriteLine("The loaded image does not support multiple pages.");
                 }
             }
         }
@@ -72,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD application needs to export each page of a multi‑page EMF drawing to high‑resolution TIFF files for printing or archiving.
- * 2. When a document management system must convert vector‑based EMF reports into separate 300 dpi TIFF images for compatibility with legacy scanners.
- * 3. When a GIS workflow requires rasterizing multi‑page EMF maps into individual TIFF tiles at a specific DPI for use in raster‑based analysis tools.
- * 4. When an e‑learning platform wants to generate high‑quality TIFF slides from a multi‑page EMF presentation for offline viewing on devices that only support TIFF.
- * 5. When a legal firm needs to preserve each page of an EMF‑generated contract as a separate, DPI‑controlled TIFF file for court‑approved electronic evidence.
+ * 1. When a developer must extract each page of a multi‑page EMF vector drawing and save them as high‑resolution (e.g., 300 DPI) TIFF files for archival or printing, this code provides a C# solution using Aspose.Imaging.
+ * 2. When an engineering application needs to convert complex EMF schematics into separate TIFF images with LZW compression for faster loading in a web viewer, the example demonstrates the required steps.
+ * 3. When a document‑management system requires batch processing of EMF reports into individual TIFF pages at a specific DPI to meet regulatory image‑quality standards, the code shows how to automate the conversion in .NET.
+ * 4. When a GIS or mapping tool must preserve the detail of vector‑based EMF map layers by rendering each page to a 300 DPI TIFF for downstream raster analysis, this snippet handles the conversion.
+ * 5. When a medical‑imaging workflow needs to transform multi‑page EMF charts into separate high‑resolution TIFF files for integration with DICOM archives, the sample illustrates the necessary C# implementation.
  */

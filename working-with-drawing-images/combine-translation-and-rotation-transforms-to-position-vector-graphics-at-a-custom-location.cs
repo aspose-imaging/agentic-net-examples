@@ -2,9 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,49 +9,44 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputSvgPath = "input.svg";
-            string outputPngPath = "output.png";
+            // Hard‑coded input and output paths
+            string inputPath = "input\\vector.svg";
+            string outputPath = "output\\result.png";
 
-            // Validate input file existence
-            if (!File.Exists(inputSvgPath))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputSvgPath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPngPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the SVG vector image
-            using (SvgImage vectorImage = (SvgImage)Image.Load(inputSvgPath))
+            // Create a blank PNG canvas
+            using (RasterImage canvas = (RasterImage)Image.Create(new PngOptions(), 800, 600))
             {
-                // Determine canvas size (using the vector image dimensions)
-                int canvasWidth = vectorImage.Width;
-                int canvasHeight = vectorImage.Height;
+                // Initialize Graphics for the canvas
+                Graphics graphics = new Graphics(canvas);
+                graphics.Clear(Color.White);
 
-                // Create a file source for the output PNG
-                Source fileSource = new FileCreateSource(outputPngPath, false);
-
-                // Configure PNG options with the file source
-                PngOptions pngOptions = new PngOptions { Source = fileSource };
-
-                // Create the raster canvas bound to the output file
-                using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
+                // Load the vector graphic (SVG) as a raster image
+                using (RasterImage vectorRaster = (RasterImage)Image.Load(inputPath))
                 {
-                    // Create a Graphics instance for drawing
-                    Graphics graphics = new Graphics(canvas);
+                    // Build a combined transform: rotate 45° then translate (200,150)
+                    Matrix transform = new Matrix();
+                    transform.Rotate(45f);               // Rotation around the origin
+                    transform.Translate(200f, 150f);     // Translation after rotation
 
-                    // Apply translation (move) and rotation transforms
-                    graphics.TranslateTransform(100, 50); // move 100px right, 50px down
-                    graphics.RotateTransform(45);        // rotate 45 degrees clockwise
+                    // Apply the transform to the graphics context
+                    graphics.Transform = transform;
 
-                    // Draw the vector image onto the transformed canvas
-                    graphics.DrawImage(vectorImage, new Rectangle(0, 0, vectorImage.Width, vectorImage.Height));
-
-                    // Save the bound image (no need to pass path/options)
-                    canvas.Save();
+                    // Draw the rasterized vector graphic at the origin (transform will position it)
+                    graphics.DrawImage(vectorRaster, 0, 0);
                 }
+
+                // Save the final image to the specified file
+                canvas.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -66,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating product catalog thumbnails where an SVG logo must be placed at a specific offset and rotated to match the product angle before exporting to PNG.
- * 2. When creating dynamic map tiles that require positioning and rotating a vector road symbol at precise coordinates on a raster background.
- * 3. When designing custom UI icons that need to be shifted and angled within a fixed-size PNG button image for consistent layout across devices.
- * 4. When automating the production of printable certificates that overlay a rotated SVG seal at a designated spot on a PNG template.
- * 5. When building a batch process that adds a translated and rotated SVG watermark to a series of PNG images for brand protection.
+ * 1. When a developer needs to overlay a rotated SVG company logo onto a product photo at a specific offset, they can use this code to rotate the logo 45° and translate it to the desired coordinates before saving as a PNG.
+ * 2. When generating printable marketing flyers, a developer can position a vector illustration at an exact spot on a blank canvas, applying rotation and translation to fit the layout requirements.
+ * 3. When creating dynamic UI thumbnails that show icons rotated to indicate status, the code lets the developer rotate the SVG icon and move it to the correct location on a raster background.
+ * 4. When building a map‑based web service that places a rotated directional arrow (SVG) on a map image at a given latitude/longitude offset, this transform logic positions the arrow accurately.
+ * 5. When automating the production of custom certificates, a developer can rotate and place a vector seal onto the certificate canvas at a precise location before exporting the final PNG.
  */

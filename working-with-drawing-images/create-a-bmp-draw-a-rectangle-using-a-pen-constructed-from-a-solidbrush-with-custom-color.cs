@@ -11,40 +11,34 @@ class Program
     {
         try
         {
-            // Output BMP file path
-            string outputPath = "output.bmp";
+            string outputPath = @"C:\temp\output.bmp";
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set BMP options
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
-            };
+            // Configure BMP options with a FileCreateSource
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a new image canvas
-            using (Image image = Image.Create(bmpOptions, 200, 200))
+            // Create the image canvas
+            using (Image image = Image.Create(bmpOptions, 500, 500))
             {
-                // Create a solid brush with a custom color
-                using (SolidBrush brush = new SolidBrush(Color.Blue))
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(image);
+
+                // Create a SolidBrush with a custom color
+                using (SolidBrush brush = new SolidBrush(Color.FromArgb(255, 128, 0, 128))) // Purple
                 {
-                    // Create a pen from the solid brush
+                    // Construct a Pen from the SolidBrush
                     Pen pen = new Pen(brush);
 
-                    // Initialize graphics for drawing
-                    Graphics graphics = new Graphics(image);
-
-                    // Clear the canvas with white background
-                    graphics.Clear(Color.White);
-
-                    // Draw a rectangle using the pen
-                    graphics.DrawRectangle(pen, new Rectangle(50, 50, 100, 100));
-
-                    // Save the image
-                    image.Save();
+                    // Draw a rectangle using the Pen
+                    graphics.DrawRectangle(pen, new Rectangle(100, 100, 300, 200));
                 }
+
+                // Save the image (output is already bound to the file)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -56,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP thumbnail with a blue rectangular border for a product catalog in a C# ASP.NET application using Aspose.Imaging.
- * 2. When an automated reporting tool must create a BMP diagram that highlights a specific area by drawing a rectangle with a custom SolidBrush color on a white canvas.
- * 3. When a Windows desktop utility requires programmatically drawing a colored rectangle onto a BMP file to indicate selection zones in a screenshot editor built with C#.
- * 4. When a batch image processing script has to add a blue outline to BMP assets for branding purposes, using Aspose.Imaging’s Pen and SolidBrush classes.
- * 5. When a game development pipeline needs to generate placeholder BMP textures with simple geometric shapes, such as a rectangle drawn with a custom color, to test rendering pipelines in .NET.
+ * 1. When a developer needs to generate a 24‑bit BMP thumbnail that highlights a specific area with a purple rectangle for a reporting dashboard.
+ * 2. When an automated document‑generation system must embed a custom‑colored rectangle into a BMP placeholder image to indicate a selected region in a C# application.
+ * 3. When a Windows desktop utility creates a printable BMP map and uses a SolidBrush‑based Pen to draw a colored bounding box around a user‑defined zone.
+ * 4. When a batch image‑processing script programmatically adds a visual marker to BMP files before archiving them, using Aspose.Imaging’s Graphics, Pen, and SolidBrush classes.
+ * 5. When a testing framework needs to produce a known BMP file with a precise rectangle shape and color to validate image‑comparison algorithms in .NET.
  */

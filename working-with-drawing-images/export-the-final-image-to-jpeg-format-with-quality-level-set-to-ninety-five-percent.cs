@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.bmp";
+        string outputPath = @"C:\temp\output.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.bmp";
-            string outputPath = @"C:\Images\sample_converted.jpg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -32,7 +32,7 @@ class Program
                     Quality = 95
                 };
 
-                // Save the image as JPEG
+                // Save the image as JPEG using the configured options
                 image.Save(outputPath, saveOptions);
             }
         }
@@ -45,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy BMP files to web‑friendly JPEGs with high visual quality for faster page loads.
- * 2. When an application must generate thumbnails from high‑resolution scans and store them as 95% quality JPEGs to balance size and clarity.
- * 3. When a batch‑processing tool has to archive scanned documents by saving them in JPEG format with a specific quality setting to meet storage policies.
- * 4. When a photo‑editing workflow requires exporting edited images from Aspose.Imaging to JPEG with a 95% quality level for client delivery.
- * 5. When a server‑side service processes user‑uploaded BMP images and needs to save them as JPEGs with controlled compression for consistent display across browsers.
+ * 1. When a developer needs to convert legacy BMP assets to web‑friendly JPEG files while preserving high visual quality for an e‑commerce product catalog.
+ * 2. When an automated batch‑processing service must generate thumbnail previews from scanned documents and store them as 95 % quality JPEGs to balance file size and clarity.
+ * 3. When a Windows desktop application exports user‑edited screenshots to JPEG for email attachment, ensuring the output meets typical email size limits without noticeable degradation.
+ * 4. When a server‑side image pipeline resizes and saves uploaded photos as JPEG with a fixed 95 % quality setting before storing them in a cloud storage bucket.
+ * 5. When a reporting tool converts chart images generated in BMP format to JPEG for inclusion in PDF reports, using Aspose.Imaging to control the compression level.
  */

@@ -26,9 +26,9 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*", SearchOption.TopDirectoryOnly);
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (string inputPath in files)
+            foreach (var inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -36,36 +36,24 @@ class Program
                     return;
                 }
 
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string jpegOutputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
+                string pngOutputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(jpegOutputPath));
+                Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
+
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Prepare vector rasterization options for high‑resolution output
-                    var vectorOptions = new VectorRasterizationOptions
+                    using (JpegOptions jpegOptions = new JpegOptions())
                     {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    };
+                        image.Save(jpegOutputPath, jpegOptions);
+                    }
 
-                    // JPEG output
-                    var jpegOptions = new JpegOptions
+                    using (PngOptions pngOptions = new PngOptions())
                     {
-                        Quality = 100,
-                        VectorRasterizationOptions = vectorOptions
-                    };
-                    string jpegOutputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
-                    Directory.CreateDirectory(Path.GetDirectoryName(jpegOutputPath));
-                    image.Save(jpegOutputPath, jpegOptions);
-
-                    // PNG output
-                    var pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = vectorOptions
-                    };
-                    string pngOutputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(pngOutputPath));
-                    image.Save(pngOutputPath, pngOptions);
+                        image.Save(pngOutputPath, pngOptions);
+                    }
                 }
             }
         }
@@ -78,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate high‑resolution JPEG previews of a batch of vector drawings (e.g., SVG, AI) for web thumbnails while preserving the original dimensions.
- * 2. When a developer must create lossless PNG copies of each vector file for archival or print‑ready distribution alongside the JPEG versions.
- * 3. When a developer wants to automate rasterization of vector assets stored in an Input folder, applying a white background and specific smoothing settings before saving to an Output directory.
- * 4. When a developer requires a C# solution that loads any image type, uses VectorRasterizationOptions to control page width, height, and rendering hints, and outputs both JPEG and PNG formats in a single pass.
- * 5. When a developer is building a CI/CD pipeline that validates vector artwork by converting each file to JPEG (quality 100) and PNG to ensure visual fidelity across different platforms.
+ * 1. When a developer must convert a large collection of vector drawings into high‑resolution JPEGs for fast web preview and lossless PNGs for print‑ready distribution, this C# batch‑processing code provides an automated solution.
+ * 2. When an e‑commerce platform needs to generate both compressed JPEG thumbnails and full‑quality PNG assets from supplier‑provided SVG or AI files, the code can be integrated into the image pipeline.
+ * 3. When a marketing team requires daily conversion of newly uploaded vector artwork into dual formats for email campaigns (JPEG) and social media posts (PNG), the script automates the task on a Windows server.
+ * 4. When a document management system has to archive vector illustrations as JPEG for quick indexing and PNG for archival integrity, developers can employ this code to process all files in a designated folder.
+ * 5. When a desktop publishing workflow demands simultaneous creation of screen‑optimized JPEGs and lossless PNGs from source vector files before sending them to designers and printers, this example handles the batch conversion in C#.
  */

@@ -3,7 +3,6 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
@@ -11,8 +10,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.emf";
-            string outputPath = "Output/sample.pdf";
+            string inputPath = "input.emf";
+            string outputPath = "output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -24,26 +23,26 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
+                var vectorOptions = new VectorRasterizationOptions
                 {
-                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo
+                    BackgroundColor = Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None
+                };
+
+                var pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = vectorOptions,
+                    PdfDocumentInfo = new PdfDocumentInfo
                     {
-                        Author = "John Doe",
-                        Title = "Sample PDF"
-                    };
+                        Author = "Author Name",
+                        Title = "Document Title"
+                    }
+                };
 
-                    EmfRasterizationOptions vectorOptions = new EmfRasterizationOptions
-                    {
-                        PageSize = image.Size,
-                        BackgroundColor = Aspose.Imaging.Color.White,
-                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = Aspose.Imaging.SmoothingMode.None
-                    };
-
-                    pdfOptions.VectorRasterizationOptions = vectorOptions;
-
-                    image.Save(outputPath, pdfOptions);
-                }
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -55,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a Windows desktop application must generate printable PDF reports from vector‑based EMF charts while preserving font fidelity and adding author and title metadata.
- * 2. When an automated document conversion service needs to batch‑process EMF logos into PDF files with embedded fonts for consistent branding across different operating systems.
- * 3. When a legal or compliance system requires converting EMF diagrams to PDF and embedding metadata such as author and title for audit‑trail purposes.
- * 4. When a cloud‑based API transforms user‑uploaded EMF drawings into searchable PDF documents, ensuring the fonts are rasterized correctly and PDF properties are set programmatically in C#.
- * 5. When a legacy engineering tool exports schematics as EMF and a .NET utility must create PDF documentation with proper page size, white background, and PDF metadata for inclusion in technical manuals.
+ * 1. When a developer needs to generate printable PDF reports from vector EMF diagrams created by a Windows application, preserving font fidelity and embedding author and title metadata.
+ * 2. When an enterprise workflow requires automatic conversion of EMF assets such as logos or schematics to PDF for archiving, ensuring embedded fonts prevent missing characters.
+ * 3. When a web service must deliver downloadable PDFs that contain EMF‑based charts, adding PDF metadata for search indexing and compliance reporting.
+ * 4. When a batch script converts a library of EMF files into PDF brochures, using C# and Aspose.Imaging to retain vector quality and embed fonts for consistent rendering on any device.
+ * 5. When a desktop application exports user‑created EMF drawings to PDF for electronic signatures, inserting author and title information to meet legal document standards.
  */

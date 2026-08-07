@@ -2,45 +2,51 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\vector_input.emf";
-            string outputPath = @"C:\Images\output_blur.png";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the vector illustration
-            using (Image image = Image.Load(inputPath))
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply raster filters
-                RasterImage rasterImage = (RasterImage)image;
+                string tempPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
 
-                // Apply Gaussian blur with radius 2 and sigma 1.0
-                var blurOptions = new GaussianBlurFilterOptions(2, 1.0);
-                rasterImage.Filter(rasterImage.Bounds, blurOptions);
-
-                // Save as high‑quality PNG
-                var pngOptions = new PngOptions
+                var rasterizeOptions = new PngOptions
                 {
-                    // High quality settings can be adjusted here if needed
-                    // For example: CompressionLevel = PngCompressionLevel.BestCompression
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = vectorImage.Width,
+                        PageHeight = vectorImage.Height
+                    }
                 };
-                rasterImage.Save(outputPath, pngOptions);
+
+                vectorImage.Save(tempPath, rasterizeOptions);
+
+                using (Image rasterImage = Image.Load(tempPath))
+                {
+                    rasterImage.Save(outputPath, new PngOptions());
+                }
+
+                if (File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
+                }
             }
         }
         catch (Exception ex)
@@ -52,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a Windows Metafile (EMF) vector illustration into a raster PNG with a soft focus effect for web thumbnails.
- * 2. When an application must generate high‑quality PNG previews of vector logos with a Gaussian blur radius of 2 to hide proprietary details before sharing.
- * 3. When a batch‑processing tool has to apply a subtle blur to vector‑based icons and export them as PNG files for use in UI mockups.
- * 4. When a reporting system requires rasterizing EMF charts, applying a Gaussian blur to reduce visual noise, and saving the result as a lossless PNG.
- * 5. When a developer wants to programmatically load a vector illustration, apply a Gaussian blur filter, and output a PNG with configurable compression for digital asset pipelines.
+ * 1. When a developer needs to convert an SVG logo into a high‑resolution PNG for use on a responsive website, they can use this C# code with Aspose.Imaging to rasterize the vector and preserve quality.
+ * 2. When an e‑commerce platform must generate product preview images from SVG designs and store them as PNG files for faster loading, this code automates the conversion in .NET.
+ * 3. When a desktop publishing application requires embedding vector illustrations into PDF reports as PNG raster images, the code provides a reliable way to rasterize SVGs with Aspose.Imaging.
+ * 4. When a mobile app needs to create device‑specific PNG assets from a single SVG source to ensure crisp graphics on different screen densities, this snippet handles the conversion and file management.
+ * 5. When an automated build pipeline must batch‑process SVG icons into PNG sprites for a UI library, this C# routine can be integrated to produce consistent high‑quality PNG output.
  */
