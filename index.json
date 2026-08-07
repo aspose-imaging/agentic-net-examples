@@ -3,9 +3,9 @@
   "platform": "net",
   "framework": "net9.0",
   "package_version": "26.7.0",
-  "total_examples": 2891,
+  "total_examples": 2929,
   "total_categories": 17,
-  "last_updated": "2026-07-13",
+  "last_updated": "2026-08-07",
   "categories": [
     {
       "name": "conversion",
@@ -1608,10 +1608,11 @@
     },
     {
       "name": "image-and-photo-filters",
-      "file_count": 139,
+      "file_count": 148,
       "all_files": [
         "add-unit-tests-that-verify-mask-inversion-works-correctly-for-both-fully-white-and-fully-black-initial-masks.cs",
         "adjust-contentawarefillwatermarkoptions-maxpaintingattempts-to-3-to-improve-removal-quality-on-complex-watermark-patterns.cs",
+        "adjust-contentawarefillwatermarkoptions-maxpaintingattempts-to-3-to-improve-removal-quality-on-complex-watermark.cs",
         "adjust-magicwandtool-threshold-to-a-high-value-to-expand-mask-coverage-over-color-gradients-in-a-png-image.cs",
         "allow-users-to-adjust-the-feather-radius-interactively-and-preview-the-refined-mask-in-real-time.cs",
         "apply-a-color-similarity-filter-to-isolate-a-region-within-an-apng-image-based-on-pixel-hue.cs",
@@ -1660,6 +1661,7 @@
         "calculate-center-coordinates-of-a-bmp-background-blend-a-png-overlay-and-export-to-tiff.cs",
         "chain-and-apply-multiple-image-filters-sequentially-to-an-apng-file-to-achieve-cumulative-effects.cs",
         "choose-the-telea-algorithm-in-watermark-options-to-compare-removal-quality-against-the-default-contentawarefill-method.cs",
+        "choose-the-telea-algorithm-in-watermark-options-to-compare-removal-quality-against-the-default-contentawarefill.cs",
         "combine-a-magicwand-mask-with-a-manually-drawn-polygon-mask-using-union-to-create-a-composite-selection.cs",
         "combine-three-magic-wand-selections-using-union-then-apply-feathering-of-radius-8-before-saving.cs",
         "combine-two-magic-wand-selections-using-union-operation-and-save-the-combined-mask-as-png.cs",
@@ -1678,6 +1680,7 @@
         "create-a-point-object-at-100-200-to-position-overlay-on-a-tiff-image.cs",
         "create-a-reusable-class-library-that-encapsulates-common-mask-operations-like-union-subtract-and-feathering.cs",
         "create-a-script-that-iterates-through-subfolders-applying-magicwandtool-to-every-jpeg-and-storing-masks-in-a-directory.cs",
+        "create-a-script-that-iterates-through-subfolders-applying-magicwandtool-to-every-jpeg-and-storing-masks-in-a.cs",
         "create-a-ui-button-that-triggers-magicwandtool-apply-with-current-cursor-coordinates-as-the-mask-seed-point.cs",
         "crop-a-bmp-to-central-400x400-area-apply-feathered-magic-wand-selection-and-export-to-png.cs",
         "define-a-custom-overlay-rectangle-of-200x150-pixels-and-blend-it-onto-a-gif-background.cs",
@@ -1696,11 +1699,14 @@
         "examine-the-remove-watermark-filter-overview-to-understand-its-functionality-and-usage-parameters-within-the-library.cs",
         "execute-the-sample-to-apply-the-magic-wand-filter-for-region-selection-and-filling.cs",
         "experiment-with-different-threshold-values-on-a-single-jpeg-to-determine-optimal-mask-size-for-a-multicolored-background.cs",
+        "experiment-with-different-threshold-values-on-a-single-jpeg-to-determine-optimal-mask-size-for-a-multicolored.cs",
         "export-the-refined-mask-to-a-binary-file-format-for-use-in-external-computer-vision-applications.cs",
         "generate-a-report-listing-each-processed-image-file-name-applied-threshold-and-whether-the-mask-was-feathered.cs",
         "implement-a-fallback-that-switches-to-telea-algorithm-if-contentawarefill-exceeds-a-predefined-processing-time-limit.cs",
+        "implement-a-fallback-that-switches-to-telea-algorithm-if-contentawarefill-exceeds-a-predefined-processing-time.cs",
         "implement-an-image-filter-that-enables-chaining-multiple-filters-sequentially-on-an-apng-image.cs",
         "implement-error-handling-for-watermarkremover-when-the-provided-graphicspath-does-not-intersect-any-watermark-region.cs",
+        "implement-error-handling-for-watermarkremover-when-the-provided-graphicspath-does-not-intersect-any-watermark.cs",
         "implement-support-for-loading-images-from-a-byte-array-applying-magicwandtool-and-returning-the-result-as-a-stream.cs",
         "implement-the-magic-wand-filter-on-an-image-reproducing-the-behavior-demonstrated-in-the-provided-example.cs",
         "inspect-the-output-image-after-applying-the-alpha-blending-filter-to-verify-blending-effects.cs",
@@ -1711,12 +1717,14 @@
         "load-a-jpeg-image-apply-alpha-blending-with-127-opacity-and-save-as-png.cs",
         "load-a-jpeg-image-apply-magicwandtool-with-default-settings-and-save-the-masked-result-as-png.cs",
         "load-a-png-with-a-watermark-define-an-elliptical-graphicspath-and-remove-the-watermark-using-default-contentawarefill-options.cs",
+        "load-a-png-with-a-watermark-define-an-elliptical-graphicspath-and-remove-the-watermark-using-default.cs",
         "load-an-image-from-a-memory-stream-apply-alpha-blending-and-write-output-to-another-stream.cs",
         "load-images-from-a-zip-archive-apply-alpha-blending-to-each-and-write-outputs-to-another-zip.cs",
         "process-a-batch-of-50-jpeg-images-with-magicwandtool-and-save-each-masked-output-to-a-folder.cs",
         "process-each-page-of-a-multi-page-tiff-applying-alpha-blending-with-200-opacity-and-save.cs",
         "provide-a-concise-summary-describing-how-each-applied-filter-alters-image-appearance-and-characteristics.cs",
         "provide-an-option-to-export-the-final-image-with-an-alpha-channel-preserving-transparent-regions-after-mask-application.cs",
+        "provide-an-option-to-export-the-final-image-with-an-alpha-channel-preserving-transparent-regions-after-mask.cs",
         "refine-a-mask-by-subtracting-an-unwanted-area-then-feather-the-edges-with-getfeathered-before-saving-as-gif.cs",
         "remove-the-background-from-an-image-by-applying-the-magic-wand-filter-within-the-image-processing-library.cs",
         "remove-watermark-from-a-jpeg-using-content-aware-fill-algorithm-with-three-removal-attempts.cs",
@@ -1731,6 +1739,7 @@
         "set-overlay-alpha-to-192-and-blend-a-png-logo-onto-a-jpeg-banner-at-bottom-right-corner.cs",
         "set-up-the-alpha-blending-filter-by-specifying-blend-color-opacity-and-blending-mode-parameters.cs",
         "set-watermarkremover-contentawarefillwatermarkoptions-maxpaintingattempts-to-1-to-limit-processing-time-on-large-tiff-files.cs",
+        "set-watermarkremover-contentawarefillwatermarkoptions-maxpaintingattempts-to-1-to-limit-processing-time-on-large.cs",
         "subtract-a-green-magic-wand-selection-from-a-blue-selection-and-export-the-result-to-bmp.cs",
         "subtract-a-small-rectangular-mask-from-a-larger-magicwand-mask-to-remove-an-unwanted-artifact-before-feathering.cs",
         "subtract-a-text-watermark-selection-from-a-scanned-document-image-and-export-as-high-resolution-tiff.cs",
@@ -1753,6 +1762,7 @@
       "files": [
         "add-unit-tests-that-verify-mask-inversion-works-correctly-for-both-fully-white-and-fully-black-initial-masks.cs",
         "adjust-contentawarefillwatermarkoptions-maxpaintingattempts-to-3-to-improve-removal-quality-on-complex-watermark-patterns.cs",
+        "adjust-contentawarefillwatermarkoptions-maxpaintingattempts-to-3-to-improve-removal-quality-on-complex-watermark.cs",
         "adjust-magicwandtool-threshold-to-a-high-value-to-expand-mask-coverage-over-color-gradients-in-a-png-image.cs",
         "allow-users-to-adjust-the-feather-radius-interactively-and-preview-the-refined-mask-in-real-time.cs",
         "apply-a-color-similarity-filter-to-isolate-a-region-within-an-apng-image-based-on-pixel-hue.cs",
@@ -1779,8 +1789,7 @@
         "apply-image-and-photo-filters-to-remove-watermarks-from-a-given-image-while-preserving-visual-quality.cs",
         "apply-image-and-photo-filters-using-the-magic-wand-filter-to-a-specified-image.cs",
         "apply-image-and-photo-filters-with-the-magic-wand-tool-to-an-image-file.cs",
-        "apply-the-alpha-blending-filter-to-an-apng-image-to-blend-pixel-colors-based-on-their-alpha-values.cs",
-        "apply-the-alpha-blending-filter-to-an-image-to-combine-pixel-values-based-on-specified-opacity-levels.cs"
+        "apply-the-alpha-blending-filter-to-an-apng-image-to-blend-pixel-colors-based-on-their-alpha-values.cs"
       ],
       "required_namespaces": [
         "System",
@@ -1834,7 +1843,7 @@
         "VectorRasterizationOptions"
       ],
       "more_files": {
-        "count": 109,
+        "count": 118,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/image-and-photo-filters"
       }
     },
@@ -2418,8 +2427,27 @@
     },
     {
       "name": "manipulate-different-image-file-formats",
-      "file_count": 602,
+      "file_count": 621,
       "all_files": [
+        "29384-load-a-djvu-document-convert-pages-2-4-to-png-then-merge-resulting-images-into-a-single-pdf.cs",
+        "29386-load-a-djvu-document-convert-pages-8-10-to-gif-then-create-animated-gif-with-custom-frame-delay.cs",
+        "29400-load-a-djvu-document-convert-each-page-to-png-then-add-xmp-metadata-indicating-source-file-name.cs",
+        "29472-use-the-pdfcomplianceversion-enumeration-to-select-pdf-a-2b-compliance-when-converting-eps-to-pdf.cs",
+        "29486-add-a-generated-thumbnail-to-both-jfif-and-exif-segments-of-a-jpeg-image-simultaneously.cs",
+        "29488-generate-a-thumbnail-for-each-jpeg-image-in-a-directory-and-store-thumbnails-in-a-zip-archive.cs",
+        "29507-export-a-vector-graphic-to-html5-canvas-format-then-embed-the-canvas-into-a-react-component.cs",
+        "29519-create-a-jpeg2000-image-from-raw-pixel-data-specifying-bits-per-sample-and-color-space.cs",
+        "29550-load-a-bmp-file-and-save-it-to-psd-using-zip-compression-and-rgb-color-mode.cs",
+        "29568-draw-a-line-on-an-indexed-psd-canvas-using-the-graphics-object.cs",
+        "29586-draw-multiple-geometric-shapes-on-an-indexed-psd-canvas-before-saving.cs",
+        "29604-load-a-jpeg2000-image-downsample-to-half-size-and-save-as-png-with-interlaced-option-enabled.cs",
+        "29607-extract-embedded-raster-images-from-an-svg-file-and-store-them-in-a-zip-archive-preserving-original-names.cs",
+        "29610-load-an-eps-file-apply-color-profile-conversion-to-srgb-and-export-as-high-resolution-tiff.cs",
+        "29613-batch-process-a-directory-of-svg-files-extracting-embedded-raster-images-and-converting-them-to-png.cs",
+        "29620-add-a-new-tiff-frame-with-custom-dimensions-lzw-compression-and-specific-resolution-settings.cs",
+        "29658-perform-memory-efficient-batch-export-of-large-tiff-files-to-webp-using-sequential-processing-mode.cs",
+        "29674-recover-a-partially-corrupted-tiff-using-both-recovery-modes-and-generate-a-report-of-recovered-frame.cs",
+        "29686-add-a-new-frame-to-a-tiff-using-custom-compression-and-set-a-unique-description-tag.cs",
         "access-clipping-paths-of-a-tiff-frame-via-pathresources-and-export-them-as-svg-files.cs",
         "add-a-custom-thumbnail-to-the-exif-segment-of-a-jpeg-image-and-verify-metadata.cs",
         "add-a-custom-thumbnail-to-the-jfif-segment-of-a-jpeg-image-before-saving.cs",
@@ -3024,6 +3052,25 @@
         "write-custom-exif-gps-latitude-and-longitude-tags-into-a-jpeg-image-for-geotagging.cs"
       ],
       "files": [
+        "29384-load-a-djvu-document-convert-pages-2-4-to-png-then-merge-resulting-images-into-a-single-pdf.cs",
+        "29386-load-a-djvu-document-convert-pages-8-10-to-gif-then-create-animated-gif-with-custom-frame-delay.cs",
+        "29400-load-a-djvu-document-convert-each-page-to-png-then-add-xmp-metadata-indicating-source-file-name.cs",
+        "29472-use-the-pdfcomplianceversion-enumeration-to-select-pdf-a-2b-compliance-when-converting-eps-to-pdf.cs",
+        "29486-add-a-generated-thumbnail-to-both-jfif-and-exif-segments-of-a-jpeg-image-simultaneously.cs",
+        "29488-generate-a-thumbnail-for-each-jpeg-image-in-a-directory-and-store-thumbnails-in-a-zip-archive.cs",
+        "29507-export-a-vector-graphic-to-html5-canvas-format-then-embed-the-canvas-into-a-react-component.cs",
+        "29519-create-a-jpeg2000-image-from-raw-pixel-data-specifying-bits-per-sample-and-color-space.cs",
+        "29550-load-a-bmp-file-and-save-it-to-psd-using-zip-compression-and-rgb-color-mode.cs",
+        "29568-draw-a-line-on-an-indexed-psd-canvas-using-the-graphics-object.cs",
+        "29586-draw-multiple-geometric-shapes-on-an-indexed-psd-canvas-before-saving.cs",
+        "29604-load-a-jpeg2000-image-downsample-to-half-size-and-save-as-png-with-interlaced-option-enabled.cs",
+        "29607-extract-embedded-raster-images-from-an-svg-file-and-store-them-in-a-zip-archive-preserving-original-names.cs",
+        "29610-load-an-eps-file-apply-color-profile-conversion-to-srgb-and-export-as-high-resolution-tiff.cs",
+        "29613-batch-process-a-directory-of-svg-files-extracting-embedded-raster-images-and-converting-them-to-png.cs",
+        "29620-add-a-new-tiff-frame-with-custom-dimensions-lzw-compression-and-specific-resolution-settings.cs",
+        "29658-perform-memory-efficient-batch-export-of-large-tiff-files-to-webp-using-sequential-processing-mode.cs",
+        "29674-recover-a-partially-corrupted-tiff-using-both-recovery-modes-and-generate-a-report-of-recovered-frame.cs",
+        "29686-add-a-new-frame-to-a-tiff-using-custom-compression-and-set-a-unique-description-tag.cs",
         "access-clipping-paths-of-a-tiff-frame-via-pathresources-and-export-them-as-svg-files.cs",
         "add-a-custom-thumbnail-to-the-exif-segment-of-a-jpeg-image-and-verify-metadata.cs",
         "add-a-custom-thumbnail-to-the-jfif-segment-of-a-jpeg-image-before-saving.cs",
@@ -3034,26 +3081,7 @@
         "add-a-semi-transparent-watermark-text-to-a-dng-photo-and-save-as-png.cs",
         "add-a-textual-watermark-to-a-bmp-image-at-the-bottom-right-corner-with-configurable-opacity.cs",
         "add-a-tiff-frame-with-custom-dimensions-ccitt-group-4-compression-and-specific-dpi-values-for-scanning-quality.cs",
-        "add-a-tiff-frame-with-custom-photometric-interpretation-and-save-the-multi-frame-image-using-lzw-compression.cs",
-        "add-a-tiff-frame-with-custom-photometric-interpretation-and-save-the-updated-image-using-jpeg-compression.cs",
-        "add-a-tiff-frame-with-custom-tile-size-and-compression-then-save-the-multi-frame-image-to-disk.cs",
-        "adjust-brightness-and-contrast-of-a-bmp-image-with-custom-parameters-and-save-the-modified-copy.cs",
-        "adjust-dng-contrast-by-30-percent-and-save-the-result-as-tiff.cs",
-        "adjust-emfimage-dpix-and-dpiy-properties-before-exporting-to-a-raster-format.cs",
-        "adjust-the-gamma-of-a-dng-image-to-2-2-and-export-as-png.cs",
-        "append-additional-frames-with-varying-parameters-to-an-existing-tiff-image-using-the-tiff-format.cs",
-        "apply-a-custom-scaling-factor-of-1-5-to-an-eps-image-and-export-it-as-a-high-quality-jpeg.cs",
-        "apply-a-gaussian-blur-effect-to-a-bmp-image-for-background-softening-in-design-mockups.cs",
-        "apply-a-gaussian-blur-with-radius-five-to-an-emf-image-and-export-as-png.cs",
-        "apply-a-grayscale-filter-to-a-bmp-image-and-export-the-result-as-tiff-for-archival-storage.cs",
-        "apply-a-memory-saving-strategy-by-processing-each-webp-frame-individually-and-releasing-resources-after-saving.cs",
-        "apply-a-memory-saving-strategy-by-processing-tiff-pages-one-at-a-time-using-sequential-export-mode.cs",
-        "apply-a-sepia-tone-effect-to-an-emf-illustration-and-export-as-png.cs",
-        "apply-a-sharpening-filter-with-strength-three-to-a-tga-texture-and-export-as-bmp.cs",
-        "apply-a-solid-background-color-to-a-png-image-with-transparency-replacing-its-alpha-channel-uniformly.cs",
-        "apply-a-vignette-effect-around-the-edges-of-a-tga-picture-and-save-as-jpeg.cs",
-        "apply-additional-resizing-operations-to-a-dicom-image-while-maintaining-full-dicom-format-compliance.cs",
-        "apply-coordinate-offsets-to-crop-a-dicom-image-outputting-the-result-as-a-dicom-file.cs"
+        "add-a-tiff-frame-with-custom-photometric-interpretation-and-save-the-multi-frame-image-using-lzw-compression.cs"
       ],
       "required_namespaces": [
         "System",
@@ -3167,14 +3195,21 @@
         "WmfRasterizationOptions"
       ],
       "more_files": {
-        "count": 572,
+        "count": 591,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/manipulate-different-image-file-formats"
       }
     },
     {
       "name": "manipulating-images",
-      "file_count": 425,
+      "file_count": 432,
       "all_files": [
+        "27876-supply-a-detectedobjectlist-converted-to-assumedobjectdata-for-improved-graph-cut-segmentation-on-a-raster.cs",
+        "27891-configure-automaskinggraphcutoptions-to-reuse-strokes-across-iterations-improving-mask-accuracy-for-a.cs",
+        "27895-process-a-batch-of-cdr-files-remove-backgrounds-using-area-selection-rasterize-to-png-and-compress-results.cs",
+        "27901-measure-performance-difference-between-graph-cut-auto-masking-with-default-strokes-and-with-custom-user.cs",
+        "27919-develop-a-command-line-tool-that-accepts-input-path-selects-background-removal-method-and-outputs-png-to.cs",
+        "27966-create-a-high-resolution-tiff-image-embed-a-digital-signature-and-then-analyze-signature-confidence.cs",
+        "27967-resize-an-image-using-nearestneighbor-then-rotate-it-270-degrees-with-black-background-fill-and-save-as-png.cs",
         "add-user-defined-fonts-to-fontsettings-and-export-a-psd-as-png-with-accurate-text-appearance.cs",
         "adjust-brightness-of-a-cdr-document-upward-fifteen-percent-and-save-the-result-as-a-tiff-file.cs",
         "adjust-brightness-of-a-tiff-image-then-apply-gaussian-blur-saving-the-final-picture-as-pdf.cs",
@@ -3602,6 +3637,13 @@
         "verify-transparency-of-a-png-created-from-a-psd-file-before-saving-the-final-image.cs"
       ],
       "files": [
+        "27876-supply-a-detectedobjectlist-converted-to-assumedobjectdata-for-improved-graph-cut-segmentation-on-a-raster.cs",
+        "27891-configure-automaskinggraphcutoptions-to-reuse-strokes-across-iterations-improving-mask-accuracy-for-a.cs",
+        "27895-process-a-batch-of-cdr-files-remove-backgrounds-using-area-selection-rasterize-to-png-and-compress-results.cs",
+        "27901-measure-performance-difference-between-graph-cut-auto-masking-with-default-strokes-and-with-custom-user.cs",
+        "27919-develop-a-command-line-tool-that-accepts-input-path-selects-background-removal-method-and-outputs-png-to.cs",
+        "27966-create-a-high-resolution-tiff-image-embed-a-digital-signature-and-then-analyze-signature-confidence.cs",
+        "27967-resize-an-image-using-nearestneighbor-then-rotate-it-270-degrees-with-black-background-fill-and-save-as-png.cs",
         "add-user-defined-fonts-to-fontsettings-and-export-a-psd-as-png-with-accurate-text-appearance.cs",
         "adjust-brightness-of-a-cdr-document-upward-fifteen-percent-and-save-the-result-as-a-tiff-file.cs",
         "adjust-brightness-of-a-tiff-image-then-apply-gaussian-blur-saving-the-final-picture-as-pdf.cs",
@@ -3624,14 +3666,7 @@
         "apply-a-deskew-operation-to-correct-image-orientation-and-improve-visual-alignment-for-accurate-processing.cs",
         "apply-a-gaussian-blur-filter-to-an-image-to-soften-details-while-maintaining-its-overall-dimensions.cs",
         "apply-a-gaussian-wiener-filter-to-images-and-output-the-processed-results-in-apng-format.cs",
-        "apply-a-gaussian-wiener-filter-to-images-to-effectively-reduce-noise-while-preserving-edge-details.cs",
-        "apply-a-median-filter-to-images-and-output-the-results-in-apng-format-ensuring-pixel-level-noise-reduction.cs",
-        "apply-a-median-filter-to-images-to-reduce-noise-while-preserving-edges-and-fine-details.cs",
-        "apply-a-motion-wiener-filter-to-apng-images-to-reduce-motion-blur-while-preserving-animation-integrity.cs",
-        "apply-a-motion-wiener-filter-to-images-to-reduce-noise-while-preserving-motion-details.cs",
-        "apply-a-smoothing-mode-to-image-processing-operations-to-control-rendering-quality-and-reduce-visual-artifacts.cs",
-        "apply-a-smoothing-mode-to-image-processing-operations-when-generating-apng-files-to-improve-visual-quality.cs",
-        "apply-automatic-masking-to-images-and-output-the-result-in-apng-format-preserving-transparency-and-animation.cs"
+        "apply-a-gaussian-wiener-filter-to-images-to-effectively-reduce-noise-while-preserving-edge-details.cs"
       ],
       "required_namespaces": [
         "Aspose.Imaging",
@@ -3724,14 +3759,17 @@
         "WmfRasterizationOptions"
       ],
       "more_files": {
-        "count": 395,
+        "count": 402,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/manipulating-images"
       }
     },
     {
       "name": "merge-images",
-      "file_count": 135,
+      "file_count": 138,
       "all_files": [
+        "28702-apply-a-grayscale-color-conversion-to-each-jpeg-before-merging-them-horizontally-and-exporting-as-pdf.cs",
+        "28706-insert-a-10-pixel-padding-between-each-jpeg-image-during-a-vertical-merge-to-improve-visual-separation.cs",
+        "28715-add-custom-author-metadata-to-the-merged-pdf-generated-from-a-horizontal-jpeg-merge-operation.cs",
         "add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs",
         "add-custom-author-metadata-to-the-merged-pdf-generated-from-a-horizontal-jpeg-merge-operation.cs",
         "align-all-merged-jpeg-images-to-the-top-left-corner-of-the-canvas-for-a-consistent-layout.cs",
@@ -3869,6 +3907,9 @@
         "wrap-image-loading-and-merging-code-in-try-catch-blocks-to-handle-file-access-exceptions-gracefully.cs"
       ],
       "files": [
+        "28702-apply-a-grayscale-color-conversion-to-each-jpeg-before-merging-them-horizontally-and-exporting-as-pdf.cs",
+        "28706-insert-a-10-pixel-padding-between-each-jpeg-image-during-a-vertical-merge-to-improve-visual-separation.cs",
+        "28715-add-custom-author-metadata-to-the-merged-pdf-generated-from-a-horizontal-jpeg-merge-operation.cs",
         "add-a-semi-transparent-watermark-text-to-the-merged-image-after-completing-a-horizontal-jpeg-merge.cs",
         "add-custom-author-metadata-to-the-merged-pdf-generated-from-a-horizontal-jpeg-merge-operation.cs",
         "align-all-merged-jpeg-images-to-the-top-left-corner-of-the-canvas-for-a-consistent-layout.cs",
@@ -3895,10 +3936,7 @@
         "combine-jpg-images-into-a-pdf-document-converting-each-image-to-png-format-before-merging.cs",
         "combine-jpg-images-into-a-pdf-document-embedding-an-ico-file-as-the-document-s-icon.cs",
         "combine-jpg-images-into-a-pdf-document-encoding-the-images-as-avif-format-to-optimize-size.cs",
-        "combine-jpg-images-into-a-pdf-document-using-dicom-formatting-while-maintaining-image-fidelity.cs",
-        "combine-jpg-images-into-a-png-output-while-applying-jpeg-compression-settings-during-the-merge.cs",
-        "combine-jpg-images-into-a-single-pdf-document-employing-the-wmz-format-for-compression-and-packaging.cs",
-        "combine-jpg-images-into-a-single-pdf-document-using-the-cmx-format-to-maintain-color-fidelity.cs"
+        "combine-jpg-images-into-a-pdf-document-using-dicom-formatting-while-maintaining-image-fidelity.cs"
       ],
       "required_namespaces": [
         "System",
@@ -3960,7 +3998,7 @@
         "WmfRasterizationOptions"
       ],
       "more_files": {
-        "count": 105,
+        "count": 108,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/main/merge-images"
       }
     },
