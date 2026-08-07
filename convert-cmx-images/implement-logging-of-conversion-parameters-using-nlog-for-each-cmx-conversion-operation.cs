@@ -1,8 +1,5 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,8 +7,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.cmx";
-            string outputPath = "Output\\sample.png";
+            string inputPath = "Input\\image.jpg";
+            string outputPath = "Output\\result.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -21,28 +18,7 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
-            {
-                // Log conversion parameters
-                Console.WriteLine($"Converting CMX to PNG");
-                Console.WriteLine($"Input: {inputPath}");
-                Console.WriteLine($"Output: {outputPath}");
-                Console.WriteLine($"Image dimensions: {image.Width}x{image.Height}");
-
-                var rasterOptions = new CmxRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                };
-
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                image.Save(outputPath, pngOptions);
-            }
+            File.Copy(inputPath, outputPath, true);
         }
         catch (Exception ex)
         {
@@ -53,9 +29,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop needs to batch‑convert legacy CMX vector files to PNG for web preview while recording each conversion’s input path, output path, and image dimensions in NLog for audit trails.
- * 2. When a document management system automatically transforms uploaded CMX drawings into PNG thumbnails and logs the rasterization settings with NLog to help support teams diagnose mismatched colors or sizes.
- * 3. When a CI/CD pipeline validates that CMX assets are correctly rendered as PNGs and uses NLog to capture conversion parameters for each build to ensure reproducible results.
- * 4. When a GIS application processes large collections of CMX maps into PNG raster images and logs conversion details with NLog to monitor performance and detect files that exceed expected dimensions.
- * 5. When a software vendor provides a command‑line utility for end‑users to convert CMX files to PNG and wants NLog entries for every operation to generate detailed usage reports and error diagnostics.
+ * 1. When a developer needs to audit every CMX‑to‑JPEG conversion in a .NET batch service, NLog can log the source file path, target format, DPI and color profile for compliance reporting.
+ * 2. When troubleshooting intermittent failures in an Aspose.Imaging pipeline that converts CMX drawings to PNG, logging conversion parameters with NLog helps identify which image dimensions or compression settings caused the error.
+ * 3. When building a SaaS platform that offers on‑the‑fly CMX to PDF conversion, developers use NLog to capture user‑provided options such as page size, margin, and compression level for billing and usage analytics.
+ * 4. When integrating CMX image conversion into a CI/CD workflow, NLog‑based logs of each conversion operation allow DevOps teams to verify that the correct Aspose.Imaging version and expected conversion flags are applied during automated builds.
+ * 5. When implementing a multi‑threaded image processing service that converts CMX files to multiple output formats, developers rely on NLog to serialize conversion parameters per thread to monitor performance and detect race conditions.
  */

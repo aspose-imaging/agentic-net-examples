@@ -2,55 +2,58 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging;
 
+/// <summary>
+/// Demonstrates loading an image, converting it, and validating the output file size.
+/// </summary>
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hard‑coded input and output paths
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output.png";
+
+        // Maximum allowed output size in bytes (example: 5 MB)
+        const long maxOutputSizeBytes = 5 * 1024 * 1024;
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = Path.Combine("Input", "sample.jpg");
-            string outputPath = Path.Combine("Output", "sample.tif");
-
-            // Validate input file existence
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define maximum allowed output file size (bytes)
-            const long maxSizeBytes = 5_000_000; // 5 MB
-
-            // Load the source image
-            using (Image image = Image.Load(inputPath))
+            // Load the source image (no special load options required)
+            using (Image image = Image.Load(inputPath, new LoadOptions()))
             {
-                // Set TIFF save options
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                // Define save options – here we convert to PNG
+                var saveOptions = new PngOptions();
 
-                // Save the image as TIFF
-                image.Save(outputPath, tiffOptions);
+                // Save the converted image to the output path
+                image.Save(outputPath, saveOptions);
             }
 
-            // Verify output file size
-            FileInfo outInfo = new FileInfo(outputPath);
-            if (outInfo.Length > maxSizeBytes)
+            // Validate the size of the generated file
+            long outputSize = new FileInfo(outputPath).Length;
+            if (outputSize > maxOutputSizeBytes)
             {
-                Console.WriteLine($"Warning: Output file size {outInfo.Length} bytes exceeds the limit of {maxSizeBytes} bytes.");
+                Console.Error.WriteLine($"Output file size {outputSize} exceeds limit of {maxOutputSizeBytes} bytes.");
             }
             else
             {
-                Console.WriteLine($"Success: Output file size {outInfo.Length} bytes is within the limit.");
+                Console.WriteLine($"Conversion succeeded. Output size: {outputSize} bytes.");
             }
         }
         catch (Exception ex)
         {
+            // Report any unexpected errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -58,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application must convert user‑uploaded JPEG photos to TIFF for archival storage while ensuring each file stays under a 5 MB limit to comply with storage quotas.
- * 2. When a medical imaging system converts scanned documents to multi‑page TIFF and needs to verify the resulting file does not exceed the maximum size allowed by the PACS server.
- * 3. When an automated batch job processes product catalog images, converting them to TIFF and checking the file size to prevent oversized files from breaking downstream printing pipelines.
- * 4. When a cloud‑based document management service transforms incoming JPEG attachments to TIFF and validates the size to stay within API payload restrictions.
- * 5. When a desktop utility creates TIFF versions of high‑resolution photographs and alerts the user if the saved file surpasses a predefined byte limit to avoid exceeding disk space allocations.
+ * 1. When a web application must convert user‑uploaded JPEG photos to PNG thumbnails and ensure each generated file stays under a 5 MB upload limit.
+ * 2. When an automated batch‑processing service converts high‑resolution scans to lossless PNG for archival storage while guaranteeing the resulting files do not exceed a predefined storage quota.
+ * 3. When a desktop utility resizes and converts images for email attachments and needs to verify that the final PNG size complies with the email provider’s attachment size restriction.
+ * 4. When a cloud‑based document generation pipeline transforms embedded images to PNG and must reject any output that would cause the final PDF to surpass a maximum file‑size threshold.
+ * 5. When a mobile app synchronizes images to a server, converting them to PNG on the device and checking that each file remains within the network‑transfer limit to avoid throttling.
  */

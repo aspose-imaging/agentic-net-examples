@@ -2,34 +2,39 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.cmx";
+        string outputPath = "output.jpg";
+
         try
         {
-            string inputPath = "input.cmx";
-            string outputPath = "output.jpg";
-
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath);
             Directory.CreateDirectory(outputDir);
 
-            using (CmxImage cmx = (CmxImage)Image.Load(inputPath))
+            // Load the CMX image
+            using (Image image = Image.Load(inputPath))
             {
-                var jpegOptions = new JpegOptions
+                // Configure JPEG options to keep metadata (including EXIF if present)
+                JpegOptions jpegOptions = new JpegOptions
                 {
                     KeepMetadata = true
                 };
 
-                cmx.Save(outputPath, jpegOptions);
+                // Save as JPEG preserving metadata
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -41,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design workflow requires converting legacy CorelDRAW CMX files to web‑friendly JPEG images while keeping the original EXIF orientation metadata intact.
- * 2. When an e‑commerce platform needs to batch‑process product illustrations stored as CMX and generate correctly oriented JPEG thumbnails for faster page loads.
- * 3. When a digital asset management system must ingest CMX artwork and store it as JPEGs without losing camera orientation data for downstream printing pipelines.
- * 4. When a mobile app that displays user‑uploaded designs must transform CMX files into JPEGs on the server while preserving orientation tags for accurate on‑screen rendering.
- * 5. When a document conversion service automates the migration of archived CMX graphics to JPEG format and needs to retain EXIF orientation to maintain visual consistency across devices.
+ * 1. When a digital asset management system receives legacy CorelDRAW CMX files and must generate web‑ready JPEG thumbnails while keeping the original EXIF orientation for correct display.
+ * 2. When a photo‑editing workflow needs to batch‑convert client‑supplied CMX drawings to JPEG for inclusion in an online portfolio, preserving metadata so the images appear upright on mobile devices.
+ * 3. When an e‑commerce platform imports product illustrations stored as CMX and converts them to JPEG for fast loading on product pages, while retaining the EXIF orientation tag to avoid rotated pictures.
+ * 4. When a document‑generation service extracts embedded CMX graphics from legacy reports and saves them as JPEGs for PDF embedding, ensuring the orientation metadata is kept for accurate rendering.
+ * 5. When a mobile app syncs design assets from a Windows workstation, converting CMX files to JPEG on the server side with Aspose.Imaging so the images retain their original orientation when viewed on the device.
  */

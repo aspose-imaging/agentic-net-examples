@@ -6,28 +6,31 @@ using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\input.cmx";
-            string outputPath = "C:\\output.tif";
+            // Hardcoded input and output file paths
+            string inputPath = "C:\\temp\\input.cmx";
+            string outputPath = "C:\\temp\\output.tif";
 
-            // Validate input file existence
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load CMX image and save as TIFF with default compression
+            // Load the CMX image
             using (Image image = Image.Load(inputPath))
             {
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                // Prepare default TIFF save options
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                // Save the image as a single‑page TIFF
                 image.Save(outputPath, tiffOptions);
             }
         }
@@ -40,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive legacy CorelDRAW CMX drawings as single‑page TIFF files for compatibility with document management systems.
- * 2. When an application must convert a CMX illustration received from a client into a TIFF image to embed in a PDF report generated in C#.
- * 3. When a batch‑processing service processes incoming CMX files and saves them as TIFFs with default compression for efficient storage on a server.
- * 4. When a Windows desktop tool provides users the ability to export a single‑page CMX design to a TIFF format for printing on high‑resolution printers.
- * 5. When a migration script moves graphic assets from an old CMX‑based workflow to a modern TIFF‑based pipeline while preserving image quality using Aspose.Imaging for .NET.
+ * 1. When a CAD application needs to export a single‑page CMX drawing to a TIFF file for inclusion in a PDF report, a developer can use this code to perform the conversion with default compression.
+ * 2. When an archival system requires storing legacy CorelDRAW CMX graphics as lossless TIFF images for long‑term preservation, the snippet provides a straightforward C# solution.
+ * 3. When a document management workflow must convert incoming CMX files to TIFF so they can be indexed by OCR engines, this code enables the format transformation using Aspose.Imaging.
+ * 4. When a batch‑processing service needs to generate thumbnail previews of CMX drawings by first converting them to single‑page TIFFs, the example shows how to load and save the image in C#.
+ * 5. When a Windows desktop utility must ensure compatibility with printers that only accept TIFF input, developers can use this code to convert a CMX file to a single‑page TIFF with default compression.
  */

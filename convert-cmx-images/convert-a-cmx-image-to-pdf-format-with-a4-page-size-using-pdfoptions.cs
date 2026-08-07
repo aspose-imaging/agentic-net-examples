@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
@@ -9,44 +9,32 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "Input/sample.cmx";
             string outputPath = "Output/sample.pdf";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CMX image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.FileFormats.Cmx.CmxImage cmx = (Aspose.Imaging.FileFormats.Cmx.CmxImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                // Configure PDF options with A4 page size
-                using (PdfOptions pdfOptions = new PdfOptions())
+                var pdfOptions = new PdfOptions();
+
+                var rasterOptions = new CmxRasterizationOptions
                 {
-                    // A4 size in points (1 point = 1/72 inch)
-                    pdfOptions.PageSize = new SizeF(595f, 842f);
+                    PageSize = new Aspose.Imaging.SizeF(595f, 842f), // A4 size in points
+                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.None,
+                    Positioning = PositioningTypes.DefinedByDocument
+                };
 
-                    // Set vector rasterization options for CMX
-                    var vectorOptions = new CmxRasterizationOptions
-                    {
-                        PageSize = new SizeF(595f, 842f),
-                        BackgroundColor = Color.White,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None,
-                        Positioning = PositioningTypes.DefinedByDocument
-                    };
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                    pdfOptions.VectorRasterizationOptions = vectorOptions;
-
-                    // Save as PDF
-                    image.Save(outputPath, pdfOptions);
-                }
+                cmx.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -58,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD designer needs to share a Corel Metafile (CMX) drawing with clients who only view PDF documents, they can use this code to convert the CMX file to a PDF with an A4 page layout.
- * 2. When an automated document‑generation pipeline must archive legacy CMX illustrations as printable PDFs, the snippet provides a reliable way to rasterize the vector data and enforce A4 dimensions.
- * 3. When a web service receives CMX uploads and must return a PDF preview that fits standard paper size, developers can call this routine to produce a white‑background PDF using Aspose.Imaging’s PdfOptions.
- * 4. When a batch‑processing job needs to convert a folder of CMX files into A4‑sized PDFs for compliance reporting, the example shows how to load each image, set vector rasterization options, and save the result with C# file‑system checks.
- * 5. When integrating a .NET desktop application that exports technical drawings, this code enables developers to transform a CMX drawing into a PDF ready for printing on A4 paper while preserving vector quality through CmxRasterizationOptions.
+ * 1. When a developer needs to use C# and Aspose.Imaging to convert legacy CMX vector drawings into PDF files with exact A4 page size for printing or archiving.
+ * 2. When an automated .NET batch process must load CMX images, apply CmxRasterizationOptions (such as SingleBitPerPixel text rendering and no smoothing), and save them as PDF using PdfOptions.
+ * 3. When a web API built with C# has to accept CMX uploads, rasterize them with defined positioning, and return A4‑sized PDF documents generated via Aspose.Imaging.Image.Load and Save.
+ * 4. When creating a document conversion utility that preserves the original CMX layout by setting PageSize to 595 × 842 points and uses PdfOptions to produce PDF output for compliance systems.
+ * 5. When a Windows desktop application requires precise rendering of CMX content—using Aspose.Imaging.SizeF for A4 dimensions and PositioningTypes.DefinedByDocument—before embedding the result in a PDF portfolio.
  */

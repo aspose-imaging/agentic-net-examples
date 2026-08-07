@@ -1,7 +1,8 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -9,8 +10,8 @@ class Program
     {
         try
         {
-            string inputPath = "input/sample.cmx";
-            string outputPath = "output/result.pdf";
+            string inputPath = "Input/sample.cmx";
+            string outputPath = "Output/output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -20,10 +21,21 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (CmxImage cmx = (CmxImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                var pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                var pdfOptions = new PdfOptions
+                {
+                    VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Aspose.Imaging.Color.White,
+                        PageWidth = cmx.Width,
+                        PageHeight = cmx.Height,
+                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = Aspose.Imaging.SmoothingMode.None
+                    }
+                };
+
+                cmx.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -35,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application in a printing house receives multi‑page CMX artwork and must create a single PDF so clients can preview each page of the design.
- * 2. When a CAD team uses C# to archive legacy CorelDRAW CMX drawings as multi‑page PDFs, preserving each drawing as an individual PDF page for future reference.
- * 3. When a document management system built with .NET needs to import CMX files and store them as searchable, multi‑page PDFs that can be opened in any PDF viewer.
- * 4. When an automated C# batch process converts CMX technical schematics into a PDF manual, ensuring each schematic appears on its own PDF page for easy navigation.
- * 5. When a legal workflow in a .NET environment requires converting CMX evidence files into a single PDF document, with each page of the original CMX becoming a separate page in the PDF for court submission.
+ * 1. When an engineering firm needs to archive multi‑page CorelDRAW CMX drawings as PDF documents that preserve each original page layout for long‑term storage.
+ * 2. When a printing service must convert client‑submitted CMX files into PDF pages with exact dimensions and white background before sending them to a raster image processor.
+ * 3. When a document management system integrates Aspose.Imaging in C# to transform CMX design files into multi‑page PDFs for easy viewing in web browsers without requiring CorelDRAW.
+ * 4. When a batch‑processing tool automatically reads CMX files from a directory and generates PDF files where each CMX page becomes a separate PDF page using specific vector rasterization options.
+ * 5. When a software application needs to programmatically rasterize CMX vector graphics to PDF pages while controlling rendering settings such as TextRenderingHint and SmoothingMode.
  */
