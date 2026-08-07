@@ -2,18 +2,17 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,7 +26,7 @@ class Program
             // Load the JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PNG save options with 150 DPI resolution
+                // Configure PNG save options with 150 DPI resolution
                 PngOptions saveOptions = new PngOptions
                 {
                     ResolutionSettings = new ResolutionSetting(150.0, 150.0)
@@ -46,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. A developer converting high‑resolution JPEG photographs to PNG for a print catalog needs to preserve a 150 DPI resolution using Aspose.Imaging ImageOptions in C#.
- * 2. When generating PNG assets from scanned JPEG documents for archival purposes, setting the output resolution to 150 DPI ensures consistent print quality across all files.
- * 3. An e‑commerce platform that merges product JPEG images and saves them as PNG thumbnails may require a fixed 150 DPI resolution to meet the vendor’s packaging guidelines.
- * 4. A desktop application that batch‑processes JPEG graphics for inclusion in a PDF brochure uses Aspose.Imaging to save each image as PNG with a 150 DPI setting to maintain layout fidelity.
- * 5. In a medical imaging workflow, converting diagnostic JPEG scans to lossless PNG while enforcing a 150 DPI resolution helps meet regulatory standards for image clarity.
+ * 1. When a web application needs to convert high‑resolution JPEG photographs to PNG thumbnails while preserving a print‑ready 150 DPI resolution for consistent display across devices.
+ * 2. When an e‑commerce platform merges product JPEG images and saves them as PNG files with a fixed 150 DPI setting to meet the catalog’s printing specifications.
+ * 3. When a desktop utility processes scanned JPEG documents and outputs PNG files at 150 DPI so that downstream OCR tools receive images at the required resolution.
+ * 4. When a mobile app generates PNG assets from user‑uploaded JPEGs and enforces a 150 DPI resolution to ensure the graphics appear sharp when printed from the app.
+ * 5. When a batch‑processing script automates the conversion of archival JPEG images to PNG format with a standardized 150 DPI resolution to maintain uniform quality in a digital library.
  */

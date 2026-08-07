@@ -13,15 +13,15 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
-            string outputPath = "output/merged.jpg";
+            string[] inputPaths = new[] { "input1.jpg", "input2.jpg", "input3.jpg" };
+            string outputPath = "merged.jpg";
 
             // Validate input files
-            foreach (string path in inputPaths)
+            foreach (string inputPath in inputPaths)
             {
-                if (!File.Exists(path))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {path}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
             }
@@ -29,25 +29,36 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Calculate canvas size
-            int totalWidth = 0;
-            int maxHeight = 0;
-            foreach (string path in inputPaths)
+            // Collect sizes
+            List<Size> sizes = new List<Size>();
+            using (JpegImage firstImg = (JpegImage)Image.Load(inputPaths[0]))
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                sizes.Add(firstImg.Size);
+            }
+
+            for (int i = 1; i < inputPaths.Length; i++)
+            {
+                using (RasterImage img = (RasterImage)Image.Load(inputPaths[i]))
                 {
-                    totalWidth += img.Width;
-                    if (img.Height > maxHeight)
-                        maxHeight = img.Height;
+                    sizes.Add(img.Size);
                 }
             }
 
-            // Create output canvas bound to file
+            // Calculate canvas dimensions (horizontal merge)
+            int canvasWidth = 0;
+            int canvasHeight = 0;
+            foreach (Size sz in sizes)
+            {
+                canvasWidth += sz.Width;
+                if (sz.Height > canvasHeight) canvasHeight = sz.Height;
+            }
+
+            // Create JPEG canvas with bound output source
             Source source = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
-
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
+                // Merge images horizontally
                 int offsetX = 0;
                 foreach (string path in inputPaths)
                 {
@@ -58,6 +69,8 @@ class Program
                         offsetX += img.Width;
                     }
                 }
+
+                // Save the bound image
                 canvas.Save();
             }
         }
@@ -70,9 +83,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer creates a panoramic JPEG by stitching multiple shots side‑by‑side and needs to keep the original EXIF camera settings for later editing or cataloging.
- * 2. When an e‑commerce platform merges product image variations into a single composite JPEG while preserving EXIF metadata to satisfy image provenance and compliance rules.
- * 3. When a mobile app generates a before‑and‑after comparison JPEG from two photos and must retain the original EXIF timestamps for audit‑trail purposes.
- * 4. When a digital asset management system combines several high‑resolution JPEG scans into one file and wants to keep the original EXIF data for searchable metadata and licensing information.
- * 5. When a real‑estate website creates a wide‑angle view by concatenating room photos and needs to preserve the EXIF GPS coordinates so the merged image can still be mapped correctly.
+ * 1. When a photographer wants to combine multiple JPEG photos into a single panoramic image while keeping the original EXIF camera settings for the first photo, this code can merge the images and preserve the metadata.
+ * 2. When an e‑commerce platform needs to stitch product shot thumbnails side‑by‑side into a catalog image but must retain the original EXIF date and GPS data for compliance, the snippet does the job.
+ * 3. When a mobile app generates a combined receipt image from several scanned JPEG pages and wants the first page’s EXIF orientation and resolution to stay intact for downstream processing, this example is applicable.
+ * 4. When a digital archiving system consolidates scanned document JPEGs into a single file for storage efficiency yet must keep the first file’s EXIF author and creation timestamp, the code provides a solution.
+ * 5. When a social‑media scheduler creates a composite promotional banner from multiple JPEG assets and needs the first image’s EXIF copyright information to be preserved for legal reasons, this routine can be used.
  */

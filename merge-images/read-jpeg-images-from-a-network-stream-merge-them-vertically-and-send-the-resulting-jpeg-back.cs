@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -13,61 +12,72 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG file paths (simulating network streams)
-            string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
-            // Hardcoded output path
-            string outputPath = "merged.jpg";
+            // Hardcoded input and output paths
+            string inputPath1 = "input1.jpg";
+            string inputPath2 = "input2.jpg";
+            string outputPath = "output.jpg";
 
-            // Validate each input file exists
-            foreach (string inputPath in inputPaths)
+            // Validate input files
+            if (!File.Exists(inputPath1))
             {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                Console.Error.WriteLine($"File not found: {inputPath1}");
+                return;
+            }
+            if (!File.Exists(inputPath2))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath2}");
+                return;
+            }
+
+            // Collect sizes of input images
+            List<Size> sizes = new List<Size>();
+            using (RasterImage img1 = (RasterImage)Image.Load(inputPath1))
+            {
+                sizes.Add(img1.Size);
+            }
+            using (RasterImage img2 = (RasterImage)Image.Load(inputPath2))
+            {
+                sizes.Add(img2.Size);
+            }
+
+            // Calculate canvas dimensions for vertical merge
+            int newWidth = 0;
+            int newHeight = 0;
+            foreach (var sz in sizes)
+            {
+                if (sz.Width > newWidth) newWidth = sz.Width;
+                newHeight += sz.Height;
             }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of all input images
-            List<Size> sizes = new List<Size>();
-            foreach (string inputPath in inputPaths)
-            {
-                using (RasterImage img = (RasterImage)Image.Load(inputPath))
-                {
-                    sizes.Add(img.Size);
-                }
-            }
-
-            // Determine canvas dimensions for vertical merge
-            int canvasWidth = sizes.Max(s => s.Width);
-            int canvasHeight = sizes.Sum(s => s.Height);
-
-            // Prepare JPEG options with bound source
-            Source src = new FileCreateSource(outputPath, false);
+            // Create JPEG options with bound source
+            Source outSource = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions()
             {
-                Source = src,
+                Source = outSource,
                 Quality = 90
             };
 
-            // Create JPEG canvas
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            // Create canvas image
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
                 int offsetY = 0;
-                foreach (string inputPath in inputPaths)
+                string[] inputs = new[] { inputPath1, inputPath2 };
+                foreach (var inPath in inputs)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                    using (RasterImage img = (RasterImage)Image.Load(inPath))
                     {
+                        // Define where to place the current image on the canvas
                         Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
+                        // Copy pixel data onto the canvas
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetY += img.Height;
                     }
                 }
 
-                // Save the bound canvas (no need to pass path/options again)
+                // Save the bound canvas (output already bound to source)
                 canvas.Save();
             }
         }
@@ -80,9 +90,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to combine multiple user‑uploaded JPEG photos into a single tall image for a printable photo collage, it can read the JPEG streams, merge them vertically, and return the merged JPEG.
- * 2. When an e‑commerce platform generates a product‑detail banner by stacking several JPEG thumbnails received from a CDN, the code can assemble them into one image before sending it to the front‑end.
- * 3. When a digital signage system receives separate JPEG advertisements over a network and must display them as a continuous vertical scroll, the developer can use this code to merge the streams into one JPEG file.
- * 4. When a mobile app uploads scanned JPEG pages to a server that needs to create a single PDF‑like image by stacking the pages vertically, the server can apply this code to produce the combined JPEG.
- * 5. When a document‑management workflow receives individual JPEG pages from different scanners via network streams and must return a single merged JPEG for archival, this code provides the necessary processing.
+ * 1. When a web service must combine multiple JPEG photos received over HTTP into a single vertical image before returning it to the client.
+ * 2. When an e‑commerce platform needs to merge a product thumbnail JPEG and a high‑resolution banner JPEG streamed from a CDN into one image for a mobile app.
+ * 3. When a document‑management system receives scanned page JPEGs from a network scanner and must stitch them vertically into a single JPEG for archiving.
+ * 4. When a social‑media scheduler aggregates user‑uploaded JPEG stories into a vertical collage that is sent back as a single JPEG via an API.
+ * 5. When a reporting tool pulls chart JPEGs from remote services, stacks them vertically, and delivers the combined JPEG as an email attachment.
  */

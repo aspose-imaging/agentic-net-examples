@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -14,62 +13,63 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string[] inputPaths = new string[]
-            {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
-            };
-            string outputPath = "merged_with_border.jpg";
+            string[] inputPaths = new[] { "input1.jpg", "input2.jpg", "input3.jpg" };
+            string outputPath = "merged.jpg";
 
             // Validate input files
-            foreach (string inputPath in inputPaths)
+            foreach (string path in inputPaths)
             {
-                if (!File.Exists(inputPath))
+                if (!File.Exists(path))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {path}");
                     return;
                 }
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Collect sizes of all input images
-            List<Size> sizes = new List<Size>();
-            foreach (string inputPath in inputPaths)
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(outputDir))
             {
-                using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                Directory.CreateDirectory(outputDir);
+            }
+
+            // Collect dimensions
+            var dimensions = new List<(int Width, int Height)>();
+            foreach (string path in inputPaths)
+            {
+                using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    sizes.Add(img.Size);
+                    dimensions.Add((img.Width, img.Height));
                 }
             }
 
-            // Calculate canvas size with a 5‑pixel border on all sides
-            int border = 5;
-            int totalWidth = sizes.Sum(s => s.Width);
-            int maxHeight = sizes.Max(s => s.Height);
-            int canvasWidth = totalWidth + 2 * border;
-            int canvasHeight = maxHeight + 2 * border;
-
-            // Create JPEG canvas bound to the output file
-            Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 100 };
-
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            int totalWidth = 0;
+            int maxHeight = 0;
+            foreach (var dim in dimensions)
             {
-                int offsetX = border;
-                foreach (string inputPath in inputPaths)
+                totalWidth += dim.Width;
+                if (dim.Height > maxHeight) maxHeight = dim.Height;
+            }
+
+            // Create output source and options
+            Source outputSource = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = outputSource, Quality = 100 };
+
+            // Create canvas
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
+            {
+                int offsetX = 0;
+                foreach (string path in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                    using (RasterImage img = (RasterImage)Image.Load(path))
                     {
-                        Rectangle bounds = new Rectangle(offsetX, border, img.Width, img.Height);
+                        var bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
 
-                // Save the bound image (output file)
+                // Save the merged image (canvas is already bound to output source)
                 canvas.Save();
             }
         }
@@ -82,9 +82,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a product catalog page where multiple product photos need to be displayed side‑by‑side in a single JPEG with a uniform 5‑pixel border for visual separation.
- * 2. When generating a printable photo strip for a photo‑booth application that stitches several JPEG snapshots horizontally and adds a thin border to frame the combined image.
- * 3. When preparing a web‑ready banner that combines several promotional JPEG images into one horizontal strip and requires a consistent border to match the site’s design guidelines.
- * 4. When automating the assembly of scanned document pages saved as JPEGs into a single wide image for archival, with a border added to prevent content from touching the canvas edges.
- * 5. When building a C# desktop tool that merges user‑selected JPEG screenshots into a single image for bug‑report submissions, adding a 5‑pixel border to improve readability in the final attachment.
+ * 1. When a developer needs to combine multiple JPEG photos side‑by‑side and add a 5‑pixel white border for a consistent look in an online product catalog using C# and Aspose.Imaging.
+ * 2. When a C# application must merge scanned JPEG pages into a single horizontal strip and apply a uniform border to improve readability for document management systems.
+ * 3. When generating social‑media collage images from user‑uploaded JPEGs, a developer can use Aspose.Imaging to stitch them horizontally and add a thin border that matches the platform’s design guidelines.
+ * 4. When preparing high‑resolution JPEG artwork for print, a developer may merge individual image layers side‑by‑side and add a precise 5‑pixel border to ensure proper trimming and alignment.
+ * 5. When building a thumbnail gallery in a Windows Forms app, a developer can horizontally merge JPEG thumbnails and apply a uniform border to create a clean, spaced‑out visual grid.
  */

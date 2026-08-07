@@ -1,7 +1,8 @@
+// HOW-TO: Merge Multiple JPEGs Horizontally Into PDF and Set Author Metadata In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -14,18 +15,15 @@ class Program
     {
         try
         {
-            // Input JPEG files (hardcoded relative paths)
+            // Hardcoded input image paths
             string[] inputPaths = new string[]
             {
-                "Input/image1.jpg",
-                "Input/image2.jpg",
-                "Input/image3.jpg"
+                "image1.jpg",
+                "image2.jpg",
+                "image3.jpg"
             };
 
-            // Output PDF file (hardcoded relative path)
-            string outputPath = "Output/merged.pdf";
-
-            // Validate input files
+            // Validate each input file exists
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -35,7 +33,7 @@ class Program
                 }
             }
 
-            // Collect sizes of all input images
+            // Collect sizes of all images
             List<Size> sizes = new List<Size>();
             foreach (string path in inputPaths)
             {
@@ -49,8 +47,15 @@ class Program
             int newWidth = sizes.Sum(s => s.Width);
             int newHeight = sizes.Max(s => s.Height);
 
-            // Temporary JPEG file to serve as intermediate canvas source
-            string tempJpegPath = Path.Combine(Path.GetTempPath(), "temp_merge.jpg");
+            // Output PDF path
+            string outputPdfPath = "merged.pdf";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+
+            // Temporary JPEG file used as bound source for the canvas
+            string tempJpegPath = "temp.jpg";
+            Directory.CreateDirectory(Path.GetDirectoryName(tempJpegPath));
             Source tempSource = new FileCreateSource(tempJpegPath, false);
             JpegOptions jpegOptions = new JpegOptions
             {
@@ -58,9 +63,10 @@ class Program
                 Quality = 100
             };
 
-            // Create JPEG canvas
+            // Create canvas bound to temporary JPEG source
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
+                // Merge images horizontally onto the canvas
                 int offsetX = 0;
                 foreach (string path in inputPaths)
                 {
@@ -72,12 +78,17 @@ class Program
                     }
                 }
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Prepare PDF options with custom author metadata
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    PdfDocumentInfo = new PdfDocumentInfo
+                    {
+                        Author = "Custom Author"
+                    }
+                };
 
-                // Save the merged image as PDF
-                PdfOptions pdfOptions = new PdfOptions();
-                canvas.Save(outputPath, pdfOptions);
+                // Save the merged canvas as PDF
+                canvas.Save(outputPdfPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -89,9 +100,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a single PDF report that shows multiple product photos side‑by‑side, they can use this code to merge JPEG images horizontally and save the result as a PDF.
- * 2. When an e‑commerce platform wants to create a printable catalog page that combines several item images into one PDF sheet, this C# snippet merges the JPEGs and outputs a PDF document.
- * 3. When a medical imaging system must bundle a series of scanned X‑ray JPEGs into a single PDF for easy sharing with clinicians, the code provides a quick horizontal merge and PDF export.
- * 4. When a real‑estate application wants to combine interior and exterior JPEG photos of a property into a single PDF flyer, the example shows how to stitch the images horizontally and save them as a PDF.
- * 5. When an automated document workflow needs to concatenate marketing banner JPEGs into one PDF brochure page, this code demonstrates the necessary image loading, canvas creation, and PDF output in .NET.
+ * 1. When you need to combine several product photos into a single PDF brochure while preserving the original JPEG quality.
+ * 2. When you must generate a PDF report that displays scanned receipts side by side and include the creator’s name in the document metadata.
+ * 3. When an e‑commerce platform wants to create a printable catalog page by stitching horizontal images and embedding author information for copyright tracking.
+ * 4. When a legal firm needs to merge signed JPEG agreements into one PDF file and record the attorney’s name as the document author.
+ * 5. When an automated workflow creates a PDF portfolio of marketing banners and requires custom author metadata for document management systems.
  */

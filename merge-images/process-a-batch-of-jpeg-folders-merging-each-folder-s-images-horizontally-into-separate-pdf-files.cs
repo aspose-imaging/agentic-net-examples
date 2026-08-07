@@ -1,11 +1,11 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -26,13 +26,22 @@ class Program
 
             foreach (string folder in folders)
             {
+                // Prepare output PDF path for this folder
+                string folderName = Path.GetFileName(folder);
+                string outputPath = Path.Combine(outputRoot, folderName + ".pdf");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 // Get JPEG files in the current folder
                 string[] imageFiles = Directory.GetFiles(folder, "*.jpg")
                     .Concat(Directory.GetFiles(folder, "*.jpeg"))
                     .ToArray();
 
                 if (imageFiles.Length == 0)
-                    continue; // Skip folders without images
+                {
+                    continue; // No images to process
+                }
 
                 // Collect sizes of all images
                 List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
@@ -41,7 +50,7 @@ class Program
                     if (!File.Exists(imgPath))
                     {
                         Console.Error.WriteLine($"File not found: {imgPath}");
-                        return;
+                        continue;
                     }
 
                     using (RasterImage img = (RasterImage)Image.Load(imgPath))
@@ -50,13 +59,18 @@ class Program
                     }
                 }
 
-                // Calculate canvas dimensions for horizontal merge
-                int canvasWidth = sizes.Sum(s => s.Width);
-                int canvasHeight = sizes.Max(s => s.Height);
+                if (sizes.Count == 0)
+                {
+                    continue; // All files missing
+                }
 
-                // Create an unbound JPEG canvas
-                JpegOptions canvasOptions = new JpegOptions();
-                using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, canvasWidth, canvasHeight))
+                // Calculate canvas dimensions for horizontal merge
+                int newWidth = sizes.Sum(s => s.Width);
+                int newHeight = sizes.Max(s => s.Height);
+
+                // Create an unbound canvas (no source) using PNG options
+                PngOptions canvasOptions = new PngOptions();
+                using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, newWidth, newHeight))
                 {
                     int offsetX = 0;
                     foreach (string imgPath in imageFiles)
@@ -64,23 +78,16 @@ class Program
                         if (!File.Exists(imgPath))
                         {
                             Console.Error.WriteLine($"File not found: {imgPath}");
-                            return;
+                            continue;
                         }
 
                         using (RasterImage img = (RasterImage)Image.Load(imgPath))
                         {
-                            Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, 0, img.Width, img.Height);
+                            Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                             canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                             offsetX += img.Width;
                         }
                     }
-
-                    // Prepare PDF output path
-                    string relativeFolder = Path.GetFileName(folder);
-                    string outputPath = Path.Combine(outputRoot, relativeFolder + ".pdf");
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save the merged canvas as PDF
                     PdfOptions pdfOptions = new PdfOptions();
@@ -97,9 +104,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert product catalog image folders into single‑page PDF brochures by stitching each folder’s JPEG photos side‑by‑side.
- * 2. When an e‑commerce platform must generate printable order‑summary PDFs that combine all uploaded JPEG receipts from each customer’s folder into a horizontal layout.
- * 3. When a real‑estate agency wants to create PDF floor‑plan sheets that merge multiple room‑view JPEG images stored per property into one wide PDF page.
- * 4. When a medical imaging system requires batch processing of patient scan JPEG directories to produce horizontally merged PDF reports for quick review.
- * 5. When a marketing team automates the creation of PDF mood boards by horizontally merging themed JPEG assets from separate folders into individual PDF files.
+ * 1. When a developer needs to generate product catalogs by combining multiple JPEG product photos stored in separate category folders into single PDF brochures for each category using Aspose.Imaging for .NET.
+ * 2. When an e‑learning platform must automatically convert sets of lecture slide JPEG images organized by module into horizontally stitched PDF handouts for students.
+ * 3. When a real‑estate agency wants to create printable property brochures by merging room‑by‑room JPEG photos from each property folder into one landscape PDF per property.
+ * 4. When a marketing team requires batch creation of campaign PDFs by stitching together campaign‑specific JPEG assets from different folders into separate PDF files for distribution.
+ * 5. When a document management system needs to archive scanned JPEG pages stored in folder batches as combined PDF documents while preserving the original image dimensions.
  */

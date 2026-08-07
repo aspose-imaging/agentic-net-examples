@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -20,7 +19,7 @@ class Program
                 "input2.jpg",
                 "input3.jpg"
             };
-            string outputPath = "merged.jpg";
+            string outputPath = "merged_output.jpg";
 
             // Validate input files
             foreach (string path in inputPaths)
@@ -35,7 +34,7 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of all input images
+            // Collect image sizes
             List<Size> sizes = new List<Size>();
             foreach (string path in inputPaths)
             {
@@ -45,19 +44,24 @@ class Program
                 }
             }
 
-            // Calculate canvas size for vertical merge
-            int canvasWidth = sizes.Max(s => s.Width);
-            int canvasHeight = sizes.Sum(s => s.Height);
-
-            // Create JPEG canvas with metadata removal
-            Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions()
+            // Calculate canvas dimensions for vertical merge
+            int canvasWidth = 0;
+            int canvasHeight = 0;
+            foreach (Size sz in sizes)
             {
-                Source = source,
+                if (sz.Width > canvasWidth) canvasWidth = sz.Width;
+                canvasHeight += sz.Height;
+            }
+
+            // Create JPEG options with metadata removal
+            JpegOptions jpegOptions = new JpegOptions
+            {
+                Source = new FileCreateSource(outputPath, false),
                 Quality = 90,
                 KeepMetadata = false
             };
 
+            // Create canvas image bound to the output file
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
@@ -71,7 +75,7 @@ class Program
                     }
                 }
 
-                // Save the bound image (output path already bound via source)
+                // Save the bound image (output file already specified in options)
                 canvas.Save();
             }
         }
@@ -84,9 +88,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to combine multiple product photos into a single vertical collage and wants to minimize download size by stripping EXIF and XMP metadata from the resulting JPEG.
- * 2. When an e‑commerce platform generates printable receipt images by stacking scanned pages vertically and must remove personal metadata to comply with privacy regulations.
- * 3. When a mobile app creates a vertical timeline of user‑uploaded images for social sharing and wants to reduce bandwidth usage by discarding all JPEG metadata after merging.
- * 4. When a document management system archives scanned documents as a single merged JPEG and needs to eliminate metadata to prevent leakage of scanner information.
- * 5. When a digital signage solution builds a tall banner from several advertisement images and requires a lightweight JPEG without metadata for faster loading on display hardware.
+ * 1. When a web application needs to combine multiple product photos into a single vertical strip for a gallery while minimizing download size by stripping EXIF metadata.
+ * 2. When an automated reporting tool merges scanned document pages into one JPEG and must comply with privacy regulations by removing location and camera data.
+ * 3. When a mobile app creates a tall infographic from several images and wants to reduce the final file size for faster sharing on social media.
+ * 4. When a digital archiving system consolidates high‑resolution satellite image tiles into a single JPEG and needs to discard unnecessary metadata to save storage space.
+ * 5. When an e‑commerce platform generates a combined receipt image from multiple transaction screenshots and must ensure no personal metadata is retained before emailing the file.
  */

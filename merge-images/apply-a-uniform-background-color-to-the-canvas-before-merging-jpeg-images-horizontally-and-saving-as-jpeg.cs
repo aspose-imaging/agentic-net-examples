@@ -1,11 +1,11 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -14,11 +14,16 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string[] inputPaths = new string[] { "input1.jpg", "input2.jpg", "input3.jpg" };
-            string outputPath = "output.jpg";
+            string[] inputPaths = new string[]
+            {
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
+            string outputPath = "merged_output.jpg";
 
-            // Validate each input file exists
-            foreach (var path in inputPaths)
+            // Validate input files
+            foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -30,32 +35,41 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of all input images
-            List<Size> sizes = new List<Size>();
-            foreach (var path in inputPaths)
+            // Collect dimensions
+            var dimensions = new List<(int Width, int Height)>();
+            foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    sizes.Add(img.Size);
+                    dimensions.Add((img.Width, img.Height));
                 }
             }
 
-            // Calculate canvas dimensions for horizontal merge
-            int newWidth = sizes.Sum(s => s.Width);
-            int newHeight = sizes.Max(s => s.Height);
-
-            // Create JPEG canvas with options
-            Source src = new FileCreateSource(outputPath, false);
-            JpegOptions options = new JpegOptions { Source = src, Quality = 100 };
-            using (JpegImage canvas = new JpegImage(options, newWidth, newHeight))
+            // Calculate canvas size for horizontal merge
+            int canvasWidth = 0;
+            int canvasHeight = 0;
+            foreach (var dim in dimensions)
             {
-                // Fill canvas with uniform background color
-                Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Color.White);
+                canvasWidth += dim.Width;
+                if (dim.Height > canvasHeight)
+                    canvasHeight = dim.Height;
+            }
 
-                // Merge images side by side
+            // Create JPEG canvas with background color
+            Source src = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = src, Quality = 90 };
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            {
+                // Fill background
+                Graphics graphics = new Graphics(canvas);
+                using (SolidBrush brush = new SolidBrush(Color.LightGray))
+                {
+                    graphics.FillRectangle(brush, new Rectangle(0, 0, canvasWidth, canvasHeight));
+                }
+
+                // Merge images horizontally
                 int offsetX = 0;
-                foreach (var path in inputPaths)
+                foreach (string path in inputPaths)
                 {
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
@@ -65,7 +79,7 @@ class Program
                     }
                 }
 
-                // Save the bound canvas (source already bound to outputPath)
+                // Save the bound image
                 canvas.Save();
             }
         }
@@ -78,9 +92,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a product catalog PDF, a developer can use this code to stitch multiple product photos into a single high‑quality JPEG with a white background for consistent layout.
- * 2. When generating a social media collage, the code merges several JPEG snapshots horizontally and fills any empty space with a uniform color, ensuring the final image meets platform size requirements.
- * 3. When preparing a printable banner, a developer can combine different resolution JPEG images side by side on a canvas, applying a solid background to hide mismatched heights.
- * 4. When building an e‑commerce thumbnail strip, the snippet concatenates thumbnail JPEGs into one image and sets a consistent background color to avoid transparent gaps.
- * 5. When automating a report that includes side‑by‑side before‑and‑after photos, the code creates a single JPEG with a uniform background, simplifying file handling and display.
+ * 1. When creating a product catalog page that combines multiple product photos side‑by‑side, a developer can use this code to merge JPEG images on a uniform background color before saving the final catalog image.
+ * 2. When generating an email newsletter that displays a horizontal strip of promotional banners, this code ensures the banners are merged with a consistent background and output as a single JPEG for reliable email rendering.
+ * 3. When building a social‑media collage where user‑uploaded JPEG pictures need to be aligned horizontally with a solid color backdrop to match the brand palette, the code provides the necessary canvas preparation and merging.
+ * 4. When producing a PDF report that includes a combined header image made from several JPEG charts, a developer can apply a uniform background color and merge the charts horizontally before embedding the JPEG into the document.
+ * 5. When an e‑commerce platform creates a combined thumbnail of related items for a product detail page, this code merges the JPEG thumbnails on a consistent background color to generate a single, optimized JPEG thumbnail.
  */
