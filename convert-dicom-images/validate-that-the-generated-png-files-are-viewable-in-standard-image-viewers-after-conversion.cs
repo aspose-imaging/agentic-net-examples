@@ -7,12 +7,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.jpg";
-        string outputPath = @"C:\temp\output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.jpg";
+            string outputPath = @"C:\temp\output.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,33 +20,29 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists (unconditional call)
-            string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
-            Directory.CreateDirectory(outputDir);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image (any supported format)
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PNG save options (default options are sufficient)
-                PngOptions pngOptions = new PngOptions();
-
-                // Save the image as PNG
+                // Save as PNG with default options
+                var pngOptions = new PngOptions();
                 image.Save(outputPath, pngOptions);
             }
 
-            // Validate that the saved PNG can be loaded (viewable in standard viewers)
+            // Validate that the saved PNG can be loaded (viewable)
             if (Image.CanLoad(outputPath))
             {
-                Console.WriteLine("PNG saved successfully and is viewable.");
+                Console.WriteLine("PNG file saved successfully and is viewable.");
             }
             else
             {
-                Console.Error.WriteLine("Saved PNG could not be loaded; it may be corrupted.");
+                Console.Error.WriteLine("Saved PNG file could not be loaded.");
             }
         }
         catch (Exception ex)
         {
-            // Catch any runtime exception and report it
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -54,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert user‑uploaded JPEG photos to PNG for lossless web delivery and verify that the resulting files open in standard image viewers.
- * 2. When an automated batch job must normalize mixed‑format image assets to PNG before indexing them in a searchable media library, confirming each conversion succeeded.
- * 3. When a desktop application processes scanned JPEG documents, saves them as PNG for archival quality, and validates the output to prevent corrupted files from being stored.
- * 4. When a CI/CD pipeline includes a step that transforms generated JPEG screenshots into PNG for consistent rendering across platforms, checking that the PNG can be reloaded without errors.
- * 5. When a cloud service receives JPEG attachments, converts them to PNG for downstream processing (e.g., OCR or thumbnail generation), and uses Image.CanLoad to ensure the conversion produced a viewable image.
+ * 1. When a developer needs to batch‑convert user‑uploaded JPEG photos to lossless PNG files for storage in a web application and must ensure the resulting files can be opened by standard image viewers.
+ * 2. When an automated image‑processing pipeline must generate PNG thumbnails from original JPEG assets and verify that each thumbnail is not corrupted before publishing to a content delivery network.
+ * 3. When a desktop utility program has to replace legacy JPEG images with PNG equivalents for compliance with a corporate branding guideline while confirming the new files are viewable in Windows Photo Viewer.
+ * 4. When a background service processes scanned documents saved as JPEG, converts them to PNG for OCR preprocessing, and needs to validate that the conversion succeeded without data loss.
+ * 5. When a migration script moves product catalog images from a legacy system, converts them from JPEG to PNG for better transparency support, and checks that each converted image can be loaded by the Aspose.Imaging library.
  */

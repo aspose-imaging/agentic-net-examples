@@ -12,18 +12,18 @@ class Program
         string inputPath = "input.dcm";
         string outputPath = "output.png";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
@@ -31,18 +31,17 @@ class Program
                 DicomImage dicomImage = image as DicomImage;
                 if (dicomImage == null)
                 {
-                    Console.Error.WriteLine("The loaded file is not a valid DICOM image.");
+                    Console.Error.WriteLine("The input file is not a valid DICOM image.");
                     return;
                 }
 
-                // Prepare PNG options and copy metadata from the DICOM image
+                // Prepare PNG options and copy XMP metadata from the DICOM image
                 var pngOptions = new PngOptions
                 {
-                    KeepMetadata = true,               // Preserve metadata during export
-                    XmpData = dicomImage.XmpData       // Transfer XMP metadata
+                    XmpData = dicomImage.XmpData // preserve original metadata
                 };
 
-                // Save as PNG with the prepared options
+                // Save as PNG with the transferred metadata
                 dicomImage.Save(outputPath, pngOptions);
             }
         }
@@ -55,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology PACS system needs to export DICOM scans as PNG thumbnails while preserving patient and study metadata for audit trails.
- * 2. When a medical research application converts DICOM images to PNG for web display but must retain XMP metadata to link back to the original study.
- * 3. When a healthcare mobile app generates PNG snapshots from DICOM files for offline viewing and requires embedded metadata for regulatory compliance.
- * 4. When a hospital's document management workflow transforms DICOM files into PNG format for archival in a non‑DICOM repository while keeping traceability information.
- * 5. When a diagnostic AI pipeline extracts PNG images from DICOM datasets for model training and needs to carry over metadata to maintain data provenance.
+ * 1. When a medical imaging application must convert DICOM scans to PNG for web viewing while preserving patient and study metadata for audit trails.
+ * 2. When a radiology workflow needs to generate thumbnail PNGs from DICOM files for integration into electronic health record (EHR) systems without losing XMP metadata.
+ * 3. When a research project requires batch conversion of DICOM images to PNG for machine‑learning preprocessing while keeping original acquisition parameters embedded.
+ * 4. When a hospital IT team wants to archive DICOM images as lossless PNGs on a file server and retain traceability by copying the DICOM XMP metadata.
+ * 5. When a developer builds a diagnostic reporting tool that extracts DICOM images, converts them to PNG for inclusion in PDF reports, and needs the original metadata for regulatory compliance.
  */

@@ -2,8 +2,6 @@ using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -11,27 +9,25 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "Input/sample.dcm";
-            string outputDirectory = "Output";
+            string outputPath = "Output/sample.png";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(outputDirectory);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the DICOM image and convert to PNG
             using (Image image = Image.Load(inputPath))
             {
-                DicomImage dicomImage = (DicomImage)image;
-
-                foreach (var page in dicomImage.DicomPages)
-                {
-                    string outputPath = Path.Combine(outputDirectory, $"page_{page.Index}.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    page.Save(outputPath, new PngOptions());
-                }
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -43,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a hospital’s PACS system needs to batch‑convert incoming DICOM scans to PNG thumbnails, a developer can call Image.IsValid to skip corrupted files before saving each page as a PNG.
- * 2. When a research lab automates the extraction of image data from thousands of DICOM files for machine‑learning preprocessing, using Image.IsValid ensures only intact files are loaded and converted to PNG format.
- * 3. When a telemedicine app receives patient imaging uploads and must verify file integrity before displaying them in a web viewer, Image.IsValid can be used to validate the DICOM file before converting each frame to PNG.
- * 4. When a medical device manufacturer integrates Aspose.Imaging into a C# workflow that archives DICOM images as lossless PNGs, checking Image.IsValid prevents runtime exceptions caused by incomplete or tampered DICOM files.
- * 5. When a cloud‑based image‑processing service processes user‑submitted DICOM files and needs to log and skip invalid files during PNG conversion, developers can rely on Image.IsValid to filter out bad inputs efficiently.
+ * 1. When a hospital’s PACS system needs to validate incoming DICOM scans for corruption before converting them to PNG thumbnails for web viewers.
+ * 2. When a research lab automates the preprocessing of radiology images and wants to skip any malformed DICOM files to avoid runtime errors during batch PNG export.
+ * 3. When a telemedicine app receives patient imaging files and must ensure each DICOM file is valid before generating PNG snapshots for mobile display.
+ * 4. When a medical device manufacturer integrates a C# service that checks the integrity of DICOM output using Image.IsValid before storing PNG versions in a cloud archive.
+ * 5. When a health‑IT consultant builds a diagnostic reporting tool that loads DICOM files, verifies them with Image.IsValid, and then saves them as PNG for inclusion in PDF reports.
  */

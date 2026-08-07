@@ -1,45 +1,38 @@
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.dicom";
-        string outputPath = "sample.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\input.dcm";
+            string outputPath = @"C:\Temp\output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the DICOM image
-            using (Image image = Image.Load(inputPath))
+            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
             {
-                // Cast to DicomImage to access DICOM-specific methods
-                if (image is DicomImage dicomImage)
-                {
-                    // Rotate 90 degrees clockwise without flipping
-                    dicomImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                // Rotate 90 degrees clockwise
+                dicomImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-                    // Save as PNG
-                    dicomImage.Save(outputPath, new PngOptions());
-                }
-                else
-                {
-                    Console.Error.WriteLine("The loaded file is not a DICOM image.");
-                }
+                // Save as PNG
+                dicomImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -51,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to display a DICOM radiology scan in a web viewer that only supports PNG, a developer can rotate the image 90° clockwise and convert it to PNG using Aspose.Imaging for .NET.
- * 2. When integrating a PACS system with a reporting tool that expects correctly oriented images, a developer can use this code to fix the orientation of DICOM files and export them as PNG thumbnails.
- * 3. When building a batch processing script that prepares DICOM images for machine‑learning training, a developer can rotate each image and save it as PNG to ensure consistent orientation and format.
- * 4. When a hospital’s mobile app must show patient scans in portrait mode, a developer can apply a 90‑degree clockwise rotation to the DICOM image and save it as a PNG for efficient rendering on iOS/Android.
- * 5. When converting legacy DICOM files to a standard image format for archival or documentation purposes, a developer can use this code to rotate the image correctly and store it as a PNG file.
+ * 1. When a radiology web portal needs to display DICOM scans in the correct orientation on browsers that only support PNG, a developer can rotate the image 90° clockwise and convert it to PNG.
+ * 2. When generating printable reports from medical imaging systems, a developer may need to align portrait‑oriented DICOM slices by rotating them and saving as PNG for inclusion in PDF documents.
+ * 3. When integrating a DICOM viewer into a C# desktop application that uses standard image controls, the code can rotate the scan and export it as PNG so the UI can render it without additional plugins.
+ * 4. When preprocessing DICOM files for machine‑learning pipelines that accept PNG inputs, a developer can correct orientation by rotating 90° clockwise before saving the images.
+ * 5. When archiving DICOM images in a file system that requires consistent orientation and a universal format, a developer can rotate the image and store it as a PNG for easy retrieval and sharing.
  */

@@ -3,43 +3,50 @@ using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Temp\sample.dcm";
+        string outputPath = @"C:\Temp\sample_converted.png";
+
         try
         {
-            string inputPath = "Input/sample.dcm";
-            string outputPath = "Output/sample.png";
-
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DICOM image and capture original pixel data
-            using (Image image = Image.Load(inputPath))
+            // Load the DICOM image
+            using (Image dicomImage = Image.Load(inputPath))
             {
-                DicomImage dicomImage = (DicomImage)image;
-                int[] originalPixels = dicomImage.LoadArgb32Pixels(dicomImage.Bounds);
-
-                // Save as PNG
+                // Save the first page (or only page) as PNG
+                // For multi‑page DICOM, we take the active page (default is first)
                 dicomImage.Save(outputPath, new PngOptions());
 
-                // Load saved PNG and capture its pixel data
+                // Extract pixel data from the original DICOM image
+                int[] originalPixels = ((RasterImage)dicomImage).LoadArgb32Pixels(dicomImage.Bounds);
+
+                // Load the saved PNG image
                 using (Image pngImage = Image.Load(outputPath))
                 {
-                    var raster = (RasterImage)pngImage;
-                    int[] pngPixels = raster.LoadArgb32Pixels(raster.Bounds);
+                    // Extract pixel data from the PNG image
+                    int[] pngPixels = ((RasterImage)pngImage).LoadArgb32Pixels(pngImage.Bounds);
 
                     // Compare pixel arrays
-                    bool identical = originalPixels.Length == pngPixels.Length;
-                    if (identical)
+                    bool identical = true;
+                    if (originalPixels.Length != pngPixels.Length)
+                    {
+                        identical = false;
+                    }
+                    else
                     {
                         for (int i = 0; i < originalPixels.Length; i++)
                         {
@@ -51,9 +58,10 @@ class Program
                         }
                     }
 
+                    // Report result
                     if (identical)
                     {
-                        Console.WriteLine("Pixel data unchanged after conversion.");
+                        Console.WriteLine("Pixel data is unchanged after conversion.");
                     }
                     else
                     {
@@ -71,9 +79,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application generates PNG thumbnails of DICOM scans for web preview and must ensure the visual fidelity of the original pixel data.
- * 2. When a hospital’s PACS integration validates that exported PNG reports match the source DICOM images before archiving them in an electronic health record system.
- * 3. When a research workflow converts DICOM MRI datasets to PNG for machine‑learning preprocessing and needs to confirm that no pixel values were altered during the conversion.
- * 4. When a diagnostic device manufacturer runs a quality‑control test that checks the consistency of pixel data after converting DICOM images to PNG for patient‑friendly printouts.
- * 5. When a telemedicine platform automates the conversion of DICOM radiology images to PNG for mobile viewing and must verify that the conversion preserves the exact pixel intensities.
+ * 1. When a medical imaging application needs to create PNG thumbnails of DICOM scans for quick preview while guaranteeing that the original pixel values remain unchanged.
+ * 2. When a hospital PACS system converts DICOM files to PNG for web‑based viewers and must validate that the conversion does not alter any diagnostic pixel data.
+ * 3. When a research team extracts pixel arrays from DICOM images, saves them as PNG for machine‑learning pipelines, and wants to ensure the PNG representation is pixel‑identical to the source.
+ * 4. When a compliance audit requires proof that converting DICOM to PNG does not modify pixel intensity values used in quantitative analysis.
+ * 5. When an automated batch job processes large volumes of DICOM images into PNG format and includes a pixel‑by‑pixel comparison to detect any loss of information before release.
  */
