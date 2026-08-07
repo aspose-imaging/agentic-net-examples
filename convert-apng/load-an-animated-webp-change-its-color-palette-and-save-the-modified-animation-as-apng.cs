@@ -1,29 +1,45 @@
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.webp";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.webp";
-            string outputPath = "output.apng";
-
-            if (!File.Exists(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Create a simple palette with a few colors
+                var palette = new Aspose.Imaging.ColorPalette(new Aspose.Imaging.Color[]
+                {
+                    Aspose.Imaging.Color.Red,
+                    Aspose.Imaging.Color.Green,
+                    Aspose.Imaging.Color.Blue,
+                    Aspose.Imaging.Color.White
+                });
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Set the palette in APNG options
+                ApngOptions apngOptions = new ApngOptions
+                {
+                    Palette = palette
+                };
 
-            using (Image image = Image.Load(inputPath))
-            {
-                image.Save(outputPath, new ApngOptions());
+                // Save the modified animation as APNG
+                image.Save(outputPath, apngOptions);
             }
         }
         catch (Exception ex)
@@ -35,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a mobile app needs to replace the original colors of an animated WEBP logo with brand‑specific hues before serving it as an APNG for cross‑browser compatibility.
- * 2. When an e‑learning platform wants to convert animated WEBP tutorials into APNG format while applying a custom palette to match the course theme.
- * 3. When a game developer must recolor sprite animations stored in animated WEBP files and export them as APNGs for use in Unity’s UI system.
- * 4. When a marketing website requires animated product demos originally in WEBP to be recolored for seasonal campaigns and delivered as APNGs to support older browsers.
- * 5. When a digital publishing tool needs to ingest animated WEBP assets, adjust their color palette for accessibility standards, and save the result as APNG for inclusion in EPUB files.
+ * 1. When a developer needs to convert an animated WEBP file to an APNG while applying a custom color palette for reduced file size and consistent branding.
+ * 2. When a mobile app requires animated graphics in APNG format instead of WEBP to support iOS devices, and the developer wants to adjust the colors programmatically using C# and Aspose.Imaging.
+ * 3. When a web designer wants to replace the original colors of an animated WEBP with a limited set of brand colors before publishing the animation as an APNG on a website.
+ * 4. When a game developer must preprocess animated assets by loading a WEBP animation, applying a predefined palette, and exporting it as an APNG for use in a cross‑platform engine.
+ * 5. When an automated build pipeline needs to validate the existence of an animated WEBP, transform its palette, and generate an APNG output as part of a continuous‑integration image processing step.
  */

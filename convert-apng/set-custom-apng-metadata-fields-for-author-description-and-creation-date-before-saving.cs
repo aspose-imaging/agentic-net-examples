@@ -10,11 +10,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.apng";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output.apng";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -32,14 +32,11 @@ class Program
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                using (ApngImage apngImage = (ApngImage)Image.Create(
-                    options,
-                    sourceImage.Width,
-                    sourceImage.Height))
+                using (ApngImage apng = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
                 {
-                    apngImage.RemoveAllFrames();
-                    apngImage.AddFrame(sourceImage);
-                    apngImage.Save();
+                    apng.RemoveAllFrames();
+                    apng.AddFrame(sourceImage);
+                    apng.Save();
                 }
             }
         }
@@ -52,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed author, description, and creation date metadata into an animated PNG (APNG) file to meet digital asset management requirements.
- * 2. When a web application generates APNG stickers and wants to include creator information and timestamps for copyright tracking.
- * 3. When an e‑learning platform creates animated diagrams in APNG format and must store metadata for version control and content indexing.
- * 4. When a mobile game exports character animations as APNG files and requires embedded metadata to be read by analytics tools.
- * 5. When a documentation generator produces APNG screenshots and wants to preserve the original author and creation date for audit trails.
+ * 1. When a developer needs to embed author, description, and creation date metadata into an animated PNG (APNG) for compliance with digital asset management systems, they can use Aspose.Imaging for .NET to set these fields before saving the file.
+ * 2. When generating APNG files for an e‑learning platform where each animation must carry provenance information such as the content creator’s name, a brief description, and the timestamp of creation, the code can be extended to add custom metadata.
+ * 3. When exporting animated charts from a C# reporting tool and the client requires the APNG to include metadata for version tracking and audit trails, developers can set the author, description, and creation date using Aspose.Imaging before calling Save().
+ * 4. When creating marketing GIF‑style animations that are saved as APNG and need to be searchable in a media library by author and description, adding custom metadata fields ensures the images are indexed correctly.
+ * 5. When automating a CI/CD pipeline that produces APNG assets and the build process must record the build number and build date in the image metadata for later debugging, developers can programmatically assign these values prior to saving the APNG.
  */

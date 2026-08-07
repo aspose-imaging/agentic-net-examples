@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
@@ -10,57 +11,62 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input PNG sequence (alphabetical order) and output APNG path
+        string[] inputPaths = new string[]
+        {
+            "frame1.png",
+            "frame2.png",
+            "frame3.png"
+        };
+        string outputPath = "output_animation.apng";
+
         try
         {
-            // Hardcoded input PNG file paths (alphabetical order)
-            string inputPath1 = "frames\\frame1.png";
-            string inputPath2 = "frames\\frame2.png";
-            string inputPath3 = "frames\\frame3.png";
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Verify each input file exists
-            if (!File.Exists(inputPath1)) { Console.Error.WriteLine($"File not found: {inputPath1}"); return; }
-            if (!File.Exists(inputPath2)) { Console.Error.WriteLine($"File not found: {inputPath2}"); return; }
-            if (!File.Exists(inputPath3)) { Console.Error.WriteLine($"File not found: {inputPath3}"); return; }
-
-            // Hardcoded output APNG path
-            string outputPath = "output\\animation.apng";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the first image to obtain canvas dimensions
-            using (RasterImage firstImage = (RasterImage)Image.Load(inputPath1))
+            foreach (string path in inputPaths)
             {
-                // Configure APNG creation options
-                ApngOptions createOptions = new ApngOptions
+                if (!File.Exists(path))
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 100, // default frame duration in milliseconds
-                    ColorType = PngColorType.TruecolorWithAlpha
+                    Console.Error.WriteLine($"File not found: {path}");
+                    return;
+                }
+            }
+
+            // Load the first image to obtain canvas size
+            using (RasterImage firstImage = (RasterImage)Image.Load(inputPaths[0]))
+            {
+                int width = firstImage.Width;
+                int height = firstImage.Height;
+
+                // Prepare APNG creation options
+                Source source = new FileCreateSource(outputPath, false);
+                ApngOptions options = new ApngOptions
+                {
+                    Source = source,
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    DefaultFrameTime = 100 // default frame duration in ms
                 };
 
-                // Create the APNG canvas bound to the output file
-                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, firstImage.Width, firstImage.Height))
+                // Create the APNG canvas
+                using (ApngImage apng = (ApngImage)Image.Create(options, width, height))
                 {
-                    // Remove the automatically added initial frame
-                    apngImage.RemoveAllFrames();
+                    // Remove the default single frame
+                    apng.RemoveAllFrames();
 
-                    // Add the first frame
-                    apngImage.AddFrame(firstImage);
-
-                    // Load and add subsequent frames
-                    using (RasterImage img2 = (RasterImage)Image.Load(inputPath2))
+                    // Add each PNG as a frame
+                    foreach (string path in inputPaths)
                     {
-                        apngImage.AddFrame(img2);
+                        using (RasterImage frame = (RasterImage)Image.Load(path))
+                        {
+                            apng.AddFrame(frame);
+                        }
                     }
 
-                    using (RasterImage img3 = (RasterImage)Image.Load(inputPath3))
-                    {
-                        apngImage.AddFrame(img3);
-                    }
-
-                    // Save the APNG (output path already bound via Source)
-                    apngImage.Save();
+                    // Save the APNG file
+                    apng.Save();
                 }
             }
         }
@@ -73,9 +79,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate an animated PNG (APNG) for a web banner from a series of sequentially named PNG frames stored in a folder.
- * 2. When an e‑learning platform wants to convert step‑by‑step tutorial screenshots (frame1.png, frame2.png, …) into a single APNG file for smoother playback in browsers.
- * 3. When a game developer creates sprite animations offline by assembling PNG sprite sheets into an APNG to preview character motions without writing custom rendering code.
- * 4. When a marketing team automates the production of product showcase animations by combining product photo PNGs into an APNG that can be embedded in email newsletters.
- * 5. When a mobile app generates lightweight animated icons by merging PNG assets into an APNG at runtime using C# and Aspose.Imaging.
+ * 1. When a developer wants to generate an animated PNG (APNG) from a series of sequentially named PNG files (e.g., frame1.png, frame2.png) for use in web banners or UI animations.
+ * 2. When a C# application needs to combine individual PNG assets into a single APNG file with a consistent frame duration for cross‑platform mobile game sprites.
+ * 3. When a reporting tool must convert a folder of chart images saved as PNG into an APNG slideshow that can be embedded in PDF or HTML reports.
+ * 4. When an automated build pipeline has to create an APNG preview of image processing results by loading the first PNG to determine canvas size and then appending the rest as frames.
+ * 5. When a developer is implementing a custom image export feature that saves a time‑lapse sequence of screenshots as an APNG using Aspose.Imaging’s ApngOptions and FileCreateSource.
  */

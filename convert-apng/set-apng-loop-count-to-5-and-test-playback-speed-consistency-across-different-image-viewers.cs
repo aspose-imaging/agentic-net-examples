@@ -20,17 +20,20 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image (supports animated formats)
+            // Load the source image (could be animated or single-frame)
             using (Image image = Image.Load(inputPath))
             {
-                // Save as APNG with 5 loop cycles; default frame timing is preserved
+                // Configure APNG options: set loop count to 5 and a default frame time (e.g., 100 ms)
                 var apngOptions = new ApngOptions
                 {
-                    NumPlays = 5
+                    NumPlays = 5,                 // Loop the animation 5 times
+                    DefaultFrameTime = 100       // 100 ms per frame to test playback speed
                 };
+
+                // Save as APNG with the specified options
                 image.Save(outputPath, apngOptions);
             }
         }
@@ -43,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an animated WebP file to an APNG with a fixed loop count of 5 to guarantee consistent playback across web browsers and mobile apps.
- * 2. When building a C# desktop application that generates looping animated PNGs for UI notifications and wants to control the NumPlays property to limit the animation cycles.
- * 3. When creating marketing assets that must display a specific number of animation repeats in email newsletters, using Aspose.Imaging to set the APNG loop count while preserving original frame timing.
- * 4. When testing playback speed and loop behavior of animated images across different viewers, a developer can use this code to produce an APNG with a known loop count for reliable comparison.
- * 5. When automating a batch process that converts animated WebP files to APNGs, ensuring the output directory exists and handling missing input files gracefully in a .NET environment.
+ * 1. When a developer needs to generate an animated PNG (APNG) from a WebP source that loops exactly five times for use in product tutorials, ensuring consistent frame timing across browsers and image viewers.
+ * 2. When a developer wants to create a looping banner ad in C# where the animation repeats a fixed number of times (five) and the 100 ms frame delay must be verified on desktop and mobile image viewers.
+ * 3. When a developer is building a game UI and must export character sprite animations as APNG files that play five cycles with a uniform playback speed to test synchronization with sound effects.
+ * 4. When a developer is implementing an automated quality‑control pipeline that converts animated WebP assets to APNG and checks that the NumPlays property of 5 and DefaultFrameTime of 100 ms render correctly in popular image editors.
+ * 5. When a developer needs to produce a diagnostic sample for client support, converting an animated WebP to an APNG that repeats five times so that support staff can compare playback speed consistency across different viewer applications.
  */

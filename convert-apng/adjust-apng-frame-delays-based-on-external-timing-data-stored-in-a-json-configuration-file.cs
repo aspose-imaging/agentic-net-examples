@@ -9,79 +9,78 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded paths
-            string inputPath = "input\\source.png";
-            string outputPath = "output\\animation.png";
-            string configPath = "config.json";
+            string inputImagePath = "input.png";
+            string jsonConfigPath = "config.json";
+            string outputPath = "output.apng";
 
-            // Input file checks
-            if (!File.Exists(inputPath))
+            // Input validation
+            if (!File.Exists(inputImagePath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputImagePath}");
                 return;
             }
-            if (!File.Exists(configPath))
+            if (!File.Exists(jsonConfigPath))
             {
-                Console.Error.WriteLine($"File not found: {configPath}");
+                Console.Error.WriteLine($"File not found: {jsonConfigPath}");
                 return;
             }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load timing data from JSON (simple format: {"delays":[100,200,150]})
-            List<uint> frameDelays = new List<uint>();
-            string json = File.ReadAllText(configPath);
-            int start = json.IndexOf('[');
-            int end = json.IndexOf(']');
-            if (start >= 0 && end > start)
+            // Load source raster image
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputImagePath))
             {
-                string numbers = json.Substring(start + 1, end - start - 1);
-                foreach (var part in numbers.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                // Parse frame delays from JSON (expects an array of numbers)
+                var delays = new List<uint>();
+                string json = File.ReadAllText(jsonConfigPath);
+                string number = "";
+                foreach (char ch in json)
                 {
-                    if (uint.TryParse(part.Trim(), out uint value))
+                    if (char.IsDigit(ch))
                     {
-                        frameDelays.Add(value);
+                        number += ch;
+                    }
+                    else
+                    {
+                        if (number.Length > 0)
+                        {
+                            delays.Add(uint.Parse(number));
+                            number = "";
+                        }
                     }
                 }
-            }
+                if (number.Length > 0)
+                {
+                    delays.Add(uint.Parse(number));
+                }
 
-            if (frameDelays.Count == 0)
-            {
-                Console.Error.WriteLine("No frame delays found in configuration.");
-                return;
-            }
-
-            // Load source raster image
-            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
-            {
                 // Create APNG options
                 ApngOptions createOptions = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
+                    DefaultFrameTime = 0, // will be set per frame
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
                 // Create APNG image canvas
-                using (ApngImage apngImage = (ApngImage)Image.Create(
-                    createOptions,
-                    sourceImage.Width,
-                    sourceImage.Height))
+                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
                 {
                     // Remove default frame
                     apngImage.RemoveAllFrames();
 
                     // Add frames with specific delays
-                    foreach (uint delay in frameDelays)
+                    foreach (uint delay in delays)
                     {
                         apngImage.AddFrame(sourceImage, delay);
                     }
 
-                    // Save the APNG file
+                    // Save the APNG (output is already bound via FileCreateSource)
                     apngImage.Save();
                 }
             }
@@ -95,9 +94,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating an animated PNG (APNG) for a web banner where each frame must display for a duration defined by a marketing schedule stored in a JSON file.
- * 2. When converting a single PNG sprite sheet into an APNG slideshow and need to synchronize frame timing with audio cues described in an external JSON configuration.
- * 3. When generating a product tutorial animation where the step‑by‑step delays are maintained in a JSON manifest and must be applied to each frame using Aspose.Imaging for .NET.
- * 4. When building a game UI animation that reads frame delay values from a server‑provided JSON file to ensure consistent playback across devices.
- * 5. When automating the creation of an APNG advertisement that pulls per‑frame display times from a JSON configuration to match a predefined storyboard.
+ * 1. When a developer wants to generate an animated PNG (APNG) whose frame timing is driven by a JSON configuration file that stores per‑frame delay values.
+ * 2. When an application needs to synchronize animation speed with external data such as sensor readings or user‑defined timelines stored in JSON.
+ * 3. When a game or UI designer must create a sprite sheet animation where each frame’s display duration is customized without hard‑coding values in C#.
+ * 4. When a content management system must convert a static PNG into an APNG and apply variable frame delays based on metadata exported as JSON.
+ * 5. When a developer is building a reporting tool that visualizes step‑by‑step processes, using JSON‑defined delays to control the pacing of each APNG frame.
  */
