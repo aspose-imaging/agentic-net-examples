@@ -1,6 +1,9 @@
+// HOW-TO: Resize PNG to 640x480, Apply Gaussian Blur, Save as SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -19,17 +22,18 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
                 // Resize to 640x480
                 image.Resize(640, 480);
 
                 // Apply Gaussian blur
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 1.5));
+                RasterImage raster = (RasterImage)image;
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
                 // Save as SVG
-                image.Save(outputPath, new SvgOptions());
+                SvgOptions svgOptions = new SvgOptions();
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -41,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to generate a lightweight SVG thumbnail from a high‑resolution PNG for responsive design, they can resize the PNG to 640×480, apply a Gaussian blur for a soft‑focus effect, and save it as SVG using Aspose.Imaging for .NET.
- * 2. When an e‑learning platform wants to create blurred background images for slide overlays, the code can take the original PNG assets, downscale them to 640×480, apply a Gaussian blur, and export them as SVG vectors that scale without loss.
- * 3. When a marketing automation tool must produce stylized SVG icons from product photos, developers can use this snippet to resize the PNGs, add a subtle blur, and output SVG files that are easy to embed in email templates.
- * 4. When a desktop application needs to preprocess user‑uploaded PNG screenshots for a preview pane, the code resizes the images to a standard 640×480 size, softens them with a Gaussian blur, and saves them as SVG for fast rendering.
- * 5. When a data‑visualization service wants to convert PNG charts into scalable SVG graphics with a blurred background for visual emphasis, the snippet performs the resize, blur, and format conversion in a single C# workflow.
+ * 1. When you need to generate a lightweight vector version of a blurred thumbnail from a PNG for responsive web design.
+ * 2. When creating a blurred background image for a UI overlay and you want the result in SVG to scale without loss.
+ * 3. When preprocessing PNG assets for an e‑book, resizing them to 640×480, applying a soft blur, and converting to SVG for better compatibility with e‑reader rendering engines.
+ * 4. When automating a batch process that prepares product photos by standardizing size, adding a Gaussian blur for aesthetic effect, and saving as SVG for print‑ready vector workflows.
+ * 5. When developing a C# application that must convert user‑uploaded PNGs into blurred SVG icons of a fixed dimension for use in a mobile app’s asset pipeline.
  */
