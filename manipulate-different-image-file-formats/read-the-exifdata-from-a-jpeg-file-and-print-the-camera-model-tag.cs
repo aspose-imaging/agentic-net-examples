@@ -1,3 +1,4 @@
+// HOW-TO: Read JPEG EXIF Camera Model Tag in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,12 +9,13 @@ class Program
 {
     static void Main()
     {
+        // Wrap the whole logic to catch unexpected exceptions
         try
         {
-            // Hardcoded input path
+            // Hardcoded input path (no argument validation)
             string inputPath = "sample.jpg";
 
-            // Verify the input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,8 +25,9 @@ class Program
             // Load the JPEG image
             using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                // Access JPEG-specific EXIF data
+                // Access the EXIF data; cast to JpegExifData to get JPEG‑specific tags
                 JpegExifData jpegExif = image.ExifData as JpegExifData;
+
                 if (jpegExif != null)
                 {
                     // Print the camera model tag
@@ -38,7 +41,7 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -46,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building a photo gallery web app that displays camera information alongside each JPEG thumbnail, a developer can use this C# code with Aspose.Imaging to extract the camera model from the EXIF data.
- * 2. When generating a usage report for a photography studio, the snippet reads the Model tag from JPEG files to identify which camera captured each image.
- * 3. When validating image metadata before archiving digital assets, a developer can run this code to ensure that each JPEG contains a valid camera model EXIF tag.
- * 4. When creating a C# desktop tool that sorts JPEG images into folders based on the camera model, the program reads the Model property from the JPEG EXIF data using Aspose.Imaging.
- * 5. When troubleshooting inconsistencies in a batch of product photos, a developer can quickly print the camera model from each JPEG to verify that the correct device was used during shooting.
+ * 1. When building a photo gallery app that displays the camera model for each uploaded JPEG image.
+ * 2. When generating a report of equipment used in field photography by extracting camera model tags from image files.
+ * 3. When validating that images were captured with a specific camera model before processing them in a workflow.
+ * 4. When creating a digital asset management system that indexes JPEG files by their EXIF camera model metadata.
+ * 5. When debugging image import pipelines by printing the camera model to verify correct EXIF extraction.
  */
