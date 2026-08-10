@@ -1,8 +1,12 @@
-// HOW-TO: Extract and Save Each Page of a Multi‑Page PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Motion Blur Filter to Each Frame of an APNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -11,45 +15,56 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPathTemplate = "output\\page_{0}.png";
+            string inputPath = "input.apng";
+            string outputDirectory = "output";
 
-            // Input file existence check
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Load the image (could be multi‑page)
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
+            // Load the multi‑page (animated) PNG
             using (Image image = Image.Load(inputPath))
             {
-                if (image is IMultipageImage multipageImage)
+                // Cast to ApngImage to access pages
+                ApngImage apngImage = image as ApngImage;
+                if (apngImage == null)
                 {
-                    int pageCount = multipageImage.PageCount;
-                    for (int i = 0; i < pageCount; i++)
-                    {
-                        // Extract the page as a raster image
-                        using (RasterImage page = (RasterImage)multipageImage.Pages[i])
-                        {
-                            string outputPath = string.Format(outputPathTemplate, i);
-                            // Ensure output directory exists
-                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                            // Save the page as PNG
-                            page.Save(outputPath, new PngOptions());
-                        }
-                    }
+                    Console.Error.WriteLine("The input file is not a valid APNG image.");
+                    return;
                 }
-                else
+
+                // Iterate through each page/frame
+                for (int i = 0; i < apngImage.PageCount; i++)
                 {
-                    // Single-page image handling
-                    using (RasterImage raster = (RasterImage)image)
+                    // Retrieve the frame as a RasterImage
+                    RasterImage frame = apngImage.Pages[i] as RasterImage;
+                    if (frame == null)
                     {
-                        string outputPath = string.Format(outputPathTemplate, 0);
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                        raster.Save(outputPath, new PngOptions());
+                        Console.Error.WriteLine($"Page {i} is not a raster image.");
+                        continue;
                     }
+
+                    // Apply convolution filter using GetBlurMotion (size 5, angle 225)
+                    frame.Filter(frame.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.GetBlurMotion(5, 225)));
+
+                    // Prepare output path for the current page
+                    string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.png");
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the filtered page as PNG
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+                    frame.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -62,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to split a multi‑page PNG (such as a scanned document saved as PNG) into separate page files for further processing or distribution.
- * 2. When a web service must generate individual PNG thumbnails from each page of a multi‑page image for a gallery view.
- * 3. When an automated workflow extracts each frame of an animated PNG to apply different filters or archive them individually.
- * 4. When a desktop application requires converting a multi‑page PNG into single‑page PNGs to meet a system that only accepts one page per file.
- * 5. When a batch process saves each page of a large multi‑page PNG into a structured folder hierarchy for downstream OCR or analysis.
+ * 1. When you need to add a directional motion blur effect to every frame of an animated PNG for a web animation.
+ * 2. When you must process a multi‑page APNG and export each blurred frame as separate image files for further editing.
+ * 3. When you want to programmatically enhance video‑like PNG sequences with a consistent blur angle and size in a C# backend.
+ * 4. When you are building a batch image pipeline that applies the same convolution filter to all pages of an APNG before publishing.
+ * 5. When you need to verify that an APNG’s individual frames can be accessed, filtered, and saved individually using Aspose.Imaging.
  */
