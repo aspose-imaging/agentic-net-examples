@@ -1,3 +1,4 @@
+// HOW-TO: Resize EPS to Double Size and Save as High‑Resolution PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,13 +8,13 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\source.eps";
+        string outputPath = @"C:\Images\output.png";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\source.eps";
-            string outputPath = @"C:\Images\ResizedResult.png";
-
-            // Verify input file exists
+            // Verify that the input EPS file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,9 +25,9 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EPS image
-            using (Image image = Image.Load(inputPath))
+            using (var image = Image.Load(inputPath))
             {
-                // Calculate double size
+                // Calculate double dimensions
                 int newWidth = image.Width * 2;
                 int newHeight = image.Height * 2;
 
@@ -47,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to double the size of a vector EPS logo for printing and export it as a high‑resolution PNG for web use.
- * 2. When an application must convert legacy EPS artwork into a larger PNG thumbnail while preserving quality using Aspose.Imaging in C#.
- * 3. When a batch process has to upscale EPS diagrams for inclusion in a PowerPoint presentation and save them as PNG files.
- * 4. When a graphics pipeline requires resizing EPS schematics to double dimensions before embedding them in a PDF report as PNG images.
- * 5. When a .NET service must validate the existence of an EPS file, enlarge it, and deliver a high‑resolution PNG to a client‑side viewer.
+ * 1. When you need to enlarge a vector EPS logo for printing on large banners while preserving quality by converting it to a high‑resolution PNG.
+ * 2. When a web application must generate a zoomed‑in preview of an EPS diagram for detailed inspection in a browser.
+ * 3. When an automated workflow processes EPS artwork and creates double‑sized PNG assets for high‑DPI displays.
+ * 4. When a desktop tool resizes EPS icons to twice their original size to match modern UI guidelines and saves them as PNG files.
+ * 5. When a batch script converts legacy EPS files to high‑resolution PNGs with doubled dimensions for archival or sharing purposes.
  */
