@@ -1,43 +1,59 @@
+// HOW-TO: Widen a GraphicsPath by 3 Pixels for Hit Testing in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input\\sample.png";
-        string outputPath = "output\\result.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string outputPath = "output.png";
 
         try
         {
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Create PNG options with a file create source
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
+
+            // Create a new image canvas
+            using (Image image = Image.Create(pngOptions, 400, 300))
             {
-                Graphics graphics = new Graphics(raster);
+                // Initialize graphics
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
 
-                GraphicsPath path = new GraphicsPath();
-                Figure figure = new Figure();
-                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
-                path.AddFigure(figure);
+                // Original path (rectangle)
+                GraphicsPath originalPath = new GraphicsPath();
+                Figure originalFigure = new Figure();
+                originalFigure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
+                originalPath.AddFigure(originalFigure);
 
-                Pen widenPen = new Pen(Color.Blue, 3);
-                path.Widen(widenPen);
+                // Draw original path with a thin black pen
+                Pen thinPen = new Pen(Color.Black, 1);
+                graphics.DrawPath(thinPen, originalPath);
 
-                Pen drawPen = new Pen(Color.Red, 1);
-                graphics.DrawPath(drawPen, path);
+                // Widened path for hit testing
+                GraphicsPath widenedPath = new GraphicsPath();
+                Figure widenedFigure = new Figure();
+                widenedFigure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 150f)));
+                widenedPath.AddFigure(widenedFigure);
 
-                PngOptions pngOptions = new PngOptions();
-                raster.Save(outputPath, pngOptions);
+                // Pen that defines the widening width (3 pixels)
+                Pen thickPen = new Pen(Color.Red, 3);
+                widenedPath.Widen(thickPen);
+
+                // Draw the widened path with a blue pen to visualize the expanded area
+                Pen visualPen = new Pen(Color.Blue, 1);
+                graphics.DrawPath(visualPen, widenedPath);
+
+                // Save the image
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -49,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to increase the clickable area of a rectangular UI element in a PNG image by three pixels for more forgiving hit testing, they can use the Widen method with a thick Pen as shown.
- * 2. When a developer wants to generate a visual guide that highlights the expanded boundary of a shape in a raster image for debugging layout issues, they can widen the GraphicsPath and draw it with a contrasting pen.
- * 3. When a developer is preparing a PNG asset for a game and must ensure that touch targets are at least three pixels larger than the original shape to meet accessibility guidelines, the code can widen the path before saving.
- * 4. When a developer needs to create a mask image where the stroke width of a rectangle is increased for later compositing or clipping operations, using Widen with a Pen of width 3 achieves the required thickness.
- * 5. When a developer is implementing custom image annotation tools that require a thicker selection outline for better visibility on high‑resolution screenshots, the Widen method expands the path and the result is saved as a PNG file.
+ * 1. When you need to detect mouse clicks on a rectangle with a tolerance of a few pixels, you can widen the GraphicsPath using a thick Pen for accurate hit testing.
+ * 2. When creating a selectable UI overlay on a PNG image, widening the path ensures the selection area is larger than the visible border, improving user interaction.
+ * 3. When generating printable graphics where the clickable region must extend beyond the visual shape, using Widen with a 3‑pixel pen creates a buffer zone for the hit test.
+ * 4. When implementing custom shape editing tools in a C# application, widening the path helps to capture drag events even if the user clicks slightly outside the original shape.
+ * 5. When building a diagram editor that saves to PNG, widening the path before hit testing allows you to highlight the expanded area with a different color for debugging.
  */
