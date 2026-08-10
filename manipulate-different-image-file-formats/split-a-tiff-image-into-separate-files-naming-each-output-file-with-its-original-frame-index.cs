@@ -1,3 +1,4 @@
+// HOW-TO: Split Multi‑Page TIFF Into Separate Files By Frame Index In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directory paths
+        string inputPath = @"C:\Images\input_multi.tif";
+        string outputDir = @"C:\Images\output";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.tif";
-            string outputDirectory = "output";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,25 +21,20 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
-
             // Load the multi‑frame TIFF image
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            using (TiffImage multiPage = (TiffImage)Image.Load(inputPath))
             {
-                // Iterate through each frame
-                for (int i = 0; i < tiffImage.Frames.Length; i++)
+                // Iterate over each frame in the source image
+                for (int i = 0; i < multiPage.Frames.Length; i++)
                 {
-                    // Create a new frame based on the current frame
-                    TiffFrame newFrame = new TiffFrame(tiffImage.Frames[i]);
-
-                    // Create a new TiffImage containing only this frame
-                    using (TiffImage singleFrameImage = new TiffImage(newFrame))
+                    // Create a new TiffImage that contains only the current frame
+                    TiffFrame frame = multiPage.Frames[i];
+                    using (TiffImage singleFrameImage = new TiffImage(frame))
                     {
                         // Build output file path using the original frame index
-                        string outputPath = Path.Combine(outputDirectory, $"frame_{i}.tif");
+                        string outputPath = Path.Combine(outputDir, $"frame_{i}.tif");
 
-                        // Ensure the directory for the output file exists
+                        // Ensure the output directory exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                         // Save the single‑frame TIFF
@@ -56,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system receives a multi‑page TIFF scan and must store each slice as an individual file for downstream analysis, developers can use this code to split the TIFF and name each file with its original frame index.
- * 2. When a document management workflow needs to extract each page of a scanned multi‑page TIFF contract into separate files for OCR processing, the code provides a simple C# way to create per‑page TIFFs named by their page number.
- * 3. When a GIS application receives a multi‑band satellite TIFF and wants to isolate each band as its own image file for separate rendering, developers can employ this snippet to generate single‑frame TIFFs with indexed filenames.
- * 4. When an archival system must preserve the original ordering of frames in a multi‑frame TIFF animation by exporting each frame as an individual file for version control, this code automates the extraction and naming based on the frame index.
- * 5. When a printing service needs to split a multi‑page TIFF brochure into separate printable TIFF files while keeping the original sequence, the example shows how to programmatically save each frame as “frame_0.tif”, “frame_1.tif”, etc., using Aspose.Imaging for .NET.
+ * 1. When you need to extract every page of a scanned multi‑page TIFF so each frame can be processed or shared as an individual image file.
+ * 2. When a legacy system requires single‑frame TIFFs, you can split a multi‑frame TIFF and name the outputs with their original frame index for correct ordering.
+ * 3. When archiving documents, saving each TIFF frame as “frame_0.tif”, “frame_1.tif”, etc., preserves the original sequence and simplifies retrieval.
+ * 4. When performing batch image analysis, separating a multi‑frame TIFF into individual files lets you apply computer‑vision algorithms to each page independently.
+ * 5. When automating email workflows, splitting a multi‑page TIFF allows you to attach each page as a separate TIFF attachment with a clear index‑based filename.
  */
