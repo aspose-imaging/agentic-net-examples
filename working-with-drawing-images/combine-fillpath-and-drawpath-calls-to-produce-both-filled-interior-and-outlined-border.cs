@@ -1,46 +1,57 @@
+// HOW-TO: How To Fill And Outline Shapes With Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = @"c:\temp\filled_and_outlined.png";
-
         try
         {
+            // Define output file path
+            string outputPath = "output.png";
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Create PNG options with a file source bound to the output path
             PngOptions pngOptions = new PngOptions();
             pngOptions.Source = new FileCreateSource(outputPath, false);
 
+            // Create a new image canvas (500x500)
             using (Image image = Image.Create(pngOptions, 500, 500))
             {
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
+
+                // Clear background to white
                 graphics.Clear(Color.White);
 
+                // Build a graphics path with a rectangle and an ellipse
                 GraphicsPath path = new GraphicsPath();
-                Figure figure = new Figure { IsClosed = true };
+                Figure figure = new Figure();
+
+                // Add a rectangle shape
                 figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
-                figure.AddShape(new EllipseShape(new RectangleF(150f, 150f, 200f, 200f)));
+                // Add an ellipse shape
+                figure.AddShape(new EllipseShape(new RectangleF(100f, 100f, 200f, 200f)));
+
+                // Attach the figure to the path
                 path.AddFigure(figure);
 
-                Pen outlinePen = new Pen(Color.Black, 2);
-                using (SolidBrush fillBrush = new SolidBrush())
+                // Fill the interior of the path with yellow
+                using (SolidBrush fillBrush = new SolidBrush(Color.Yellow))
                 {
-                    fillBrush.Color = Color.Yellow;
-                    fillBrush.Opacity = 100;
-
                     graphics.FillPath(fillBrush, path);
-                    graphics.DrawPath(outlinePen, path);
                 }
 
-                image.Save();
+                // Draw the outline of the path with a black pen (2px width)
+                graphics.DrawPath(new Pen(Color.Black, 2), path);
             }
         }
         catch (Exception ex)
@@ -52,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a PNG badge for a web dashboard that needs a colored shape with a crisp black outline, developers can use FillPath and DrawPath to create the filled interior and outlined border.
- * 2. When creating printable certificates in PNG format that highlight sections with a yellow fill and a defined border, this code lets developers emphasize important text.
- * 3. When rendering custom map markers in a GIS application, developers can combine a rectangle and ellipse shape, fill them with a specific color, and outline them for clear visibility on various map layers.
- * 4. When producing UI icons for a Windows Forms application, developers use FillPath and DrawPath to ensure the icon’s shape remains filled and stroked, preserving clarity at different DPI settings.
- * 5. When building an automated report that inserts annotated diagrams into PNG files, developers need this code to draw filled shapes with outlines that stand out against a white background.
+ * 1. When you need to generate a PNG badge that shows a colored rectangle with a highlighted border for a web dashboard.
+ * 2. When creating printable certificates that require filled shapes with precise outlines using C# and Aspose.Imaging.
+ * 3. When building a custom chart where overlapping shapes must be both filled and stroked to improve visual clarity.
+ * 4. When developing a game UI element that displays a semi‑transparent background shape with a crisp black edge.
+ * 5. When automating the production of marketing thumbnails that combine filled ellipses and rectangles with defined outlines.
  */
