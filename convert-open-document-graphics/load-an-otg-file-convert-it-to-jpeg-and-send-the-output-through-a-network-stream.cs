@@ -1,3 +1,4 @@
+// HOW-TO: Convert OTG Image To JPEG And Stream Over TCP In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Net.Sockets;
@@ -8,12 +9,11 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.otg";
-        string outputPath = @"C:\Images\output.jpg";
-
         try
         {
+            // Hardcoded input OTG file path
+            string inputPath = @"C:\Images\sample.otg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,21 +21,26 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Load the OTG image
-            using (Image image = Image.Load(inputPath))
+            // Load the OTG image using Aspose.Imaging.Image.Load
+            using (Image otgImage = Image.Load(inputPath))
             {
                 // Prepare JPEG save options
                 var jpegOptions = new JpegOptions();
 
-                // Connect to a TCP server and obtain the network stream
-                using (var client = new TcpClient("127.0.0.1", 5000))
-                using (NetworkStream networkStream = client.GetStream())
+                // Save the image to a memory stream in JPEG format
+                using (var jpegStream = new MemoryStream())
                 {
-                    // Save the image as JPEG directly to the network stream
-                    image.Save(networkStream, jpegOptions);
+                    otgImage.Save(jpegStream, jpegOptions);
+                    jpegStream.Position = 0; // Reset stream position for reading
+
+                    // Connect to a TCP server (hardcoded host and port)
+                    using (var client = new TcpClient("localhost", 5000))
+                    using (NetworkStream networkStream = client.GetStream())
+                    {
+                        // Send JPEG data over the network stream
+                        jpegStream.CopyTo(networkStream);
+                        networkStream.Flush();
+                    }
                 }
             }
         }
@@ -48,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to stream a converted JPEG image from an OTG file to a remote client over a TCP connection, such as delivering thumbnails to a web service in real time.
- * 2. When a desktop application must read proprietary OTG graphics, convert them to JPEG for bandwidth‑efficient transmission, and send the result through a network socket to a server for further processing.
- * 3. When an IoT device captures images in OTG format, uses Aspose.Imaging to transform them into JPEG, and pushes the data over a TCP stream to a central monitoring system.
- * 4. When a batch job processes a folder of OTG files, converts each to JPEG on the fly, and streams the output directly to a network printer or image‑processing service without writing intermediate files.
- * 5. When a cloud‑based microservice receives OTG image uploads, converts them to JPEG using C# and Aspose.Imaging, and streams the compressed image to another service via a TCP network stream for storage or analysis.
+ * 1. When you need to send a vector OTG drawing from a desktop app to a server that only accepts JPEG streams.
+ * 2. When integrating a legacy CAD system that outputs OTG files with a modern web service that processes JPEG images over a TCP socket.
+ * 3. When building a real‑time imaging pipeline that converts high‑resolution OTG graphics to compressed JPEGs before transmitting them to remote clients.
+ * 4. When automating batch processing that reads OTG files, compresses them to JPEG, and pushes the result to a network printer or image‑processing server.
+ * 5. When creating a lightweight C# service that streams converted OTG images to a cloud endpoint without writing temporary files to disk.
  */
