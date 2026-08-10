@@ -1,3 +1,4 @@
+// HOW-TO: Convert OTG to PNG and Measure Conversion Time in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Diagnostics;
@@ -8,12 +9,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\input\sample.otg";
-        string outputPath = @"C:\output\sample.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.otg";
+            string outputPath = "output\\converted.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,32 +25,27 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Start timing the conversion
-            Stopwatch stopwatch = Stopwatch.StartNew();
+            // Measure conversion time
+            Stopwatch sw = Stopwatch.StartNew();
 
-            // Load the OTG image
+            // Load OTG image and save as PNG
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PNG save options with OTG rasterization settings
-                PngOptions pngOptions = new PngOptions();
-                OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
+                var pngOptions = new PngOptions();
+                var otgRaster = new OtgRasterizationOptions
                 {
-                    // Preserve original page size
                     PageSize = image.Size
                 };
-                pngOptions.VectorRasterizationOptions = otgRasterization;
+                pngOptions.VectorRasterizationOptions = otgRaster;
 
-                // Save as PNG
                 image.Save(outputPath, pngOptions);
             }
 
-            // Stop timing and report
-            stopwatch.Stop();
-            Console.WriteLine($"Conversion completed in {stopwatch.ElapsedMilliseconds} ms.");
+            sw.Stop();
+            Console.WriteLine($"Conversion time: {sw.ElapsedMilliseconds} ms");
         }
         catch (Exception ex)
         {
-            // Log any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -57,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a GIS application needs to generate web‑ready raster thumbnails from vector OTG maps and measure how long each conversion takes for scaling the service.
- * 2. When an automated batch job processes engineering drawings stored as OTG files, converts them to PNG for inclusion in PDF reports, and records the elapsed milliseconds to identify performance bottlenecks.
- * 3. When a desktop utility built with C# and Aspose.Imaging converts user‑selected OTG schematics to PNG for preview in a Windows Forms UI while logging conversion time to display progress feedback.
- * 4. When a cloud‑based image processing pipeline receives OTG assets, rasterizes them to PNG using OtgRasterizationOptions and stores the timing data in logs to monitor SLA compliance.
- * 5. When a QA test suite validates that the OtgRasterizationOptions preserve the original page size during OTG‑to‑PNG conversion and captures the stopwatch measurement to compare against expected performance thresholds.
+ * 1. When you need to generate PNG thumbnails from OTG vector drawings while tracking how long each conversion takes.
+ * 2. When you are benchmarking Aspose.Imaging’s rasterization performance for OTG files in a C# application.
+ * 3. When an automated workflow must validate that OTG assets are correctly exported to PNG before publishing.
+ * 4. When you integrate image conversion into a server‑side service and need to log conversion latency for monitoring.
+ * 5. When you are troubleshooting slow image processing and want to compare OTG‑to‑PNG conversion times across different hardware.
  */
