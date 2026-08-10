@@ -1,7 +1,8 @@
+// HOW-TO: Merge Multiple JPEG Images Horizontally Into One JPEG Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
@@ -13,17 +14,25 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input directory and output file path
             string inputDirectory = "InputImages";
-            string outputPath = "Output/merged.jpg";
+            string outputPath = "Output\\merged.jpg";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Get JPEG files from the input directory
-            string[] imageFiles = Directory.GetFiles(inputDirectory, "*.jpg");
+            // Retrieve JPEG files from the input directory
+            string[] jpgFiles = Directory.GetFiles(inputDirectory, "*.jpg");
+            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpeg");
+            string[] imageFiles = jpgFiles.Concat(jpegFiles).ToArray();
 
-            // Validate each input file
+            if (imageFiles.Length == 0)
+            {
+                Console.WriteLine("No JPEG files found in the input directory.");
+                return;
+            }
+
+            // Validate each input file exists
             foreach (string filePath in imageFiles)
             {
                 if (!File.Exists(filePath))
@@ -47,12 +56,17 @@ class Program
             int newWidth = sizes.Sum(s => s.Width);
             int newHeight = sizes.Max(s => s.Height);
 
-            // Create JPEG canvas
-            Source source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = source, Quality = 90 };
+            // Prepare JPEG options with output source
+            Source src = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions()
+            {
+                Source = src,
+                Quality = 90
+            };
+
+            // Create the output JPEG canvas (bound to the file)
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
-                // Merge images horizontally
                 int offsetX = 0;
                 foreach (string filePath in imageFiles)
                 {
@@ -64,9 +78,11 @@ class Program
                     }
                 }
 
-                // Save the merged image
+                // Save the bound image
                 canvas.Save();
             }
+
+            Console.WriteLine($"Merged image saved to: {outputPath}");
         }
         catch (Exception ex)
         {
@@ -77,9 +93,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a product catalog thumbnail that stitches several product photos side‑by‑side into one JPEG for faster web loading.
- * 2. When generating a panoramic view from a series of sequential camera shots by horizontally concatenating JPEG images in a C# application using Aspose.Imaging.
- * 3. When building an email newsletter that needs a single banner image composed of multiple promotional JPEGs merged on a horizontal canvas.
- * 4. When preparing a printable contact sheet where a photographer wants all selected JPEG files arranged in one row for quick review.
- * 5. When automating a batch process that consolidates scanned document pages saved as JPEGs into a single wide image for archival or OCR preprocessing.
+ * 1. When you need to create a panoramic view by stitching a series of product photos stored as JPEGs into a single wide image for an online catalog.
+ * 2. When a reporting tool must combine multiple scanned JPEG pages side‑by‑side into one image for easier preview in a web application.
+ * 3. When an automated workflow has to batch‑process camera‑generated JPEG files and generate a single composite image for archival or printing.
+ * 4. When a marketing script has to merge several banner JPEG assets horizontally to produce a continuous ad strip without manual editing.
+ * 5. When a desktop utility must read JPEG files from a folder and output a single merged JPEG for use in slide‑show thumbnails or social‑media posts.
  */
