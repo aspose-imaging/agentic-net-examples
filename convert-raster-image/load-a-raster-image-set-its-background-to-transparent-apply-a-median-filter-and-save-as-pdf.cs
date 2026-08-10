@@ -1,45 +1,52 @@
+// HOW-TO: Apply Median Filter to PNG and Save as Transparent PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png; // for raster image types if needed
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.pdf";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.pdf";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
+            // Load the raster image
+            using (Image image = Image.Load(inputPath))
             {
-                var maskingOptions = new MaskingOptions
+                // Cast to RasterImage to access filtering
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Apply median filter with size 5 to the whole image
+                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+
+                // Prepare PDF save options with transparent background
+                PdfOptions pdfOptions = new PdfOptions
                 {
-                    BackgroundReplacementColor = Color.Transparent,
-                    ExportOptions = new PdfOptions()
+                    VectorRasterizationOptions = new OtgRasterizationOptions
+                    {
+                        BackgroundColor = Color.Transparent,
+                        PageSize = rasterImage.Size
+                    }
                 };
 
-                var masking = new ImageMasking(image);
-                using (var result = masking.Decompose(maskingOptions))
-                using (RasterImage transparentImage = (RasterImage)result[1].GetImage())
-                {
-                    transparentImage.Filter(transparentImage.Bounds, new MedianFilterOptions(5));
-                    transparentImage.Save(outputPath, new PdfOptions());
-                }
+                // Save the processed image as PDF
+                rasterImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -51,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert scanned PNG documents with uneven backgrounds into clean PDF files that have a transparent background for seamless overlay on other pages.
- * 2. When an e‑commerce platform wants to automatically remove background noise from product PNG images, apply a median filter, and embed the resulting transparent images into PDF catalogs.
- * 3. When a medical imaging system must preprocess PNG scans by applying a median filter to reduce speckle noise before generating PDF reports with a transparent background.
- * 4. When a publishing workflow requires batch conversion of PNG illustrations to PDF while preserving transparency and smoothing edges using a median filter.
- * 5. When a GIS application needs to export raster map tiles (PNG) as PDF layers with transparent backgrounds and noise reduction for seamless map composition.
+ * 1. When you need to clean up noise in a scanned PNG before embedding it in a PDF report with a transparent background.
+ * 2. When you want to programmatically convert raster images to PDF while preserving transparency for overlay in document editors.
+ * 3. When you must preprocess product photos with a median filter to remove speckles and then generate a PDF catalog page.
+ * 4. When an automated workflow requires batch processing of images to improve visual quality and store the results as PDF files.
+ * 5. When a web service needs to accept user‑uploaded PNGs, denoise them, and return a PDF that can be layered on top of other graphics.
  */
