@@ -1,52 +1,47 @@
+// HOW-TO: Apply Horizontal Edge Detection to SVG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
         try
         {
+            // Hardcoded paths
+            string inputPath = "input.svg";
+            string tempPngPath = "temp\\temp.png";
+            string outputPath = "output\\output.png";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load SVG and rasterize to a temporary PNG
-            string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
-            using (Image image = Image.Load(inputPath))
+            using (Image svgImage = Image.Load(inputPath))
             {
-                SvgImage svgImage = (SvgImage)image;
-
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Color.White
-                };
-
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
+                var rasterOptions = new SvgRasterizationOptions { PageSize = svgImage.Size };
+                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
                 svgImage.Save(tempPngPath, pngOptions);
             }
 
-            // Load the rasterized PNG, apply horizontal edge detection kernel, and save final output
-            using (Image rasterImageContainer = Image.Load(tempPngPath))
+            // Load the rasterized PNG, apply horizontal edge detection, and save the result
+            using (Image img = Image.Load(tempPngPath))
             {
-                RasterImage rasterImage = (RasterImage)rasterImageContainer;
+                var rasterImage = (RasterImage)img;
 
+                // Custom kernel emphasizing horizontal edges
                 double[,] kernel = new double[,]
                 {
                     { -1, -2, -1 },
@@ -60,7 +55,10 @@ class Program
             }
 
             // Clean up temporary file
-            File.Delete(tempPngPath);
+            if (File.Exists(tempPngPath))
+            {
+                File.Delete(tempPngPath);
+            }
         }
         catch (Exception ex)
         {
@@ -71,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to highlight horizontal edges in an architectural SVG drawing by converting it to PNG and applying a Sobel‑like convolution kernel.
- * 2. When a C# application needs to rasterize vector floor plans from SVG to a raster format before performing edge detection for feature extraction.
- * 3. When a .NET service must generate a printable PNG preview of a building blueprint with emphasized horizontal lines for visual inspection.
- * 4. When an image‑processing pipeline requires converting SVG schematics to raster images and applying a custom convolution filter to detect roof or wall outlines.
- * 5. When a developer is building a GIS tool that extracts horizontal structural edges from SVG maps by loading, rasterizing, filtering, and saving the result as PNG.
+ * 1. When you need to highlight structural lines in an architectural SVG by converting it to PNG and applying a horizontal edge‑detecting convolution filter in C#.
+ * 2. When you want to preprocess vector floor plans for edge‑based analysis or feature extraction by rasterizing them and emphasizing horizontal edges.
+ * 3. When creating stylized blueprint visuals that accentuate horizontal walls and beams using Aspose.Imaging’s custom kernel in a .NET application.
+ * 4. When preparing SVG drawings for OCR or machine‑learning pipelines that require clear horizontal edge contrast after rasterization.
+ * 5. When automating a batch workflow that converts SVG diagrams to high‑contrast PNGs with horizontal edge emphasis for printing or web display.
  */
