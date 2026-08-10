@@ -1,72 +1,71 @@
+// HOW-TO: Batch Convert DICOM Files to PNG with Progress Reporting in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.ProgressManagement;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = @"C:\InputDicom";
-        string outputDirectory = @"C:\OutputPng";
-
-        // Progress reporter that writes percentage to console
-        IProgress<double> progress = new Progress<double>(p =>
-        {
-            Console.WriteLine($"Progress: {p:F2}%");
-        });
-
         try
         {
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\InputDicom";
+            string outputDirectory = @"C:\OutputPng";
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
             // Get all DICOM files in the input directory
             string[] dicomFiles = Directory.GetFiles(inputDirectory, "*.dcm");
 
-            int totalFiles = dicomFiles.Length;
-            if (totalFiles == 0)
+            // Progress reporter using IProgress
+            IProgress<ProgressEventHandlerInfo> progressReporter = new Progress<ProgressEventHandlerInfo>(info =>
             {
-                Console.WriteLine("No DICOM files found.");
-                return;
-            }
+                Console.WriteLine($"{info.EventType}: {info.Value}/{info.MaxValue}");
+            });
 
-            for (int i = 0; i < totalFiles; i++)
+            foreach (string inputPath in dicomFiles)
             {
-                string inputPath = dicomFiles[i];
-
-                // Input file existence check
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load the DICOM image
-                using (var dicomImage = (DicomImage)Image.Load(inputPath))
+                // Load the DICOM image with a load options progress handler
+                var loadOptions = new LoadOptions
                 {
-                    // Process each page of the DICOM image
+                    ProgressEventHandler = info => progressReporter.Report(info)
+                };
+
+                using (var dicomImage = (DicomImage)Image.Load(inputPath, loadOptions))
+                {
+                    int pageIndex = 0;
                     foreach (var dicomPage in dicomImage.DicomPages)
                     {
-                        // Build output file name: originalname_pageIndex.png
-                        string baseName = Path.GetFileNameWithoutExtension(inputPath);
-                        string outputFileName = $"{baseName}_{dicomPage.Index}.png";
+                        // Build output PNG file path
+                        string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + $"_page{pageIndex}.png";
                         string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                        // Ensure output directory exists
+                        // Ensure the directory for the output file exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save page as PNG
-                        dicomPage.Save(outputPath, new PngOptions());
+                        // Save each page as PNG with its own progress handler
+                        var pngOptions = new PngOptions
+                        {
+                            ProgressEventHandler = info => progressReporter.Report(info)
+                        };
+
+                        dicomPage.Save(outputPath, pngOptions);
+                        pageIndex++;
                     }
                 }
-
-                // Report progress after each file
-                double percent = ((i + 1) * 100.0) / totalFiles;
-                progress.Report(percent);
             }
-
-            Console.WriteLine("Batch conversion completed.");
         }
         catch (Exception ex)
         {
@@ -77,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application must batch‑convert DICOM scans to PNG thumbnails for web preview and display conversion progress to the user.
- * 2. When a radiology research pipeline needs to export multi‑frame DICOM series as individual PNG files for machine‑learning preprocessing while providing real‑time percentage feedback.
- * 3. When a hospital IT system automates nightly archiving of DICOM studies to PNG format for integration with electronic health record viewers and requires monitoring of the batch status.
- * 4. When a diagnostic device manufacturer builds a C# utility that extracts each DICOM page, saves it as a PNG with the page index, and reports progress to a console or UI logger.
- * 5. When a cloud‑based image processing service processes incoming DICOM files, converts them to PNG for downstream analysis, and uses IProgress<double> to update a progress bar in a monitoring dashboard.
+ * 1. When a medical imaging application must export thousands of DICOM scans to PNG thumbnails while showing conversion progress to the user.
+ * 2. When a radiology workflow needs to automate batch processing of DICOM files into web‑friendly PNG images and monitor the status in a C# service.
+ * 3. When a research project requires converting multi‑page DICOM studies to separate PNG files and logging progress for long‑running jobs.
+ * 4. When a hospital IT system integrates Aspose.Imaging to transform DICOM archives into PNG for electronic health record display with real‑time feedback.
+ * 5. When a desktop utility must read DICOM files from a folder, save each page as a PNG, and report the percentage completed using the IProgress interface.
  */
