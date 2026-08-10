@@ -1,7 +1,9 @@
+// HOW-TO: Create BMP with Thick Red Line and Thin Black Outline in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -9,30 +11,32 @@ class Program
     {
         try
         {
+            // Output BMP file path
             string outputPath = "output.bmp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // BMP options
+            // Set up BMP options with a file source bound to the output path
             BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath);
 
-            // Create a 200x200 BMP image
+            // Create a new image canvas (200x200 pixels)
             using (Image image = Image.Create(bmpOptions, 200, 200))
             {
-                // Graphics for drawing
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Thick red line
-                Pen thickRedPen = new Pen(Color.Red, 10);
-                graphics.DrawLine(thickRedPen, new Point(20, 20), new Point(180, 180));
+                // Draw a thick red line
+                Pen redPen = new Pen(Color.Red, 10);
+                graphics.DrawLine(redPen, new Point(20, 20), new Point(180, 180));
 
-                // Thinner black line for contrast
-                Pen thinBlackPen = new Pen(Color.Black, 2);
-                graphics.DrawLine(thinBlackPen, new Point(20, 20), new Point(180, 180));
+                // Overlay a thinner black line for contrast
+                Pen blackPen = new Pen(Color.Black, 2);
+                graphics.DrawLine(blackPen, new Point(20, 20), new Point(180, 180));
 
-                // Save the image
-                image.Save(outputPath, bmpOptions);
+                // Save the image (output path already bound)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -44,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a BMP icon for a desktop application that requires a bold red line with a thin black outline to improve visibility across different UI themes.
- * 2. When creating a printable schematic in C# where a thick red line highlights a critical path and a thinner black line adds contrast for laser engraving.
- * 3. When producing a diagnostic BMP image for a medical device that uses a thick red marker overlaid with a thin black line to emphasize a region of interest.
- * 4. When building a game asset pipeline that programmatically draws highlighted borders on BMP textures, using a thick red stroke with a finer black edge for depth.
- * 5. When automating the generation of custom watermarks in BMP format where a bold red line is overlaid with a thinner black line to ensure legibility on both light and dark backgrounds.
+ * 1. When you need to generate a BMP diagram that highlights a path with a bold red line and a subtle black edge for better visibility in a Windows desktop application.
+ * 2. When creating custom icons or UI elements where a thick colored stroke must be outlined with a thinner contrasting line to improve legibility on varied backgrounds.
+ * 3. When producing test images for computer‑vision algorithms that require distinct colored lines with contrasting borders to evaluate edge detection performance.
+ * 4. When automating the generation of printable schematics in C# where the primary line is emphasized in red and a thin black outline ensures clarity after printing.
+ * 5. When building a reporting tool that programmatically draws highlighted trends on a bitmap chart, using a thick red line for the trend and a thin black line for contrast.
  */
