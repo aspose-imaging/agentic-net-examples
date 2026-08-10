@@ -1,51 +1,63 @@
+// HOW-TO: Batch Deskew PSD Files and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
         try
         {
-            // Define input and output directories relative to the current directory
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDir = Path.Combine(baseDir, "Input");
-            string outputDir = Path.Combine(baseDir, "Output");
+            // Hardcoded input and output directories
+            string inputDir = "Input";
+            string outputDir = "Output";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDir);
+            // Validate input directory
+            if (!Directory.Exists(inputDir))
+            {
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add PSD files and rerun.");
+                return;
+            }
 
-            // Get all PSD files in the input directory
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            // Get all PSD files
             string[] files = Directory.GetFiles(inputDir, "*.psd");
 
             foreach (string inputPath in files)
             {
-                // Verify the input file exists
+                // Validate each input file
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare the output PNG path
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + ".png");
+                // Prepare output PNG path
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
-                // Ensure the output directory for this file exists
+                // Ensure output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the PSD image, deskew, and save as PNG
-                using (Image image = Image.Load(inputPath))
+                // Load PSD as raster image and deskew
+                using (RasterImage raster = (RasterImage)Image.Load(inputPath))
                 {
-                    RasterImage raster = (RasterImage)image;
                     raster.NormalizeAngle(false, Color.LightGray);
 
-                    using (var pngOptions = new PngOptions())
+                    // Save as PNG
+                    PngOptions pngOptions = new PngOptions
                     {
-                        image.Save(outputPath, pngOptions);
-                    }
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+                    raster.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -58,9 +70,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically straighten scanned PSD artwork batches and export them as PNGs for web publishing.
- * 2. When a photo‑editing pipeline must process a folder of PSD files, correct their rotation using deskew, and generate lightweight PNG thumbnails for a gallery.
- * 3. When an e‑commerce platform requires bulk conversion of product mockups from PSD to PNG while ensuring each image is properly aligned.
- * 4. When a document management system imports PSD scans, removes skew, and stores the cleaned images as PNGs for archival and preview.
- * 5. When a C# automation script has to iterate through a directory, apply raster image normalization, and save the corrected results in PNG format for downstream processing.
+ * 1. When you need to automatically straighten scanned Photoshop documents in a folder and convert them to web‑friendly PNGs using C#.
+ * 2. When a graphics pipeline must process multiple PSD layers, correct their rotation, and output lossless PNGs for further editing.
+ * 3. When an e‑commerce site requires batch conversion of uploaded PSD product mockups into correctly oriented PNG thumbnails.
+ * 4. When a digital archiving tool has to normalize the angle of legacy PSD files before storing them as PNG images for searchable archives.
+ * 5. When a Windows service has to monitor a directory, deskew any new PSD files, and save the corrected images as PNGs for downstream processing.
  */
