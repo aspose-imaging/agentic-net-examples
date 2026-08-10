@@ -1,9 +1,9 @@
+// HOW-TO: Batch Deskew TIFF Images and Convert to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -15,38 +15,37 @@ class Program
             string inputFolder = @"C:\Images\Input";
             string outputFolder = @"C:\Images\Output";
 
-            // Ensure the output directory exists
+            // Ensure the output directory exists (will also handle subfolders)
             Directory.CreateDirectory(outputFolder);
 
-            // Get all TIFF files in the input folder
-            string[] tiffFiles = Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly);
-            foreach (string inputPath in tiffFiles)
+            // Process each TIFF file in the input folder
+            foreach (string filePath in Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly))
             {
-                // Process only .tif and .tiff extensions
-                string ext = Path.GetExtension(inputPath).ToLowerInvariant();
-                if (ext != ".tif" && ext != ".tiff")
-                    continue;
+                string extension = Path.GetExtension(filePath).ToLowerInvariant();
+                if (extension != ".tif" && extension != ".tiff")
+                    continue; // Skip non‑TIFF files
 
                 // Verify input file exists
-                if (!File.Exists(inputPath))
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
 
                 // Prepare output PDF path
-                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                string outputFileName = Path.GetFileNameWithoutExtension(filePath) + ".pdf";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
 
-                // Ensure the output directory exists (unconditional)
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the TIFF image, deskew, and save as PDF
-                using (TiffImage image = (TiffImage)Image.Load(inputPath))
+                using (TiffImage image = (TiffImage)Image.Load(filePath))
                 {
-                    // Deskew the image (do not resize, use light gray background)
+                    // Deskew the image (do not resize, use LightGray background)
                     image.NormalizeAngle(false, Color.LightGray);
 
-                    // Save as PDF
+                    // Save as PDF using default PDF options
                     PdfOptions pdfOptions = new PdfOptions();
                     image.Save(outputPath, pdfOptions);
                 }
@@ -61,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a company needs to batch‑process scanned receipts stored as TIFF files, automatically deskew each image and archive them as searchable PDF documents for accounting audits.
- * 2. When a legal firm receives case files in multi‑page TIFF format, they can use this code to correct skewed pages and convert them to PDF for easy review and e‑filing.
- * 3. When a healthcare provider digitizes patient records as TIFF scans, the script deskews the images and saves them as PDF to integrate with electronic health‑record (EHR) systems.
- * 4. When a construction project manager collects site photos in TIFF, the program straightens the pictures and creates PDF portfolios for client presentations.
- * 5. When an archival project migrates historical documents from TIFF to PDF, this C# routine normalizes the image angles and produces clean PDF files for long‑term digital preservation.
+ * 1. When you need to automatically straighten scanned TIFF documents and archive them as searchable PDFs.
+ * 2. When a batch of scanned receipts saved as TIFF files must be deskewed before being shared with accounting in PDF format.
+ * 3. When a medical imaging workflow requires correcting orientation of TIFF X‑ray images and converting them to PDF reports.
+ * 4. When a legal firm wants to preprocess TIFF evidence files by removing skew and packaging each as a PDF for case management.
+ * 5. When an automated document pipeline must process incoming TIFF files, normalize their angle, and output PDFs for downstream OCR processing.
  */
