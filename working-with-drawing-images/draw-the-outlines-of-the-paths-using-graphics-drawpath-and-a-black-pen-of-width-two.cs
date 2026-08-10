@@ -1,9 +1,11 @@
+// HOW-TO: Draw Rectangle and Ellipse Outlines to TIFF with Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 public class Program
 {
@@ -11,34 +13,34 @@ public class Program
     {
         try
         {
-            string outputPath = "output\\drawn_path.png";
+            // Hardcoded output path
+            string outputPath = "output/output.tiff";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up PNG options with a file create source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
+            // Set up TIFF options with a file source bound to the output path
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            tiffOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a 500x500 image canvas
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            // Create a new image canvas
+            using (Image image = Image.Create(tiffOptions, 500, 500))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                // Build a graphics path with several shapes
+                // Build a graphics path with a rectangle and an ellipse
                 GraphicsPath path = new GraphicsPath();
                 Figure figure = new Figure();
-                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 300f, 300f)));
-                figure.AddShape(new EllipseShape(new RectangleF(100f, 100f, 200f, 200f)));
-                figure.AddShape(new PieShape(new RectangleF(new PointF(150f, 150f), new SizeF(200f, 200f)), 0f, 45f));
+                figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
+                figure.AddShape(new EllipseShape(new RectangleF(100f, 100f, 150f, 150f)));
                 path.AddFigure(figure);
 
-                // Draw the outline of the path with a black pen of width 2
+                // Draw the outline of the path using a black pen of width 2
                 graphics.DrawPath(new Pen(Color.Black, 2), path);
 
-                // Save the image (output is already bound to the file)
+                // Save the image (output file is already bound via FileCreateSource)
                 image.Save();
             }
         }
@@ -51,9 +53,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PNG thumbnail that highlights the borders of UI components such as buttons, panels, or custom shapes for documentation or design reviews.
- * 2. When creating vector‑based diagrams in a .NET application where the outlines of rectangles, ellipses, and pie slices must be rendered with a consistent 2‑pixel black stroke for printing or reporting.
- * 3. When building an automated testing tool that captures screenshots of rendered graphics and overlays black outlines on specific shapes to verify layout accuracy.
- * 4. When producing marketing assets that require a clean, high‑resolution PNG image with highlighted shape boundaries to illustrate product features in brochures or web pages.
- * 5. When implementing a CAD‑like preview in a C# application that draws the contour of geometric figures using Aspose.Imaging’s Graphics.DrawPath and a black Pen of width two for precise visual feedback.
+ * 1. When you need to programmatically create a TIFF diagram that highlights geometric shapes with a thin black outline for technical documentation.
+ * 2. When generating placeholder graphics for a PDF report and you want precise rectangle and ellipse outlines drawn using Aspose.Imaging in C#.
+ * 3. When building a custom watermark or border overlay on scanned images and require drawing vector paths onto a blank TIFF canvas.
+ * 4. When creating test images for computer‑vision algorithms that need clear, high‑contrast shape outlines in a lossless TIFF format.
+ * 5. When automating the production of UI mock‑ups where simple shape outlines are rendered directly to a TIFF file without using external design tools.
  */
