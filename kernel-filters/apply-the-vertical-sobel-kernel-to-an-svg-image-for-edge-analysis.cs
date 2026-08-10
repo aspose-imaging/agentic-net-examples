@@ -1,3 +1,4 @@
+// HOW-TO: Apply Vertical Sobel Edge Detection to SVG and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,42 +9,52 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output.png";
-
-            if (!File.Exists(inputPath))
+            using (Image svgImage = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Rasterize SVG to PNG in memory
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = svgImage.Size
+                };
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-            using (Image image = Image.Load(inputPath))
-            {
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    var rasterOptions = new SvgRasterizationOptions { PageSize = image.Size };
-                    var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
-                    image.Save(ms, pngOptions);
+                    svgImage.Save(ms, pngOptions);
                     ms.Position = 0;
 
-                    using (Image rasterImg = Image.Load(ms))
+                    using (RasterImage raster = (RasterImage)Image.Load(ms))
                     {
-                        RasterImage rasterImage = (RasterImage)rasterImg;
-
-                        double[,] kernel = new double[,]
+                        // Apply vertical Sobel kernel using convolution filter
+                        double[,] sobelKernel = new double[,]
                         {
                             { -1, 0, 1 },
                             { -2, 0, 2 },
                             { -1, 0, 1 }
                         };
-                        var convOptions = new ConvolutionFilterOptions(kernel);
-                        rasterImage.Filter(rasterImage.Bounds, convOptions);
 
-                        rasterImage.Save(outputPath, new PngOptions());
+                        ConvolutionFilterOptions convOptions = new ConvolutionFilterOptions(sobelKernel);
+                        raster.Filter(raster.Bounds, convOptions);
+
+                        // Save the processed image
+                        raster.Save(outputPath, new PngOptions());
                     }
                 }
             }
@@ -57,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to detect vertical edges in an SVG logo and export the result as a PNG for quality inspection.
- * 2. When an automated pipeline needs to convert vector graphics to raster format and apply a Sobel filter to highlight structural outlines before OCR.
- * 3. When a web service generates thumbnails of user‑uploaded SVG diagrams and uses vertical Sobel convolution to emphasize borders for better visual contrast.
- * 4. When a desktop application analyzes engineering schematics stored as SVG files to identify vertical lines and save the processed image for reporting.
- * 5. When a machine‑learning preprocessing step requires edge detection on vector icons, converting them to raster PNGs and applying the vertical Sobel kernel to create feature maps.
+ * 1. When you need to extract vertical edges from a vector logo (SVG) to create a high‑contrast PNG for printing or UI icons.
+ * 2. When performing automated quality checks on SVG diagrams by detecting edge patterns and saving the results as raster images.
+ * 3. When generating edge‑enhanced thumbnails of SVG illustrations for web galleries using C# and Aspose.Imaging.
+ * 4. When converting SVG floor plans into PNG maps with vertical edge emphasis for GIS or navigation applications.
+ * 5. When building a computer‑vision preprocessing pipeline that rasterizes SVG assets and applies Sobel filtering before further analysis.
  */
