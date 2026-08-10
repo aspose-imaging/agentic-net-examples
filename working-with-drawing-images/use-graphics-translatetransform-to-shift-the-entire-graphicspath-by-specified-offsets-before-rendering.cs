@@ -1,7 +1,8 @@
+// HOW-TO: Apply TranslateTransform To Move GraphicsPath Before Drawing In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
@@ -10,48 +11,42 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
+            // Output file path (hardcoded)
             string outputPath = "output.png";
 
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Set up PNG options with a file create source
+            PngOptions pngOptions = new PngOptions();
+            pngOptions.Source = new FileCreateSource(outputPath, false);
+
+            // Create a new image canvas
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 400, 400))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Initialize graphics for drawing
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.LightGray);
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Build a graphics path with shapes
+                Aspose.Imaging.GraphicsPath path = new Aspose.Imaging.GraphicsPath();
+                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
 
-            // Load the source image as a RasterImage
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
-            {
-                // Cache data for better performance
-                if (!image.IsCached) image.CacheData();
+                // Add a rectangle shape
+                figure.AddShape(new Aspose.Imaging.Shapes.RectangleShape(new Aspose.Imaging.RectangleF(50f, 50f, 100f, 100f)));
+                // Add an ellipse shape
+                figure.AddShape(new Aspose.Imaging.Shapes.EllipseShape(new Aspose.Imaging.RectangleF(200f, 50f, 100f, 150f)));
 
-                // Create a Graphics instance for drawing
-                Graphics graphics = new Graphics(image);
-
-                // Apply translation to shift all subsequent drawing operations
-                float offsetX = 50f; // horizontal shift
-                float offsetY = 30f; // vertical shift
-                graphics.TranslateTransform(offsetX, offsetY);
-
-                // Build a GraphicsPath containing a single rectangle shape
-                GraphicsPath path = new GraphicsPath();
-                Figure figure = new Figure();
-                // Rectangle at (0,0) with size 100x100; translation will move it
-                figure.AddShape(new RectangleShape(new RectangleF(0f, 0f, 100f, 100f)));
                 path.AddFigure(figure);
 
-                // Draw the path with a red pen
-                Pen pen = new Pen(Color.Red, 3);
-                graphics.DrawPath(pen, path);
+                // Shift the entire path by the specified offsets
+                graphics.TranslateTransform(50f, 30f);
 
-                // Save the modified image as PNG
-                PngOptions saveOptions = new PngOptions();
-                image.Save(outputPath, saveOptions);
+                // Render the path
+                graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3), path);
+
+                // Save the image (output is already bound to the file)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -63,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add a consistent margin or offset to a vector shape—such as moving a logo rectangle 50 px right and 30 px down—before drawing it onto a PNG image.
- * 2. When generating dynamic thumbnails where watermarks or decorative frames must be positioned relative to the original image dimensions using a translation transform.
- * 3. When creating a batch‑processing tool that re‑positions UI elements in screenshots (e.g., shifting buttons) without altering the source file, by applying TranslateTransform to a GraphicsPath.
- * 4. When implementing a custom annotation system that places red rectangular highlights at a calculated offset on medical imaging files saved as PNG.
- * 5. When building a layout engine that aligns multiple shapes on a raster canvas by applying a uniform offset to each shape through Graphics.TranslateTransform before rendering.
+ * 1. When you need to offset multiple vector shapes together on a PNG canvas without modifying each shape’s coordinates individually.
+ * 2. When generating a diagram in C# where all elements must be positioned relative to a margin or padding using Aspose.Imaging.
+ * 3. When creating a printable badge or label and you want to shift the entire graphics path to align with page borders before saving as PNG.
+ * 4. When re‑using a predefined GraphicsPath in different layouts and you need to place it at various X/Y offsets programmatically with TranslateTransform.
+ * 5. When building a dynamic UI thumbnail and you must translate the drawn shapes to fit within a background image using Aspose.Imaging’s Graphics class.
  */
