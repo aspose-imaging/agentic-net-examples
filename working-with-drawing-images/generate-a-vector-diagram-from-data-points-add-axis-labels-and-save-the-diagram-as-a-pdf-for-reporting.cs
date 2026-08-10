@@ -1,9 +1,9 @@
-// HOW-TO: Create PDF Chart with Axes from Data Points in C# (Aspose.Imaging for .NET)
+// HOW-TO: Create a PDF Vector Diagram from Data Points with Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -12,84 +12,68 @@ class Program
         try
         {
             // Output PDF path
-            string outputPath = "Output/diagram.pdf";
-
+            string outputPath = Path.Combine("Output", "diagram.pdf");
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Canvas size
-            int width = 600;
-            int height = 400;
+            int width = 800;
+            int height = 600;
+            int margin = 50;
 
             // Sample data points
-            double[] data = { 10, 20, 15, 30, 25 };
+            double[] dataX = { 0, 1, 2, 3, 4, 5 };
+            double[] dataY = { 0, 2, 4, 3, 5, 7 };
 
-            // Margins
-            int leftMargin = 50;
-            int rightMargin = 20;
-            int topMargin = 20;
-            int bottomMargin = 50;
+            // Determine scaling factors
+            double maxX = 0;
+            double maxY = 0;
+            foreach (double v in dataX) if (v > maxX) maxX = v;
+            foreach (double v in dataY) if (v > maxY) maxY = v;
+            double scaleX = (width - 2 * margin) / maxX;
+            double scaleY = (height - 2 * margin) / maxY;
 
-            // Determine scaling
-            double minY = double.MaxValue;
-            double maxY = double.MinValue;
-            foreach (double v in data)
+            // Create a raster image canvas
+            using (var pngOptions = new PngOptions())
+            using (var image = Aspose.Imaging.Image.Create(pngOptions, width, height))
             {
-                if (v < minY) minY = v;
-                if (v > maxY) maxY = v;
-            }
-            double yRange = maxY - minY;
-            if (yRange == 0) yRange = 1; // avoid division by zero
-
-            double plotHeight = height - topMargin - bottomMargin;
-            double plotWidth = width - leftMargin - rightMargin;
-            double xStep = plotWidth / (data.Length - 1);
-            double yScale = plotHeight / yRange;
-
-            // Create a raster image (PNG) as canvas
-            PngOptions pngOptions = new PngOptions();
-            using (Image image = Image.Create(pngOptions, width, height))
-            {
-                // Initialize graphics
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                var graphics = new Aspose.Imaging.Graphics(image);
+                // Clear background
+                graphics.Clear(Aspose.Imaging.Color.White);
 
                 // Draw axes
-                Pen axisPen = new Pen(Color.Black, 2);
+                var axisPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2);
                 // X axis
-                graphics.DrawLine(axisPen,
-                    new Point(leftMargin, height - bottomMargin),
-                    new Point(width - rightMargin, height - bottomMargin));
+                graphics.DrawLine(axisPen, new Aspose.Imaging.Point(margin, height - margin), new Aspose.Imaging.Point(width - margin, height - margin));
                 // Y axis
-                graphics.DrawLine(axisPen,
-                    new Point(leftMargin, topMargin),
-                    new Point(leftMargin, height - bottomMargin));
+                graphics.DrawLine(axisPen, new Aspose.Imaging.Point(margin, margin), new Aspose.Imaging.Point(margin, height - margin));
 
-                // Draw data line
-                Pen dataPen = new Pen(Color.Blue, 2);
-                for (int i = 0; i < data.Length - 1; i++)
+                // Draw data polyline
+                var dataPen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 2);
+                Aspose.Imaging.Point[] points = new Aspose.Imaging.Point[dataX.Length];
+                for (int i = 0; i < dataX.Length; i++)
                 {
-                    int x1 = leftMargin + (int)(i * xStep);
-                    int y1 = topMargin + (int)((maxY - data[i]) * yScale);
-                    int x2 = leftMargin + (int)((i + 1) * xStep);
-                    int y2 = topMargin + (int)((maxY - data[i + 1]) * yScale);
-                    graphics.DrawLine(dataPen, new Point(x1, y1), new Point(x2, y2));
+                    int x = margin + (int)(dataX[i] * scaleX);
+                    int y = height - margin - (int)(dataY[i] * scaleY);
+                    points[i] = new Aspose.Imaging.Point(x, y);
                 }
+                graphics.DrawLines(dataPen, points);
 
-                // Draw axis labels
-                Font labelFont = new Font("Arial", 12);
-                using (SolidBrush textBrush = new SolidBrush())
+                // Axis labels
+                using (var textBrush = new SolidBrush(Aspose.Imaging.Color.Black))
                 {
-                    textBrush.Color = Color.Black;
-                    // X axis label
-                    graphics.DrawString("X Axis", labelFont, textBrush, new Point(width / 2, height - bottomMargin + 20));
-                    // Y axis label (rotated not required, simple placement)
-                    graphics.DrawString("Y Axis", labelFont, textBrush, new Point(leftMargin - 40, topMargin - 10));
+                    var font = new Aspose.Imaging.Font("Arial", 16);
+                    // X label
+                    graphics.DrawString("X Axis", font, textBrush, new Aspose.Imaging.Point(width / 2, height - margin + 20));
+                    // Y label (rotated)
+                    graphics.DrawString("Y Axis", font, textBrush, new Aspose.Imaging.Point(margin - 30, height / 2));
                 }
 
                 // Save as PDF
-                PdfOptions pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                using (var pdfOptions = new PdfOptions())
+                {
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -101,9 +85,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to programmatically generate a line chart from data points and export it as a PDF using Aspose.Imaging for .NET.
- * 2. When you want to visualize sensor measurements or financial figures in a PDF document without relying on external charting libraries, using C# and Aspose.Imaging.
- * 3. When an automated reporting system must create printable diagrams with custom margins, axis scaling, and PDF output based on dynamic data arrays.
- * 4. When you need to embed a generated chart into a PDF invoice or analytics dashboard created on the server side with Aspose.Imaging.
- * 5. When you are building a C# console application that produces PDF graphics for regulatory compliance or archival purposes using Aspose.Imaging.
+ * 1. When you need to programmatically generate a chart for a business report and export it as a PDF file using Aspose.Imaging.
+ * 2. When you want to visualize sensor measurements or experiment results in a scalable diagram using Aspose.Imaging instead of third‑party chart libraries.
+ * 3. When an automated reporting system must embed custom‑drawn graphics, such as axes and data lines, into PDF documents with Aspose.Imaging.
+ * 4. When you have to convert raw numeric arrays into a printable image for compliance documentation or audit trails using Aspose.Imaging.
+ * 5. When you are building a C# application that creates PDF graphics on the fly for invoices, dashboards, or scientific papers with Aspose.Imaging.
  */
