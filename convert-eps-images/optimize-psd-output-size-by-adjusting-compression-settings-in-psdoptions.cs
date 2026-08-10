@@ -1,3 +1,4 @@
+// HOW-TO: How to Reduce PSD File Size Using RLE Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,12 +9,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\sample.bmp";
+        string outputPath = @"c:\temp\output.psd";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.bmp";
-            string outputPath = @"C:\temp\output.psd";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -31,7 +32,6 @@ class Program
                 PsdOptions psdOptions = new PsdOptions
                 {
                     CompressionMethod = CompressionMethod.RLE
-                    // Additional options (e.g., ColorMode) can be set here if needed
                 };
 
                 // Save the image as PSD using the configured options
@@ -40,6 +40,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -47,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design workflow requires converting high‑resolution BMP assets to PSD files for Photoshop while keeping the file size low for faster network transfer, a developer can use this code with RLE compression.
- * 2. When an automated batch‑processing service generates PSD previews from uploaded images and must stay within storage quotas, the code helps reduce each PSD’s footprint.
- * 3. When a cloud‑based collaboration platform needs to store user‑edited layers as PSDs but wants to minimize bandwidth for real‑time syncing, applying the CompressionMethod.RLE option is essential.
- * 4. When a digital asset management system archives legacy bitmap files as PSDs for future editing and must keep archive size manageable, this snippet provides the necessary compression.
- * 5. When a CI/CD pipeline validates that exported PSDs meet size constraints before publishing to a design repository, developers can employ this code to enforce RLE compression during the save operation.
+ * 1. When you need to convert high‑resolution BMP files to Photoshop PSD format in a C# application while keeping the resulting files as small as possible.
+ * 2. When batch‑processing a large collection of bitmap assets for a design pipeline and want each PSD to use RLE compression to save disk space.
+ * 3. When developing a .NET service that stores user‑uploaded images as PSDs and must limit storage costs by applying lossless compression.
+ * 4. When preparing PSD files for version‑control systems where smaller file sizes reduce commit times and repository size.
+ * 5. When generating PSD previews from BMP sources on a server with limited bandwidth and you want to minimize the amount of data transferred.
  */
