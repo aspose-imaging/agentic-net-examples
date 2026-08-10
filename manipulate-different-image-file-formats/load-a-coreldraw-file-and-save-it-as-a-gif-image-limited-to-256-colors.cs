@@ -1,19 +1,21 @@
+// HOW-TO: Convert CorelDRAW CDR to 256‑Color GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.cdr";
+        string outputPath = @"C:\temp\sample.gif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.cdr";
-            string outputPath = @"C:\temp\sample.gif";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,22 +25,22 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CorelDRAW (CDR) file
-            using (Image image = Image.Load(inputPath))
+            // Load the CorelDRAW (CDR) image
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Configure GIF save options (256‑color limit is inherent to GIF)
+                // Configure GIF save options
                 GifOptions gifOptions = new GifOptions
                 {
-                    // Maximum color resolution (7 => 8 bits per primary color)
-                    ColorResolution = 7,
-                    // Enable palette correction for best matching palette
+                    // Use palette correction to build the best matching 256‑color palette
                     DoPaletteCorrection = true,
-                    // Optional: set interlaced to false for a standard GIF
-                    Interlaced = false
+                    // Set color resolution (bits per primary color minus 1). 7 => 8 bits per channel.
+                    ColorResolution = 7,
+                    // No lossy compression; keep the palette as is
+                    MaxDiff = 0
                 };
 
-                // Save the image as GIF
-                image.Save(outputPath, gifOptions);
+                // Save the image as GIF with the specified options
+                cdrImage.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -50,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy CorelDRAW (CDR) artwork into a web‑friendly GIF with a 256‑color palette for inclusion in HTML emails.
- * 2. When an automated build pipeline must generate low‑size preview thumbnails of CDR files for a digital asset management system.
- * 3. When a Windows desktop application has to export vector drawings from CorelDRAW to GIF for compatibility with older browsers that only support 8‑bit images.
- * 4. When a batch‑processing script is required to transform a folder of CDR logos into GIF icons while ensuring palette correction for accurate colors.
- * 5. When a content‑management system needs to display user‑uploaded CorelDRAW designs as animated or static GIFs with a guaranteed 256‑color limit to meet file‑size constraints.
+ * 1. When you need to embed a CorelDRAW illustration into a web page that only supports GIF with a 256‑color palette.
+ * 2. When you must generate a lightweight preview of a CDR file for email attachments that require GIF format.
+ * 3. When an automated batch process converts legacy CDR assets to GIF for compatibility with older graphics software.
+ * 4. When you are creating animated slideshows and need each frame from a CDR source saved as a 256‑color GIF.
+ * 5. When a content management system stores user‑uploaded CDR files and needs to display them as GIF thumbnails.
  */
