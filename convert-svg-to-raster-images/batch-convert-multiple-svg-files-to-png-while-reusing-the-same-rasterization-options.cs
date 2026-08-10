@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert Multiple SVG Files to PNG Using Shared Rasterization Options in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -14,45 +15,39 @@ class Program
             string inputFolder = @"C:\InputSvgs";
             string outputFolder = @"C:\OutputPngs";
 
-            // List of SVG files to convert (hardcoded)
-            string[] svgFiles = new[]
-            {
-                "image1.svg",
-                "image2.svg",
-                "image3.svg"
-            };
+            // Get all SVG files in the input folder
+            string[] inputFiles = Directory.GetFiles(inputFolder, "*.svg");
 
-            // Reuse the same rasterization options for all conversions
-            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
-            {
-                // Example settings; adjust as needed
-                BackgroundColor = Aspose.Imaging.Color.White,
-                SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
-                TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias
-            };
+            // Prepare a reusable rasterization options instance
+            SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions();
 
+            // Prepare PNG save options that will use the rasterization options
             PngOptions pngSaveOptions = new PngOptions
             {
                 VectorRasterizationOptions = rasterizationOptions
             };
 
-            foreach (string fileName in svgFiles)
+            foreach (string inputPath in inputFiles)
             {
-                string inputPath = Path.Combine(inputFolder, fileName);
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string outputFileName = Path.GetFileNameWithoutExtension(fileName) + ".png";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
+                // Determine output path
+                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+                // Load the SVG image
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Set page size for current image (preserves aspect ratio if needed)
+                    rasterizationOptions.PageSize = image.Size;
+
                     // Save as PNG using the shared options
                     image.Save(outputPath, pngSaveOptions);
                 }
@@ -67,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate thumbnail PNG previews for a batch of SVG icons stored on a server, this code can rasterize them with consistent background and smoothing settings.
- * 2. When an automated build pipeline must convert design assets from SVG to PNG for inclusion in a mobile app’s resource bundle, the shared rasterization options ensure uniform image quality across all files.
- * 3. When a reporting tool has to embed high‑resolution PNG charts that were originally created as SVG diagrams, the code can batch‑process the SVG files while preserving anti‑aliasing and text rendering hints.
- * 4. When a content management system imports user‑uploaded SVG logos and needs to store them as PNGs for faster browser rendering, this snippet provides a simple C# solution that reuses the same rasterization configuration.
- * 5. When a desktop utility converts a collection of SVG illustrations into PNG files for printing or offline viewing, the shared SvgRasterizationOptions guarantee consistent background color and smoothing for every conversion.
+ * 1. When you need to generate PNG thumbnails for a large collection of SVG icons in a web application.
+ * 2. When you want to automate the conversion of vector graphics to raster images for printing or email attachments without recreating rasterization settings for each file.
+ * 3. When you are building a CI/CD pipeline that validates SVG assets by converting them to PNG for visual regression testing.
+ * 4. When you need to export SVG diagrams to PNG format for inclusion in PowerPoint presentations while preserving aspect ratios.
+ * 5. When you are developing a desktop tool that processes user‑uploaded SVG files and saves them as PNGs using consistent rasterization parameters.
  */
