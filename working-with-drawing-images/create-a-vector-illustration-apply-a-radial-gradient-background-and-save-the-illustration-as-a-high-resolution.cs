@@ -1,48 +1,46 @@
+// HOW-TO: Create High-Resolution TIFF with Vector Shapes and LZW Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string outputPath = "output.tif";
+
         try
         {
-            // Output path for the high‑resolution TIFF
-            string outputPath = @"C:\Temp\vector_illustration.tif";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // TIFF options configuration
             TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
             tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-            tiffOptions.Photometric = TiffPhotometrics.Rgb;
+            tiffOptions.ByteOrder = TiffByteOrder.LittleEndian;
             tiffOptions.Compression = TiffCompressions.Lzw;
+            tiffOptions.Photometric = TiffPhotometrics.Rgb;
             tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-            tiffOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Desired image size (high resolution)
             int width = 2000;
             int height = 2000;
 
-            // Create the TIFF image canvas
-            using (Image image = Image.Create(tiffOptions, width, height))
+            using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, width, height))
             {
-                // Define a solid brush for background
-                using (SolidBrush solidBrush = new SolidBrush(Color.White))
+                Graphics graphics = new Graphics(tiffImage);
+
+                using (SolidBrush brush = new SolidBrush(Color.White))
                 {
-                    // Draw the background
-                    Graphics graphics = new Graphics(image);
-                    graphics.FillRectangle(solidBrush, new Rectangle(0, 0, width, height));
+                    graphics.FillRectangle(brush, new RectangleF(0, 0, width, height));
                 }
 
-                // Save the image (output path already bound via FileCreateSource)
-                image.Save();
+                Pen pen = new Pen(Color.Black, 5);
+                graphics.DrawRectangle(pen, new RectangleF(200, 200, 1600, 1600));
+                graphics.DrawEllipse(pen, new RectangleF(500, 500, 1000, 1000));
+
+                tiffImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -54,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a publishing system must generate print‑ready, high‑resolution TIFF files of vector logos with a radial gradient background for magazine layouts.
- * 2. When an e‑commerce platform needs to create scalable product mockups on a gradient canvas and store them as lossless LZW‑compressed TIFF images for archival.
- * 3. When a GIS application requires rendering map symbols as vector illustrations with smooth gradient fills and exporting them as 2000×2000 TIFF tiles for high‑detail satellite overlays.
- * 4. When a medical imaging workflow has to produce annotated vector diagrams with a radial gradient background and save them as contiguous planar TIFFs for compatibility with DICOM viewers.
- * 5. When a branding agency automates the batch creation of high‑resolution TIFF assets with custom gradient backgrounds for corporate stationery, using C# and Aspose.Imaging’s Image.Create and TiffOptions.
+ * 1. When you need to generate a printable 2000 × 2000 pixel TIFF file containing vector shapes such as rectangles and ellipses for a catalog or brochure.
+ * 2. When you want to programmatically create a high‑resolution raster image from vector drawing commands and save it with lossless LZW compression for archival purposes.
+ * 3. When an application must produce a white‑background TIFF image with precise dimensions and embed simple graphics for use in GIS or medical imaging workflows.
+ * 4. When you are building a C# service that automatically creates vector‑based diagrams and stores them as TIFF files compatible with legacy imaging systems.
+ * 5. When you require a repeatable way to render basic vector illustrations into a TIFF format with specific TIFF options like little‑endian byte order and RGB photometric settings.
  */
