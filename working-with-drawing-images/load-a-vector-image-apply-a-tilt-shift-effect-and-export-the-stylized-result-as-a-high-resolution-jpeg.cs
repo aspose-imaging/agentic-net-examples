@@ -1,11 +1,8 @@
+// HOW-TO: Apply Tilt‑Shift Effect To SVG And Save As High‑Resolution JPEG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -14,7 +11,6 @@ class Program
         try
         {
             string inputPath = "input.svg";
-            string tempPngPath = "temp.png";
             string outputPath = "output.jpg";
 
             if (!File.Exists(inputPath))
@@ -25,32 +21,44 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image svgImage = Image.Load(inputPath))
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    PageSize = new SizeF(svgImage.Width * 2, svgImage.Height * 2)
+                    PageWidth = vectorImage.Width,
+                    PageHeight = vectorImage.Height,
+                    BackgroundColor = Color.White
                 };
 
-                svgImage.Save(tempPngPath, pngOptions);
-            }
+                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
 
-            using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
-            {
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 1.0));
-
-                JpegOptions jpegOptions = new JpegOptions
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    Quality = 95
-                };
+                    vectorImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                raster.Save(outputPath, jpegOptions);
-            }
+                    using (Image rasterImg = Image.Load(ms))
+                    {
+                        RasterImage raster = (RasterImage)rasterImg;
 
-            if (File.Exists(tempPngPath))
-            {
-                File.Delete(tempPngPath);
+                        int width = raster.Width;
+                        int height = raster.Height;
+                        int blurHeight = height / 3;
+
+                        var blurOptions = new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(15, 5.0);
+
+                        raster.Filter(new Rectangle(0, 0, width, blurHeight), blurOptions);
+                        raster.Filter(new Rectangle(0, height - blurHeight, width, blurHeight), blurOptions);
+
+                        var jpegOptions = new JpegOptions
+                        {
+                            Quality = 95,
+                            ResolutionSettings = new ResolutionSetting(300, 300)
+                        };
+
+                        raster.Save(outputPath, jpegOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -62,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG illustration to a high‑resolution JPEG for web or print while applying a tilt‑shift style blur using Aspose.Imaging for .NET in C#.
- * 2. When a C# desktop tool must upscale vector graphics, rasterize them to PNG, apply a Gaussian blur filter, and output a 95‑quality JPEG for marketing materials.
- * 3. When an e‑commerce platform requires automated processing of SVG product icons into blurred, high‑definition JPEG thumbnails for a modern UI.
- * 4. When a batch‑processing script has to read vector files, enlarge the canvas, add a stylized blur effect, and save the results as JPEGs for archival or publishing workflows.
- * 5. When a developer wants to demonstrate Aspose.Imaging’s vector‑to‑raster conversion, image filtering, and JPEG export capabilities in a C# code sample for documentation or training.
+ * 1. When you need to convert a vector logo (SVG) into a print‑ready JPEG with a tilt‑shift blur for a stylized brochure cover.
+ * 2. When an e‑commerce site wants to generate high‑resolution product thumbnails from SVG artwork with a selective blur effect for visual emphasis.
+ * 3. When a mobile app creates custom postcards by rasterizing user‑uploaded SVG designs, applying a tilt‑shift look, and exporting a 300 dpi JPEG for printing.
+ * 4. When a marketing automation workflow automatically transforms SVG infographics into JPEG images with a top‑and‑bottom blur to simulate depth of field.
+ * 5. When a desktop publishing tool programmatically adds a tilt‑shift effect to vector illustrations before saving them as high‑quality JPEGs for magazine layouts.
  */
