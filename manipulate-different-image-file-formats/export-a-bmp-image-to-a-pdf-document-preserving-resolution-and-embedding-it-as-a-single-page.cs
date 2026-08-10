@@ -1,3 +1,4 @@
+// HOW-TO: Convert BMP Image to Single‑Page PDF Preserving Resolution in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,13 +8,13 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.bmp";
+        string outputPath = @"C:\temp\output.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.bmp";
-            string outputPath = @"C:\temp\output.pdf";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,13 +27,11 @@ class Program
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up PDF export options
+                // Configure PDF export options
                 PdfOptions pdfOptions = new PdfOptions
                 {
-                    // Preserve the original DPI resolution
-                    UseOriginalImageResolution = true,
-                    // No multipage handling needed for a single BMP
-                    MultiPageOptions = null
+                    // Preserve the original image resolution
+                    UseOriginalImageResolution = true
                 };
 
                 // Save the image as a single‑page PDF
@@ -48,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a high‑resolution BMP scan of a signed contract into a PDF for electronic archiving while preserving the original DPI.
- * 2. When a C# application must generate a single‑page PDF report that embeds a BMP diagram created by a legacy imaging system without losing image quality.
- * 3. When an automated document workflow requires batch processing of BMP screenshots into PDF files for compliance auditing, ensuring each page retains its original resolution.
- * 4. When a Windows service exports BMP medical images (e.g., X‑ray scans) to PDF for integration with a healthcare records system that only accepts PDF format.
- * 5. When a desktop utility needs to embed a BMP logo into a PDF brochure page, keeping the exact pixel density for print‑ready output.
+ * 1. When you need to embed a high‑resolution bitmap into a PDF report without losing detail.
+ * 2. When generating printable PDFs from scanned BMP files for archival or distribution.
+ * 3. When converting legacy BMP assets to PDF for inclusion in a document workflow that only accepts PDF.
+ * 4. When creating a single‑page PDF thumbnail from a BMP to share with clients while keeping original resolution.
+ * 5. When automating batch processing of BMP images to PDF for compliance with electronic filing standards.
  */
