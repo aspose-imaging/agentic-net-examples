@@ -1,3 +1,4 @@
+// HOW-TO: Get Digital Signature Confidence Percentage From a JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,45 +9,37 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
+            // Hardcoded input path
             string inputPath = "input.jpg";
-            string outputPath = "output/result.txt";
 
-            // Verify that the input file exists
+            // Verify the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists before any possible save operation
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the JPEG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access digital‑signature methods
+                // Ensure we have a raster image to work with
                 RasterImage rasterImage = image as RasterImage;
                 if (rasterImage == null)
                 {
-                    Console.Error.WriteLine("Loaded image does not support digital signature analysis.");
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
                     return;
                 }
 
-                // Analyze the digital signature confidence percentage.
-                // An empty password is used when no specific password is known.
-                int confidence = rasterImage.AnalyzePercentageDigitalSignature(string.Empty);
+                // Analyze digital signature confidence (empty password used here)
+                string password = "";
+                int confidence = rasterImage.AnalyzePercentageDigitalSignature(password);
 
-                // Output the result to the console
+                // Output the confidence percentage
                 Console.WriteLine($"Digital signature confidence: {confidence}%");
-
-                // Also write the result to the output file
-                File.WriteAllText(outputPath, $"Digital signature confidence: {confidence}%");
             }
         }
         catch (Exception ex)
         {
-            // Catch any unexpected errors and report them
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -54,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must verify the authenticity of a JPEG photograph received from a client by checking its digital signature confidence percentage before processing it further.
- * 2. When an automated image ingestion pipeline needs to log the digital signature confidence of each uploaded JPEG to ensure compliance with security policies.
- * 3. When a desktop utility for forensic analysts reads JPEG files and displays the digital signature confidence to help determine if the image has been tampered with.
- * 4. When a batch processing script validates a collection of JPEG images by writing the signature confidence values to a text report for audit purposes.
- * 5. When a cloud‑based service extracts metadata from JPEGs and includes the digital signature confidence percentage in the response to inform downstream image‑processing decisions.
+ * 1. When you need to verify that a JPEG file has not been tampered with by checking its embedded digital signature confidence before processing it further.
+ * 2. When building an automated workflow that validates incoming images from a client portal and logs the signature confidence to ensure authenticity.
+ * 3. When integrating security checks into a C# application that extracts and reports the digital signature confidence of scanned documents saved as JPEGs.
+ * 4. When performing compliance audits that require you to programmatically read the digital signature confidence of product photos stored in JPEG format.
+ * 5. When creating a diagnostic tool that reads a JPEG’s digital signature confidence and displays it in the console for troubleshooting image integrity issues.
  */
