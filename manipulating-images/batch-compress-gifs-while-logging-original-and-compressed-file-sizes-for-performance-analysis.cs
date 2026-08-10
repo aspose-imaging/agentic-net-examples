@@ -1,3 +1,4 @@
+// HOW-TO: Batch Compress GIF Files and Log Size Reduction in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,50 +11,54 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputFolder = @"C:\Images\Input";
-            string outputFolder = @"C:\Images\Output";
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputFolder);
+            // Ensure the output base directory exists
+            Directory.CreateDirectory(outputDir);
 
-            // Get all GIF files in the input folder
-            string[] gifFiles = Directory.GetFiles(inputFolder, "*.gif");
+            // Retrieve all GIF files from the input directory
+            string[] gifFiles = Directory.GetFiles(inputDir, "*.gif");
 
             foreach (string inputPath in gifFiles)
             {
-                // Verify the input file exists
+                // Verify that the input file actually exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
+
+                // Determine the output file path (same file name, different folder)
+                string fileName = Path.GetFileName(inputPath);
+                string outputPath = Path.Combine(outputDir, fileName);
+
+                // Ensure the directory for the output file exists (unconditional)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Record original file size
+                long originalSize = new FileInfo(inputPath).Length;
 
                 // Load the GIF image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Prepare lossy GIF save options
+                    // Configure lossy compression options
                     GifOptions saveOptions = new GifOptions
                     {
-                        // Recommended value for optimal lossy compression
-                        MaxDiff = 80,
-                        // Optional: enable palette correction for better quality
-                        DoPaletteCorrection = true
+                        MaxDiff = 80,               // Recommended value for good lossy compression
+                        DoPaletteCorrection = true // Improves visual quality
                     };
-
-                    // Determine the output file path
-                    string outputPath = Path.Combine(outputFolder, Path.GetFileName(inputPath));
-
-                    // Ensure the output directory exists (unconditional as required)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save the compressed GIF
                     image.Save(outputPath, saveOptions);
                 }
 
-                // Log original and compressed file sizes
-                long originalSize = new FileInfo(inputPath).Length;
-                long compressedSize = new FileInfo(Path.Combine(outputFolder, Path.GetFileName(inputPath))).Length;
-                Console.WriteLine($"File: {Path.GetFileName(inputPath)} | Original: {originalSize} bytes | Compressed: {compressedSize} bytes");
+                // Record compressed file size
+                long compressedSize = new FileInfo(outputPath).Length;
+
+                // Log the results
+                Console.WriteLine($"Processed: {fileName}");
+                Console.WriteLine($"Original size: {originalSize} bytes, Compressed size: {compressedSize} bytes");
             }
         }
         catch (Exception ex)
@@ -65,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to reduce the bandwidth of animated GIF banners for a marketing campaign, they can batch compress the files and log size reductions to verify performance gains.
- * 2. When a mobile app team wants to optimize GIF assets for faster loading on low‑end devices, they can use this code to compress the images and compare original versus compressed file sizes.
- * 3. When an e‑learning platform must shrink large GIF tutorials before uploading to a content delivery network, the batch process provides automated compression and size tracking for quality control.
- * 4. When a digital archivist is preparing a collection of GIF memes for public download, they can compress the set in bulk and record size metrics to ensure the archive stays within storage limits.
- * 5. When a SaaS provider offers image‑optimization services, they can employ this routine to process client‑submitted GIFs, log the before‑and‑after sizes, and generate reports on compression efficiency.
+ * 1. When you need to reduce the bandwidth of a website by compressing a large collection of GIF animations while tracking how much each file shrinks.
+ * 2. When you are preparing GIF assets for a mobile app and want to automate loss‑y compression and record original versus compressed sizes for quality assurance.
+ * 3. When a digital marketing team requires a nightly job that processes new GIFs, applies Aspose.Imaging compression settings, and logs size metrics for reporting.
+ * 4. When you are migrating legacy GIF archives to a storage‑optimized format and need to batch compress them with C# while capturing size statistics for cost analysis.
+ * 5. When you want to benchmark different GifOptions parameters by compressing multiple GIFs and comparing the before‑and‑after file sizes in a .NET application.
  */
