@@ -1,50 +1,68 @@
+// HOW-TO: Apply Edge Detection to Each Page of a Multipage TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        string outputDir = Path.GetDirectoryName(outputPath);
-        if (!string.IsNullOrWhiteSpace(outputDir))
-        {
-            Directory.CreateDirectory(outputDir);
-        }
-
         try
         {
-            using (Image image = Image.Load(inputPath))
+            // Hardcoded input TIFF path
+            string inputPath = "input.tif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                TiffImage tiff = (TiffImage)image;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                double[,] kernel = new double[,]
+            // Load the multipage TIFF image
+            using (Image img = Image.Load(inputPath))
+            {
+                TiffImage tiff = img as TiffImage;
+                if (tiff == null)
                 {
-                    { -1, 0, 1 },
-                    { -2, 0, 2 },
-                    { -1, 0, 1 }
-                };
-
-                foreach (TiffFrame frame in tiff.Frames)
-                {
-                    tiff.ActiveFrame = frame;
-                    tiff.Filter(frame.Bounds, new ConvolutionFilterOptions(kernel));
+                    Console.Error.WriteLine("Input file is not a TIFF image.");
+                    return;
                 }
 
-                tiff.Save(outputPath);
+                // Edge detection kernel (simple Laplacian)
+                double[,] kernel = new double[,]
+                {
+                    { -1, -1, -1 },
+                    { -1,  8, -1 },
+                    { -1, -1, -1 }
+                };
+
+                // Create convolution filter options with the kernel
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+
+                // Process each frame (page) of the TIFF
+                for (int i = 0; i < tiff.PageCount; i++)
+                {
+                    // Set the current frame as active
+                    tiff.ActiveFrame = tiff.Frames[i];
+
+                    // Apply the edge detection filter to the active frame
+                    tiff.Filter(tiff.ActiveFrame.Bounds, filterOptions);
+
+                    // Prepare output path for the processed page
+                    string outputPath = Path.Combine("output", $"page_{i + 1}.png");
+
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the processed frame as PNG
+                    using (var pngOptions = new PngOptions())
+                    {
+                        tiff.ActiveFrame.Save(outputPath, pngOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -56,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract and highlight edges from each page of a multi‑page TIFF scan (e.g., architectural drawings) using C# and Aspose.Imaging’s convolution filter.
- * 2. When an application must automatically process every frame of a TIFF document to detect borders for quality‑control checks in a document‑management system.
- * 3. When a medical‑imaging workflow requires applying a Sobel‑like edge detection kernel to each slice of a multi‑frame TIFF to enhance tissue boundaries before analysis.
- * 4. When a GIS tool has to preprocess satellite imagery stored as a multi‑page TIFF by sharpening edges on each layer for better feature extraction.
- * 5. When a batch‑conversion utility needs to read a TIFF, apply an edge detection filter to all pages, and save the result as a new TIFF for downstream computer‑vision tasks.
+ * 1. When you need to highlight outlines in each page of a scanned multipage TIFF before feeding it to an OCR engine.
+ * 2. When you want to generate edge‑enhanced PNG previews of every page in a large TIFF archive for quick visual inspection.
+ * 3. When processing medical imaging TIFF stacks to emphasize structural boundaries for diagnostic analysis in a C# application.
+ * 4. When converting multi‑page engineering drawings stored as TIFF into separate PNG files with edge detection for feature extraction.
+ * 5. When automating document digitization pipelines that require per‑page edge sharpening to improve downstream pattern‑recognition accuracy.
  */
