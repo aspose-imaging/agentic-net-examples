@@ -1,3 +1,4 @@
+// HOW-TO: Apply 3×3 High‑Pass Sharpen Filter to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.png";
-        string outputPath = @"C:\Images\output.png";
-
         try
         {
+            // Hard‑coded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,21 +21,20 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to RasterImage to access filtering capabilities
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Apply a 3x3 high‑pass (sharpen) kernel to emphasize edges
-                // SharpenFilterOptions with size 3 and sigma 1.0 uses the built‑in Sharpen3x3 kernel
-                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(3, 1.0));
+                // Apply a 3×3 high‑pass (sharpen) kernel
+                raster.Filter(raster.Bounds, new SharpenFilterOptions(3, 1.0));
 
                 // Save the processed image
-                rasterImage.Save(outputPath);
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -46,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to enhance the outlines of UI icons stored as PNG files before embedding them in a Windows desktop application, they can apply a 3×3 high‑pass kernel to sharpen the edges.
- * 2. When preprocessing scanned documents in PNG format for OCR, a developer may use the SharpenFilterOptions to emphasize text edges and improve character recognition accuracy.
- * 3. When generating thumbnail previews of product photos for an e‑commerce site, a developer can sharpen the PNG thumbnails with a 3×3 high‑pass filter to make details more visible on small screens.
- * 4. When creating visual effects for a game’s sprite sheet stored as PNG, a developer can apply the built‑in Sharpen3x3 kernel in C# to highlight edges and give a crisp, stylized look.
- * 5. When preparing PNG images for a machine‑learning pipeline that relies on edge features, a developer can use Aspose.Imaging’s raster filter to accentuate edges before feeding the data to the model.
+ * 1. When you need to enhance edges in a PNG before performing optical character recognition.
+ * 2. When preparing product photos for a web catalog and want to sharpen details without changing the file format.
+ * 3. When creating a preprocessing step for a computer‑vision algorithm that requires emphasized edges in input images.
+ * 4. When automating batch processing of scanned documents to improve visual contrast for printing.
+ * 5. When developing a C# desktop application that lets users apply a high‑pass filter to their PNG images on the fly.
  */
