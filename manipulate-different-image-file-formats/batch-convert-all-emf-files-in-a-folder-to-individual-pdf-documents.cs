@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert EMF Files to PDF Documents in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -13,15 +14,12 @@ class Program
             string inputFolder = @"C:\InputEmf";
             string outputFolder = @"C:\OutputPdf";
 
-            // Ensure the output directory exists (rule for each output path will also call this)
-            Directory.CreateDirectory(outputFolder);
-
             // Get all EMF files in the input folder
             string[] emfFiles = Directory.GetFiles(inputFolder, "*.emf");
 
             foreach (string inputPath in emfFiles)
             {
-                // Verify the input file exists (rule)
+                // Verify that the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -32,14 +30,17 @@ class Program
                 string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
                 string outputPath = Path.Combine(outputFolder, outputFileName);
 
-                // Ensure the output directory exists (rule)
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the EMF image
+                // Load the EMF image and save it as PDF
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Save as PDF using PdfOptions
-                    image.Save(outputPath, new PdfOptions());
+                    // Use default PDF options
+                    PdfOptions pdfOptions = new PdfOptions();
+
+                    // Save the image to PDF
+                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -52,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch convert a folder of Windows Metafile (EMF) diagrams created by a reporting engine into separate PDF documents for easy sharing and archival using C# and Aspose.Imaging.
- * 2. When a software solution must automatically transform vector‑based EMF assets from a design repository into PDF files for inclusion in client‑facing PDFs or print‑ready packages.
- * 3. When an application has to process incoming EMF files from a scanner or export routine and generate individual PDF files for compliance reporting without manual intervention.
- * 4. When a migration tool must convert legacy EMF icons stored on a server into PDF format to integrate with a modern web portal that only supports PDF rendering.
- * 5. When a background service needs to monitor a directory, load each EMF image, and save it as a PDF using Aspose.Imaging’s PdfOptions to support document management workflows.
+ * 1. When you need to automatically transform a collection of Windows Metafile (EMF) graphics into individual PDF reports for archiving or distribution.
+ * 2. When a document‑generation workflow requires converting vector‑based EMF logos stored in a folder into PDF files for printing or e‑signing.
+ * 3. When a migration script must replace legacy EMF assets with PDF equivalents across multiple projects without manual intervention.
+ * 4. When an application processes user‑uploaded EMF diagrams and must save each as a PDF to ensure cross‑platform viewing.
+ * 5. When a batch job has to generate PDF invoices that embed EMF charts from a directory, using Aspose.Imaging in C#.
  */
