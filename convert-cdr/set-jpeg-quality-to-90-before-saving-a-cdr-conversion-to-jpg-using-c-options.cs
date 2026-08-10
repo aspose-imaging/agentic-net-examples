@@ -1,3 +1,4 @@
+// HOW-TO: Convert CorelDRAW CDR to JPEG with Quality 90 in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,19 +10,19 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input/sample.cdr";
+        string outputPath = "Output/sample.jpg";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.cdr";
-            string outputPath = "output/output.jpg";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
                 JpegOptions jpegOptions = new JpegOptions
@@ -29,9 +30,9 @@ class Program
                     Quality = 90,
                     VectorRasterizationOptions = new VectorRasterizationOptions
                     {
+                        BackgroundColor = Color.White,
                         PageWidth = cdr.Width,
-                        PageHeight = cdr.Height,
-                        BackgroundColor = Color.White
+                        PageHeight = cdr.Height
                     }
                 };
 
@@ -47,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to export a CorelDRAW (CDR) file to a high‑quality JPEG for web publishing, they can set the JPEG quality to 90 using Aspose.Imaging for .NET.
- * 2. When an e‑commerce platform automatically generates product thumbnails from CDR source files and wants consistent image quality, the code can rasterize the vector page and save it as a JPEG with 90 % quality.
- * 3. When a document management system converts archived CDR drawings to JPEG for preview in browsers, developers use this snippet to ensure the saved JPEG retains visual fidelity with a quality setting of 90.
- * 4. When a batch‑processing tool processes a folder of CDR logos and outputs JPEG images for print‑ready proofs, the code provides controlled compression by specifying Quality = 90.
- * 5. When a mobile app backend receives user‑uploaded CDR artwork and needs to deliver a compressed JPEG version with minimal loss, the developer applies this Aspose.Imaging C# example to set the JPEG quality to 90 before saving.
+ * 1. When a design team needs to generate web‑ready JPEG previews of CorelDRAW (.cdr) files with a specific compression quality of 90.
+ * 2. When an automated build pipeline must batch‑convert CDR assets to JPEGs while preserving the original dimensions and a white background.
+ * 3. When a desktop application requires exporting vector drawings to JPEG for email attachment, ensuring consistent visual quality across different devices.
+ * 4. When a content management system stores user‑uploaded CorelDRAW files and needs to create thumbnail JPEGs with controlled quality for faster loading.
+ * 5. When a reporting tool extracts pages from CDR documents and saves them as high‑quality JPEG images for inclusion in PDF reports.
  */
