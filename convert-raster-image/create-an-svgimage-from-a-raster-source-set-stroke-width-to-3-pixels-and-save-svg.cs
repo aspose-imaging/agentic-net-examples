@@ -1,3 +1,4 @@
+// HOW-TO: Create SVG From BMP With 3 Pixel Border In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,44 +7,37 @@ using Aspose.Imaging.FileFormats.Svg.Graphics;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        string inputPath = "input.bmp";
+        string outputPath = "output.svg";
+
         try
         {
-            // Hardcoded input raster image and output SVG paths
-            string inputPath = "C:\\temp\\source.png";
-            string outputPath = "C:\\temp\\result.svg";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the raster image
-            using (Image rasterImage = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                int width = rasterImage.Width;
-                int height = rasterImage.Height;
-                int dpi = 96; // Standard screen DPI
+                int width = raster.Width;
+                int height = raster.Height;
+                int dpi = 96;
 
-                // Create an SVG graphics context with the same dimensions
                 SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-                // Set stroke width to 3 pixels using a pen
-                Pen pen = new Pen(Color.Black, 3);
+                // Draw the raster image onto the SVG canvas
+                graphics.DrawImage(raster, new Point(0, 0));
 
-                // Draw a rectangle border around the entire image area
-                graphics.DrawRectangle(pen, 0, 0, width, height);
+                // Draw a border with a 3‑pixel stroke width
+                graphics.DrawRectangle(new Pen(Color.Black, 3), 0, 0, width, height);
 
-                // Finalize SVG recording and obtain the SvgImage
                 using (SvgImage svgImage = graphics.EndRecording())
                 {
-                    // Save the SVG file
                     svgImage.Save(outputPath);
                 }
             }
@@ -57,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a PNG icon into a scalable SVG file with a 3‑pixel black border for responsive web layouts, this code creates the vector outline directly from the raster source.
- * 2. When an image‑processing service must generate SVG placeholders that preserve the original image dimensions and add a uniform stroke for UI mockups, the snippet records the raster size and saves the SVG with the specified pen width.
- * 3. When a reporting tool requires embedding raster charts inside SVG diagrams while ensuring a consistent 3‑pixel border for visual emphasis, this C# example produces the SVG wrapper using Aspose.Imaging.
- * 4. When a desktop application automates the creation of printable SVG assets from scanned PNG files and needs a precise stroke thickness to meet branding guidelines, the code records the raster dimensions and applies the required pen width.
- * 5. When a batch conversion utility must generate SVG files from a folder of PNG images and add a standard border for downstream vector editing, this program demonstrates the end‑to‑end process of loading, drawing, and saving the SVG.
+ * 1. When you need to embed a bitmap logo into a scalable SVG document and ensure it has a consistent 3‑pixel outline for branding purposes.
+ * 2. When generating printable graphics where a raster photograph must be wrapped in a vector border to maintain sharp edges at any resolution.
+ * 3. When converting legacy BMP assets to SVG for web use while adding a uniform stroke to match a site’s design system.
+ * 4. When creating automated reports that combine raster screenshots with vector annotations, such as a 3‑pixel frame around each image.
+ * 5. When building a batch process that transforms a folder of raster images into SVG files with a predefined border thickness for consistent UI icons.
  */
