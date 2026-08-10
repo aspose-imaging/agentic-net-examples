@@ -1,43 +1,48 @@
+// HOW-TO: Save WebP as PDF while Keeping EXIF Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.webp";
-        string outputPath = @"C:\temp\output.pdf";
+        string inputPath = @"c:\temp\input.webp";
+        string outputPath = @"c:\temp\output.pdf";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the WebP image
-            using (Image webpImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Prepare PDF options and preserve metadata
+                // Prepare PDF options
                 var pdfOptions = new PdfOptions
                 {
-                    KeepMetadata = true,
-                    // Transfer EXIF data from the source image if present
-                    ExifData = webpImage.Metadata?.ExifData,
-                    // Transfer XMP data as well (optional)
-                    XmpData = webpImage.Metadata?.XmpData
+                    // Preserve original metadata
+                    KeepMetadata = true
                 };
 
-                // Save as PDF preserving EXIF metadata
-                webpImage.Save(outputPath, pdfOptions);
+                // Transfer EXIF data from the WebP image to PDF options, if present
+                if (image is WebPImage webPImage && webPImage.ExifData != null)
+                {
+                    pdfOptions.ExifData = webPImage.ExifData;
+                }
+
+                // Save as PDF with the prepared options
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photography website needs to convert user‑uploaded WebP images to PDF portfolios while keeping the original camera EXIF data for attribution and copyright tracking.
- * 2. When a mobile app generates PDF receipts that embed WebP screenshots of a scene and must retain GPS coordinates and timestamp metadata for audit purposes.
- * 3. When a digital asset management system migrates archived WebP files to searchable PDF documents and wants to preserve EXIF tags so assets remain searchable by camera model or capture date.
- * 4. When an e‑commerce platform creates printable product catalogs from WebP product photos and needs to retain XMP and EXIF metadata for compliance with brand guidelines and image provenance.
- * 5. When a legal firm converts WebP evidence images to PDF case files and must maintain the original EXIF metadata to support chain‑of‑custody documentation.
+ * 1. When an application needs to generate PDF reports from user‑uploaded WebP photos and retain the original camera details for auditing.
+ * 2. When a digital asset management system converts WebP images to PDF for archival while preserving EXIF data for future search.
+ * 3. When a photo‑sharing website offers downloadable PDFs of WebP images and wants to keep GPS coordinates and timestamps embedded.
+ * 4. When a document‑generation service merges WebP screenshots into PDFs and must maintain metadata for compliance tracking.
+ * 5. When a mobile app exports captured WebP pictures to PDF and requires the EXIF information to be available for downstream processing.
  */
