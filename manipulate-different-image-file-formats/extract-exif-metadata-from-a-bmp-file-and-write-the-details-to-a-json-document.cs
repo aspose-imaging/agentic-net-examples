@@ -1,60 +1,69 @@
+// HOW-TO: Extract BMP EXIF Metadata and Save as JSON in C# (Aspose.Imaging for .NET)
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
+using System.Collections.Generic;
 using System.Text.Json;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.bmp";
-        string outputPath = @"C:\temp\exif.json";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = "input.bmp";
+        string outputPath = "output.json";
 
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Retrieve EXIF data if present
-                var exifData = image.Metadata?.ExifData;
-                var exifDictionary = new Dictionary<string, object>();
+                // Retrieve metadata (may be null for BMP)
+                var metadata = image.Metadata;
+                var exifData = metadata?.ExifData;
+
+                // Prepare a dictionary to hold EXIF tag values
+                var exifDict = new Dictionary<string, object>();
 
                 if (exifData != null)
                 {
-                    // Reflect over all public instance properties of the EXIF data object
-                    PropertyInfo[] properties = exifData.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
-                    foreach (PropertyInfo prop in properties)
+                    // Use reflection to read all public readable properties
+                    var props = exifData.GetType().GetProperties();
+                    foreach (var prop in props)
                     {
-                        try
+                        if (prop.CanRead)
                         {
-                            object value = prop.GetValue(exifData);
-                            if (value != null)
+                            try
                             {
-                                exifDictionary[prop.Name] = value;
+                                var value = prop.GetValue(exifData);
+                                // Skip null values to keep JSON concise
+                                if (value != null)
+                                {
+                                    exifDict[prop.Name] = value;
+                                }
                             }
-                        }
-                        catch
-                        {
-                            // Ignore properties that throw on get
+                            catch
+                            {
+                                // Ignore any property that throws during get
+                            }
                         }
                     }
                 }
 
-                // Serialize the dictionary to JSON
-                string json = JsonSerializer.Serialize(exifDictionary, new JsonSerializerOptions { WriteIndented = true });
+                // Serialize dictionary to JSON with indentation
+                string json = JsonSerializer.Serialize(exifDict, new JsonSerializerOptions { WriteIndented = true });
 
                 // Write JSON to the output file
                 File.WriteAllText(outputPath, json);
@@ -69,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to audit BMP files for embedded camera settings before importing them into a digital asset management system, they can extract EXIF metadata and store it in a JSON file for easy indexing.
- * 2. When a software solution must generate a searchable catalog of legacy BMP images by reading their EXIF tags and exporting the data to JSON for integration with a web API.
- * 3. When a forensic analyst wants to preserve image provenance by extracting BMP EXIF information and saving it as a structured JSON report for evidence documentation.
- * 4. When an automated pipeline processes user‑uploaded BMP pictures and requires the EXIF metadata to be logged in JSON format for compliance and auditing purposes.
- * 5. When a developer builds a cross‑platform image viewer that reads BMP EXIF details and writes them to a JSON configuration file to display metadata alongside the image.
+ * 1. When you need to read camera or device information stored in a BMP file and store it in a portable JSON format for further analysis or reporting.
+ * 2. When a legacy system produces BMP images with embedded EXIF tags and you must migrate the metadata to a modern database that accepts JSON payloads.
+ * 3. When building a C# application that validates image compliance by comparing EXIF fields such as resolution or orientation against business rules.
+ * 4. When creating an automated pipeline that extracts image properties from BMP files and feeds them to a logging service or analytics dashboard in JSON.
+ * 5. When you want to provide end‑users a downloadable JSON file that lists all available EXIF attributes from their uploaded BMP pictures.
  */
