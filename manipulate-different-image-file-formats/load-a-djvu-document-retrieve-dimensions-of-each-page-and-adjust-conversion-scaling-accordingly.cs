@@ -1,54 +1,54 @@
+// HOW-TO: Resize DjVu Pages to Fixed Width and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "sample.djvu";
-        string outputDirectory = "output";
-
         try
         {
-            // Verify input file exists
+            // Hardcoded input and output paths
+            string inputPath = "sample.djvu";
+            string outputDirectory = "output";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the base output directory exists
             Directory.CreateDirectory(outputDirectory);
 
-            // Open the DjVu file stream
+            // Load DjVu document from file stream
             using (Stream stream = File.OpenRead(inputPath))
-            // Load the DjVu document
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Iterate through each page
+                // Target width for scaling each page
+                int targetWidth = 1240;
+
                 foreach (DjvuPage page in djvuImage.Pages)
                 {
                     // Retrieve original dimensions
                     int originalWidth = page.Width;
                     int originalHeight = page.Height;
 
-                    // Define target width for scaling (example: 1024 pixels)
-                    const int targetWidth = 1024;
-                    // Calculate scaling factor while preserving aspect ratio
-                    float scale = (float)targetWidth / originalWidth;
+                    // Calculate scaling factor and target height while preserving aspect ratio
+                    double scale = (double)targetWidth / originalWidth;
                     int targetHeight = (int)(originalHeight * scale);
 
-                    // Resize the page to the new dimensions
-                    page.Resize(targetWidth, targetHeight);
+                    // Resize the page
+                    page.Resize(targetWidth, targetHeight, ResizeType.NearestNeighbourResample);
 
-                    // Prepare output file path
+                    // Prepare output file path for the current page
                     string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
 
-                    // Ensure the directory for the output file exists (already created above)
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save the resized page as PNG
@@ -65,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert multi‑page DjVu documents into web‑ready PNG images with a consistent width, they can use this code to read each page, calculate the scaling factor, resize while preserving aspect ratio, and save the results.
- * 2. When an archival system must generate thumbnail previews of DjVu files for a document management portal, the code can load the DjVu, obtain each page’s dimensions, scale them to a target width, and output PNG thumbnails.
- * 3. When a printing workflow requires down‑sampling high‑resolution DjVu pages to a fixed pixel width before rasterizing to PNG for faster preview rendering, this snippet provides the necessary page‑by‑page resizing logic.
- * 4. When a mobile app needs to display DjVu content on devices with limited screen width, developers can employ this example to read the DjVu, compute the appropriate scale for each page, resize, and store the images as PNG for efficient loading.
- * 5. When a batch processing script must standardize the size of scanned DjVu pages for machine‑learning image analysis, the code can iterate through pages, determine original dimensions, apply a uniform target width, and save the scaled PNG files for downstream processing.
+ * 1. When you need to convert each page of a multi‑page DjVu document into uniformly sized PNG images for web thumbnails.
+ * 2. When you must preserve the original aspect ratio while scaling DjVu pages to a specific pixel width for consistent layout in a mobile app.
+ * 3. When processing scanned books stored as DjVu, you want to extract pages, resize them, and store them in a folder structure for further OCR processing.
+ * 4. When generating preview images from large DjVu files, you need to read the document, determine each page’s dimensions, and produce scaled‑down PNGs to reduce bandwidth.
+ * 5. When automating a batch job that reads DjVu files from a directory, resizes pages to a target width, and saves the results as PNGs for archival or publishing pipelines.
  */
