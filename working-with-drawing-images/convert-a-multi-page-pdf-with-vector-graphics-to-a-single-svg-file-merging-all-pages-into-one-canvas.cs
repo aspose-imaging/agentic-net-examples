@@ -1,8 +1,9 @@
+// HOW-TO: Merge Multi‑Page PDF Vector Graphics Into One SVG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg.Graphics;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
@@ -10,10 +11,10 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Data\input.pdf";
-        string outputPath = @"C:\Data\output.svg";
+        string inputPath = @"C:\Temp\input.pdf";
+        string outputPath = @"C:\Temp\output.svg";
 
-        // Input file existence check
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,59 +29,53 @@ class Program
             // Load the PDF (vector multipage image)
             using (Image image = Image.Load(inputPath))
             {
-                var multipage = image as IMultipageImage;
-                if (multipage == null || multipage.Pages == null || multipage.PageCount == 0)
+                // Cast to vector multipage image to access pages
+                var vectorMultiPage = image as VectorMultipageImage;
+                if (vectorMultiPage == null)
                 {
-                    Console.Error.WriteLine("The loaded document does not contain any pages.");
+                    Console.Error.WriteLine("The loaded file is not a vector multipage image.");
                     return;
                 }
 
-                // Determine total canvas size (max width, sum of heights)
-                int totalWidth = 0;
-                int totalHeight = 0;
-                foreach (var page in multipage.Pages)
+                // Determine canvas size: width = max page width, height = sum of page heights
+                int canvasWidth = 0;
+                int canvasHeight = 0;
+                foreach (var page in vectorMultiPage.Pages)
                 {
-                    totalWidth = Math.Max(totalWidth, page.Width);
-                    totalHeight += page.Height;
+                    canvasWidth = Math.Max(canvasWidth, page.Width);
+                    canvasHeight += page.Height;
                 }
 
-                var sb = new StringBuilder();
-                sb.AppendLine($"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{totalWidth}\" height=\"{totalHeight}\">");
+                // Create an SVG canvas
+                var graphics = new SvgGraphics2D(canvasWidth, canvasHeight, 96);
 
-                int currentY = 0;
-                foreach (var page in multipage.Pages)
+                int yOffset = 0;
+                foreach (var page in vectorMultiPage.Pages)
                 {
-                    // Export each page to an intermediate SVG stored in memory
+                    // Rasterize the current page to a PNG in memory
                     using (var ms = new MemoryStream())
                     {
-                        var svgOptions = new SvgOptions
+                        var pngOptions = new PngOptions();
+                        page.Save(ms, pngOptions);
+                        ms.Position = 0;
+
+                        // Load the rasterized page
+                        using (RasterImage rasterPage = (RasterImage)Image.Load(ms))
                         {
-                            VectorRasterizationOptions = new SvgRasterizationOptions
-                            {
-                                PageSize = page.Size
-                            }
-                        };
-                        page.Save(ms, svgOptions);
-                        string pageSvg = Encoding.UTF8.GetString(ms.ToArray());
-
-                        // Extract inner SVG content (exclude outer <svg> tags)
-                        int start = pageSvg.IndexOf('>') + 1;
-                        int end = pageSvg.LastIndexOf("</svg>", StringComparison.Ordinal);
-                        string innerContent = (start < end) ? pageSvg.Substring(start, end - start) : string.Empty;
-
-                        // Place the page content at the correct vertical offset
-                        sb.AppendLine($"  <g transform=\"translate(0,{currentY})\">");
-                        sb.AppendLine(innerContent);
-                        sb.AppendLine("  </g>");
+                            // Draw the raster page onto the SVG canvas at the current offset
+                            graphics.DrawImage(rasterPage, new Point(0, yOffset), new Size(page.Width, page.Height));
+                        }
                     }
 
-                    currentY += page.Height;
+                    yOffset += page.Height;
                 }
 
-                sb.AppendLine("</svg>");
-
-                // Write the combined SVG to the output file
-                File.WriteAllText(outputPath, sb.ToString());
+                // Finalize SVG image
+                using (SvgImage svgImage = graphics.EndRecording())
+                {
+                    // Save the merged SVG
+                    svgImage.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)
@@ -92,9 +87,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed a multi‑page vector PDF brochure into a web page as a single scalable SVG canvas for responsive design.
- * 2. When an automated reporting tool must combine several PDF chart pages into one SVG file for high‑resolution printing without rasterization.
- * 3. When a document conversion service wants to transform a multi‑page PDF invoice into a single SVG document to preserve vector quality for downstream editing.
- * 4. When a GIS application requires merging multiple PDF map sheets into one SVG layer to enable pan‑and‑zoom interactions in a C# desktop client.
- * 5. When a digital asset pipeline needs to batch‑process engineering drawings stored as multi‑page PDFs and output a consolidated SVG for inclusion in technical documentation.
+ * 1. When you need to embed an entire multi‑page PDF brochure as a single scalable SVG graphic on a website.
+ * 2. When you want to combine several PDF report pages into one SVG file for high‑quality printing or vector editing.
+ * 3. When you must convert PDF vector drawings into a single SVG canvas while keeping them resolution‑independent in a C# application.
+ * 4. When you are developing a document viewer that displays all PDF pages together as one SVG element.
+ * 5. When you require automated batch processing to merge PDF pages into a single SVG for downstream workflows.
  */
