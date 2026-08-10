@@ -1,22 +1,23 @@
+// HOW-TO: Merge Multiple PNG Images Horizontally with Error Handling in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string[] inputPaths = new string[] { "input1.png", "input2.png", "input3.png" };
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string[] inputPaths = { "input1.jpg", "input2.jpg" };
-            string outputPath = "output.jpg";
-
-            // Validate input files
+            // Verify each input file exists
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -25,9 +26,6 @@ class Program
                     return;
                 }
             }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Collect sizes of all input images
             List<Size> sizes = new List<Size>();
@@ -40,22 +38,21 @@ class Program
             }
 
             // Calculate canvas dimensions for horizontal merge
-            int newWidth = 0;
-            int newHeight = 0;
-            foreach (var sz in sizes)
-            {
-                newWidth += sz.Width;
-                if (sz.Height > newHeight) newHeight = sz.Height;
-            }
+            int newWidth = sizes.Sum(s => s.Width);
+            int newHeight = sizes.Max(s => s.Height);
 
-            // Create output image source and options
+            // Prepare output file source and PNG options
             Source src = new FileCreateSource(outputPath, false);
-            JpegOptions options = new JpegOptions() { Source = src, Quality = 90 };
+            PngOptions pngOptions = new PngOptions() { Source = src };
 
-            // Create canvas
-            using (JpegImage canvas = (JpegImage)Image.Create(options, newWidth, newHeight))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Create canvas image
+            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, newWidth, newHeight))
             {
                 int offsetX = 0;
+                // Merge each image onto the canvas
                 foreach (string path in inputPaths)
                 {
                     using (RasterImage img = (RasterImage)Image.Load(path))
@@ -65,8 +62,7 @@ class Program
                         offsetX += img.Width;
                     }
                 }
-
-                // Save the merged image
+                // Save the merged image (canvas is already bound to output path)
                 canvas.Save();
             }
         }
@@ -79,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to combine multiple user‑uploaded JPEG photos into a single panoramic image before returning it to the client, a developer can use this code to load, validate, and merge the files while safely handling missing or locked files.
- * 2. When an automated reporting tool generates a composite image of product screenshots for a PDF catalog, the code can stitch the screenshots horizontally and ensure that absent or inaccessible image files do not crash the job.
- * 3. When a desktop application creates a side‑by‑side comparison view of before‑and‑after medical scans stored as JPEGs, the developer can employ this routine to load the scans, verify their existence, and merge them while catching file‑access exceptions.
- * 4. When a batch processing script prepares marketing banners by concatenating several promotional JPEG assets, this snippet provides a reliable way to validate each asset, merge them on a canvas, and gracefully handle permission errors.
- * 5. When a cloud function assembles a timeline collage from a list of image URLs saved locally as JPEG files, the code enables the function to load each image, compute the canvas size, and merge them while protecting against I/O failures such as missing files or locked resources.
+ * 1. When you need to combine several product photos into a single wide PNG for a web banner while safely handling missing or locked files.
+ * 2. When an automated report generator must stitch chart images side‑by‑side into one image and ensure the process doesn’t crash if an input file is unavailable.
+ * 3. When a desktop application creates a composite sprite sheet from individual PNG assets and must gracefully handle file‑access errors during loading.
+ * 4. When a batch‑processing script merges scanned page images into a panoramic view and needs to verify each file exists before creating the output PNG.
+ * 5. When a CI/CD pipeline assembles UI screenshots into a single image for documentation and requires robust exception handling to avoid pipeline failures.
  */
