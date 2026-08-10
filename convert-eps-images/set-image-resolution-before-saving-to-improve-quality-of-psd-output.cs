@@ -1,3 +1,4 @@
+// HOW-TO: Set Image Resolution When Converting BMP to PSD in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,7 +9,7 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\temp\sample.bmp";
         string outputPath = @"C:\temp\output.psd";
 
@@ -30,10 +31,12 @@ class Program
                 // Configure PSD save options
                 PsdOptions psdOptions = new PsdOptions
                 {
-                    // Example: set compression method (optional)
-                    CompressionMethod = CompressionMethod.RLE,
                     // Set desired resolution (e.g., 300 DPI)
-                    ResolutionSettings = new ResolutionSetting(300.0, 300.0)
+                    ResolutionSettings = new ResolutionSetting(300.0, 300.0),
+
+                    // Optional: set compression method and color mode
+                    CompressionMethod = CompressionMethod.RLE,
+                    ColorMode = ColorModes.Rgb
                 };
 
                 // Save the image as PSD with the specified options
@@ -49,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop receives high‑resolution bitmap artwork and needs to convert it to a PSD file with 300 DPI for accurate color separation and scaling.
- * 2. When a digital asset management system imports user‑uploaded BMP images and must store them as PSDs with consistent resolution for downstream editing in Photoshop.
- * 3. When an e‑commerce platform generates product mockups from BMP templates and saves them as PSDs at 300 DPI to ensure crisp detail on large‑format marketing prints.
- * 4. When a scientific imaging application converts microscope BMP captures to PSD format while preserving the original DPI to maintain measurement fidelity.
- * 5. When a mobile app backend processes scanned documents, converting them from BMP to PSD and setting the resolution to 300 DPI so that designers can edit the files without loss of quality.
+ * 1. When you need to generate high‑resolution PSD files from bitmap assets for professional printing.
+ * 2. When you must preserve image quality by setting a specific DPI before saving to Photoshop format.
+ * 3. When an automated pipeline converts scanned images to PSD and requires consistent 300 DPI output.
+ * 4. When you are building a C# application that exports layered designs with RLE compression and a defined color mode.
+ * 5. When you need to ensure the output PSD matches the resolution requirements of downstream graphic‑editing tools.
  */
