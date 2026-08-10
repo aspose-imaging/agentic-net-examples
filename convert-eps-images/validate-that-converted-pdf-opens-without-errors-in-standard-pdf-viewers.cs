@@ -1,8 +1,8 @@
+// HOW-TO: Convert JPG to PDF and Verify PDF Opens in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -10,30 +10,41 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "Input/sample.jpg";
-            string outputPath = "Output/output.pdf";
+            string outputPath = "Output/sample.pdf";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the source image and convert to PDF
             using (Image image = Image.Load(inputPath))
             {
-                var pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    image.Save(outputPath, pdfOptions);
+                }
             }
 
-            // Validate the generated PDF by loading it
-            using (Image pdf = Image.Load(outputPath))
+            // Validate that the generated PDF can be loaded without errors
+            using (Image pdfImage = Image.Load(outputPath))
             {
-                // If loading succeeds, the PDF is considered valid.
-                Console.WriteLine("PDF validation succeeded.");
+                // Simple validation: check that dimensions are positive
+                if (pdfImage.Width <= 0 || pdfImage.Height <= 0)
+                {
+                    Console.Error.WriteLine("Validation failed: PDF has invalid dimensions.");
+                    return;
+                }
             }
+
+            Console.WriteLine("PDF conversion and validation succeeded.");
         }
         catch (Exception ex)
         {
@@ -44,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a JPEG image to a PDF for archival or sharing and must ensure the resulting PDF opens correctly in standard PDF viewers.
- * 2. When building an automated C# document generation pipeline that transforms product photos into printable PDFs and validates the output to prevent corrupted files.
- * 3. When integrating Aspose.Imaging into a web service that receives user‑uploaded images, converts them to PDF, and verifies the PDF can be rendered before returning it to the client.
- * 4. When creating a batch‑processing tool that reads images from a folder, saves each as a PDF, and checks each PDF for load errors to guarantee reliable batch conversion.
- * 5. When developing a desktop application that allows users to export scanned images as PDFs and needs to confirm the exported PDF is readable without throwing exceptions.
+ * 1. When you need to generate a PDF report from user‑uploaded JPEG images and ensure the resulting file can be opened by any PDF viewer.
+ * 2. When an automated workflow must convert product photos to PDF for archiving and validate that the PDFs are not corrupted before storage.
+ * 3. When a web service creates printable PDFs from scanned JPEG documents and requires a quick check that the PDF dimensions are valid.
+ * 4. When a desktop application batch‑processes image assets into PDFs and needs to confirm each PDF loads without errors to avoid downstream failures.
+ * 5. When integrating Aspose.Imaging into a CI pipeline to test that image‑to‑PDF conversion produces viewable PDFs for quality assurance.
  */
