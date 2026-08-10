@@ -1,50 +1,50 @@
+// HOW-TO: Convert ODG to PDF and Set Document Title in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.FileFormats.OpenDocument.Objects;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Temp\sample.odg";
-        string outputPath = @"C:\Temp\sample.pdf";
-
         try
         {
-            // Verify that the input file exists
+            string inputPath = "Input/sample.odg";
+            string outputPath = "Output/sample.pdf";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Set up rasterization options for ODG
-                OdgRasterizationOptions rasterizationOptions = new OdgRasterizationOptions
+                // Set ODG metadata title
+                if (image is OdImage odImage)
                 {
-                    BackgroundColor = Color.White,
+                    odImage.Metadata.Title = "My Document Title";
+                }
+
+                // Configure rasterization options for PDF conversion
+                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
+                {
+                    BackgroundColor = Aspose.Imaging.Color.White,
                     PageSize = image.Size
                 };
 
-                // Configure PDF save options
+                // Configure PDF options and set PDF document title
                 PdfOptions pdfOptions = new PdfOptions
                 {
-                    VectorRasterizationOptions = rasterizationOptions,
-                    PdfDocumentInfo = new PdfDocumentInfo
-                    {
-                        Title = "Converted ODG Document"
-                    }
+                    VectorRasterizationOptions = rasterOptions,
+                    PdfDocumentInfo = new PdfDocumentInfo { Title = "My Document Title" }
                 };
 
-                // Save the image as PDF with the specified options
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -57,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically convert OpenDocument graphics (ODG) files to PDF for distribution while preserving the original page size and setting a custom document title in the PDF metadata.
- * 2. When an automated document processing pipeline must validate the existence of source ODG files, rasterize them with a white background, and generate searchable PDF reports with a predefined title.
- * 3. When integrating Aspose.Imaging into a C# application to batch‑convert design assets from ODG to PDF and embed meaningful metadata for document management systems.
- * 4. When a Windows service has to ensure output directories exist before saving converted PDFs, applying rasterization options to maintain visual fidelity of ODG drawings.
- * 5. When troubleshooting file conversion errors, a developer uses try‑catch handling around Aspose.Imaging’s Image.Load and Save methods to log issues while converting ODG graphics to PDF with title metadata.
+ * 1. When you need to generate a searchable PDF from an OpenDocument graphics file while preserving the original title for cataloging.
+ * 2. When automating a batch process that converts multiple ODG drawings to PDFs and assigns a consistent document title for downstream indexing.
+ * 3. When creating PDF reports from ODG diagrams in a C# application and you want the PDF metadata to reflect the drawing’s title.
+ * 4. When integrating Aspose.Imaging into a document management system to ensure converted PDFs carry the correct title property for compliance.
+ * 5. When exporting ODG artwork to PDF for client delivery and you must embed the title in the PDF metadata without manual editing.
  */
