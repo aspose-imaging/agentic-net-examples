@@ -1,7 +1,10 @@
+// HOW-TO: Convert Multi‑Page SVG to Single PDF with Vector Fidelity in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -9,8 +12,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output\\result.pdf";
+            string inputPath = @"C:\temp\multipage.svg";
+            string outputPath = @"C:\temp\output.pdf";
 
             if (!File.Exists(inputPath))
             {
@@ -22,7 +25,20 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                image.Save(outputPath, new PdfOptions());
+                PdfOptions exportOptions = new PdfOptions();
+
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                {
+                    PageWidth = image.Width,
+                    PageHeight = image.Height,
+                    BackgroundColor = Color.White,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None
+                };
+
+                exportOptions.VectorRasterizationOptions = rasterOptions;
+
+                image.Save(outputPath, exportOptions);
             }
         }
         catch (Exception ex)
@@ -34,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a printable PDF report from a multi‑page SVG diagram while preserving the original vector quality and page sequence.
- * 2. When an application must convert a batch of SVG assets created by a design tool into a single PDF portfolio for easy distribution to clients.
- * 3. When a web service receives an uploaded multi‑page SVG invoice and must return a PDF version that retains scalable graphics for compliance auditing.
- * 4. When a desktop utility automates the transformation of SVG‑based technical drawings into a consolidated PDF handbook without rasterizing the images.
- * 5. When a CI/CD pipeline includes a step that validates that SVG documentation can be rendered as a single PDF file with exact vector fidelity for archival purposes.
+ * 1. When you need to generate a printable PDF from a multi‑page SVG design while keeping the original vector quality for high‑resolution output.
+ * 2. When an application must batch‑process SVG assets and combine them into a single PDF report for distribution to clients.
+ * 3. When you want to preserve the exact page order of a multi‑page SVG diagram when converting it to a PDF for documentation purposes.
+ * 4. When you require a C# solution that uses Aspose.Imaging to convert SVG graphics to PDF without losing scalability or introducing raster artifacts.
+ * 5. When you need to automate the creation of PDF portfolios from SVG files in a server‑side workflow, ensuring consistent background color and rendering settings.
  */
