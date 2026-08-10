@@ -1,3 +1,4 @@
+// HOW-TO: Update Artist EXIF Tag in Multiple JPEGs Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,15 +9,20 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input directory containing JPEG files
-        string inputDirectory = @"C:\Images\Input";
-
         try
         {
-            // Get all JPEG files in the directory
-            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg");
+            // Hardcoded list of JPEG files to process
+            string[] inputFiles = new string[]
+            {
+                @"C:\Images\photo1.jpg",
+                @"C:\Images\photo2.jpg",
+                @"C:\Images\photo3.jpg"
+            };
 
-            foreach (string inputPath in jpegFiles)
+            // New value for the Artist EXIF tag
+            string newArtist = "John Doe";
+
+            foreach (string inputPath in inputFiles)
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -25,21 +31,21 @@ class Program
                     return;
                 }
 
-                // Ensure the output directory exists (same as input directory for in‑place save)
-                Directory.CreateDirectory(Path.GetDirectoryName(inputPath));
+                // Ensure the output directory exists (same as input directory)
+                string outputDir = Path.GetDirectoryName(inputPath);
+                Directory.CreateDirectory(outputDir);
 
                 // Load the JPEG image
                 using (JpegImage image = (JpegImage)Image.Load(inputPath))
                 {
-                    // Access JPEG EXIF data
-                    JpegExifData jpegExif = image.ExifData as JpegExifData;
-                    if (jpegExif != null)
+                    // Access EXIF data and set the Artist tag
+                    JpegExifData exif = image.ExifData;
+                    if (exif != null)
                     {
-                        // Modify the Artist tag
-                        jpegExif.Artist = "New Artist";
+                        exif.Artist = newArtist;
                     }
 
-                    // Save changes back to the same file (in‑place)
+                    // Save changes back to the original file (in-place)
                     image.Save(inputPath);
                 }
             }
@@ -53,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photographer uses Aspose.Imaging for .NET to embed or update the Artist EXIF tag across a folder of JPEG images before publishing them online.
- * 2. When a digital asset management system processes a batch of JPEG files in C# and standardizes the Artist metadata to enable consistent search and filtering.
- * 3. When a web application automatically adds the photographer’s name to existing JPEG files during a bulk upload, using Aspose.Imaging to modify the EXIF Artist tag in place.
- * 4. When a company migrates legacy product images and must replace outdated Artist information with the current brand name across thousands of JPEG files using C# batch processing.
- * 5. When a photo‑editing workflow requires batch correction of the Artist EXIF tag after renaming files, ensuring the metadata matches the new organization without creating new files.
+ * 1. When a photographer wants to embed their name into a batch of JPEG photos before uploading them to a portfolio site.
+ * 2. When a digital asset management system needs to standardize the Artist metadata across existing images for proper attribution.
+ * 3. When a legal compliance script must add or correct the creator information in JPEG files stored on a server.
+ * 4. When a photo‑sharing application requires updating the EXIF Artist tag of user‑uploaded images without creating new files.
+ * 5. When a batch‑processing tool needs to modify JPEG metadata in place to keep file paths unchanged while preserving image quality.
  */
