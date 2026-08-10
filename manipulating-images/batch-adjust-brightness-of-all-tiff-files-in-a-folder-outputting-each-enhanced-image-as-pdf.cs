@@ -1,6 +1,6 @@
+// HOW-TO: Batch Increase Brightness of TIFF Images and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
@@ -15,32 +15,34 @@ class Program
             string inputFolder = @"C:\Images\Input";
             string outputFolder = @"C:\Images\Output";
 
-            // Ensure the output directory exists (will also handle subfolders)
+            // Ensure the output directory exists
             Directory.CreateDirectory(outputFolder);
 
             // Get all TIFF files in the input folder
-            var tiffFiles = Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly)
-                                     .Where(f => f.EndsWith(".tif", StringComparison.OrdinalIgnoreCase) ||
-                                                 f.EndsWith(".tiff", StringComparison.OrdinalIgnoreCase));
-
-            foreach (var inputPath in tiffFiles)
+            string[] tiffFiles = Directory.GetFiles(inputFolder, "*.*", SearchOption.TopDirectoryOnly);
+            foreach (string filePath in tiffFiles)
             {
+                // Process only .tif and .tiff extensions
+                string extension = Path.GetExtension(filePath).ToLowerInvariant();
+                if (extension != ".tif" && extension != ".tiff")
+                    continue;
+
                 // Verify the input file exists
-                if (!File.Exists(inputPath))
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
 
-                // Build the output PDF path (same file name, .pdf extension)
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
+                // Prepare output PDF path
+                string outputFileName = Path.GetFileNameWithoutExtension(filePath) + ".pdf";
                 string outputPath = Path.Combine(outputFolder, outputFileName);
 
-                // Ensure the directory for the output file exists
+                // Ensure the output directory exists (unconditional as required)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the TIFF image
-                using (Image image = Image.Load(inputPath))
+                using (Image image = Image.Load(filePath))
                 {
                     // Cast to TiffImage to access AdjustBrightness
                     TiffImage tiffImage = (TiffImage)image;
@@ -62,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging department needs to improve the visibility of scanned X‑ray TIFF files and archive them as searchable PDF reports.
- * 2. When a publishing house wants to brighten scanned manuscript pages stored as TIFF and generate PDF proofs for editorial review.
- * 3. When a construction firm must enhance aerial survey TIFF images for better contrast before converting them to PDF for client presentations.
- * 4. When a government archive needs to batch‑process historical TIFF photographs, increase their brightness, and store the results as PDF for digital preservation.
- * 5. When an e‑commerce platform processes product catalog TIFF scans, adjusts brightness for consistent appearance, and creates PDF catalogs for distribution.
+ * 1. When you need to improve the visibility of scanned TIFF documents before archiving them as searchable PDFs.
+ * 2. When a medical imaging workflow requires brightening multiple TIFF X‑ray files and converting them to PDF for patient records.
+ * 3. When a publishing system must automatically enhance the brightness of a batch of TIFF artwork files and output them as PDF proofs.
+ * 4. When a legal firm wants to batch‑process TIFF evidence photos, increase their brightness, and store them in PDF format for case files.
+ * 5. When an automated script must convert a folder of low‑contrast TIFF scans into brighter PDFs for easier viewing on mobile devices.
  */
