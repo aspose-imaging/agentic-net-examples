@@ -1,18 +1,17 @@
+// HOW-TO: Embed and Verify Digital Signature in PNG Image Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output file paths
-            string inputPath = "input.jpg";
-            string outputPath = "output_signed.jpg";
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output_signed.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,23 +26,28 @@ class Program
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for digital signature operations
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage to access digital signature methods
+                if (image is RasterImage rasterImage)
+                {
+                    // Password longer than four characters
+                    string password = "StrongPass123";
 
-                // Embed a digital signature using a password longer than four characters
-                string validPassword = "secure123";
-                raster.EmbedDigitalSignature(validPassword);
+                    // Embed the digital signature
+                    rasterImage.EmbedDigitalSignature(password);
 
-                // Confirm that the signature was embedded successfully
-                bool isSigned = raster.IsDigitalSigned(validPassword);
-                Console.WriteLine($"Signature embedded: {isSigned}");
+                    // Save the signed image
+                    rasterImage.Save(outputPath);
 
-                // Prepare save options with a bound file source
-                Source source = new FileCreateSource(outputPath, false);
-                JpegOptions options = new JpegOptions { Source = source, Quality = 100 };
-
-                // Save the signed image
-                raster.Save(outputPath, options);
+                    // Verify the signature
+                    bool isSigned = rasterImage.IsDigitalSigned(password);
+                    Console.WriteLine(isSigned
+                        ? "The image has been successfully signed and verified."
+                        : "Signature verification failed.");
+                }
+                else
+                {
+                    Console.Error.WriteLine("The loaded image does not support digital signatures.");
+                }
             }
         }
         catch (Exception ex)
@@ -55,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed a tamper‑detectable digital signature into a JPEG photo before sending it to a client, ensuring the signature is protected with a password longer than four characters.
- * 2. When an e‑commerce platform wants to sign product images to verify authenticity during download, using Aspose.Imaging’s RasterImage.EmbedDigitalSignature method with a secure password.
- * 3. When a medical imaging system must attach a password‑protected digital signature to scanned patient images (e.g., JPEG) to comply with data integrity regulations.
- * 4. When a document management workflow requires programmatically signing and later validating image attachments in C# before archiving them in a secure repository.
- * 5. When a mobile app backend processes user‑uploaded pictures and needs to embed and confirm a digital signature using a strong password to prevent unauthorized modifications.
+ * 1. When you need to protect a PNG product photo from unauthorized modifications by embedding a password‑protected digital signature before publishing it online.
+ * 2. When a medical imaging system must ensure the integrity of scanned images by signing them with a strong password and later verifying the signature in C#.
+ * 3. When a legal document workflow requires embedding a tamper‑evident signature into scanned evidence images to comply with audit regulations.
+ * 4. When a cloud‑based asset management platform stores user‑uploaded images and wants to confirm they have not been altered by checking the embedded digital signature.
+ * 5. When an e‑commerce application generates watermarked product images and needs to embed and validate a digital signature to guarantee authenticity across multiple devices.
  */
