@@ -1,8 +1,10 @@
+// HOW-TO: Deskew GIF and Apply Floyd Steinberg Dithering to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
@@ -10,29 +12,30 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = "C:\\temp\\input.gif";
-            string outputPath = "C:\\temp\\output.png";
+            // Hardcoded input and output paths
+            string inputPath = "input.gif";
+            string outputPath = "output.png";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to GifImage to access GIF‑specific methods
                 GifImage gifImage = (GifImage)image;
 
-                // Deskew the image (remove any skew angle)
+                // Deskew the image (normalize its angle)
                 gifImage.NormalizeAngle();
 
-                // Apply Floyd‑Steinberg dithering with a 1‑bit palette (black & white)
+                // Apply Floyd‑Steinberg dithering with a 1‑bit palette
                 gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 1, null);
 
                 // Save the processed image as PNG
@@ -41,7 +44,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -49,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to automatically correct the orientation of scanned GIF receipts and convert them to high‑contrast black‑and‑white PNGs for archival, a developer can use this code.
- * 2. When an e‑learning platform receives user‑uploaded animated GIF diagrams that are slightly skewed and must be displayed as static PNG images with Floyd‑Steinberg dithering for better readability on low‑bandwidth devices, this snippet is applicable.
- * 3. When a batch‑processing tool must normalize the angle of legacy GIF icons, apply 1‑bit dithering to reduce file size, and output PNG files for modern UI themes, the code provides the required steps.
- * 4. When a document‑management system imports scanned forms saved as GIF, needs to deskew them, convert them to black‑white PNG using Floyd‑Steinberg dithering for OCR preprocessing, a developer can implement this routine.
- * 5. When a mobile app backend processes user‑submitted GIF screenshots, removes any tilt, applies Floyd‑Steinberg dithering to enhance contrast, and stores the result as PNG for consistent rendering across platforms, this example is useful.
+ * 1. When you need to correct the rotation of scanned animated GIF frames and convert them to a high‑contrast PNG for web display.
+ * 2. When you want to reduce a GIF’s color depth to a 1‑bit palette using Floyd‑Steinberg dithering before saving as PNG for printing.
+ * 3. When an application must automatically straighten misaligned GIF screenshots and output a lossless PNG for archival.
+ * 4. When you are processing user‑uploaded GIFs, removing skew and applying dithering to meet a PNG‑only workflow in a C# service.
+ * 5. When a batch job has to normalize the angle of GIF images and generate dithered PNG thumbnails for a mobile app.
  */
