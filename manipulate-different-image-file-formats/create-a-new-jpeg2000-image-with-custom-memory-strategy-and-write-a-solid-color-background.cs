@@ -1,36 +1,50 @@
+// HOW-TO: Create JPEG2000 Image With Custom Buffer And Solid Color Background In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg2000;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"C:\Temp\output.jp2";
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Create JPEG2000 options with a custom memory buffer size (in MB)
-            Jpeg2000Options createOptions = new Jpeg2000Options();
-            createOptions.BufferSizeHint = 64; // Example: 64 MB buffer
+            // Define output path
+            string outputPath = @"C:\temp\output.jp2";
 
-            // Create a new JPEG2000 image with the specified size and options
-            using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(200, 200, createOptions))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Create a source bound to the output file
+            Source fileSource = new FileCreateSource(outputPath, false);
+
+            // Configure JPEG2000 options with custom memory strategy
+            Jpeg2000Options jp2Options = new Jpeg2000Options
             {
-                // Draw a solid color background
-                Graphics graphics = new Graphics(jpeg2000Image);
-                SolidBrush brush = new SolidBrush(Color.Blue);
-                graphics.FillRectangle(brush, jpeg2000Image.Bounds);
+                Source = fileSource,
+                BufferSizeHint = 10 * 1024 * 1024, // 10 MB buffer
+                Irreversible = true // optional: use irreversible DWT
+            };
 
-                // Save the image to the output path
-                jpeg2000Image.Save(outputPath, new Jpeg2000Options());
+            int width = 200;
+            int height = 200;
+
+            // Create JPEG2000 image canvas
+            using (Jpeg2000Image canvas = new Jpeg2000Image(width, height, jp2Options))
+            {
+                // Draw solid color background
+                Graphics graphics = new Graphics(canvas);
+                using (SolidBrush brush = new SolidBrush(Color.Blue))
+                {
+                    graphics.FillRectangle(brush, canvas.Bounds);
+                }
+
+                // Save the bound image
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -42,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a high‑resolution JPEG2000 placeholder image with a uniform background for a web‑based document viewer while controlling memory usage.
- * 2. When an application must create a JPEG2000 thumbnail of a specific size for a medical imaging system and wants to pre‑allocate a 64 MB buffer to avoid runtime memory spikes.
- * 3. When a batch‑processing service creates blank JPEG2000 canvases with a solid color fill for later overlay of satellite data, using Aspose.Imaging in C#.
- * 4. When a reporting tool programmatically produces JPEG2000 charts with a colored background and requires explicit buffer size hints to run efficiently on limited‑resource servers.
- * 5. When a digital archiving solution needs to initialize empty JPEG2000 files with a predefined background color before embedding scanned documents, leveraging custom memory strategy in .NET.
+ * 1. When you need to generate a JPEG2000 file on the fly with a specific buffer size to avoid high memory consumption while filling the canvas with a uniform background color.
+ * 2. When an application must create a lossless or near‑lossless JPEG2000 thumbnail for medical imaging or GIS data and requires a solid color placeholder before adding actual content.
+ * 3. When a server‑side service processes large images and wants to write the output directly to disk using a FileCreateSource to control the file creation and memory usage.
+ * 4. When you are building a batch job that programmatically creates blank JPEG2000 canvases of a fixed size for later overlay of graphics or text.
+ * 5. When you need to use Aspose.Imaging’s Jpeg2000Options to enable irreversible DWT and custom buffer hints while initializing the image with a single‑color background for testing compression settings.
  */
