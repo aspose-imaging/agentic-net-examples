@@ -1,7 +1,11 @@
+// HOW-TO: Draw Subpixel Accurate Line on BMP Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -9,35 +13,33 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.bmp";
-            string outputPath = @"C:\temp\output.bmp";
+            // Output BMP file path
+            string outputPath = "output/output.bmp";
 
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
-            using (Image image = Image.Load(inputPath))
+            // Set up BMP options with a file create source bound to the output path
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+            // Create a 200x200 BMP image
+            using (Image image = Image.Create(bmpOptions, 200, 200))
             {
-                // Create graphics for drawing
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Define a pen with sub-pixel width
-                Pen pen = new Pen(Color.Red, 1.5f);
+                // Clear background to white
+                graphics.Clear(Color.White);
 
-                // Draw a line using floating-point coordinates for sub-pixel accuracy
-                graphics.DrawLine(pen, 10.3f, 20.7f, 200.8f, 150.2f);
+                // Pen with sub‑pixel width for higher accuracy
+                Pen pen = new Pen(Color.Black, 1.5f);
 
-                // Save the modified image as BMP
-                BmpOptions bmpOptions = new BmpOptions();
-                image.Save(outputPath, bmpOptions);
+                // Draw a line using floating‑point coordinates (sub‑pixel precision)
+                graphics.DrawLine(pen, 10.5f, 10.5f, 150.75f, 150.25f);
+
+                // Save the image (output path already bound via FileCreateSource)
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -49,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add a precise red annotation line to an existing BMP file, such as marking a measurement on a scanned blueprint, and wants sub‑pixel accuracy using floating‑point coordinates.
- * 2. When a C# application must overlay a thin, anti‑aliased line on a bitmap image for a UI overlay or watermark without rasterizing to a higher resolution.
- * 3. When a software tool generates custom graphics on BMP screenshots, like drawing a guide line on a game capture, and requires the line to be positioned at non‑integer pixel locations for smoother appearance.
- * 4. When an image‑processing pipeline needs to programmatically modify legacy BMP assets by drawing diagnostic lines with a 1.5‑pixel wide pen to highlight defects.
- * 5. When a developer is building a reporting system that draws precise trend lines on BMP charts and must preserve the original BMP format while using Aspose.Imaging’s Graphics.DrawLine overload for sub‑pixel rendering.
+ * 1. When you need to generate a high‑resolution BMP diagram where thin lines must appear smooth and precisely positioned, such as technical schematics or UI mockups.
+ * 2. When creating raster graphics for printing that require sub‑pixel line placement to avoid aliasing, like vector‑to‑bitmap conversion for brochures.
+ * 3. When developing a reporting tool that overlays measurement lines on scanned BMP images and demands floating‑point accuracy for exact scale representation.
+ * 4. When building a game asset pipeline that draws pixel‑perfect borders on BMP textures, ensuring consistent line thickness across different screen densities.
+ * 5. When automating the production of BMP assets for scientific visualizations where line coordinates come from floating‑point data sets and must be rendered without rounding errors.
  */
