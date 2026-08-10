@@ -1,52 +1,56 @@
+// HOW-TO: Draw High Precision Bezier Curve with Points in PNG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\temp\bezier_output.png";
+            // Output file path (hardcoded)
+            string outputPath = @"C:\temp\bezier.png";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create PNG options (no source stream needed for creation)
-            PngOptions pngOptions = new PngOptions();
-
-            // Create a new 500x500 image
-            using (Image image = Image.Create(pngOptions, 500, 500))
+            // Create a file stream for the output image
+            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
             {
-                // Initialize graphics object for drawing
-                Graphics graphics = new Graphics(image);
+                // Set PNG options with the stream as source
+                PngOptions pngOptions = new PngOptions();
+                pngOptions.Source = new StreamSource(stream);
 
-                // Fill background with white
-                graphics.Clear(Color.White);
+                // Create a 500x500 PNG image
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(pngOptions, 500, 500))
+                {
+                    // Initialize graphics for drawing
+                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-                // Define a blue pen with width 2
-                Pen pen = new Pen(Color.Blue, 2);
+                    // Clear background to white
+                    graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Define four points for the Bezier curve using Point structures
-                Point pt1 = new Point(50, 400);   // start point
-                Point pt2 = new Point(150, 50);   // first control point
-                Point pt3 = new Point(350, 350);  // second control point
-                Point pt4 = new Point(450, 100);  // end point
+                    // Define a blue pen for the Bezier curve
+                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 2);
 
-                // Draw the Bezier spline using the Point overload
-                graphics.DrawBezier(pen, pt1, pt2, pt3, pt4);
+                    // Draw a Bezier curve using Point structures
+                    graphics.DrawBezier(
+                        pen,
+                        new Aspose.Imaging.Point(50, 250),   // start point
+                        new Aspose.Imaging.Point(150, 50),   // first control point
+                        new Aspose.Imaging.Point(350, 450),  // second control point
+                        new Aspose.Imaging.Point(450, 250)   // end point
+                    );
 
-                // Save the image to the specified output path
-                image.Save(outputPath);
+                    // Save the image (writes to the stream)
+                    image.Save();
+                }
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -54,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PNG badge with a smooth curved banner for a marketing email, they can use DrawBezier with Point structures to draw the precise curve.
- * 2. When creating a custom data‑visualization chart that requires a smooth spline between data points, the code can render the curve onto a 500×500 image for export as PNG.
- * 3. When implementing a signature capture feature that stores the pen strokes as high‑precision Bezier curves, the DrawBezier overload lets the app render the signature to a PNG file.
- * 4. When designing a game UI overlay that includes decorative curved lines, developers can use the Point‑based DrawBezier call to draw anti‑aliased curves on a transparent PNG background.
- * 5. When automating the production of printable vector‑style diagrams (e.g., flowchart connectors) in a .NET service, the code provides a simple way to draw accurate Bezier segments and save them as PNG images.
+ * 1. When you need to generate a PNG diagram that includes a smooth, high‑precision Bezier curve for UI mockups or technical illustrations.
+ * 2. When you want to programmatically create vector‑style graphics in a bitmap image for reports, using Aspose.Imaging’s Graphics.DrawBezier with Point structures.
+ * 3. When you must render custom curved paths in a server‑side C# service that outputs PNG files for web thumbnails or email attachments.
+ * 4. When you are building a CAD‑like preview where control points are defined as points and you need exact curve placement without loss of precision.
+ * 5. When you require automated drawing of scalable curves in batch processing, saving each result directly to a file stream for efficient storage.
  */
