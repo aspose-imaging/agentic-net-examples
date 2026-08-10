@@ -1,46 +1,60 @@
+// HOW-TO: How To Improve Watermark Removal Smoothness By Increasing MaxPaintingAttempts In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Watermark;
+using Aspose.Imaging.Watermark.Options;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputDir = "output";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(outputDir);
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input\\ball.png";
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            string outputPathDefault = "output\\result_default.png";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPathDefault));
-
             // Load the source image
             using (var image = Image.Load(inputPath))
             {
+                // Cast to specific raster image type
                 var pngImage = (PngImage)image;
 
-                // Create a mask for the region to be filled
+                // Define a simple elliptical mask
                 var mask = new GraphicsPath();
                 var figure = new Figure();
-                figure.AddShape(new EllipseShape(new RectangleF(350, 170, 570 - 350, 400 - 170)));
+                figure.AddShape(new EllipseShape(new RectangleF(50, 50, 200, 200)));
                 mask.AddFigure(figure);
 
-                // Default MaxPaintingAttempts
-                var optionsDefault = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask);
-                using (var resultDefault = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, optionsDefault))
+                // Test different MaxPaintingAttempts values
+                int[] attempts = new int[] { 2, 4, 8 };
+                foreach (var attempt in attempts)
                 {
-                    var pngOptions = new PngOptions();
-                    resultDefault.Save(outputPathDefault, pngOptions);
+                    // Higher MaxPaintingAttempts can produce smoother fill results
+                    var options = new ContentAwareFillWatermarkOptions(mask)
+                    {
+                        MaxPaintingAttempts = attempt
+                    };
+
+                    // Perform watermark removal (content-aware fill)
+                    using (var result = WatermarkRemover.PaintOver(pngImage, options))
+                    {
+                        string outPath = Path.Combine(outputDir, $"result_{attempt}.png");
+                        result.Save(outPath);
+                    }
                 }
             }
         }
@@ -53,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to remove a watermark from a PNG logo and ensure the filled area blends seamlessly with surrounding pixels, they can use this code to create an elliptical mask and apply ContentAwareFillWatermarkOptions.
- * 2. When an e‑commerce platform must automatically clean product photos (e.g., PNG images of balls) before publishing, this snippet demonstrates loading the image, defining the region to fill, and saving the result.
- * 3. When a desktop application processes user‑uploaded PNG files and must guarantee that the output directory exists before writing the cleaned image, the code shows how to create the folder and handle missing input files.
- * 4. When a developer wants to improve the visual smoothness of the filled watermark region by increasing the MaxPaintingAttempts property, they can adjust the option to perform more painting passes, reducing artifacts and producing a more natural look.
- * 5. When troubleshooting image‑processing pipelines that involve Aspose.Imaging’s WatermarkRemover, this example provides a reproducible scenario for testing different PNG compression settings via PngOptions after the content‑aware fill operation.
+ * 1. When you need to remove a logo or watermark from a PNG image while keeping the surrounding area visually smooth.
+ * 2. When you want to compare different MaxPaintingAttempts values to determine which setting yields the highest quality content‑aware fill.
+ * 3. When you are creating an automated batch process that cleans scanned documents by erasing watermarks with minimal visual artifacts.
+ * 4. When you need to generate multiple versions of a cleaned image to evaluate how painting attempts affect edge continuity and texture.
+ * 5. When you are integrating Aspose.Imaging into a C# application to programmatically restore photo regions obscured by watermarks.
  */
