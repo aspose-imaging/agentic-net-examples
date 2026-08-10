@@ -1,6 +1,6 @@
+// HOW-TO: Create BMP Image With Filled Rectangle Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
@@ -11,39 +11,34 @@ class Program
     {
         try
         {
-            // Output file path (hardcoded)
+            // Output BMP file path
             string outputPath = @"C:\temp\output.bmp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create BMP options with a FileCreateSource bound to the output file
+            // Set BMP options
             BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Define canvas size
-            int width = 400;
-            int height = 300;
-
-            // Create the image canvas
-            using (Image image = Image.Create(bmpOptions, width, height))
+            // Create a new image canvas
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, 200, 200))
             {
                 // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-                // Define rectangle bounds
-                Rectangle rect = new Rectangle(50, 50, 300, 200);
+                // Define a pen for the rectangle border
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 2);
+                graphics.DrawRectangle(pen, new Aspose.Imaging.Rectangle(20, 20, 160, 160));
 
-                // Draw rectangle outline
-                graphics.DrawRectangle(new Pen(Color.Black, 2), rect);
-
-                // Fill rectangle interior with solid color
-                using (SolidBrush brush = new SolidBrush(Color.Blue))
+                // Fill the rectangle interior with a solid brush
+                using (SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Red))
                 {
-                    graphics.FillRectangle(brush, rect);
+                    graphics.FillRectangle(brush, new Aspose.Imaging.Rectangle(20, 20, 160, 160));
                 }
 
-                // Save the image (file is already bound to outputPath)
+                // Save the image to the specified path
                 image.Save();
             }
         }
@@ -56,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP thumbnail with a highlighted area for a reporting dashboard, they can use this code to draw and fill a rectangle on a bitmap.
- * 2. When creating a simple placeholder image for a UI component that requires a solid‑color background within a defined border, this snippet shows how to draw and fill a rectangle in C# with Aspose.Imaging.
- * 3. When automating the production of printable labels that include a colored box to emphasize product information, the code can create a BMP file, outline the box, and fill it with a solid brush.
- * 4. When building a test harness that validates image‑processing pipelines by generating known BMP files with specific shapes and colors, this example provides a quick way to draw a filled rectangle.
- * 5. When developing a game asset pipeline that needs to programmatically generate BMP sprites with colored rectangular hit‑boxes, the code demonstrates how to create the file, draw the rectangle outline, and fill its interior using a SolidBrush.
+ * 1. When you need to generate a simple BMP thumbnail with a colored box for a Windows desktop application.
+ * 2. When you want to programmatically create a bitmap badge or icon that includes a solid‑filled shape for UI overlays.
+ * 3. When you must produce a BMP report graphic that highlights a region by drawing and filling a rectangle in C#.
+ * 4. When an automated tool has to add a colored rectangle watermark to a batch of BMP files during image preprocessing.
+ * 5. When you are building a test image to verify that Aspose.Imaging correctly renders pens and solid brushes on bitmap canvases.
  */
