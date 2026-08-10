@@ -1,38 +1,40 @@
+// HOW-TO: Convert DICOM File To PNG Byte Array In ASP.NET Core (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "Input/sample.dcm";
+        string outputPath = "Output/sample.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.dcm";
-            string outputPath = "Output/sample.png";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load DICOM image and save as PNG
             using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
             {
-                dicomImage.Save(outputPath, new PngOptions());
-            }
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    var pngOptions = new PngOptions();
+                    dicomImage.Save(memoryStream, pngOptions);
+                    byte[] pngBytes = memoryStream.ToArray();
 
-            // Read the generated PNG into a byte array
-            byte[] pngBytes = File.ReadAllBytes(outputPath);
-            Console.WriteLine($"PNG byte array length: {pngBytes.Length}");
+                    File.WriteAllBytes(outputPath, pngBytes);
+                    Console.WriteLine($"PNG byte array length: {pngBytes.Length}");
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -43,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a hospital’s web portal needs to display radiology images stored as DICOM files directly in a browser, a developer can use this code to convert the DICOM to PNG and return the PNG byte array from an ASP.NET Core API.
- * 2. When a telemedicine mobile app requests patient imaging data via a REST service, the backend can employ this conversion to transform DICOM scans into lightweight PNG streams for fast download.
- * 3. When an electronic health record (EHR) system integrates third‑party imaging archives, developers can expose an endpoint that turns DICOM files into PNG byte arrays for embedding in PDF reports.
- * 4. When a machine‑learning pipeline consumes medical images over HTTP, the API can use this code to serve PNG byte arrays instead of raw DICOM to simplify preprocessing.
- * 5. When a research portal offers public access to anonymized imaging studies, the server can convert each DICOM study to PNG on‑the‑fly and stream the byte array to web clients without storing intermediate files.
+ * 1. When a medical imaging web service needs to deliver DICOM scans as PNG images for browser display.
+ * 2. When integrating a PACS system with a .NET API that must provide thumbnails of DICOM studies as PNG byte streams.
+ * 3. When building a telemedicine portal that converts uploaded DICOM files to PNG for inclusion in patient reports.
+ * 4. When creating a microservice that transforms DICOM images into PNG for downstream AI models that accept raster formats.
+ * 5. When developing a mobile app backend that fetches DICOM scans from storage and returns them as PNG byte arrays to reduce client‑side processing.
  */
