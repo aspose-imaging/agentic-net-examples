@@ -1,3 +1,4 @@
+// HOW-TO: Extract Multi‑Page TIFF Pages to JPEG with Quality 80 in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,8 +11,9 @@ class Program
     {
         try
         {
-            // Hardcoded input path
-            string inputPath = "input.tif";
+            // Hardcoded input and output directories
+            string inputPath = @"C:\Temp\input_multi_page.tif";
+            string outputDirectory = @"C:\Temp\OutputJpeg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,23 +22,26 @@ class Program
                 return;
             }
 
-            // Load the multi‑page TIFF image
+            // Ensure output directory exists (unconditional as per rule)
+            Directory.CreateDirectory(outputDirectory);
+
+            // Load the multi‑page TIFF
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
             {
-                // Iterate over each frame (page)
+                // Prepare JPEG options with quality 80
+                JpegOptions jpegOptions = new JpegOptions
+                {
+                    Quality = 80
+                };
+
+                // Iterate over each frame (page) in the TIFF
                 for (int i = 0; i < tiffImage.Frames.Length; i++)
                 {
-                    // Hardcoded output path for each page
-                    string outputPath = $"output_page_{i + 1}.jpg";
+                    // Build output file path for the current page
+                    string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.jpg");
 
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
-
-                    // JPEG save options with quality 80
-                    JpegOptions jpegOptions = new JpegOptions
-                    {
-                        Quality = 80
-                    };
+                    // Ensure the directory for the output file exists (unconditional)
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                     // Save the current frame as a JPEG file
                     tiffImage.Frames[i].Save(outputPath, jpegOptions);
@@ -52,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system stores patient scans as multi‑page TIFF files and a developer uses Aspose.Imaging for .NET to extract each page and save JPEG previews at quality 80 for a web portal.
- * 2. When a document management workflow receives scanned contracts in a multi‑page TIFF and needs to use C# with Aspose.Imaging to split the file into individual JPEG pages (quality 80) for email attachments.
- * 3. When a publishing pipeline receives high‑resolution TIFF artwork and a developer leverages Aspose.Imaging for .NET to convert each page into a JPEG image with quality 80 for fast thumbnail generation.
- * 4. When a GIS application exports multi‑band satellite imagery as a TIFF and the code uses Aspose.Imaging in C# to break it into separate JPEG tiles (quality 80) for mobile map display.
- * 5. When an archival tool processes historical newspaper archives stored as multi‑page TIFFs and employs Aspose.Imaging for .NET to save each page as a JPEG (quality 80) to feed an OCR engine.
+ * 1. When you need to convert each page of a scanned multi‑page TIFF document into separate JPEG images for web preview or thumbnail generation.
+ * 2. When a medical imaging system stores patient scans as multi‑frame TIFFs and you must export each frame as a JPEG with a specific compression quality for integration with a PACS viewer.
+ * 3. When an archival workflow requires extracting individual pages from a large TIFF file to create JPEG files that can be uploaded to a content management system with size constraints.
+ * 4. When a desktop application processes multi‑page TIFF invoices and needs to save each page as a JPEG at quality 80 to balance visual fidelity and file size for email attachment.
+ * 5. When a batch script automates the conversion of multi‑page TIFF maps into JPEG tiles, preserving a consistent quality setting for GIS applications.
  */
