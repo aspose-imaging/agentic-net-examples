@@ -1,35 +1,53 @@
+// HOW-TO: Extract Frames from Animated APNG to PNG Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 
-public class Program
+class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.apng";
-            string outputDir = "frames";
+            string outputDirectory = "output_frames";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(outputDir);
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+            // Load the APNG image
+            using (Image image = Image.Load(inputPath))
             {
-                int frameCount = apng.PageCount;
-                for (int i = 0; i < frameCount; i++)
+                // Cast to ApngImage to access frames
+                ApngImage apngImage = image as ApngImage;
+                if (apngImage == null)
                 {
-                    using (Image frame = apng.Pages[i])
+                    Console.Error.WriteLine("The provided file is not a valid APNG image.");
+                    return;
+                }
+
+                // Iterate through each frame and save as a separate PNG file
+                for (int i = 0; i < apngImage.PageCount; i++)
+                {
+                    // Retrieve the frame as a RasterImage
+                    using (RasterImage frame = (RasterImage)apngImage.Pages[i])
                     {
-                        string outputPath = Path.Combine(outputDir, $"frame_{i + 1}.png");
+                        string outputPath = Path.Combine(outputDirectory, $"frame_{i:D4}.png");
+
+                        // Ensure the directory for the output file exists (already created above)
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the frame as PNG
                         frame.Save(outputPath, new PngOptions());
                     }
                 }
@@ -44,9 +62,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each frame from an animated APNG to individual PNG files for further image analysis or editing using C# and Aspose.Imaging.
- * 2. When a game developer wants to convert APNG sprite animations into separate PNG assets to integrate with a game engine that only supports static textures.
- * 3. When a web developer must generate thumbnail previews of each frame in an APNG for a media gallery, requiring per‑frame PNG extraction via Aspose.Imaging in .NET.
- * 4. When a data‑science team needs to feed individual animation frames into a machine‑learning model, they can use this code to split the APNG into PNG images for preprocessing.
- * 5. When a digital‑marketing analyst wants to repurpose frames from an animated APNG for social‑media posts, they can programmatically save each frame as a PNG using C# and Aspose.Imaging.
+ * 1. When you need to analyze or edit each individual frame of an animated APNG for tasks such as adding watermarks or applying filters.
+ * 2. When you want to generate a thumbnail gallery by extracting every frame of an APNG and saving them as separate PNG images for a web preview.
+ * 3. When a game developer must convert APNG sprite animations into separate PNG assets to integrate with a custom rendering engine.
+ * 4. When a data‑processing pipeline requires breaking down an APNG into static images to feed a machine‑learning model that only accepts PNG inputs.
+ * 5. When you are creating a video from an APNG and need to export each frame as PNG to assemble with a video encoder.
  */
