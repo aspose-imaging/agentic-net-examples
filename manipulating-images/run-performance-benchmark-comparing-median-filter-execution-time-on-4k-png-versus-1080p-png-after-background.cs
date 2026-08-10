@@ -1,6 +1,7 @@
+// HOW-TO: Benchmark Median Filter Speed on 4K vs 1080p PNG Images in C# (Aspose.Imaging for .NET)
 using System;
-using System.Diagnostics;
 using System.IO;
+using System.Diagnostics;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
@@ -8,72 +9,75 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath4K = @"C:\Images\input_4k.png";
+        string inputPath1080p = @"C:\Images\input_1080p.png";
+        string outputPath4K = @"C:\Images\output_4k_median.png";
+        string outputPath1080p = @"C:\Images\output_1080p_median.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath4K = @"C:\Images\image_4k.png";
-            string inputPath1080p = @"C:\Images\image_1080p.png";
-            string outputPath4K = @"C:\Images\output_4k_median.png";
-            string outputPath1080p = @"C:\Images\output_1080p_median.png";
-
-            // Verify input files exist
+            // ---------- 4K image processing ----------
             if (!File.Exists(inputPath4K))
             {
                 Console.Error.WriteLine($"File not found: {inputPath4K}");
                 return;
             }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath4K));
+
+            using (Image image = Image.Load(inputPath4K))
+            {
+                // Cast to RasterImage to access Filter method
+                RasterImage raster = (RasterImage)image;
+
+                // Measure median filter execution time
+                Stopwatch sw = Stopwatch.StartNew();
+                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+                sw.Stop();
+
+                Console.WriteLine($"4K median filter time: {sw.ElapsedMilliseconds} ms");
+
+                // Save the filtered image
+                raster.Save(outputPath4K);
+            }
+
+            // ---------- 1080p image processing ----------
             if (!File.Exists(inputPath1080p))
             {
                 Console.Error.WriteLine($"File not found: {inputPath1080p}");
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath4K));
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath1080p));
 
-            // Benchmark for 4K image
-            long elapsed4K = ApplyMedianFilterAndMeasure(inputPath4K, outputPath4K);
-            // Benchmark for 1080p image
-            long elapsed1080p = ApplyMedianFilterAndMeasure(inputPath1080p, outputPath1080p);
+            using (Image image = Image.Load(inputPath1080p))
+            {
+                RasterImage raster = (RasterImage)image;
 
-            Console.WriteLine($"Median filter on 4K image took {elapsed4K} ms");
-            Console.WriteLine($"Median filter on 1080p image took {elapsed1080p} ms");
+                Stopwatch sw = Stopwatch.StartNew();
+                raster.Filter(raster.Bounds, new MedianFilterOptions(5));
+                sw.Stop();
+
+                Console.WriteLine($"1080p median filter time: {sw.ElapsedMilliseconds} ms");
+
+                raster.Save(outputPath1080p);
+            }
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    // Loads the image, applies a median filter, saves the result, and returns elapsed milliseconds
-    static long ApplyMedianFilterAndMeasure(string inputPath, string outputPath)
-    {
-        Stopwatch sw = new Stopwatch();
-        using (Image image = Image.Load(inputPath))
-        {
-            // Cast to RasterImage to access Filter method
-            RasterImage rasterImage = (RasterImage)image;
-
-            // Optional: background removal step could be placed here if needed
-
-            // Measure filter execution time
-            sw.Start();
-            rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
-            sw.Stop();
-
-            // Save the processed image
-            rasterImage.Save(outputPath);
-        }
-        return sw.ElapsedMilliseconds;
-    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to measure how long a median filter takes on high‑resolution 4K PNG versus 1080p PNG after background removal to decide if the processing fits within a real‑time UI.
- * 2. When a C# application must compare performance of Aspose.Imaging’s median filter on different image sizes to optimize batch background‑removal workflows for large photo libraries.
- * 3. When a performance engineer wants to benchmark the execution time of the median filter on raster PNG files using Stopwatch to identify potential bottlenecks before scaling to 4K video frames.
- * 4. When a software team is evaluating whether to pre‑process 4K PNG assets with a median filter on the server or client side by measuring the milliseconds required for each resolution.
- * 5. When a developer is building an automated image‑processing pipeline that applies background removal followed by a median filter and needs concrete timing data for 4K and 1080p PNG outputs.
+ * 1. When you need to compare processing time of a median filter on high‑resolution (4K) versus HD (1080p) PNG files to decide if your application can handle large images efficiently.
+ * 2. When you want to measure and log the execution speed of Aspose.Imaging’s MedianFilterOptions on different image sizes for performance tuning.
+ * 3. When you are building an automated image‑processing pipeline and must ensure that applying a median filter to 4K PNGs stays within acceptable latency limits.
+ * 4. When you are evaluating hardware or server configurations by benchmarking how long a median filter takes on 4K and 1080p PNG images in a C# environment.
+ * 5. When you need to generate filtered output files and record the median filter runtime to compare against other image‑processing algorithms or libraries.
  */
