@@ -1,57 +1,73 @@
+// HOW-TO: Apply ICC Color Profile to OTG Image and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\output.png";
-            string rgbIccPath = @"C:\Images\iccprofiles\eciRGB_v2.icc";
+            string inputPath = "Input/sample.otg";
+            string iccProfilePath = "Input/profile.icc";
+            string tempJpegPath = "Output/temp.jpg";
+            string outputPath = "Output/output.png";
 
-            // Verify input files exist
+            // Validate input OTG file
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
-            if (!File.Exists(rgbIccPath))
+
+            // Validate ICC profile file
+            if (!File.Exists(iccProfilePath))
             {
-                Console.Error.WriteLine($"File not found: {rgbIccPath}");
+                Console.Error.WriteLine($"File not found: {iccProfilePath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(tempJpegPath));
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
-            using (Image image = Image.Load(inputPath))
+            using (Image otgImage = Image.Load(inputPath))
             {
-                // Open the ICC profile stream
-                using (Stream rgbProfileStream = File.OpenRead(rgbIccPath))
+                // Prepare JPEG options with the ICC profile
+                JpegOptions jpegOptions = new JpegOptions
                 {
-                    // Attempt to apply the ICC profile if the image type supports it.
-                    // Using dynamic to avoid compile‑time errors for image types that lack the property.
-                    var dynImage = image as dynamic;
-                    try
-                    {
-                        dynImage.RgbColorProfile = new StreamSource(rgbProfileStream);
-                    }
-                    catch
-                    {
-                        // If the property is not supported, silently continue.
-                    }
-                }
+                    // Use the ICC profile for RGB conversion
+                    RgbColorProfile = new StreamSource(File.OpenRead(iccProfilePath))
+                };
 
-                // Save as PNG
-                PngOptions pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                // Save as a temporary JPEG to embed the ICC profile
+                otgImage.Save(tempJpegPath, jpegOptions);
+            }
+
+            // Load the temporary JPEG (now containing the ICC profile)
+            using (Image jpegImage = Image.Load(tempJpegPath))
+            {
+                // Prepare PNG options
+                PngOptions pngOptions = new PngOptions
+                {
+                    // No specific ICC handling for PNG; the color data is already transformed
+                };
+
+                // Save the final PNG image
+                jpegImage.Save(outputPath, pngOptions);
+            }
+
+            // Optionally delete the temporary JPEG file
+            if (File.Exists(tempJpegPath))
+            {
+                File.Delete(tempJpegPath);
             }
         }
         catch (Exception ex)
@@ -63,9 +79,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphics pipeline receives OTG vector images from a design tool and must embed a specific RGB ICC profile before converting them to PNG for web delivery, a developer can use this code.
- * 2. When an e‑commerce platform needs to ensure product photos originally stored as OTG files display consistent colors across browsers by applying an eciRGB_v2 ICC profile and saving them as PNG thumbnails, this snippet is applicable.
- * 3. When a digital asset management system imports OTG artwork and must standardize its color space to sRGB using a custom ICC profile prior to archiving the images as lossless PNG files, the code provides a solution.
- * 4. When a printing workflow requires converting OTG illustrations to PNG while preserving color fidelity by attaching a calibrated ICC profile before the final print‑ready export, developers can rely on this example.
- * 5. When a mobile app processes user‑uploaded OTG graphics and needs to embed a specific ICC profile to maintain accurate colors on different devices before saving the result as a PNG cache file, this code is useful.
+ * 1. When you need to embed a specific ICC color profile into an OTG graphic before converting it to a PNG for accurate color reproduction on the web.
+ * 2. When a workflow requires converting proprietary OTG files to PNG while preserving the source color space using a custom ICC profile.
+ * 3. When you must generate PNG thumbnails from OTG images that match a brand’s color standards defined in an ICC profile.
+ * 4. When automating batch processing of OTG assets, you need to apply a corporate ICC profile and output PNG files for cross‑platform compatibility.
+ * 5. When integrating Aspose.Imaging into a C# application to ensure OTG images retain correct color when saved as PNG for printing or publishing.
  */
