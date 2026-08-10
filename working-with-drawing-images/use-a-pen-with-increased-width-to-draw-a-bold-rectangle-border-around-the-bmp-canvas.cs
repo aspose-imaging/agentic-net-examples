@@ -1,49 +1,44 @@
+// HOW-TO: Create BMP Image with Thick Black Border Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.bmp";
+        // Hardcoded output path
         string outputPath = @"C:\temp\output.bmp";
 
         try
         {
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Set up BMP options with a file create source
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+            int width = 500;
+            int height = 500;
+
+            // Create the image canvas bound to the output file
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(bmpOptions, width, height))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Initialize graphics for drawing
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-            // Load the BMP image from the input path
-            using (Image image = Image.Load(inputPath))
-            {
-                // Create a Graphics object for drawing on the image
-                Graphics graphics = new Graphics(image);
+                // Draw a bold rectangle border around the canvas
+                graphics.DrawRectangle(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 10), 0, 0, width, height);
 
-                // Define a pen with increased width for a bold border
-                Pen boldPen = new Pen(Color.Red, 5); // 5-pixel-wide red pen
-
-                // Draw a rectangle that matches the image borders
-                graphics.DrawRectangle(boldPen, 0, 0, image.Width, image.Height);
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the modified image to the output path
-                image.Save(outputPath);
+                // Save the image (file is already bound via FileCreateSource)
+                image.Save();
             }
         }
         catch (Exception ex)
         {
-            // Output any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -51,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to add a bold red border to a BMP image using a 5‑pixel‑wide Pen and Graphics.DrawRectangle for highlighting or branding before publishing it online.
- * 2. When an application must generate printable BMP files with a thick rectangle frame to indicate page margins by drawing a rectangle that matches the image dimensions.
- * 3. When a batch‑processing tool has to mark scanned BMP documents with a visible border for quality‑control review by drawing a rectangle with an increased pen width.
- * 4. When a C# program creates thumbnail previews of BMP assets and wants to emphasize the edges with a 5‑pixel‑wide Pen drawn via Graphics.DrawRectangle.
- * 5. When a legacy system requires BMP images with a colored border to comply with a specific file‑format specification for downstream processing, using Aspose.Imaging to draw the rectangle.
+ * 1. When you need to generate a 24‑bit BMP file with a thick black border for printing or UI thumbnails.
+ * 2. When you want to add a 10‑pixel rectangle outline to an image canvas to highlight its edges in a report using Aspose.Imaging.
+ * 3. When you are programmatically creating placeholder graphics in C# that require a bold rectangular frame for layout testing.
+ * 4. When you need to apply a consistent 10‑pixel black border around dynamically sized BMP images in a batch processing pipeline.
+ * 5. When you are building a custom branding overlay that surrounds the entire image with a solid rectangle using the Aspose.Imaging Pen class.
  */
