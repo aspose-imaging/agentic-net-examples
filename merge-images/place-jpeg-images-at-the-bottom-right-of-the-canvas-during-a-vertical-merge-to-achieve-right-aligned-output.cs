@@ -1,6 +1,6 @@
+// HOW-TO: Vertically Merge JPEG Images with Right‑Aligned Placement in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -13,16 +13,11 @@ class Program
     {
         try
         {
-            // Hardcoded input image paths (JPEG files) and output path
-            string[] inputPaths = new[]
-            {
-                "Input/image1.jpg",
-                "Input/image2.jpg",
-                "Input/image3.jpg"
-            };
-            string outputPath = "Output/merged.jpg";
+            // Hardcoded input and output paths
+            string[] inputPaths = { "image1.jpg", "image2.jpg", "image3.jpg" };
+            string outputPath = "merged.jpg";
 
-            // Validate each input file exists
+            // Validate input files
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -35,7 +30,7 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // First pass: collect sizes to determine canvas dimensions
+            // Collect sizes of all images
             List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
             foreach (string path in inputPaths)
             {
@@ -45,12 +40,20 @@ class Program
                 }
             }
 
-            int canvasWidth = sizes.Max(s => s.Width);               // right‑aligned width
-            int canvasHeight = sizes.Sum(s => s.Height);             // total height for vertical stack
+            // Calculate canvas dimensions for vertical merge with right alignment
+            int canvasWidth = 0;
+            int canvasHeight = 0;
+            foreach (var sz in sizes)
+            {
+                if (sz.Width > canvasWidth) canvasWidth = sz.Width;
+                canvasHeight += sz.Height;
+            }
 
             // Create JPEG canvas bound to the output file
-            Source src = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions { Source = src, Quality = 100 };
+            JpegOptions jpegOptions = new JpegOptions
+            {
+                Source = new FileCreateSource(outputPath, false)
+            };
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
@@ -58,14 +61,14 @@ class Program
                 {
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
-                        int offsetX = canvasWidth - img.Width; // right‑align each image
-                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, offsetY, img.Width, img.Height);
+                        int offsetX = canvasWidth - img.Width; // right‑align
+                        Rectangle bounds = new Rectangle(offsetX, offsetY, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetY += img.Height;
                     }
                 }
 
-                // Save the bound canvas (no need to pass path/options again)
+                // Save the bound image
                 canvas.Save();
             }
         }
@@ -78,9 +81,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a printable photo collage where each portrait‑oriented JPEG must be stacked vertically and aligned to the right edge of a single output image.
- * 2. When generating a multi‑page product catalog preview by merging individual JPEG product photos into one right‑aligned vertical strip for web display.
- * 3. When preparing a vertical banner for a digital signage system that requires all source JPEG banners to be combined into a single right‑aligned image to maintain consistent alignment.
- * 4. When automating the assembly of scanned document pages saved as JPEGs into a single right‑aligned JPEG image for archival or further processing.
- * 5. When building a C# application that consolidates user‑uploaded JPEG screenshots into a single right‑aligned vertical summary image for reporting dashboards.
+ * 1. When you need to combine multiple product photos into a single JPEG brochure page while keeping each image aligned to the right edge of the page.
+ * 2. When generating a vertical sprite sheet for a mobile app and want all sprites right‑justified to maintain consistent layout.
+ * 3. When creating a printable catalog where varying‑size JPEGs must be stacked vertically and aligned to the right margin for a clean appearance.
+ * 4. When automating the assembly of scanned receipts into one PDF‑ready JPEG file and require right‑aligned placement to preserve column alignment.
+ * 5. When building a reporting tool that merges user‑uploaded JPEG charts into a single image and needs the charts positioned at the bottom‑right of each segment.
  */
