@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert BMP Images to Lossless WebP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,40 +9,44 @@ class Program
     static void Main()
     {
         // Hardcoded input and output directories
-        string inputDirectory = @"C:\Images\Input";
-        string outputDirectory = @"C:\Images\Output";
+        string inputDirectory = @"C:\Images\Bmp";
+        string outputDirectory = @"C:\Images\Webp";
 
         try
         {
-            // Get all BMP files in the input directory
-            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-            foreach (string bmpFilePath in bmpFiles)
+            // Get all BMP files in the input directory
+            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp", SearchOption.TopDirectoryOnly);
+
+            foreach (string inputPath in bmpFiles)
             {
-                // Verify that the input file exists
-                if (!File.Exists(bmpFilePath))
+                // Verify the input file exists
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {bmpFilePath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine the output file path with .webp extension
-                string outputFilePath = Path.Combine(
-                    outputDirectory,
-                    Path.GetFileNameWithoutExtension(bmpFilePath) + ".webp");
+                // Build the output file path with .webp extension
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".webp";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath));
+                // Ensure the output directory for this file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the BMP image
-                using (Image image = Image.Load(bmpFilePath))
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Save as lossless WebP
+                    // Set lossless WebP options
                     var webpOptions = new WebPOptions
                     {
                         Lossless = true
                     };
-                    image.Save(outputFilePath, webpOptions);
+
+                    // Save as WebP
+                    image.Save(outputPath, webpOptions);
                 }
             }
         }
@@ -54,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce storage costs by converting a folder of legacy BMP assets to lossless WebP files for faster web delivery.
- * 2. When an image processing pipeline must automatically migrate user‑uploaded BMP screenshots to WebP format without quality loss before archiving.
- * 3. When a desktop application has to generate WebP thumbnails from a batch of BMP design files to improve loading speed in a gallery view.
- * 4. When a migration script is required to replace BMP icons in a Windows application with WebP equivalents while preserving exact pixel data.
- * 5. When a CI/CD build step must ensure all BMP resources in a project are converted to lossless WebP to meet modern web standards.
+ * 1. When you need to shrink a folder of legacy BMP assets for faster web page loading while preserving pixel‑perfect quality.
+ * 2. When preparing game textures stored as BMP for a mobile app that requires lossless WebP to reduce package size.
+ * 3. When migrating an old desktop application's image library from BMP to a modern WebP format for cross‑platform compatibility.
+ * 4. When automating a nightly build process that converts newly added BMP screenshots into lossless WebP for archival storage.
+ * 5. When integrating Aspose.Imaging in a C# service to batch process user‑uploaded BMP files into WebP before delivering them to a CDN.
  */
