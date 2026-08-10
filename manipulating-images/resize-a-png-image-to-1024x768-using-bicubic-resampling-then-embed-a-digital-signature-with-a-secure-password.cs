@@ -1,3 +1,4 @@
+// HOW-TO: Resize PNG to 1024x768 With Bicubic Resampling And Add Digital Signature In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,10 +11,10 @@ class Program
     {
         try
         {
-            // Hardcoded paths and password
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output_resized_signed.png";
-            string password = "StrongPassword123!";
+            // Hard‑coded input, output and password
+            string inputPath = @"C:\Images\source.png";
+            string outputPath = @"C:\Images\output\resized_signed.png";
+            string password = "MySecurePassword!";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,21 +27,24 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (Image img = Image.Load(inputPath))
             {
-                // Resize to 1024x768 using Bicubic (CubicConvolution) resampling
-                image.Resize(1024, 768, ResizeType.CubicConvolution);
-
-                // Embed digital signature with the provided password
-                // The method is available on RasterCachedImage, which PngImage inherits
-                if (image is RasterCachedImage cachedImage)
+                // Work with the raster representation
+                var raster = img as RasterImage;
+                if (raster == null)
                 {
-                    cachedImage.EmbedDigitalSignature(password);
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
                 }
 
+                // Resize to 1024x768 using Bicubic (CubicConvolution) resampling
+                raster.Resize(1024, 768, ResizeType.CubicConvolution);
+
+                // Embed a digital signature with the provided password
+                raster.EmbedDigitalSignature(password);
+
                 // Save the processed image as PNG
-                var pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -52,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When preparing product screenshots for a web catalog, a developer can resize high‑resolution PNGs to a standard 1024×768 size with bicubic resampling and protect them with a password‑protected digital signature.
- * 2. When automating the generation of secure marketing assets, a C# service can downscale PNG logos to 1024×768 using CubicConvolution and embed a digital signature to verify authenticity.
- * 3. When delivering printable PDFs that include embedded PNG images, a developer may need to resize the PNGs to 1024×768 for consistent layout and sign them with a password to prevent tampering.
- * 4. When building a document management system that stores PNG thumbnails, the code can create 1024×768 thumbnails with high‑quality bicubic scaling and attach a digital signature for audit trails.
- * 5. When integrating PNG images into a regulated e‑learning platform, a developer can ensure each image meets the 1024×768 resolution requirement and is cryptographically signed with a secure password for compliance.
+ * 1. When preparing product screenshots for a web gallery that must fit a 1024x768 layout while ensuring the image cannot be altered without the correct password.
+ * 2. When generating printable marketing assets from high‑resolution PNGs, resizing them to standard dimensions and protecting them with a digital signature for copyright enforcement.
+ * 3. When automating a batch process that converts user‑uploaded PNG avatars to a uniform size for a mobile app and adds a secure signature to verify authenticity.
+ * 4. When creating archival copies of PNG diagrams that need to be downscaled for faster viewing but still require tamper‑evidence via password‑protected digital signatures.
+ * 5. When integrating image processing into a document management system that stores PNG files at a fixed resolution and uses a digital signature to guarantee integrity during transfer.
  */
