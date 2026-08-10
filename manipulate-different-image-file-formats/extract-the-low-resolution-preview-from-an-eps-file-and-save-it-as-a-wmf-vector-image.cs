@@ -1,8 +1,8 @@
+// HOW-TO: Extract EPS Low‑Resolution WMF Preview and Save as WMF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -10,7 +10,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.eps";
-        string outputPath = @"C:\Images\Output\sample.wmf";
+        string outputPath = @"C:\Images\sample_preview.wmf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -25,18 +25,21 @@ class Program
         try
         {
             // Load EPS image
-            using (var epsImage = (EpsImage)Image.Load(inputPath))
+            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Retrieve WMF preview
-                var preview = epsImage.GetPreviewImage(EpsPreviewFormat.WMF);
-                if (preview == null)
+                // Retrieve WMF preview (low‑resolution)
+                using (Image preview = epsImage.GetPreviewImage(EpsPreviewFormat.WMF))
                 {
-                    Console.Error.WriteLine("WMF preview not available in the EPS file.");
-                    return;
+                    if (preview != null)
+                    {
+                        // Save preview as WMF vector image
+                        preview.Save(outputPath);
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("No WMF preview available in the EPS file.");
+                    }
                 }
-
-                // Save preview as WMF vector image
-                preview.Save(outputPath, new WmfOptions());
             }
         }
         catch (Exception ex)
@@ -48,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a low‑resolution WMF preview of an EPS artwork for quick display in a Windows Forms UI without loading the full vector data.
- * 2. When a document‑conversion service must extract the embedded WMF thumbnail from EPS files to embed into PDF/A metadata for faster indexing.
- * 3. When an automated publishing pipeline has to create lightweight WMF icons from EPS logos for use in legacy reporting tools that only accept WMF graphics.
- * 4. When a batch‑processing script has to verify that EPS files contain a preview image and save it as a separate WMF file for quality‑control reviewers.
- * 5. When a web application needs to serve a small vector preview of uploaded EPS files to browsers that support WMF via an ActiveX control, reducing bandwidth compared to the full EPS.
+ * 1. When you need to generate a quick thumbnail of an EPS artwork for a Windows Forms UI, extracting the WMF preview lets you display a lightweight vector thumbnail without rendering the full EPS.
+ * 2. When converting legacy EPS files to a format that older Office applications understand, saving the embedded WMF preview provides a compatible vector representation for documents.
+ * 3. When building a batch process that indexes EPS files and stores a low‑resolution preview for search results, using the WMF preview reduces storage and speeds up rendering.
+ * 4. When creating a print preview pane that shows a simplified version of an EPS diagram, extracting the WMF preview ensures fast display while preserving vector quality.
+ * 5. When developing a migration tool that moves design assets from EPS to WMF for use in CAD or diagramming software, the code extracts the embedded preview to retain the original layout.
  */
