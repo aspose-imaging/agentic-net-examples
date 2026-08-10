@@ -1,19 +1,21 @@
+// HOW-TO: Measure Memory Usage of 7x7 Gaussian Blur on High Resolution PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output/output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\Images\\high_res.png";
-            string outputPath = "C:\\Images\\high_res_gaussian.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,44 +26,35 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Record memory usage before loading the image
-            long memoryBeforeLoad = Aspose.Imaging.Cache.AllocatedMemoryBytesCount;
+            // Record memory usage before processing
+            long memoryBefore = GC.GetTotalMemory(true);
 
-            // Load the high‑resolution PNG image
-            using (PngImage pngImage = new PngImage(inputPath))
+            // Load the high‑resolution PNG
+            using (Image image = Image.Load(inputPath))
             {
                 // Cast to RasterImage for filtering
-                RasterImage rasterImage = (RasterImage)pngImage;
+                RasterImage raster = (RasterImage)image;
 
-                // Record memory usage after loading
-                long memoryAfterLoad = Aspose.Imaging.Cache.AllocatedMemoryBytesCount;
+                // Configure a 7x7 Gaussian blur filter
+                var blurOptions = new GaussianBlurFilterOptions(3, 1.0); // radius 3 (approx. 7x7), sigma 1.0
+                blurOptions.Size = 7; // explicit kernel size
 
-                // Apply a 7x7 Gaussian blur with sigma = 1.0
-                var blurOptions = new GaussianBlurFilterOptions(7, 1.0);
-                rasterImage.Filter(rasterImage.Bounds, blurOptions);
+                // Apply the filter to the entire image
+                raster.Filter(raster.Bounds, blurOptions);
 
-                // Record memory usage after applying the filter
-                long memoryAfterFilter = Aspose.Imaging.Cache.AllocatedMemoryBytesCount;
+                // Prepare PNG save options
+                var saveOptions = new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
 
-                // Save the processed image
-                rasterImage.Save(outputPath);
-
-                // Record memory usage after saving
-                long memoryAfterSave = Aspose.Imaging.Cache.AllocatedMemoryBytesCount;
-
-                // Output memory consumption details
-                Console.WriteLine($"Memory before load: {memoryBeforeLoad}");
-                Console.WriteLine($"Memory after load: {memoryAfterLoad}");
-                Console.WriteLine($"Memory after filter: {memoryAfterFilter}");
-                Console.WriteLine($"Memory after save: {memoryAfterSave}");
-                Console.WriteLine($"Increase due to processing: {memoryAfterFilter - memoryAfterLoad}");
+                // Save the filtered image
+                raster.Save(outputPath, saveOptions);
             }
 
-            // Force cleanup and report final memory usage
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            long finalMemory = Aspose.Imaging.Cache.AllocatedMemoryBytesCount;
-            Console.WriteLine($"Final allocated memory: {finalMemory}");
+            // Record memory usage after processing
+            long memoryAfter = GC.GetTotalMemory(true);
+            Console.WriteLine($"Memory used: {memoryAfter - memoryBefore} bytes");
         }
         catch (Exception ex)
         {
@@ -72,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer is optimizing a desktop photo‑editing application that processes high‑resolution PNG files and needs to ensure the 7×7 Gaussian blur filter does not cause excessive memory usage.
- * 2. When a performance engineer is evaluating the memory footprint of batch‑processing pipelines that apply large Gaussian kernels to satellite imagery stored as PNGs before archiving.
- * 3. When a cloud‑based image‑service provider wants to benchmark the memory consumption of on‑the‑fly PNG transformations using Aspose.Imaging to size their VM instances correctly.
- * 4. When a QA tester is measuring how much memory is allocated during loading, filtering, and saving of ultra‑HD PNG assets in a C# game engine that uses Gaussian blur for visual effects.
- * 5. When a DevOps team needs to set memory limits for containerized micro‑services that perform high‑resolution PNG Gaussian blur operations with Aspose.Imaging to prevent out‑of‑memory crashes.
+ * 1. When you need to ensure that applying a large Gaussian blur to a high‑resolution PNG does not exceed the memory limits of your .NET application.
+ * 2. When you want to profile the RAM impact of image filtering before deploying a batch‑processing service that handles high‑resolution photos.
+ * 3. When you are optimizing a server‑side image pipeline and need concrete memory numbers for a 7×7 kernel blur operation.
+ * 4. When you compare different blur kernel sizes or filter libraries and require a baseline memory consumption measurement for PNG files.
+ * 5. When you troubleshoot out‑of‑memory exceptions in a C# program that processes large PNG images with Gaussian filters.
  */
