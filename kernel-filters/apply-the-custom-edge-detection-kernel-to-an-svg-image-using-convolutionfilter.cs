@@ -1,14 +1,16 @@
+// HOW-TO: Apply Edge Detection to SVG and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
         string inputPath = "input.svg";
-        string tempPngPath = "temp.png";
         string outputPath = "output.png";
 
         if (!File.Exists(inputPath))
@@ -21,43 +23,28 @@ class Program
 
         try
         {
-            using (Image svgImage = Image.Load(inputPath))
+            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
             {
-                var rasterOptions = new SvgRasterizationOptions
+                var pngOptions = new PngOptions();
+                using (var memoryStream = new MemoryStream())
                 {
-                    PageSize = svgImage.Size,
-                    BackgroundColor = Color.White
-                };
+                    svgImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
 
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                    using (RasterImage rasterImage = (RasterImage)Image.Load(memoryStream))
+                    {
+                        double[,] kernel = new double[,]
+                        {
+                            { -1, -1, -1 },
+                            { -1,  8, -1 },
+                            { -1, -1, -1 }
+                        };
 
-                svgImage.Save(tempPngPath, pngOptions);
-            }
-
-            using (Image img = Image.Load(tempPngPath))
-            {
-                RasterImage raster = (RasterImage)img;
-
-                double[,] kernel = new double[,]
-                {
-                    { -1, -1, -1 },
-                    { -1,  8, -1 },
-                    { -1, -1, -1 }
-                };
-
-                var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 3);
-
-                raster.Filter(raster.Bounds, convOptions);
-
-                raster.Save(outputPath);
-            }
-
-            if (File.Exists(tempPngPath))
-            {
-                File.Delete(tempPngPath);
+                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel, 1.0, 0);
+                        rasterImage.Filter(rasterImage.Bounds, filterOptions);
+                        rasterImage.Save(outputPath, pngOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -69,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate high‑contrast outlines of vector logos stored as SVG for use in print‑ready PNG assets, they can rasterize the SVG and apply a custom edge‑detection convolution filter.
- * 2. When an e‑learning platform wants to highlight diagram boundaries in SVG illustrations before converting them to PNG thumbnails, the code provides a C# solution that rasterizes and sharpens edges with a 3×3 kernel.
- * 3. When a web service must automatically detect and emphasize edges in user‑uploaded SVG icons to create stylized PNG badges, the Aspose.Imaging ConvolutionFilter can be used to process the images server‑side.
- * 4. When a GIS application requires extracting contour lines from SVG map overlays and saving them as PNG layers, applying the custom edge‑detection kernel after rasterization simplifies the workflow.
- * 5. When a mobile app needs to preprocess SVG assets for computer‑vision models by converting them to PNG and enhancing edge features, this C# code demonstrates the necessary rasterization and filtering steps.
+ * 1. When you need to highlight the edges of an SVG illustration before converting it to a PNG thumbnail for a web gallery.
+ * 2. When you want to generate a print‑ready PNG from an SVG logo with a custom convolution filter that emphasizes outlines.
+ * 3. When you are preprocessing SVG diagrams with edge detection to improve OCR accuracy after rasterizing them to PNG.
+ * 4. When you are creating a C# batch utility that applies a sharpening/edge‑detection filter to many SVG files and saves the results as PNG images.
+ * 5. When you require server‑side image processing in a .NET application to detect and accentuate outlines in SVG icons for dynamic UI theming.
  */
