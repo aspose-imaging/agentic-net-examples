@@ -1,19 +1,20 @@
+// HOW-TO: Convert ODG to Progressive JPEG with Maximum Quality in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.odg";
-        string outputPath = @"C:\temp\sample_converted.jpg";
-
         try
         {
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\sample.odg";
+            string outputPath = @"C:\temp\sample.jpg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,10 +29,10 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Configure JPEG options for progressive encoding
-                JpegOptions jpegOptions = new JpegOptions
+                var jpegOptions = new JpegOptions
                 {
-                    CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
-                    Quality = 100 // Maximum quality; adjust as needed
+                    CompressionType = JpegCompressionMode.Progressive,
+                    Quality = 100 // maximum quality
                 };
 
                 // Save as JPEG with the specified options
@@ -47,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to display vector graphics from an OpenDocument (.odg) file as fast‑loading JPEG images on a website, they can use this code to convert the ODG to a progressive JPEG.
- * 2. When an e‑learning platform must generate thumbnail previews of user‑uploaded ODG diagrams for course catalogs, the snippet provides a C# way to create high‑quality progressive JPEGs for quick preview rendering.
- * 3. When a content management system has to batch‑process archived ODG illustrations into web‑optimized JPEGs with progressive encoding to reduce perceived load time, this example shows the necessary Aspose.Imaging calls.
- * 4. When a mobile app needs to download vector drawings from an OpenDocument source and display them as JPEGs that load incrementally on slow connections, the code demonstrates how to perform the conversion in C#.
- * 5. When a digital asset pipeline requires converting design assets stored as ODG files into progressive JPEGs for SEO‑friendly image indexing, this sample illustrates the required file format conversion and compression settings.
+ * 1. When you need to display OpenDocument graphics on a website and want faster loading by serving progressive JPEGs.
+ * 2. When an application must batch‑convert ODG drawings to high‑quality JPEGs for email attachments without losing detail.
+ * 3. When a content management system stores design files as ODG and requires on‑the‑fly conversion to JPEG for thumbnail previews.
+ * 4. When you are building a .NET service that receives ODG uploads and must store them as progressive JPEGs to reduce bandwidth.
+ * 5. When you need to integrate Aspose.Imaging into a C# workflow to ensure ODG images are saved as JPEGs with maximum quality for print‑ready PDFs.
  */
