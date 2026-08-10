@@ -1,7 +1,9 @@
+// HOW-TO: Batch Resize BMP to 800x800, Sharpen and Convert to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -9,6 +11,7 @@ class Program
     {
         try
         {
+            // Setup input and output directories
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
@@ -25,30 +28,38 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.bmp");
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
             foreach (string inputPath in files)
             {
+                // Process only BMP files
+                if (!inputPath.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPdfPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
                 {
+                    // Ensure we are working with a raster image
                     RasterImage raster = (RasterImage)image;
+                    if (!raster.IsCached)
+                        raster.CacheData();
 
-                    raster.Resize(800, 800);
-
+                    // Apply sharpening filter to the whole image
                     raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions());
 
-                    raster.Save(outputPdfPath, new PdfOptions());
+                    // Resize to 800x800
+                    raster.Resize(800, 800);
+
+                    // Save as PDF
+                    raster.Save(outputPath, new PdfOptions());
                 }
             }
         }
@@ -61,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a folder of legacy BMP scans into searchable PDF documents while standardizing each page to an 800 × 800 pixel size and enhancing detail with a sharpening filter.
- * 2. When an e‑commerce platform must automatically process product photo BMP uploads, resize them to a uniform 800 × 800 resolution, apply sharpening for clearer visuals, and store the results as PDF catalogs.
- * 3. When a medical imaging system requires batch preparation of BMP radiology images for archival, resizing them to a consistent size, sharpening to improve diagnostic clarity, and saving them as PDF reports.
- * 4. When a publishing workflow needs to transform a collection of BMP illustrations into print‑ready PDFs, ensuring each image is resized to 800 × 800 pixels and sharpened to maintain line crispness.
- * 5. When a document management solution must ingest BMP files from scanners, uniformly resize and sharpen them, and convert them to PDF for easy viewing and indexing.
+ * 1. When you need to automatically generate printable PDFs from a folder of scanned BMP photos, resizing them to a standard page size and enhancing details.
+ * 2. When a web service must preprocess user‑uploaded BMP icons by scaling them to 800 × 800 pixels, applying a sharpening filter, and storing them as PDFs for archival.
+ * 3. When a batch job has to prepare BMP graphics for inclusion in a PDF report, ensuring consistent dimensions and improved clarity without manual editing.
+ * 4. When migrating legacy BMP assets to a PDF‑based documentation system, you want to automate resizing, sharpening, and format conversion in C#.
+ * 5. When creating a command‑line tool that processes multiple BMP files at once, applying a sharpen filter and converting each to a PDF for distribution to clients.
  */
