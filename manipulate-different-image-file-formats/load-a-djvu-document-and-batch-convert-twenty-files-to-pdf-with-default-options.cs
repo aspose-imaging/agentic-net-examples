@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert Multiple DjVu Files to PDF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,16 +11,20 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Input\Djvu\";
-            string outputDir = @"C:\Output\Pdf\";
-
-            // Process twenty DjVu files
-            for (int i = 1; i <= 20; i++)
+            // Hardcoded input and output file paths for 20 documents
+            string[] inputPaths = new string[20];
+            string[] outputPaths = new string[20];
+            for (int i = 0; i < 20; i++)
             {
-                // Build input and output file paths
-                string inputPath = Path.Combine(inputDir, $"file{i}.djvu");
-                string outputPath = Path.Combine(outputDir, $"file{i}.pdf");
+                inputPaths[i] = $"C:\\Input\\file{i + 1}.djvu";
+                outputPaths[i] = $"C:\\Output\\file{i + 1}.pdf";
+            }
+
+            // Process each file
+            for (int i = 0; i < 20; i++)
+            {
+                string inputPath = inputPaths[i];
+                string outputPath = outputPaths[i];
 
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -28,14 +33,17 @@ class Program
                     return;
                 }
 
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the DjVu document and save as PDF with default options
-                using (FileStream stream = File.OpenRead(inputPath))
-                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+                // Load DjVu document and save as PDF
+                using (Stream stream = File.OpenRead(inputPath))
                 {
-                    djvuImage.Save(outputPath, new PdfOptions());
+                    using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
+                    {
+                        // Save with default PDF options
+                        djvuImage.Save(outputPath, new PdfOptions());
+                    }
                 }
             }
         }
@@ -48,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy archive of scanned DjVu files into universally readable PDF format for distribution to clients.
- * 2. When an automated nightly job must process a batch of up to twenty DjVu images from a shared folder and generate PDF reports without manual intervention.
- * 3. When a document management system requires converting incoming DjVu uploads to PDF to enable preview, indexing, and search across different platforms.
- * 4. When a C# application integrates Aspose.Imaging to transform DjVu technical drawings into PDF portfolios for compliance documentation.
- * 5. When a cloud‑based workflow needs to validate the existence of DjVu files, load them with DjvuImage, and save them as PDFs using default PdfOptions for archival storage.
+ * 1. When a company needs to archive a large set of scanned DjVu documents as searchable PDFs for legal compliance.
+ * 2. When a desktop application must automatically convert newly uploaded DjVu files into PDF format for easier viewing by end‑users.
+ * 3. When a migration script processes a batch of legacy DjVu manuals, turning each into PDF without custom rendering settings.
+ * 4. When an automated workflow generates PDF reports from DjVu source files to integrate with existing PDF‑based document management systems.
+ * 5. When a developer wants to ensure all DjVu files in a folder are converted to PDF with default options before sending them to a third‑party service.
  */
