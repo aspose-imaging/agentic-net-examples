@@ -1,10 +1,9 @@
+// HOW-TO: Batch Convert SVG to PNG with Motion Blur in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -12,13 +11,14 @@ class Program
     {
         try
         {
-            string inputDirectory = "InputSvg";
-            string outputDirectory = "OutputPng";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add SVG files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
@@ -37,36 +37,33 @@ class Program
                     return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
 
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (MemoryStream ms = new MemoryStream())
+                using (Image svgImage = Image.Load(inputPath))
                 {
-                    using (Image svgImage = Image.Load(inputPath))
+                    var rasterOptions = new SvgRasterizationOptions
                     {
-                        var rasterOptions = new SvgRasterizationOptions
-                        {
-                            PageWidth = svgImage.Width,
-                            PageHeight = svgImage.Height,
-                            BackgroundColor = Color.White
-                        };
+                        BackgroundColor = Color.White,
+                        PageSize = svgImage.Size
+                    };
 
-                        var pngOptions = new PngOptions
-                        {
-                            VectorRasterizationOptions = rasterOptions
-                        };
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterOptions
+                    };
 
+                    using (var ms = new MemoryStream())
+                    {
                         svgImage.Save(ms, pngOptions);
-                    }
-
-                    ms.Position = 0;
-
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
-                    {
-                        raster.Filter(raster.Bounds, new MotionWienerFilterOptions(8, 1.0, 60.0));
-                        raster.Save(outputPath, new PngOptions());
+                        ms.Position = 0;
+                        using (RasterImage raster = (RasterImage)Image.Load(ms))
+                        {
+                            raster.Filter(raster.Bounds, new MotionWienerFilterOptions(8, 1.0, 60.0));
+                            raster.Save(outputPath);
+                        }
                     }
                 }
             }
@@ -80,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to batch convert a library of SVG icons to PNG thumbnails with a 60‑degree motion blur (size 8) using Aspose.Imaging for .NET to improve page load speed.
- * 2. When a UI/UX designer wants to generate motion‑blurred PNG previews of vector assets from an SVG folder for inclusion in design system documentation.
- * 3. When an e‑commerce platform must automatically transform product SVG illustrations into blurred PNG images for promotional banners and email campaigns.
- * 4. When a game developer requires a script that rasterizes SVG sprites, applies a size‑8 motion blur at a 60° angle, and saves them as PNG files for background effects in a 2D game.
- * 5. When an automation tool processes a directory of corporate SVG logos, applies a 60° motion blur (size 8) and outputs PNG versions for printing or marketing collateral.
+ * 1. When you need to generate blurred PNG thumbnails from a collection of SVG icons for a web gallery.
+ * 2. When you want to preprocess vector graphics for a mobile app by rasterizing them to PNG and adding a motion‑blur effect to simulate movement.
+ * 3. When an e‑commerce platform requires product illustrations in PNG format with a consistent blur style for promotional banners.
+ * 4. When automating the creation of background images for video games, converting SVG assets to PNG and applying a 60‑degree motion blur of size 8.
+ * 5. When preparing print‑ready assets where SVG logos must be rasterized to PNG with a subtle motion blur to match a brand’s visual guidelines.
  */
