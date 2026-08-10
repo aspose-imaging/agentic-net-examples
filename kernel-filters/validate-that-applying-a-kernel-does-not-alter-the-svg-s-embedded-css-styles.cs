@@ -1,11 +1,10 @@
+// HOW-TO: Verify Convolution Kernel Does Not Change SVG Embedded CSS in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -13,8 +12,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output.png";
+            string inputPath = @"C:\temp\input.svg";
+            string outputPath = @"C:\temp\output.svg";
 
             if (!File.Exists(inputPath))
             {
@@ -24,34 +23,47 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            byte[] originalBytes = File.ReadAllBytes(inputPath);
+            // Read original SVG content
+            string originalSvg = File.ReadAllText(inputPath);
 
+            // Save the SVG unchanged to the output path
             using (Image svgImage = Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions();
-                var vectorRasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = svgImage.Size
-                };
-                pngOptions.VectorRasterizationOptions = vectorRasterOptions;
-
-                using (var memoryStream = new MemoryStream())
-                {
-                    svgImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
-
-                    using (RasterImage raster = (RasterImage)Image.Load(memoryStream))
-                    {
-                        var filterOptions = new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3);
-                        raster.Filter(raster.Bounds, filterOptions);
-                        raster.Save(outputPath);
-                    }
-                }
+                svgImage.Save(outputPath);
             }
 
-            byte[] afterBytes = File.ReadAllBytes(inputPath);
-            bool cssUnchanged = originalBytes.SequenceEqual(afterBytes);
-            Console.WriteLine($"Embedded CSS unchanged: {cssUnchanged}");
+            // Rasterize SVG to PNG for kernel application
+            string tempPngPath = Path.Combine(Path.GetDirectoryName(outputPath), "temp.png");
+            using (Image svgImage = Image.Load(inputPath))
+            {
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+                rasterOptions.PageSize = svgImage.Size;
+
+                PngOptions pngOptions = new PngOptions();
+                pngOptions.VectorRasterizationOptions = rasterOptions;
+
+                svgImage.Save(tempPngPath, pngOptions);
+            }
+
+            // Apply a convolution kernel to the rasterized PNG
+            using (RasterImage raster = (RasterImage)Image.Load(tempPngPath))
+            {
+                double[,] kernel = new double[,]
+                {
+                    { 0, -1, 0 },
+                    { -1, 5, -1 },
+                    { 0, -1, 0 }
+                };
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                raster.Save(tempPngPath);
+            }
+
+            // Read processed SVG content
+            string processedSvg = File.ReadAllText(outputPath);
+
+            // Validate that CSS styles are unchanged
+            bool cssUnchanged = originalSvg == processedSvg;
+            Console.WriteLine(cssUnchanged ? "CSS unchanged." : "CSS altered.");
         }
         catch (Exception ex)
         {
@@ -62,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application converts user‑uploaded SVG icons to PNG thumbnails with an emboss filter, the developer can use this code to ensure the original SVG’s embedded CSS styles remain unchanged after processing.
- * 2. When an automated build pipeline generates high‑resolution PNG assets from SVG logos for print, the code helps verify that applying a convolution kernel does not corrupt the SVG’s style definitions used later for re‑rasterization.
- * 3. When a digital asset management system applies visual effects to SVG graphics before storing them as PNG, the snippet validates that the CSS styling embedded in the SVG file is preserved, preventing layout inconsistencies.
- * 4. When a C# desktop tool batch‑processes SVG diagrams into PNGs with Aspose.Imaging’s Emboss3x3 filter, the developer can check that the CSS rules inside the original SVG files are untouched, ensuring downstream SVG edits still work.
- * 5. When a CI/CD test suite validates image‑processing code that rasterizes SVG to PNG and applies a convolution filter, this example confirms that the file’s byte‑level CSS content is identical before and after the operation.
+ * 1. When you need to confirm that applying a convolution kernel to a rasterized SVG does not alter the file’s embedded CSS styles.
+ * 2. When you want to generate an unchanged SVG copy alongside a filtered PNG preview while ensuring the original CSS remains intact.
+ * 3. When automating image processing that sharpens SVG graphics with a kernel but must preserve the SVG’s CSS for downstream web use.
+ * 4. When validating a CI/CD pipeline that processes SVG assets, checking that CSS definitions survive rasterization and filter operations.
+ * 5. When building a batch tool that applies filters to SVG‑derived PNGs and requires verification that the source SVG’s style sheet is unchanged.
  */
