@@ -1,48 +1,54 @@
+// HOW-TO: Convert Multi‑Page TIFF to Animated WebP with Low Memory in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\input.tif";
-        string outputPath = @"C:\Images\output.webp";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the multi‑page TIFF image
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
-            {
-                // Release each page after it is processed to keep memory usage low
-                tiffImage.PageExportingAction = (index, page) =>
-                {
-                    // Force garbage collection for the just‑processed page
-                    GC.Collect();
-                };
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.tif";
+            string outputPath = @"C:\temp\output.webp";
 
-                // Prepare WebP export options (adjust as needed)
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the multi‑page TIFF
+            using (Image image = Image.Load(inputPath))
+            {
+                // If the image supports page exporting, release each page after it is saved
+                if (image is RasterCachedMultipageImage multiPageImage)
+                {
+                    multiPageImage.PageExportingAction = (index, page) =>
+                    {
+                        // Force garbage collection to free page resources
+                        GC.Collect();
+                    };
+                }
+
+                // Configure WebP export (all pages become animated frames)
                 var webpOptions = new WebPOptions
                 {
+                    MultiPageOptions = null, // export all pages
                     Lossless = false,
-                    Quality = 80 // example quality setting
+                    Quality = 80
                 };
 
-                // Save all pages as an animated WebP (single file)
-                tiffImage.Save(outputPath, webpOptions);
+                // Save as a single WebP file
+                image.Save(outputPath, webpOptions);
             }
         }
         catch (Exception ex)
@@ -54,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert scanned multi‑page TIFF documents into a compact animated WebP file for faster web delivery while keeping memory usage low.
- * 2. When an application must process large multi‑page TIFF medical images on a server with limited RAM and output a single WebP for integration into a web‑based viewer.
- * 3. When a batch job has to transform archival TIFF image stacks into lossily compressed WebP animations for mobile apps without loading all pages into memory at once.
- * 4. When a document management system requires on‑the‑fly conversion of multi‑page TIFF invoices to a single WebP file to reduce storage size and improve loading speed in C#.
- * 5. When a cloud service needs to generate a single WebP preview from a multi‑page TIFF blueprint while using Aspose.Imaging’s page‑exporting action to release each page and avoid out‑of‑memory errors.
+ * 1. When you need to transform a large multi‑page scanned document (TIFF) into a single animated WebP for faster web delivery while keeping server memory usage low.
+ * 2. When a cloud‑based image service must batch‑process high‑resolution TIFF archives into WebP without loading all pages into memory at once.
+ * 3. When a mobile app requires converting multi‑frame TIFF medical images into an animated WebP thumbnail to reduce file size and improve loading speed.
+ * 4. When an e‑commerce platform wants to display product manuals stored as TIFFs as lightweight animated WebP previews without exhausting RAM.
+ * 5. When a digital archiving workflow needs to generate a single WebP animation from multi‑page TIFFs while ensuring each page is released promptly to avoid memory leaks.
  */
