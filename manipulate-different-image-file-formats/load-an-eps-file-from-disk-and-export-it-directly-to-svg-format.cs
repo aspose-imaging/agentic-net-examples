@@ -1,3 +1,4 @@
+// HOW-TO: Convert EPS File to SVG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,13 +8,13 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.eps";
-        string outputPath = "output.svg";
-
         try
         {
-            // Verify that the input EPS file exists
+            // Hardcoded input and output file paths
+            string inputPath = "input.eps";
+            string outputPath = "output/output.svg";
+
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,19 +24,15 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EPS image
+            // Load the EPS image and save it as SVG
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG export options
                 var svgOptions = new SvgOptions();
-
-                // Export the image to SVG format
                 image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -43,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy EPS vector graphics from a design repository into web‑friendly SVG files using C# and Aspose.Imaging for .NET.
- * 2. When an automated build pipeline must validate that EPS assets are available as scalable SVGs for responsive UI rendering without manual intervention.
- * 3. When a desktop application imports user‑provided EPS logos and exports them as SVG to allow further editing in browser‑based vector editors.
- * 4. When a batch processing script has to ensure the output directory exists and safely handle missing EPS files while converting them to SVG format.
- * 5. When a server‑side service receives EPS uploads and must instantly transform them to SVG for inclusion in HTML emails or PDFs.
+ * 1. When you need to display a printable EPS logo on a web page, you can convert it to scalable SVG with C#.
+ * 2. When a design workflow requires transforming vector EPS artwork into SVG for responsive UI components, this code automates the conversion.
+ * 3. When an automated build process must generate SVG assets from EPS source files for cross‑platform compatibility, the snippet provides a simple solution.
+ * 4. When a desktop application imports user‑provided EPS diagrams and needs to export them as SVG for further editing in vector editors, this approach handles the conversion.
+ * 5. When a cloud service receives EPS files via API and must return lightweight SVG previews to clients, the code demonstrates how to perform the conversion in .NET.
  */
