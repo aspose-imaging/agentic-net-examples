@@ -1,52 +1,46 @@
+// HOW-TO: Remove Background From Vector PNG And Save As Transparent PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Watermark;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output paths
+        string inputPath = "input.png";
+        string outputPath = "output\\result.png";
+
+        // Verify that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the image
+            // Load the image (vector or raster)
             using (Image image = Image.Load(inputPath))
             {
-                // Attempt background removal for vector images
+                // If the image is a vector image, remove its background
                 if (image is VectorImage vectorImg)
                 {
-                    // Simple removal without custom settings
+                    // Use the parameterless overload for default background removal
                     vectorImg.RemoveBackground();
+                }
 
-                    // Save as PNG
-                    vectorImg.Save(outputPath, new PngOptions());
-                }
-                // For raster images, fallback to saving unchanged (or implement watermark removal if needed)
-                else if (image is RasterImage rasterImg)
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                // Save the processed image as PNG
+                var pngOptions = new PngOptions
                 {
-                    // Example placeholder: no mask applied, just save original
-                    rasterImg.Save(outputPath, new PngOptions());
-                }
-                else
-                {
-                    // Generic save for other image types
-                    image.Save(outputPath, new PngOptions());
-                }
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -58,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs a command‑line utility that accepts a vector logo file (e.g., SVG or EPS), removes its background using Aspose.Imaging’s RemoveBackground method, and saves the result as a transparent PNG for web publishing.
- * 2. When an e‑commerce platform must batch‑process thousands of product illustrations, automatically stripping backgrounds from vector images and outputting PNGs to a designated folder via a C# console app.
- * 3. When a mobile‑first application generates user‑drawn stickers, the tool can be invoked to convert the vector artwork to a PNG with a cleared background, ready for overlay on photos.
- * 4. When a CI/CD pipeline includes a step that validates and converts design assets, the command‑line program can select the appropriate background removal mode and store the PNGs in the build output directory.
- * 5. When a document‑management workflow extracts raster images from scanned PDFs, the utility can fall back to saving the original raster image as a PNG in the target location while preserving image quality.
+ * 1. When you need to automatically strip the background from SVG or EPS files and output a transparent PNG for web thumbnails.
+ * 2. When a desktop application must convert user‑uploaded vector graphics to PNG with an alpha channel without manual editing.
+ * 3. When a build pipeline requires a lightweight command‑line utility to prepare assets by removing backgrounds before packaging.
+ * 4. When an e‑commerce platform wants to generate product images with clean transparent backgrounds from supplier vector files.
+ * 5. When a reporting service needs to ensure all exported charts are saved as PNGs with preserved transparency for PDF embedding.
  */
