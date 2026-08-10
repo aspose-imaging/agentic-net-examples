@@ -1,48 +1,43 @@
+// HOW-TO: Convert SVG to BMP With Custom Width And Height In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.bmp";
-
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure the output directory exists
-        string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
-        Directory.CreateDirectory(outputDir);
-
         try
         {
-            // Load the SVG image
-            using (Image svgImage = Image.Load(inputPath))
+            string inputPath = "input.svg";
+            string outputPath = "output\\output.bmp";
+
+            if (!File.Exists(inputPath))
             {
-                // Define custom rasterization size
-                int customWidth = 800;   // desired bitmap width
-                int customHeight = 600;  // desired bitmap height
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Configure BMP save options with vector rasterization settings
-                BmpOptions bmpOptions = new BmpOptions
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                var svgImage = image as Aspose.Imaging.FileFormats.Svg.SvgImage;
+                if (svgImage == null)
                 {
-                    // Set rasterization options to control the output size
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = new Size(customWidth, customHeight)
-                    }
-                };
+                    Console.Error.WriteLine("Loaded image is not an SVG.");
+                    return;
+                }
 
-                // Save the rasterized image as BMP
+                int newWidth = 800;
+                int newHeight = 600;
+
+                svgImage.Resize(newWidth, newHeight, ResizeType.NearestNeighbourResample);
+
+                BmpOptions bmpOptions = new BmpOptions();
                 svgImage.Save(outputPath, bmpOptions);
             }
         }
@@ -55,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application must generate thumbnail previews of user‑uploaded SVG icons as BMP files with a fixed 800×600 size for legacy Windows components.
- * 2. When a desktop reporting tool needs to embed vector graphics from SVG files into a BMP‑based PDF template, requiring precise raster dimensions to align with the layout grid.
- * 3. When an automated batch process converts a library of SVG logos into BMP assets for a game engine that only supports bitmap textures of specific resolution.
- * 4. When a document‑generation service must render scalable SVG diagrams as BMP images at a custom width and height to meet print‑ready specifications.
- * 5. When a migration script rewrites legacy SVG assets into BMP format for an older Windows application that cannot handle vector formats, ensuring each image matches the required screen resolution.
+ * 1. When you need to generate a bitmap thumbnail of an SVG logo at a specific size for a Windows desktop application.
+ * 2. When a reporting tool requires BMP images of vector graphics with exact pixel dimensions for legacy printer compatibility.
+ * 3. When an automated batch process must convert scalable SVG diagrams into fixed‑size BMP files for inclusion in PDF documents.
+ * 4. When a game engine only accepts BMP textures, and you must resize SVG assets to match the engine’s resolution constraints.
+ * 5. When migrating web‑based SVG assets to a Windows service that stores images as BMP files with predefined width and height.
  */
