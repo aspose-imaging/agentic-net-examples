@@ -1,6 +1,7 @@
+// HOW-TO: Batch Convert JPEG Images to HTML5 Canvas and Create Index Page in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Text;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -8,26 +9,25 @@ class Program
 {
     static void Main()
     {
-        // Wrap the whole logic to catch unexpected errors
+        // Hardcoded paths
+        string inputDirectory = @"C:\Images\Input";
+        string outputDirectory = @"C:\Images\Output";
+        string finalHtmlPath = Path.Combine(outputDirectory, "index.html");
+
         try
         {
-            // Hard‑coded input and output locations
-            string inputDir = @"C:\Images\Input";
-            string canvasDir = @"C:\Images\Canvas";
-            string finalHtmlPath = @"C:\Images\output.html";
+            // Ensure the output directory exists for individual canvas files and the final HTML page
+            Directory.CreateDirectory(outputDirectory);
 
-            // Ensure the canvas output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(canvasDir));
+            // Collect all JPEG files in the input directory
+            string[] jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg");
 
-            // Collect generated canvas snippets
-            List<string> canvasSnippets = new List<string>();
-
-            // Get all JPEG files in the input directory
-            string[] jpegFiles = Directory.GetFiles(inputDir, "*.jpg");
+            // Store paths of generated canvas fragments
+            var canvasFragments = new System.Collections.Generic.List<string>();
 
             foreach (string jpegPath in jpegFiles)
             {
-                // Verify the source file exists
+                // Verify input file exists
                 if (!File.Exists(jpegPath))
                 {
                     Console.Error.WriteLine($"File not found: {jpegPath}");
@@ -37,11 +37,11 @@ class Program
                 // Load the JPEG image
                 using (Image image = Image.Load(jpegPath))
                 {
-                    // Determine the canvas file path
-                    string canvasPath = Path.Combine(canvasDir,
-                        Path.GetFileNameWithoutExtension(jpegPath) + ".html");
+                    // Determine canvas output file path
+                    string canvasFileName = Path.GetFileNameWithoutExtension(jpegPath) + ".html";
+                    string canvasPath = Path.Combine(outputDirectory, canvasFileName);
 
-                    // Ensure the directory for the canvas file exists
+                    // Ensure directory exists (already created above, but call as required)
                     Directory.CreateDirectory(Path.GetDirectoryName(canvasPath));
 
                     // Save only the canvas tag (no full HTML page)
@@ -51,27 +51,36 @@ class Program
                     };
                     image.Save(canvasPath, canvasOptions);
 
-                    // Read the generated canvas snippet
-                    string canvasHtml = File.ReadAllText(canvasPath);
-                    canvasSnippets.Add(canvasHtml);
+                    // Store the fragment for later aggregation
+                    canvasFragments.Add(canvasPath);
                 }
             }
 
-            // Build the final HTML page that embeds all canvases
-            string finalHtml = "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<title>Canvas Gallery</title>\n</head>\n<body>\n";
+            // Build the final HTML page that includes all canvas fragments
+            var sb = new StringBuilder();
+            sb.AppendLine("<!DOCTYPE html>");
+            sb.AppendLine("<html>");
+            sb.AppendLine("<head>");
+            sb.AppendLine("<meta charset=\"utf-8\"/>");
+            sb.AppendLine("<title>Canvas Gallery</title>");
+            sb.AppendLine("</head>");
+            sb.AppendLine("<body>");
 
-            foreach (string snippet in canvasSnippets)
+            foreach (string fragmentPath in canvasFragments)
             {
-                finalHtml += snippet + "\n";
+                // Read the canvas tag content
+                string canvasTag = File.ReadAllText(fragmentPath);
+                sb.AppendLine(canvasTag);
             }
 
-            finalHtml += "</body>\n</html>";
+            sb.AppendLine("</body>");
+            sb.AppendLine("</html>");
 
-            // Ensure the directory for the final HTML file exists
+            // Ensure the directory for the final HTML exists
             Directory.CreateDirectory(Path.GetDirectoryName(finalHtmlPath));
 
             // Write the combined HTML page
-            File.WriteAllText(finalHtmlPath, finalHtml);
+            File.WriteAllText(finalHtmlPath, sb.ToString());
         }
         catch (Exception ex)
         {
@@ -82,9 +91,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch convert a collection of JPEG photos into HTML5 canvas snippets for embedding in a lightweight web gallery without loading full HTML pages.
- * 2. When an e‑learning platform wants to transform stored JPEG images into canvas elements that can be dynamically styled or animated with JavaScript.
- * 3. When a digital asset management system requires generating a single HTML report that displays all JPEG assets as canvas drawings for quick visual inspection.
- * 4. When a marketing team aims to create an offline HTML5 portfolio by converting JPEG campaign images to canvas tags and assembling them into one consolidated HTML file.
- * 5. When a C# application must automate the migration of legacy JPEG files to HTML5 canvas format to improve page‑load performance and enable client‑side image manipulation.
+ * 1. When you need to display a gallery of JPEG photos on a web page using canvas elements without loading full image files.
+ * 2. When you want to pre‑process a large set of JPEGs into lightweight HTML5 canvas snippets for faster client‑side rendering.
+ * 3. When you are building an offline HTML report that embeds images as canvas tags to avoid external image references.
+ * 4. When you need to automate the creation of a single index.html that aggregates multiple canvas fragments for a slideshow or portfolio.
+ * 5. When you are migrating legacy JPEG assets to a modern HTML5 canvas format to improve compatibility with responsive web designs.
  */
