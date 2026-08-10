@@ -1,3 +1,4 @@
+// HOW-TO: Read Loop Count and Frame Count from APNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,7 +11,7 @@ class Program
         try
         {
             // Hardcoded input path
-            string inputPath = "input.apng";
+            string inputPath = "sample.apng";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,21 +23,21 @@ class Program
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to ApngImage to access APNG-specific metadata
+                // Cast to ApngImage to access APNG-specific properties
                 ApngImage apng = image as ApngImage;
                 if (apng == null)
                 {
-                    Console.WriteLine("The specified file is not an APNG image.");
+                    Console.Error.WriteLine("The file is not a valid APNG image.");
                     return;
                 }
 
-                // Retrieve loop count (NumPlays) and total frame count (PageCount)
-                int loopCount = apng.NumPlays; // 0 indicates infinite looping
-                int frameCount = apng.PageCount;
+                // Retrieve loop count and total frame count
+                int loopCount = apng.NumPlays;      // Number of times the animation loops (0 = infinite)
+                int frameCount = apng.PageCount;   // Total number of frames in the APNG
 
                 // Display the metadata
-                Console.WriteLine($"Loop count (NumPlays): {(loopCount == 0 ? "Infinite" : loopCount.ToString())}");
-                Console.WriteLine($"Total frame count: {frameCount}");
+                Console.WriteLine($"Loop count (NumPlays): {loopCount}");
+                Console.WriteLine($"Total frame count (PageCount): {frameCount}");
             }
         }
         catch (Exception ex)
@@ -48,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a game developer needs to verify that an animated PNG (APNG) asset loops the correct number of times before integrating it into a Unity UI, they can use this code to read the NumPlays and PageCount metadata.
- * 2. When a web application builds a dynamic image gallery and must display the total number of frames and whether an APNG will repeat infinitely, the snippet shows how to extract those values with Aspose.Imaging for .NET.
- * 3. When a content‑management system imports user‑submitted APNG files and must enforce a policy that animated images contain no more than a certain frame count, developers can read the PageCount using this C# example.
- * 4. When a digital‑signage solution schedules animated PNG advertisements and needs to calculate playback duration based on loop count and frame count, the code demonstrates how to obtain NumPlays and PageCount from the file.
- * 5. When a QA engineer automates testing of animated assets and wants to confirm that an APNG’s loop setting matches the specification (e.g., infinite looping), this C# routine provides a quick way to read the NumPlays metadata.
+ * 1. When you need to determine how many times an APNG animation will repeat and how many frames it contains before processing or displaying it.
+ * 2. When building a media library that catalogs animated PNGs and you must store their loop count and frame count as searchable metadata.
+ * 3. When validating user‑uploaded APNG files to ensure they meet specific animation length requirements for a web application.
+ * 4. When generating reports on animation assets and need to extract APNG playback information programmatically in a C# backend.
+ * 5. When converting or resizing APNG files and want to preserve or adjust the original number of loops and frames based on the source metadata.
  */
