@@ -1,3 +1,4 @@
+// HOW-TO: Resize DjVu Pages to 1024x768 and Convert to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,12 +9,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input\\sample.djvu";
-        string outputPath = "output\\result.pdf";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Temp\sample.djvu";
+            string outputPath = @"C:\Temp\Result\sample.pdf";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,7 +29,7 @@ class Program
             using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
             {
-                // Resize each page to 1024x768 using bilinear resampling
+                // Resize each page to 1024x768 using Bilinear resampling
                 djvuImage.Resize(1024, 768, ResizeType.BilinearResample);
 
                 // Save the resized document as PDF
@@ -44,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert scanned DjVu archives of technical manuals into PDF files that fit a standard 1024×768 display resolution for easier viewing on web browsers.
- * 2. When an application must batch‑process DjVu e‑books, resize each page to a uniform 1024×768 size to reduce file size, and output them as searchable PDF documents.
- * 3. When a document‑management system requires importing legacy DjVu drawings, scaling them to 1024×768 pixels, and storing them as PDF for compatibility with common office tools.
- * 4. When a mobile app needs to display DjVu comic pages at a fixed 1024×768 resolution and then share them as PDF attachments via email.
- * 5. When a cloud service automates the conversion of DjVu blueprints into PDF reports, applying bilinear resampling to maintain image quality at 1024×768 dimensions.
+ * 1. When you need to compress large DjVu documents for web viewing by resizing each page to a standard 1024×768 resolution before creating a PDF version.
+ * 2. When an archival system requires DjVu scans to be converted into searchable PDFs with consistent page dimensions for easier indexing.
+ * 3. When a printing workflow demands that all pages from a multi‑page DjVu file be uniformly resized to fit a specific paper size prior to PDF generation.
+ * 4. When a mobile app must display DjVu content as PDF thumbnails at a fixed resolution to ensure fast loading on devices.
+ * 5. When a batch processing script automates the conversion of DjVu manuals into PDF manuals while standardizing page size for consistent layout across all files.
  */
