@@ -1,8 +1,8 @@
+// HOW-TO: Batch Convert All WebP Files to GIF in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -11,16 +11,14 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\input\";
-            string outputDirectory = @"C:\output\";
+            string inputDir = "C:\\WebPInput\\";
+            string outputDir = "C:\\GifOutput\\";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            // Ensure the base output directory exists
+            Directory.CreateDirectory(outputDir);
 
-            // Get all WebP files in the input directory
-            string[] webpFiles = Directory.GetFiles(inputDirectory, "*.webp");
-
-            foreach (string inputPath in webpFiles)
+            // Process each WebP file in the input directory
+            foreach (string inputPath in Directory.GetFiles(inputDir, "*.webp"))
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -29,17 +27,16 @@ class Program
                     return;
                 }
 
-                // Determine the output GIF path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".gif";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                // Build the corresponding GIF output path
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".gif");
 
-                // Ensure the output directory exists (unconditional)
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the WebP image and save as GIF
-                using (Image image = Image.Load(inputPath))
+                // Load the WebP image and save it as GIF
+                using (WebPImage webPImage = new WebPImage(inputPath))
                 {
-                    image.Save(outputPath, new GifOptions());
+                    webPImage.Save(outputPath, new GifOptions());
                 }
             }
         }
@@ -52,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an entire folder of WebP images to GIF format for compatibility with legacy web browsers, they can use this batch conversion loop.
- * 2. When automating the preparation of animated assets for email newsletters that only support GIF, the code can process all WebP files in a directory and save them as GIFs.
- * 3. When migrating a digital asset library from modern WebP files to a universally supported GIF format for a content management system, this foreach‑based converter streamlines the task.
- * 4. When building a scheduled job that nightly transforms newly uploaded WebP pictures into GIFs for a mobile app that only renders GIF animations, the sample demonstrates the required file‑system and image‑processing steps.
- * 5. When creating a command‑line utility that allows users to select an input folder and receive GIF versions of every WebP file for offline viewing, the code provides the core batch processing logic.
+ * 1. When you need to automatically transform a folder of WebP assets into GIFs for web animation compatibility.
+ * 2. When a migration script must process thousands of WebP images on a server and save them as GIFs without manual intervention.
+ * 3. When an e‑commerce platform wants to generate GIF previews from user‑uploaded WebP product photos in bulk.
+ * 4. When a desktop utility has to read WebP files from a directory, convert each to GIF, and store them in a separate output folder.
+ * 5. When a CI/CD pipeline requires a step that converts all WebP test images to GIF format for legacy reporting tools.
  */
