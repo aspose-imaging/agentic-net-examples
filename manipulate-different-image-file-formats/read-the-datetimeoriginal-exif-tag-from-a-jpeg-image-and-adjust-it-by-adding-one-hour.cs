@@ -1,5 +1,7 @@
+// HOW-TO: How to Add One Hour to JPEG EXIF DateTimeOriginal in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Globalization;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Exif;
@@ -11,8 +13,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output.jpg";
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,44 +23,34 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the JPEG image
-            using (Image image = Image.Load(inputPath))
+            using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                JpegImage jpegImage = (JpegImage)image;
-
                 // Access EXIF data
-                JpegExifData jpegExif = jpegImage.ExifData as JpegExifData;
-                if (jpegExif != null && !string.IsNullOrEmpty(jpegExif.DateTimeOriginal))
+                ExifData exif = image.ExifData;
+                if (exif != null && !string.IsNullOrEmpty(exif.DateTimeOriginal))
                 {
-                    // Parse the original DateTime string (format: "yyyy:MM:dd HH:mm:ss")
+                    // Parse the original DateTime string (format: yyyy:MM:dd HH:mm:ss)
                     if (DateTime.TryParseExact(
-                            jpegExif.DateTimeOriginal,
+                            exif.DateTimeOriginal,
                             "yyyy:MM:dd HH:mm:ss",
-                            System.Globalization.CultureInfo.InvariantCulture,
-                            System.Globalization.DateTimeStyles.None,
-                            out DateTime originalDate))
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.None,
+                            out DateTime originalDateTime))
                     {
                         // Add one hour
-                        DateTime updatedDate = originalDate.AddHours(1);
+                        DateTime updatedDateTime = originalDateTime.AddHours(1);
 
                         // Write back in the same format
-                        jpegExif.DateTimeOriginal = updatedDate.ToString("yyyy:MM:dd HH:mm:ss");
+                        exif.DateTimeOriginal = updatedDateTime.ToString("yyyy:MM:dd HH:mm:ss");
                     }
-                    else
-                    {
-                        Console.Error.WriteLine("Failed to parse DateTimeOriginal EXIF tag.");
-                    }
-                }
-                else
-                {
-                    Console.Error.WriteLine("DateTimeOriginal EXIF tag not found.");
                 }
 
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 // Save the modified image
-                jpegImage.Save(outputPath);
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -70,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a photo‑management application needs to correct the capture time of JPEG images after a daylight‑saving time change, it can read the DateTimeOriginal EXIF tag with Aspose.Imaging for .NET and add one hour.
- * 2. When a digital forensics tool must normalize timestamps across images taken in different time zones, it can load the JPEG, parse the DateTimeOriginal tag, and adjust it by an hour using C# and Aspose.Imaging.
- * 3. When a cloud‑based image‑upload service wants to ensure consistent metadata before storing user photos, it can read the JPEG EXIF DateTimeOriginal value and increment it by one hour to match the server’s clock.
- * 4. When a batch‑processing script processes travel photos and needs to shift all capture times forward by one hour to align with itinerary schedules, it can use Aspose.Imaging to modify the DateTimeOriginal tag in each JPEG file.
- * 5. When a content‑management system displays photo galleries and must display corrected capture times after a recent timezone update, it can load the JPEG image, read the EXIF DateTimeOriginal field, and add one hour using the Aspose.Imaging API.
+ * 1. When you need to correct the capture time of photos taken in a different time zone by shifting the JPEG DateTimeOriginal EXIF tag forward one hour using Aspose.Imaging in C#.
+ * 2. When an application must synchronize image timestamps with a server clock that is one hour ahead, updating the EXIF DateTimeOriginal field of each JPEG file programmatically.
+ * 3. When preparing a photo gallery for legal evidence, you may need to adjust the original capture time in the JPEG metadata to reflect daylight‑saving changes before archiving.
+ * 4. When automating a batch import of travel photos, you can use this code to add an hour to each image’s EXIF DateTimeOriginal so the chronological order matches the itinerary.
+ * 5. When building a C# tool that repairs corrupted or missing EXIF timestamps, adding a one‑hour offset ensures consistency across all JPEG images processed with Aspose.Imaging.
  */
