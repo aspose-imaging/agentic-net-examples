@@ -1,6 +1,8 @@
+// HOW-TO: Convert EMF Vector File to SVG Preserving Shapes in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
 
@@ -8,10 +10,11 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.emf";
-        string outputPath = @"C:\temp\output.svg";
+        // Hardcoded input and output file paths
+        string inputPath = @"c:\temp\test.emf";
+        string outputPath = @"c:\temp\test.output.svg";
 
+        // Ensure any runtime exception is reported without crashing
         try
         {
             // Verify input file exists
@@ -38,11 +41,13 @@ class Program
                 {
                     BackgroundColor = Color.WhiteSmoke,
                     PageSize = emfImage.Size,
-                    RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
+                    RenderMode = EmfRenderMode.Auto,
+                    // Optional margins; can be omitted if not needed
                     BorderX = 0,
                     BorderY = 0
                 };
 
+                // Attach rasterization options to SVG options
                 saveOptions.VectorRasterizationOptions = rasterizationOptions;
 
                 // Save as SVG
@@ -58,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer uses Aspose.Imaging for .NET to convert legacy Windows EMF files into web‑compatible SVG format while preserving all vector shape definitions for responsive UI rendering.
- * 2. When an automated batch process must read multiple EMF diagrams with Aspose.Imaging, apply rasterization options, and output scalable SVG assets for inclusion in HTML or PDF reports.
- * 3. When a document conversion service needs to keep text as vector shapes during EMF‑to‑SVG conversion to avoid font embedding and ensure consistent typography across browsers.
- * 4. When a GIS or CAD application requires exporting map symbols stored as EMF to SVG so they can be styled with CSS and rendered at any resolution in a web map.
- * 5. When a CI/CD pipeline validates that EMF icons are rendered with a specific background color (e.g., WhiteSmoke) and saved as SVG using Aspose.Imaging’s SvgOptions for cross‑platform mobile app assets.
+ * 1. When you need to display Windows Metafile (EMF) graphics on the web, you can convert them to scalable SVG files while keeping all vector shapes intact.
+ * 2. When generating printable reports that contain EMF logos, you can export the logos to SVG to ensure they remain resolution‑independent in PDF or HTML outputs.
+ * 3. When migrating a legacy desktop application that stores diagrams as EMF, you can batch‑convert the files to SVG for use in modern browsers or mobile apps.
+ * 4. When creating an automated build pipeline that processes design assets, you can use this code to transform EMF icons into SVG sprites without losing text as vector shapes.
+ * 5. When integrating with a GIS system that requires SVG overlays, you can convert EMF map symbols to SVG while preserving their exact geometry and styling.
  */
