@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert EMF Files to PDF with Filename Bookmarks in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,41 +11,38 @@ class Program
     {
         try
         {
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            string[] emfFiles = Directory.GetFiles(inputDirectory, "*.emf");
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-            foreach (string inputPath in emfFiles)
+            // Get all EMF files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
+
+            foreach (var filePath in files)
             {
+                string inputPath = filePath;
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
 
+                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
-                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    // Set PDF document title (used as a simple bookmark placeholder)
-                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo { Title = fileNameWithoutExt };
-
-                    // Configure vector rasterization options manually
-                    var vectorOptions = new VectorRasterizationOptions
+                    PdfOptions pdfOptions = new PdfOptions
                     {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
+                        PdfDocumentInfo = new Aspose.Imaging.FileFormats.Pdf.PdfDocumentInfo { Title = fileName }
                     };
-                    pdfOptions.VectorRasterizationOptions = vectorOptions;
-
                     image.Save(outputPath, pdfOptions);
                 }
             }
@@ -58,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automate the conversion of a large collection of Windows Metafile (EMF) diagrams into searchable PDF documents while preserving each diagram’s original filename as a PDF bookmark for easy navigation.
- * 2. When a reporting system must generate printable PDF reports from vector‑based EMF charts and embed the chart name as the document title using Aspose.Imaging’s VectorRasterizationOptions in C#.
- * 3. When a batch processing job has to convert engineering schematics stored as EMF files into PDF files with consistent page size and white background, ensuring the output PDFs are indexed by the original file names.
- * 4. When a document management workflow requires programmatically converting multiple EMF assets to PDF format and creating a simple bookmark hierarchy based on each file’s name to improve document discoverability.
- * 5. When a .NET application needs to read EMF images from a folder, apply custom rasterization settings such as TextRenderingHint and SmoothingMode, and save each image as a PDF with the source filename embedded as the PDF title for downstream indexing.
+ * 1. When you need to generate a searchable PDF catalog from a collection of vector EMF drawings, preserving each drawing’s name as a bookmark for quick navigation.
+ * 2. When automating the creation of printable reports that combine multiple EMF charts into a single PDF document with clickable sections labeled by the original file names.
+ * 3. When migrating legacy EMF assets to PDF for archiving, and you want each archived page to be indexed by its original filename for easy retrieval.
+ * 4. When building a C# application that batches converts design schematics stored as EMF into PDF manuals, using the file names as chapter titles in the PDF outline.
+ * 5. When integrating Aspose.Imaging into a workflow that processes incoming EMF files and outputs PDF files with embedded metadata, enabling downstream systems to reference the source file via bookmarks.
  */
