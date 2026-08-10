@@ -1,3 +1,4 @@
+// HOW-TO: Increase PSD Brightness, Apply Anti-Alias Smoothing, Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,35 +10,31 @@ class Program
     static void Main(string[] args)
     {
         string inputPath = "input.psd";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string outputPath = "output/output.png";
 
         try
         {
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                // Adjust brightness (+50)
                 RasterImage raster = (RasterImage)image;
-                raster.AdjustBrightness(50);
+                raster.AdjustBrightness(50); // Increase brightness
 
-                // Prepare PNG save options with smoothing mode
+                Graphics graphics = new Graphics(raster);
+                graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
                 PngOptions pngOptions = new PngOptions
                 {
-                    Source = new FileCreateSource(outputPath, false),
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        SmoothingMode = SmoothingMode.AntiAlias
-                    }
+                    Source = new FileCreateSource(outputPath, false)
                 };
 
-                // Save the brightened image as PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -50,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to increase the brightness of a Photoshop PSD file and deliver a high‑quality PNG preview for a web gallery, they can use Aspose.Imaging for .NET to adjust brightness, apply anti‑alias smoothing, and save the result.
- * 2. When an e‑commerce platform must generate product thumbnails from layered PSD assets with consistent lighting, the code can brighten the image by 50 units, set SmoothingMode.AntiAlias, and export to PNG for fast loading.
- * 3. When a digital publishing workflow requires converting edited PSD designs into PNGs with smoother edges for print‑ready PDFs, developers can use the AdjustBrightness method and VectorRasterizationOptions to ensure the output looks bright and crisp.
- * 4. When a mobile app needs to preprocess user‑uploaded PSD files by enhancing visibility and reducing jagged edges before displaying them as PNGs, this C# snippet provides a straightforward solution.
- * 5. When an automated batch process must standardize the appearance of PSD assets by applying a uniform brightness boost and anti‑alias smoothing before archiving them as PNG files, the Aspose.Imaging code handles the conversion efficiently.
+ * 1. When you need to brighten a Photoshop PSD file and export it as a web‑ready PNG with anti‑alias smoothing for an e‑commerce product catalog.
+ * 2. When a designer wants to increase the visibility of a dark layer in a PSD before converting it to PNG for mobile app assets.
+ * 3. When automating a workflow that adjusts the overall brightness of scanned artwork PSDs and saves them as high‑quality PNGs for print proofs.
+ * 4. When preprocessing PSD images for a machine‑learning pipeline, applying brightness correction and smoothing before saving them in PNG format.
+ * 5. When creating thumbnails from PSD source files, you can boost brightness, apply anti‑alias smoothing, and output PNGs for faster page loading.
  */
