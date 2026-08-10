@@ -1,3 +1,4 @@
+// HOW-TO: Restore Details in Blurred PNG Using Gauss Wiener Deconvolution C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\blurred.png";
-        string outputPath = @"C:\Images\restored.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\blurred.png";
+            string outputPath = @"C:\Images\restored.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -29,8 +30,8 @@ class Program
                 // Cast to RasterImage to access filtering capabilities
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply a Gauss-Wiener deconvolution filter to restore details
-                // Parameters: radius = 5, sigma = 4.0 (adjust as needed for the blur)
+                // Apply a Gauss-Wiener deconvolution filter (radius 5, sigma 4.0)
+                // This filter helps restore details from a blurred image.
                 var filterOptions = new GaussWienerFilterOptions(5, 4.0);
                 rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
@@ -47,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to restore sharpness in a blurred PNG photograph taken with a low‑quality camera by applying a Gauss‑Wiener deconvolution filter using Aspose.Imaging for .NET.
- * 2. When an image‑processing pipeline must automatically clean up scanned PNG documents that appear out of focus before archiving them in a document management system.
- * 3. When a C# application has to enhance details in PNG screenshots captured from a remote desktop session that suffered motion blur during transmission.
- * 4. When a batch job processes a folder of PNG assets for a game and requires deconvolution to recover texture details lost during compression.
- * 5. When a web service receives user‑uploaded PNG images with camera shake and needs to programmatically improve visual quality before storing them in cloud storage.
+ * 1. When a developer needs to sharpen a blurred PNG photo taken with a low‑quality camera by applying a Gauss‑Wiener deconvolution filter in a C# application.
+ * 2. When an automated image‑processing pipeline must improve the readability of scanned documents that appear out of focus, using Aspose.Imaging to deblur PNG files.
+ * 3. When a web service has to enhance user‑uploaded PNG screenshots that suffer from motion blur before storing them in a database.
+ * 4. When a desktop utility program restores details in PNG textures for game assets that were unintentionally blurred during export.
+ * 5. When a batch job processes a folder of blurred PNG images to prepare them for OCR or computer‑vision analysis by applying deconvolution in .NET.
  */
