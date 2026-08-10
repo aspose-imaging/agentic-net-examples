@@ -1,18 +1,20 @@
+// HOW-TO: Invert BMP Colors And Save As SVG Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.svg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input\\sample.bmp";
+            string outputPath = "output\\inverted.svg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,11 +23,19 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the BMP image
-            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
+            // Load BMP image
+            using (Image image = Image.Load(inputPath))
             {
+                // Cast to raster image for pixel manipulation
+                var raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
+
                 // Invert colors pixel by pixel
                 for (int y = 0; y < raster.Height; y++)
                 {
@@ -41,7 +51,7 @@ class Program
                     }
                 }
 
-                // Save the inverted image as SVG
+                // Save the processed image as SVG
                 var svgOptions = new SvgOptions();
                 raster.Save(outputPath, svgOptions);
             }
@@ -55,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy BMP assets to scalable SVG for responsive web design while applying a negative color effect.
- * 2. When an application must generate high‑contrast SVG icons from bitmap screenshots for accessibility compliance.
- * 3. When a batch‑processing tool has to invert colors of scanned BMP diagrams and export them as vector SVG files for printing.
- * 4. When a game engine pipeline requires turning BMP textures into SVG sprites with inverted colors for a night‑mode visual style.
- * 5. When a document generation system needs to embed an inverted‑color version of a BMP logo as an SVG image in PDF reports.
+ * 1. When you need to convert legacy BMP icons to scalable SVG graphics with a negative color scheme for a dark‑mode UI.
+ * 2. When generating high‑contrast negative images for computer‑vision preprocessing or visual analysis.
+ * 3. When preparing web assets that require SVG format but the source files are BMPs that must be color‑inverted for branding.
+ * 4. When creating accessible, high‑visibility graphics by inverting colors of BMP illustrations before exporting them as SVG.
+ * 5. When batch‑processing scanned BMP documents to produce inverted, resolution‑independent SVG files for printing or archiving.
  */
