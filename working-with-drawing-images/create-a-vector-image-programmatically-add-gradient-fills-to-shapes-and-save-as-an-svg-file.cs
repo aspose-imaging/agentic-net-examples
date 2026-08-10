@@ -1,9 +1,10 @@
+// HOW-TO: Create SVG with Filled Rectangles Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -11,36 +12,33 @@ class Program
     {
         try
         {
-            // Output SVG file path (hardcoded)
-            string outputPath = "output/output.svg";
+            // Output SVG file path
+            string outputPath = "output.svg";
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Define canvas size and DPI
             int width = 600;
             int height = 400;
             int dpi = 96;
 
-            // Create an SVG graphics canvas
+            // Create an SVG graphics context
             var graphics = new SvgGraphics2D(width, height, dpi);
 
-            // Solid fill for a rectangle
-            using (var solidBrush = new SolidBrush(Color.Red))
-            {
-                var rectPen = new Pen(Color.Black, 1);
-                graphics.FillRectangle(rectPen, solidBrush, 50, 50, 200, 150);
-            }
+            // Draw and fill a rectangle with a solid brush (gradient not supported in FillRectangle)
+            var rectPen = new Pen(Color.Black, 2);
+            var rectBrush = new SolidBrush(Color.LightBlue);
+            graphics.DrawRectangle(rectPen, 50, 50, 200, 150);
+            graphics.FillRectangle(rectPen, rectBrush, 50, 50, 200, 150);
 
-            // Solid fill for a shape (using rectangle as placeholder)
-            using (var solidBrush2 = new SolidBrush(Color.Green))
-            {
-                var shapePen = new Pen(Color.DarkGreen, 2);
-                graphics.DrawRectangle(shapePen, 300, 100, 200, 200);
-                graphics.FillRectangle(shapePen, solidBrush2, 300, 100, 200, 200);
-            }
+            // Draw and fill another rectangle with a different solid color
+            var rectPen2 = new Pen(Color.DarkGreen, 2);
+            var rectBrush2 = new SolidBrush(Color.LightGreen);
+            graphics.DrawRectangle(rectPen2, 300, 200, 250, 150);
+            graphics.FillRectangle(rectPen2, rectBrush2, 300, 200, 250, 150);
 
-            // Finalize and save the SVG image
+            // Finalize the SVG image and save it
             using (SvgImage svgImage = graphics.EndRecording())
             {
                 svgImage.Save(outputPath);
@@ -55,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to generate a scalable SVG diagram with custom colors and DPI on the server side, they can use Aspose.Imaging in C# to draw shapes and save the vector image as an SVG file.
- * 2. When an automated reporting tool must embed dynamically created vector icons with solid or gradient fills into HTML or PDF reports, this code shows how to programmatically create and export the SVG assets.
- * 3. When a desktop application requires on‑the‑fly creation of printable badges or labels that include rectangles with precise stroke and fill properties, developers can use the SvgGraphics2D canvas to render and save the SVG.
- * 4. When a game or simulation engine needs to export level maps or UI components as resolution‑independent SVG files for vector‑based rendering, the example demonstrates the C# workflow with Aspose.Imaging.
- * 5. When a CI/CD pipeline needs to verify that generated SVG graphics meet branding color specifications by programmatically drawing shapes with specific brushes, this snippet provides a repeatable method to produce the SVG output.
+ * 1. Generate a scalable SVG diagram with colored rectangles for a web dashboard using C# and Aspose.Imaging.
+ * 2. Programmatically create vector SVG assets with solid fills for responsive UI components without manual design.
+ * 3. Export server‑side graphics as DPI‑aware SVG files for high‑quality printing or preview generation.
+ * 4. Build a reporting service that inserts vector shapes with solid colors into PDF or HTML reports via Aspose.Imaging.
+ * 5. Automate the creation of SVG icons or placeholders with specific dimensions and solid fills for a design system.
  */
