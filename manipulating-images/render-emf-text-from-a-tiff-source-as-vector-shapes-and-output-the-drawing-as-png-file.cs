@@ -1,8 +1,10 @@
+// HOW-TO: Convert TIFF Text to Vector EMF and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.FileFormats.Emf.Graphics;
 
 class Program
 {
@@ -23,12 +25,30 @@ class Program
 
             using (Image tiffImage = Image.Load(inputPath))
             {
-                using (EmfImage emfImage = new EmfImage(tiffImage.Width, tiffImage.Height))
-                {
-                    Graphics graphics = new Graphics(emfImage);
-                    graphics.DrawImage(tiffImage, new Rectangle(0, 0, emfImage.Width, emfImage.Height));
+                int width = tiffImage.Width;
+                int height = tiffImage.Height;
 
-                    PngOptions pngOptions = new PngOptions();
+                var frame = new Rectangle(0, 0, width, height);
+                var deviceSize = new Size(width, height);
+                var deviceSizeMm = new Size((int)(width / 100f), (int)(height / 100f));
+
+                EmfRecorderGraphics2D emfGraphics = new EmfRecorderGraphics2D(frame, deviceSize, deviceSizeMm);
+                emfGraphics.DrawImage((RasterImage)tiffImage,
+                    new Rectangle(0, 0, width, height),
+                    new Rectangle(0, 0, width, height),
+                    GraphicsUnit.Pixel);
+
+                using (EmfImage emfImage = emfGraphics.EndRecording())
+                {
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new EmfRasterizationOptions
+                        {
+                            PageSize = new Size(width, height),
+                            BackgroundColor = Color.White
+                        }
+                    };
+
                     emfImage.Save(outputPath, pngOptions);
                 }
             }
@@ -42,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert scanned TIFF documents that contain embedded EMF text into high‑resolution PNG images for web preview without losing vector quality.
- * 2. When an application must generate thumbnail PNGs from multi‑page TIFF files while preserving the original EMF‑based annotations as scalable graphics.
- * 3. When a reporting tool has to embed TIFF‑based charts with EMF labels into PNG charts for inclusion in PDF or email attachments.
- * 4. When a legacy system stores printable forms as TIFF files with EMF text and the new system requires PNG assets for mobile display.
- * 5. When a batch‑processing service automates the conversion of TIFF images containing vector‑based watermarks (EMF) into PNG files for archival storage.
+ * 1. When you need to convert scanned TIFF pages that contain searchable text into high‑resolution PNGs while keeping the text as scalable vector shapes.
+ * 2. When generating thumbnail previews of TIFF documents for a web portal and want the text to remain crisp at any zoom level.
+ * 3. When automating a batch process that extracts text‑rich graphics from TIFF files and saves them as PNGs with a white background for consistent printing.
+ * 4. When integrating legacy TIFF assets into a modern C# application that requires PNG output but must preserve the original vector quality of embedded text.
+ * 5. When creating PDF‑like visualizations from TIFF sources and need a PNG representation that can be further edited without losing text clarity.
  */
