@@ -1,3 +1,4 @@
+// HOW-TO: Limit Parallel Image Conversion to PNG with Controlled Memory Usage in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,40 +10,51 @@ class Program
     {
         try
         {
-            // Base directories (relative to current working directory)
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDirectory = Path.Combine(baseDir, "Input");
-            string outputDirectory = Path.Combine(baseDir, "Output");
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            // Retrieve all files from the input directory
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
             string[] files = Directory.GetFiles(inputDirectory);
 
-            // Limit concurrency to avoid high memory usage
-            var parallelOptions = new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = 4 };
+            // Limit concurrency to avoid excessive memory consumption
+            var parallelOptions = new System.Threading.Tasks.ParallelOptions
+            {
+                MaxDegreeOfParallelism = 4 // adjust as needed
+            };
 
             System.Threading.Tasks.Parallel.ForEach(files, parallelOptions, inputPath =>
             {
-                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output file path (convert to PNG)
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                 string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
 
-                // Ensure the output directory for this file exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image and save it as PNG
                 using (Image image = Image.Load(inputPath))
                 {
-                    image.Save(outputPath, new PngOptions());
+                    using (var options = new PngOptions())
+                    {
+                        image.Save(outputPath, options);
+                    }
                 }
             });
         }
@@ -55,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert thousands of JPEG or TIFF files to PNG in a C# backend service without running out of memory, they can use this parallel batch conversion with a limited MaxDegreeOfParallelism.
- * 2. When an automated image‑processing pipeline must resize and re‑encode a large photo archive on a limited‑resource VM, the code ensures only a safe number of images are loaded simultaneously.
- * 3. When a desktop utility has to generate PNG previews for a folder of mixed‑format graphics while keeping the UI responsive, limiting concurrency prevents excessive RAM usage.
- * 4. When a cloud function processes user‑uploaded images in batches and must stay within the allocated memory quota, the parallel options control how many images are handled at once.
- * 5. When a scheduled job migrates legacy BMP assets to modern PNG format on a shared server, the constrained parallel loop avoids overloading other applications running on the same machine.
+ * 1. When processing a large folder of mixed‑format images on a server and you need to convert them to PNG without exhausting RAM.
+ * 2. When building a desktop utility that batch‑converts user‑uploaded photos to PNG while keeping CPU usage predictable.
+ * 3. When automating image preparation for a web application and must limit the number of simultaneous conversions to stay within memory limits.
+ * 4. When migrating legacy image assets to a standardized PNG format in a CI pipeline and want to avoid out‑of‑memory crashes.
+ * 5. When creating a background service that watches a directory and converts new files to PNG, using a fixed parallelism level to ensure stable performance.
  */
