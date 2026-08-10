@@ -1,9 +1,10 @@
+// HOW-TO: Apply Custom Color Palette to SVG and Convert to 8‑Bit PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -13,7 +14,7 @@ class Program
         string inputPath = "input.svg";
         string outputPath = "output.png";
 
-        // Input file existence check
+        // Validate input file existence
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,26 +29,24 @@ class Program
             // Load the SVG image
             using (Image image = Image.Load(inputPath))
             {
-                // Apply a custom palette to the SVG if possible
-                if (image is SvgImage svgImage)
-                {
-                    // Create an 8‑bit palette (you can customize this as needed)
-                    var customPalette = ColorPaletteHelper.Create8Bit();
+                // Cast to SvgImage to access SetPalette
+                SvgImage svgImage = (SvgImage)image;
 
-                    // Apply the palette and update existing colors
-                    svgImage.SetPalette(customPalette, true);
-                }
+                // Create a custom 8‑bit palette (you can replace this with any custom palette)
+                IColorPalette customPalette = ColorPaletteHelper.Create8Bit();
 
-                // Configure PNG options for 8‑bit indexed color
-                var pngOptions = new PngOptions
+                // Apply the palette to the SVG; updateColors = true to remap existing colors
+                svgImage.SetPalette(customPalette, true);
+
+                // Prepare PNG options for 8‑bit indexed color output
+                PngOptions pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.IndexedColor,
-                    Palette = ColorPaletteHelper.Create8Bit(), // use the same or another palette
-                    CompressionLevel = 9,
-                    Progressive = true
+                    Palette = customPalette,
+                    // BitsPerChannel defaults to 8, which is suitable for 8‑bit PNG
                 };
 
-                // Save as PNG
+                // Save the image as an 8‑bit PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -60,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate web‑optimized 8‑bit PNG thumbnails from brand‑styled SVG icons while enforcing a corporate color palette.
- * 2. When an application must convert user‑uploaded SVG diagrams into low‑size indexed PNGs for email attachments that require a specific palette for consistent rendering across email clients.
- * 3. When a game engine imports vector assets and requires them as 8‑bit PNG sprites with a predefined palette to match the engine’s limited color set.
- * 4. When a reporting tool transforms SVG charts into printable PNG images and must replace the original colors with a printer‑friendly palette to avoid color shifts.
- * 5. When a mobile app pre‑processes SVG assets into 8‑bit PNG resources to reduce memory usage and enforce a custom palette for theme consistency.
+ * 1. When you need to recolor an SVG with a specific 256‑color palette before delivering it as a lightweight 8‑bit PNG for web or mobile use.
+ * 2. When generating thumbnails for a large SVG catalog and want consistent branding colors while keeping file size minimal.
+ * 3. When preparing graphics for embedded systems that only support indexed‑color PNGs and require a custom palette to match the device’s display.
+ * 4. When automating a batch process that converts SVG assets to PNGs with exact color mapping for print‑ready proofs.
+ * 5. When integrating Aspose.Imaging in a C# application to replace default SVG colors with corporate brand colors and export them as indexed PNGs for faster loading.
  */
