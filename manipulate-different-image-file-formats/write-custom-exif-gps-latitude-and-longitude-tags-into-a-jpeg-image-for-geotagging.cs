@@ -1,10 +1,10 @@
+// HOW-TO: How to Write Custom EXIF GPS Latitude and Longitude to JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,8 +12,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.jpg";
-            string outputPath = "Output/sample_geotagged.jpg";
+            string inputPath = "input.jpg";
+            string outputPath = "output/output.jpg";
 
             if (!File.Exists(inputPath))
             {
@@ -25,33 +25,21 @@ class Program
 
             using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                var exif = image.ExifData as Aspose.Imaging.Exif.JpegExifData;
-                if (exif == null)
+                var exif = image.ExifData;
+                if (exif != null)
                 {
-                    exif = new Aspose.Imaging.Exif.JpegExifData();
+                    double latitude = 37.7749;   // example latitude
+                    double longitude = -122.4194; // example longitude
+
+                    exif.GPSLatitude = new TiffRational[] { new TiffRational((uint)Math.Abs(latitude), 1) };
+                    exif.GPSLatitudeRef = latitude >= 0 ? "N" : "S";
+
+                    exif.GPSLongitude = new TiffRational[] { new TiffRational((uint)Math.Abs(longitude), 1) };
+                    exif.GPSLongitudeRef = longitude >= 0 ? "E" : "W";
                 }
 
-                exif.GPSLatitude = new TiffRational[]
-                {
-                    new TiffRational(37, 1),
-                    new TiffRational(48, 1),
-                    new TiffRational(30, 1)
-                };
-                exif.GPSLatitudeRef = "N";
-
-                exif.GPSLongitude = new TiffRational[]
-                {
-                    new TiffRational(122, 1),
-                    new TiffRational(24, 1),
-                    new TiffRational(0, 1)
-                };
-                exif.GPSLongitudeRef = "W";
-
-                image.ExifData = exif;
-
-                var jpegOptions = new JpegOptions();
-                jpegOptions.Source = new FileCreateSource(outputPath, false);
-                image.Save(outputPath, jpegOptions);
+                var saveOptions = new JpegOptions();
+                image.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -63,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed GPS latitude and longitude EXIF tags into a JPEG image using C# and Aspose.Imaging for geotagging before publishing to a mapping service.
- * 2. When an application must programmatically add precise GPS coordinates to drone‑captured JPEG files so they can be sorted and displayed on geographic information system (GIS) platforms.
- * 3. When a photo‑organizing tool requires inserting latitude/longitude reference tags into existing JPEG images via Aspose.Imaging’s JpegExifData class to enable location‑based searches.
- * 4. When a real‑estate website wants to automatically tag property photos with accurate GPS EXIF data using C# so the listings appear correctly on interactive maps.
- * 5. When a mobile synchronization service processes user‑taken JPEGs and needs to ensure each file contains valid EXIF GPSLatitudeRef and GPSLongitudeRef tags for downstream analytics.
+ * 1. When you need to add or update GPS coordinates in a JPEG photo for location‑based services using C# and Aspose.Imaging.
+ * 2. When building a desktop application that automatically geotags images taken offline before uploading them to a mapping platform.
+ * 3. When creating a batch process that embeds latitude and longitude into travel‑journal photos to enable map previews in web galleries.
+ * 4. When integrating image metadata editing into a real‑estate listing tool to show property locations directly on the property photos.
+ * 5. When developing a mobile‑to‑desktop sync solution that adds precise GPS tags to user‑captured JPEGs for archival and compliance purposes.
  */
