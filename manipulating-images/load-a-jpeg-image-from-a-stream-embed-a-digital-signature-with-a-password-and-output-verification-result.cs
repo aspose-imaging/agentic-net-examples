@@ -1,15 +1,15 @@
+// HOW-TO: Embed and Verify Password Protected Digital Signature in JPEG Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded paths
+        // Hardcoded input and output paths
         string inputPath = "input.jpg";
-        string outputPath = "output/signed.jpg";
+        string outputPath = "output.jpg";
         string password = "mySecretPassword";
 
         try
@@ -21,22 +21,30 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load JPEG from a file stream
-            using (FileStream fs = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
-            using (RasterImage image = (RasterImage)Image.Load(fs))
+            // Load JPEG image from a file stream
+            using (FileStream inputStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
+            using (Image image = Image.Load(inputStream))
             {
-                // Embed digital signature using the provided password
-                image.EmbedDigitalSignature(password);
+                // Ensure the loaded image is a raster image
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("The loaded image is not a raster image.");
+                    return;
+                }
 
-                // Save the signed image
-                image.Save(outputPath);
+                // Embed digital signature using the provided password
+                raster.EmbedDigitalSignature(password);
 
                 // Verify that the image is digitally signed
-                bool isSigned = image.IsDigitalSigned(password);
-                Console.WriteLine($"Is image digitally signed? {isSigned}");
+                bool isSigned = raster.IsDigitalSigned(password);
+                Console.WriteLine($"Digital signature embedded. Verification result: {isSigned}");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                // Save the signed image
+                raster.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -48,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to securely embed a password‑protected digital signature into user‑uploaded JPEG photos before storing them in a cloud repository.
- * 2. When a desktop utility must read a JPEG from a file stream, sign it with a secret key, and verify the signature to ensure image integrity for legal documentation.
- * 3. When an automated batch process has to add a tamper‑evident digital signature to marketing JPEG assets and confirm the signature before publishing them to a CDN.
- * 4. When a mobile backend service processes incoming JPEG images, embeds a password‑protected signature for copyright protection, and validates the signature before sending the image to clients.
- * 5. When a compliance‑focused system needs to load a JPEG via a stream, apply a digital signature using Aspose.Imaging, save the signed file, and programmatically check that the signature matches the provided password.
+ * 1. When a developer needs to add a tamper‑evident signature to a JPEG before sending it to a client.
+ * 2. When a system must ensure that an image file has not been altered by verifying a password‑protected digital signature.
+ * 3. When an application stores confidential photos and wants to embed authentication data without changing the visual content.
+ * 4. When integrating image security into a workflow that reads JPEGs from streams and saves the signed version to disk.
+ * 5. When building a compliance solution that requires proof of origin for raster images using Aspose.Imaging in .NET.
  */
