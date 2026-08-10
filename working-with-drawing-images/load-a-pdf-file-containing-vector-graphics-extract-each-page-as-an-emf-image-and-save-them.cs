@@ -1,17 +1,17 @@
+// HOW-TO: Extract PDF Pages as EMF Vector Images Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input PDF file path
-            string inputPath = @"C:\Data\input.pdf";
+            // Hardcoded input PDF path
+            string inputPath = "input.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,43 +20,42 @@ class Program
                 return;
             }
 
-            // Hardcoded output directory for EMF pages
-            string outputDir = @"C:\Data\OutputEmf";
-
-            // Ensure the output directory exists (CreateDirectory works even if the path already exists)
-            Directory.CreateDirectory(outputDir);
-
             // Load the PDF document
             using (Image pdfImage = Image.Load(inputPath))
             {
-                // Cast to multipage image to access individual pages
+                // Ensure output directory exists
+                string outputDir = "output";
+                Directory.CreateDirectory(outputDir);
+
+                // Cast to multipage interface
                 IMultipageImage multipage = pdfImage as IMultipageImage;
-                if (multipage == null || multipage.PageCount == 0)
+                if (multipage == null)
                 {
-                    Console.Error.WriteLine("The loaded document does not contain any pages.");
+                    Console.Error.WriteLine("The loaded PDF is not a multipage image.");
                     return;
                 }
 
-                // Iterate through each page and save it as an EMF file
-                for (int i = 0; i < multipage.PageCount; i++)
+                int pageCount = multipage.PageCount;
+
+                // Iterate through each page and save as EMF
+                for (int i = 0; i < pageCount; i++)
                 {
-                    // Prepare EMF export options for the current page
-                    EmfOptions exportOptions = new EmfOptions();
-
-                    // Export only the current page (range length = 1)
-                    exportOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, 1));
-
-                    // Set rasterization options with the original page size
-                    exportOptions.VectorRasterizationOptions = new EmfRasterizationOptions
-                    {
-                        PageSize = pdfImage.Size
-                    };
-
-                    // Build output file path for the current page
                     string outputPath = Path.Combine(outputDir, $"page_{i + 1}.emf");
 
-                    // Ensure the directory for the output file exists
+                    // Ensure the directory for the output file
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Configure EMF export options
+                    EmfOptions exportOptions = new EmfOptions
+                    {
+                        // Export only the current page
+                        MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1)),
+                        // Set vector rasterization options (page size)
+                        VectorRasterizationOptions = new EmfRasterizationOptions
+                        {
+                            PageSize = pdfImage.Size
+                        }
+                    };
 
                     // Save the current page as EMF
                     pdfImage.Save(outputPath, exportOptions);
@@ -72,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert each page of a multi‑page PDF containing vector graphics into separate EMF files for high‑quality scaling in Windows applications.
- * 2. When an automated reporting system must extract vector‑based pages from PDF invoices and store them as EMF images for inclusion in Excel charts.
- * 3. When a document management workflow requires batch conversion of PDF blueprints into EMF format to preserve line art for CAD integration.
- * 4. When a .NET service has to generate printable EMF assets from PDF marketing brochures to maintain crisp vector quality in printed flyers.
- * 5. When a legacy Windows desktop application only accepts EMF files, and a developer must programmatically split a PDF catalog into individual EMF pages for import.
+ * 1. When you need to convert each page of a multi‑page PDF containing vector graphics into separate EMF files for high‑quality printing or inclusion in Microsoft Office documents.
+ * 2. When a reporting system must generate scalable vector thumbnails of PDF reports for use in a web portal without losing resolution.
+ * 3. When an engineering workflow requires extracting vector drawings from PDF schematics and saving them as EMF to edit later in CAD or Visio.
+ * 4. When an automated batch process has to archive PDF pages as EMF assets for long‑term storage while preserving their original vector fidelity.
+ * 5. When a document‑conversion service needs to split a PDF into individual EMF pages to feed downstream vector‑based image processing pipelines.
  */
