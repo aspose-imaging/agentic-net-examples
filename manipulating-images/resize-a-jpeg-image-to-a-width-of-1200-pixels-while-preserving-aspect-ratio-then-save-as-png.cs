@@ -1,8 +1,9 @@
+// HOW-TO: Resize JPEG to 1200px Width and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -11,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"c:\temp\input.jpg";
-            string outputPath = @"c:\temp\output.png";
+            string inputPath = "c:\\temp\\sample.jpg";
+            string outputPath = "c:\\temp\\sample_resized.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,20 +22,21 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load JPEG image using the JpegImage constructor
+            // Load the JPEG image using the JpegImage constructor
             using (JpegImage jpegImage = new JpegImage(inputPath))
             {
-                // Calculate new height to preserve aspect ratio
+                // Desired width
                 int newWidth = 1200;
-                int newHeight = (int)((double)jpegImage.Height * newWidth / jpegImage.Width);
+                // Compute height to preserve aspect ratio
+                int newHeight = (int)Math.Round((double)jpegImage.Height * newWidth / jpegImage.Width);
 
-                // Resize the image
+                // Resize the image (default resampling)
                 jpegImage.Resize(newWidth, newHeight);
 
-                // Save as PNG with default options
+                // Save the resized image as PNG
                 jpegImage.Save(outputPath, new PngOptions());
             }
         }
@@ -47,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create web‑ready images by resizing high‑resolution JPEG photos to a fixed width of 1200 px while preserving aspect ratio and saving them as lossless PNG files for consistent browser rendering.
- * 2. When an e‑commerce platform must generate product thumbnails from original JPEG uploads, ensuring the thumbnails fit a 1200 px width layout and are stored in PNG format to support transparent backgrounds.
- * 3. When a content management system automates the conversion of user‑submitted JPEG images into PNG assets of a standard width for faster page loads and uniform image dimensions across the site.
- * 4. When a digital marketing tool prepares campaign assets by downscaling large JPEG banners to 1200 px wide, maintaining the original proportions, and exporting them as PNG to preserve image quality for email newsletters.
- * 5. When a mobile app backend processes uploaded JPEG photos, resizes them to a 1200 px width to meet device display constraints, and saves them as PNG to enable lossless editing and future format conversions.
+ * 1. When you need to generate web‑optimized thumbnails from high‑resolution JPEG photos while preserving their original proportions.
+ * 2. When converting user‑uploaded JPEGs to lossless PNGs for archival or further image processing in a .NET application.
+ * 3. When preparing product images for an e‑commerce site that requires a maximum width of 1200 pixels to ensure fast page loads.
+ * 4. When standardizing image dimensions across a batch of photos before applying watermarking or other graphic overlays.
+ * 5. When integrating image resizing into a server‑side API that receives JPEGs and returns PNGs at a consistent size for mobile apps.
  */
