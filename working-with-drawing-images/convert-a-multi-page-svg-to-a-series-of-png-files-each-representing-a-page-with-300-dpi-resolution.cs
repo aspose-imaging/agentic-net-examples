@@ -1,7 +1,9 @@
+// HOW-TO: Convert Multi‑Page SVG to High‑Resolution PNG Pages in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -9,8 +11,10 @@ class Program
     {
         try
         {
-            // Input SVG file (multi‑page)
-            string inputPath = "Input/multipage.svg";
+            // Hardcoded input SVG path
+            string inputPath = "input.svg";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -18,45 +22,53 @@ class Program
             }
 
             // Output directory for PNG pages
-            string outputDir = "Output";
-            Directory.CreateDirectory(outputDir);
+            string outputDir = "output";
 
+            // Load the SVG (or any vector) image
             using (Image image = Image.Load(inputPath))
             {
-                // Ensure the loaded image supports multiple pages
-                IMultipageImage multipage = image as IMultipageImage;
-                if (multipage == null)
+                // Prepare common PNG options (300 DPI)
+                PngOptions pngOptions = new PngOptions();
+                pngOptions.ResolutionSettings = new ResolutionSetting(300, 300);
+
+                // Set vector rasterization options if the source is a vector image
+                if (image is VectorImage)
                 {
-                    Console.Error.WriteLine("The input file is not a multipage vector image.");
-                    return;
+                    var rasterOptions = new SvgRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+                    pngOptions.VectorRasterizationOptions = rasterOptions;
                 }
 
-                int pageCount = multipage.PageCount;
+                // Attempt to treat the image as a multipage vector image
+                IMultipageImage multipage = image as IMultipageImage;
 
-                for (int i = 0; i < pageCount; i++)
+                if (multipage != null && multipage.PageCount > 0)
                 {
-                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    using (PngOptions pngOptions = new PngOptions())
+                    // Export each page to a separate PNG file
+                    for (int i = 0; i < multipage.PageCount; i++)
                     {
-                        // Set 300 DPI resolution
-                        pngOptions.ResolutionSettings = new ResolutionSetting(300, 300);
+                        string outputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Configure rasterization of the vector page
-                        pngOptions.VectorRasterizationOptions = new SvgRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageSize = image.Size
-                        };
-
-                        // Export only the current page
+                        // Set MultiPageOptions to export only the current page
                         pngOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, 1));
 
-                        // Save the page as PNG
+                        // Save the current page as PNG
                         image.Save(outputPath, pngOptions);
                     }
+                }
+                else
+                {
+                    // Single-page SVG case
+                    string outputPath = Path.Combine(outputDir, "page_1.png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // No MultiPageOptions needed for single page
+                    image.Save(outputPath, pngOptions);
                 }
             }
         }
@@ -69,9 +81,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate high‑resolution printable PNG assets from a multi‑page SVG brochure for a marketing campaign, they can use this code to rasterize each page at 300 DPI.
- * 2. When an e‑learning platform must convert multi‑page SVG lesson diagrams into separate PNG slides for offline viewing on tablets, this snippet automates the page‑by‑page export with proper resolution.
- * 3. When a document management system imports vector‑based invoices stored as multi‑page SVG files and must store them as PNG thumbnails for quick preview, the code provides a reliable C# solution.
- * 4. When a web service creates downloadable PNG versions of each page of a multi‑page SVG technical drawing to meet client specifications for 300 DPI raster images, this example shows how to perform the conversion with Aspose.Imaging.
- * 5. When a CI/CD pipeline needs to validate the visual fidelity of each page in a multi‑page SVG design by comparing generated 300 DPI PNGs against baseline images, the code can be integrated into automated tests.
+ * 1. When you need to generate printable PNG assets from a multi‑page SVG diagram for a catalog, preserving 300 DPI quality.
+ * 2. When an application must split a vector‑based SVG brochure into separate high‑resolution PNG files for web preview thumbnails.
+ * 3. When a reporting tool exports charts as a multi‑page SVG and you require each page as a PNG image for inclusion in PDF reports.
+ * 4. When automating a build pipeline that converts design assets stored as SVG pages into PNGs for mobile app resources at a specific DPI.
+ * 5. When a legacy system only accepts PNG images and you must rasterize each page of a multi‑page SVG invoice at 300 DPI for archival.
  */
