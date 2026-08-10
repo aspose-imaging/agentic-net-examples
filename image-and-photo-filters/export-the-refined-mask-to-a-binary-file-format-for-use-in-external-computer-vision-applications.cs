@@ -1,3 +1,4 @@
+// HOW-TO: Generate Binary Mask PNG From Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,48 +13,55 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputMaskPath = "mask.png";
+
+        // Validate input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputMaskPath));
+
         try
         {
-            string inputPath = "Input\\sample.png";
-            string outputPath = "Output\\mask.bin";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+            // Load source image as RasterImage
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                var maskingOptions = new MaskingOptions
+                // Export options required by masking API (stream source to avoid temp files)
+                PngOptions exportOptions = new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    Source = new StreamSource(new MemoryStream())
+                };
+
+                // Configure masking options (GraphCut auto masking)
+                MaskingOptions maskingOptions = new MaskingOptions
                 {
                     Method = SegmentationMethod.GraphCut,
                     Decompose = false,
                     Args = new AutoMaskingArgs(),
                     BackgroundReplacementColor = Color.Transparent,
-                    ExportOptions = new PngOptions
-                    {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new StreamSource(new MemoryStream())
-                    }
+                    ExportOptions = exportOptions
                 };
 
-                using (MaskingResult maskingResult = new ImageMasking(image).Decompose(maskingOptions))
+                // Perform masking
+                ImageMasking masking = new ImageMasking(image);
+                using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
                 {
+                    // Retrieve the foreground mask (binary mask)
                     using (RasterImage mask = maskingResult[1].GetMask())
                     {
-                        int[] argbPixels = mask.LoadArgb32Pixels(new Rectangle(0, 0, mask.Width, mask.Height));
-
-                        using (var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                        using (var writer = new BinaryWriter(fileStream))
+                        // Save mask as PNG (binary format) for external CV applications
+                        mask.Save(outputMaskPath, new PngOptions
                         {
-                            foreach (int pixel in argbPixels)
-                            {
-                                writer.Write(pixel);
-                            }
-                        }
+                            ColorType = PngColorType.TruecolorWithAlpha,
+                            Source = new FileCreateSource(outputMaskPath, false)
+                        });
                     }
                 }
             }
@@ -67,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a binary ARGB mask from a PNG image using Aspose.Imaging in C# and store it as a .bin file for consumption by a machine‑learning model that requires raw pixel data.
- * 2. When integrating background removal via GraphCut segmentation into a .NET application and exporting the resulting mask to a binary format for downstream processing with OpenCV or other computer‑vision libraries.
- * 3. When building a cloud‑based image analysis service that receives user‑uploaded PNGs, creates refined masks with AutoMaskingArgs, and saves the masks as compact binary files for fast retrieval by external vision APIs.
- * 4. When running a batch job that converts a library of PNG assets into binary mask files to be loaded by a robotics vision system that reads .bin files directly for object detection.
- * 5. When developing a custom annotation tool that lets users edit image masks and then persists the mask layer as a binary file to minimize storage size and enable rapid loading in real‑time video processing pipelines.
+ * 1. When a developer needs to create a binary PNG mask of an object for feeding into a machine‑learning model that expects foreground/background segmentation.
+ * 2. When integrating Aspose.Imaging into a C# application to automatically separate foreground from background using GraphCut for image editing tools.
+ * 3. When exporting a refined mask to a lossless PNG with alpha channel for use in external computer‑vision pipelines that require precise pixel‑level masks.
+ * 4. When building an automated preprocessing step that generates masks for large batches of photos before running object detection or OCR.
+ * 5. When a developer wants to replace the background of an image with transparency and save the resulting mask for further compositing in video or graphics software.
  */
