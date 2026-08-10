@@ -1,40 +1,50 @@
+// HOW-TO: Convert EMF to PNG with Custom DPI in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
         string inputPath = "input.emf";
         string outputPath = "output.png";
 
+        // Validate input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            if (!File.Exists(inputPath))
+            // Load EMF image
+            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            using (Image image = Image.Load(inputPath))
-            {
-                var pngOptions = new PngOptions
+                // Configure rasterization options for EMF to PNG conversion
+                EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
                 {
+                    // Set page size based on source image dimensions
+                    PageSize = new SizeF(emfImage.Width, emfImage.Height)
+                };
+
+                // Set PNG export options, including DPI via ResolutionSettings
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions,
+                    // Example DPI setting: 300x300
                     ResolutionSettings = new ResolutionSetting(300, 300)
                 };
 
-                var rasterOptions = new EmfRasterizationOptions
-                {
-                    PageSize = image.Size
-                };
-
-                pngOptions.VectorRasterizationOptions = rasterOptions;
-
-                image.Save(outputPath, pngOptions);
+                // Save as PNG with specified DPI
+                emfImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a vector‑based EMF logo into a high‑resolution PNG for web display, preserving sharpness at 300 DPI.
- * 2. When an application must generate printable PNG thumbnails from EMF diagrams for inclusion in PDF reports that require a specific DPI setting.
- * 3. When a Windows desktop tool automates batch processing of EMF icons into PNG assets for mobile apps, ensuring consistent resolution across devices.
- * 4. When a document management system extracts embedded EMF charts and saves them as PNG images with 300 DPI to meet corporate printing standards.
- * 5. When a C# service receives user‑uploaded EMF files and needs to rasterize them to PNG with a defined DPI for storage in a cloud image repository.
+ * 1. When you need to embed a vector EMF logo into a high‑resolution PDF or print layout, you can rasterize it to a PNG at 300 dpi using Aspose.Imaging in C#.
+ * 2. When a desktop application must display legacy EMF diagrams on screens that only support raster images, converting them to PNG with a specific DPI ensures consistent visual quality.
+ * 3. When generating thumbnails for an asset‑management system, you may convert EMF files to PNG files sized for web use while preserving the required DPI for accurate scaling.
+ * 4. When preparing graphics for a marketing campaign that requires PNG images with exact DPI settings for print vendors, this code automates the EMF‑to‑PNG conversion in a .NET workflow.
+ * 5. When migrating a legacy document repository that stores drawings as EMF, you can batch‑process them to DPI‑controlled PNGs for compatibility with modern browsers and mobile devices.
  */
