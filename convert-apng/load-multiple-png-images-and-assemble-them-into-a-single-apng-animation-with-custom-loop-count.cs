@@ -1,3 +1,4 @@
+// HOW-TO: Create APNG Animation From Multiple PNGs With Loop Count In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,13 +13,11 @@ class Program
     {
         try
         {
-            // Hardcoded input PNG files
+            // Hardcoded input PNG file paths
             string[] inputPaths = { "frame1.png", "frame2.png", "frame3.png" };
-            // Hardcoded output APNG file
-            string outputPath = "output_animation.png";
 
-            // Validate each input file exists
-            foreach (var path in inputPaths)
+            // Verify each input file exists
+            foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -27,39 +26,41 @@ class Program
                 }
             }
 
+            // Hardcoded output APNG path (ensure it contains a directory)
+            string outputPath = "output\\animation.png";
+
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the first image to obtain canvas size
-            using (RasterImage first = (RasterImage)Image.Load(inputPaths[0]))
+            // Load the first image to obtain canvas dimensions
+            using (RasterImage firstImage = (RasterImage)Image.Load(inputPaths[0]))
             {
-                // Create source and APNG options
-                Source source = new FileCreateSource(outputPath, false);
-                ApngOptions options = new ApngOptions
+                // Configure APNG creation options
+                ApngOptions createOptions = new ApngOptions
                 {
-                    Source = source,
-                    DefaultFrameTime = 100, // frame duration in ms
+                    Source = new FileCreateSource(outputPath, false),
+                    DefaultFrameTime = 100, // default frame duration in milliseconds
                     ColorType = PngColorType.TruecolorWithAlpha,
-                    NumPlays = 3 // custom loop count
+                    NumPlays = 3 // custom loop count (0 = infinite)
                 };
 
-                // Create APNG canvas bound to the output file
-                using (ApngImage apng = (ApngImage)Image.Create(options, first.Width, first.Height))
+                // Create the APNG canvas
+                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, firstImage.Width, firstImage.Height))
                 {
                     // Remove the default single frame
-                    apng.RemoveAllFrames();
+                    apngImage.RemoveAllFrames();
 
                     // Add each PNG as a frame
-                    foreach (var path in inputPaths)
+                    foreach (string path in inputPaths)
                     {
                         using (RasterImage frame = (RasterImage)Image.Load(path))
                         {
-                            apng.AddFrame(frame);
+                            apngImage.AddFrame(frame);
                         }
                     }
 
-                    // Save the assembled animation
-                    apng.Save();
+                    // Save the assembled animation (output path already bound via FileCreateSource)
+                    apngImage.Save();
                 }
             }
         }
@@ -72,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating an animated product showcase where each PNG represents a product view and the APNG animation must loop exactly three times.
- * 2. When generating a step‑by‑step tutorial that stitches together a series of screenshot PNGs into an APNG that repeats a custom number of cycles for e‑learning platforms.
- * 3. When building a web banner that cycles through promotional PNG images and requires a fixed loop count to meet advertising display rules.
- * 4. When exporting a sequence of medical imaging slices as a single APNG file so researchers can view the PNG frames in a controlled three‑play loop.
- * 5. When developing a game UI that displays a short animated icon composed of multiple PNG frames and needs the animation to stop after three repetitions.
+ * 1. When you need to merge several PNG screenshots into a single APNG file for a product demo using C#.
+ * 2. When you want to generate a looping animated PNG banner for a website by programmatically adding PNG frames with a custom loop count.
+ * 3. When you have individual sprite PNG images and must create an APNG with a defined number of plays for a game UI.
+ * 4. When you must produce an APNG email attachment that plays each frame for a set duration and stops after three repetitions.
+ * 5. When you are building a C# desktop utility that converts a folder of PNG icons into an animated PNG with three loops for visual feedback.
  */
