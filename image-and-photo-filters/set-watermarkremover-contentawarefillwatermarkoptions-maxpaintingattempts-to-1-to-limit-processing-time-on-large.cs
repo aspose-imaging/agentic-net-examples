@@ -1,19 +1,20 @@
+// HOW-TO: Limit Watermark Removal Processing Time on Large TIFFs in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Watermark;
-using Aspose.Imaging.Watermark.Options;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.tif";
-        string outputPath = "output.tif";
-
         try
         {
+            string inputPath = "input.tif";
+            string outputPath = "output\\result.tif";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,24 +23,24 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (var image = Image.Load(inputPath))
             {
-                RasterImage rasterImage = (RasterImage)image;
+                var raster = (RasterImage)image;
 
                 var mask = new GraphicsPath();
                 var figure = new Figure();
-                figure.AddShape(new EllipseShape(new RectangleF(0, 0, rasterImage.Width, rasterImage.Height)));
+                figure.AddShape(new EllipseShape(new RectangleF(100, 100, 200, 200)));
                 mask.AddFigure(figure);
 
-                var options = new ContentAwareFillWatermarkOptions(mask)
+                var options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask)
                 {
                     MaxPaintingAttempts = 1
                 };
 
-                using (RasterImage result = WatermarkRemover.PaintOver(rasterImage, options))
+                var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(raster, options);
+                using (result)
                 {
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                    result.Save(outputPath);
+                    result.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
                 }
             }
         }
@@ -52,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When processing multi‑gigabyte TIFF scans of architectural blueprints on a web server, a developer can set MaxPaintingAttempts to 1 to ensure the watermark removal completes quickly without exhausting CPU resources.
- * 2. In a nightly batch job that cleans up thousands of scanned legal documents stored as TIFF images, limiting MaxPaintingAttempts to 1 prevents long‑running tasks from delaying subsequent jobs.
- * 3. For a desktop C# application that lets users preview edited medical images in real time, using MaxPaintingAttempts = 1 speeds up the removal of diagnostic watermarks on large DICOM‑converted TIFF files.
- * 4. When deploying an Azure Function that automatically strips watermarks from uploaded TIFF photographs, setting MaxPaintingAttempts to 1 keeps the function execution within the platform’s time limits.
- * 5. In a cloud‑based document management system that indexes high‑resolution TIFF maps, developers can use MaxPaintingAttempts = 1 to reduce processing latency while still achieving acceptable content‑aware fill results.
+ * 1. When processing multi‑megapixel TIFF scans and need to remove watermarks quickly without exhausting CPU time.
+ * 2. When integrating Aspose.Imaging into a document‑management system that must handle batch watermark removal on large TIFF files within strict performance budgets.
+ * 3. When developing a C# service that cleans up scanned legal documents and wants to cap the number of painting attempts to avoid long delays.
+ * 4. When optimizing a server‑side image pipeline that receives high‑resolution TIFFs and requires fast watermark erasure to meet SLA response times.
+ * 5. When building a desktop utility for archivists that strips watermarks from large TIFF images while ensuring the operation completes promptly.
  */
