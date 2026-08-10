@@ -1,8 +1,7 @@
-// HOW-TO: Read JPEG EXIF Exposure Time and Create Sorted Shutter Speed Report in C# (Aspose.Imaging for .NET)
+// HOW-TO: Read JPEG EXIF Exposure Time and Create Sorted Report in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
 
@@ -13,58 +12,87 @@ class Program
         try
         {
             string inputDirectory = "Input";
-            string outputFilePath = "Output\\report.txt";
+            string outputFile = "Output/report.txt";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputFilePath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
 
-            var records = new List<(string FileName, double Exposure)>();
+            string[] files = Directory.GetFiles(inputDirectory, "*.jpg");
+            var records = new List<(string FileName, string Exposure)>();
 
-            // Get JPEG files (both .jpg and .jpeg)
-            var jpegFiles = Directory.GetFiles(inputDirectory, "*.jpg")
-                .Concat(Directory.GetFiles(inputDirectory, "*.jpeg"))
-                .ToList();
-
-            foreach (var filePath in jpegFiles)
+            foreach (var file in files)
             {
-                if (!File.Exists(filePath))
+                if (!File.Exists(file))
                 {
-                    Console.Error.WriteLine($"File not found: {filePath}");
+                    Console.Error.WriteLine($"File not found: {file}");
                     return;
                 }
 
-                using (JpegImage image = (JpegImage)Image.Load(filePath))
+                using (JpegImage image = (JpegImage)Image.Load(file))
                 {
                     var exif = image.ExifData;
+                    string exposureStr = "N/A";
                     if (exif != null)
                     {
-                        // ExposureTime is typically a double; fallback to MaxValue if unavailable
-                        double exposure = double.MaxValue;
-                        try
+                        var exposure = exif.ExposureTime;
+                        if (exposure != null)
                         {
-                            exposure = Convert.ToDouble(exif.ExposureTime);
+                            exposureStr = exposure.ToString();
                         }
-                        catch
-                        {
-                            // Keep MaxValue for sorting; will appear last
-                        }
-
-                        records.Add((Path.GetFileName(filePath), exposure));
                     }
+                    records.Add((Path.GetFileName(file), exposureStr));
                 }
             }
 
-            // Sort by fastest shutter speed (smallest exposure time)
-            var sorted = records.OrderBy(r => r.Exposure).ToList();
-
-            var lines = new List<string> { "File\tExposureTime" };
-            foreach (var rec in sorted)
+            records.Sort((a, b) =>
             {
-                string exposureStr = rec.Exposure == double.MaxValue ? "N/A" : rec.Exposure.ToString();
-                lines.Add($"{rec.FileName}\t{exposureStr}");
-            }
+                double valA = 0;
+                double valB = 0;
 
-            File.WriteAllLines(outputFilePath, lines);
+                string partA = a.Exposure?.Split('(')[0].Trim();
+                if (!double.TryParse(partA, out valA))
+                {
+                    if (!string.IsNullOrEmpty(partA) && partA.Contains("/"))
+                    {
+                        var nums = partA.Split('/');
+                        if (nums.Length == 2 && double.TryParse(nums[0], out double num) && double.TryParse(nums[1], out double den) && den != 0)
+                            valA = num / den;
+                        else
+                            valA = double.MaxValue;
+                    }
+                    else
+                    {
+                        valA = double.MaxValue;
+                    }
+                }
+
+                string partB = b.Exposure?.Split('(')[0].Trim();
+                if (!double.TryParse(partB, out valB))
+                {
+                    if (!string.IsNullOrEmpty(partB) && partB.Contains("/"))
+                    {
+                        var nums = partB.Split('/');
+                        if (nums.Length == 2 && double.TryParse(nums[0], out double num) && double.TryParse(nums[1], out double den) && den != 0)
+                            valB = num / den;
+                        else
+                            valB = double.MaxValue;
+                    }
+                    else
+                    {
+                        valB = double.MaxValue;
+                    }
+                }
+
+                return valA.CompareTo(valB);
+            });
+
+            using (var writer = new StreamWriter(outputFile))
+            {
+                writer.WriteLine("Exposure Time Report (sorted by fastest shutter speed)");
+                foreach (var rec in records)
+                {
+                    writer.WriteLine($"{rec.FileName}: {rec.Exposure}");
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -75,9 +103,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to audit a collection of photos to identify which images were captured with the quickest shutter for quality control.
- * 2. When building a photo‑management tool that lists JPEG files by exposure time so photographers can quickly find low‑light shots.
- * 3. When generating a compliance report that documents exposure settings of images stored on a server using Aspose.Imaging in C#.
- * 4. When creating a batch‑processing script that extracts EXIF data from JPEGs and outputs a sortable text summary for archival purposes.
- * 5. When developing a digital asset pipeline that ranks images by fastest shutter speed to prioritize them for further processing or display.
+ * 1. When a photographer wants to list all images in a folder by fastest shutter speed for quick review.
+ * 2. When a digital asset management system needs to extract exposure information from JPEGs to generate metadata reports.
+ * 3. When a web application must display a summary of camera settings for uploaded photos, sorted by shutter speed.
+ * 4. When a forensic analyst needs to audit image files and identify those captured with the shortest exposure times.
+ * 5. When a batch processing tool has to create a text report of EXIF exposure values for quality control in a photo‑printing workflow.
  */
