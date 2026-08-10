@@ -1,3 +1,4 @@
+// HOW-TO: Convert DICOM File to PNG Images Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,18 +9,21 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input DICOM file path and output folder path
-        string inputPath = @"C:\temp\input.dcm";
-        string outputFolder = @"C:\temp\output\";
-
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input DICOM file and output folder
+            string inputPath = "sample.dicom";
+            string outputFolder = "output";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
+
+            // Ensure the output folder exists
+            Directory.CreateDirectory(outputFolder);
 
             // Open the DICOM file as a stream
             using (Stream stream = File.OpenRead(inputPath))
@@ -27,16 +31,15 @@ class Program
                 // Load the DICOM image from the stream
                 using (DicomImage dicomImage = new DicomImage(stream))
                 {
-                    // Iterate through each page in the DICOM image
+                    // Iterate through each page and save as PNG
                     foreach (var dicomPage in dicomImage.DicomPages)
                     {
-                        // Build the output PNG file path for the current page
                         string outputPath = Path.Combine(outputFolder, $"page_{dicomPage.Index}.png");
 
-                        // Ensure the output directory exists before saving
+                        // Ensure the directory for the output file exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save the page as a PNG image
+                        // Save the page as PNG
                         dicomPage.Save(outputPath, new PngOptions());
                     }
                 }
@@ -44,7 +47,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -52,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology department needs to export DICOM scans as PNG files for inclusion in patient reports or presentations.
- * 2. When a medical imaging researcher wants to batch‑convert DICOM image series to PNG for use in machine‑learning pipelines written in C#.
- * 3. When a hospital IT team must provide a simple command‑line utility to extract individual DICOM frames as PNGs for integration with electronic health record systems.
- * 4. When a developer is building a cross‑platform diagnostic web app and needs to pre‑process DICOM files into PNG thumbnails on a Windows server.
- * 5. When a quality‑control engineer requires automated conversion of DICOM files to PNG to compare visual output against reference images during software testing.
+ * 1. When a medical imaging application needs to extract each frame from a DICOM study and store them as PNG files for web preview.
+ * 2. When a radiology workflow requires a command‑line utility to batch‑convert DICOM scans to portable PNG images for integration with non‑DICOM systems.
+ * 3. When a developer wants to automate the creation of thumbnail PNGs from multi‑page DICOM files for reporting dashboards.
+ * 4. When a hospital IT script must verify that a DICOM file exists and generate PNG outputs in a specific output folder before archiving.
+ * 5. When a research project needs to read DICOM data from a stream, iterate over all pages, and save each as a lossless PNG for image analysis.
  */
