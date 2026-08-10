@@ -1,13 +1,12 @@
-// HOW-TO: Deskew Multiple CDR Files and Combine Into a Single Multipage TIFF Using C# (Aspose.Imaging for .NET)
+// HOW-TO: Deskew Multiple CDR Files and Merge Into Multipage TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -23,10 +22,10 @@ class Program
             };
 
             // Hardcoded output TIFF file
-            string outputPath = "output.tif";
+            string outputPath = "output\\combined.tif";
 
-            // Verify each input file exists
-            foreach (string path in inputPaths)
+            // Validate input files
+            foreach (var path in inputPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -35,38 +34,66 @@ class Program
                 }
             }
 
-            // Load the first CDR file to obtain canvas dimensions
-            using (CdrImage cdrCanvas = (CdrImage)Image.Load(inputPaths[0]))
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Prepare variables for the first image (used to create the TIFF canvas)
+            int canvasWidth = 0;
+            int canvasHeight = 0;
+            bool firstImageProcessed = false;
+
+            // TiffOptions with bound output file
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            tiffOptions.Source = new FileCreateSource(outputPath, false);
+            tiffOptions.Photometric = TiffPhotometrics.Rgb;
+            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+
+            // Create the TIFF image placeholder (will be initialized after first raster is ready)
+            TiffImage tiffImage = null;
+
+            // Process each CDR file
+            foreach (var inputPath in inputPaths)
             {
-                int canvasWidth = cdrCanvas.Width;
-                int canvasHeight = cdrCanvas.Height;
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Create a TIFF image with the same dimensions as the CDR canvas
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, canvasWidth, canvasHeight))
+                // Load CDR image
+                using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
                 {
-                    // Merge each input raster image onto the TIFF canvas
-                    foreach (string rasterPath in inputPaths)
+                    // Rasterize the CDR to a PNG in memory
+                    using (MemoryStream ms = new MemoryStream())
                     {
-                        using (RasterImage raster = (RasterImage)Image.Load(rasterPath))
+                        cdr.Save(ms, new PngOptions());
+                        ms.Position = 0;
+
+                        // Load the rasterized image
+                        using (RasterImage raster = (RasterImage)Image.Load(ms))
                         {
-                            // Load pixel data as ARGB integers
-                            int[] argbPixels = raster.LoadPixels(raster.Bounds).Select(c => c.ToArgb()).ToArray();
+                            // Deskew the rasterized image (do not resize canvas, fill background with white)
+                            raster.NormalizeAngle(false, Color.White);
 
-                            // Define the area to paste (top-left corner)
-                            var pasteRect = new Rectangle(0, 0, raster.Width, raster.Height);
+                            // Initialize TIFF canvas on first iteration
+                            if (!firstImageProcessed)
+                            {
+                                canvasWidth = raster.Width;
+                                canvasHeight = raster.Height;
 
-                            // Paste pixels onto the TIFF canvas
-                            tiffImage.SaveArgb32Pixels(pasteRect, argbPixels);
+                                tiffImage = (TiffImage)Image.Create(tiffOptions, canvasWidth, canvasHeight);
+                                tiffImage.AddPage(raster);
+                                firstImageProcessed = true;
+                            }
+                            else
+                            {
+                                // Add subsequent pages
+                                tiffImage.AddPage(raster);
+                            }
                         }
                     }
-
-                    // Save the final merged TIFF image
-                    tiffImage.Save(outputPath, tiffOptions);
                 }
+            }
+
+            // Save the multipage TIFF
+            if (tiffImage != null)
+            {
+                tiffImage.Save();
+                tiffImage.Dispose();
             }
         }
         catch (Exception ex)
@@ -78,9 +105,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to automatically correct the orientation of several CorelDRAW (CDR) drawings and produce a single searchable multipage TIFF for archiving.
- * 2. When a batch processing tool must convert a collection of CDR files into a consolidated TIFF document for printing or document management systems.
- * 3. When integrating a C# application that prepares scanned artwork by deskewing each CDR page before merging them into one TIFF for easy distribution.
- * 4. When you want to generate a multipage TIFF report from multiple CDR design files without manual editing, using Aspose.Imaging in .NET.
- * 5. When a workflow requires programmatic handling of CDR images, applying deskew corrections and combining them into a single TIFF for compliance or archival purposes.
+ * 1. When you need to automatically correct the orientation of scanned CorelDRAW drawings and store them as a single searchable multipage TIFF for archiving.
+ * 2. When a batch processing job must convert several CDR design files to a common raster format while applying deskew to each page before combining them for printing.
+ * 3. When an application has to generate a consolidated TIFF report from multiple vector drawings, ensuring each page is properly aligned without manual intervention.
+ * 4. When integrating CorelDRAW assets into a document management system that only accepts TIFF, and you must deskew and merge the files programmatically.
+ * 5. When creating a digital archive of engineering schematics stored as CDR files, requiring automated deskew and multi‑page TIFF output for compliance.
  */
