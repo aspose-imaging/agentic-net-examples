@@ -1,3 +1,4 @@
+// HOW-TO: Create Progressive JPEG From BMP And Reduce File Size In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,21 +9,20 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\sample_progressive.jpg";
-
-        // Ensure any runtime exception is reported cleanly
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.bmp";
+            string outputPath = @"C:\Images\sample_progressive.jpg";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
@@ -31,18 +31,20 @@ class Program
                 // Configure JPEG save options with progressive compression
                 JpegOptions saveOptions = new JpegOptions
                 {
-                    // Set progressive compression mode
+                    BitsPerChannel = 8,
                     CompressionType = Aspose.Imaging.FileFormats.Jpeg.JpegCompressionMode.Progressive,
-                    // Optional: set quality (1-100)
-                    Quality = 90,
-                    // Preserve resolution (optional)
+                    Quality = 90, // reasonable quality
                     ResolutionSettings = new ResolutionSetting(96.0, 96.0),
                     ResolutionUnit = ResolutionUnit.Inch
                 };
 
-                // Save the image using the configured options
+                // Save the image as progressive JPEG
                 image.Save(outputPath, saveOptions);
             }
+
+            // Report file size of the saved JPEG
+            long fileSize = new FileInfo(outputPath).Length;
+            Console.WriteLine($"Saved progressive JPEG size: {fileSize} bytes");
         }
         catch (Exception ex)
         {
@@ -53,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. A developer uses this code to convert high‑resolution BMP screenshots to progressive JPEGs for faster page loads on a website, reducing file size while maintaining visual quality.
- * 2. When building an email marketing system, a programmer applies progressive JPEG compression to attached product images to keep email payloads small and ensure quick rendering in mail clients.
- * 3. A mobile app developer generates progressive JPEG thumbnails from user‑uploaded photos to save bandwidth and storage on devices with limited resources.
- * 4. In a digital asset management workflow, a C# service employs Aspose.Imaging to re‑encode archival BMP files as progressive JPEGs, achieving lower storage costs without losing detail.
- * 5. A content management system (CMS) plugin automatically converts uploaded BMP graphics to progressive JPEG format using JpegOptions, optimizing images for SEO and improving page‑rank‑friendly load times.
+ * 1. When you need to serve web images that load gradually, converting BMP files to progressive JPEGs reduces initial download time and improves user experience.
+ * 2. When migrating legacy bitmap assets to a smaller, web‑friendly format, you can preserve visual quality while cutting storage space using progressive JPEG compression in C#.
+ * 3. When optimizing server storage, generating progressive JPEGs lets you compare file size reductions against baseline JPEGs for bandwidth‑saving decisions.
+ * 4. When preparing images for email newsletters, progressive JPEGs display a low‑resolution preview as the message loads, enhancing perceived performance.
+ * 5. When building an automated C# image‑processing pipeline, setting the JPEG CompressionType to Progressive standardizes resolution and creates smaller files for faster delivery.
  */
