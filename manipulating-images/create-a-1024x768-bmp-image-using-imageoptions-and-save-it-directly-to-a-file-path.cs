@@ -1,9 +1,9 @@
+// HOW-TO: Create a 1024x768 BMP Image and Save to File in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -11,8 +11,8 @@ class Program
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\temp\output.bmp";
+            // Output file path (hard‑coded)
+            string outputPath = @"C:\Temp\output.bmp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -20,21 +20,16 @@ class Program
             // Configure BMP creation options
             BmpOptions bmpOptions = new BmpOptions
             {
-                BitsPerPixel = 24,
+                // Define where the image will be created
                 Source = new FileCreateSource(outputPath, false),
+                BitsPerPixel = 24,
                 ResolutionSettings = new ResolutionSetting(96.0, 96.0)
             };
 
-            // Create a 1024x768 image using the options
+            // Create a blank 1024x768 BMP image and save it
             using (Image image = Image.Create(bmpOptions, 1024, 768))
             {
-                // Fill the image with white background
-                Graphics graphics = new Graphics(image);
-                SolidBrush whiteBrush = new SolidBrush(Color.White);
-                graphics.FillRectangle(whiteBrush, image.Bounds);
-
-                // Save the image (writes to the file specified in Source)
-                image.Save();
+                image.Save(); // Saves to the path specified in bmpOptions.Source
             }
         }
         catch (Exception ex)
@@ -46,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a legacy printing workflow requires a 24‑bit 1024×768 BMP file with 96 DPI, a developer can use Aspose.Imaging for .NET to create the blank canvas and save it directly to a file path.
- * 2. When a game level editor expects a white BMP background of exact dimensions, a C# program can generate the 1024×768 BMP using ImageOptions and store it on disk for the editor to load.
- * 3. When exporting a data‑visualization chart to a raster image for a Word document, a developer can create a 1024×768 BMP with Aspose.Imaging, fill it with a background, and save it to a specified folder.
- * 4. When building a batch image‑processing pipeline that adds watermarks to a template, a developer can first generate a 1024×768 BMP file with the required resolution using Image.Create and then reuse it for each watermark operation.
- * 5. When implementing a document conversion service that converts PDFs to BMP, the service can start by creating an empty 1024×768 BMP file with Aspose.Imaging for .NET and then render each PDF page onto this canvas before saving.
+ * 1. When you need to generate a blank 24‑bit BMP canvas for later drawing or watermarking in a C# application.
+ * 2. When an automated report generator must create a fixed‑size bitmap thumbnail and store it directly on disk without intermediate streams.
+ * 3. When a server‑side service prepares a background image of specific resolution (1024×768) for use in a legacy Windows application that only accepts BMP files.
+ * 4. When a batch process has to ensure the output directory exists and then create a BMP file with 96 dpi resolution for printing or archival purposes.
+ * 5. When you want to programmatically produce a BMP file with custom bits‑per‑pixel settings using Aspose.Imaging’s ImageOptions in .NET.
  */
