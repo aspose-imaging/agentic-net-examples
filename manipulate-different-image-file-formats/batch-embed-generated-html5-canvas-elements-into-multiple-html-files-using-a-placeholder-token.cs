@@ -1,3 +1,4 @@
+// HOW-TO: Batch Replace Placeholder With HTML5 Canvas From SVG Files Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Text;
@@ -10,57 +11,57 @@ class Program
     {
         try
         {
-            // Hard‑coded input SVG files
-            string[] svgInputs = {
-                @"C:\Images\Input1.svg",
-                @"C:\Images\Input2.svg"
+            // Hard‑coded source SVG files
+            string[] svgSources = {
+                @"C:\Input\Sample1.svg",
+                @"C:\Input\Sample2.svg"
             };
 
-            // Hard‑coded HTML template files containing the placeholder {{CANVAS_PLACEHOLDER}}
+            // Corresponding HTML files that contain the placeholder token {{CANVAS_PLACEHOLDER}}
             string[] htmlTemplates = {
-                @"C:\Html\Template1.html",
-                @"C:\Html\Template2.html"
+                @"C:\Input\Page1.html",
+                @"C:\Input\Page2.html"
             };
 
-            // Output HTML files (same name as template with suffix "_out")
+            // Output HTML files
             string[] htmlOutputs = {
-                @"C:\Html\Result1_out.html",
-                @"C:\Html\Result2_out.html"
+                @"C:\Output\Page1.html",
+                @"C:\Output\Page2.html"
             };
 
             const string placeholder = "{{CANVAS_PLACEHOLDER}}";
 
-            // Validate existence of all SVG inputs
-            foreach (var svgPath in svgInputs)
+            // Ensure the arrays have matching lengths
+            if (svgSources.Length != htmlTemplates.Length || svgSources.Length != htmlOutputs.Length)
             {
+                Console.Error.WriteLine("Configuration error: source, template, and output arrays must have the same length.");
+                return;
+            }
+
+            for (int i = 0; i < svgSources.Length; i++)
+            {
+                string svgPath = svgSources[i];
+                string templatePath = htmlTemplates[i];
+                string outputPath = htmlOutputs[i];
+
+                // Input validation for SVG source
                 if (!File.Exists(svgPath))
                 {
                     Console.Error.WriteLine($"File not found: {svgPath}");
                     return;
                 }
-            }
 
-            // Validate existence of all HTML template inputs
-            foreach (var tmplPath in htmlTemplates)
-            {
-                if (!File.Exists(tmplPath))
+                // Input validation for HTML template
+                if (!File.Exists(templatePath))
                 {
-                    Console.Error.WriteLine($"File not found: {tmplPath}");
+                    Console.Error.WriteLine($"File not found: {templatePath}");
                     return;
                 }
-            }
 
-            // Process each pair (SVG -> HTML)
-            for (int i = 0; i < svgInputs.Length && i < htmlTemplates.Length && i < htmlOutputs.Length; i++)
-            {
-                string svgPath = svgInputs[i];
-                string templatePath = htmlTemplates[i];
-                string outputPath = htmlOutputs[i];
-
-                // Load SVG image
+                // Load SVG and generate canvas HTML fragment (no full page)
+                string canvasHtml;
                 using (Image image = Image.Load(svgPath))
                 {
-                    // Render SVG to HTML5 canvas fragment (no full page)
                     using (var ms = new MemoryStream())
                     {
                         var options = new Html5CanvasOptions
@@ -70,20 +71,19 @@ class Program
                             CanvasTagId = $"canvas{i}"
                         };
                         image.Save(ms, options);
-                        string canvasHtml = Encoding.UTF8.GetString(ms.ToArray());
-
-                        // Read template, replace placeholder
-                        string templateContent = File.ReadAllText(templatePath);
-                        string resultContent = templateContent.Replace(placeholder, canvasHtml);
-
-                        // Ensure output directory exists
-                        string outputDir = Path.GetDirectoryName(outputPath);
-                        Directory.CreateDirectory(outputDir ?? ".");
-
-                        // Write the final HTML file
-                        File.WriteAllText(outputPath, resultContent, Encoding.UTF8);
+                        canvasHtml = Encoding.UTF8.GetString(ms.ToArray());
                     }
                 }
+
+                // Read template, replace placeholder with generated canvas HTML
+                string templateContent = File.ReadAllText(templatePath);
+                string resultContent = templateContent.Replace(placeholder, canvasHtml);
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Write the resulting HTML file
+                File.WriteAllText(outputPath, resultContent, Encoding.UTF8);
             }
         }
         catch (Exception ex)
@@ -95,9 +95,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically replace a {{CANVAS_PLACEHOLDER}} token in multiple HTML templates with rendered SVG graphics as HTML5 canvas elements for a product catalog.
- * 2. When a web application must batch‑process SVG files into canvas fragments and embed them into pre‑designed HTML pages using Aspose.Imaging for dynamic report generation.
- * 3. When an e‑learning platform wants to convert a set of SVG diagrams into interactive canvas snippets and insert them into course HTML modules without manual editing.
- * 4. When a marketing team requires a C# script that reads SVG logos, renders them to HTML5 canvas code, and updates several landing‑page HTML files containing the placeholder token.
- * 5. When a CI/CD pipeline needs to validate that all SVG assets are correctly rendered into canvas HTML and embedded into the corresponding documentation HTML files during build time.
+ * 1. When you need to automatically insert SVG‑derived canvas graphics into a series of web pages during a build process.
+ * 2. When generating product documentation where each HTML file must display a dynamic canvas rendering of a corresponding SVG diagram.
+ * 3. When creating an e‑learning portal that swaps a placeholder token with interactive canvas elements for multiple lessons in one batch.
+ * 4. When migrating legacy HTML templates that contain {{CANVAS_PLACEHOLDER}} to modern HTML5 canvas content without manual editing.
+ * 5. When automating the preparation of marketing landing pages that require SVG images to be rendered as canvas snippets across many files.
  */
