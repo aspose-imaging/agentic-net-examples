@@ -1,49 +1,48 @@
+// HOW-TO: Convert WMF Vector Graphic to PDF Preserving Line Thickness in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.wmf";
+        string outputPath = @"C:\temp\output.pdf";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input\\sample.wmf";
-            string outputPath = "Output\\sample.pdf";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the WMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PDF save options
-                using (PdfOptions pdfOptions = new PdfOptions())
+                // Prepare PDF export options with vector rasterization settings
+                var pdfOptions = new PdfOptions();
+
+                // Use WMF rasterization options to keep original vector data
+                var vectorOptions = new WmfRasterizationOptions
                 {
-                    // Basic PDF document info (can be extended as needed)
-                    pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
+                    PageSize = image.Size,                     // Preserve original size
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.None, // Keep line thickness
+                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel
+                };
 
-                    // Vector rasterization options to keep original line thickness and colors
-                    pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height
-                    };
+                pdfOptions.VectorRasterizationOptions = vectorOptions;
 
-                    // Save as PDF
-                    image.Save(outputPath, pdfOptions);
-                }
+                // Save as PDF
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -55,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy Windows Metafile (WMF) diagrams into PDF reports while preserving the original line thickness and colors.
- * 2. When an engineering application must generate printable PDF schematics from WMF vector drawings without losing visual fidelity for client review.
- * 3. When an automated document pipeline has to batch‑process WMF assets and output PDF files that retain exact stroke widths for compliance documentation.
- * 4. When a C# desktop tool requires exporting WMF icons or flowcharts to PDF for inclusion in marketing brochures while maintaining their original color palette.
- * 5. When a web service needs to transform user‑uploaded WMF files into PDF format on the server using Aspose.Imaging, ensuring that vector line styles remain unchanged.
+ * 1. When a developer needs to embed legacy WMF diagrams into PDF reports without losing the original line weights.
+ * 2. When an application must generate printable PDFs from vector‑based WMF icons while keeping exact colors and stroke widths.
+ * 3. When a migration tool converts old Windows Metafile assets to PDF for archival storage, preserving visual fidelity.
+ * 4. When CAD or engineering software exports technical drawings stored as WMF into PDF for client distribution.
+ * 5. When a web service creates downloadable PDF previews of WMF files for users who only have PDF viewers.
  */
