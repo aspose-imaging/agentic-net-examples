@@ -1,3 +1,4 @@
+// HOW-TO: Convert DjVu Pages to PNG with Sub Filter Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,33 +12,40 @@ class Program
     {
         try
         {
-            // Hardcoded input path
+            // Hardcoded input and output paths
             string inputPath = "sample.djvu";
+            string outputDirectory = "Output";
+
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Output directory
-            string outputDir = "Output";
-            Directory.CreateDirectory(outputDir);
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-            // Load DjVu document
-            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            // Load DjVu document from file stream
+            using (Stream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Configure PNG options with a custom filter type
-                PngOptions pngOptions = new PngOptions
+                // Iterate through each page and save as PNG with custom filter type
+                foreach (DjvuPage page in djvuImage.Pages)
                 {
-                    FilterType = PngFilterType.Sub
-                };
+                    // Prepare output file path for the current page
+                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.png");
 
-                // Convert each page to PNG
-                for (int i = 0; i < djvuImage.Pages.Length; i++)
-                {
-                    var page = djvuImage.Pages[i];
-                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.png");
+                    // Ensure the directory for the output file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Configure PNG options with a custom filter type
+                    PngOptions pngOptions = new PngOptions
+                    {
+                        FilterType = PngFilterType.Sub
+                    };
+
+                    // Save the page as PNG using the configured options
                     page.Save(outputPath, pngOptions);
                 }
             }
@@ -51,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract every page from a multi‑page DjVu document and save them as PNG files using a custom PNG filter to improve compression and image quality.
- * 2. When an archival system must convert scanned DjVu files into PNG thumbnails for web preview while specifying the PNG filter type for optimal file size.
- * 3. When a digital publishing workflow requires batch conversion of DjVu ebooks into PNG assets because the target e‑reader only supports PNG format.
- * 4. When a document management application programmatically loads a DjVu file, applies a custom PngOptions filter (e.g., Sub) and stores each page as a separate PNG for downstream image analysis.
- * 5. When a C# service automates the conversion of DjVu invoices into PNG images to feed a third‑party OCR engine that expects PNG input with specific filter settings.
+ * 1. When you need to extract each page of a DjVu document as separate PNG files for web preview, you can use this code.
+ * 2. When you want to apply a specific PNG filter (Sub) to reduce file size while preserving image quality during batch conversion of DjVu pages.
+ * 3. When an application processes scanned books stored in DjVu format and must generate PNG thumbnails for each page on the fly.
+ * 4. When integrating Aspose.Imaging into a C# service that converts multi‑page DjVu files into individual PNG images for further image analysis.
+ * 5. When automating a workflow that reads DjVu files from a directory, creates an output folder, and saves each page as a PNG with custom compression settings.
  */
