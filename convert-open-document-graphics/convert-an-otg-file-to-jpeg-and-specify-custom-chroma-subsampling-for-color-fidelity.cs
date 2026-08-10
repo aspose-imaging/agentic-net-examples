@@ -1,3 +1,4 @@
+// HOW-TO: Convert OTG to JPEG with Custom Chroma Subsampling in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.otg";
-            string outputPath = "Output/sample.jpg";
+            string inputPath = Path.Combine("Input", "sample.otg");
+            string outputPath = Path.Combine("Output", "sample.jpg");
 
             if (!File.Exists(inputPath))
             {
@@ -23,24 +24,22 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
+                var jpegOptions = new JpegOptions
+                {
+                    HorizontalSampling = new byte[] { 2, 1, 1 },
+                    VerticalSampling = new byte[] { 2, 1, 1 },
+                    Quality = 100
+                };
+
                 var vectorOptions = new VectorRasterizationOptions
                 {
                     BackgroundColor = Color.White,
                     PageWidth = image.Width,
                     PageHeight = image.Height
                 };
+                jpegOptions.VectorRasterizationOptions = vectorOptions;
 
-                using (var jpegOptions = new JpegOptions
-                {
-                    ColorType = JpegCompressionColorMode.YCbCr,
-                    HorizontalSampling = new byte[] { 2, 2, 2 },
-                    VerticalSampling = new byte[] { 2, 2, 2 },
-                    Quality = 90,
-                    VectorRasterizationOptions = vectorOptions
-                })
-                {
-                    image.Save(outputPath, jpegOptions);
-                }
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate web‑ready JPEG thumbnails from OTG vector drawings while preserving color fidelity by specifying YCbCr chroma subsampling.
- * 2. When an e‑commerce platform must convert product illustration OTG files to high‑quality JPEG images for catalog pages, controlling sampling to avoid banding.
- * 3. When a mobile app processes user‑uploaded OTG graphics and saves them as JPEGs with custom horizontal and vertical sampling to reduce file size without losing color detail.
- * 4. When a printing workflow requires rasterizing OTG artwork to JPEG for proofing, using vector rasterization options and explicit chroma subsampling to match print color standards.
- * 5. When a document management system automatically transforms stored OTG schematics into JPEG previews, applying a 2‑2‑2 sampling scheme to maintain accurate colors across browsers.
+ * 1. When you need to render an OTG vector graphic as a high‑quality JPEG for web publishing while preserving color fidelity through specific chroma subsampling.
+ * 2. When a batch process must convert multiple OTG files to JPEGs with 100 % quality and custom sampling to match a printing workflow’s color requirements.
+ * 3. When integrating Aspose.Imaging into a C# application that generates thumbnails of OTG drawings and requires precise control over JPEG compression parameters.
+ * 4. When automating the conversion of OTG design assets to JPEG for email newsletters, ensuring the background is white and the image dimensions match the original vector size.
+ * 5. When developing a document management system that stores OTG files but needs to display them as JPEG previews with consistent chroma sampling across different devices.
  */
