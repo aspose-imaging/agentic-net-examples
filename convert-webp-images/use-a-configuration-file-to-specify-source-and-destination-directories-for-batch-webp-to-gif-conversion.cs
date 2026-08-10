@@ -1,13 +1,13 @@
+// HOW-TO: Batch Convert WebP Images to GIF Using Config File in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Text.Json;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    // Configuration model matching the JSON file
+    // Configuration model matching the JSON file structure
     class Config
     {
         public string SourceDir { get; set; }
@@ -18,55 +18,58 @@ class Program
     {
         try
         {
-            // Hardcoded configuration file path
+            // Hard‑coded path to the configuration file
             string configPath = "config.json";
 
-            // Verify configuration file exists
+            // Verify the configuration file exists
             if (!File.Exists(configPath))
             {
                 Console.Error.WriteLine($"File not found: {configPath}");
                 return;
             }
 
-            // Load and deserialize configuration
-            string configContent = File.ReadAllText(configPath);
-            Config cfg = JsonSerializer.Deserialize<Config>(configContent);
+            // Read and deserialize the JSON configuration
+            string json = File.ReadAllText(configPath);
+            Config config = JsonSerializer.Deserialize<Config>(json);
 
-            // Basic validation of configuration values
-            if (cfg == null || string.IsNullOrEmpty(cfg.SourceDir) || string.IsNullOrEmpty(cfg.DestinationDir))
+            // Basic validation of the deserialized configuration
+            if (config == null ||
+                string.IsNullOrEmpty(config.SourceDir) ||
+                string.IsNullOrEmpty(config.DestinationDir))
             {
                 Console.Error.WriteLine("Invalid configuration.");
                 return;
             }
 
-            // Process each WebP file in the source directory
-            foreach (string inputPath in Directory.GetFiles(cfg.SourceDir, "*.webp"))
+            // Get all WebP files in the source directory
+            string[] webpFiles = Directory.GetFiles(config.SourceDir, "*.webp");
+
+            foreach (string inputPath in webpFiles)
             {
-                // Verify the input file still exists
+                // Ensure the input file still exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
                 // Build the output GIF path
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(cfg.DestinationDir, fileNameWithoutExt + ".gif");
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".gif";
+                string outputPath = Path.Combine(config.DestinationDir, outputFileName);
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load WebP image and save as GIF
+                // Load the WebP image and save it as GIF
                 using (WebPImage webPImage = new WebPImage(inputPath))
                 {
                     webPImage.Save(outputPath, new GifOptions());
                 }
-
-                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
         {
+            // Any unexpected error is reported without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -74,9 +77,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a marketing team needs to convert a large collection of WebP ads into GIFs for email campaigns, a developer can use this code with a JSON config to point to the source folder of WebP files and the destination folder for the generated GIFs.
- * 2. When an e‑commerce platform stores product images in WebP to save bandwidth but must supply animated GIF previews for legacy browsers, a developer can automate the conversion by setting source and output paths in a config file.
- * 3. When a content management system runs nightly jobs to transform newly uploaded WebP graphics into GIFs for social media sharing, the batch converter reads the directories from a JSON configuration to keep the schedule flexible.
- * 4. When a game developer wants to repurpose WebP sprite sheets as GIF animations for documentation, they can define the input and output directories in a config file and let the Aspose.Imaging code process all files in one pass.
- * 5. When a digital archivist needs to migrate a folder of WebP screenshots to GIF format for compatibility with older archival tools, they can adjust the source and destination paths in the JSON config without changing the C# source code.
+ * 1. When you need to automatically convert a large collection of WebP graphics to animated GIFs for web deployment without hard‑coding paths.
+ * 2. When your application must read source and target folders from a JSON settings file to allow non‑technical users to change directories.
+ * 3. When you want to integrate Aspose.Imaging’s WebP and GIF support into a C# batch job that processes all files in a folder.
+ * 4. When you are building a CI/CD pipeline that transforms WebP assets into GIFs as part of a build step using configurable paths.
+ * 5. When you require error‑checked, directory‑aware image conversion that skips missing files and creates the output folder on the fly.
  */
