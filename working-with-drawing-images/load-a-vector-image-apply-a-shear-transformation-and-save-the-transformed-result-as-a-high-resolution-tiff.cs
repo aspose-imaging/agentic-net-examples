@@ -1,9 +1,10 @@
+// HOW-TO: Shear an SVG and Export as High-Resolution TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.FileFormats.Svg;
 
 class Program
 {
@@ -22,16 +23,28 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image vectorImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.ResolutionSettings = new ResolutionSetting(300, 300);
-
-                using (Image rasterImage = Image.Create(tiffOptions, vectorImage.Width, vectorImage.Height))
+                if (image is VectorImage)
                 {
-                    Graphics graphics = new Graphics(rasterImage);
-                    graphics.DrawImage(vectorImage, new Point(0, 0));
-                    rasterImage.Save(outputPath, tiffOptions);
+                    Graphics graphics = new Graphics(image);
+                    Matrix matrix = new Matrix(1, 0, 0.2f, 1, 0, 0); // shear X axis
+                    graphics.Transform = matrix;
+
+                    var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    tiffOptions.ResolutionSettings = new ResolutionSetting(300, 300);
+                    tiffOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        BackgroundColor = Color.White
+                    };
+
+                    image.Save(outputPath, tiffOptions);
+                }
+                else
+                {
+                    Console.Error.WriteLine("The loaded image is not a vector image.");
                 }
             }
         }
@@ -44,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG logo into a 300 dpi TIFF file for high‑quality print production, they can use this code to rasterize the vector and preserve detail.
- * 2. When a web application must generate a print‑ready TIFF from user‑uploaded SVG diagrams for inclusion in PDF reports, the snippet provides a straightforward C# solution.
- * 3. When an archival system requires storing vector artwork as lossless TIFF images to ensure compatibility with legacy imaging software, this code performs the conversion with proper resolution settings.
- * 4. When a document‑processing pipeline needs to transform scalable SVG icons into high‑resolution TIFF thumbnails for OCR preprocessing, the example shows how to load, rasterize, and save the images in .NET.
- * 5. When a batch job has to automate the conversion of multiple SVG files to 300 dpi TIFFs for a publishing workflow, the code demonstrates the necessary file handling, graphics drawing, and format options in Aspose.Imaging for .NET.
+ * 1. When you need to tilt or skew a logo stored as SVG before printing it on high‑resolution TIFF paper.
+ * 2. When a web application must convert user‑uploaded SVG diagrams into 300 DPI TIFF files with a horizontal shear for archival quality.
+ * 3. When generating engineering drawings that require a shear distortion and must be saved as a TIFF for compatibility with legacy CAD systems.
+ * 4. When creating batch scripts that preprocess vector graphics by applying a shear matrix and outputting print‑ready TIFFs for a publishing workflow.
+ * 5. When integrating Aspose.Imaging into a C# service to transform scalable icons into raster TIFFs with precise DPI settings for high‑quality marketing materials.
  */
