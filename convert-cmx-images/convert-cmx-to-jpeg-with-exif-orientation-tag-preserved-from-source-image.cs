@@ -1,40 +1,44 @@
+// HOW-TO: Convert CMX to JPEG While Preserving EXIF Orientation in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
         string inputPath = "input.cmx";
         string outputPath = "output.jpg";
 
         try
         {
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CMX image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image cmxImage = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Configure JPEG options to keep metadata (including EXIF if present)
-                JpegOptions jpegOptions = new JpegOptions
+                CmxImage cmx = cmxImage as CmxImage;
+                if (cmx == null)
                 {
-                    KeepMetadata = true
+                    Console.Error.WriteLine("Failed to load CMX image.");
+                    return;
+                }
+
+                var jpegOptions = new JpegOptions
+                {
+                    KeepMetadata = true,
+                    Source = new FileCreateSource(outputPath, false)
                 };
 
-                // Save as JPEG preserving metadata
-                image.Save(outputPath, jpegOptions);
+                cmx.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a digital asset management system receives legacy CorelDRAW CMX files and must generate web‑ready JPEG thumbnails while keeping the original EXIF orientation for correct display.
- * 2. When a photo‑editing workflow needs to batch‑convert client‑supplied CMX drawings to JPEG for inclusion in an online portfolio, preserving metadata so the images appear upright on mobile devices.
- * 3. When an e‑commerce platform imports product illustrations stored as CMX and converts them to JPEG for fast loading on product pages, while retaining the EXIF orientation tag to avoid rotated pictures.
- * 4. When a document‑generation service extracts embedded CMX graphics from legacy reports and saves them as JPEGs for PDF embedding, ensuring the orientation metadata is kept for accurate rendering.
- * 5. When a mobile app syncs design assets from a Windows workstation, converting CMX files to JPEG on the server side with Aspose.Imaging so the images retain their original orientation when viewed on the device.
+ * 1. When a design team needs to export CorelDRAW CMX artwork as JPEGs for web preview while keeping the original camera orientation metadata.
+ * 2. When an automated batch process converts archived CMX files to JPEG for a digital asset management system and must retain EXIF tags for proper sorting.
+ * 3. When a mobile app receives CMX drawings and must display them as JPEG thumbnails with correct orientation without losing metadata.
+ * 4. When a migration script moves legacy CMX graphics to a JPEG‑based workflow and requires the EXIF orientation to stay intact for downstream processing.
+ * 5. When a reporting tool generates JPEG images from CMX sources and needs to preserve metadata for compliance auditing.
  */
