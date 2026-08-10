@@ -1,10 +1,11 @@
-// HOW-TO: Create High Resolution PNG with Vector Shapes in C# (Aspose.Imaging for .NET)
+// HOW-TO: Generate 300 DPI PNG with Vector Shapes Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
 
 class Program
 {
@@ -12,64 +13,46 @@ class Program
     {
         try
         {
-            // Output path for the high‑resolution PNG image
-            string outputPath = @"C:\temp\highres.png";
+            string outputPath = "output.png";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Create a file stream bound to the output file
-            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+            var pngOptions = new PngOptions
             {
-                // Configure PNG options
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new StreamSource(stream);
+                Source = new FileCreateSource(outputPath, false)
+            };
 
-                // Create a 1000x1000 pixel image
-                using (Image image = Image.Create(pngOptions, 1000, 1000))
+            using (Image image = Image.Create(pngOptions, 1200, 800))
+            {
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
+
+                Pen blackPen = new Pen(Color.Black, 5);
+                graphics.DrawRectangle(blackPen, new Rectangle(100, 100, 400, 300));
+
+                using (SolidBrush redBrush = new SolidBrush(Color.Red))
                 {
-                    // Initialize Graphics for drawing
-                    Graphics graphics = new Graphics(image);
-
-                    // Clear background with light gray
-                    graphics.Clear(Color.LightGray);
-
-                    // Draw a thick black rectangle border
-                    Pen rectPen = new Pen(Color.Black, 5);
-                    graphics.DrawRectangle(rectPen, new Rectangle(50, 50, 900, 900));
-
-                    // Fill an inner ellipse with blue using SolidBrush
-                    using (SolidBrush ellipseBrush = new SolidBrush(Color.Blue))
-                    {
-                        graphics.FillEllipse(ellipseBrush, new Rectangle(200, 200, 600, 600));
-                    }
-
-                    // Draw a red diagonal line across the image
-                    Pen linePen = new Pen(Color.Red, 3);
-                    graphics.DrawLine(linePen, new Point(50, 50), new Point(950, 950));
-
-                    // Draw a green polygon
-                    Pen polyPen = new Pen(Color.Green, 4);
-                    Point[] polyPoints = new Point[]
-                    {
-                        new Point(500, 150),
-                        new Point(800, 400),
-                        new Point(650, 800),
-                        new Point(350, 800),
-                        new Point(200, 400)
-                    };
-                    graphics.DrawPolygon(polyPen, polyPoints);
-
-                    // Add a text label using a solid brush
-                    using (SolidBrush textBrush = new SolidBrush(Color.DarkSlateGray))
-                    {
-                        Font textFont = new Font("Arial", 48);
-                        graphics.DrawString("High‑Res Vector", textFont, textBrush, new PointF(250, 920));
-                    }
-
-                    // Save the image (stream is already bound to the file)
-                    image.Save();
+                    graphics.FillRectangle(redBrush, new Rectangle(150, 150, 300, 200));
                 }
+
+                Pen bluePen = new Pen(Color.Blue, 3);
+                graphics.DrawEllipse(bluePen, new Rectangle(200, 200, 200, 150));
+
+                Pen greenPen = new Pen(Color.Green, 2);
+                graphics.DrawLine(greenPen, new Point(100, 500), new Point(1100, 500));
+
+                Pen purplePen = new Pen(Color.Purple, 4);
+                GraphicsPath path = new GraphicsPath();
+                Figure figure = new Figure();
+                figure.AddShape(new PolygonShape(new PointF[]
+                {
+                    new PointF(600, 100),
+                    new PointF(800, 100),
+                    new PointF(700, 300)
+                }));
+                path.AddFigure(figure);
+                graphics.DrawPath(purplePen, path);
+
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -81,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a printable 300 DPI PNG badge with crisp vector graphics for a marketing campaign.
- * 2. When an application must programmatically create a diagram containing rectangles, ellipses, lines, and polygons for a reporting dashboard.
- * 3. When you want to export dynamically drawn shapes to a lossless PNG image for use in a PDF brochure without rasterization artifacts.
- * 4. When a server‑side service creates custom icons or thumbnails with precise dimensions and background colors for a web portal.
- * 5. When you need to automate the production of high‑resolution graphics for CNC laser cutting or embroidery patterns using C#.
+ * 1. When you need to programmatically create a high‑resolution PNG for print‑ready graphics such as brochures or flyers while drawing crisp vector shapes in C#.
+ * 2. When you want to generate dynamic diagrams like rectangles, ellipses, lines, and polygons on the server side for reporting dashboards without losing quality at 300 DPI.
+ * 3. When an application must produce custom UI assets such as icons or badges that require precise vector drawing and a white background for consistent branding.
+ * 4. When you need to automate the creation of printable certificates or tickets that include colored shapes and lines, ensuring they remain sharp after scaling.
+ * 5. When you are building a batch process that creates annotated images (e.g., highlighting areas with rectangles and ellipses) for medical or engineering documents where resolution matters.
  */
