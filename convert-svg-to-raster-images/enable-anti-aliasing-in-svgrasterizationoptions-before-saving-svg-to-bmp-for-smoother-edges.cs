@@ -1,3 +1,4 @@
+// HOW-TO: How to Enable Anti‑Aliasing When Converting SVG to BMP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,11 +11,11 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\input.svg";
-            string outputPath = @"C:\Images\output.bmp";
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\input.svg";
+            string outputPath = "C:\\temp\\output.bmp";
 
-            // Verify that the input SVG exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,14 +29,14 @@ class Program
             using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
             {
                 // Configure rasterization options with anti‑aliasing
-                var rasterizationOptions = new SvgRasterizationOptions
+                SvgRasterizationOptions rasterizationOptions = new SvgRasterizationOptions
                 {
                     PageSize = svgImage.Size,
                     SmoothingMode = SmoothingMode.AntiAlias
                 };
 
-                // Set up BMP save options and attach the rasterization options
-                var bmpOptions = new BmpOptions
+                // Set BMP save options and attach rasterization options
+                BmpOptions bmpOptions = new BmpOptions
                 {
                     VectorRasterizationOptions = rasterizationOptions
                 };
@@ -53,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate high‑quality BMP thumbnails from user‑uploaded SVG logos, enabling anti‑aliasing ensures smooth edges in the rasterized output.
- * 2. When converting vector illustrations to BMP for legacy Windows printing pipelines, applying SmoothingMode.AntiAlias prevents jagged lines and preserves visual fidelity.
- * 3. When an automated report generator creates BMP charts from SVG diagrams, anti‑aliasing in SvgRasterizationOptions yields professional‑looking graphics for PDF export.
- * 4. When a desktop tool batch‑processes SVG icons into BMP assets for a game engine, enabling anti‑aliasing avoids pixelated borders on high‑resolution screens.
- * 5. When a C# service transforms SVG floor plans into BMP maps for GIS applications, anti‑aliasing improves the clarity of walls and room outlines during rasterization.
+ * 1. When a web application needs to generate high‑quality BMP thumbnails from user‑uploaded SVG logos, enabling anti‑aliasing ensures smooth edges.
+ * 2. When exporting vector diagrams to BMP for legacy Windows printing, applying smoothing prevents jagged lines in the printed output.
+ * 3. When creating raster assets for a game engine that only accepts BMP files, anti‑aliased conversion maintains the visual fidelity of the original SVG artwork.
+ * 4. When batch‑processing SVG icons into BMP format for a desktop UI, using Aspose.Imaging with anti‑aliasing reduces visual artifacts without manual editing.
+ * 5. When converting SVG floor plans to BMP for integration with GIS software, enabling smoothing improves the clarity of walls and annotations.
  */
