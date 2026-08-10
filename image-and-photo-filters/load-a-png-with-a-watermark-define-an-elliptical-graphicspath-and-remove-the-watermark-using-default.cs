@@ -1,3 +1,4 @@
+// HOW-TO: Remove Watermark from PNG Using Elliptical Mask and ContentAwareFill in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,7 +7,7 @@ using Aspose.Imaging.Shapes;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static void Main()
     {
         try
         {
@@ -32,7 +33,8 @@ public class Program
 
                 var options = new Aspose.Imaging.Watermark.Options.ContentAwareFillWatermarkOptions(mask);
 
-                using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options))
+                var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options);
+                using (result)
                 {
                     result.Save(outputPath);
                 }
@@ -47,9 +49,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically clean up scanned product photos that contain a circular logo watermark before uploading them to an e‑commerce site.
- * 2. When a C# application must prepare marketing images by removing an elliptical watermark from PNG banners while preserving surrounding pixels using ContentAwareFill.
- * 3. When a batch‑processing tool has to strip a semi‑transparent watermark from user‑generated PNG avatars so they can be displayed without branding.
- * 4. When a photo‑editing service wants to programmatically erase a custom‑shaped watermark from PNG screenshots before performing further image analysis.
- * 5. When a document‑generation system requires removing a watermark placed inside a specific elliptical region of a PNG diagram to comply with licensing restrictions.
+ * 1. When you need to automatically erase a semi‑transparent logo from a PNG product photo before publishing it on an e‑commerce site.
+ * 2. When you must clean scanned PNG receipts that contain a faint watermark so they can be processed by an OCR engine.
+ * 3. When you want to remove a circular watermark from screenshots of a software demo to create a clean presentation slide.
+ * 4. When you are preparing a batch of PNG assets for a mobile app and need to strip out test watermarks without manually selecting each region.
+ * 5. When you have a PNG map image with an elliptical copyright stamp and need to replace it using Aspose.Imaging’s ContentAwareFill algorithm.
  */
