@@ -1,73 +1,78 @@
+// HOW-TO: Create Multipage TIFF From Multiple GIF Frames In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Gif;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input GIF files and output TIFF file
-            string[] inputPaths = new string[]
-            {
-                "input1.gif",
-                "input2.gif",
-                "input3.gif"
-            };
-            string outputPath = "output.tif";
+            // Hardcoded input GIF paths
+            string inputPath1 = @"c:\temp\frame1.gif";
+            string inputPath2 = @"c:\temp\frame2.gif";
+            string inputPath3 = @"c:\temp\frame3.gif";
 
-            // Verify each input file exists
-            foreach (var inputPath in inputPaths)
+            // Verify input files exist
+            if (!File.Exists(inputPath1))
             {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                Console.Error.WriteLine($"File not found: {inputPath1}");
+                return;
             }
+            if (!File.Exists(inputPath2))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath2}");
+                return;
+            }
+            if (!File.Exists(inputPath3))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath3}");
+                return;
+            }
+
+            // Output TIFF path
+            string outputPath = @"c:\temp\multipage.tif";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Prepare TIFF creation options
-            TiffOptions tiffOptions = new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default)
+            // Determine canvas size from the first GIF
+            int canvasWidth, canvasHeight;
+            using (Aspose.Imaging.Image firstImg = Aspose.Imaging.Image.Load(inputPath1))
             {
-                Source = new FileCreateSource(outputPath, false),
-                Photometric = Aspose.Imaging.FileFormats.Tiff.Enums.TiffPhotometrics.Rgb,
-                BitsPerSample = new ushort[] { 8, 8, 8 }
-            };
+                canvasWidth = firstImg.Width;
+                canvasHeight = firstImg.Height;
+            }
 
-            // Create an empty TIFF image (size will be adjusted by added frames)
-            using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, 1, 1))
+            // Configure TIFF creation options
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            tiffOptions.Source = new FileCreateSource(outputPath, false);
+            tiffOptions.Photometric = TiffPhotometrics.Rgb;
+            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
+
+            // Create the multipage TIFF image
+            using (TiffImage tiffImage = (TiffImage)Aspose.Imaging.Image.Create(tiffOptions, canvasWidth, canvasHeight))
             {
-                // Add each GIF image as a separate TIFF frame
-                foreach (var inputPath in inputPaths)
+                // Add each GIF as a separate TIFF frame
+                string[] gifPaths = new[] { inputPath1, inputPath2, inputPath3 };
+                foreach (string gifPath in gifPaths)
                 {
-                    // Load GIF (or any raster image) from file
-                    RasterImage raster = (RasterImage)Image.Load(inputPath);
-
-                    // Create a TIFF frame from the loaded raster image
-                    TiffFrame frame = new TiffFrame(raster);
-
-                    // Add the frame to the TIFF image
+                    // Create a TiffFrame directly from the GIF file
+                    TiffFrame frame = new TiffFrame(gifPath);
                     tiffImage.AddFrame(frame);
                 }
 
-                // Remove the initial default frame created by Image.Create
-                TiffFrame activeFrame = tiffImage.ActiveFrame;
-                if (tiffImage.Frames.Length > 1)
-                {
-                    tiffImage.ActiveFrame = tiffImage.Frames[1];
-                    tiffImage.RemoveFrame(0);
-                }
-                activeFrame.Dispose();
+                // Remove the initially created blank frame
+                TiffFrame initialFrame = tiffImage.ActiveFrame;
+                tiffImage.ActiveFrame = tiffImage.Frames[1];
+                tiffImage.RemoveFrame(0);
+                initialFrame.Dispose();
 
-                // Save the multipage TIFF
+                // Save the TIFF (output path already bound via FileCreateSource)
                 tiffImage.Save();
             }
         }
@@ -80,9 +85,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to combine several animated GIF screenshots into a single multipage TIFF for archival or printing purposes.
- * 2. When an application must generate a multi‑page document from individual GIF icons to embed in a PDF or Word report.
- * 3. When a medical imaging system converts a series of GIF‑based scan slices into a single TIFF stack for compatibility with DICOM viewers.
- * 4. When a web service creates a downloadable TIFF portfolio from user‑uploaded GIF artwork for high‑resolution printing.
- * 5. When a batch processing tool consolidates daily GIF charts into one multipage TIFF for automated email distribution.
+ * 1. When you need to combine several GIF frames into a single multi‑page TIFF using Aspose.Imaging for .NET for archival or printing purposes.
+ * 2. When a document‑management workflow requires TIFF files but your source images are separate GIF files, and you want to generate the TIFF programmatically in C#.
+ * 3. When generating a multi‑page report where each page is a GIF screenshot captured from a web application, and you need to assemble them into a TIFF document.
+ * 4. When converting GIF assets into a TIFF stack for compatibility with legacy imaging software that only reads TIFF, using Aspose.Imaging’s TiffOptions.
+ * 5. When creating a multi‑page fax or scanned document from individual GIF scans to meet regulatory file‑format standards in a C# application.
  */
