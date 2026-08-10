@@ -1,44 +1,46 @@
+// HOW-TO: Create BMP Image and Draw Colored Rectangle with Pen in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded paths
+        string outputPath = @"C:\Temp\output.bmp";
+
         try
         {
-            string outputPath = @"C:\temp\output.bmp";
-
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure BMP options with a FileCreateSource
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create the image canvas
-            using (Image image = Image.Create(bmpOptions, 500, 500))
+            // Create BMP image options
+            BmpOptions bmpOptions = new BmpOptions
             {
-                // Initialize graphics for drawing
+                BitsPerPixel = 24
+            };
+
+            // Create a new BMP image (200x200 pixels)
+            using (Image image = Image.Create(bmpOptions, 200, 200))
+            {
+                // Initialize graphics object for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Create a SolidBrush with a custom color
-                using (SolidBrush brush = new SolidBrush(Color.FromArgb(255, 128, 0, 128))) // Purple
-                {
-                    // Construct a Pen from the SolidBrush
-                    Pen pen = new Pen(brush);
+                // Create a SolidBrush with a custom color (e.g., semi‑transparent blue)
+                SolidBrush solidBrush = new SolidBrush(Color.FromArgb(255, 0, 128, 255));
 
-                    // Draw a rectangle using the Pen
-                    graphics.DrawRectangle(pen, new Rectangle(100, 100, 300, 200));
-                }
+                // Construct a Pen from the SolidBrush's color
+                Pen pen = new Pen(solidBrush.Color, 5); // 5‑pixel wide pen
 
-                // Save the image (output is already bound to the file)
-                image.Save();
+                // Draw a rectangle using the pen
+                graphics.DrawRectangle(pen, 20, 20, 160, 160);
+
+                // Save the BMP image to the output path
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -50,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP thumbnail that highlights a specific area with a purple rectangle for a reporting dashboard.
- * 2. When an automated document‑generation system must embed a custom‑colored rectangle into a BMP placeholder image to indicate a selected region in a C# application.
- * 3. When a Windows desktop utility creates a printable BMP map and uses a SolidBrush‑based Pen to draw a colored bounding box around a user‑defined zone.
- * 4. When a batch image‑processing script programmatically adds a visual marker to BMP files before archiving them, using Aspose.Imaging’s Graphics, Pen, and SolidBrush classes.
- * 5. When a testing framework needs to produce a known BMP file with a precise rectangle shape and color to validate image‑comparison algorithms in .NET.
+ * 1. When you need to generate a 200×200 BMP thumbnail with a blue border for a reporting dashboard.
+ * 2. When you want to programmatically add a colored rectangle overlay to an existing bitmap for watermarking purposes.
+ * 3. When you are building a C# utility that creates simple diagram elements, such as boxes, directly in BMP files without using external editors.
+ * 4. When you must produce a BMP file with a custom‑colored outline to highlight regions in image‑processing pipelines.
+ * 5. When you are automating the creation of test images that contain precise geometric shapes for computer‑vision algorithm validation.
  */
