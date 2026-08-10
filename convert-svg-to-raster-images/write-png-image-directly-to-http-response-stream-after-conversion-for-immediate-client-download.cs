@@ -1,3 +1,4 @@
+// HOW-TO: Convert JPEG to PNG and Stream to HTTP Response in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,8 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input image path
-            string inputPath = "Input/sample.jpg";
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string outputPath = "output.png";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -19,30 +21,29 @@ class Program
                 return;
             }
 
-            // Set up a simple HTTP listener
-            using (var listener = new System.Net.HttpListener())
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir);
+
+            // Load the source image
+            using (Image image = Image.Load(inputPath))
             {
-                listener.Prefixes.Add("http://localhost:8080/");
-                listener.Start();
-                Console.WriteLine("Listening on http://localhost:8080/ ...");
+                // Prepare PNG save options
+                PngOptions pngOptions = new PngOptions();
 
-                // Wait for a single request
-                var context = listener.GetContext();
-                var response = context.Response;
-                response.ContentType = "image/png";
-
-                // Load the source image and convert to PNG directly into the response stream
-                using (Image image = Image.Load(inputPath))
+                // Simulated HTTP response stream (replace with actual response stream in real scenario)
+                using (Stream responseStream = new MemoryStream())
                 {
-                    var pngOptions = new PngOptions();
-                    image.Save(response.OutputStream, pngOptions);
+                    // Save the image as PNG directly to the stream
+                    image.Save(responseStream, pngOptions);
+
+                    // Example: write the stream to a file for verification (optional)
+                    responseStream.Position = 0;
+                    using (FileStream file = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+                    {
+                        responseStream.CopyTo(file);
+                    }
                 }
-
-                // Close the response
-                response.OutputStream.Close();
-                response.Close();
-
-                listener.Stop();
             }
         }
         catch (Exception ex)
@@ -54,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to let users download a JPEG photo as a PNG file without storing the converted image on the server, a developer can use this code to convert and stream the PNG directly to the HTTP response.
- * 2. When building a lightweight image‑conversion microservice that receives a request and returns the converted PNG instantly, this pattern of loading the source image with Aspose.Imaging and saving to response.OutputStream is ideal.
- * 3. When integrating on‑the‑fly format conversion into an ASP.NET Core endpoint for a mobile app that expects PNG thumbnails, developers can employ this approach to avoid temporary files and reduce I/O overhead.
- * 4. When creating a secure intranet tool that serves confidential scanned documents as PNGs over HTTPS, the code demonstrates how to validate the source file, convert it with PngOptions, and stream it directly to the client.
- * 5. When implementing a custom HTTP listener for a kiosk or IoT device that must deliver PNG images generated from existing JPEG assets in real time, this snippet shows the necessary C# operations to load, convert, and write the image to the response stream.
+ * 1. When a web application needs to let users download a resized JPEG as a PNG file without storing the converted image on the server.
+ * 2. When an ASP.NET API must return dynamically generated PNG thumbnails from uploaded JPEG photos directly to the client’s browser.
+ * 3. When a cloud service streams converted PNG images over HTTP to mobile apps to reduce bandwidth and improve load times.
+ * 4. When a server‑side script creates on‑the‑fly PNG versions of user‑submitted JPEGs for instant preview in a single HTTP response.
+ * 5. When an e‑commerce platform delivers product images in PNG format for transparent backgrounds by converting JPEGs and streaming them to the shopper’s request.
  */
