@@ -1,3 +1,4 @@
+// HOW-TO: How To Apply Lossless Compression To JPEG2000 And Compare File Size In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,37 +7,45 @@ using Aspose.Imaging.FileFormats.Jpeg2000;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "Input\\sample.jp2";
-            string outputPath = "Output\\sample_lossless.jp2";
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\input.jp2";
+            string outputPath = @"c:\temp\output_lossless.jp2";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Jpeg2000Image jpeg2000Image = new Jpeg2000Image(inputPath))
+            // Load the original JPEG2000 image
+            using (Jpeg2000Image originalImage = new Jpeg2000Image(inputPath))
             {
-                Jpeg2000Options options = new Jpeg2000Options(); // default is lossless (Irreversible = false)
-                jpeg2000Image.Save(outputPath, options);
+                // Prepare lossless JPEG2000 options (Irreversible = false by default)
+                Jpeg2000Options options = new Jpeg2000Options
+                {
+                    Irreversible = false, // Ensure lossless DWT 5-3 compression
+                    Codec = Jpeg2000Codec.J2K // Use raw codestream format
+                };
+
+                // Save the image with lossless compression
+                originalImage.Save(outputPath, options);
             }
 
+            // Compare file sizes
             long originalSize = new FileInfo(inputPath).Length;
             long compressedSize = new FileInfo(outputPath).Length;
 
-            Console.WriteLine($"Original size: {originalSize} bytes");
-            Console.WriteLine($"Compressed size: {compressedSize} bytes");
-            if (originalSize > 0)
-            {
-                double ratio = (double)compressedSize / originalSize * 100;
-                Console.WriteLine($"Size after compression: {ratio:F2}% of original");
-            }
+            Console.WriteLine($"Original size   : {originalSize} bytes");
+            Console.WriteLine($"Compressed size : {compressedSize} bytes");
+            Console.WriteLine($"Size reduction  : {originalSize - compressedSize} bytes");
         }
         catch (Exception ex)
         {
@@ -47,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive high‑resolution medical scans in JPEG2000 format with lossless compression and verify how much storage space the compression saves.
- * 2. When a GIS application must store satellite imagery as lossless JPEG2000 files and compare the compressed size to the original to optimize bandwidth usage.
- * 3. When a digital asset management system requires converting existing JPEG2000 assets to a smaller lossless version using C# and Aspose.Imaging and log the percentage of size reduction.
- * 4. When an e‑learning platform wants to serve large textbook diagrams in lossless JPEG2000 to preserve detail, and the developer must measure the file‑size impact before deployment.
- * 5. When a printing workflow automates the preparation of artwork files in JPEG2000, applying lossless compression via Aspose.Imaging and checking the resulting file size to meet printer specifications.
+ * 1. When you need to archive high‑resolution JPEG2000 images without quality loss while minimizing storage space.
+ * 2. When you are building a medical‑imaging application that must store DICOM JPEG2000 scans losslessly and verify the size reduction.
+ * 3. When a GIS system requires lossless compression of satellite JPEG2000 tiles before uploading them to a cloud repository.
+ * 4. When you want to benchmark Aspose.Imaging’s lossless JPEG2000 codec against the original file size in a C# performance test.
+ * 5. When an e‑learning platform must generate smaller, lossless JPEG2000 assets for offline delivery and report the saved bytes.
  */
