@@ -1,48 +1,49 @@
+// HOW-TO: How to Rasterize OTG to JPEG with 300 DPI in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample_300dpi.jpg";
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.otg";
+            string outputPath = "Output/sample.jpg";
 
-            // Verify that the input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary)
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG options with 300 dpi resolution
-                JpegOptions jpegOptions = new JpegOptions
+                // Configure JPEG save options with 300 DPI
+                var jpegOptions = new JpegOptions
                 {
-                    ResolutionSettings = new ResolutionSetting(300.0, 300.0),
-                    ResolutionUnit = ResolutionUnit.Inch,
-                    Quality = 100 // optional: maximum quality
+                    ResolutionSettings = new ResolutionSetting(300, 300),
+                    ResolutionUnit = ResolutionUnit.Inch
                 };
 
-                // Set vector rasterization options for OTG conversion
-                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
+                // Set up OTG rasterization options
+                var otgOptions = new OtgRasterizationOptions
                 {
-                    PageSize = image.Size // preserve original page size
+                    PageSize = image.Size,
+                    BackgroundColor = Color.White
                 };
+
                 jpegOptions.VectorRasterizationOptions = otgOptions;
 
-                // Save the rasterized image as JPEG
+                // Save as JPEG with the specified options
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -55,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating print‑ready marketing brochures from vector OTG artwork, a developer can rasterize the file to a 300 dpi JPEG to meet printer resolution requirements.
- * 2. When converting architectural floor‑plan OTG files to high‑resolution JPEGs for inclusion in PDF construction documents, the code ensures the output meets the 300 dpi standard for clear detail.
- * 3. When creating product catalog images from OTG vector graphics, a developer uses this code to produce 300 dpi JPEGs that retain sharpness when printed on glossy paper.
- * 4. When exporting OTG diagrams to JPEG for archival in a digital asset management system that expects 300 dpi images for consistent metadata handling, the code provides the required resolution.
- * 5. When a web‑based reporting tool needs to embed OTG charts as high‑resolution JPEGs for downloadable PDF reports, the developer sets the DPI to 300 to guarantee legible print output.
+ * 1. When a developer needs to generate print‑ready JPEGs from vector OTG drawings at 300 DPI for high‑quality brochures.
+ * 2. When an application must convert OTG files to JPEG thumbnails while preserving a specific resolution for consistent display on web galleries.
+ * 3. When a reporting tool requires embedding OTG diagrams into PDF reports as high‑resolution JPEG images with exact DPI settings.
+ * 4. When a CAD system exports designs to JPEG for archival purposes and must ensure the output meets a 300 DPI standard for regulatory compliance.
+ * 5. When an e‑commerce platform processes OTG product illustrations into JPEGs for catalog printing, needing precise DPI to match printer specifications.
  */
