@@ -1,8 +1,8 @@
+// HOW-TO: Convert OTG Vector Image to JPEG in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -10,35 +10,34 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample_converted.jpg";
+            string outputPath = @"C:\Images\sample.jpg";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare JPEG save options with default quality
-                JpegOptions jpegOptions = new JpegOptions();
+                // Prepare JPEG save options
+                var jpegOptions = new JpegOptions();
 
-                // Configure vector rasterization for OTG files
-                OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
+                // Configure rasterization for vector OTG content
+                var otgRasterOptions = new OtgRasterizationOptions
                 {
-                    // Preserve original size
                     PageSize = image.Size
                 };
-                jpegOptions.VectorRasterizationOptions = otgRasterization;
+                jpegOptions.VectorRasterizationOptions = otgRasterOptions;
 
-                // Save the image as JPEG
+                // Save as JPEG with default quality
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -51,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a JPEG preview of an OpenDocument graphic (OTG) for web display or email attachment.
- * 2. When an application must batch‑convert user‑uploaded OTG diagrams to JPEG to store them in a database that only supports raster image file formats.
- * 3. When a reporting tool has to embed vector‑based OTG charts into PDF reports that require JPEG raster images for compatibility using C# and Aspose.Imaging.
- * 4. When a mobile app needs to display OTG icons on devices that only support JPEG decoding, requiring on‑the‑fly conversion with default quality settings.
- * 5. When a document management system must create thumbnail images of OTG files using Aspose.Imaging’s vector rasterization options and save them as JPEG for quick browsing.
+ * 1. When you need to display a CAD‑style OTG drawing on a web page that only supports JPEG images.
+ * 2. When you must generate thumbnail previews of OTG files for a document management system using C#.
+ * 3. When an automated batch job has to archive vector OTG graphics as compressed JPEG files for long‑term storage.
+ * 4. When a reporting tool requires converting OTG charts into JPEG format to embed them in PDF reports.
+ * 5. When a mobile app consumes JPEG images, and you have to transform server‑side OTG assets into JPEG on the fly with Aspose.Imaging.
  */
