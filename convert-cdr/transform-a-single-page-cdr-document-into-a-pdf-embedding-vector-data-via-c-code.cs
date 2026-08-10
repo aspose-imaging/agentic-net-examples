@@ -1,54 +1,49 @@
+// HOW-TO: Convert Single Page CDR to PDF with Vector Rasterization in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input\\sample.cdr";
-            string outputPath = "Output\\sample.pdf";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Data\sample.cdr";
+            string outputPath = @"C:\Data\output\sample_page0.pdf";
 
-            // Validate input file existence
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR document
-            using (Image image = Image.Load(inputPath))
+            // Load the CDR image
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Cast to CdrImage to access pages
-                CdrImage cdrImage = (CdrImage)image;
+                // Select the first page (index 0)
+                CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
 
-                // Get the first (single) page
-                int pageNumber = 0;
-                CdrImagePage imagePage = (CdrImagePage)cdrImage.Pages[pageNumber];
-
-                // Configure PDF options with vector rasterization settings
+                // Prepare PDF export options with vector rasterization settings
                 PdfOptions pdfOptions = new PdfOptions();
                 CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
+                    SmoothingMode = SmoothingMode.None,
+                    PageWidth = page.Width,
+                    PageHeight = page.Height
                 };
                 pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Set page dimensions to match the CDR page size
-                pdfOptions.VectorRasterizationOptions.PageWidth = imagePage.Width;
-                pdfOptions.VectorRasterizationOptions.PageHeight = imagePage.Height;
-
-                // Save the page as PDF
-                imagePage.Save(outputPath, pdfOptions);
+                // Save the selected page as a PDF
+                page.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -60,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a single‑page CorelDRAW (CDR) design to a PDF for client‑ready documentation while preserving vector quality, they can use this C# code with Aspose.Imaging.
- * 2. When an ASP.NET application must generate PDF invoices from CDR templates on the fly, this code provides the necessary rasterization options to keep text crisp and layout accurate.
- * 3. When a batch‑processing service has to create PDF previews of individual CDR logo files for a marketing portal, the example shows how to load each page and save it as a vector‑based PDF.
- * 4. When a CAD workflow requires PDF output that matches the exact dimensions of a CDR drawing, the code demonstrates setting page width and height via CdrRasterizationOptions.
- * 5. When a document‑management system needs to validate and display CDR files by converting them to searchable PDFs, this snippet illustrates the straightforward C# conversion process.
+ * 1. When you need to export a CorelDRAW page as a high‑quality PDF while preserving vector information for printing.
+ * 2. When an automated workflow must convert CDR files to PDF without losing exact dimensions or text rendering.
+ * 3. When a server‑side application generates PDFs from user‑uploaded CDR drawings for archival or sharing.
+ * 4. When you want to embed vector rasterization settings such as no smoothing and single‑bit text rendering to control PDF output size.
+ * 5. When you have to programmatically ensure the output folder exists and handle missing CDR files gracefully during batch conversion.
  */
