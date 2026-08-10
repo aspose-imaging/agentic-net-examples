@@ -1,3 +1,4 @@
+// HOW-TO: Measure EPS to PNG Conversion Time with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -10,39 +11,60 @@ class Program
     {
         try
         {
-            string inputDir = "Input";
-            string outputDir = "Output";
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            string[] epsFiles = Directory.GetFiles(inputDir, "*.eps");
-            var logLines = new List<string>();
+            if (!Directory.Exists(inputDirectory))
+            {
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
 
-            foreach (var inputPath in epsFiles)
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+            foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                if (!inputPath.EndsWith(".eps", StringComparison.OrdinalIgnoreCase))
+                {
                     continue;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + ".png");
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
                 DateTime start = DateTime.Now;
+
                 using (Image image = Image.Load(inputPath))
                 {
-                    image.Save(outputPath, new PngOptions());
+                    using (var options = new PngOptions())
+                    {
+                        options.VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height
+                        };
+
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        image.Save(outputPath, options);
+                    }
                 }
-                TimeSpan duration = DateTime.Now - start;
 
-                Console.WriteLine($"{inputPath} conversion took {duration.TotalMilliseconds} ms");
-                logLines.Add($"{inputPath},{duration.TotalMilliseconds}");
+                TimeSpan elapsed = DateTime.Now - start;
+                Console.WriteLine($"{Path.GetFileName(inputPath)} conversion took {elapsed.TotalMilliseconds} ms");
             }
-
-            string logPath = Path.Combine(outputDir, "conversion_times.csv");
-            Directory.CreateDirectory(Path.GetDirectoryName(logPath));
-            File.WriteAllLines(logPath, logLines);
         }
         catch (Exception ex)
         {
@@ -53,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop needs to batch‑convert customer EPS artwork to PNG thumbnails and track how long each conversion takes to ensure the rendering pipeline meets service‑level agreements.
- * 2. When a web‑application processes uploaded EPS logos into PNGs for display and records conversion times in a CSV to identify performance bottlenecks on the server.
- * 3. When a CI/CD pipeline validates that a new version of Aspose.Imaging does not degrade EPS‑to‑PNG conversion speed by logging the duration of each file conversion.
- * 4. When a digital asset management system migrates legacy EPS files to PNG format and stores per‑file conversion durations for audit and capacity‑planning reports.
- * 5. When a developer builds a monitoring tool that watches an input folder, converts incoming EPS files to PNG, and writes the elapsed milliseconds to a log for real‑time performance analytics.
+ * 1. When you need to benchmark how long batch converting EPS artwork to PNG takes in a C# application.
+ * 2. When you want to log conversion performance for each EPS file to identify slow‑processing documents.
+ * 3. When you are optimizing a server‑side image pipeline and need precise timing for EPS‑to‑PNG rasterization.
+ * 4. When you must compare different rasterization settings and need per‑file duration metrics for EPS conversions.
+ * 5. When you are generating a performance report for a graphics workflow that processes many EPS files into PNG format.
  */
