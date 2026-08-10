@@ -1,44 +1,57 @@
+// HOW-TO: Extract Frames from Animated GIF and Save as PNG Sequence in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Gif.Blocks;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input GIF and output folder paths
+        string inputPath = "Animation.gif";
+        string outputFolder = "ExtractedFrames";
+
         try
         {
-            string inputPath = "input.gif";
-            string outputFolder = "output_frames";
-
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure the output folder exists
             Directory.CreateDirectory(outputFolder);
 
-            using (GifImage gif = (GifImage)Image.Load(inputPath))
+            // Load the animated GIF
+            using (Image img = Image.Load(inputPath))
             {
-                int frameCount = gif.PageCount;
-
-                for (int i = 0; i < frameCount; i++)
+                // Cast to GifImage to access frames
+                GifImage gif = img as GifImage;
+                if (gif == null)
                 {
-                    string outputPath = Path.Combine(outputFolder, $"frame_{i + 1}.png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    Console.Error.WriteLine("The provided file is not a GIF image.");
+                    return;
+                }
 
-                    var pngOptions = new PngOptions
+                // Iterate through each frame (page) in the GIF
+                for (int i = 0; i < gif.PageCount; i++)
+                {
+                    // Retrieve the frame as a RasterImage
+                    using (RasterImage frame = (RasterImage)gif.Pages[i])
                     {
-                        Source = new FileCreateSource(outputPath, false),
-                        MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1))
-                    };
+                        // Build output file path (e.g., frame_000.png)
+                        string outputPath = Path.Combine(outputFolder, $"frame_{i:D3}.png");
 
-                    gif.Save(outputPath, pngOptions);
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the frame as PNG
+                        var pngOptions = new PngOptions();
+                        frame.Save(outputPath, pngOptions);
+                    }
                 }
             }
         }
@@ -51,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate individual PNG thumbnails from each frame of an animated GIF for use in a web gallery or preview carousel.
- * 2. When a video editing tool requires extracting every frame of a GIF animation to apply per‑frame filters or overlays in a C# application using Aspose.Imaging.
- * 3. When an e‑learning platform wants to convert animated instructional GIFs into separate PNG images for step‑by‑step slide presentations.
- * 4. When a mobile app needs to cache each frame of a GIF as a PNG file to improve rendering performance on low‑power devices.
- * 5. When a digital asset management system must archive the original frames of a GIF animation as lossless PNG files for compliance or version control.
+ * 1. When you need to break down an animated GIF into individual PNG images for creating thumbnails or preview frames in a web gallery.
+ * 2. When a video editing tool requires each frame of a GIF animation to be processed separately as PNG files for further compositing.
+ * 3. When you want to generate a sprite sheet by extracting GIF frames and then recombining the PNG sequence in a game development pipeline.
+ * 4. When an e‑learning platform must convert animated GIF lessons into static PNG slides for accessibility or printing purposes.
+ * 5. When a digital asset management system needs to index each frame of an animated GIF as separate PNG files for searchable metadata tagging.
  */
