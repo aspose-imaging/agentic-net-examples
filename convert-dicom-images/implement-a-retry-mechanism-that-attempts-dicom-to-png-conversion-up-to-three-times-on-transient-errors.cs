@@ -1,60 +1,79 @@
+// HOW-TO: Retry DICOM to PNG Conversion Up to Three Times in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.CoreExceptions.ImageFormats;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "Input/sample.dcm";
-            string outputPath = "Output/sample.png";
+            // Hardcoded input and output paths
+            string inputPath = "sample.dcm";
+            string outputDirectory = "output";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
             const int maxAttempts = 3;
-            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            int attempt = 0;
+            bool success = false;
+
+            while (attempt < maxAttempts && !success)
             {
                 try
                 {
-                    using (DicomImage dicom = (DicomImage)Image.Load(inputPath))
+                    // Load the DICOM image
+                    using (Image img = Image.Load(inputPath))
                     {
-                        int pageIndex = 0;
-                        foreach (var page in dicom.DicomPages)
+                        // Cast to DicomImage to access DicomPages
+                        DicomImage dicomImage = img as DicomImage;
+                        if (dicomImage == null)
                         {
-                            string pageOutput = outputPath;
-                            if (dicom.DicomPages.Count() > 1)
-                            {
-                                string dir = Path.GetDirectoryName(outputPath);
-                                string name = Path.GetFileNameWithoutExtension(outputPath);
-                                string ext = Path.GetExtension(outputPath);
-                                pageOutput = Path.Combine(dir, $"{name}_{pageIndex}{ext}");
-                            }
+                            Console.Error.WriteLine("The loaded file is not a DICOM image.");
+                            return;
+                        }
 
-                            page.Save(pageOutput, new PngOptions());
-                            pageIndex++;
+                        // Convert each DICOM page to PNG
+                        foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                        {
+                            string outputPath = Path.Combine(outputDirectory, $"page_{dicomPage.Index}.png");
+                            // Ensure the directory for the output file exists
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                            // Save the page as PNG
+                            dicomPage.Save(outputPath, new PngOptions());
                         }
                     }
 
-                    break;
+                    success = true; // conversion succeeded
                 }
-                catch (Exception)
+                catch (DicomImageException ex)
                 {
-                    if (attempt == maxAttempts)
-                    {
-                        throw;
-                    }
+                    attempt++;
+                    if (attempt >= maxAttempts)
+                        throw; // rethrow after max attempts
+                    // Optionally log transient error
+                    Console.Error.WriteLine($"Transient DICOM error (attempt {attempt}): {ex.Message}");
+                }
+                catch (PngImageException ex)
+                {
+                    attempt++;
+                    if (attempt >= maxAttempts)
+                        throw; // rethrow after max attempts
+                    // Optionally log transient error
+                    Console.Error.WriteLine($"Transient PNG error (attempt {attempt}): {ex.Message}");
                 }
             }
         }
@@ -67,9 +86,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology PACS system needs to generate PNG thumbnails of DICOM scans for web preview and must handle transient file‑access errors with a retry loop.
- * 2. When a medical research application batch‑processes multi‑frame DICOM studies into separate PNG images for machine‑learning training and occasional I/O timeouts require automatic retries.
- * 3. When a hospital EMR integrates patient imaging by converting DICOM files to PNG for display on mobile devices, and temporary storage failures need to be recovered without crashing the app.
- * 4. When a diagnostic imaging workflow exports DICOM series to PNG for inclusion in PDF reports and must gracefully retry after brief permission or lock conflicts.
- * 5. When a telemedicine platform streams DICOM images as PNG snapshots to browsers and needs to recover from short network interruptions during the conversion process.
+ * 1. When you need to reliably convert medical DICOM files to PNG images in a C# application, handling occasional read errors.
+ * 2. When processing multi‑frame DICOM studies and you must ensure each page is saved as a separate PNG even if the file is temporarily inaccessible.
+ * 3. When integrating Aspose.Imaging into a healthcare workflow that requires automatic retries on transient I/O failures during image conversion.
+ * 4. When building a batch conversion tool that creates an output folder structure and needs to recover from intermittent network or disk glitches.
+ * 5. When converting diagnostic images on a server and you want to guarantee up to three attempts before reporting a failure to the user.
  */
