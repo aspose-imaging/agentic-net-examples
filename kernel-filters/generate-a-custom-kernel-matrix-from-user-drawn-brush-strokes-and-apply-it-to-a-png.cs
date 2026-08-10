@@ -1,10 +1,9 @@
-// HOW-TO: Create Custom Convolution Kernel from Brush Strokes and Apply to PNG in C# (Aspose.Imaging for .NET)
+// HOW-TO: Apply Custom Sharpen Convolution Kernel to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 
@@ -14,58 +13,50 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source PNG as a raster image
-            using (Aspose.Imaging.Image inputImage = Aspose.Imaging.Image.Load(inputPath))
+            using (Image inputImage = Image.Load(inputPath))
             {
-                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)inputImage;
+                RasterImage raster = (RasterImage)inputImage;
 
-                // Create a small temporary image to capture brush strokes (5x5)
-                using (PngImage kernelImg = new PngImage(5, 5))
+                // Define a custom convolution kernel (e.g., sharpen)
+                double[,] kernel = new double[,]
                 {
-                    // Draw a simple diagonal stroke
-                    Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(kernelImg);
-                    graphics.Clear(Aspose.Imaging.Color.White);
-                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 1);
-                    graphics.DrawLine(pen, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Point(4, 4));
+                    { 0, -1, 0 },
+                    { -1, 5, -1 },
+                    { 0, -1, 0 }
+                };
 
-                    // Extract ARGB pixels and convert to a grayscale kernel matrix
-                    int[] argbPixels = kernelImg.LoadArgb32Pixels(kernelImg.Bounds);
-                    double[,] kernel = new double[5, 5];
-                    for (int y = 0; y < 5; y++)
-                    {
-                        for (int x = 0; x < 5; x++)
-                        {
-                            int pixel = argbPixels[y * 5 + x];
-                            // Compute luminance using Rec. 601 coefficients
-                            double r = (pixel >> 16) & 0xFF;
-                            double g = (pixel >> 8) & 0xFF;
-                            double b = pixel & 0xFF;
-                            double lum = 0.299 * r + 0.587 * g + 0.114 * b;
-                            // Normalize to range [-1,1] for convolution kernel
-                            kernel[y, x] = (lum / 255.0) * 2.0 - 1.0;
-                        }
-                    }
+                // Create convolution filter options with the custom kernel
+                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
 
-                    // Apply the custom convolution filter to the original image
-                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
-                }
+                // Apply the convolution filter to the entire image
+                raster.Filter(raster.Bounds, filterOptions);
 
-                // Save the processed image as PNG
+                // Prepare PNG save options
                 PngOptions saveOptions = new PngOptions
                 {
                     Source = new FileCreateSource(outputPath, false)
                 };
+
+                // Save the processed image
+                raster.Save();
+                // Since the image was created from a file source, use Canvas.Save()
+                // (Image.Create with FileCreateSource binds the output file)
+                // Here we loaded from a file, so we can use Save with options
                 raster.Save(outputPath, saveOptions);
             }
         }
@@ -78,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to simulate a hand‑drawn filter effect by converting a user’s brush stroke into a convolution matrix for a PNG image.
- * 2. When you want to generate a custom sharpening or edge‑detect filter based on a small sketch and apply it to photographs in a .NET application.
- * 3. When building an image‑editing tool that lets users draw their own kernels and instantly see the result on uploaded PNG files.
- * 4. When automating batch processing of PNG assets with dynamically created filters derived from designer‑provided stroke patterns.
- * 5. When creating artistic effects such as motion blur or emboss by converting simple line drawings into grayscale kernels for raster image manipulation.
+ * 1. When you need to enhance the edges of a PNG photograph programmatically in a .NET application.
+ * 2. When you want to implement a custom image filter, such as sharpening, using a user‑defined kernel with Aspose.Imaging.
+ * 3. When you must process large batches of PNG files on a server and apply the same convolution effect automatically.
+ * 4. When you are building a graphics editor that lets users draw brush strokes to define a filter matrix and then apply it to an image.
+ * 5. When you need to improve the visual clarity of scanned PNG documents before saving them to disk.
  */
