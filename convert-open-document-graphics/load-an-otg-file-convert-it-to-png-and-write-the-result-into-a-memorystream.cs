@@ -1,3 +1,4 @@
+// HOW-TO: Convert OTG to PNG and Get MemoryStream in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -13,7 +14,7 @@ class Program
             // Hardcoded input path
             string inputPath = @"C:\Images\sample.otg";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -32,13 +33,12 @@ class Program
                 };
                 pngOptions.VectorRasterizationOptions = otgRasterOptions;
 
-                // Save the image to a memory stream in PNG format
-                using (var memoryStream = new MemoryStream())
+                // Save the image to a memory stream
+                using (MemoryStream memoryStream = new MemoryStream())
                 {
                     otgImage.Save(memoryStream, pngOptions);
-
-                    // Example usage of the resulting PNG data
-                    Console.WriteLine($"PNG data size: {memoryStream.Length} bytes");
+                    // Example usage of the resulting stream
+                    Console.WriteLine($"PNG saved to memory stream, length = {memoryStream.Length} bytes");
                 }
             }
         }
@@ -51,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to receive an OpenDocument graphic (OTG) upload and return a PNG thumbnail without writing temporary files to disk.
- * 2. When a desktop application must embed a vector OTG diagram into a PDF report by first rasterizing it to a PNG stream for further processing.
- * 3. When an automated batch job converts a library of OTG icons to PNG format for use in a mobile app, storing the results in memory before uploading to a CDN.
- * 4. When a cloud function generates on‑the‑fly PNG previews of user‑submitted OTG files for display in a gallery, using a MemoryStream to avoid filesystem I/O.
- * 5. When a unit test validates that the Aspose.Imaging OTG rasterization options correctly preserve the original page size by converting the image to PNG in a memory buffer.
+ * 1. When you need to display or transmit an OpenDocument Graphic (OTG) as a PNG without writing a temporary file, you can load the OTG and save it directly to a MemoryStream.
+ * 2. When a web API must return a PNG representation of an uploaded OTG image, this code converts the file in memory for a fast response.
+ * 3. When generating thumbnails for OTG documents in a background service, converting to PNG in a MemoryStream avoids disk I/O and simplifies caching.
+ * 4. When integrating Aspose.Imaging into a Windows service that processes batch OTG files and streams the PNG results to another system, this approach keeps the workflow entirely in memory.
+ * 5. When performing on‑the‑fly rasterization of vector OTG graphics for PDF or email attachments, saving to a MemoryStream lets you embed the PNG without creating intermediate files.
  */
