@@ -1,14 +1,13 @@
+// HOW-TO: Resize PNG to 500x500, Apply Gaussian Blur, Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Pdf;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         try
         {
@@ -25,15 +24,14 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
+                // Resize to 500x500 pixels
+                image.Resize(500, 500);
+
+                // Apply Gaussian blur filter
                 RasterImage raster = (RasterImage)image;
-                if (!raster.IsCached)
-                    raster.CacheData();
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
-                raster.Resize(500, 500);
-
-                double[,] kernel = ConvolutionFilter.GetGaussian(5, 1.0);
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
-
+                // Save the result as PDF
                 PdfOptions pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
@@ -47,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate a printable PDF thumbnail from user‑uploaded PNG avatars, resizing them to 500 × 500 pixels and applying a Gaussian blur for a soft‑focus effect.
- * 2. When an e‑commerce platform wants to create catalog pages that embed blurred product images, converting high‑resolution PNGs to 500 × 500 PDF assets using Aspose.Imaging in C#.
- * 3. When a document‑automation script must batch‑process marketing banners, scaling each PNG to a fixed 500 × 500 size, smoothing edges with a Gaussian filter, and exporting the result as a PDF for distribution.
- * 4. When a desktop utility needs to prepare confidential screenshots by resizing them, applying a Gaussian blur to obscure details, and saving them as PDF files for secure archiving.
- * 5. When a reporting tool generates PDF reports that include resized and softly blurred PNG charts, using Aspose.Imaging’s image filters and PDF options in a .NET environment.
+ * 1. When you need to generate a high‑resolution PDF thumbnail from a PNG by resizing it to a fixed 500 × 500 size and softening the image with a Gaussian blur.
+ * 2. When creating printable PDF brochures that require PNG logos to be uniformly sized and lightly blurred for a subtle background effect.
+ * 3. When automating a workflow that converts user‑uploaded PNG screenshots into standardized 500 × 500 PDF pages with a blur filter to protect sensitive details.
+ * 4. When preparing image assets for a mobile app’s PDF documentation, ensuring each PNG is resized and blurred before embedding.
+ * 5. When building a batch process that normalizes PNG icons to 500 × 500 pixels, applies a Gaussian blur for visual consistency, and saves them as PDF files for archival.
  */
