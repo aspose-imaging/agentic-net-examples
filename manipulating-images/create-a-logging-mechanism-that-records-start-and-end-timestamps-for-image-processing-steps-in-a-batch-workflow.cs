@@ -1,75 +1,67 @@
+// HOW-TO: Log Start and End Timestamps for Batch Image Conversion to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
-class Logger
-{
-    private static readonly string LogFilePath = @"C:\Images\process.log";
-
-    // Writes a message with a timestamp to the log file.
-    public static void Log(string message)
-    {
-        string entry = $"{DateTime.Now:O} - {message}";
-        try
-        {
-            File.AppendAllText(LogFilePath, entry + Environment.NewLine);
-        }
-        catch
-        {
-            // If logging fails, fall back to console output.
-            Console.Error.WriteLine("Logging failed: " + entry);
-        }
-    }
-}
-
 class Program
 {
+    // Simple logger that records timestamps for each step
+    static void Log(string message)
+    {
+        Console.WriteLine($"{DateTime.Now:O} - {message}");
+    }
+
     static void Main()
     {
-        // Hard‑coded input and output directories.
-        string inputDirectory = @"C:\Images\Input";
-        string outputDirectory = @"C:\Images\Output";
-
         try
         {
-            // Ensure the output directory exists.
+            // Hardcoded input files (replace with actual existing files)
+            string[] inputPaths = new string[]
+            {
+                @"C:\Images\input1.jpg",
+                @"C:\Images\input2.png"
+            };
+
+            // Hardcoded output directory
+            string outputDirectory = @"C:\Images\Processed";
+
+            // Ensure the base output directory exists (rule 3)
             Directory.CreateDirectory(outputDirectory);
 
-            // Get all PNG files in the input directory.
-            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.png");
-
-            foreach (string inputPath in inputFiles)
+            foreach (string inputPath in inputPaths)
             {
-                // Verify the input file exists.
+                // Rule 2: verify input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                Logger.Log($"Start processing: {inputPath}");
+                Log($"Start processing {inputPath}");
 
-                // Load the image.
+                // Load the image using Aspose.Imaging (lifecycle rule)
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Determine output path (convert to JPEG).
+                    // Determine output file path (convert to PNG)
                     string outputPath = Path.Combine(
                         outputDirectory,
-                        Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
+                        Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
-                    // Ensure the output directory exists (unconditional per requirements).
+                    // Rule 3: ensure output directory exists before saving
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the image as JPEG.
-                    image.Save(outputPath, new JpegOptions());
-
-                    Logger.Log($"Finished processing: {inputPath}");
+                    // Save the image as PNG (lifecycle rule)
+                    var pngOptions = new PngOptions();
+                    image.Save(outputPath, pngOptions);
                 }
+
+                Log($"Finished processing {inputPath}");
             }
         }
         catch (Exception ex)
         {
+            // Rule 4: catch any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -77,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to audit a nightly batch that converts thousands of PNG files to JPEG using Aspose.Imaging for .NET, the logger records start timestamps for each file to verify that every image was processed.
- * 2. When troubleshooting slow image processing performance, the logged timestamps let a developer pinpoint which conversion steps take the most time in a C# batch workflow.
- * 3. When regulatory compliance requires a tamper‑evident record of when image transformations occurred, the logger writes ISO‑8601 timestamps to a central log file for each processed file.
- * 4. When scaling a server‑side image pipeline, the developer can use the log entries to monitor the throughput of the batch job and detect any files that were skipped or failed.
- * 5. When generating operational reports for stakeholders, the timestamped log provides a simple way to calculate total processing duration and success rates for the PNG‑to‑JPEG conversion batch.
+ * 1. When you need to track how long each image takes to convert from JPEG or PNG to PNG in a batch process for performance monitoring.
+ * 2. When you want to ensure that missing input files are detected early and logged before processing begins.
+ * 3. When you require automatic creation of output folders so that saved PNG files are stored without manual directory setup.
+ * 4. When you need a simple console logger that records precise ISO 8601 timestamps for debugging and audit trails in image pipelines.
+ * 5. When you are building a .NET service that processes multiple images and must record start and finish times for each file to generate processing reports.
  */
