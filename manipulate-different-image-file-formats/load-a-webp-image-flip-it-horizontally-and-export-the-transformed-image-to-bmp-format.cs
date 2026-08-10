@@ -1,3 +1,4 @@
+// HOW-TO: Flip WebP Image Horizontally and Save as BMP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.webp";
-            string outputPath = "C:\\temp\\output.bmp";
+            string inputPath = @"C:\temp\input.webp";
+            string outputPath = @"C:\temp\output.bmp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -43,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a WebP image to BMP format and flip it horizontally for a legacy Windows application that only accepts BMP files.
- * 2. When a developer must generate a mirrored thumbnail of a WebP photo for a web gallery that stores thumbnails as BMP for faster rendering on older browsers.
- * 3. When a developer wants to preprocess user‑uploaded WebP graphics by horizontally flipping them and saving as BMP to meet a printing service’s file‑format requirements.
- * 4. When a developer is building an automated batch job that normalizes image orientation by flipping WebP assets and converts them to BMP for compatibility with a third‑party image analysis tool.
- * 5. When a developer needs to integrate image transformation in a C# utility that reads WebP files, applies a horizontal flip, and outputs BMP files for use in a Windows‑only reporting system.
+ * 1. When you need to convert user‑uploaded WebP graphics to BMP for legacy Windows applications while mirroring the image for a right‑to‑left layout.
+ * 2. When generating thumbnails for a printing pipeline that requires BMP files and the source assets are stored as WebP, and the design calls for a horizontal flip.
+ * 3. When processing scanned documents saved as WebP and you must flip them to correct orientation before saving them in BMP for OCR tools that only accept BMP input.
+ * 4. When creating assets for a game engine that only supports BMP textures, and you have to mirror WebP sprites horizontally during the import process.
+ * 5. When automating batch conversion of WebP icons to BMP format for a desktop UI, ensuring each icon is flipped to match the UI’s mirrored theme.
  */
