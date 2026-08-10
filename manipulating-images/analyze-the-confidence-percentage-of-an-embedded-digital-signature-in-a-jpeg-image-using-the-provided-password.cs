@@ -1,3 +1,4 @@
+// HOW-TO: Get Digital Signature Confidence Percentage of a JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,42 +8,30 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded input path and password
         string inputPath = "input.jpg";
-        string outputPath = "output/result.txt";
         string password = "myPassword";
 
         try
         {
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists (unconditional)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the JPEG image
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Cast to RasterImage to access digital signature methods
-                RasterImage rasterImage = image as RasterImage;
-                if (rasterImage == null)
-                {
-                    Console.Error.WriteLine("The loaded image is not a raster image.");
-                    return;
-                }
+                // Get the confidence percentage of the embedded digital signature
+                int confidence = image.AnalyzePercentageDigitalSignature(password);
 
-                // Analyze the confidence percentage of the embedded digital signature
-                int confidence = rasterImage.AnalyzePercentageDigitalSignature(password);
+                // Optionally, determine if the image is considered signed using the default threshold (75%)
+                bool isSigned = image.IsDigitalSigned(password);
 
-                // Output the result to console
                 Console.WriteLine($"Digital signature confidence: {confidence}%");
-
-                // Also write the result to the output file
-                File.WriteAllText(outputPath, $"Digital signature confidence: {confidence}%");
+                Console.WriteLine($"Is image signed (default threshold): {isSigned}");
             }
         }
         catch (Exception ex)
@@ -54,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a legal document management system stores signed contracts as JPEG scans, a developer can use this code to verify the confidence level of the embedded digital signature before archiving the file.
- * 2. When a photo‑sharing platform needs to ensure that uploaded images contain a trusted watermark signature, the code can read the JPEG, apply the password, and report the signature confidence percentage.
- * 3. When a compliance audit tool processes marketing assets saved as JPEGs, it can call AnalyzePercentageDigitalSignature to confirm that each image meets the required signature integrity threshold.
- * 4. When an e‑commerce site generates product images with embedded digital signatures for anti‑counterfeit protection, the developer can run this snippet to programmatically assess the signature’s confidence score.
- * 5. When a forensic analysis application examines suspect JPEG files, it can load the image with Aspose.Imaging, supply the known password, and retrieve the digital signature confidence to aid in authenticity verification.
+ * 1. When you need to verify the authenticity of a JPEG received from a partner by checking its digital signature confidence.
+ * 2. When you want to enforce a policy that only images with a signature confidence above a certain threshold are accepted in a document management system.
+ * 3. When you are building an audit trail that records whether each uploaded image is digitally signed and how strong the signature is.
+ * 4. When you need to programmatically reject tampered JPEG files by comparing the confidence value against the expected level.
+ * 5. When you are integrating image security checks into a C# web API that validates user‑submitted photos before processing them.
  */
