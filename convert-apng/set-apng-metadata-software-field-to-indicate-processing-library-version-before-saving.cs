@@ -1,5 +1,7 @@
+// HOW-TO: Add Software Metadata to APNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
@@ -22,26 +24,20 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.RasterImage sourceImage = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                ApngOptions createOptions = new ApngOptions
+                ApngOptions options = new ApngOptions
                 {
                     Source = new FileCreateSource(outputPath, false),
-                    DefaultFrameTime = 70,
+                    DefaultFrameTime = 100,
                     ColorType = PngColorType.TruecolorWithAlpha
                 };
 
-                using (ApngImage apngImage = (ApngImage)Aspose.Imaging.Image.Create(createOptions, sourceImage.Width, sourceImage.Height))
+                using (ApngImage apng = (ApngImage)Image.Create(options, sourceImage.Width, sourceImage.Height))
                 {
-                    int numOfFrames = 10;
-                    apngImage.RemoveAllFrames();
-
-                    for (int i = 0; i < numOfFrames; i++)
-                    {
-                        apngImage.AddFrame(sourceImage);
-                    }
-
-                    apngImage.Save();
+                    apng.RemoveAllFrames();
+                    apng.AddFrame(sourceImage);
+                    apng.Save();
                 }
             }
         }
@@ -54,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to embed the Aspose.Imaging for .NET version into the APNG “Software” metadata field to trace which library generated the animated PNG during a CI/CD pipeline.
- * 2. When a graphics workflow requires recording the processing tool’s version in the APNG file so that downstream applications can verify compatibility before rendering.
- * 3. When an e‑learning platform creates animated PNG tutorials and needs to tag each file with the exact library version for future maintenance and support tickets.
- * 4. When a digital asset management system archives APNG assets and relies on the “Software” metadata to filter images processed by a specific version of Aspose.Imaging.
- * 5. When a QA team runs automated tests on image conversion scripts and uses the APNG “Software” field to confirm that the correct library build was used for each generated animation.
+ * 1. When you need to embed the Aspose.Imaging library version into an APNG file so downstream tools can identify which version generated the animation.
+ * 2. When creating animated PNGs from static PNG frames and you want to include a “Software” tag to comply with PNG metadata standards.
+ * 3. When generating APNGs in a CI/CD pipeline and must record the build number or library version in the image metadata for audit trails.
+ * 4. When delivering APNG assets to clients and want to provide traceability by adding a custom software identifier to the file.
+ * 5. When processing large batches of PNGs into APNGs and need to programmatically set the Software metadata field to avoid manual editing.
  */
