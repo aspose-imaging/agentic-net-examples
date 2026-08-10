@@ -1,16 +1,16 @@
+// HOW-TO: Check Default FillMode of GraphicsPath Is Alternate in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.txt";
-            string outputPath = @"C:\temp\output.txt";
+            string inputPath = "input.jpg";
+            string outputPath = "output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,14 +20,26 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Instantiate a GraphicsPath object
-            GraphicsPath graphicspath = new GraphicsPath();
+            // Instantiate GraphicsPath
+            var graphicsPath = new Aspose.Imaging.GraphicsPath();
 
-            // Confirm the default FillMode is Alternate
-            bool isAlternate = graphicspath.FillMode == FillMode.Alternate;
-            Console.WriteLine($"Default FillMode is Alternate: {isAlternate}");
+            // Retrieve default FillMode
+            var defaultFillMode = graphicsPath.FillMode;
+
+            // Output the default FillMode
+            Console.WriteLine($"Default FillMode: {defaultFillMode}");
+
+            // Confirm it is Alternate
+            if (defaultFillMode == Aspose.Imaging.FillMode.Alternate)
+            {
+                Console.WriteLine("FillMode is Alternate as expected.");
+            }
+            else
+            {
+                Console.WriteLine("FillMode is not Alternate.");
+            }
         }
         catch (Exception ex)
         {
@@ -38,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building a C# application that generates vector‑based PDF reports with Aspose.Imaging, a developer can instantiate a GraphicsPath and verify its FillMode is Alternate to ensure overlapping shapes are filled correctly without manual configuration.
- * 2. When creating custom clipping regions for PNG or JPEG images in a .NET image‑processing workflow, checking that the default FillMode is Alternate helps guarantee that complex polygons are rendered with the expected winding rule.
- * 3. When developing a unit test for a graphics‑editing tool that relies on Aspose.Imaging’s GraphicsPath, confirming the default FillMode prevents regression bugs caused by accidental changes to the library’s default fill behavior.
- * 4. When converting scanned bitmap documents to SVG vectors, a developer may need to confirm the FillMode is Alternate before applying fill operations to preserve the original document’s visual fidelity.
- * 5. When integrating Aspose.Imaging into a C# web service that dynamically draws charts and shapes, verifying the default FillMode avoids unexpected rendering artifacts when multiple overlapping paths are combined.
+ * 1. When creating custom vector shapes with Aspose.Imaging, you may need to verify that the GraphicsPath starts with the Alternate fill mode to ensure correct winding rule for complex polygons.
+ * 2. When converting raster images to vector paths, confirming the default FillMode helps avoid unexpected holes in filled regions during rendering.
+ * 3. When debugging a drawing routine that relies on fill rules, checking the default FillMode lets you quickly determine if you must explicitly set it to NonZero.
+ * 4. When building a PDF or SVG export feature, knowing the initial FillMode of a GraphicsPath ensures consistent appearance across different output formats.
+ * 5. When writing unit tests for image processing libraries, asserting that GraphicsPath.FillMode equals Alternate validates the library’s default behavior.
  */
