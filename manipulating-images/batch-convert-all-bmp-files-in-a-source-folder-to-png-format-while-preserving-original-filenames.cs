@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert BMP Images to PNG in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,18 +8,18 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputFolder = @"C:\Images\Input";
-        string outputFolder = @"C:\Images\Output";
-
         try
         {
-            // Get all BMP files in the input folder
-            string[] bmpFiles = Directory.GetFiles(inputFolder, "*.bmp");
+            // Hardcoded source and destination folders
+            string sourceFolder = @"C:\Images\Source";
+            string destinationFolder = @"C:\Images\Output";
+
+            // Get all BMP files in the source folder
+            string[] bmpFiles = Directory.GetFiles(sourceFolder, "*.bmp");
 
             foreach (string inputPath in bmpFiles)
             {
-                // Verify the input file exists
+                // Verify that the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,9 +27,8 @@ class Program
                 }
 
                 // Build the output PNG path preserving the original filename
-                string outputPath = Path.Combine(
-                    outputFolder,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".png");
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                string outputPath = Path.Combine(destinationFolder, outputFileName);
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -36,7 +36,7 @@ class Program
                 // Load the BMP image and save it as PNG
                 using (Image image = Image.Load(inputPath))
                 {
-                    var pngOptions = new PngOptions();
+                    PngOptions pngOptions = new PngOptions();
                     image.Save(outputPath, pngOptions);
                 }
             }
@@ -50,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy collection of BMP assets to PNG for web delivery while keeping the original filenames, this batch conversion code can automate the process.
- * 2. When an automated build pipeline must generate PNG thumbnails from BMP source files stored in a folder, the script provides a C# solution using Aspose.Imaging.
- * 3. When a desktop application must replace BMP images with lossless PNG equivalents to reduce file size and improve compatibility across browsers, the code performs the required conversion.
- * 4. When a migration tool has to process dozens of BMP files in a directory and output PNG files to a separate folder without manual intervention, this example shows how to achieve it with Aspose.Imaging.ImageOptions.
- * 5. When a server‑side service needs to validate that each BMP file exists before converting it to PNG and preserving the original name, the provided C# routine handles the verification and saving steps.
+ * 1. When you need to migrate a folder of legacy BMP assets to web‑compatible PNG files while keeping the original filenames.
+ * 2. When you want to reduce image file size for faster page loads by converting BMPs to lossless PNGs in an automated batch process.
+ * 3. When you are preparing graphics for inclusion in a PDF report and must supply PNG images instead of BMP.
+ * 4. When you have scanned BMP pictures that require transparency support, and you need to convert them to PNG in bulk.
+ * 5. When you are building a CI/CD pipeline that must convert newly added BMP resources to PNG before deployment.
  */
