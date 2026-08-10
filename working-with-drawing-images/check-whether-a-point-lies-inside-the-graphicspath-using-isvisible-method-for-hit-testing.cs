@@ -1,8 +1,8 @@
+// HOW-TO: How to Test If a Point Is Inside a GraphicsPath in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
@@ -11,47 +11,41 @@ class Program
     {
         try
         {
-            // Hardcoded output path
-            string outputPath = @"C:\temp\output.png";
+            // Input image path (must exist)
+            string inputPath = @"C:\temp\input.png";
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-            // Ensure the output directory exists
+            // Output image path
+            string outputPath = @"C:\temp\output.png";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up PNG options with a file create source
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a blank image canvas
-            using (Image image = Image.Create(pngOptions, 400, 400))
+            // Load the input image
+            using (Image image = Image.Load(inputPath))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
-
-                // Build a graphics path containing a rectangle shape
+                // Create a GraphicsPath with a rectangle shape
                 GraphicsPath path = new GraphicsPath();
                 Figure figure = new Figure();
                 figure.AddShape(new RectangleShape(new RectangleF(50f, 50f, 200f, 200f)));
                 path.AddFigure(figure);
 
-                // Draw the path for visual reference
-                Pen pen = new Pen(Color.Black, 2);
-                graphics.DrawPath(pen, path);
+                // Test a point for visibility inside the path
+                float testX = 100f;
+                float testY = 100f;
+                bool isInside = path.IsVisible(testX, testY);
+                Console.WriteLine($"Point ({testX}, {testY}) inside path: {isInside}");
 
-                // Test a point that lies inside the rectangle
-                float insideX = 100f;
-                float insideY = 100f;
-                bool isInside = path.IsVisible(insideX, insideY);
-                Console.WriteLine($"Point ({insideX}, {insideY}) inside path: {isInside}");
+                // Draw the path onto the image for visual verification
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
+                graphics.DrawPath(new Pen(Color.Black, 2), path);
 
-                // Test a point that lies outside the rectangle
-                float outsideX = 10f;
-                float outsideY = 10f;
-                bool isOutside = path.IsVisible(outsideX, outsideY);
-                Console.WriteLine($"Point ({outsideX}, {outsideY}) inside path: {isOutside}");
-
-                // Save the image
-                image.Save();
+                // Save the resulting image
+                PngOptions options = new PngOptions();
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -63,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building an interactive PNG map where clicking on a drawn rectangle should trigger an action, a developer can use IsVisible to determine if the mouse coordinates fall inside the GraphicsPath.
- * 2. When creating a custom diagram editor that lets users select and move shapes, IsVisible helps to perform hit testing on the rectangle shape stored in a GraphicsPath to know which object was clicked.
- * 3. When implementing a PDF‑to‑image conversion tool that overlays clickable hotspots on the generated PNG, IsVisible can verify whether a user‑supplied point lies within a defined hotspot region.
- * 4. When developing a game UI that displays button‑like regions drawn with Aspose.Imaging shapes, IsVisible enables the engine to detect clicks inside those button areas for event handling.
- * 5. When adding annotation features to a medical image viewer, IsVisible can be used to check if a cursor position is inside a rectangular annotation drawn on a PNG canvas before allowing edits.
+ * 1. When building a custom image editor you can use this code to determine whether a mouse click falls inside a drawn rectangle shape for selection or resizing.
+ * 2. When implementing hit‑testing for interactive graphics in a C# WinForms or WPF application, the IsVisible method lets you verify if a user‑selected point lies within any GraphicsPath region.
+ * 3. When generating dynamic reports that overlay shapes on PNG files, you can check point containment before adding annotations to ensure they appear inside the intended area.
+ * 4. When creating a game or simulation that uses vector shapes for collision detection, this snippet shows how to test if a sprite’s coordinates intersect a rectangular path.
+ * 5. When validating user‑drawn regions on a scanned document, the code can confirm whether a given coordinate is inside the predefined rectangle before processing the selection.
  */
