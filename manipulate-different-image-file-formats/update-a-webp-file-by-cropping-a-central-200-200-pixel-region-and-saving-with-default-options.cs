@@ -1,19 +1,19 @@
+// HOW-TO: Crop Central 200x200 Region from WebP Image in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input/input.webp";
+        string outputPath = "output/output.webp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.webp";
-            string outputPath = "output.webp";
-
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,32 +24,27 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the WebP image
-            using (WebPImage webPImage = new WebPImage(inputPath))
+            using (WebPImage image = new WebPImage(inputPath))
             {
-                // Cache data for better performance
-                if (!webPImage.IsCached) webPImage.CacheData();
+                // Desired crop size
+                int cropWidth = 200;
+                int cropHeight = 200;
 
-                // Define crop size
-                int cropSize = 200;
-
-                // Calculate top-left corner to center the crop area
-                int left = (webPImage.Width - cropSize) / 2;
-                int top = (webPImage.Height - cropSize) / 2;
+                // Calculate top-left corner for central crop
+                int left = (image.Width - cropWidth) / 2;
+                int top = (image.Height - cropHeight) / 2;
 
                 // Adjust if the image is smaller than the crop size
                 if (left < 0) left = 0;
                 if (top < 0) top = 0;
-                int cropWidth = Math.Min(cropSize, webPImage.Width);
-                int cropHeight = Math.Min(cropSize, webPImage.Height);
-
-                // Create the crop rectangle
-                Rectangle cropRect = new Rectangle(left, top, cropWidth, cropHeight);
+                if (cropWidth > image.Width) cropWidth = image.Width;
+                if (cropHeight > image.Height) cropHeight = image.Height;
 
                 // Perform cropping
-                webPImage.Crop(cropRect);
+                image.Crop(new Aspose.Imaging.Rectangle(left, top, cropWidth, cropHeight));
 
                 // Save with default options
-                webPImage.Save(outputPath);
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -61,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating thumbnail previews for a web gallery that stores images in WebP format, a developer can use this code to extract a centered 200 × 200 pixel thumbnail.
- * 2. When preparing profile pictures for a social‑media app that requires a fixed square size, the code can crop the middle of any uploaded WebP image to 200 × 200 pixels before saving.
- * 3. When optimizing product images for an e‑commerce site that uses WebP to reduce bandwidth, the snippet can create a consistent 200 × 200 pixel crop for display in the product carousel.
- * 4. When building a batch‑processing tool that standardizes image dimensions for machine‑learning datasets, this C# example crops the central region of each WebP file to the required size.
- * 5. When implementing a server‑side image‑resizing service in ASP.NET that must return a square WebP preview, the code provides a quick way to crop and save the central 200 × 200 area with default options.
+ * 1. When you need to generate a thumbnail by extracting the central 200 × 200 pixels from a WebP picture in a .NET application.
+ * 2. When you want to standardize profile picture dimensions by cropping the middle of user‑uploaded WebP files before storing them.
+ * 3. When you are preparing WebP assets for a responsive web layout and must ensure a consistent square region for UI components.
+ * 4. When you need to remove unwanted borders from a WebP image by keeping only the central area in a C# batch‑processing script.
+ * 5. When you are creating a preview image for a gallery and require a centered 200 × 200 crop of each WebP file using Aspose.Imaging.
  */
