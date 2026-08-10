@@ -1,3 +1,4 @@
+// HOW-TO: Handle No Intersection Error When Removing Watermark With Telea In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,11 +10,11 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.png";
-        string outputPath = "output.png";
-
         try
         {
+            string inputPath = "input.png";
+            string outputPath = "output.png";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,25 +27,23 @@ class Program
             {
                 var pngImage = (PngImage)image;
 
-                // Create a mask that does not intersect any watermark region (outside image bounds)
                 var mask = new GraphicsPath();
                 var figure = new Figure();
-                figure.AddShape(new RectangleShape(new RectangleF(-100, -100, 10, 10)));
+                figure.AddShape(new EllipseShape(new RectangleF(0, 0, 10, 10)));
                 mask.AddFigure(figure);
 
                 var options = new Aspose.Imaging.Watermark.Options.TeleaWatermarkOptions(mask);
 
                 try
                 {
-                    var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options);
-                    using (result)
+                    using (var result = Aspose.Imaging.Watermark.WatermarkRemover.PaintOver(pngImage, options))
                     {
                         result.Save(outputPath);
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine($"Watermark removal error: {ex.Message}");
+                    Console.Error.WriteLine($"Watermark removal failed: {ex.Message}");
                 }
             }
         }
@@ -57,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must safely remove watermarks from PNG files but the user‑provided GraphicsPath may be outside the image bounds, this code validates the mask and catches the resulting exception.
- * 2. When integrating Aspose.Imaging into an automated batch job that processes scanned documents, developers can use this pattern to handle cases where the watermark region is missing or incorrectly defined.
- * 3. When building a web service that accepts user‑uploaded images and a custom watermark mask, the error handling ensures the service returns a clear message instead of crashing if the mask does not intersect any watermark.
- * 4. When performing image cleanup in a desktop utility that supports Telea inpainting, the try‑catch around WatermarkRemover.PaintOver prevents unhandled exceptions when the GraphicsPath is empty or off‑canvas.
- * 5. When writing unit tests for watermark removal logic, this example demonstrates how to verify that the code gracefully reports an error when the supplied RectangleShape lies outside the PNG image dimensions.
+ * 1. When you need to delete a logo or text watermark from a PNG file and must verify that the drawn GraphicsPath actually overlaps the watermark region, catching an error if it does not.
+ * 2. When processing large batches of scanned documents and want the pipeline to skip images where the specified watermark mask is absent without terminating the whole job.
+ * 3. When integrating Aspose.Imaging’s WatermarkRemover into an automated image‑processing service and require graceful handling of cases where the Telea mask fails to intersect any watermark.
+ * 4. When building a user‑driven tool that lets users draw shapes to erase watermarks and you need to inform them instantly if their shape does not intersect any watermark area.
+ * 5. When generating thumbnails after removing watermarks and you want to log a clear “no intersecting watermark” message instead of an unhandled exception that could crash the application.
  */
