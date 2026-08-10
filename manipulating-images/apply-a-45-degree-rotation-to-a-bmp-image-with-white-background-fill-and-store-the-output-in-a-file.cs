@@ -1,3 +1,4 @@
+// HOW-TO: Rotate BMP Image 45 Degrees with White Background in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -25,26 +26,20 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the BMP image
-            using (Image img = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access Rotate method
-                if (img is RasterImage rasterImage)
-                {
-                    // Rotate 45 degrees, resize canvas to fit, fill background with white
-                    rasterImage.Rotate(45f, true, Color.White);
+                // Cast to RasterImage to access rotation functionality
+                RasterImage raster = (RasterImage)image;
 
-                    // Save the rotated image
-                    rasterImage.Save(outputPath);
-                }
-                else
-                {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
-                }
+                // Rotate 45 degrees clockwise, resize canvas, fill background with white
+                raster.Rotate(45f, true, Color.White);
+
+                // Save the rotated image
+                image.Save(outputPath);
             }
         }
         catch (Exception ex)
         {
-            // Catch any unexpected errors and report them
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -52,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to automatically rotate user‑uploaded BMP screenshots by 45 degrees and fill the empty corners with a white background before saving them to disk.
- * 2. When a batch‑processing tool must re‑orient legacy BMP assets for a game’s UI, applying a 45° rotation and preserving image dimensions by expanding the canvas with white fill using C# and Aspose.Imaging.
- * 3. When an automated report generator creates BMP charts that must be displayed at a diagonal angle, requiring a 45‑degree rotation with white background padding and saving the result as a new BMP file.
- * 4. When a document‑conversion service receives BMP images and needs to correct their orientation by rotating them 45 degrees while ensuring the background remains white to meet publishing standards.
- * 5. When a Windows service monitors a folder of BMP scans and needs to rotate each image 45 degrees, resize the canvas to fit, fill the new area with white, and store the processed files for downstream processing.
+ * 1. When you need to display a scanned document at a diagonal angle in a printable report, you can rotate the BMP file 45 degrees and fill the empty canvas with white.
+ * 2. When generating thumbnails for a photo gallery that require a tilted orientation, this code rotates BMP images and adds a consistent white background.
+ * 3. When preparing game UI assets where icons must be slanted, you can use the routine to rotate BMP sprites and keep the surrounding area white.
+ * 4. When correcting the orientation of legacy BMP scans that were saved sideways, the method rotates them 45 degrees without cropping and pads the background with white.
+ * 5. When creating a batch process that adds a uniform white border after rotating BMP images for a printing workflow, this code handles the rotation and background fill automatically.
  */
