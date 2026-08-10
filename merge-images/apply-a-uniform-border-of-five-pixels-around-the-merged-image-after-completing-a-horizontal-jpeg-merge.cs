@@ -1,5 +1,7 @@
+// HOW-TO: Merge Multiple JPEGs Horizontally And Add 5‑Pixel Border In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -13,8 +15,13 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string[] inputPaths = new[] { "input1.jpg", "input2.jpg", "input3.jpg" };
-            string outputPath = "merged.jpg";
+            string[] inputPaths = new string[]
+            {
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
+            string outputPath = "merged_with_border.jpg";
 
             // Validate input files
             foreach (string path in inputPaths)
@@ -27,49 +34,55 @@ class Program
             }
 
             // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrEmpty(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect dimensions
-            var dimensions = new List<(int Width, int Height)>();
+            // Collect sizes of all input images
+            List<Size> sizes = new List<Size>();
             foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    dimensions.Add((img.Width, img.Height));
+                    sizes.Add(img.Size);
                 }
             }
 
-            int totalWidth = 0;
-            int maxHeight = 0;
-            foreach (var dim in dimensions)
-            {
-                totalWidth += dim.Width;
-                if (dim.Height > maxHeight) maxHeight = dim.Height;
-            }
+            // Calculate canvas size for horizontal merge
+            int mergedWidth = sizes.Sum(s => s.Width);
+            int mergedHeight = sizes.Max(s => s.Height);
 
-            // Create output source and options
-            Source outputSource = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions() { Source = outputSource, Quality = 100 };
+            // Add uniform border of 5 pixels on each side
+            int borderSize = 5;
+            int finalWidth = mergedWidth + borderSize * 2;
+            int finalHeight = mergedHeight + borderSize * 2;
 
-            // Create canvas
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, totalWidth, maxHeight))
+            // Create JPEG options with bound output file
+            Source source = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions
             {
-                int offsetX = 0;
+                Source = source,
+                Quality = 100
+            };
+
+            // Create canvas bound to the output file
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, finalWidth, finalHeight))
+            {
+                // Fill entire canvas with white (border color)
+                int[] borderPixels = Enumerable.Repeat(Aspose.Imaging.Color.White.ToArgb(), finalWidth * finalHeight).ToArray();
+                canvas.SaveArgb32Pixels(new Rectangle(0, 0, finalWidth, finalHeight), borderPixels);
+
+                // Merge images horizontally with offset for border
+                int offsetX = borderSize;
                 foreach (string path in inputPaths)
                 {
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
-                        var bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                        Rectangle destRect = new Rectangle(offsetX, borderSize, img.Width, img.Height);
+                        canvas.SaveArgb32Pixels(destRect, img.LoadArgb32Pixels(img.Bounds));
                         offsetX += img.Width;
                     }
                 }
 
-                // Save the merged image (canvas is already bound to output source)
+                // Save the bound image
                 canvas.Save();
             }
         }
@@ -82,9 +95,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to combine multiple JPEG photos side‑by‑side and add a 5‑pixel white border for a consistent look in an online product catalog using C# and Aspose.Imaging.
- * 2. When a C# application must merge scanned JPEG pages into a single horizontal strip and apply a uniform border to improve readability for document management systems.
- * 3. When generating social‑media collage images from user‑uploaded JPEGs, a developer can use Aspose.Imaging to stitch them horizontally and add a thin border that matches the platform’s design guidelines.
- * 4. When preparing high‑resolution JPEG artwork for print, a developer may merge individual image layers side‑by‑side and add a precise 5‑pixel border to ensure proper trimming and alignment.
- * 5. When building a thumbnail gallery in a Windows Forms app, a developer can horizontally merge JPEG thumbnails and apply a uniform border to create a clean, spaced‑out visual grid.
+ * 1. When you need to combine several product photos side‑by‑side into a single image for an online catalog while keeping a consistent margin around the combined picture.
+ * 2. When generating a composite banner from multiple JPEG advertisements and you want a uniform border to separate it from surrounding page elements.
+ * 3. When creating a printable strip of scanned receipts and you require a thin frame to ensure the edges are not cut off during printing.
+ * 4. When developing a photo‑gallery web app that displays a row of user‑uploaded images as one image with a clean border for aesthetic consistency.
+ * 5. When automating the preparation of image assets for a slideshow where each slide consists of horizontally merged JPEGs and a surrounding border improves visual separation.
  */
