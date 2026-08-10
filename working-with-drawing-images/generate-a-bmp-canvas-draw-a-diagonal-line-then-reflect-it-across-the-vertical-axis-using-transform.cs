@@ -1,40 +1,47 @@
+// HOW-TO: Create BMP Image and Mirror Diagonal Line Using Transform in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded output path
+        string outputPath = "c:\\temp\\reflected.bmp";
+
         try
         {
-            string outputPath = "Output\\canvas.bmp";
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            Source source = new FileCreateSource(outputPath, false);
-            BmpOptions options = new BmpOptions() { Source = source };
+            int width = 200;
+            int height = 200;
 
-            int width = 400;
-            int height = 400;
-
-            using (RasterImage canvas = (RasterImage)Image.Create(options, width, height))
+            // Create a BMP canvas
+            using (BmpImage bmp = new BmpImage(width, height))
             {
-                Graphics graphics = new Graphics(canvas);
+                // Initialize graphics object
+                Graphics graphics = new Graphics(bmp);
                 graphics.Clear(Color.White);
 
-                Pen pen1 = new Pen(Color.Black, 2);
-                graphics.DrawLine(pen1, new Point(0, 0), new Point(width, height));
+                // Draw original diagonal line
+                Pen pen = new Pen(Color.Black, 2);
+                graphics.DrawLine(pen, 0, 0, width, height);
 
-                // Reflect across the vertical axis
-                graphics.ScaleTransform(-1, 1);
-                graphics.TranslateTransform(-width, 0);
+                // Apply horizontal reflection transform (vertical axis)
+                Matrix reflect = new Matrix(-1, 0, 0, 1, width, 0);
+                graphics.Transform = reflect;
 
-                Pen pen2 = new Pen(Color.Red, 2);
-                graphics.DrawLine(pen2, new Point(0, 0), new Point(width, height));
+                // Draw the same line; it will appear reflected
+                graphics.DrawLine(pen, 0, 0, width, height);
 
-                canvas.Save();
+                // Reset transform (optional)
+                graphics.Transform = new Matrix();
+
+                // Save the resulting image
+                bmp.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -46,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP file with a simple geometric illustration, such as a diagonal line, for documentation or testing image pipelines.
- * 2. When creating a mirrored version of a graphic element by reflecting a drawn line across the vertical axis, useful for generating symmetrical icons or UI assets.
- * 3. When building a custom image processing routine that programmatically draws shapes on a raster canvas and saves the result as a BMP for compatibility with legacy Windows applications.
- * 4. When implementing automated visual verification tests that require drawing and transforming lines to ensure the graphics engine correctly applies ScaleTransform and TranslateTransform operations.
- * 5. When producing sample BMP images to demonstrate Aspose.Imaging’s Graphics API capabilities, including drawing, clearing, and applying coordinate transformations in C#.
+ * 1. When you need to generate a BMP file with a simple geometric pattern for testing image rendering pipelines.
+ * 2. When you want to programmatically create a mirrored version of a line or shape without manually calculating pixel positions.
+ * 3. When you are building a graphics editor that supports real‑time reflection of drawing strokes on a bitmap canvas.
+ * 4. When you need to produce a symmetric design for UI icons or placeholders by reflecting existing graphics.
+ * 5. When you are benchmarking Aspose.Imaging transformation performance on BMP images in a .NET application.
  */
