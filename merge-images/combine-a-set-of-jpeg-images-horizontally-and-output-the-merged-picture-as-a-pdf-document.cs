@@ -1,3 +1,4 @@
+// HOW-TO: Combine Multiple JPEG Images Horizontally and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -14,57 +15,58 @@ class Program
     {
         try
         {
-            // Input JPEG files (hardcoded relative paths)
-            string[] inputPaths = new string[]
-            {
-                "Input/image1.jpg",
-                "Input/image2.jpg",
-                "Input/image3.jpg"
-            };
+            // Define input and output directories
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Output PDF file (hardcoded relative path)
-            string outputPath = "Output/merged.pdf";
+            // Define output PDF path
+            string outputPath = Path.Combine(outputDirectory, "merged.pdf");
 
-            // Validate input files
-            foreach (string path in inputPaths)
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Get JPEG files from input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.jpg");
+            if (files.Length == 0)
             {
-                if (!File.Exists(path))
-                {
-                    Console.Error.WriteLine($"File not found: {path}");
-                    return;
-                }
+                Console.Error.WriteLine("No JPEG files found in the input directory.");
+                return;
             }
 
-            // Collect sizes of all input images
+            // Validate each input file exists and collect sizes
             List<Size> sizes = new List<Size>();
-            foreach (string path in inputPaths)
+            List<string> validFiles = new List<string>();
+            foreach (string file in files)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                if (!File.Exists(file))
+                {
+                    Console.Error.WriteLine($"File not found: {file}");
+                    return;
+                }
+                using (RasterImage img = (RasterImage)Image.Load(file))
                 {
                     sizes.Add(img.Size);
                 }
+                validFiles.Add(file);
             }
 
             // Calculate canvas dimensions for horizontal merge
             int newWidth = sizes.Sum(s => s.Width);
             int newHeight = sizes.Max(s => s.Height);
 
-            // Temporary JPEG file to serve as intermediate canvas source
-            string tempJpegPath = Path.Combine(Path.GetTempPath(), "temp_merge.jpg");
-            Source tempSource = new FileCreateSource(tempJpegPath, false);
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                Source = tempSource,
-                Quality = 100
-            };
+            // Temporary file for the intermediate JPEG canvas
+            string tempCanvasPath = Path.Combine(outputDirectory, "temp_canvas.jpg");
+            Directory.CreateDirectory(Path.GetDirectoryName(tempCanvasPath));
 
-            // Create JPEG canvas
+            // Create JPEG canvas bound to temporary file
+            Source tempSource = new FileCreateSource(tempCanvasPath, true);
+            JpegOptions jpegOptions = new JpegOptions() { Source = tempSource, Quality = 100 };
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
                 int offsetX = 0;
-                foreach (string path in inputPaths)
+                foreach (string imgPath in validFiles)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
+                    using (RasterImage img = (RasterImage)Image.Load(imgPath))
                     {
                         Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
@@ -72,10 +74,10 @@ class Program
                     }
                 }
 
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Save the canvas (writes to temporary JPEG file)
+                canvas.Save();
 
-                // Save the merged image as PDF
+                // Export the canvas as PDF
                 PdfOptions pdfOptions = new PdfOptions();
                 canvas.Save(outputPath, pdfOptions);
             }
@@ -89,9 +91,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a single PDF report that shows multiple product photos side‑by‑side, they can use this code to merge JPEG images horizontally and save the result as a PDF.
- * 2. When an e‑commerce platform wants to create a printable catalog page that combines several item images into one PDF sheet, this C# snippet merges the JPEGs and outputs a PDF document.
- * 3. When a medical imaging system must bundle a series of scanned X‑ray JPEGs into a single PDF for easy sharing with clinicians, the code provides a quick horizontal merge and PDF export.
- * 4. When a real‑estate application wants to combine interior and exterior JPEG photos of a property into a single PDF flyer, the example shows how to stitch the images horizontally and save them as a PDF.
- * 5. When an automated document workflow needs to concatenate marketing banner JPEGs into one PDF brochure page, this code demonstrates the necessary image loading, canvas creation, and PDF output in .NET.
+ * 1. When you need to create a single PDF catalog page that shows product photos side‑by‑side from a folder of JPEG files.
+ * 2. When you want to generate a printable proof sheet that merges scanned JPEG pages into one horizontal layout before archiving as PDF.
+ * 3. When an application must batch‑process user‑uploaded JPEG screenshots and combine them into a single PDF for easy sharing.
+ * 4. When you are building a reporting tool that stitches together chart images horizontally and exports the result as a PDF document.
+ * 5. When you need to automate the creation of a PDF brochure by concatenating multiple JPEG advertisements in a single row.
  */
