@@ -1,3 +1,4 @@
+// HOW-TO: Auto Mask Background From Image And Save As PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,55 +13,55 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input image and output folder
+        string inputPath = "input.jpg";
+        string outputFolder = "output";
+
+        // Validate input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        string outputPath = Path.Combine(outputFolder, "masked.png");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input\\image.png";
-            string outputPath = "output\\result.png";
-
-            // Validate input file existence
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the source image as a raster image
+            // Load source image as RasterImage
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Export options for the masking process
+                // Auto-masking arguments (default strokes)
+                var autoArgs = new AutoMaskingArgs();
+
+                // Export options for PNG with transparency
                 var exportOptions = new PngOptions
                 {
                     ColorType = PngColorType.TruecolorWithAlpha,
                     Source = new StreamSource(new MemoryStream())
                 };
 
-                // Configure masking options (auto‑masking with GraphCut)
+                // Configure masking options
                 var maskingOptions = new MaskingOptions
                 {
                     Method = SegmentationMethod.GraphCut,
                     Decompose = false,
-                    Args = new AutoMaskingArgs(),
+                    Args = autoArgs,
                     BackgroundReplacementColor = Color.Transparent,
                     ExportOptions = exportOptions
                 };
 
                 // Perform masking
                 var masking = new ImageMasking(image);
-                using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
+                using (MaskingResult result = masking.Decompose(maskingOptions))
                 {
-                    // Retrieve the foreground segment (index 1)
-                    using (RasterImage foreground = (RasterImage)maskingResult[1].GetImage())
+                    // Get the foreground (masked object) image
+                    using (RasterImage foreground = (RasterImage)result[1].GetImage())
                     {
-                        // Save the foreground as a PNG file
-                        foreground.Save(outputPath, new PngOptions
-                        {
-                            ColorType = PngColorType.TruecolorWithAlpha,
-                            Source = new FileCreateSource(outputPath, false)
-                        });
+                        // Save the masked image as PNG
+                        foreground.Save(outputPath, exportOptions);
                     }
                 }
             }
@@ -74,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑process product photos from a folder, automatically remove the background with GraphCut auto‑masking and save the transparent PNGs to an output directory.
- * 2. When an e‑commerce platform requires a command‑line tool that accepts image file paths, isolates the foreground objects, and generates PNG files with alpha channels for seamless web display.
- * 3. When a digital asset management system must convert scanned PNG scans into cut‑out images by applying auto‑masking and exporting the result as a true‑color‑with‑alpha PNG.
- * 4. When a game‑development pipeline needs a quick C# console utility to strip backgrounds from sprite sheets using Aspose.Imaging’s ImageMasking and output the masked sprites as PNG files.
- * 5. When a marketing automation script has to process user‑uploaded PNG logos, automatically separate the logo from its background, and store the transparent PNGs for later use in branding materials.
+ * 1. When you need to automatically remove the background from photos and generate transparent PNGs for e‑commerce product listings.
+ * 2. When you want to integrate a lightweight C# console tool that processes user‑provided image paths and outputs masked images without manual editing.
+ * 3. When you are building a batch pipeline that extracts foreground objects from JPEGs using GraphCut segmentation for later compositing in design software.
+ * 4. When you require a programmatic way to replace the original background with transparency and save the result in a specific output folder for web publishing.
+ * 5. When you need to automate image preparation for machine‑learning datasets by creating PNG masks that isolate objects from varied source images.
  */
