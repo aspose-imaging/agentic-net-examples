@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert PNG Files to Sequentially Named PDF Documents in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,36 +10,39 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
+            // Hard‑coded input and output directories
             string inputDirectory = @"C:\Images\Input";
             string outputDirectory = @"C:\Images\Output";
+
+            // Ensure the output directory exists (creates parent folders if needed)
+            Directory.CreateDirectory(outputDirectory);
 
             // Get all PNG files in the input directory
             string[] pngFiles = Directory.GetFiles(inputDirectory, "*.png");
 
+            // Prepare PDF export options (default constructor)
+            PdfOptions pdfOptions = new PdfOptions();
+
             int index = 1;
             foreach (string inputPath in pngFiles)
             {
-                // Verify that the input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output PDF file path with a sequential numeric suffix
+                // Build the output file path with a sequential numeric suffix
                 string outputPath = Path.Combine(outputDirectory, $"output_{index}.pdf");
 
-                // Ensure the output directory exists
+                // Ensure the directory for the output file exists (covers cases where outputDirectory may have subfolders)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the PNG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Set up PDF export options
-                    var pdfOptions = new PdfOptions();
-
-                    // Save the image as PDF
+                    // Save the image as PDF using the prepared options
                     image.Save(outputPath, pdfOptions);
                 }
 
@@ -54,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a printable PDF catalog from a folder of product PNG images, assigning each page a sequential file name.
- * 2. When an automated reporting system must archive daily screenshot PNGs as PDF documents with numeric suffixes for easy chronological sorting.
- * 3. When a document management workflow requires converting scanned PNG receipts into PDF files named in order to match accounting entry numbers.
- * 4. When a web application processes user‑uploaded PNG avatars in bulk and stores them as PDF files with incremental filenames for batch processing downstream.
- * 5. When a migration script moves legacy PNG assets into a PDF archive, creating sequentially numbered PDFs to preserve the original order for compliance audits.
+ * 1. When you need to generate a series of PDF reports from a folder of PNG screenshots, assigning each PDF a unique numeric filename.
+ * 2. When automating the archival of scanned PNG images into PDF format for easier distribution and printing, while preserving order through sequential naming.
+ * 3. When creating PDF invoices from PNG logos or graphics in bulk, ensuring each file is saved with a predictable numbered name for downstream processing.
+ * 4. When preparing a batch of PNG design assets for client delivery as PDFs, and you want the output files to be automatically numbered to match a checklist.
+ * 5. When integrating image-to-PDF conversion into a C# backend service that processes uploaded PNG files and stores the resulting PDFs with incremental filenames for version control.
  */
