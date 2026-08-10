@@ -1,7 +1,9 @@
+// HOW-TO: Convert ODG to PDF and Set Custom Author Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
@@ -10,9 +12,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Input\sample.odg";
-            string outputPath = @"C:\Output\sample.pdf";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Data\sample.odg";
+            string outputPath = @"C:\Data\sample.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -30,7 +32,7 @@ class Program
                 // Set up rasterization options for ODG
                 OdgRasterizationOptions rasterizationOptions = new OdgRasterizationOptions
                 {
-                    BackgroundColor = Aspose.Imaging.Color.White,
+                    BackgroundColor = Color.White,
                     PageSize = image.Size
                 };
 
@@ -38,13 +40,10 @@ class Program
                 PdfOptions pdfOptions = new PdfOptions
                 {
                     VectorRasterizationOptions = rasterizationOptions,
-                    PdfDocumentInfo = new PdfDocumentInfo
-                    {
-                        Author = "Custom Author"
-                    }
+                    PdfDocumentInfo = new PdfDocumentInfo { Author = "Custom Author Name" }
                 };
 
-                // Save the image as PDF
+                // Save as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -57,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert OpenDocument Graphics (ODG) drawings created in LibreOffice into searchable PDF files for archiving while preserving the original page size.
- * 2. When an application must programmatically generate PDF reports from ODG diagrams and embed a custom author name in the PDF metadata for compliance tracking.
- * 3. When a batch processing tool has to validate the existence of ODG source files, create the output folder structure, and rasterize the vector graphics to PDF using Aspose.Imaging in a C# environment.
- * 4. When a document management system requires converting ODG assets to PDF and setting the PdfDocumentInfo.Author property so that end‑users can filter documents by author in the UI.
- * 5. When a .NET service automates the conversion of design assets from ODG to PDF with a white background and needs to handle exceptions gracefully during the image loading and saving process.
+ * 1. When you need to programmatically export OpenDocument graphics (ODG) files to PDF for distribution while embedding a specific author name in the PDF metadata.
+ * 2. When an automated reporting system must generate PDF versions of ODG diagrams and ensure the author field reflects the document creator for compliance tracking.
+ * 3. When a document management workflow requires converting user‑uploaded ODG assets to searchable PDF files and adding custom metadata for indexing.
+ * 4. When a batch processing job has to convert multiple ODG drawings to PDF and uniformly apply a corporate author tag for branding purposes.
+ * 5. When integrating Aspose.Imaging into a C# application to rasterize ODG pages to PDF and embed author information for digital rights management.
  */
