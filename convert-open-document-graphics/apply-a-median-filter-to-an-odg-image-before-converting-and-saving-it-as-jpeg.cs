@@ -1,22 +1,22 @@
+// HOW-TO: Apply Median Filter to ODG and Save as JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.OpenDocument;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.odg";
+        string outputPath = @"C:\Images\sample_filtered.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.odg";
-            string tempPngPath = @"C:\Images\temp.png";
-            string outputPath = @"C:\Images\sample_converted.jpg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,48 +24,47 @@ class Program
                 return;
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the ODG image
             using (Image odgImg = Image.Load(inputPath))
             {
-                // Cast to OdgImage to access vector rasterization options
+                // Cast to OdgImage to access rasterization options
                 OdgImage odgImage = (OdgImage)odgImg;
 
-                // Prepare PNG options with rasterization settings
-                PngOptions pngOptions = new PngOptions
+                // Set up rasterization options to convert vector ODG to raster
+                OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
                 {
-                    Source = new StreamSource(new MemoryStream(), false),
-                    VectorRasterizationOptions = new OdgRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageSize = odgImage.Size
-                    }
+                    BackgroundColor = Color.White,
+                    PageSize = odgImage.Size
                 };
 
-                // Save ODG as a temporary PNG (raster image)
-                odgImage.Save(tempPngPath, pngOptions);
-            }
+                // Use PNG options as an intermediate raster format
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-            // Load the temporary PNG as a raster image
-            using (Image rasterImg = Image.Load(tempPngPath))
-            {
-                var rasterImage = (RasterImage)rasterImg;
+                // Rasterize ODG to a memory stream
+                using (MemoryStream rasterStream = new MemoryStream())
+                {
+                    odgImage.Save(rasterStream, pngOptions);
+                    rasterStream.Position = 0; // Reset stream position for reading
 
-                // Apply median filter with size 5 to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
+                    // Load the rasterized image
+                    using (Image rasterImg = Image.Load(rasterStream))
+                    {
+                        RasterImage rasterImage = (RasterImage)rasterImg;
 
-                // Save the filtered image as JPEG
-                JpegOptions jpegOptions = new JpegOptions(); // default options
-                rasterImage.Save(outputPath, jpegOptions);
-            }
+                        // Apply median filter with size 5 to the whole image
+                        rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
-            // Optionally delete the temporary PNG file
-            if (File.Exists(tempPngPath))
-            {
-                try { File.Delete(tempPngPath); } catch { /* ignore cleanup errors */ }
+                        // Save the filtered image as JPEG
+                        JpegOptions jpegOptions = new JpegOptions();
+                        rasterImage.Save(outputPath, jpegOptions);
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -77,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to clean up scanned hand‑drawn diagrams stored as ODG files by removing salt‑and‑pepper noise before publishing them as JPEGs on a web portal.
- * 2. When an application must batch‑process OpenDocument graphics from a CAD system, apply a median filter to smooth edges, and convert the results to JPEG for inclusion in email reports.
- * 3. When a document management workflow requires converting vector ODG illustrations to raster JPEG thumbnails while preserving visual quality by denoising with a median filter in C#.
- * 4. When a mobile‑first website needs lightweight JPEG previews of ODG charts, and the server‑side code uses Aspose.Imaging to rasterize, median‑filter, and compress the images.
- * 5. When a legacy archival tool must transform ODG artwork into JPEG format for archival storage, applying a median filter to mitigate compression artifacts introduced during the conversion.
+ * 1. When you need to reduce noise in a vector ODG drawing before exporting it as a high‑quality JPEG for web publishing.
+ * 2. When an automated batch process must convert multiple ODG files to JPEG while applying a median filter to improve visual clarity.
+ * 3. When integrating Aspose.Imaging into a C# application that generates thumbnails of ODG diagrams with noise reduction.
+ * 4. When preparing ODG artwork for inclusion in a PDF report and you require a filtered raster JPEG version.
+ * 5. When building a server‑side service that receives ODG uploads, applies a median filter, and returns a compressed JPEG for mobile devices.
  */
