@@ -1,9 +1,10 @@
+// HOW-TO: Apply Custom Diagonal Edge Detection to SVG and Export as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -11,42 +12,42 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.svg";
-            string outputPath = "output\\output.png";
+            string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the SVG image
             using (Image svgImage = Image.Load(inputPath))
             {
-                // Rasterize SVG to PNG in memory
-                using (var memoryStream = new MemoryStream())
+                // Prepare rasterization options for PNG output
+                var svgRasterOptions = new SvgRasterizationOptions
                 {
-                    var pngOptions = new PngOptions();
-                    var vectorOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = svgImage.Size
-                    };
-                    pngOptions.VectorRasterizationOptions = vectorOptions;
+                    PageSize = svgImage.Size
+                };
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = svgRasterOptions
+                };
 
-                    svgImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
+                // Rasterize SVG to a memory stream
+                using (var ms = new MemoryStream())
+                {
+                    svgImage.Save(ms, pngOptions);
+                    ms.Position = 0;
 
-                    // Load rasterized image
-                    using (Image rasterImageContainer = Image.Load(memoryStream))
+                    // Load the rasterized PNG as a RasterImage
+                    using (Image rasterImageContainer = Image.Load(ms))
                     {
                         var rasterImage = (RasterImage)rasterImageContainer;
 
-                        // Define custom diagonal edge‑detection kernel (3x3)
+                        // Define a custom diagonal edge‑detection kernel
                         double[,] kernel = new double[,]
                         {
                             { -1, 0, 1 },
@@ -54,13 +55,14 @@ class Program
                             {  1, 0,-1 }
                         };
 
-                        // Apply convolution filter with the custom kernel
-                        var convOptions = new ConvolutionFilterOptions(kernel);
-                        rasterImage.Filter(rasterImage.Bounds, convOptions);
+                        // Create convolution filter options with the custom kernel
+                        var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
 
-                        // Save the filtered image
-                        var outPngOptions = new PngOptions();
-                        rasterImage.Save(outputPath, outPngOptions);
+                        // Apply the filter to the entire image
+                        rasterImage.Filter(rasterImage.Bounds, filterOptions);
+
+                        // Save the filtered image as PNG
+                        rasterImage.Save(outputPath);
                     }
                 }
             }
@@ -74,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to highlight diagonal edges in vector logos by converting SVG files to PNG and applying a custom convolution kernel for sharper visual inspection.
- * 2. When an automated build pipeline must generate edge‑enhanced thumbnails of SVG diagrams for quick preview in web galleries using C# and Aspose.Imaging.
- * 3. When a quality‑control tool scans technical drawings stored as SVG and detects misaligned lines by applying a diagonal edge‑detection filter before saving the result as PNG.
- * 4. When a mobile app backend prepares SVG icons for low‑bandwidth devices by rasterizing them and emphasizing diagonal contours through a custom 3×3 kernel.
- * 5. When a data‑visualization service needs to extract feature outlines from SVG charts by applying a convolution filter that emphasizes diagonal edges and outputs the processed image as PNG.
+ * 1. When you need to highlight diagonal edges in a vector logo by converting the SVG to a PNG with a custom convolution filter.
+ * 2. When generating thumbnails for a web gallery that require edge‑enhanced previews of SVG illustrations.
+ * 3. When preprocessing SVG diagrams for computer‑vision algorithms that expect raster images with emphasized diagonal features.
+ * 4. When creating stylized graphics for print media where a diagonal edge‑detect effect must be applied before saving as PNG.
+ * 5. When automating batch conversion of SVG assets to PNG while applying a custom kernel to improve visual contrast for UI mockups.
  */
