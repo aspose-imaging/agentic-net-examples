@@ -1,7 +1,9 @@
+// HOW-TO: Batch Convert WMF Files to PNG, JPEG, and BMP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
@@ -9,12 +11,12 @@ class Program
     {
         try
         {
-            // Define input and output directories relative to the current directory
+            // Define base, input and output directories (relative paths)
             string baseDir = Directory.GetCurrentDirectory();
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Validate input directory
+            // Ensure input directory exists; if not, create and exit
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -37,28 +39,54 @@ class Program
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
                 // Load the WMF image
                 using (Image image = Image.Load(inputPath))
                 {
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                    // Prepare vector rasterization options common to all output formats
+                    var vectorOptions = new WmfRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageSize = image.Size
+                    };
+
+                    // Determine base file name without extension
+                    string baseFileName = Path.GetFileNameWithoutExtension(inputPath);
 
                     // Convert to PNG
-                    string pngPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
-                    Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
-                    image.Save(pngPath, new PngOptions());
+                    {
+                        string outputPath = Path.Combine(outputDirectory, baseFileName + ".png");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        var pngOptions = new PngOptions
+                        {
+                            VectorRasterizationOptions = vectorOptions
+                        };
+                        image.Save(outputPath, pngOptions);
+                    }
 
                     // Convert to JPEG
-                    string jpegPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
-                    Directory.CreateDirectory(Path.GetDirectoryName(jpegPath));
-                    image.Save(jpegPath, new JpegOptions());
+                    {
+                        string outputPath = Path.Combine(outputDirectory, baseFileName + ".jpg");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        var jpegOptions = new JpegOptions
+                        {
+                            VectorRasterizationOptions = vectorOptions
+                        };
+                        image.Save(outputPath, jpegOptions);
+                    }
 
                     // Convert to BMP
-                    string bmpPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".bmp");
-                    Directory.CreateDirectory(Path.GetDirectoryName(bmpPath));
-                    image.Save(bmpPath, new BmpOptions());
+                    {
+                        string outputPath = Path.Combine(outputDirectory, baseFileName + ".bmp");
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                        var bmpOptions = new BmpOptions
+                        {
+                            VectorRasterizationOptions = vectorOptions
+                        };
+                        image.Save(outputPath, bmpOptions);
+                    }
                 }
             }
         }
@@ -71,9 +99,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy collection of Windows Metafile (WMF) graphics to modern web‑friendly formats such as PNG, JPEG, and BMP in a single batch operation using Aspose.Imaging for .NET.
- * 2. When an automation script must generate thumbnail previews and high‑resolution copies of WMF icons for a desktop application by converting each file to PNG, JPEG, and BMP without manual intervention.
- * 3. When a content management system requires bulk import of WMF diagrams and must store them in multiple raster formats for cross‑platform compatibility, leveraging C# file I/O and Aspose.Imaging’s format enumeration.
- * 4. When a reporting tool needs to export WMF charts to printable JPEG images and lossless PNG files while also preserving a BMP version for legacy printers, using a single loop over the input directory.
- * 5. When a migration project automates the conversion of archived WMF assets into standard image formats for SEO‑friendly web pages, employing Aspose.Imaging’s Image.Load and Save methods in C#.
+ * 1. When you need to automatically transform a collection of legacy WMF vector graphics into web‑friendly raster formats such as PNG, JPEG, and BMP for display in browsers.
+ * 2. When a document processing pipeline must generate multiple image versions from WMF diagrams to support different downstream applications like reporting, printing, and thumbnail creation.
+ * 3. When you are building a batch migration tool that converts archived WMF assets to modern image formats without manually opening each file.
+ * 4. When an e‑learning platform requires converting instructor‑provided WMF illustrations into PNG for high‑quality online viewing and JPEG for email attachments.
+ * 5. When a Windows desktop application needs to export user‑drawn WMF sketches into BMP for legacy system compatibility while also providing PNG and JPEG alternatives.
  */
