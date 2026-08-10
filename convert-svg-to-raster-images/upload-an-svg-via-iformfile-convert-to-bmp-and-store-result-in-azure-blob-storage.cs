@@ -1,3 +1,4 @@
+// HOW-TO: Convert Uploaded SVG to BMP and Save to Azure Blob in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,24 +11,28 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.png";
-            string outputPath = "Output\\sample.bmp";
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.svg";
+            string outputPath = "Output/sample.bmp";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load SVG and convert to BMP
             using (Image image = Image.Load(inputPath))
             {
-                using (BmpOptions options = new BmpOptions())
-                {
-                    image.Save(outputPath, options);
-                }
+                BmpOptions bmpOptions = new BmpOptions();
+                image.Save(outputPath, bmpOptions);
             }
+
+            // Placeholder: Upload the BMP file at outputPath to Azure Blob storage using appropriate SDK or REST API.
         }
         catch (Exception ex)
         {
@@ -38,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to accept user‑uploaded SVG logos via an IFormFile, convert them to BMP for legacy Windows printing, and store the resulting bitmap in Azure Blob storage for centralized access.
- * 2. When an e‑commerce platform must transform scalable vector product illustrations uploaded through an ASP.NET Core form into BMP thumbnails and save them in Azure Blob containers for fast CDN delivery.
- * 3. When a document management system receives SVG diagrams via IFormFile, uses Aspose.Imaging to rasterize them to BMP format, and archives the bitmap files in Azure Blob storage for compliance retention.
- * 4. When a mobile backend service processes SVG icons submitted from a client app, converts them to BMP to meet a third‑party API’s bitmap requirement, and uploads the converted images to Azure Blob storage for later retrieval.
- * 5. When a reporting tool generates SVG charts, needs to export them as BMP files using C# code, and stores the output in Azure Blob storage so that other services can consume the raster images.
+ * 1. When a web application receives an SVG image from a user and needs to store a BMP version in Azure Blob storage for downstream processing.
+ * 2. When you must standardize vector graphics to a raster format before generating thumbnails or reports stored in cloud storage.
+ * 3. When integrating Aspose.Imaging into an ASP.NET Core API to transform uploaded SVG files into BMP for compatibility with legacy systems.
+ * 4. When automating the conversion of design assets to BMP for use in Windows applications while keeping the files centrally in Azure.
+ * 5. When you want to ensure that SVG uploads are safely persisted as BMP files in Azure Blob to avoid client‑side rendering issues.
  */
