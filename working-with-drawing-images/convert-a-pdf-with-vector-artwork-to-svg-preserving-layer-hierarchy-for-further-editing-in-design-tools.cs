@@ -1,3 +1,4 @@
+// HOW-TO: Convert PDF Vector Artwork to Editable SVG with Layers in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,13 +8,13 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Temp\input.pdf";
+        string outputPath = @"C:\Temp\output.svg";
+
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Input\sample.pdf";
-            string outputPath = @"C:\Output\sample.svg";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,28 +24,25 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PDF document
+            // Load the PDF document (vector image)
             using (Image image = Image.Load(inputPath))
             {
+                // Configure rasterization options for SVG export
+                var rasterizationOptions = new SvgRasterizationOptions
+                {
+                    // Preserve original page size
+                    PageSize = image.Size
+                };
+
                 // Configure SVG export options
                 var svgOptions = new SvgOptions
                 {
+                    VectorRasterizationOptions = rasterizationOptions,
                     // Render text as shapes to keep editability
-                    TextAsShapes = true,
-                    // Set page size based on the source image
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = image.Size
-                    }
+                    TextAsShapes = true
                 };
 
-                // If the PDF has multiple pages, export only the first page
-                if (image is IMultipageImage multipage && multipage.PageCount > 1)
-                {
-                    svgOptions.MultiPageOptions = new MultiPageOptions(new IntRange(0, 1));
-                }
-
-                // Save as SVG, preserving vector layers
+                // Save the PDF as SVG, preserving layer hierarchy
                 image.Save(outputPath, svgOptions);
             }
         }
@@ -57,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a multi‑page PDF containing vector graphics into an editable SVG file while preserving the original layer hierarchy for use in design tools like Adobe Illustrator.
- * 2. When an automated workflow must extract the first page of a PDF brochure and generate an SVG where all text is rendered as shapes to keep the typography editable in downstream editing.
- * 3. When a C# application has to batch‑process PDF assets from a file system, ensuring the output SVG matches the source page size and retains vector fidelity for responsive web graphics.
- * 4. When a .NET service integrates Aspose.Imaging to transform client‑uploaded PDFs into scalable SVGs that can be further manipulated via CSS or JavaScript without rasterizing the artwork.
- * 5. When a developer wants to validate the existence of input PDF files, create the necessary output directories, and safely export vector layers to SVG using SvgOptions and MultiPageOptions in a try‑catch block.
+ * 1. When a developer needs to transform a multi‑page PDF containing vector graphics into an SVG file that retains the original layer structure for further editing in tools like Adobe Illustrator or Inkscape.
+ * 2. When building an automated workflow that extracts scalable artwork from PDF brochures and converts it to SVG so web designers can reuse the graphics on responsive websites.
+ * 3. When migrating legacy design assets from PDF to a modern vector format while keeping text editable as shapes for precise typography adjustments in downstream applications.
+ * 4. When creating a batch conversion utility that prepares PDF schematics for inclusion in documentation systems that only accept SVG, ensuring the visual fidelity and layer hierarchy remain intact.
+ * 5. When integrating PDF‑to‑SVG conversion into a C# application that generates printable marketing materials, allowing designers to fine‑tune individual layers after conversion.
  */
