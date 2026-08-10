@@ -1,57 +1,45 @@
+// HOW-TO: Draw A Black Rectangle On A PSD Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded output path
             string outputPath = @"C:\temp\output.psd";
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define canvas size
-            int width = 400;
-            int height = 300;
+            // Create PSD options (default settings)
+            var psdOptions = new PsdOptions();
 
-            // Create a source bound to the output file
-            Source source = new FileCreateSource(outputPath, false);
-
-            // Configure PSD options for an indexed color mode
-            PsdOptions psdOptions = new PsdOptions();
-            psdOptions.Source = source;
-            psdOptions.ColorMode = ColorModes.Indexed;
-            psdOptions.CompressionMethod = CompressionMethod.RLE;
-            psdOptions.Version = 6;
-            psdOptions.ChannelBitsCount = (short)8;
-            psdOptions.ChannelsCount = (short)1;
-            // Simple palette with a few colors
-            psdOptions.Palette = new ColorPalette(new Color[]
+            // Create a new PSD image with width and height
+            using (Image image = Image.Create(psdOptions, 500, 500))
             {
-                Color.Black,
-                Color.White,
-                Color.Red,
-                Color.Green,
-                Color.Blue
-            });
+                // Initialize graphics for drawing
+                var graphics = new Graphics(image);
 
-            // Create the PSD canvas (output file is already bound)
-            using (Image canvas = Image.Create(psdOptions, width, height))
-            {
-                // Draw a rectangle on the canvas
-                Graphics graphics = new Graphics(canvas);
-                Pen pen = new Pen(Color.Black, 2);
-                graphics.DrawRectangle(pen, new Rectangle(50, 50, 200, 150));
+                // Optional: clear background to white
+                graphics.Clear(Color.White);
 
-                // Save the bound image
-                canvas.Save();
+                // Define a pen for the rectangle
+                var pen = new Pen(Color.Black, 5);
+
+                // Define rectangle bounds
+                var rect = new Rectangle(50, 50, 400, 400);
+
+                // Draw the rectangle on the canvas
+                graphics.DrawRectangle(pen, rect);
+
+                // Save the image to the specified path using the same PSD options
+                image.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)
@@ -63,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PSD file with an indexed color palette and overlay a simple rectangle for a thumbnail or placeholder image in a C# application.
- * 2. When creating automated mock‑ups of print layouts where the PSD must use RLE compression and a limited palette, and a rectangle marks the safe‑area boundaries.
- * 3. When building a batch‑processing tool that adds a border rectangle to existing indexed PSD files before they are handed off to a Photoshop workflow.
- * 4. When implementing a server‑side image service that programmatically creates PSD canvases in ColorModes.Indexed and draws vector shapes such as rectangles for UI icons.
- * 5. When testing Aspose.Imaging for .NET’s support for indexed PSD creation, compression, and graphics drawing by drawing a rectangle on a newly created canvas.
+ * 1. When you need to programmatically add a border or highlight area in a Photoshop PSD file for automated design workflows.
+ * 2. When generating template PSD files with placeholder shapes for later editing by graphic designers.
+ * 3. When creating batch‑processed PSD assets that require a consistent rectangular frame around each image.
+ * 4. When building a C# application that marks regions of interest on PSD layers for documentation or review purposes.
+ * 5. When automating the preparation of PSD files for printing, adding a black rectangle as a crop or bleed guide.
  */
