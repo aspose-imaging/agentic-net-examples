@@ -1,52 +1,44 @@
+// HOW-TO: Apply Custom Gauss Wiener Filter to SVG and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.svg";
+            string outputPath = @"C:\Images\output.png";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image svgImage = Image.Load(inputPath))
+            // Load the SVG image
+            using (Image image = Image.Load(inputPath))
             {
-                using (MemoryStream ms = new MemoryStream())
+                // Cast to RasterImage for filtering
+                using (RasterImage rasterImage = (RasterImage)image)
                 {
-                    var rasterOptions = new Aspose.Imaging.ImageOptions.SvgRasterizationOptions
-                    {
-                        PageSize = svgImage.Size
-                    };
-                    var pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions
-                    };
+                    // Custom Gauss‑Wiener filter parameters
+                    int size = 5;          // kernel size (must be odd)
+                    double sigma = 4.0;    // smoothing sigma (positive)
 
-                    svgImage.Save(ms, pngOptions);
-                    ms.Position = 0;
+                    // Apply the filter to the whole image
+                    rasterImage.Filter(rasterImage.Bounds, new GaussWienerFilterOptions(size, sigma));
 
-                    using (Image rasterImg = Image.Load(ms))
-                    {
-                        RasterImage rasterImage = (RasterImage)rasterImg;
-
-                        int radius = 5;
-                        double sigma = 4.0;
-                        rasterImage.Filter(rasterImage.Bounds,
-                            new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(radius, sigma));
-
-                        rasterImage.Save(outputPath, new PngOptions());
-                    }
+                    // Save the processed image
+                    rasterImage.Save(outputPath);
                 }
             }
         }
@@ -59,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG logo to a high‑resolution PNG for a website but wants to reduce the slight blur introduced during rasterization by applying a Gauss‑Wiener filter with custom radius and sigma values.
- * 2. When an automated build pipeline generates thumbnail previews from vector icons and must sharpen the images after rasterizing them to PNG using Aspose.Imaging in C#.
- * 3. When a desktop application imports user‑provided SVG diagrams, rasterizes them to bitmap format, and applies a custom‑strength Gauss‑Wiener filter to improve visual clarity before saving as PNG.
- * 4. When a batch‑processing script processes a folder of SVG assets, converts each to PNG, and uses the Gauss‑Wiener filter to compensate for anti‑aliasing artifacts caused by the rasterization step.
- * 5. When a reporting tool creates printable PNG charts from SVG templates and needs to enhance edge definition by tuning the Gauss‑Wiener filter’s radius and sigma parameters in a .NET environment.
+ * 1. When you need to remove slight blur from an SVG after rasterizing it to a high‑resolution PNG for web publishing.
+ * 2. When you want to programmatically enhance scanned vector graphics by applying a custom‑strength Gauss‑Wiener filter in a C# batch process.
+ * 3. When you must ensure consistent image quality across a folder of SVG icons before embedding them in a mobile app.
+ * 4. When you are building an automated pipeline that converts user‑uploaded SVG logos to sharpened PNG thumbnails using Aspose.Imaging.
+ * 5. When you require fine‑tuned noise reduction on vector‑derived images to meet print‑ready specifications without manual editing.
  */
