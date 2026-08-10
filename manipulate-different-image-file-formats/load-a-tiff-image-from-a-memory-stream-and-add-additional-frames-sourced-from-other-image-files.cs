@@ -1,3 +1,4 @@
+// HOW-TO: Add PNG Frames to Existing TIFF from Memory Stream in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,21 +10,21 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded paths
         string inputTiffPath = "input.tif";
-        string[] additionalImagePaths = { "frame1.png", "frame2.png" };
+        string[] additionalImagePaths = new string[] { "frame1.png", "frame2.png" };
         string outputPath = "output.tif";
 
         try
         {
-            // Verify existence of the base TIFF file
+            // Verify input TIFF exists
             if (!File.Exists(inputTiffPath))
             {
                 Console.Error.WriteLine($"File not found: {inputTiffPath}");
                 return;
             }
 
-            // Verify existence of each additional image file
+            // Verify each additional image exists
             foreach (var path in additionalImagePaths)
             {
                 if (!File.Exists(path))
@@ -33,27 +34,31 @@ class Program
                 }
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-            // Load the base TIFF image from a memory stream
-            using (MemoryStream tiffStream = new MemoryStream(File.ReadAllBytes(inputTiffPath)))
-            using (TiffImage tiffImage = (TiffImage)Image.Load(tiffStream))
+            // Load the original TIFF from a memory stream
+            using (var tiffStream = new MemoryStream(File.ReadAllBytes(inputTiffPath)))
             {
-                // Add each additional image as a new frame
-                foreach (var framePath in additionalImagePaths)
+                using (TiffImage tiffImage = (TiffImage)Image.Load(tiffStream))
                 {
-                    // Load the source image (any raster format supported by Aspose.Imaging)
-                    using (RasterImage raster = (RasterImage)Image.Load(framePath))
+                    // Add each additional image as a new frame
+                    foreach (var imgPath in additionalImagePaths)
                     {
-                        // Create a TiffFrame from the raster image and add it to the TIFF
-                        TiffFrame frame = new TiffFrame(raster);
-                        tiffImage.AddFrame(frame);
+                        // Load the image (any raster format supported by Aspose.Imaging)
+                        using (RasterImage raster = (RasterImage)Image.Load(imgPath))
+                        {
+                            // Create a TiffFrame from the raster image
+                            TiffFrame frame = new TiffFrame(raster);
+                            // Add the frame to the TIFF image
+                            tiffImage.AddFrame(frame);
+                            // No explicit disposal needed for the frame; it will be disposed with the TiffImage
+                        }
                     }
-                }
 
-                // Save the updated multi‑frame TIFF
-                tiffImage.Save(outputPath);
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+                    // Save the updated TIFF
+                    tiffImage.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)
@@ -65,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to merge several scanned pages stored as PNG or JPEG files into a single multi‑page TIFF for archival or printing, they can load the base TIFF from a memory stream and append the additional image frames.
- * 2. When building a medical imaging workflow that converts DICOM slices to PNG and then combines them into a multi‑frame TIFF for efficient storage and transmission, this code shows how to load the existing TIFF and add new raster frames.
- * 3. When creating a digital invoice batch where each page is generated as a separate PNG file, a developer can merge them into one multi‑page TIFF using a memory stream to avoid temporary files on disk.
- * 4. When implementing a document management system that receives scanned images via a web API as byte arrays, the code demonstrates loading the base TIFF from a MemoryStream and programmatically adding the incoming image frames.
- * 5. When developing a photo‑book export feature that consolidates selected PNG photos into a single high‑resolution multi‑page TIFF for printing, this snippet illustrates how to load the original TIFF and append each photo as a new frame.
+ * 1. When you need to combine multiple images into a multi‑page TIFF for archival or printing without writing temporary files.
+ * 2. When a base TIFF is stored in a database or received over a network and you must append additional pages from PNG or JPEG files.
+ * 3. When you want to create a multi‑frame TIFF for fax or document‑scanning workflows by programmatically adding frames from user‑uploaded images.
+ * 4. When you must merge scanned documents with supplementary graphics while keeping the original TIFF in memory to avoid extra disk I/O.
+ * 5. When building a server‑side service that receives a TIFF stream and needs to enrich it with extra pages before returning the final file.
  */
