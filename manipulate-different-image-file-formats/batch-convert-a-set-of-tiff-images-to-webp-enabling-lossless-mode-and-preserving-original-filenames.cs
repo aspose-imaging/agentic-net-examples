@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert TIFF Images to Lossless WebP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -25,7 +26,7 @@ class Program
                     return;
                 }
 
-                // Build output path preserving original filename with .webp extension
+                // Build output path preserving original filename but with .webp extension
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
                 string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".webp");
 
@@ -53,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy archive of high‑resolution TIFF scans to modern, lossless WebP files for faster web delivery while keeping the original filenames.
- * 2. When an e‑commerce platform wants to convert product catalog TIFF images to WebP in bulk to reduce page load times without sacrificing image quality.
- * 3. When a medical imaging system requires batch transformation of diagnostic TIFF files to lossless WebP for storage optimization while preserving file naming conventions.
- * 4. When a digital asset management tool must automate the conversion of scanned documents from TIFF to WebP using C# to integrate with downstream web services.
- * 5. When a photographer’s workflow script needs to process a folder of TIFF photos, saving each as a lossless WebP image with the same base name for archival and web publishing.
+ * 1. When you need to shrink a large collection of high‑resolution TIFF scans for faster web delivery while keeping them lossless, this code converts each file to WebP and keeps the original names.
+ * 2. When a legacy system exports medical or archival images as TIFF and your web portal requires modern WebP assets, the script automates the batch transformation in C#.
+ * 3. When you are building an image‑processing pipeline that must preserve filename consistency across formats, this example shows how to rename TIFFs to .webp without losing the base name.
+ * 4. When you want to generate lightweight, lossless thumbnails for a digital asset management system from existing TIFF files, the code batch processes the folder and stores the results in an output directory.
+ * 5. When you need to integrate Aspose.Imaging into a scheduled Windows service that periodically converts newly added TIFF files to WebP for storage cost reduction, this sample provides the core conversion loop.
  */
