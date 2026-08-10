@@ -1,9 +1,8 @@
+// HOW-TO: Preserve PNG Transparency While Applying Emboss3x3 Filter In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
@@ -33,18 +32,18 @@ class Program
                 RasterImage raster = (RasterImage)image;
 
                 // Apply Emboss3x3 convolution filter while preserving alpha channel
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                raster.Filter(raster.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                        Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
 
-                // Prepare PNG save options to keep transparency
+                // Prepare PNG save options to keep alpha channel
                 PngOptions saveOptions = new PngOptions
                 {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    FilterType = PngFilterType.Adaptive,
-                    CompressionLevel = 9
+                    ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.TruecolorWithAlpha
                 };
 
                 // Save the processed image
-                image.Save(outputPath, saveOptions);
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -56,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer wants to add a subtle emboss effect to UI icons stored as PNG files while keeping their transparent backgrounds intact, they can use this Aspose.Imaging C# code.
- * 2. When a game asset pipeline requires batch processing of sprite sheets to apply a 3‑x‑3 emboss convolution without losing per‑pixel alpha information, the example demonstrates the needed steps.
- * 3. When an e‑commerce platform needs to generate watermarked product thumbnails with an embossed look while preserving the PNG’s alpha channel for overlay on different backgrounds, this code provides a reliable solution.
- * 4. When a mobile app designer wants to programmatically enhance PNG logos with an emboss filter in a .NET backend service and ensure the resulting images remain fully transparent where required, the snippet shows how to configure PngOptions accordingly.
- * 5. When an automated image‑processing workflow must convert transparent PNG graphics to a stylized embossed version for print‑ready PDFs, the code illustrates how to maintain truecolor with alpha during filtering and saving.
+ * 1. When you need to add an emboss effect to a logo PNG without losing its transparent background.
+ * 2. When generating thumbnails for a web app and must keep the original alpha channel after applying a convolution filter.
+ * 3. When processing UI icons in a desktop application and want the emboss style while preserving click‑through transparency.
+ * 4. When batch‑editing product images for an e‑commerce site, ensuring the emboss filter does not turn transparent areas opaque.
+ * 5. When creating stylized overlays for a game UI and require the PNG’s alpha channel to remain intact after filtering.
  */
