@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert BMP to SVG with Timestamped Filenames in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -5,46 +6,48 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Define input and output directories (relative to the current directory)
-            string baseDir = Directory.GetCurrentDirectory();
-            string inputDir = Path.Combine(baseDir, "Input");
-            string outputDir = Path.Combine(baseDir, "Output");
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\InputBmp";
+            string outputDirectory = @"C:\OutputSvg";
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
             // Get all BMP files in the input directory
-            string[] files = Directory.GetFiles(inputDir, "*.bmp");
+            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp", SearchOption.TopDirectoryOnly);
 
-            foreach (string inputPath in files)
+            int index = 0;
+            foreach (string bmpPath in bmpFiles)
             {
-                // Verify that the input file exists
-                if (!File.Exists(inputPath))
+                // Verify the input file exists
+                if (!File.Exists(bmpPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {bmpPath}");
                     return;
                 }
 
-                // Build a unique output file name with a timestamp prefix
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                // Create a unique timestamp prefix
                 string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                string outputFileName = $"{timestamp}_{fileNameWithoutExt}.svg";
-                string outputPath = Path.Combine(outputDir, outputFileName);
+                // Increment index to avoid identical timestamps when loop runs quickly
+                string uniquePrefix = $"{timestamp}_{index++}";
 
-                // Ensure the output directory exists
+                // Build the output SVG file path
+                string outputFileName = $"{uniquePrefix}_{Path.GetFileNameWithoutExtension(bmpPath)}.svg";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the BMP image and save it as SVG
-                using (Image image = Image.Load(inputPath))
+                using (Image image = Image.Load(bmpPath))
                 {
-                    var svgOptions = new SvgOptions
-                    {
-                        VectorRasterizationOptions = new SvgRasterizationOptions
-                        {
-                            PageSize = image.Size
-                        }
-                    };
+                    SvgOptions svgOptions = new SvgOptions();
+                    // Optional: configure vector rasterization options if needed
+                    // svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions { PageSize = image.Size };
 
                     image.Save(outputPath, svgOptions);
                 }
@@ -59,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy collection of BMP icons to scalable SVG graphics for a web UI while ensuring each output file has a unique timestamped name to avoid overwriting.
- * 2. When an automated build pipeline must convert newly generated BMP screenshots into SVG format for documentation generation, and the timestamp prefix helps track when each conversion occurred.
- * 3. When a desktop application processes user‑uploaded BMP drawings in bulk and saves them as SVG files with timestamped filenames to maintain version history and prevent name collisions.
- * 4. When a server‑side service periodically scans an input folder for BMP assets, converts them to SVG for responsive design, and uses the timestamp prefix to create audit‑ready filenames.
- * 5. When a migration script needs to archive BMP assets into an SVG archive, naming each file with a precise timestamp to simplify sorting and retrieval in a content‑management system.
+ * 1. When you need to automatically convert a folder of legacy BMP assets into scalable SVG graphics for a web application while ensuring each output file has a unique timestamped name.
+ * 2. When a build pipeline must generate vector versions of design mock‑ups stored as BMPs and avoid filename collisions by prefixing each SVG with a precise timestamp.
+ * 3. When an image‑processing service processes user‑uploaded BMP files in bulk and saves the resulting SVGs with unique identifiers for later retrieval or auditing.
+ * 4. When migrating a desktop application's bitmap icons to SVG format and you want to keep a chronological record of each conversion run in the filenames.
+ * 5. When creating a nightly batch job that transforms scanned BMP documents into SVG for lightweight storage, using timestamps to track when each file was produced.
  */
