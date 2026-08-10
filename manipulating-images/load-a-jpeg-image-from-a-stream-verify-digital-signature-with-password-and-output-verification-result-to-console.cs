@@ -1,6 +1,8 @@
+// HOW-TO: Verify JPEG Digital Signature From Stream With Password In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -8,8 +10,9 @@ class Program
     {
         try
         {
-            // Hardcoded input path and password
+            // Hardcoded input path
             string inputPath = "input.jpg";
+            // Password used for digital signature verification
             string password = "myPassword";
 
             // Verify input file exists
@@ -25,7 +28,7 @@ class Program
             {
                 bool isSigned = false;
 
-                // Determine the concrete type to call IsDigitalSigned
+                // Determine the concrete image type that supports digital signature checking
                 if (image is RasterImage rasterImage)
                 {
                     isSigned = rasterImage.IsDigitalSigned(password);
@@ -38,7 +41,13 @@ class Program
                 {
                     isSigned = multiPageImage.IsDigitalSigned(password);
                 }
+                else
+                {
+                    Console.Error.WriteLine("Unsupported image type for digital signature verification.");
+                    return;
+                }
 
+                // Output verification result
                 Console.WriteLine(isSigned
                     ? "Image is digitally signed."
                     : "Image is NOT digitally signed.");
@@ -53,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to confirm that a received JPEG file from a client is digitally signed before processing it further in a C# web service.
- * 2. When an application must validate the authenticity of scanned documents stored as JPEG images by checking the digital signature with a password during batch import.
- * 3. When a secure image archiving system loads JPEG images from a file stream and verifies their digital signature to ensure they have not been tampered with.
- * 4. When a desktop utility reads JPEG photos from a user‑selected folder and reports whether each image is digitally signed using Aspose.Imaging in .NET.
- * 5. When a cloud‑based workflow validates uploaded JPEG assets by loading them from a stream and using a password‑protected digital signature check before allowing them to be published.
+ * 1. When you need to confirm that a received JPEG file has not been tampered with before processing it in a C# application.
+ * 2. When an enterprise workflow requires validating digitally signed images uploaded via a web service using a known password.
+ * 3. When integrating secure image storage, you must check the digital signature of JPEGs stored in a database before displaying them to users.
+ * 4. When building a desktop utility that scans a folder of JPEGs and reports which ones are digitally signed using a password.
+ * 5. When implementing compliance checks that ensure all product photos contain a valid digital signature before they are published online.
  */
