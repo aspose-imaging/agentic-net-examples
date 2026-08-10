@@ -1,3 +1,4 @@
+// HOW-TO: Rotate A JPEG 90 Degrees Clockwise And Save With Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,28 +9,25 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\input.jpg";
-        string outputPath = @"C:\Images\output_rotated.jpg";
+        string inputPath = @"C:\temp\input.jpg";
+        string outputPath = @"C:\temp\output_rotated.jpg";
 
         try
         {
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the JPEG image, rotate it, and save the result
+            // Load the JPEG image, rotate 90 degrees clockwise, and save
             using (Image image = Image.Load(inputPath))
             {
-                // Rotate 90 degrees clockwise without flipping
                 image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-
-                // Save the rotated image to the output path
                 image.Save(outputPath);
             }
         }
@@ -42,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to display user‑uploaded photos in portrait orientation, a developer can load the JPEG, rotate it 90° with RotateFlip, and save the corrected file.
- * 2. When an automated batch‑processing script prepares product catalog images for printing, it can use Aspose.Imaging to rotate each JPEG 90 degrees clockwise before saving the output.
- * 3. When a mobile‑to‑desktop sync tool receives images taken in landscape mode, the code can rotate the JPEG to match the desktop layout and store the new file.
- * 4. When a digital asset management system must generate thumbnails that require a specific orientation, developers can rotate the source JPEG 90° and save it as a new image for thumbnail creation.
- * 5. When a document generation service embeds photos into PDFs and needs the images oriented correctly, it can programmatically rotate the JPEG using RotateFlip and save the adjusted file for inclusion.
+ * 1. When an e‑commerce site needs to automatically correct portrait‑oriented product photos uploaded as JPEGs before displaying them online.
+ * 2. When a desktop application must rotate scanned JPEG documents 90° clockwise to match the original page orientation.
+ * 3. When a photo‑gallery service processes user‑uploaded JPEG images to ensure consistent landscape layout across thumbnails.
+ * 4. When a batch‑processing script has to re‑orient a large number of JPEG files on a server without using external tools.
+ * 5. When a mobile‑backend API receives JPEG images from devices and must rotate them server‑side before storing them in storage.
  */
