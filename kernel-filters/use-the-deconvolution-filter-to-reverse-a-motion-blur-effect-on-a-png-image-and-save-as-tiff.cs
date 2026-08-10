@@ -1,38 +1,45 @@
+// HOW-TO: Remove Motion Blur From PNG Using Deconvolution And Save As TIFF In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input\\blurred.png";
-        string outputPath = "Output\\restored.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"c:\temp\input.png";
+        string outputPath = @"c:\temp\output.tif";
+
+        // Ensure the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Create output directory unconditionally
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+            // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage to apply filters
+                RasterImage rasterImage = (RasterImage)image;
 
-                var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(10, 1.0, 90.0);
-                raster.Filter(raster.Bounds, filterOptions);
+                // Apply Motion Wiener deconvolution filter to reverse motion blur
+                // Parameters: length, smooth, angle (example values)
+                var motionWienerOptions = new MotionWienerFilterOptions(10, 1.0, 90.0);
+                rasterImage.Filter(rasterImage.Bounds, motionWienerOptions);
 
-                using (var tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
-                {
-                    raster.Save(outputPath, tiffOptions);
-                }
+                // Save the result as TIFF
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                rasterImage.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -44,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to restore a motion‑blurred PNG screenshot taken from a video frame and archive the cleaned result as a high‑quality TIFF for legal evidence.
- * 2. When an image‑processing pipeline must automatically deblur scanned PNG documents captured with a moving camera and output them as TIFF files for downstream OCR.
- * 3. When a photo‑editing application built in C# wants to offer a “undo motion blur” feature that reads a PNG, applies the MotionWiener deconvolution filter, and saves the corrected image in TIFF format for lossless storage.
- * 4. When a batch job processes a folder of blurred PNG assets from a surveillance system, uses Aspose.Imaging’s filter API to reverse the blur, and stores the restored images as TIFFs for archival compliance.
- * 5. When a scientific imaging tool requires converting motion‑blurred PNG microscopy images into deblurred TIFF files to preserve pixel fidelity for further analysis.
+ * 1. When you need to clean up a scanned PNG that suffered camera shake before archiving it as a high‑quality TIFF.
+ * 2. When a web service receives motion‑blurred PNG uploads and must output deblurred TIFF files for printing.
+ * 3. When a forensic analyst wants to reverse motion blur in evidence images and store the results in a lossless TIFF format using C#.
+ * 4. When an automated batch job processes PNG screenshots from video frames, removes blur with a Wiener filter, and saves them as TIFF for further analysis.
+ * 5. When a medical imaging workflow requires converting blurred PNG scans to TIFF after applying deconvolution to improve diagnostic clarity.
  */
