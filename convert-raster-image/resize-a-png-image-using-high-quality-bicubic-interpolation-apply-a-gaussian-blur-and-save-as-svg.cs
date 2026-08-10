@@ -1,7 +1,9 @@
+// HOW-TO: Resize PNG with Bicubic Interpolation, Apply Gaussian Blur, Save as SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -22,21 +24,15 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                // Resize using high‑quality bicubic interpolation (CubicConvolution)
-                int newWidth = image.Width * 2;
-                int newHeight = image.Height * 2;
-                image.Resize(newWidth, newHeight, ResizeType.CubicConvolution);
-
-                // Apply Gaussian blur filter
                 RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
-                // Save the result as SVG
-                SvgOptions svgOptions = new SvgOptions
-                {
-                    VectorRasterizationOptions = new SvgRasterizationOptions { PageSize = image.Size }
-                };
-                image.Save(outputPath, svgOptions);
+                int newWidth = raster.Width * 2;
+                int newHeight = raster.Height * 2;
+
+                raster.Resize(newWidth, newHeight, ResizeType.CubicConvolution);
+                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+
+                image.Save(outputPath, new SvgOptions());
             }
         }
         catch (Exception ex)
@@ -48,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to generate a scalable SVG version of a high‑resolution PNG thumbnail for responsive UI, they can resize the PNG with bicubic interpolation, blur it, and save as SVG.
- * 2. When an e‑commerce platform wants to create smooth, blurred product icons that scale without pixelation across devices, they can use this code to enlarge the PNG, apply Gaussian blur, and export to SVG.
- * 3. When a mobile app needs to pre‑process user‑uploaded PNG avatars by doubling their size, softening edges with a Gaussian blur, and converting them to vector SVG for faster rendering, this snippet provides the solution.
- * 4. When a publishing workflow requires converting high‑quality PNG illustrations into SVG graphics while applying a subtle blur effect for background images, developers can employ this code.
- * 5. When a digital signage system must upscale PNG logos, add a Gaussian blur for a glow effect, and store them as SVG files for infinite scaling on large displays, this code handles the task.
+ * 1. When you need to upscale a low‑resolution PNG for high‑quality printing while smoothing edges with a Gaussian blur before converting it to a scalable SVG.
+ * 2. When generating web‑ready vector graphics from raster icons, you want to double their size using bicubic scaling and add a subtle blur for a modern look.
+ * 3. When preparing assets for a responsive UI, you may resize PNG assets, apply a blur effect for a soft‑focus background, and store them as SVG to keep file size low.
+ * 4. When automating a batch process that converts scanned PNG diagrams into larger, blurred SVG illustrations for inclusion in documentation.
+ * 5. When creating stylized thumbnails where the original PNG is enlarged, blurred, and saved as an SVG to retain crisp vector outlines at any display size.
  */
