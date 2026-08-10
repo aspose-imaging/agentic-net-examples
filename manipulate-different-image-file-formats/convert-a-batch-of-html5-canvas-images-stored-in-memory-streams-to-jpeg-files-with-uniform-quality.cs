@@ -1,3 +1,4 @@
+// HOW-TO: Convert Multiple HTML5 Canvas Files to JPEG with Fixed Quality in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,45 +10,54 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = "C:\\input\\";
-            string outputDir = "C:\\output\\";
-
-            // List of canvas image file names (for demonstration purposes)
-            string[] inputFiles = new[] { "canvas1.png", "canvas2.png", "canvas3.png" };
-
-            // Desired uniform JPEG quality (1-100)
-            int jpegQuality = 85;
-
-            foreach (var fileName in inputFiles)
+            // Hard‑coded list of input HTML5 Canvas files (stored as binary data)
+            string[] inputPaths = new string[]
             {
-                // Build full input path
-                string inputPath = Path.Combine(inputDir, fileName);
+                @"C:\Images\canvas1.html",
+                @"C:\Images\canvas2.html",
+                @"C:\Images\canvas3.html"
+            };
 
-                // Verify input file exists
+            // Hard‑coded output directory
+            string outputDir = @"C:\Images\Output";
+
+            // Uniform JPEG quality (1‑100)
+            int jpegQuality = 80;
+
+            // Ensure the output directory exists (unconditional as required)
+            Directory.CreateDirectory(outputDir);
+
+            for (int i = 0; i < inputPaths.Length; i++)
+            {
+                string inputPath = inputPaths[i];
+
+                // Verify input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load the image into a memory stream
-                using (MemoryStream memoryStream = new MemoryStream(File.ReadAllBytes(inputPath)))
+                // Load the HTML5 Canvas file into a memory stream
+                using (FileStream fileStream = File.OpenRead(inputPath))
+                using (MemoryStream canvasStream = new MemoryStream())
                 {
-                    // Load Aspose.Imaging image from the stream
-                    using (Image image = Image.Load(memoryStream))
+                    fileStream.CopyTo(canvasStream);
+                    canvasStream.Position = 0; // reset for reading
+
+                    // Load the image from the memory stream
+                    using (Image image = Image.Load(canvasStream))
                     {
-                        // Configure JPEG save options with the uniform quality
+                        // Prepare JPEG save options with the desired quality
                         JpegOptions jpegOptions = new JpegOptions
                         {
                             Quality = jpegQuality
                         };
 
-                        // Determine output file path (same name with .jpg extension)
-                        string outputFileName = Path.ChangeExtension(fileName, ".jpg");
-                        string outputPath = Path.Combine(outputDir, outputFileName);
+                        // Build the output file path
+                        string outputPath = Path.Combine(outputDir, $"canvas_{i + 1}.jpg");
 
-                        // Ensure the output directory exists
+                        // Ensure the output directory exists (unconditional)
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                         // Save the image as JPEG using the specified options
@@ -65,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to convert a batch of HTML5 Canvas screenshots stored in memory streams to JPEG files with a consistent compression quality for archival or reporting purposes.
- * 2. When an e‑learning platform generates PNG images from Canvas drawings on the client side and must batch‑process them on the server using C# and Aspose.Imaging to produce uniform‑quality JPEG thumbnails for faster loading.
- * 3. When a digital asset management system receives uploaded Canvas images as byte arrays and requires a reliable way to convert them to JPEG with a fixed quality setting before indexing them.
- * 4. When a marketing automation tool extracts Canvas graphics from email templates and needs to save them as JPEG files with the same quality level to ensure consistent visual appearance across campaigns.
- * 5. When a desktop utility written in .NET processes a list of Canvas‑generated PNG files from a temporary folder, loads them via memory streams, and saves them as JPEGs with a predefined quality to meet size‑restriction guidelines.
+ * 1. When you need to generate JPEG thumbnails from a series of HTML5 canvas drawings stored on disk.
+ * 2. When a web application exports canvas graphics as HTML files and you must batch‑convert them to JPEG for email attachments.
+ * 3. When you want to archive canvas‑based artwork in a compressed, widely supported image format with consistent quality.
+ * 4. When a reporting tool consumes JPEG images, so you must transform canvas output into JPEG before feeding the report.
+ * 5. When you automate image processing pipelines that read canvas files from memory streams and output JPEGs for downstream systems.
  */
