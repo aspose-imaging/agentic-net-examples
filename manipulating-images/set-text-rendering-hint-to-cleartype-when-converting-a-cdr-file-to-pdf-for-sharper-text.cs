@@ -1,40 +1,44 @@
+// HOW-TO: Convert CDR to PDF with ClearType Text Rendering in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "Input/sample.cdr";
-        string outputPath = "Output/sample.pdf";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.cdr";
+            string outputPath = "output.pdf";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the CDR image
             using (Image image = Image.Load(inputPath))
             {
-                PdfOptions pdfOptions = new PdfOptions
+                // Configure PDF options with ClearType text rendering
+                PdfOptions pdfOptions = new PdfOptions();
+                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = image.Width,
-                        PageHeight = image.Height,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = SmoothingMode.None
-                    }
+                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.ClearTypeGridFit,
+                    SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
+                    Positioning = PositioningTypes.DefinedByDocument
                 };
+                pdfOptions.VectorRasterizationOptions = rasterOptions;
 
+                // Save the image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -47,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert CorelDRAW (CDR) files to PDF while applying ClearType text rendering for sharper on‑screen text, this Aspose.Imaging C# code provides a ready‑to‑use solution.
- * 2. When a document management system must generate PDF previews of vector‑based CDR artwork with precise text clarity, the code demonstrates how to set TextRenderingHint to ClearType during conversion.
- * 3. When an automated batch process has to transform a folder of CDR designs into PDF reports and ensure the rendered text is crisp for digital viewing, the example shows the required Image and PdfOptions configuration.
- * 4. When a web application offers users the ability to download their CorelDRAW drawings as high‑quality PDFs with ClearType‑optimized typography, this snippet illustrates the necessary C# operations.
- * 5. When a print‑to‑screen workflow requires converting CDR graphics to PDF while preserving exact page dimensions and improving text readability with ClearType, the code provides the exact implementation steps.
+ * 1. When you need to generate a PDF from a CorelDRAW file while preserving sharp, ClearType‑rendered text for high‑quality print or on‑screen viewing.
+ * 2. When an application must batch‑process CDR documents and output PDFs that retain the original text clarity without manual rasterization settings.
+ * 3. When you are building a document‑conversion service that requires anti‑aliased vector rendering and precise text positioning defined by the source CDR file.
+ * 4. When you want to ensure that the converted PDF displays readable text on Windows devices that rely on ClearType font smoothing.
+ * 5. When you need to programmatically verify the existence of the source CDR file and create the output folder before performing the conversion in a .NET environment.
  */
