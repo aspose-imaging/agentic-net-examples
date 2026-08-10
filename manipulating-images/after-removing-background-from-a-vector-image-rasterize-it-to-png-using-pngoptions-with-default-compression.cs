@@ -1,20 +1,20 @@
+// HOW-TO: How To Remove Background From SVG And Save As PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
-public class Program
+class Program
 {
-    public static void Main()
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
             string inputPath = "input.svg";
-            string outputPath = "output.png";
+            string outputPath = "output\\result.png";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,27 +24,19 @@ public class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the vector image
+            // Load the image
             using (Image image = Image.Load(inputPath))
             {
-                // Remove background if the image is a vector type
+                // Remove background if it's a vector image
                 if (image is VectorImage vectorImage)
                 {
-                    vectorImage.RemoveBackground(new RemoveBackgroundSettings());
+                    vectorImage.RemoveBackground();
                 }
 
-                // Configure PNG options with default compression and transparency
-                var pngOptions = new PngOptions
-                {
-                    ColorType = PngColorType.TruecolorWithAlpha,
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.Transparent,
-                        PageSize = image.Size
-                    }
-                };
+                // Prepare PNG options with default compression
+                PngOptions pngOptions = new PngOptions();
 
-                // Save the rasterized PNG
+                // Save rasterized PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -57,9 +49,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate transparent PNG thumbnails from user‑uploaded SVG logos after removing any unwanted background.
- * 2. When an e‑commerce platform wants to convert product vector illustrations into high‑quality PNG images for display on mobile devices while preserving alpha transparency.
- * 3. When a desktop publishing tool automates the preparation of print‑ready assets by stripping backgrounds from SVG icons and rasterizing them to PNG with default compression.
- * 4. When a marketing automation script batch‑processes brand assets, converting SVG graphics to PNG format after background removal for use in email campaigns.
- * 5. When a game development pipeline requires converting vector UI elements into PNG sprites with transparent backgrounds to integrate them into the game engine.
+ * 1. When you need to strip the white or colored background from an SVG logo before embedding it in a web page as a PNG thumbnail.
+ * 2. When an automated image pipeline must convert vector illustrations to raster PNGs with default compression for faster loading on mobile devices.
+ * 3. When generating product catalog images where the original SVG files contain unwanted background layers that must be removed prior to printing.
+ * 4. When creating PDF reports that require PNG snapshots of vector diagrams without any background to maintain a transparent look.
+ * 5. When building a C# desktop application that lets users import SVG icons, cleans the background, and saves them as PNG files for use in UI controls.
  */
