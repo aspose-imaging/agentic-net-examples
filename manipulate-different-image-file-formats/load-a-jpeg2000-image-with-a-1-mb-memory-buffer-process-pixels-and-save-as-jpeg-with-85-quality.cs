@@ -1,50 +1,61 @@
+// HOW-TO: Convert JPEG2000 to JPEG with Color Inversion and 85% Quality in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg2000;
-using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg2000;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\temp\input.jp2";
-            string outputPath = @"C:\temp\output.jpg";
+            string inputPath = "input.jp2";
+            string outputPath = "output/output.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath) ?? ".";
+            Directory.CreateDirectory(outputDir);
 
-            // Load JPEG2000 using a buffered stream with a 1 MB buffer
-            using (FileStream fileStream = File.OpenRead(inputPath))
-            using (BufferedStream bufferedStream = new BufferedStream(fileStream, 1024 * 1024))
-            using (Jpeg2000Image jp2Image = new Jpeg2000Image(bufferedStream))
+            var loadOptions = new LoadOptions { BufferSizeHint = 1 * 1024 * 1024 };
+            using (Jpeg2000Image jp2Image = (Jpeg2000Image)Image.Load(inputPath, loadOptions))
             {
-                // Simple pixel processing: invert colors
-                for (int y = 0; y < jp2Image.Height; y++)
+                using (RasterImage raster = (RasterImage)jp2Image)
                 {
-                    for (int x = 0; x < jp2Image.Width; x++)
+                    if (!raster.IsCached)
+                        raster.CacheData();
+
+                    var rect = new Rectangle(0, 0, raster.Width, raster.Height);
+                    int[] pixels = raster.LoadArgb32Pixels(rect);
+
+                    for (int i = 0; i < pixels.Length; i++)
                     {
-                        var color = jp2Image.GetPixel(x, y);
-                        var inverted = Aspose.Imaging.Color.FromArgb(255 - color.R, 255 - color.G, 255 - color.B);
-                        jp2Image.SetPixel(x, y, inverted);
+                        int a = (pixels[i] >> 24) & 0xFF;
+                        int r = (pixels[i] >> 16) & 0xFF;
+                        int g = (pixels[i] >> 8) & 0xFF;
+                        int b = pixels[i] & 0xFF;
+
+                        r = 255 - r;
+                        g = 255 - g;
+                        b = 255 - b;
+
+                        pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
                     }
+
+                    raster.SaveArgb32Pixels(rect, pixels);
                 }
 
-                // Save as JPEG with 85 % quality
-                JpegOptions jpegOptions = new JpegOptions
+                var jpegOptions = new JpegOptions
                 {
-                    Quality = 85
+                    Quality = 85,
+                    Source = new FileCreateSource(outputPath, false)
                 };
                 jp2Image.Save(outputPath, jpegOptions);
             }
@@ -58,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. Convert high‑resolution JPEG2000 scans of archival documents to smaller JPEG files for web preview while applying a simple color inversion filter.
- * 2. Process satellite imagery stored as JPEG2000, invert pixel colors for analysis, then export to JPEG with 85 % quality for inclusion in a GIS report.
- * 3. Reduce the file size of medical imaging JPEG2000 files by converting them to JPEG with controlled quality after applying a pixel‑wise transformation.
- * 4. Automate batch conversion of JPEG2000 product photos to JPEG for e‑commerce platforms, using a 1 MB buffered stream to improve I/O performance.
- * 5. Integrate image preprocessing in a C# desktop app that loads JPEG2000 assets, inverts colors for visual effect, and saves them as JPEG with specific quality settings for printing.
+ * 1. When you need to read a large JPEG2000 file into memory, invert its colors, and output a smaller JPEG for web display.
+ * 2. When processing medical or satellite JPEG2000 images on a server with limited memory, applying pixel‑wise transformations before saving as a standard JPEG.
+ * 3. When converting archival JPEG2000 photos to JPEG while preserving a specific compression quality (85%) for compatibility with consumer applications.
+ * 4. When performing batch image preprocessing in a C# service that requires loading images with a custom buffer size and applying custom pixel manipulation.
+ * 5. When integrating Aspose.Imaging into a .NET workflow to transform high‑resolution JPEG2000 assets into web‑ready JPEGs with controlled quality and color adjustments.
  */
