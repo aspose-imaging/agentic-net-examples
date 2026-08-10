@@ -1,3 +1,4 @@
+// HOW-TO: How To Save JPEG As Progressive And Compare File Size In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,10 +11,10 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.jpg";
-            string baselinePath = @"C:\temp\output\sample_baseline.jpg";
-            string progressivePath = @"C:\temp\output\sample_progressive.jpg";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\input.jpg";
+            string baselinePath = @"C:\Images\output_baseline.jpg";
+            string progressivePath = @"C:\Images\output_progressive.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -26,16 +27,18 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(baselinePath));
             Directory.CreateDirectory(Path.GetDirectoryName(progressivePath));
 
-            // Load the JPEG image
+            // Load the original JPEG image
             using (Image image = Image.Load(inputPath))
             {
                 // Save with default (baseline) compression
                 image.Save(baselinePath);
 
-                // Configure progressive compression options
-                JpegOptions progressiveOptions = new JpegOptions();
-                progressiveOptions.CompressionType = JpegCompressionMode.Progressive;
-                progressiveOptions.Quality = 100; // Preserve quality
+                // Prepare JPEG options for progressive compression
+                JpegOptions progressiveOptions = new JpegOptions
+                {
+                    CompressionType = JpegCompressionMode.Progressive,
+                    Quality = 100 // optional: keep high quality for comparison
+                };
 
                 // Save with progressive compression
                 image.Save(progressivePath, progressiveOptions);
@@ -45,8 +48,9 @@ class Program
             long baselineSize = new FileInfo(baselinePath).Length;
             long progressiveSize = new FileInfo(progressivePath).Length;
 
-            Console.WriteLine($"Baseline size: {baselineSize} bytes");
-            Console.WriteLine($"Progressive size: {progressiveSize} bytes");
+            Console.WriteLine($"Baseline file size: {baselineSize} bytes");
+            Console.WriteLine($"Progressive file size: {progressiveSize} bytes");
+            Console.WriteLine($"Size difference: {baselineSize - progressiveSize} bytes");
         }
         catch (Exception ex)
         {
@@ -57,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer wants to serve faster‑loading images on a website, they can use this code to convert high‑quality JPEGs to progressive format and verify that the file size reduction meets performance targets.
- * 2. When an e‑commerce platform needs to generate product thumbnails that display incrementally while downloading, the code enables saving progressive JPEGs and comparing their size against baseline compression to ensure optimal bandwidth usage.
- * 3. When a digital asset management system must archive photographs with the smallest possible file size without losing quality, developers can apply progressive compression and programmatically compare sizes to decide which version to store.
- * 4. When a mobile app requires images that render quickly on slow networks, this snippet lets developers create progressive JPEGs and confirm that the progressive file is smaller or comparable to the baseline version before deployment.
- * 5. When a content‑delivery network (CDN) automates image optimization, the code can be integrated into the pipeline to generate progressive JPEGs and log size differences, helping engineers monitor storage savings across large image collections.
+ * 1. When you need to generate a progressive JPEG for faster web page loading while preserving the original image quality.
+ * 2. When you want to measure whether progressive compression reduces file size compared to baseline JPEG to optimize bandwidth usage.
+ * 3. When building an image pipeline that must output both baseline and progressive JPEGs for A/B testing of visual loading performance.
+ * 4. When creating a batch conversion utility that logs size differences to decide which JPEG compression mode is best for archival storage.
+ * 5. When developing a photo‑sharing app that compares progressive and baseline JPEG sizes to select the most efficient format for mobile devices.
  */
