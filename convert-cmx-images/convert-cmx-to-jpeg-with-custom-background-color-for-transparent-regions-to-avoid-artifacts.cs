@@ -1,43 +1,46 @@
+// HOW-TO: Convert CMX to JPEG with White Background for Transparency in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.cmx";
-        string outputPath = "output.jpg";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load CMX image
-            using (CmxImage cmx = (CmxImage)Aspose.Imaging.Image.Load(inputPath))
-            {
-                // Set custom background color for transparent regions
-                cmx.BackgroundColor = Aspose.Imaging.Color.White; // Change to desired color
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.cmx";
+            string outputPath = @"C:\Images\output.jpg";
 
-                // Configure JPEG options
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CMX image
+            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
+            {
+                // Configure JPEG save options with a background color for transparent regions
                 JpegOptions jpegOptions = new JpegOptions
                 {
-                    Quality = 100
+                    // Set the background color (e.g., white) to fill transparent areas
+                    VectorRasterizationOptions = new CmxRasterizationOptions
+                    {
+                        BackgroundColor = Aspose.Imaging.Color.White
+                    }
                 };
 
                 // Save as JPEG
-                cmx.Save(outputPath, jpegOptions);
+                cmxImage.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy CorelDRAW CMX files to JPEG for web publishing while ensuring transparent areas are filled with a specific background color to prevent visual artifacts.
- * 2. When an automated image processing pipeline must batch‑process CMX drawings and output high‑quality JPEGs with a white (or any chosen) background for consistent appearance across browsers.
- * 3. When integrating a document management system that stores CMX assets, and the application must generate preview thumbnails in JPEG format with a defined background to avoid empty or black corners.
- * 4. When migrating a legacy design archive to a modern format, and the migration tool must replace CMX transparency with a solid color during conversion to JPEG to maintain brand colors.
- * 5. When building a C# desktop utility that allows users to select a CMX file and export it as a JPEG with a custom background, ensuring the resulting image meets print‑ready quality standards.
+ * 1. When you need to display legacy CorelDRAW CMX artwork on the web, converting it to JPEG with a white background prevents transparent‑area artifacts.
+ * 2. When generating thumbnails for a document management system, you can rasterize CMX files to JPEG while filling transparent parts with a solid color to keep the images consistent.
+ * 3. When automating batch conversion of CMX logos for print catalogs, using Aspose.Imaging in C# ensures each JPEG has a uniform background instead of unwanted gaps.
+ * 4. When integrating older CMX graphics into a mobile app, converting them to JPEG with a custom background color avoids visual glitches on devices that don’t support transparency.
+ * 5. When preparing CMX illustrations for email newsletters, saving them as JPEG with a defined background eliminates rendering issues in email clients that ignore alpha channels.
  */
