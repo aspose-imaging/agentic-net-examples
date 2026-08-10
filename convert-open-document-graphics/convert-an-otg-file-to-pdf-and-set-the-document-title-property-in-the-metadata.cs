@@ -1,3 +1,4 @@
+// HOW-TO: Convert OTG to PDF with Title Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,9 +9,9 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample.pdf";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.otg";
+        string outputPath = @"C:\temp\output.pdf";
 
         try
         {
@@ -27,7 +28,7 @@ class Program
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PDF options
+                // Prepare PDF export options
                 PdfOptions pdfOptions = new PdfOptions();
 
                 // Set PDF document title metadata
@@ -36,12 +37,12 @@ class Program
                     Title = "Converted OTG Document"
                 };
 
-                // Configure rasterization options for vector conversion
-                OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
+                // Configure rasterization for vector content
+                OtgRasterizationOptions otgRaster = new OtgRasterizationOptions
                 {
-                    PageSize = image.Size // Preserve original size
+                    PageSize = image.Size
                 };
-                pdfOptions.VectorRasterizationOptions = otgRasterization;
+                pdfOptions.VectorRasterizationOptions = otgRaster;
 
                 // Save as PDF
                 image.Save(outputPath, pdfOptions);
@@ -56,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an engineering firm needs to archive their AutoCAD OTG vector drawings as searchable PDF files with a proper title metadata for easy retrieval.
- * 2. When a web application must convert user‑uploaded OTG images to PDF on the server side in C# while embedding a custom document title for compliance reporting.
- * 3. When a document management system integrates Aspose.Imaging to transform legacy OTG files into PDF format and set the title property so that the PDFs appear correctly in catalog listings.
- * 4. When a batch job processes a folder of OTG files, converting each to PDF and assigning a meaningful title to meet corporate record‑keeping standards.
- * 5. When a desktop utility creates printable PDFs from OTG graphics and uses the PdfDocumentInfo.Title field to display the document name in PDF viewers and search indexes.
+ * 1. When you need to archive engineering drawings stored as OTG files into searchable PDF documents with a proper title property.
+ * 2. When a web application must generate PDF reports from OTG images and embed the document title for easier indexing.
+ * 3. When automating a batch process that converts legacy OTG graphics to PDF while preserving vector quality and setting metadata for document management systems.
+ * 4. When integrating Aspose.Imaging into a C# desktop tool that allows users to export OTG designs to PDF with a custom title for printing workflows.
+ * 5. When creating a document conversion service that transforms OTG files to PDF and adds title metadata to comply with corporate filing standards.
  */
