@@ -1,18 +1,19 @@
+// HOW-TO: Serve Grayscale WebP Image Via HTTP In C# Using Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "sample.webp";
-        string outputPath = "output.png";
-
         try
         {
+            string inputPath = "Input/sample.webp";
+            string outputPath = "Output/filtered.webp";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -23,7 +24,31 @@ class Program
 
             using (Image image = Image.Load(inputPath))
             {
-                image.Save(outputPath, new PngOptions());
+                var webp = (WebPImage)image;
+                webp.Grayscale();
+
+                var options = new WebPOptions();
+                webp.Save(outputPath, options);
+            }
+
+            using (var listener = new System.Net.HttpListener())
+            {
+                listener.Prefixes.Add("http://localhost:5000/");
+                listener.Start();
+                Console.WriteLine("Listening on http://localhost:5000/ ...");
+
+                var context = listener.GetContext();
+                var response = context.Response;
+
+                byte[] imageBytes = File.ReadAllBytes(outputPath);
+                response.ContentType = "image/webp";
+                response.ContentLength64 = imageBytes.Length;
+                using (var output = response.OutputStream)
+                {
+                    output.Write(imageBytes, 0, imageBytes.Length);
+                }
+
+                listener.Stop();
             }
         }
         catch (Exception ex)
@@ -35,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert user‑uploaded WebP images to PNG for compatibility with browsers that do not support WebP, they can use this Aspose.Imaging C# snippet to load the .webp file and save it as .png.
- * 2. When an automated batch job must generate PNG thumbnails from a collection of WebP assets stored on a file server, the code demonstrates how to verify file existence, create output folders, and perform the conversion with Aspose.Imaging.
- * 3. When a .NET web API has to process incoming image payloads and store them in a lossless format for archival, this example shows how to load a WebP image, handle errors, and save it as PNG using PngOptions.
- * 4. When integrating a content management system that only accepts PNG files, developers can employ this snippet to read WebP graphics, convert them to PNG, and ensure the target directory is created before saving.
- * 5. When building a desktop utility that validates image files before further processing, the code provides a straightforward way to check for the source WebP file, convert it to PNG with Aspose.Imaging, and capture any exceptions for logging.
+ * 1. When you need to deliver a grayscale WebP version of an uploaded picture directly to a browser via a simple HTTP endpoint.
+ * 2. When building a microservice that applies image filters on demand and returns the processed image without persisting intermediate files.
+ * 3. When creating a lightweight preview server that serves filtered WebP images for mobile or web applications.
+ * 4. When testing an Aspose.Imaging image‑processing workflow locally before moving it to Azure Blob Storage.
+ * 5. When integrating on‑the‑fly image conversion into an existing C# API that must respond with the correct content‑type header.
  */
