@@ -1,68 +1,78 @@
+// HOW-TO: Merge JPEG and PNG Horizontally into a PNG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string jpegPath = "input.jpg";
+        string pngPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input JPEG files and output PNG file
-            string[] inputPaths = { "input1.jpg", "input2.jpg" };
-            string outputPath = "output.png";
-
-            // Validate each input file exists
-            foreach (var path in inputPaths)
+            // Validate input files
+            if (!File.Exists(jpegPath))
             {
-                if (!File.Exists(path))
-                {
-                    Console.Error.WriteLine($"File not found: {path}");
-                    return;
-                }
+                Console.Error.WriteLine($"File not found: {jpegPath}");
+                return;
+            }
+            if (!File.Exists(pngPath))
+            {
+                Console.Error.WriteLine($"File not found: {pngPath}");
+                return;
             }
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of all input images
+            // Collect sizes of input images
             List<Size> sizes = new List<Size>();
-            foreach (var path in inputPaths)
+            using (RasterImage img = (RasterImage)Image.Load(jpegPath))
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
-                {
-                    sizes.Add(img.Size);
-                }
+                sizes.Add(img.Size);
+            }
+            using (RasterImage img = (RasterImage)Image.Load(pngPath))
+            {
+                sizes.Add(img.Size);
             }
 
-            // Calculate canvas dimensions for horizontal merge
-            int newWidth = sizes.Sum(s => s.Width);
-            int newHeight = sizes.Max(s => s.Height);
+            // Calculate canvas dimensions (horizontal merge)
+            int canvasWidth = sizes.Sum(s => s.Width);
+            int canvasHeight = sizes.Max(s => s.Height);
 
-            // Create PNG canvas with bound output source
+            // Create PNG canvas bound to the output file
             Source src = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions { Source = src };
-
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, newWidth, newHeight))
+            PngOptions pngOptions = new PngOptions() { Source = src };
+            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
             {
                 int offsetX = 0;
-                foreach (var path in inputPaths)
+
+                // Draw JPEG onto canvas
+                using (RasterImage img = (RasterImage)Image.Load(jpegPath))
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
-                    {
-                        // Copy pixels from source image to canvas at the current offset
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                        int[] pixels = img.LoadArgb32Pixels(img.Bounds);
-                        canvas.SaveArgb32Pixels(bounds, pixels);
-                        offsetX += img.Width;
-                    }
+                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                    offsetX += img.Width;
                 }
 
-                // Save the bound canvas (output file already specified in source)
+                // Draw PNG onto canvas
+                using (RasterImage img = (RasterImage)Image.Load(pngPath))
+                {
+                    Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
+                    canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
+                }
+
+                // Save the merged image (bound canvas)
                 canvas.Save();
             }
         }
@@ -75,9 +85,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to combine multiple JPEG product photos into a single PNG sprite sheet for a web gallery while ensuring all image resources are released promptly.
- * 2. When an e‑commerce platform must merge scanned JPEG invoices into a consolidated PNG document for batch processing and wants deterministic disposal of Image objects.
- * 3. When a reporting tool creates a side‑by‑side comparison of before‑and‑after JPEG images and outputs the result as a PNG for high‑quality printing, using using statements to avoid memory leaks.
- * 4. When a mobile app backend stitches together user‑uploaded JPEG thumbnails into a single PNG collage for social sharing, requiring proper cleanup of raster images.
- * 5. When a digital asset management system automates the conversion of a series of JPEG assets into a single PNG composite for archival, employing using blocks to guarantee that each image file handle is closed.
+ * 1. When you need to combine a product photo in JPEG format with a transparent logo in PNG format into a single image for web display.
+ * 2. When generating side‑by‑side before‑after comparisons by merging a JPEG screenshot with a PNG overlay.
+ * 3. When creating composite marketing banners that stitch a high‑resolution JPEG background with a PNG watermark.
+ * 4. When automating batch processing to convert mixed‑format assets into a unified PNG canvas for consistent downstream pipelines.
+ * 5. When building a reporting tool that places a JPEG chart next to a PNG icon and saves the result as a PNG file.
  */
