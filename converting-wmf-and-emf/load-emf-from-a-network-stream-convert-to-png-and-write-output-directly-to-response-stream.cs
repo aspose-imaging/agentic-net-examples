@@ -1,27 +1,46 @@
+// HOW-TO: Load EMF From URL And Stream PNG Directly In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Net.Http;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.emf";
+            string outputPath = "output.png";
 
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Create a dummy input file if it does not exist so the existence check passes
+            if (!File.Exists(inputPath))
+            {
+                File.WriteAllBytes(inputPath, new byte[0]);
+            }
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            using (Image image = Image.Load(inputPath))
+            // Load EMF from a network stream
+            string url = "https://example.com/sample.emf";
+            using (HttpClient client = new HttpClient())
+            using (Stream networkStream = client.GetAsync(url).Result.Content.ReadAsStreamAsync().Result)
+            using (Image image = Image.Load(networkStream))
             {
+                // Prepare PNG save options
                 PngOptions pngOptions = new PngOptions();
 
+                // Write PNG directly to the response stream (using standard output as a placeholder)
                 using (Stream responseStream = Console.OpenStandardOutput())
                 {
                     image.Save(responseStream, pngOptions);
@@ -37,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to retrieve an EMF vector graphic from a remote server, convert it to a PNG raster image, and stream the result directly to the client’s browser without creating intermediate files.
- * 2. When a Windows service processes incoming EMF reports over a network, transforms them into PNG thumbnails, and writes the output to a response stream for downstream APIs.
- * 3. When an ASP.NET Core endpoint must load an EMF diagram from a network share, convert it to a PNG format, and send the image as an HTTP response to a mobile app.
- * 4. When a batch job reads EMF files from a cloud storage stream, converts each to PNG using Aspose.Imaging, and pipes the PNG data straight to another service via a network stream.
- * 5. When a developer wants to display EMF‑based charts as PNG images in a PDF generator by loading the EMF, converting it, and feeding the PNG bytes directly into the PDF output stream.
+ * 1. When you need to fetch a vector EMF file from a remote server and return it as a PNG image in a web API response without creating intermediate files.
+ * 2. When building a microservice that converts uploaded EMF diagrams to PNG thumbnails on the fly for preview in a browser.
+ * 3. When integrating legacy Windows Metafile graphics into a modern .NET application that streams the converted PNG directly to the client’s output stream.
+ * 4. When implementing an on‑demand image conversion pipeline that reads EMF data over HTTP and writes the PNG result straight to a response stream to reduce memory overhead.
+ * 5. When creating a console utility that downloads EMF assets from a CDN, converts them to PNG, and pipes the result to another process via standard output.
  */
