@@ -1,3 +1,4 @@
+// HOW-TO: Convert PDF Vector Diagram to SVG While Preserving Line Widths in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -5,45 +6,44 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input\\diagram.pdf";
-        string outputPath = "Output\\diagram.svg";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the PDF document
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\Input\diagram.pdf";
+            string outputPath = @"C:\Output\diagram.svg";
+
+            // Verify that the input PDF exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the PDF (vector image) using Aspose.Imaging
             using (Image image = Image.Load(inputPath))
             {
-                // Configure SVG export options
-                using (SvgOptions svgOptions = new SvgOptions())
+                // Configure rasterization options to keep the original page size,
+                // which preserves line widths and scaling.
+                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                 {
-                    // Set up vector rasterization options to preserve original dimensions and line widths
-                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = image.Size,
-                        BackgroundColor = Color.White,
-                        SmoothingMode = SmoothingMode.None,
-                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel
-                    };
+                    PageSize = image.Size
+                };
 
-                    svgOptions.VectorRasterizationOptions = rasterOptions;
-                    svgOptions.TextAsShapes = true; // Preserve text as shapes for accurate scaling
+                // Set up SVG save options
+                SvgOptions svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterOptions,
+                    // Do not compress to keep the SVG fully vectorial
+                    Compress = false
+                };
 
-                    // Save as SVG
-                    image.Save(outputPath, svgOptions);
-                }
+                // Save the PDF as SVG
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -55,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert engineering PDF schematics into scalable SVG files for a web‑based viewer while preserving exact line widths for accurate zooming, this code provides a reliable C# solution using Aspose.Imaging.
- * 2. When a design team wants to transform vector‑based PDF illustrations into SVG icons for responsive UI layouts, ensuring that stroke thickness remains consistent across different screen resolutions, the sample demonstrates the required image processing steps.
- * 3. When a documentation system must migrate legacy PDF diagrams to SVG format for searchable, searchable‑by‑machine‑learning content without losing the original drawing dimensions, the code handles the conversion with proper rasterization options.
- * 4. When an e‑learning platform requires high‑quality SVG assets generated from PDF lecture slides so that mathematical graphs retain their precise line weights during scaling, this C# example shows how to achieve that using Aspose.Imaging.
- * 5. When a GIS application needs to import PDF map overlays as SVG layers while keeping the original line styles intact for accurate geographic scaling, the provided code performs the conversion with line‑width preservation.
+ * 1. When a developer needs to embed engineering schematics from a PDF into a responsive web page without losing the original line thickness.
+ * 2. When an application must transform architectural drawing PDFs into scalable SVG files for zoom‑able documentation viewers.
+ * 3. When preserving exact line widths is critical for generating printable vector graphics from PDF technical manuals.
+ * 4. When converting CAD‑exported PDF diagrams to SVG for use in interactive dashboards that require precise scaling.
+ * 5. When automating the migration of legacy PDF vector assets to SVG to support modern UI frameworks while keeping visual fidelity.
  */
