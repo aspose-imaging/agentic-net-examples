@@ -1,9 +1,11 @@
+// HOW-TO: Parallel Apply Emboss3x3 Filter to Multiple PNG Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -29,7 +31,7 @@ class Program
 
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-            Parallel.ForEach(files, inputPath =>
+            System.Threading.Tasks.Parallel.ForEach(files, inputPath =>
             {
                 if (!File.Exists(inputPath))
                 {
@@ -37,14 +39,18 @@ class Program
                     return;
                 }
 
-                string fileName = Path.GetFileName(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName);
+                string outputPath = Path.Combine(outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + "_emboss.png");
+
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
                 {
                     RasterImage raster = (RasterImage)image;
-                    raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                    raster.Filter(raster.Bounds,
+                        new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(
+                            Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.Emboss3x3));
                     raster.Save(outputPath);
                 }
             });
@@ -58,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to apply an emboss effect to thousands of PNG files in a folder to generate stylized thumbnails for an e‑commerce catalog, they can use this Parallel.ForEach code with Aspose.Imaging’s Emboss3x3 filter.
- * 2. When a photo‑editing web service must quickly process user‑uploaded PNG images on a server and add a 3×3 emboss filter before storing them, the parallel batch routine speeds up the workload.
- * 3. When an automated build pipeline has to convert a set of PNG assets into embossed versions for a game’s UI theme, this C# example shows how to run the convolution filter concurrently.
- * 4. When a desktop application needs to generate embossed previews of PNG diagrams for a documentation generator without blocking the UI thread, the Parallel.ForEach approach handles the processing in the background.
- * 5. When a cloud function processes incoming PNG files from a storage bucket and applies a convolution emboss filter to each file for visual effect, the code demonstrates scalable parallel execution with Aspose.Imaging.
+ * 1. When you need to quickly add an emboss effect to a large collection of PNG files for a web gallery, you can run the filter in parallel to reduce processing time.
+ * 2. When automating a preprocessing step for a machine‑learning pipeline that requires all input PNG images to have a 3×3 emboss texture, this code processes the whole folder concurrently.
+ * 3. When preparing product photos for an e‑commerce site and want to generate embossed thumbnails without blocking the main thread, the Parallel.ForEach loop handles each image independently.
+ * 4. When converting a batch of user‑uploaded PNG assets on a server and applying a visual style filter before storage, the Aspose.Imaging ConvolutionFilter.Emboss3x3 can be applied in parallel for scalability.
+ * 5. When building a desktop utility that applies the same image filter to dozens of PNG screenshots, using this code lets you leverage multiple CPU cores to finish the job faster.
  */
