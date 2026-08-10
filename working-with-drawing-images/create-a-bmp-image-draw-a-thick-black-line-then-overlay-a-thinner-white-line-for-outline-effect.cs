@@ -1,7 +1,9 @@
+// HOW-TO: Create BMP Image With Outlined Line Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -10,31 +12,34 @@ class Program
     {
         try
         {
-            string outputPath = @"C:\temp\outline.bmp";
+            // Output file path (hardcoded)
+            string outputPath = "output/output.bmp";
+
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
+            // Create a file source bound to the output path
+            Source source = new FileCreateSource(outputPath, false);
+
+            // BMP options with the bound source
+            BmpOptions bmpOptions = new BmpOptions() { Source = source };
+
+            // Create a BMP canvas of size 200x200
+            using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, 200, 200))
             {
-                BmpOptions bmpOptions = new BmpOptions();
-                bmpOptions.Source = new StreamSource(stream);
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(canvas);
 
-                int width = 400;
-                int height = 300;
+                // Draw a thick black line
+                Pen blackPen = new Pen(Color.Black, 10);
+                graphics.DrawLine(blackPen, 20, 20, 180, 180);
 
-                using (Image image = Image.Create(bmpOptions, width, height))
-                {
-                    Graphics graphics = new Graphics(image);
+                // Overlay a thinner white line for outline effect
+                Pen whitePen = new Pen(Color.White, 2);
+                graphics.DrawLine(whitePen, 20, 20, 180, 180);
 
-                    int x1 = 50, y1 = 50, x2 = 350, y2 = 250;
-
-                    Pen blackPen = new Pen(Color.Black, 10);
-                    graphics.DrawLine(blackPen, new Point(x1, y1), new Point(x2, y2));
-
-                    Pen whitePen = new Pen(Color.White, 4);
-                    graphics.DrawLine(whitePen, new Point(x1, y1), new Point(x2, y2));
-
-                    image.Save();
-                }
+                // Save the bound image
+                canvas.Save();
             }
         }
         catch (Exception ex)
@@ -46,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically create a BMP image and draw a thick black line with a thin white outline using Aspose.Imaging’s Image.Create and Graphics classes for a simple diagram in a Windows desktop app.
- * 2. When generating printable schematics where a 10‑pixel black line outlined by a 4‑pixel white stroke improves contrast on monochrome printers, leveraging C# Pen objects and BMP output.
- * 3. When producing thumbnail previews that highlight edges by drawing an outlined line on a bitmap using Aspose.Imaging for .NET, C# streams, and the Graphics.DrawLine method.
- * 4. When adding a decorative border to a bitmap in a batch‑processing script that writes the BMP file via FileStream, BmpOptions, and draws the outline with black and white Pen objects.
- * 5. When building a custom UI control that requires dynamic drawing of outlined lines on a BMP canvas for visual feedback, using Aspose.Imaging’s Graphics, Pen, and Image.Save operations.
+ * 1. When you need to programmatically generate a BMP diagram that includes a thick black line with a white outline for UI icons or simple graphics.
+ * 2. When you want to add a contrasting white border to a black line in a bitmap to improve visibility on dark or colored backgrounds.
+ * 3. When creating test images for computer‑vision or OCR systems that require a clear black stroke surrounded by a thin white edge.
+ * 4. When producing custom graphics for embedded devices that only support BMP files and need a highlighted line for status indicators.
+ * 5. When automating the creation of printable schematics where a white outline emphasizes the primary black line for better print clarity.
  */
