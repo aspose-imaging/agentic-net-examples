@@ -1,9 +1,10 @@
+// HOW-TO: Create Multipage TIFF From PSD Files Using AddPage in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -17,7 +18,7 @@ class Program
 
         try
         {
-            // Verify input files exist
+            // Verify each input file exists
             if (!File.Exists(inputPath1))
             {
                 Console.Error.WriteLine($"File not found: {inputPath1}");
@@ -34,33 +35,40 @@ class Program
                 return;
             }
 
-            // Prepare TIFF creation options
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Configure TIFF creation options
             TiffOptions tiffOptions = new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default);
-            tiffOptions.Source = new Aspose.Imaging.Sources.FileCreateSource(outputPath, false);
+            tiffOptions.Source = new FileCreateSource(outputPath, false);
             tiffOptions.Photometric = Aspose.Imaging.FileFormats.Tiff.Enums.TiffPhotometrics.Rgb;
             tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
 
-            // Create an empty TIFF image (size will be adjusted by added pages)
-            using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, 100, 100))
+            // Create an empty TIFF image (size 1x1, will be replaced by added pages)
+            using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, 1, 1))
             {
-                // Load each PSD image and add it as a page
+                // Load each PSD image and add it as a new page
                 using (RasterImage psd1 = (RasterImage)Image.Load(inputPath1))
                 {
                     tiffImage.AddPage(psd1);
                 }
-
                 using (RasterImage psd2 = (RasterImage)Image.Load(inputPath2))
                 {
                     tiffImage.AddPage(psd2);
                 }
-
                 using (RasterImage psd3 = (RasterImage)Image.Load(inputPath3))
                 {
                     tiffImage.AddPage(psd3);
                 }
 
-                // Ensure output directory exists before saving
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Remove the initially created empty frame
+                TiffFrame activeFrame = tiffImage.ActiveFrame;
+                if (tiffImage.Frames.Length > 1)
+                {
+                    tiffImage.ActiveFrame = tiffImage.Frames[1];
+                    tiffImage.RemoveFrame(0);
+                }
+                activeFrame.Dispose();
 
                 // Save the multipage TIFF
                 tiffImage.Save();
@@ -75,9 +83,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a printing service needs to combine several layered Photoshop designs into a single multipage TIFF for batch printing or archiving.
- * 2. When a digital asset management system must consolidate multiple PSD files into one TIFF document to simplify metadata handling and version control.
- * 3. When a web application generates a downloadable multi‑page product catalog by merging individual PSD mockups into a single TIFF file.
- * 4. When an e‑discovery workflow requires converting a set of PSD evidence images into a single multipage TIFF for court‑compatible submission.
- * 5. When a document scanning solution wants to preserve the original PSD artwork while creating a compact, multi‑page TIFF for storage or transmission.
+ * 1. When you need to combine several layered Photoshop (PSD) designs into a single multipage TIFF for archival or printing workflows.
+ * 2. When an application must generate a TIFF document where each page represents a separate PSD image, such as creating a portfolio or proof sheet.
+ * 3. When you want to programmatically assemble multi‑page TIFF files for batch processing in a .NET service using Aspose.Imaging.
+ * 4. When converting PSD assets to a format supported by legacy systems that only accept multipage TIFF files.
+ * 5. When automating the creation of a multi‑page TIFF report that includes high‑resolution PSD graphics for compliance or documentation purposes.
  */
