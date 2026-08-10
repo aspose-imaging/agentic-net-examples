@@ -1,7 +1,9 @@
+// HOW-TO: Apply Diagonal Edge Convolution to SVG and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -9,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "template.svg";
-            string outputPath = "result.png";
+            string inputPath = "input.svg";
+            string outputPath = "output\\result.png";
 
             if (!File.Exists(inputPath))
             {
@@ -20,24 +22,24 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image svgImage = Image.Load(inputPath))
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                using (var memoryStream = new MemoryStream())
+                using (MemoryStream ms = new MemoryStream())
                 {
                     // Rasterize SVG to PNG in memory
-                    var pngOptions = new PngOptions();
-                    var rasterOptions = new SvgRasterizationOptions
+                    PngOptions pngOptions = new PngOptions();
+                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
                     {
-                        PageWidth = svgImage.Width,
-                        PageHeight = svgImage.Height
+                        PageSize = vectorImage.Size
                     };
                     pngOptions.VectorRasterizationOptions = rasterOptions;
-                    svgImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
 
-                    using (Image rasterImageWrapper = Image.Load(memoryStream))
+                    vectorImage.Save(ms, pngOptions);
+                    ms.Position = 0;
+
+                    using (Image rasterImg = Image.Load(ms))
                     {
-                        var rasterImage = (RasterImage)rasterImageWrapper;
+                        RasterImage rasterImage = (RasterImage)rasterImg;
 
                         // Custom kernel emphasizing diagonal edges
                         double[,] kernel = new double[,]
@@ -47,9 +49,10 @@ class Program
                             {  1, 0,-1 }
                         };
 
-                        var convOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
+                        var convOptions = new ConvolutionFilterOptions(kernel);
                         rasterImage.Filter(rasterImage.Bounds, convOptions);
 
+                        // Save the filtered raster image
                         rasterImage.Save(outputPath, new PngOptions());
                     }
                 }
@@ -64,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to generate a PNG thumbnail from an SVG logo and highlight diagonal edges for a stylized preview.
- * 2. When a web application needs to rasterize user‑uploaded SVG icons and apply a custom convolution filter to emphasize diagonal lines before storing them as PNG files.
- * 3. When an automated reporting tool must convert vector diagrams to raster images and enhance diagonal edges to improve readability in printed PDFs.
- * 4. When a game asset pipeline requires processing SVG textures, applying a diagonal edge detection kernel, and saving the result as PNG for use in shaders.
- * 5. When a document‑generation system has to embed SVG diagrams into PDFs and first rasterize them with a custom kernel to accentuate diagonal features for better visual contrast.
+ * 1. When you need to convert a vector logo (SVG) into a raster PNG with a diagonal edge‑highlight effect for use in UI icons.
+ * 2. When preprocessing SVG diagrams for a computer‑vision pipeline that requires edge‑enhanced raster images.
+ * 3. When generating stylized thumbnails of SVG illustrations where diagonal edges should be emphasized for a graphic design effect.
+ * 4. When creating printable assets that need a custom convolution filter applied after rasterizing SVG to PNG to improve visual contrast.
+ * 5. When automating batch processing of SVG files to produce PNGs with a specific edge‑detect kernel for machine‑learning training data.
  */
