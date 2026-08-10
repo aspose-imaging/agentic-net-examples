@@ -1,3 +1,4 @@
+// HOW-TO: Create BMP Image, Draw Ellipse, Reset Graphics Transform in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,8 +11,8 @@ class Program
     {
         try
         {
-            // Output BMP file path (hardcoded)
-            string outputPath = @"C:\temp\ellipse.bmp";
+            // Define output BMP file path
+            string outputPath = @"c:\temp\output.bmp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -21,19 +22,19 @@ class Program
             bmpOptions.BitsPerPixel = 24;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a 500x500 BMP image
+            // Create a new image with the specified options
             using (Image image = Image.Create(bmpOptions, 500, 500))
             {
-                // Initialize Graphics for drawing
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Clear the canvas with white background
-                graphics.Clear(Color.White);
+                // Clear the canvas with a background color
+                graphics.Clear(Color.Wheat);
 
-                // Draw an ellipse with a blue pen
-                graphics.DrawEllipse(
-                    new Pen(Color.Blue, 3),
-                    new Rectangle(100, 100, 300, 200));
+                // Draw an ellipse using a blue pen
+                Pen ellipsePen = new Pen(Color.Blue, 3);
+                Rectangle ellipseBounds = new Rectangle(100, 100, 300, 200);
+                graphics.DrawEllipse(ellipsePen, ellipseBounds);
 
                 // Reset any transformations applied to the graphics object
                 graphics.ResetTransform();
@@ -51,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP file in C# and draw a precise blue ellipse for a printable report or technical diagram, this code creates the image and saves it directly to disk.
- * 2. When an application must programmatically produce a simple placeholder image with an ellipse shape for UI testing or mock‑up generation, the example shows how to clear the canvas, draw the shape, and output a BMP file.
- * 3. When a developer wants to ensure that any subsequent drawing operations start from the default coordinate system after applying transformations, the use of Graphics.ResetTransform in the code resets the transform state.
- * 4. When a batch process has to create a series of BMP thumbnails that include an elliptical highlight around a region of interest, this snippet demonstrates the core steps of image creation, ellipse drawing, and saving.
- * 5. When integrating Aspose.Imaging into a .NET service that dynamically generates custom BMP assets for embedded devices, the example provides a straightforward way to draw vector graphics (ellipse) and finalize the image without additional file handling.
+ * 1. When you need to generate a 24‑bit BMP file with a custom‑drawn ellipse for a report thumbnail.
+ * 2. When you want to programmatically create a blank canvas, draw shapes, and ensure subsequent drawing starts from the default coordinate system.
+ * 3. When you are building a server‑side image generation service that must output BMP images with precise dimensions and background colors.
+ * 4. When you need to reset any applied transformations before adding more graphics to avoid cumulative scaling or rotation effects.
+ * 5. When you are automating the creation of simple diagram elements such as ellipses for UI assets without using external design tools.
  */
