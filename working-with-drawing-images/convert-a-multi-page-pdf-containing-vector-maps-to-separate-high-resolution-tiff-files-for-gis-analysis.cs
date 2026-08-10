@@ -1,7 +1,9 @@
+// HOW-TO: Convert Multi‑Page PDF Maps to High‑Resolution TIFF Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -9,51 +11,57 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
+            // Hardcoded input PDF path
+            string inputPath = "Input\\maps.pdf";
 
-            // Ensure input directory exists; if not, create and exit
-            if (!Directory.Exists(inputDirectory))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
+            // Load the PDF document
+            using (Image pdfImage = Image.Load(inputPath))
             {
-                Directory.CreateDirectory(outputDirectory);
-            }
-
-            // Get all PDF files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.pdf");
-
-            foreach (var inputPath in files)
-            {
-                // Validate input file existence
-                if (!File.Exists(inputPath))
+                // Ensure the document is multipage
+                IMultipageImage multipage = pdfImage as IMultipageImage;
+                if (multipage == null || multipage.PageCount == 0)
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    Console.Error.WriteLine("No pages found in PDF.");
+                    return;
                 }
 
-                // Load the PDF (vector image)
-                using (Image image = Image.Load(inputPath))
-                {
-                    // Determine output file path (same name with .png extension)
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+                // Output directory for TIFF files
+                string outputDir = "Output";
+                Directory.CreateDirectory(outputDir);
 
-                    // Ensure output directory exists before saving
+                // Process each page individually
+                for (int i = 0; i < multipage.PageCount; i++)
+                {
+                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.tif");
+
+                    // Ensure output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save as PNG
-                    using (var pngOptions = new PngOptions())
+                    // Configure TIFF export options
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                     {
-                        image.Save(outputPath, pngOptions);
-                    }
+                        // Rasterize vector content at original PDF size
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageWidth = pdfImage.Width,
+                            PageHeight = pdfImage.Height,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
+                        },
+                        // Export only the current page
+                        MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1))
+                    };
+
+                    // Save the current page as a high‑resolution TIFF
+                    pdfImage.Save(outputPath, tiffOptions);
                 }
             }
         }
@@ -66,9 +74,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a GIS analyst needs to extract each page of a multi‑page PDF containing vector maps and convert them to high‑resolution PNG images for raster‑based analysis using C# and Aspose.Imaging.
- * 2. When an e‑learning platform must automatically batch‑convert uploaded PDF handouts into PNG files for web preview thumbnails and fast loading in .NET applications.
- * 3. When a printing service wants to transform vector PDF brochures into PNG assets to embed them in HTML email campaigns without losing visual fidelity.
- * 4. When a document management system requires server‑side conversion of PDF blueprints to PNG format for quick visual indexing and searchable previews.
- * 5. When a mobile app backend needs to generate PNG raster images from PDF maps on the fly to serve devices that cannot render PDF natively.
+ * 1. When a GIS analyst needs each page of a vector map PDF as a separate high‑resolution TIFF for raster‑based spatial analysis.
+ * 2. When a developer must automate the extraction of individual map sheets from a multi‑page PDF to feed into a legacy imaging system that only accepts TIFF.
+ * 3. When a web service generates printable map tiles by converting PDF pages to TIFFs with preserved vector detail at the original size.
+ * 4. When a batch job prepares archival copies of engineering drawings by rasterizing each PDF page to lossless TIFF files for long‑term storage.
+ * 5. When an application needs to split a PDF containing cadastral maps into separate TIFF images for integration with third‑party GIS software.
  */
