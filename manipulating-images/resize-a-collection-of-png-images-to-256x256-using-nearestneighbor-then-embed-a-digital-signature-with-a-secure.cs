@@ -1,7 +1,7 @@
+// HOW-TO: Resize Multiple PNG Images to 256x256 and Add Secure Digital Signature in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -30,29 +30,29 @@ class Program
             // Get all PNG files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.png");
 
-            foreach (var inputPath in files)
+            foreach (string inputPath in files)
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
                 // Prepare output file path
                 string fileName = Path.GetFileNameWithoutExtension(inputPath);
                 string outputPath = Path.Combine(outputDirectory, fileName + "_resized.png");
 
-                // Ensure the output directory exists (unconditional as per rules)
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the PNG image, resize, embed signature, and save
-                using (PngImage image = (PngImage)Image.Load(inputPath))
+                // Load, resize, embed signature, and save
+                using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
                     // Resize to 256x256 using default NearestNeighbourResample
                     image.Resize(256, 256);
 
-                    // Embed digital signature with a secure password (>=4 characters)
+                    // Embed digital signature with a secure password
                     image.EmbedDigitalSignature("secure123");
 
                     // Save the processed image
@@ -69,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑process product thumbnail PNGs for an e‑commerce site, resizing each image to a uniform 256 × 256 pixels with NearestNeighbor interpolation and embedding a password‑protected digital signature to prevent unauthorized reuse.
- * 2. When building a mobile app that displays user‑generated avatars, the code can quickly shrink uploaded PNG files to 256 × 256 while adding a secure signature to verify the image’s integrity during sync.
- * 3. When preparing PNG assets for a machine‑learning dataset, a data engineer can use the snippet to standardize image dimensions and embed a password‑protected signature that later scripts can validate before training.
- * 4. When creating a secure digital catalog of artwork, a developer can resize each high‑resolution PNG to a web‑friendly 256 × 256 size and embed a digital signature with a strong password to ensure provenance.
- * 5. When automating the generation of QR‑code overlays for marketing materials, the routine can resize the PNG overlays to 256 × 256 and embed a password‑protected signature so the printed version can be authenticated programmatically.
+ * 1. When you need to batch‑process user‑uploaded avatars to a fixed 256×256 size while protecting them with a password‑protected digital signature.
+ * 2. When a web service must generate thumbnail PNGs for a product catalog and ensure each thumbnail is cryptographically signed to prevent tampering.
+ * 3. When an automated pipeline prepares PNG assets for a mobile app, resizing them uniformly and embedding a digital signature for integrity verification.
+ * 4. When a document management system stores PNG scans and requires each file to be resized for storage efficiency and signed with a secure password for compliance.
+ * 5. When a security‑focused application needs to resize a batch of PNG logos and embed a password‑protected signature before distributing them to partners.
  */
