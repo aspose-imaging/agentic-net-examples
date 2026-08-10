@@ -1,53 +1,54 @@
+// HOW-TO: Draw Custom Dashed Line on BMP Image Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input.bmp";   // not used but kept for rule compliance
-        string outputPath = "output.bmp";
+        string inputPath = @"C:\temp\input.bmp";
+        string outputPath = @"C:\temp\output.bmp";
 
         try
         {
-            // Verify input file existence (rule 2)
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists (rule 3)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a new BMP image (200x100 pixels)
-            using (Image image = Image.Create(new BmpOptions(), 200, 100))
+            // Load the existing BMP image
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Initialize graphics object for drawing
-                Graphics graphics = new Graphics(image);
+                // Create a Graphics object for drawing
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
 
-                // Create a pen with black color, width 2
-                Pen pen = new Pen(Color.Black, 2);
+                // Create a Pen with custom dash style
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 5f);
+                pen.DashStyle = Aspose.Imaging.DashStyle.Custom;
+                pen.DashPattern = new float[] { 10f, 5f }; // dash length 10, space length 5
 
-                // Apply a dashed style to the pen
-                pen.DashStyle = DashStyle.Dash; // could also use DashStyle.Dot, etc.
+                // Draw a diagonal dashed line across the image
+                graphics.DrawLine(
+                    pen,
+                    new Aspose.Imaging.Point(0, 0),
+                    new Aspose.Imaging.Point(image.Width - 1, image.Height - 1));
 
-                // Draw a dashed line across the image
-                graphics.DrawLine(pen, 0, 0, 199, 99);
-
-                // Save the resulting image
-                image.Save(outputPath);
+                // Save the modified image as BMP
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.BitsPerPixel = 24;
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
         {
-            // Unified error handling (rule 4)
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -55,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP diagram with a dashed separator line for a printed report or PDF overlay.
- * 2. When creating a placeholder image that shows a dashed guideline for UI mockups in a Windows Forms application.
- * 3. When producing a test pattern BMP file that includes a dashed line to verify that custom dash styles are rendered correctly on different devices.
- * 4. When automating the creation of a BMP watermark that consists of a dashed line across the image to indicate a draft status.
- * 5. When building a batch process that adds a dashed border line to existing BMP assets for visual inspection in a quality‑control workflow.
+ * 1. When you need to add a stylized diagonal guide or annotation to an existing BMP file, such as marking a region of interest in a technical diagram.
+ * 2. When generating printable engineering drawings that require a custom dash pattern to differentiate measurement lines from other graphics.
+ * 3. When creating a watermark or branding element that appears as a dashed line across a bitmap image without altering its original resolution.
+ * 4. When programmatically preparing BMP assets for a game or UI where a dashed separator line must be drawn at runtime.
+ * 5. When automating batch processing of BMP files to overlay custom dashed lines for quality‑control markings or visual cues.
  */
