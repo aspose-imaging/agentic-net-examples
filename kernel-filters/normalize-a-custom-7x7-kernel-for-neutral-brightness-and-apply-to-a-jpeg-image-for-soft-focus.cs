@@ -1,20 +1,21 @@
+// HOW-TO: Apply 7x7 Gaussian Blur Soft Focus to JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.ImageFilters.Convolution;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output_softfocus.jpg";
+
+        // Ensure any runtime exception is reported cleanly
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = "input.jpg";
-            string outputPath = "output.jpg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,14 +29,12 @@ class Program
             // Load the JPEG image
             using (JpegImage jpegImage = new JpegImage(inputPath))
             {
-                // Cast to RasterImage to access filtering methods
+                // Cast to RasterImage to access filtering capabilities
                 RasterImage rasterImage = (RasterImage)jpegImage;
 
-                // Obtain a 7x7 box blur kernel (already normalized for neutral brightness)
-                double[,] kernel = ConvolutionFilter.GetBlurBox(7);
-
-                // Apply the custom convolution filter to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(kernel));
+                // Apply a Gaussian blur with a 7x7 kernel (size = 7, sigma = 1.0)
+                // This provides a soft‑focus effect while keeping overall brightness neutral.
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(7, 1.0));
 
                 // Save the processed image
                 rasterImage.Save(outputPath);
@@ -50,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to add a subtle soft‑focus effect to user‑uploaded JPEG photos in a C# web application, they can use this code to apply a normalized 7×7 blur kernel with Aspose.Imaging.
- * 2. When an e‑commerce platform needs to automatically smooth product images without changing overall brightness, the example shows how to load a JPEG, apply a neutral‑brightness 7×7 convolution filter, and save the result.
- * 3. When a desktop photo‑editing tool requires a fast, repeatable way to create a gentle box‑blur for portrait pictures, this snippet demonstrates the C# operations for loading, filtering, and saving JPEG files using Aspose.Imaging.
- * 4. When a batch‑processing script must prepare a set of JPEG thumbnails with a consistent soft‑focus look while preserving color balance, the code provides the exact steps to normalize the kernel and apply it to each image.
- * 5. When a mobile app backend processes incoming JPEG images and needs to reduce harsh edges before applying further AI analysis, the example shows how to use a 7×7 convolution filter in C# to achieve a neutral‑brightness blur.
+ * 1. When you need to create a subtle soft‑focus effect on product photos stored as JPEGs before uploading them to an e‑commerce site.
+ * 2. When you want to reduce image detail while keeping overall brightness neutral for a portrait retouching workflow in a C# application.
+ * 3. When you are building an automated batch processor that applies a 7×7 Gaussian blur to scanned documents saved as JPEG to improve readability.
+ * 4. When you need to generate a background‑blurred thumbnail from a high‑resolution JPEG for a gallery preview in a .NET web app.
+ * 5. When you are preparing images for a machine‑learning dataset and require a consistent blur filter to augment training data without altering exposure.
  */
