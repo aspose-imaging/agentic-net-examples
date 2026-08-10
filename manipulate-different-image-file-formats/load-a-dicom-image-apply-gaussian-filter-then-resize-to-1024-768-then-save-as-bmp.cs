@@ -1,6 +1,6 @@
+// HOW-TO: Convert DICOM to BMP with Gaussian Blur and Resize in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Bmp;
@@ -9,36 +9,29 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.dcm";
+        string outputPath = "output.bmp";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.dcm";
-            string outputPath = "output.bmp";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (Aspose.Imaging.FileFormats.Dicom.DicomImage dicom = (Aspose.Imaging.FileFormats.Dicom.DicomImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Apply Gaussian blur filter to the entire image
+                dicom.Filter(dicom.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load DICOM image
-            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
-            {
-                // Apply Gaussian blur filter to the whole image
-                dicomImage.Filter(
-                    dicomImage.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
-
-                // Resize to 1024x768 using nearest neighbour resampling
-                dicomImage.Resize(1024, 768, ResizeType.NearestNeighbourResample);
+                // Resize to 1024x768 using nearest neighbor resampling
+                dicom.Resize(1024, 768, Aspose.Imaging.ResizeType.NearestNeighbourResample);
 
                 // Save as BMP
-                BmpOptions bmpOptions = new BmpOptions();
-                dicomImage.Save(outputPath, bmpOptions);
+                dicom.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)
@@ -50,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert a DICOM scan into a BMP thumbnail with reduced noise for quick preview in a web portal.
- * 2. When a radiology workflow requires applying a Gaussian blur to a DICOM image to anonymize patient details before resizing it to a standard 1024×768 display.
- * 3. When a desktop C# tool must batch‑process DICOM files, smooth them with a Gaussian filter, resize them to a uniform resolution, and save them as BMP for compatibility with legacy imaging software.
- * 4. When a healthcare data‑export service needs to transform high‑resolution DICOM images into BMP format while applying a blur to reduce file size and then scaling them for inclusion in PDF reports.
- * 5. When a diagnostic imaging system wants to load a DICOM image, enhance it with a Gaussian blur, resize it to a common screen size, and store the result as BMP for use in a Windows Forms viewer.
+ * 1. When a medical imaging application needs to export DICOM scans as BMP thumbnails with a softening effect for quick preview in a Windows UI.
+ * 2. When a radiology workflow requires batch processing of DICOM files to standardize size to 1024×768 and apply Gaussian blur before archiving them as BMP for compatibility with legacy systems.
+ * 3. When a developer is building a diagnostic reporting tool that converts high‑resolution DICOM images to BMP format while reducing noise using a Gaussian filter and resizing for consistent layout.
+ * 4. When integrating Aspose.Imaging into a C# service that transforms incoming DICOM images into BMP files for downstream image analysis pipelines that expect a fixed resolution.
+ * 5. When creating a cross‑platform C# utility that prepares DICOM images for printing by applying blur, resizing, and saving them as BMP to meet printer driver requirements.
  */
