@@ -1,37 +1,52 @@
+// HOW-TO: Rotate BMP Image 90 Degrees Clockwise After SVG Conversion in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded paths
+        string inputSvgPath = "input.svg";
+        string intermediateBmpPath = "intermediate.bmp";
+        string outputBmpPath = "output_rotated.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.svg";
-            string outputPath = "output.bmp";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Verify input SVG exists
+            if (!File.Exists(inputSvgPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputSvgPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(intermediateBmpPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputBmpPath));
 
-            // Load the SVG image
-            using (Image image = Image.Load(inputPath))
+            // Load SVG and rasterize to BMP (intermediate file)
+            using (Image svgImage = Image.Load(inputSvgPath))
             {
-                // Rotate 90 degrees clockwise
-                image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                // Configure BMP save options with rasterization settings
+                var bmpOptions = new BmpOptions();
+                var vectorRasterOptions = new SvgRasterizationOptions
+                {
+                    PageSize = svgImage.Size // use original SVG size
+                };
+                bmpOptions.VectorRasterizationOptions = vectorRasterOptions;
 
-                // Save as BMP using default BMP options
-                BmpOptions bmpOptions = new BmpOptions();
-                image.Save(outputPath, bmpOptions);
+                // Save rasterized BMP
+                svgImage.Save(intermediateBmpPath, bmpOptions);
+            }
+
+            // Load the rasterized BMP, rotate 90° clockwise, and save final result
+            using (Image bmpImage = Image.Load(intermediateBmpPath))
+            {
+                bmpImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                bmpImage.Save(outputBmpPath);
             }
         }
         catch (Exception ex)
@@ -43,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG logo to a BMP thumbnail and rotate it 90° clockwise for display in a legacy Windows application.
- * 2. When an automated build script must generate right‑oriented BMP assets from vector SVG icons for inclusion in a game’s sprite sheet.
- * 3. When a batch‑processing tool has to re‑orient scanned SVG diagrams and save them as BMP files for compatibility with older reporting software.
- * 4. When a web service receives SVG diagrams, rotates them to match user‑specified orientation, and returns BMP images for download on devices that only support raster formats.
- * 5. When a desktop utility must ensure that converted BMP images from SVG files are correctly rotated for printing on a printer that expects a clockwise orientation.
+ * 1. When you need to generate a bitmap thumbnail from an SVG and display it in landscape orientation in a Windows desktop app.
+ * 2. When a reporting tool requires BMP images rotated to match page layout after converting vector graphics.
+ * 3. When automating batch processing of SVG icons to BMP assets that must be rotated for correct alignment in a game engine.
+ * 4. When preparing print‑ready BMP files from SVG logos that need a 90‑degree clockwise orientation for a specific printer feed.
+ * 5. When integrating legacy systems that only accept BMP files and expect them to be pre‑rotated after vector‑to‑raster conversion.
  */
