@@ -1,13 +1,14 @@
+// HOW-TO: Reuse AutoMasking GraphCut Strokes for Multiple PNGs in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Masking;
 using Aspose.Imaging.Masking.Options;
 using Aspose.Imaging.Masking.Result;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -15,25 +16,34 @@ class Program
     {
         try
         {
-            string[] inputFiles = {
-                "image1.png",
-                "image2.png",
-                "image3.png"
+            var inputFiles = new List<string>
+            {
+                "input1.png",
+                "input2.png",
+                "input3.png"
             };
 
-            foreach (string inputPath in inputFiles)
+            var outputFiles = new List<string>
             {
+                "output1.png",
+                "output2.png",
+                "output3.png"
+            };
+
+            for (int i = 0; i < inputFiles.Count; i++)
+            {
+                string inputPath = inputFiles[i];
+                string outputPath = outputFiles[i];
+
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                string outputPath = Path.Combine(
-                    Path.GetDirectoryName(inputPath) ?? string.Empty,
-                    Path.GetFileNameWithoutExtension(inputPath) + "_masked.png");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
+                string tempPath = Path.Combine(Path.GetTempPath(), $"tempMask_{Guid.NewGuid()}.png");
 
                 using (RasterImage image = (RasterImage)Image.Load(inputPath))
                 {
@@ -46,20 +56,25 @@ class Program
                         ExportOptions = new PngOptions
                         {
                             ColorType = PngColorType.TruecolorWithAlpha,
-                            Source = new StreamSource(new MemoryStream())
+                            Source = new FileCreateSource(tempPath, false)
                         },
                         BackgroundReplacementColor = Color.Transparent
                     };
 
-                    using (MaskingResult results = new ImageMasking(image).Decompose(options))
-                    using (RasterImage foreground = (RasterImage)results[1].GetImage())
+                    MaskingResult results = new ImageMasking(image).Decompose(options);
+
+                    options.CalculateDefaultStrokes = false;
+                    results = new ImageMasking(image).Decompose(options);
+
+                    using (RasterImage resultImage = (RasterImage)results[1].GetImage())
                     {
-                        foreground.Save(outputPath, new PngOptions
-                        {
-                            ColorType = PngColorType.TruecolorWithAlpha,
-                            Source = new FileCreateSource(outputPath, false)
-                        });
+                        resultImage.Save(outputPath, new PngOptions { ColorType = PngColorType.TruecolorWithAlpha });
                     }
+                }
+
+                if (File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
                 }
             }
         }
@@ -72,9 +87,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an e‑commerce platform needs to automatically remove product backgrounds from dozens of PNG photos in a single batch, developers can use this code to apply GraphCut auto‑masking with reusable strokes for consistent edge precision.
- * 2. When a game studio prepares sprite sheets where each character PNG must have a clean transparent background, the AutoMaskingGraphCutOptions configuration lets developers iterate over the images while preserving stroke data to improve mask accuracy across frames.
- * 3. When a marketing team wants to generate web‑ready PNG banners with smooth feathered edges around logos, developers can run this C# routine to batch‑process the files, using the GraphCut method and a 3‑pixel feathering radius for professional‑grade cutouts.
- * 4. When a document‑digitization workflow must extract foreground illustrations from scanned PNG pages and replace the background with transparency, the code reuses calculated strokes to maintain detail while processing multiple pages efficiently.
- * 5. When a social‑media automation tool needs to create transparent PNG stickers from user‑uploaded images, developers can employ this AutoMaskingGraphCutOptions setup to quickly mask each image in a loop, ensuring consistent results without manually redefining strokes for each file.
+ * 1. When you need to automatically generate accurate transparent masks for a batch of PNG images using graph cut segmentation in C#.
+ * 2. When you want to apply consistent stroke calculations across several images to improve mask precision without manual input.
+ * 3. When you are building an image‑processing pipeline that replaces backgrounds with transparency for product photos stored as PNG files.
+ * 4. When you need to export intermediate mask results to temporary PNG files before saving the final masked images.
+ * 5. When you are integrating Aspose.Imaging’s AutoMaskingGraphCutOptions into a .NET application to batch‑process images for web or mobile delivery.
  */
