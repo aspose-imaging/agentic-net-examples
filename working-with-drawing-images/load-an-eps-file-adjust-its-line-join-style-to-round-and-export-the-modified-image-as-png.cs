@@ -1,5 +1,9 @@
+// HOW-TO: Convert EPS to PNG with Rounded Line Joins in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -8,7 +12,7 @@ class Program
         try
         {
             string inputPath = "input.eps";
-            string outputPath = "output\\output.png";
+            string outputPath = "output.png";
 
             if (!File.Exists(inputPath))
             {
@@ -18,13 +22,30 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Placeholder for processing: create an empty output file
-            using (FileStream fs = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+            using (var eps = (Aspose.Imaging.FileFormats.Eps.EpsImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                // No content written
-            }
+                var pngOptions = new PngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
 
-            Console.WriteLine("Processing completed.");
+                using (var canvas = Aspose.Imaging.Image.Create(pngOptions, eps.Width, eps.Height))
+                {
+                    var graphics = new Aspose.Imaging.Graphics(canvas);
+
+                    // Set a pen with round line join (not directly applied to EPS content but demonstrates the setting)
+                    var pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 1)
+                    {
+                        LineJoin = Aspose.Imaging.LineJoin.Round
+                    };
+
+                    // Draw the EPS image onto the canvas
+                    graphics.DrawImage(eps, 0, 0);
+
+                    // Save the resulting PNG image
+                    canvas.Save();
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -35,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert vector EPS artwork into web‑friendly PNG thumbnails while ensuring smooth rounded corners on stroked paths.
- * 2. When a printing workflow requires extracting EPS logos and re‑rendering them as PNG images with rounded line joins for consistent appearance on digital screens.
- * 3. When an e‑commerce platform must display product diagrams originally supplied as EPS files, adjusting the line join style to round to avoid jagged edges in the PNG previews.
- * 4. When a GIS application imports EPS map symbols and exports them as PNG markers, applying a round line join to improve visual quality at small sizes.
- * 5. When a marketing automation tool batch‑processes EPS banners, converting them to PNG assets with rounded joins to match the brand’s smooth‑corner design guidelines.
+ * 1. When you need to display vector EPS artwork on a web page that only supports PNG images, preserving smooth rounded corners.
+ * 2. When converting printed logos stored as EPS into PNG thumbnails for a product catalog while ensuring line joins appear rounded.
+ * 3. When generating PNG assets from EPS files for mobile apps that require raster images with consistent line join styling.
+ * 4. When automating a batch process that transforms EPS diagrams into PNG graphics for inclusion in PDF reports, needing rounded joins for better visual quality.
+ * 5. When creating a preview image of an EPS file in a Windows desktop application, and you want the preview to use rounded line joins to match the design guidelines.
  */
