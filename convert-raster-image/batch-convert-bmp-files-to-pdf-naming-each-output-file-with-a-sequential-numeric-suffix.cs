@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert BMP Images to PDF with Sequential Filenames in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,42 +8,42 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputFolder = @"C:\InputBmp";
+        string outputFolder = @"C:\OutputPdf";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputBmp";
-            string outputDirectory = @"C:\OutputPdf";
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputFolder);
 
-            // Get all BMP files in the input directory
-            string[] bmpFiles = Directory.GetFiles(inputDirectory, "*.bmp");
+            // Get all BMP files in the input folder
+            string[] bmpFiles = Directory.GetFiles(inputFolder, "*.bmp");
+            int index = 1;
 
-            // Process each BMP file
-            for (int i = 0; i < bmpFiles.Length; i++)
+            foreach (string inputPath in bmpFiles)
             {
-                string inputPath = bmpFiles[i];
-
-                // Verify that the input file exists
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output PDF path with a sequential numeric suffix (starting at 1)
-                string outputPath = Path.Combine(outputDirectory, $"{i + 1}.pdf");
+                // Build the output PDF path with a sequential numeric suffix
+                string outputPath = Path.Combine(outputFolder, $"image_{index}.pdf");
 
-                // Ensure the output directory exists
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the BMP image
+                // Load the BMP image and save it as PDF
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Set up PDF export options
-                    PdfOptions pdfOptions = new PdfOptions();
-
-                    // Save the image as PDF
+                    var pdfOptions = new PdfOptions();
                     image.Save(outputPath, pdfOptions);
                 }
+
+                index++;
             }
         }
         catch (Exception ex)
@@ -54,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive a collection of scanned BMP documents as PDF files with simple numeric filenames for easy indexing, they can use this code.
- * 2. When an automated build pipeline must convert legacy BMP assets into PDF reports for compliance documentation, the batch conversion with sequential naming streamlines the process.
- * 3. When a desktop application must generate printable PDFs from user‑uploaded BMP images and store them in a folder with ordered numeric names, this snippet provides the required image processing logic.
- * 4. When a migration script has to transform a directory of BMP graphics into PDF format for a content‑management system while preserving order through sequential file names, the code handles the conversion efficiently.
- * 5. When a scheduled Windows service needs to process incoming BMP files, convert each to PDF, and save them with incremental numeric suffixes for downstream processing, this example demonstrates the necessary C# and Aspose.Imaging workflow.
+ * 1. When you need to generate a series of PDF reports from a folder of scanned BMP documents, assigning each PDF a numbered name automatically.
+ * 2. When an application must archive legacy BMP graphics as PDF files for easier distribution while preserving the original order.
+ * 3. When a batch processing script has to convert user‑uploaded BMP images to PDF for compliance with a PDF‑only workflow, naming them sequentially.
+ * 4. When you want to prepare printable PDFs from a collection of BMP screenshots, ensuring each file is saved with a unique numeric suffix.
+ * 5. When integrating Aspose.Imaging into a C# service that transforms BMP assets into PDF assets for storage in a version‑controlled repository.
  */
