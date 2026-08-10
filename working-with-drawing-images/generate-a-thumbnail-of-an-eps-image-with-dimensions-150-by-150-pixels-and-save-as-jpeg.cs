@@ -1,3 +1,4 @@
+// HOW-TO: Create 150x150 JPEG Thumbnail From EPS Image In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,12 +9,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.eps";
+        string outputPath = "output.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.eps";
-            string outputPath = "output.jpg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,14 +22,14 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the EPS image
+            // Load EPS image
             using (var image = (EpsImage)Image.Load(inputPath))
             {
-                // Resize to 150x150 pixels (thumbnail)
-                image.Resize(150, 150, ResizeType.NearestNeighbourResample);
+                // Resize to 150x150 pixels using Lanczos resampling
+                image.Resize(150, 150, ResizeType.LanczosResample);
 
                 // Save as JPEG
                 var jpegOptions = new JpegOptions();
@@ -37,6 +38,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -44,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to display preview thumbnails of user‑uploaded EPS vector files as small JPEG images (150 × 150 px) in a gallery view.
- * 2. When an e‑commerce platform must generate product‑listing images from designer‑provided EPS logos and store them as compressed JPEG thumbnails for faster page loads.
- * 3. When a document‑management system automatically creates searchable preview icons for EPS drawings by converting them to 150 px JPEG thumbnails during file ingestion.
- * 4. When a desktop utility converts batch EPS artwork into uniform 150 × 150 pixel JPEG thumbnails for quick visual selection in a file‑explorer interface.
- * 5. When a reporting tool needs to embed small JPEG previews of EPS charts into PDF reports, requiring the EPS to be resized to a 150 px thumbnail first.
+ * 1. When you need to display a small preview of a vector EPS logo on a web page, you can generate a 150×150 JPEG thumbnail with Aspose.Imaging.
+ * 2. When an e‑commerce platform stores product drawings as EPS files but requires fast‑loading thumbnail images for search results, this code creates the required JPEG previews.
+ * 3. When a document management system must convert uploaded EPS files into uniform-sized JPEG thumbnails for gallery views, the snippet resizes and saves them automatically.
+ * 4. When a desktop application needs to show a quick preview of EPS artwork in a file‑open dialog, the code produces a consistent 150‑pixel square thumbnail.
+ * 5. When a batch‑processing script has to prepare low‑resolution JPEG thumbnails from many EPS files for email attachments, this example demonstrates the resizing and saving steps.
  */
