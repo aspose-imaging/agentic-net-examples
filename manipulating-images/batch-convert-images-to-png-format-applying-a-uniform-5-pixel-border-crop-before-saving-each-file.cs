@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert Images to PNG with 5‑Pixel Border Crop in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,52 +11,51 @@ class Program
     {
         try
         {
-            // Hardcoded list of input image files to be processed.
-            string[] inputFiles = new string[]
+            // Hardcoded input files
+            string[] inputPaths = new[]
             {
-                @"c:\temp\image1.jpg",
-                @"c:\temp\image2.bmp"
-                // Add more input paths as needed.
+                @"c:\input\image1.jpg",
+                @"c:\input\image2.bmp",
+                @"c:\input\image3.tif"
             };
 
-            foreach (string inputPath in inputFiles)
+            // Hardcoded output directory
+            string outputDir = @"c:\output\";
+
+            foreach (string inputPath in inputPaths)
             {
-                // Verify that the input file exists.
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load the source image (any supported format).
+                // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Determine the crop rectangle that removes a 5‑pixel border from each side.
-                    int cropX = 5;
-                    int cropY = 5;
-                    int cropWidth = image.Width - 10;
-                    int cropHeight = image.Height - 10;
-
-                    // If the image is too small to be cropped, skip it.
-                    if (cropWidth <= 0 || cropHeight <= 0)
+                    // Ensure the image is large enough for a 5‑pixel border crop
+                    if (image.Width <= 10 || image.Height <= 10)
                     {
                         Console.Error.WriteLine($"Image too small to crop: {inputPath}");
                         continue;
                     }
 
-                    var cropBounds = new Rectangle(cropX, cropY, cropWidth, cropHeight);
+                    // Define the crop rectangle (remove 5 pixels from each side)
+                    var cropRect = new Rectangle(5, 5, image.Width - 10, image.Height - 10);
 
-                    // Prepare PNG save options (default options are sufficient here).
+                    // Prepare PNG save options
                     var pngOptions = new PngOptions();
 
-                    // Build the output path: same folder, same name, .png extension.
-                    string outputPath = Path.ChangeExtension(inputPath, ".png");
+                    // Build output file path (same name, .png extension)
+                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                    string outputPath = Path.Combine(outputDir, outputFileName);
 
-                    // Ensure the output directory exists.
+                    // Ensure output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the cropped region as a PNG file.
-                    image.Save(outputPath, pngOptions, cropBounds);
+                    // Save the cropped area as PNG
+                    image.Save(outputPath, pngOptions, cropRect);
                 }
             }
         }
@@ -68,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch convert a collection of JPEG or BMP photos to PNG while removing a 5‑pixel border from each side for consistent thumbnail generation.
- * 2. When an e‑commerce platform must automatically process product images, cropping out unwanted edges and saving them as lossless PNG files for web display.
- * 3. When a desktop application prepares scanned documents by trimming uniform margins and converting them to PNG to ensure compatibility with downstream OCR tools.
- * 4. When a content‑management system migrates legacy image assets, applying a fixed border crop and converting them to PNG to standardize file formats across the repository.
- * 5. When a photo‑editing workflow requires a quick C# script to batch crop and re‑encode images to PNG before uploading them to a cloud storage service.
+ * 1. When you need to prepare a set of product photos for a web catalog by removing unwanted edges and saving them as lightweight PNG files.
+ * 2. When an automated pipeline must trim a uniform border from scanned documents before archiving them in PNG format.
+ * 3. When a game developer wants to batch‑process sprite sheets, cropping a 5‑pixel margin and converting them to PNG for consistent texture handling.
+ * 4. When a reporting tool generates charts as JPEG or BMP and you must batch‑convert them to PNG while removing a decorative frame.
+ * 5. When a migration script moves legacy image assets to a new system, requiring a small border crop and format change to PNG for compatibility.
  */
