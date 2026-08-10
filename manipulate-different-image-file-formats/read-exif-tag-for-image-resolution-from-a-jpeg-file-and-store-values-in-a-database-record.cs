@@ -8,13 +8,13 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.jpg";
+        string outputPath = "output\\resolution.txt";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.jpg";
-            string outputPath = "Output/resolution.txt";
-
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,17 +22,19 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            string outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir);
 
-            // Load JPEG image
+            // Load JPEG image and extract resolution
             using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                // Read resolution from EXIF (or image properties)
                 double horizontalResolution = image.HorizontalResolution;
                 double verticalResolution = image.VerticalResolution;
 
-                // Simulate storing in a database by writing to a text file
+                // Prepare data to store (simulating a database record)
                 string record = $"HorizontalResolution={horizontalResolution},VerticalResolution={verticalResolution}";
+
+                // Store the record in a text file
                 File.WriteAllText(outputPath, record);
             }
         }
@@ -45,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to extract the DPI settings of uploaded JPEG photos and store them in a product catalog database.
- * 2. When a web application must validate image resolution before allowing users to publish high‑resolution graphics.
- * 3. When a digital asset management system records the horizontal and vertical resolution of JPEG files for search and filtering.
- * 4. When a batch process imports scanned documents and logs their DPI values to ensure compliance with printing standards.
- * 5. When an e‑commerce platform saves image metadata such as resolution to optimize image rendering on different devices.
+ * 1. When you need to import the DPI settings of uploaded JPEG photos into a SQL record for printing or layout calculations.
+ * 2. When a digital asset management system must catalog image resolution metadata to filter high‑resolution assets.
+ * 3. When generating thumbnails you must preserve the original horizontal and vertical resolution values for later re‑scaling.
+ * 4. When auditing a batch of camera‑generated JPEGs to verify that their EXIF resolution matches required specifications.
+ * 5. When synchronizing image metadata between a file system and a database to support responsive UI scaling in a C# web application.
  */
