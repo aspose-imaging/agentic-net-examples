@@ -1,20 +1,20 @@
+// HOW-TO: Detect Animated WebP and Convert to GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.webp";
-        string outputPath = @"C:\temp\output.gif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "c:\\temp\\input.webp";
+            string outputPath = "c:\\temp\\output.gif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -28,7 +28,7 @@ class Program
             // Load the WebP image
             using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Determine if the WebP image is animated (has more than one frame)
+                // Check if the WebP image is animated (has more than one frame)
                 bool isAnimated = false;
                 if (webPImage is IMultipageImage multipage && multipage.PageCount > 1)
                 {
@@ -37,14 +37,12 @@ class Program
 
                 if (isAnimated)
                 {
-                    // Save the animated WebP as an animated GIF
+                    // Save the animated WebP as a GIF
                     webPImage.Save(outputPath, new GifOptions());
-                    Console.WriteLine("Animated WebP saved as GIF.");
                 }
                 else
                 {
-                    // Not animated – optionally handle differently or inform the user
-                    Console.WriteLine("The WebP image is not animated. No GIF was created.");
+                    Console.WriteLine("The WebP image is not animated. No GIF will be created.");
                 }
             }
         }
@@ -57,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building a web service that converts user‑uploaded WebP files to GIFs, you need to verify if the source WebP is animated to decide whether to generate an animated GIF or skip conversion.
- * 2. In a desktop photo‑organizer app that creates thumbnail previews, checking for animation in a WebP image ensures you only export animated previews as GIFs for compatible viewers.
- * 3. While developing a batch‑processing script for migrating legacy assets, you must detect animated WebP files so they can be saved as animated GIFs and preserve motion in the new format.
- * 4. For an e‑learning platform that embeds GIF animations in course material, the code helps confirm that uploaded WebP graphics contain multiple frames before converting them to GIFs.
- * 5. In a content‑moderation pipeline that flags animated media, detecting an animated WebP image allows the system to convert it to GIF for easier analysis and review.
+ * 1. When you need to generate an animated GIF from a WebP animation for browsers that only support GIF.
+ * 2. When validating user‑uploaded WebP files to ensure they contain animation before further processing.
+ * 3. When creating thumbnails for a gallery and want to skip non‑animated WebP files.
+ * 4. When converting animated WebP assets to GIF for use in email newsletters that require GIF format.
+ * 5. When building a batch conversion tool that processes only animated WebP images to reduce unnecessary work.
  */
