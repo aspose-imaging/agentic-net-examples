@@ -1,3 +1,4 @@
+// HOW-TO: Increase Brightness of Multiple PSD Files and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -15,17 +16,11 @@ class Program
                 @"C:\Images\image2.psd"
             };
 
-            // Corresponding output PNG files
-            string[] outputPaths = {
-                @"C:\Output\image1.png",
-                @"C:\Output\image2.png"
-            };
+            // Hardcoded output directory
+            string outputDirectory = @"C:\Images\Output";
 
-            for (int i = 0; i < inputPaths.Length; i++)
+            foreach (string inputPath in inputPaths)
             {
-                string inputPath = inputPaths[i];
-                string outputPath = outputPaths[i];
-
                 // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
@@ -33,21 +28,30 @@ class Program
                     return;
                 }
 
+                // Build output PNG path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the PSD image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Adjust brightness if the image supports raster operations
-                    if (image is RasterImage rasterImage)
+                    // Cast to RasterImage to adjust brightness
+                    RasterImage raster = image as RasterImage;
+                    if (raster != null)
                     {
                         // Increase brightness uniformly (value range -255 to 255)
-                        rasterImage.AdjustBrightness(50);
-                    }
+                        raster.AdjustBrightness(50);
 
-                    // Save the result as PNG
-                    image.Save(outputPath, new PngOptions());
+                        // Save the brightened image as PNG
+                        raster.Save(outputPath, new PngOptions());
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine($"Unsupported image type (not raster): {inputPath}");
+                    }
                 }
             }
         }
@@ -60,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a marketing team needs to quickly brighten a batch of Photoshop (PSD) assets before publishing them as web‑ready PNGs, a developer can use this C# code to automate the process.
- * 2. When an e‑learning platform receives client‑provided PSD slides that are too dark and must be converted to PNG thumbnails with consistent brightness, the code provides a simple solution.
- * 3. When a digital asset management system must reprocess legacy PSD files to improve visibility and store the results as PNG for faster preview loading, this routine can be integrated into the C# pipeline.
- * 4. When a photo‑editing SaaS wants to apply a uniform brightness boost to multiple user‑uploaded PSD files and deliver the edited images as PNGs without manual Photoshop intervention, the example shows how to achieve it.
- * 5. When a game development studio needs to prepare brightened texture maps from PSD source files and export them as PNGs for the engine, the code automates the raster image adjustment and format conversion.
+ * 1. When you need to batch‑process Photoshop PSD layers to make them uniformly brighter before publishing them as web‑ready PNGs.
+ * 2. When an automated build script must convert a set of design assets from PSD to PNG while applying a fixed brightness boost for consistent visual appearance.
+ * 3. When a photo‑editing application requires programmatic adjustment of image exposure across multiple PSD files without manual Photoshop interaction.
+ * 4. When a digital asset pipeline needs to ensure all PSD source files meet a minimum brightness level before being uploaded to a content management system as PNG.
+ * 5. When you want to integrate Aspose.Imaging into a C# service that validates and enhances incoming PSD uploads by increasing brightness and saving them in PNG format.
  */
