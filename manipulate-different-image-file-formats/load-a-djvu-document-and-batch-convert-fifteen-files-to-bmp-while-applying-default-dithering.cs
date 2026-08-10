@@ -1,27 +1,31 @@
+// HOW-TO: Batch Convert DjVu Files to BMP with Default Dithering in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Input and output directories (relative paths)
-            string inputDirectory = "Input";
-            string outputDirectory = "Output";
-
-            // Get all DjVu files in the input directory
-            string[] files = Directory.GetFiles(inputDirectory, "*.djvu");
-
-            // Process up to fifteen files
-            int count = Math.Min(15, files.Length);
-            for (int i = 0; i < count; i++)
+            // Hardcoded input directory and file names (15 DjVu files)
+            string inputDirectory = @"C:\Input";
+            string[] inputFiles = new string[]
             {
-                string inputPath = files[i];
+                "file1.djvu", "file2.djvu", "file3.djvu", "file4.djvu", "file5.djvu",
+                "file6.djvu", "file7.djvu", "file8.djvu", "file9.djvu", "file10.djvu",
+                "file11.djvu", "file12.djvu", "file13.djvu", "file14.djvu", "file15.djvu"
+            };
+
+            // Hardcoded output directory
+            string outputDirectory = @"C:\Output";
+
+            foreach (string fileName in inputFiles)
+            {
+                string inputPath = Path.Combine(inputDirectory, fileName);
 
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -30,21 +34,19 @@ class Program
                     return;
                 }
 
-                // Load DjVu document
-                using (Image image = Image.Load(inputPath))
+                // Load DjVu document from file stream
+                using (FileStream stream = File.OpenRead(inputPath))
+                using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream))
                 {
-                    DjvuImage djvu = (DjvuImage)image;
+                    // Apply default dithering (Floyd‑Steinberg, 8‑bit palette)
+                    djvuImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
 
-                    // Process each page
-                    foreach (DjvuPage page in djvu.Pages)
+                    // Save each page as a BMP file
+                    for (int i = 0; i < djvuImage.Pages.Length; i++)
                     {
-                        // Apply default dithering (Floyd‑Steinberg, 1‑bit)
-                        page.Dither(DitheringMethod.FloydSteinbergDithering, 1);
-
-                        // Build output BMP path
-                        string outputPath = Path.Combine(
-                            outputDirectory,
-                            $"{Path.GetFileNameWithoutExtension(inputPath)}_page{page.PageNumber}.bmp");
+                        var page = djvuImage.Pages[i];
+                        string outputFileName = $"{Path.GetFileNameWithoutExtension(fileName)}_page{i}.bmp";
+                        string outputPath = Path.Combine(outputDirectory, outputFileName);
 
                         // Ensure output directory exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -64,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract up to fifteen pages from DjVu documents and convert each page to a 1‑bit BMP image with default Floyd‑Steinberg dithering for archival or printing purposes.
- * 2. When a batch‑processing tool must read DjVu files from a folder, apply dithering to improve contrast, and generate BMP files that can be opened by legacy Windows applications.
- * 3. When an automated workflow requires converting scanned DjVu manuals into BMP thumbnails for quick preview in a document management system.
- * 4. When a migration script has to transform DjVu graphics into BMP format while preserving page numbers in the file names for later indexing.
- * 5. When a C# application needs to process a limited set of DjVu pages, apply default dithering, and store the results in a designated output directory for further image analysis.
+ * 1. When you need to extract each page of multiple DjVu documents and save them as BMP images for legacy Windows applications that only support BMP.
+ * 2. When a document management system must archive scanned DjVu files as lossless BMPs with consistent Floyd‑Steinberg dithering to preserve visual quality.
+ * 3. When an automated pipeline processes a batch of fifteen DjVu files and converts them to BMP for further pixel‑level analysis or OCR preprocessing.
+ * 4. When you want to ensure all output BMP files use an 8‑bit palette and default dithering to reduce file size while maintaining acceptable grayscale rendering.
+ * 5. When integrating Aspose.Imaging into a C# service that monitors a folder, loads DjVu streams, applies default dithering, and writes each page as a separate BMP for downstream image processing tools.
  */
