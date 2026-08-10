@@ -1,3 +1,4 @@
+// HOW-TO: Convert EPS to PNG with Validation and Resize in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,30 +7,39 @@ using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "Input/sample.eps";
-            string outputPath = "Output/sample.png";
+            // Hardcoded input and output paths
+            string inputPath = "input.eps";
+            string outputPath = "output\\output.png";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            // Load the image and validate it is an EPS image
+            using (var image = Image.Load(inputPath) as EpsImage)
             {
-                if (!(image is EpsImage epsImage))
+                if (image == null)
                 {
-                    Console.Error.WriteLine("Loaded image is not an EPS file.");
+                    Console.Error.WriteLine("Loaded file is not an EPS image.");
                     return;
                 }
 
-                epsImage.Save(outputPath, new PngOptions());
+                // Example conversion: resize the EPS image
+                image.Resize(400, 400, ResizeType.Mitchell);
+
+                // Save the result as PNG
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -41,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to convert client‑uploaded EPS logos to PNG thumbnails, it must first verify the file is truly an EPS image to avoid processing invalid formats.
- * 2. When an automated batch job processes a folder of design assets, checking that each file is an EPS before conversion prevents runtime errors and ensures only vector graphics are rasterized.
- * 3. When generating printable PDFs that embed PNG versions of EPS illustrations, the code validates the source EPS format to guarantee the correct rendering pipeline is used.
- * 4. When a content management system allows users to replace EPS diagrams with PNG previews, confirming the original file type protects against accidental uploads of unsupported image types.
- * 5. When a CI/CD pipeline validates graphic assets before deployment, the EPS format check ensures that only approved vector files are converted to PNG for use in the final product.
+ * 1. When you need to ensure an uploaded file is a genuine EPS before converting it to a PNG for web display.
+ * 2. When you must resize a vector EPS logo to a fixed pixel dimension while preserving quality before saving as PNG.
+ * 3. When processing batch jobs that convert EPS artwork to PNG thumbnails and need to skip non‑EPS files gracefully.
+ * 4. When integrating Aspose.Imaging into a C# service that validates image type, rescales, and stores the result in a specific output folder.
+ * 5. When building a desktop utility that checks the file format, adjusts image size, and outputs a PNG for further editing or publishing.
  */
