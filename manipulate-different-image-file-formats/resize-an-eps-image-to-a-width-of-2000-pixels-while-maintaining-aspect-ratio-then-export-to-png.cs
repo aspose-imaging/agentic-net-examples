@@ -1,47 +1,54 @@
+// HOW-TO: Resize EPS to 2000px Width and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main()
     {
-        // Wrap the whole logic in a try-catch to handle unexpected errors gracefully
         try
         {
             // Hardcoded input and output file paths
-            string inputPath = @"C:\Temp\input.eps";
-            string outputPath = @"C:\Temp\output.png";
+            string inputPath = "input.eps";
+            string outputPath = "output.png";
 
-            // Verify that the input file exists
+            // Verify that the input EPS file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists (creates it if necessary)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the EPS image
-            using (var image = Image.Load(inputPath))
+            using (var image = Image.Load(inputPath) as EpsImage)
             {
-                // Calculate the new height to maintain aspect ratio for a width of 2000 pixels
-                int newWidth = 2000;
-                int originalWidth = image.Width;
-                int originalHeight = image.Height;
-                int newHeight = (int)Math.Round((double)originalHeight * newWidth / originalWidth);
+                if (image == null)
+                {
+                    Console.Error.WriteLine("Failed to load EPS image.");
+                    return;
+                }
 
-                // Resize the image using a high‑quality interpolation method
-                image.Resize(newWidth, newHeight, ResizeType.Mitchell);
+                // Desired width while preserving aspect ratio
+                int targetWidth = 2000;
+                int targetHeight = (int)Math.Round((double)image.Height * targetWidth / image.Width);
+
+                // Resize using a high‑quality interpolation method
+                image.Resize(targetWidth, targetHeight, ResizeType.Mitchell);
 
                 // Save the resized image as PNG
-                image.Save(outputPath, new PngOptions());
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
         {
+            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -49,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a vector EPS logo to a high‑resolution PNG thumbnail of exactly 2000 px width for a web storefront while preserving the original aspect ratio.
- * 2. When an automated build pipeline must generate printable PNG assets from EPS artwork, resizing them to a fixed width to meet a publisher’s layout specifications.
- * 3. When a desktop application imports user‑supplied EPS diagrams and must display them as raster PNG previews at a consistent width for faster UI rendering.
- * 4. When a batch‑processing script has to downscale large EPS files to a manageable size before uploading them to a cloud storage service that only accepts PNG images.
- * 5. When a reporting tool needs to embed EPS charts into PDF reports by first converting them to 2000‑pixel‑wide PNG images to ensure consistent visual quality across devices.
+ * 1. When you need to generate web‑ready PNG thumbnails from vector EPS logos while keeping the original aspect ratio.
+ * 2. When a printing workflow requires converting high‑resolution EPS artwork to a fixed 2000‑pixel width PNG for preview in a .NET application.
+ * 3. When an e‑commerce platform must display product illustrations originally supplied as EPS files at a consistent width on product pages.
+ * 4. When a batch‑processing tool has to downscale large EPS drawings to a manageable size before performing further image analysis in C#.
+ * 5. When a content management system imports EPS files and must store them as PNGs with a specific width for faster loading on mobile devices.
  */
