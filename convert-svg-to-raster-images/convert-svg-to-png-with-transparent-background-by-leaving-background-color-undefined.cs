@@ -1,8 +1,10 @@
+// HOW-TO: Convert SVG to PNG with Transparent Background in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
@@ -10,33 +12,42 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.svg";
-            string outputPath = @"C:\Images\output.png";
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\temp\input.svg";
+            string outputPath = @"C:\temp\output.png";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load SVG image
+            // Load the SVG image
             using (SvgImage svgImage = new SvgImage(inputPath))
             {
-                // Configure rasterization without setting a background color (transparent)
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
-
-                // Set PNG save options with the rasterization options
-                PngOptions pngOptions = new PngOptions
+                // Configure rasterization options for a transparent background
+                var rasterizationOptions = new SvgRasterizationOptions
                 {
-                    VectorRasterizationOptions = rasterOptions
+                    // Do not set a background color (or set to Transparent)
+                    BackgroundColor = Aspose.Imaging.Color.Transparent,
+                    // Use the original SVG size
+                    PageSize = svgImage.Size
                 };
 
-                // Save as PNG
+                // Indicate that the image has no background color
+                svgImage.HasBackgroundColor = false;
+
+                // Prepare PNG save options and attach rasterization settings
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Save the rasterized PNG
                 svgImage.Save(outputPath, pngOptions);
             }
         }
@@ -49,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to generate PNG icons from SVG assets for a responsive UI while preserving transparency for overlay on different background colors.
- * 2. When an e‑commerce platform automatically creates product thumbnails from vector logos, converting SVG to PNG with no background so the images blend seamlessly on varied storefront themes.
- * 3. When a reporting tool embeds vector diagrams into PDF reports and must rasterize them to PNG with a transparent background to maintain layout consistency across devices.
- * 4. When a mobile app processes user‑uploaded SVG illustrations and converts them to PNG assets for faster rendering, ensuring the background remains undefined for compositing with app UI elements.
- * 5. When a CI/CD pipeline automates asset optimization by converting design‑team SVG files to PNG format without a background color, enabling seamless integration into email templates and social media posts.
+ * 1. When you need to display vector icons on a web page with varying backgrounds, you can rasterize the SVG to a PNG that retains transparency using Aspose.Imaging in C#.
+ * 2. When generating product thumbnails for an e‑commerce platform, converting SVG logos to transparent PNGs ensures they overlay correctly on different colored promotional banners.
+ * 3. When creating PDF reports that embed images, converting SVG diagrams to transparent PNGs allows the diagrams to blend seamlessly with the report’s background colors.
+ * 4. When building a desktop application that caches vector graphics as raster images, you can use this code to store SVG assets as transparent PNG files for faster rendering.
+ * 5. When automating a CI/CD pipeline that prepares assets for mobile apps, converting SVG assets to transparent PNGs guarantees the icons appear correctly on both light and dark themes.
  */
