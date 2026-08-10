@@ -1,98 +1,95 @@
-// HOW-TO: Adjust Brightness of Multiple CDR Files and Merge into Multipage TIFF in C# (Aspose.Imaging for .NET)
+// HOW-TO: Adjust Brightness of Multiple CDR Files and Save as Multi‑Page TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input CDR files
-            string[] inputPaths = new string[]
-            {
-                @"C:\temp\file1.cdr",
-                @"C:\temp\file2.cdr",
-                @"C:\temp\file3.cdr"
-            };
+            // Hardcoded input CDR files
+            string input1 = "input1.cdr";
+            string input2 = "input2.cdr";
+            string input3 = "input3.cdr";
 
-            // Hard‑coded output multipage TIFF
-            string outputPath = @"C:\temp\combined.tif";
+            // Hardcoded output TIFF file
+            string outputPath = "output.tif";
 
-            // Verify each input file exists
-            foreach (var inputPath in inputPaths)
+            // Validate input files
+            if (!File.Exists(input1)) { Console.Error.WriteLine($"File not found: {input1}"); return; }
+            if (!File.Exists(input2)) { Console.Error.WriteLine($"File not found: {input2}"); return; }
+            if (!File.Exists(input3)) { Console.Error.WriteLine($"File not found: {input3}"); return; }
+
+            // Ensure output directory exists
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                Directory.CreateDirectory(outputDir);
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Prepare TIFF save options
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+            tiffOptions.Source = new FileCreateSource(outputPath, false);
+            tiffOptions.Photometric = TiffPhotometrics.Rgb;
+            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
 
-            TiffImage combinedTiff = null;
-
-            foreach (var inputPath in inputPaths)
+            // Load first CDR to obtain canvas size
+            using (CdrImage canvasCdr = (CdrImage)Image.Load(input1))
             {
-                // Load the CDR image
-                using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
+                int width = canvasCdr.Width;
+                int height = canvasCdr.Height;
+
+                // Create empty multipage TIFF with the canvas size
+                using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, width, height))
                 {
-                    // Prepare rasterization options for vector to raster conversion
-                    var rasterOptions = new CdrRasterizationOptions
-                    {
-                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
-                        SmoothingMode = Aspose.Imaging.SmoothingMode.None,
-                        PageWidth = cdrImage.Width,
-                        PageHeight = cdrImage.Height
-                    };
+                    // Remove the initially created blank frame
+                    tiffImage.RemoveFrame(0);
 
-                    // TIFF save options that use the rasterization options above
-                    var tiffSaveOptions = new TiffOptions(TiffExpectedFormat.Default)
+                    // Process each CDR file
+                    string[] inputs = new[] { input1, input2, input3 };
+                    foreach (var input in inputs)
                     {
-                        VectorRasterizationOptions = rasterOptions
-                    };
-
-                    // Save the rasterized page to a memory stream (as TIFF)
-                    using (var ms = new MemoryStream())
-                    {
-                        cdrImage.Save(ms, tiffSaveOptions);
-                        ms.Position = 0;
-
-                        // Load the generated TIFF so we can adjust its brightness
-                        using (TiffImage tiffPage = (TiffImage)Image.Load(ms))
+                        using (CdrImage cdr = (CdrImage)Image.Load(input))
                         {
-                            // Adjust brightness (example value: 50)
-                            tiffPage.AdjustBrightness(50);
+                            // Rasterize CDR to PNG in memory
+                            using (MemoryStream ms = new MemoryStream())
+                            {
+                                PngOptions pngOptions = new PngOptions();
+                                pngOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                                {
+                                    PageWidth = cdr.Width,
+                                    PageHeight = cdr.Height
+                                };
+                                cdr.Save(ms, pngOptions);
+                                ms.Position = 0;
 
-                            // Add the adjusted frame to the combined TIFF
-                            if (combinedTiff == null)
-                            {
-                                // First page creates the TiffImage instance
-                                combinedTiff = new TiffImage(tiffPage.ActiveFrame);
-                            }
-                            else
-                            {
-                                // Subsequent pages are added as new frames
-                                combinedTiff.AddFrame(tiffPage.ActiveFrame);
+                                // Load the rasterized PNG
+                                using (PngImage png = (PngImage)Image.Load(ms))
+                                {
+                                    // Create a TIFF frame from the PNG image
+                                    TiffFrame frame = new TiffFrame(png);
+
+                                    // Adjust brightness (example value: +30)
+                                    frame.AdjustBrightness(30);
+
+                                    // Add the processed frame to the multipage TIFF
+                                    tiffImage.AddFrame(frame);
+                                }
                             }
                         }
                     }
-                }
-            }
 
-            // Save the combined multipage TIFF
-            if (combinedTiff != null)
-            {
-                var finalSaveOptions = new TiffOptions(TiffExpectedFormat.Default);
-                combinedTiff.Save(outputPath, finalSaveOptions);
-                combinedTiff.Dispose();
+                    // Save the final multipage TIFF
+                    tiffImage.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -104,9 +101,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to increase the visual clarity of several CorelDRAW (CDR) drawings before archiving them as a single multipage TIFF document.
- * 2. When an automated batch process must apply a uniform brightness adjustment to a collection of vector graphics and combine the results for printing or PDF conversion.
- * 3. When a desktop application imports CDR assets, brightens them to match a design theme, and saves them as a multi‑page TIFF for downstream workflows.
- * 4. When a server‑side service prepares image assets for a digital asset management system by rasterizing CDR files, adjusting brightness, and storing them in a single TIFF file.
- * 5. When you need to programmatically verify the existence of multiple CDR files, enhance their exposure, and consolidate them into one TIFF for easy distribution to clients.
+ * 1. When you need to increase the visual contrast of several CorelDRAW (CDR) drawings before archiving them as a single multipage TIFF document.
+ * 2. When an automated batch job must apply a brightness adjustment to multiple CDR files and combine the results for printing or PDF conversion.
+ * 3. When a web service receives user‑uploaded CDR artwork, brightens each image, and returns a combined TIFF for easy preview or download.
+ * 4. When migrating legacy CDR assets to a TIFF‑based workflow and you want to standardize brightness across all pages in one file.
+ * 5. When generating a catalog where each product illustration is stored as a CDR file, and you need a uniformly bright, multipage TIFF for inclusion in the final brochure.
  */
