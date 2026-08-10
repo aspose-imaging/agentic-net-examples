@@ -1,8 +1,8 @@
+// HOW-TO: Batch Convert EMF To TIFF With LZW Compression And 150 DPI In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -11,46 +11,53 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputFolder = "Input";
-            string outputFolder = "Output";
+            // Define base, input and output directories (relative to current directory)
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Validate input directory
-            if (!Directory.Exists(inputFolder))
+            // Ensure input directory exists; if not, create it and exit
+            if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputFolder);
-                Console.WriteLine($"Input directory created at: {inputFolder}. Add files and rerun.");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(outputFolder);
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
 
             // Get all EMF files in the input directory
-            string[] emfFiles = Directory.GetFiles(inputFolder, "*.emf");
+            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
 
-            foreach (string inputPath in emfFiles)
+            foreach (var inputPath in files)
             {
-                // Validate each input file
+                // Validate input file existence
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Construct output TIFF path
-                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".tif");
+                // Prepare output path with .tif extension
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".tif");
 
-                // Ensure the output directory exists
+                // Ensure output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load EMF image and save as TIFF with LZW compression and 150 DPI resolution
+                // Load EMF image
                 using (Image image = Image.Load(inputPath))
                 {
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    // Configure TIFF options: LZW compression and 150 DPI resolution
+                    var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                     tiffOptions.Compression = TiffCompressions.Lzw;
                     tiffOptions.ResolutionSettings = new ResolutionSetting(150, 150);
 
+                    // Save as TIFF
                     image.Save(outputPath, tiffOptions);
                 }
             }
@@ -64,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy collection of vector EMF drawings into compressed TIFF files for archival storage while preserving a 150 DPI resolution.
- * 2. When an automated build pipeline must generate print‑ready TIFF assets from EMF logos, applying LZW compression to reduce file size.
- * 3. When a document management system requires batch conversion of user‑uploaded EMF diagrams to TIFF format with consistent DPI for OCR processing.
- * 4. When a Windows desktop application has to export multiple EMF charts to TIFF for inclusion in PDF reports, ensuring lossless compression and uniform resolution.
- * 5. When a cloud service processes bulk EMF files from a shared folder and needs to output TIFF images with LZW compression and 150 DPI for downstream image analysis.
+ * 1. When you need to archive a collection of vector EMF drawings as lossless TIFF files for long‑term storage.
+ * 2. When a printing workflow requires all images to be 150 DPI TIFFs with LZW compression before sending to a RIP.
+ * 3. When migrating legacy EMF assets to a format supported by web‑based document viewers that only accept TIFF.
+ * 4. When generating TIFF thumbnails for a batch of EMF icons while keeping file size low using LZW.
+ * 5. When automating a nightly job that converts newly added EMF reports into standardized TIFFs for compliance archives.
  */
