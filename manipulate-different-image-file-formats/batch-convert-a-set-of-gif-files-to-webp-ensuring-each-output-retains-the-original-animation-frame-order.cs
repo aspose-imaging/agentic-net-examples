@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert Animated GIFs to WebP While Preserving Frame Order in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,13 +11,11 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputGifs";
-            string outputDirectory = @"C:\OutputWebp";
+            string inputDir = @"C:\InputGifs";
+            string outputDir = @"C:\OutputWebp";
 
-            // Get all GIF files in the input directory
-            string[] gifFiles = Directory.GetFiles(inputDirectory, "*.gif");
-
-            foreach (string inputPath in gifFiles)
+            // Process each GIF file in the input directory
+            foreach (string inputPath in Directory.GetFiles(inputDir, "*.gif"))
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -25,29 +24,29 @@ class Program
                     return;
                 }
 
-                // Determine output path with .webp extension
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".webp";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                // Build the corresponding output WebP file path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".webp");
 
                 // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the GIF image (may contain multiple frames)
+                // Load the GIF (including all animation frames)
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Configure WebP options (preserve animation frames)
+                    // WebPOptions – default settings retain animation frame order
                     var webpOptions = new WebPOptions
                     {
-                        // Example settings; adjust as needed
+                        // Example settings (can be adjusted as needed)
                         Lossless = false,
-                        Quality = 80,
-                        // Ensure all pages (frames) are exported
-                        MultiPageOptions = null
+                        Quality = 80
                     };
 
                     // Save as animated WebP
                     image.Save(outputPath, webpOptions);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -59,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to reduce page load time by converting a folder of animated GIF advertisements into smaller animated WebP files while preserving the original frame sequence.
- * 2. When an e‑learning platform wants to batch‑process course illustration GIFs into high‑quality WebP assets for mobile apps using C# and Aspose.Imaging.
- * 3. When a digital marketing agency automates the migration of legacy GIF banners to WebP to improve SEO and support modern browsers without losing animation order.
- * 4. When a game studio prepares sprite animations stored as GIFs for inclusion in a Unity project by converting them to animated WebP with consistent frame timing via .NET code.
- * 5. When a content management system integrates a scheduled job that scans an upload directory, converts every new animated GIF to lossily compressed WebP, and saves the results while keeping the original animation frames intact.
+ * 1. When you need to shrink a library of animated GIF advertisements for faster website loading by converting them to WebP while keeping the original animation sequence.
+ * 2. When a mobile app must display user‑generated animated stickers and you want to reduce file size by batch converting GIFs to animated WebP in C#.
+ * 3. When an e‑learning platform wants to archive lecture animations and requires converting multiple GIF lectures to WebP without losing frame order using Aspose.Imaging.
+ * 4. When a game developer prepares texture atlases that include animated GIFs and needs to batch convert them to WebP for better compression and consistent playback order.
+ * 5. When a digital marketing agency automates the preparation of social‑media assets, converting dozens of GIF promos to WebP while preserving animation timing via a C# script.
  */
