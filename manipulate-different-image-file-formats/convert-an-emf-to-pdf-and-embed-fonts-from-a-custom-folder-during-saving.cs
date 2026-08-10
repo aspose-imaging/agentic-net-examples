@@ -1,20 +1,21 @@
+// HOW-TO: Convert EMF to PDF with Custom Font Embedding in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded paths
+        string inputPath = @"C:\Images\input.emf";
+        string outputPath = @"C:\Images\output.pdf";
+        string customFontsFolder = @"C:\CustomFonts";
+
         try
         {
-            // Hardcoded input, output and custom fonts folder paths
-            string inputPath = @"C:\Images\sample.emf";
-            string outputPath = @"C:\Images\sample.pdf";
-            string fontsFolder = @"C:\CustomFonts";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,33 +23,18 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Preserve the original font folders to restore later
-            string[] originalFontFolders = FontSettings.GetFontsFolders();
-
-            // Set the custom fonts folder for this operation
-            FontSettings.SetFontsFolders(new string[] { fontsFolder }, true);
+            // Register custom fonts folder for rendering
+            FontSettings.SetFontsFolder(customFontsFolder);
 
             // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF save options with vector rasterization based on EMF
-                var pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = new EmfRasterizationOptions
-                    {
-                        PageSize = image.Size
-                    }
-                };
-
-                // Save the image as PDF, embedding fonts from the custom folder
-                image.Save(outputPath, pdfOptions);
+                // Save as PDF, fonts from the custom folder will be embedded automatically
+                image.Save(outputPath, new PdfOptions());
             }
-
-            // Restore the original font folders
-            FontSettings.SetFontsFolders(originalFontFolders, true);
         }
         catch (Exception ex)
         {
@@ -59,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must convert EMF vector graphics into PDF documents for client‑facing reports while embedding corporate fonts located in a custom directory to preserve branding.
- * 2. When an application generates printable invoices that include EMF logos and needs to embed specific typefaces from a non‑system fonts folder to ensure consistent rendering on any device.
- * 3. When a batch‑processing service transforms a library of EMF schematics into searchable PDFs and must use a custom fonts folder to comply with licensing restrictions on font usage.
- * 4. When a desktop tool creates PDF manuals from EMF illustrations and requires embedding fonts from a designated folder to avoid missing‑font warnings in PDF viewers.
- * 5. When a CI/CD pipeline automates the conversion of EMF assets to PDF for documentation builds and needs to temporarily override system font paths with a custom fonts folder during the save operation.
+ * 1. When you need to generate a PDF report from vector EMF graphics while ensuring that corporate fonts stored in a separate folder are embedded for consistent rendering.
+ * 2. When an application must batch‑process EMF logos and embed licensed fonts from a custom directory into the resulting PDFs for print‑ready documents.
+ * 3. When a web service receives user‑uploaded EMF files and must return PDFs that preserve the original typography by loading fonts from a specified folder.
+ * 4. When automating the creation of PDF manuals that contain EMF diagrams and require embedding of specialized engineering fonts located outside the system fonts folder.
+ * 5. When integrating Aspose.Imaging into a C# workflow to convert EMF icons to PDF and guarantee that all text appears correctly on machines that do not have the custom fonts installed.
  */
