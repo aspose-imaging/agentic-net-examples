@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert JPEG2000 Images to JPEG with 80% Quality in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,11 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
-
-            // Ensure the base output directory exists
-            Directory.CreateDirectory(outputDir);
+            string inputDir = @"C:\input\";
+            string outputDir = @"C:\output\";
 
             // Get all JPEG2000 files in the input directory
             string[] inputFiles = Directory.GetFiles(inputDir, "*.jp2");
@@ -29,11 +27,10 @@ class Program
                     return;
                 }
 
-                // Build corresponding output path with .jpg extension
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + ".jpg");
+                // Determine output path with .jpg extension
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
 
-                // Ensure the directory for the output file exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load JPEG2000 image and save as JPEG with quality 80
@@ -56,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch convert a collection of JPEG2000 (.jp2) medical or satellite images to standard JPEG files for web display while maintaining a consistent 80% compression quality.
- * 2. When an image‑processing pipeline must automatically transform high‑resolution JPEG2000 assets stored in a folder into smaller JPEG files for faster loading in a mobile app.
- * 3. When a migration script is required to replace legacy JPEG2000 assets with JPEG equivalents in a content‑management system, preserving directory structure and applying uniform quality settings.
- * 4. When a C# utility is needed to generate JPEG thumbnails from a batch of JPEG2000 source images for e‑commerce product catalogs, ensuring each thumbnail uses the same 80% quality level.
- * 5. When a developer wants to integrate a scheduled job that scans an input directory, converts all JPEG2000 files to JPEG with a fixed compression ratio, and saves them to an output folder for archival purposes.
+ * 1. When you need to reduce the file size of a large collection of JPEG2000 photos for web publishing by converting them to JPEG with a fixed 80% compression quality.
+ * 2. When a digital archive requires all JPEG2000 scans to be transformed into standard JPEG files so that legacy applications can display them without special codec support.
+ * 3. When an automated workflow must process incoming JP2 files from a scanner and output JPEGs with consistent quality for downstream image analysis pipelines.
+ * 4. When a content management system stores images in JPEG2000 format but the front‑end expects JPEG, you can batch convert them while preserving visual fidelity using a set quality level.
+ * 5. When you want to migrate a photo library from JP2 to JPEG on a Windows server, ensuring each file is saved with the same 80% quality to maintain uniform appearance across the collection.
  */
