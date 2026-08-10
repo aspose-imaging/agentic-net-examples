@@ -1,3 +1,4 @@
+// HOW-TO: Rotate OTG Image 90 Degrees Clockwise and Save as JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample_rotated.jpg";
+            string inputPath = "input.otg";
+            string outputPath = "output/output.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,7 +23,7 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
@@ -44,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy OpenDocument graphics (OTG) files into web‑friendly JPEGs while correcting orientation, they can load the OTG, rotate it 90° clockwise, and save as JPEG using Aspose.Imaging for .NET.
- * 2. When an automated document processing pipeline must generate thumbnail previews of OTG diagrams for a gallery view, the code can rotate the image and output a JPEG thumbnail.
- * 3. When a batch job processes scanned engineering drawings stored as OTG and requires them to be reoriented for printing, the developer can use this snippet to rotate and save each file as a JPEG.
- * 4. When integrating a C# desktop application that lets users upload OTG graphics and immediately view them in standard image viewers, the code rotates the image and converts it to JPEG on the fly.
- * 5. When a server‑side service receives OTG files from mobile devices and must store them in a compressed JPEG format with correct orientation for downstream analytics, the example demonstrates the necessary steps.
+ * 1. When you need to display an OpenDocument graphics (OTG) file correctly in a web gallery that requires JPEG thumbnails rotated to portrait orientation.
+ * 2. When converting scanned OTG diagrams into JPEG format for embedding in PDF reports while ensuring the image is rotated 90° clockwise to match the document layout.
+ * 3. When automating batch processing of OTG assets to generate JPEG previews that are oriented for mobile devices.
+ * 4. When integrating Aspose.Imaging into a C# application to transform legacy OTG graphics into JPEG for compatibility with image viewers that do not support OTG.
+ * 5. When preparing OTG artwork for e‑commerce product listings, rotating it to the proper orientation and saving as a compressed JPEG for faster page loads.
  */
