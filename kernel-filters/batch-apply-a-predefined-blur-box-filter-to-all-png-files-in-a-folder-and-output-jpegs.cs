@@ -1,3 +1,4 @@
+// HOW-TO: Batch Apply Gaussian Blur to PNGs and Save as JPEGs in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -14,6 +15,9 @@ class Program
             string inputFolder = @"C:\Images\Input";
             string outputFolder = @"C:\Images\Output";
 
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputFolder);
+
             // Get all PNG files in the input folder
             string[] pngFiles = Directory.GetFiles(inputFolder, "*.png");
 
@@ -23,27 +27,27 @@ class Program
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
-                // Load the image
+                // Determine the output JPEG path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputFolder, fileNameWithoutExt + ".jpg");
+
+                // Ensure the directory for the output file exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                // Load the PNG image
                 using (Image image = Image.Load(inputPath))
                 {
                     // Cast to RasterImage to apply filters
                     RasterImage rasterImage = (RasterImage)image;
 
-                    // Apply a predefined Gaussian blur filter (radius 5, sigma 4.0)
+                    // Apply a Gaussian blur filter (acts as a blur box)
                     rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                    // Build the output JPEG path
-                    string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the processed image as JPEG
-                    JpegOptions jpegOptions = new JpegOptions();
-                    rasterImage.Save(outputPath, jpegOptions);
+                    // Save the result as JPEG
+                    rasterImage.Save(outputPath, new JpegOptions());
                 }
             }
         }
@@ -56,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically blur and convert a large collection of PNG assets to JPEG for faster web page loading.
- * 2. When a photo‑editing tool must apply a consistent Gaussian blur to every PNG in a directory before archiving them as JPEGs.
- * 3. When a batch‑processing script is required to prepare product images by smoothing PNG files and saving them in a JPEG format for e‑commerce platforms.
- * 4. When an automated build pipeline has to generate preview JPEGs with a predefined blur effect from source PNG graphics.
- * 5. When a migration utility must transform legacy PNG screenshots into compressed JPEGs while applying a blur filter to protect sensitive details.
+ * 1. When you need to automatically blur a collection of product photos in PNG format before publishing them as smaller JPEG thumbnails.
+ * 2. When you want to preprocess scanned documents by applying a blur box filter to reduce noise and then convert them to JPEG for web display.
+ * 3. When a photo‑editing tool must batch‑process user‑uploaded PNG images, add a Gaussian blur effect, and store the results as JPEGs for faster loading.
+ * 4. When you are building a server‑side script that prepares PNG assets for email newsletters by blurring and converting them to JPEG to meet size limits.
+ * 5. When you need to migrate a legacy PNG image library to JPEG while applying a consistent blur filter to protect sensitive details across all files.
  */
