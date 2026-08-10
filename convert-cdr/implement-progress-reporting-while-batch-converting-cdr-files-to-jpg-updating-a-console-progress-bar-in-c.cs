@@ -1,8 +1,9 @@
+// HOW-TO: Batch Convert CDR to JPG with Console Progress Bar in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ProgressManagement;
 
 class Program
 {
@@ -10,49 +11,71 @@ class Program
     {
         try
         {
-            string inputFolder = "InputCdr";
-            string outputFolder = "OutputJpg";
+            // Base directories
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            if (!Directory.Exists(inputFolder))
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputFolder);
-                Console.WriteLine($"Input directory created at: {inputFolder}. Add files and rerun.");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            if (!Directory.Exists(outputFolder))
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDirectory))
             {
-                Directory.CreateDirectory(outputFolder);
+                Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] inputFiles = Directory.GetFiles(inputFolder, "*.cdr");
+            // Get all files in input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
 
-            foreach (string inputPath in inputFiles)
+            foreach (string filePath in files)
             {
+                // Process only CDR files
+                if (!Path.GetExtension(filePath).Equals(".cdr", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                string inputPath = filePath;
+
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputFolder, fileName + ".jpg");
+                // Prepare output path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".jpg";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+                // Load options with progress handler
+                var loadOptions = new LoadOptions
                 {
-                    var jpegOptions = new JpegOptions
-                    {
-                        VectorRasterizationOptions = new CdrRasterizationOptions
-                        {
-                            PageWidth = cdr.Width,
-                            PageHeight = cdr.Height
-                        }
-                    };
+                    ProgressEventHandler = info =>
+                        Console.WriteLine($"Loading {Path.GetFileName(inputPath)}: {info.EventType} {info.Value}/{info.MaxValue}")
+                };
 
-                    cdr.Save(outputPath, jpegOptions);
+                // Save options with progress handler
+                using (var jpegOptions = new JpegOptions
+                {
+                    ProgressEventHandler = info =>
+                        Console.WriteLine($"Saving {Path.GetFileName(outputPath)}: {info.EventType} {info.Value}/{info.MaxValue}")
+                })
+                // Load CDR image
+                using (var image = Image.Load(inputPath, loadOptions))
+                {
+                    // Save as JPEG
+                    image.Save(outputPath, jpegOptions);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -64,9 +87,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a large collection of CorelDRAW (CDR) files to JPEG images for web publishing, they can use this batch conversion with a console progress bar.
- * 2. When automating the migration of legacy CDR assets to a modern image format for a digital asset management system, this code provides a C# solution that reports progress.
- * 3. When building a command‑line tool that processes design files in a CI/CD pipeline and needs to show conversion status for each CDR to JPG conversion, the example fits.
- * 4. When creating a desktop utility that prepares print‑ready JPEG previews from multiple CDR drawings and wants users to see real‑time progress, this implementation is ideal.
- * 5. When integrating Aspose.Imaging into a batch processing service that converts CDR diagrams to compressed JPEGs while monitoring throughput via a console progress bar, developers can apply this code.
+ * 1. When you need to convert many CorelDRAW (.cdr) files to JPEG images automatically and see conversion progress in the console.
+ * 2. When a command‑line tool must create an output folder structure and ensure it exists before processing each file.
+ * 3. When you want to skip non‑CDR files in a directory while batch processing only the supported format.
+ * 4. When you require error handling that reports missing input files and stops the conversion gracefully.
+ * 5. When you want to generate JPEG filenames that match the original CDR names and store them in a separate output directory.
  */
