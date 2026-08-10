@@ -1,5 +1,9 @@
+// HOW-TO: Log CMX to PNG Conversion Parameters with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
@@ -7,8 +11,8 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\image.jpg";
-            string outputPath = "Output\\result.jpg";
+            string inputPath = Path.Combine("Input", "sample.cmx");
+            string outputPath = Path.Combine("Output", "sample.png");
 
             if (!File.Exists(inputPath))
             {
@@ -18,7 +22,24 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            File.Copy(inputPath, outputPath, true);
+            using (Image image = Image.Load(inputPath))
+            {
+                // Log conversion parameters
+                Console.WriteLine("Starting CMX to PNG conversion");
+                Console.WriteLine($"Input Path: {inputPath}");
+                Console.WriteLine($"Output Path: {outputPath}");
+                Console.WriteLine($"Image Width: {image.Width}");
+                Console.WriteLine($"Image Height: {image.Height}");
+
+                if (image is CmxImage cmxImage)
+                {
+                    Console.WriteLine($"CMX Page Count: {cmxImage.PageCount}");
+                }
+
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
+                Console.WriteLine("Conversion completed successfully");
+            }
         }
         catch (Exception ex)
         {
@@ -29,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to audit every CMX‑to‑JPEG conversion in a .NET batch service, NLog can log the source file path, target format, DPI and color profile for compliance reporting.
- * 2. When troubleshooting intermittent failures in an Aspose.Imaging pipeline that converts CMX drawings to PNG, logging conversion parameters with NLog helps identify which image dimensions or compression settings caused the error.
- * 3. When building a SaaS platform that offers on‑the‑fly CMX to PDF conversion, developers use NLog to capture user‑provided options such as page size, margin, and compression level for billing and usage analytics.
- * 4. When integrating CMX image conversion into a CI/CD workflow, NLog‑based logs of each conversion operation allow DevOps teams to verify that the correct Aspose.Imaging version and expected conversion flags are applied during automated builds.
- * 5. When implementing a multi‑threaded image processing service that converts CMX files to multiple output formats, developers rely on NLog to serialize conversion parameters per thread to monitor performance and detect race conditions.
+ * 1. When you need to convert legacy CMX vector drawings to PNG thumbnails while recording input and output details for troubleshooting.
+ * 2. When an automated batch process must generate PNG assets from CMX files and keep a log of image dimensions and page count for quality control.
+ * 3. When integrating Aspose.Imaging into a C# application that requires audit trails of each conversion operation for compliance reporting.
+ * 4. When debugging failures in a document conversion pipeline, you can view logged paths, sizes, and page numbers to pinpoint issues.
+ * 5. When building a server‑side service that transforms CMX diagrams to web‑friendly PNGs and needs to capture conversion parameters for performance monitoring.
  */
