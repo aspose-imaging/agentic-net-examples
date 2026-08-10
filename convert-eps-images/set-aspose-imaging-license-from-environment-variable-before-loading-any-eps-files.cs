@@ -1,19 +1,20 @@
+// HOW-TO: Load EPS, Resize and Save as PNG with License from Environment Variable in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.eps";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.eps";
-            string outputPath = @"C:\Images\output\sample_resized.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -32,10 +33,11 @@ class Program
                 license.SetLicense(licensePath);
             }
 
-            // Load EPS image
-            using (var image = (EpsImage)Image.Load(inputPath))
+            // Load EPS image with default load options
+            var loadOptions = new EpsLoadOptions();
+            using (Image image = Image.Load(inputPath, loadOptions))
             {
-                // Resize the image (example: 400x400 using Mitchell interpolation)
+                // Example processing: resize to 400x400 using Mitchell interpolation
                 image.Resize(400, 400, ResizeType.Mitchell);
 
                 // Save as PNG
@@ -52,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When deploying a .NET web service that converts customer‑uploaded EPS logos to web‑ready PNG thumbnails, you need to read the Aspose.Imaging license from an environment variable before processing each file.
- * 2. When automating a nightly build pipeline that generates product catalog images by resizing EPS artwork to a fixed 400 × 400 pixel size, the license must be set from an environment variable to keep the build server configuration simple.
- * 3. When creating a Windows desktop application that lets users import EPS vector files and export them as PNGs for presentation slides, you must load the Aspose.Imaging license from an environment variable to avoid hard‑coding the license path.
- * 4. When running a containerized microservice that receives EPS files via an API, resizes them, and returns PNG responses, the service reads the license location from an environment variable to stay portable across environments.
- * 5. When integrating Aspose.Imaging into a CI/CD workflow that validates EPS assets by converting them to PNG and checking dimensions, setting the license from an environment variable ensures the validation script works on any build agent without code changes.
+ * 1. When you need to convert EPS vector files to PNG thumbnails in a CI pipeline that stores the Aspose license path in an environment variable.
+ * 2. When a web service must process uploaded EPS artwork, resize it to a fixed dimension, and return a PNG without hard‑coding the license location.
+ * 3. When automating batch image processing on a server, you want to ensure the Aspose.Imaging license is applied from a secure environment variable before any EPS files are opened.
+ * 4. When integrating Aspose.Imaging into a Docker container, you can read the license file path from an environment variable, load EPS files, resize them, and output PNGs.
+ * 5. When building a desktop application that lets users open EPS files, automatically apply the license from the system environment, resize the image for preview, and save it as PNG.
  */
