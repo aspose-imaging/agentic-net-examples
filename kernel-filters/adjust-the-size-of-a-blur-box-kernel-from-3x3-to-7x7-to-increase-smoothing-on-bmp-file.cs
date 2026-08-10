@@ -1,3 +1,4 @@
+// HOW-TO: Increase BMP Smoothing By Applying 7x7 Blur Box In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,28 +10,37 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.bmp";
             string outputPath = "output.bmp";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the BMP image as a raster image
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
+                RasterImage rasterImage = (RasterImage)image;
 
+                // Create a 7x7 blur box kernel
                 double[,] kernel = Aspose.Imaging.ImageFilters.Convolution.ConvolutionFilter.GetBlurBox(7);
+
+                // Prepare convolution filter options with the custom kernel
                 var filterOptions = new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel);
 
-                raster.Filter(raster.Bounds, filterOptions);
+                // Apply the blur filter to the entire image
+                rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
+                // Save the processed image as BMP
                 var bmpOptions = new BmpOptions();
-                raster.Save(outputPath, bmpOptions);
+                rasterImage.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -42,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce noise in scanned BMP documents before OCR by applying a 7x7 blur box kernel for stronger smoothing.
- * 2. When a C# application must prepare BMP textures for a video game by softening harsh edges using Aspose.Imaging’s 7x7 convolution blur filter.
- * 3. When an image‑processing pipeline requires consistent background smoothing of BMP screenshots for UI testing, increasing the kernel size from 3x3 to 7x7 to eliminate pixel‑level artifacts.
- * 4. When a medical imaging tool stores BMP slices and wants to apply a gentle blur to hide patient identifiers, using a 7x7 blur box kernel via Aspose.Imaging in .NET.
- * 5. When a batch‑processing script needs to generate visually pleasing thumbnail BMPs by applying a larger 7x7 blur to create a smoother preview without changing file format.
+ * 1. When you need to reduce noise in a BMP photograph by applying a stronger blur effect using a 7x7 convolution kernel in a C# application.
+ * 2. When you want to preprocess scanned BMP documents to smooth out grainy edges before performing OCR, using Aspose.Imaging’s blur box filter.
+ * 3. When a game developer must generate a softened background texture from a BMP asset by increasing the blur kernel size for a more gradual fade.
+ * 4. When an automated image pipeline requires consistent smoothing of BMP files across a batch, and you need to adjust the kernel from the default 3x3 to 7x7 for better results.
+ * 5. When you are building a C# tool that saves the blurred output back to BMP format, preserving the original file type while enhancing visual softness.
  */
