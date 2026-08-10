@@ -1,18 +1,20 @@
+// HOW-TO: Crop Left and Top Border from EMF and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\Images\sample.emf";
-        string outputPath = @"C:\Images\sample_cropped.emf";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.emf";
+            string outputPath = @"C:\Images\sample_cropped.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,24 +22,24 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to EmfImage to access EMF‑specific members
+                // Cast to EmfImage to access EMF-specific methods
                 EmfImage emfImage = (EmfImage)image;
 
-                // Define border sizes to remove from the top‑left corner
+                // Define border sizes to remove from the top-left corner
                 int leftBorder = 20;   // pixels to remove from the left side
-                int topBorder = 15;    // pixels to remove from the top side
+                int topBorder = 30;    // pixels to remove from the top side
 
-                // Crop using shifts: left, right, top, bottom
+                // Crop using shifts: leftShift, rightShift, topShift, bottomShift
                 emfImage.Crop(leftBorder, 0, topBorder, 0);
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the cropped image
-                emfImage.Save(outputPath);
+                // Save the cropped image as PNG
+                emfImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -49,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to remove unwanted printer margins from a vector‑based EMF report before embedding it in a PDF document.
- * 2. When an application must trim a fixed‑size left and top border from scanned EMF diagrams to align them with a template in a C# WinForms UI.
- * 3. When a batch‑processing service has to clean up legacy EMF icons by cropping the extra space on the top‑left corner using Aspose.Imaging for .NET.
- * 4. When a GIS tool requires precise cropping of EMF map overlays to eliminate offset padding so the layers line up correctly in a visualisation.
- * 5. When a document‑generation system automatically crops the header area of EMF charts to fit within a predefined layout without altering the rest of the image.
+ * 1. When you need to remove unwanted margins from a vector EMF file before converting it to a PNG for web display.
+ * 2. When an automated reporting system generates EMF charts with extra whitespace that must be trimmed programmatically in C#.
+ * 3. When you are building a batch image‑processing pipeline that standardizes the size of EMF assets by cropping the top‑left border and saving them as PNGs.
+ * 4. When a legacy application exports diagrams as EMF and you must prepare them for inclusion in a PDF by removing the border and converting to PNG.
+ * 5. When you want to programmatically clean up scanned EMF drawings by cutting off a fixed number of pixels from the left and top edges using Aspose.Imaging in .NET.
  */
