@@ -1,51 +1,42 @@
+// HOW-TO: Replace Transparent Pixels In PNG With White Background And Save As BMP In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.png";
-        string outputPath = @"c:\temp\output.bmp";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "input.png";
+            string outputPath = "output\\output.bmp";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PNG image
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                // Cast to PngImage to access transparency properties
-                if (image is PngImage pngImage)
-                {
-                    // If the image has transparent pixels, set a solid background color
-                    if (pngImage.HasTransparentColor)
-                    {
-                        pngImage.BackgroundColor = Color.Blue;      // solid background color
-                        pngImage.HasBackgroundColor = true;        // enable background replacement
-                    }
+                int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
 
-                    // Save as BMP using default options (transparency handled via background color)
-                    pngImage.Save(outputPath, new BmpOptions());
-                }
-                else
+                int bgColor = Aspose.Imaging.Color.FromArgb(255, 255, 255, 255).ToArgb();
+
+                for (int i = 0; i < pixels.Length; i++)
                 {
-                    // If not a PNG, just save using default BMP options
-                    image.Save(outputPath, new BmpOptions());
+                    int alpha = (pixels[i] >> 24) & 0xFF;
+                    if (alpha == 0)
+                    {
+                        pixels[i] = bgColor;
+                    }
                 }
+
+                raster.SaveArgb32Pixels(raster.Bounds, pixels);
+                raster.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)
@@ -57,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a PNG with an alpha channel into a BMP for legacy Windows applications that do not support transparency, this code replaces transparent pixels with a solid background color.
- * 2. When preparing product screenshots containing transparent overlays for printed documentation, the snippet saves the image as a BMP with a chosen background hue.
- * 3. When integrating an image‑processing pipeline that receives user‑uploaded PNG icons and must store them in a BMP format for a database that only accepts non‑transparent bitmaps, this example shows how to set a background color and save.
- * 4. When automating batch conversion of UI assets from PNG to BMP on a server using C# and Aspose.Imaging, the code ensures transparent areas are filled with a consistent color before saving.
- * 5. When developing a game‑asset tool that needs to export transparent sprites as BMP files for a legacy engine, this code demonstrates how to handle PNG transparency and apply a solid background in .NET.
+ * 1. When you need to convert a PNG logo with transparent areas into a BMP for legacy Windows applications that do not support alpha channels.
+ * 2. When preparing images for printing where the printer requires a solid background and BMP format, you can replace transparent pixels with a chosen color using Aspose.Imaging in C#.
+ * 3. When generating thumbnails for a report that must be embedded in a Word document as BMP files, you can fill transparent regions with white before saving.
+ * 4. When migrating assets from a web project to a desktop application that only reads BMP files, you can remove PNG transparency by substituting it with a solid color.
+ * 5. When automating batch processing of UI icons to ensure consistent background color across all BMP resources, this code replaces any fully transparent pixels with the specified color.
  */
