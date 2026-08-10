@@ -1,53 +1,50 @@
+// HOW-TO: Align Horizontal and Vertical DPI of TIFF and Raster Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.tif";
+        string outputPath = @"C:\Images\output.tif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.tif";
-            string outputPath = @"C:\Images\output.tif";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the image
             using (Image image = Image.Load(inputPath))
             {
                 // Align DPI for TIFF images using the built‑in helper
-                if (image is TiffImage tiffImg)
+                if (image is TiffImage tiffImage)
                 {
-                    tiffImg.AlignResolutions();
+                    tiffImage.AlignResolutions();
                 }
-                // For other raster images, make horizontal and vertical DPI equal
-                else if (image is RasterImage rasterImg)
+                // Align DPI for other raster images
+                else if (image is RasterImage rasterImage)
                 {
-                    double hDpi = rasterImg.HorizontalResolution;
-                    double vDpi = rasterImg.VerticalResolution;
+                    double hDpi = rasterImage.HorizontalResolution;
+                    double vDpi = rasterImage.VerticalResolution;
 
-                    if (Math.Abs(hDpi - vDpi) > 0.001)
+                    if (hDpi != vDpi)
                     {
-                        double avgDpi = (hDpi + vDpi) / 2.0;
-                        rasterImg.SetResolution(avgDpi, avgDpi);
+                        // Use the larger DPI to avoid down‑scaling
+                        double targetDpi = Math.Max(hDpi, vDpi);
+                        rasterImage.SetResolution(targetDpi, targetDpi);
                     }
-                }
-
-                // Example correction filter applied after DPI alignment
-                if (image is RasterImage ri)
-                {
-                    ri.Grayscale();
                 }
 
                 // Save the processed image
@@ -63,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When converting scanned TIFF documents to a standardized PDF, a developer can align horizontal and vertical DPI before applying grayscale or other correction filters to ensure consistent scaling across all pages.
- * 2. When preparing satellite imagery in JPEG or PNG format for GIS analysis, aligning the DPI first guarantees accurate distance measurements after applying contrast‑enhancement filters.
- * 3. When building a batch‑processing tool that normalizes product photos for an e‑commerce site, the code can equalize DPI before resizing and applying color‑correction filters to keep every image the same physical size.
- * 4. When integrating a medical‑imaging workflow that receives DICOM‑converted TIFF scans, aligning resolutions before denoising filters ensures diagnostic measurements are not distorted.
- * 5. When creating an archival pipeline for historical photographs, setting matching horizontal and vertical DPI before applying restoration filters preserves the original aspect ratio and print dimensions.
+ * 1. When you need to ensure a scanned TIFF document prints at the correct size by making its X and Y DPI identical before further processing.
+ * 2. When a batch job must normalize the resolution of mixed‑format raster images (PNG, JPEG, BMP) so that scaling operations produce consistent results.
+ * 3. When a medical imaging workflow requires matching horizontal and vertical DPI of DICOM‑converted TIFF files to avoid distortion during analysis.
+ * 4. When preparing images for a GIS application that expects square pixels, you align DPI to prevent geographic coordinate errors.
+ * 5. When applying correction filters (sharpen, de‑noise) you first align DPI to prevent uneven filter strength caused by differing pixel densities.
  */
