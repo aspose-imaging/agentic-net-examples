@@ -1,3 +1,4 @@
+// HOW-TO: Apply Gaussian Blur to BMP and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.bmp";
+            string outputPath = "output.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,20 +21,17 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply filters
-                var rasterImage = (RasterImage)image;
+                // Cast to RasterImage to access filtering methods
+                RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur with size 5 and sigma 1.5
-                rasterImage.Filter(
-                    rasterImage.Bounds,
-                    new GaussianBlurFilterOptions(5, 1.5)
-                );
+                // Apply Gaussian blur with kernel size 3 (odd) and sigma 1.5
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(3, 1.5));
 
                 // Save the result as PNG
                 rasterImage.Save(outputPath);
@@ -48,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to soften the edges of a scanned BMP document before converting it to a web‑friendly PNG for online viewing.
- * 2. When an application must preprocess legacy BMP graphics by applying a Gaussian blur with sigma 1.5 to reduce noise prior to saving as PNG for a mobile app.
- * 3. When a batch job converts high‑resolution BMP screenshots into PNG thumbnails while applying a Gaussian blur filter to create a subtle background effect.
- * 4. When a photo‑editing tool built with C# uses Aspose.Imaging to blur a BMP portrait and export the result as PNG for further composition.
- * 5. When a server‑side service receives BMP uploads, applies a Gaussian blur to meet a design guideline, and stores the processed image as PNG for CDN distribution.
+ * 1. When you need to soften the edges of a legacy BMP graphic before converting it to a web‑friendly PNG format.
+ * 2. When a desktop application must automatically apply a subtle Gaussian blur (sigma 1.5) to scanned BMP documents for privacy before archiving them as PNG files.
+ * 3. When a batch‑processing tool has to enhance BMP screenshots with a blur effect and store the results in lossless PNG for further analysis.
+ * 4. When integrating Aspose.Imaging in a C# service that receives BMP uploads, applies a Gaussian blur filter, and returns the processed image as PNG to the client.
+ * 5. When preparing BMP assets for a mobile app, you want to apply a consistent blur and convert them to PNG to reduce visual noise and improve rendering speed.
  */
