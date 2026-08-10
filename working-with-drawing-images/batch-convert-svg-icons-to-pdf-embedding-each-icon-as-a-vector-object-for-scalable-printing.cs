@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert SVG Icons to Vector PDF in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Linq;
@@ -26,9 +27,9 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
 
-            foreach (string inputPath in files)
+            foreach (var inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -36,23 +37,23 @@ class Program
                     return;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
 
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    using (PdfOptions pdfOptions = new PdfOptions())
+                    var pdfOptions = new PdfOptions
                     {
-                        pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                        VectorRasterizationOptions = new VectorRasterizationOptions
                         {
                             BackgroundColor = Color.White,
-                            PageWidth = image.Width,
-                            PageHeight = image.Height
-                        };
-                        image.Save(outputPath, pdfOptions);
-                    }
+                            PageSize = image.Size
+                        }
+                    };
+
+                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -65,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a UI/UX team needs to generate print‑ready PDFs from a library of SVG icons so that each icon remains a scalable vector object for high‑resolution brochures.
- * 2. When an e‑commerce platform wants to automatically convert newly uploaded SVG product badges into PDF files for inclusion in printable invoices and shipping labels.
- * 3. When a corporate branding department must batch‑process hundreds of SVG logos into PDF assets that preserve vector quality for use in large‑format signage.
- * 4. When a software build pipeline requires a C# step that transforms SVG assets into PDF documents to be bundled with documentation PDFs without rasterizing the graphics.
- * 5. When a developer is creating a desktop utility that scans an input folder of mixed image formats, loads each with Aspose.Imaging, and saves them as vector‑based PDFs for archival compliance.
+ * 1. When you need to generate printable PDFs from a large set of SVG icons while preserving their vector quality for high‑resolution output.
+ * 2. When an automated build process must convert design assets stored as SVG files into PDF documents for inclusion in marketing collateral.
+ * 3. When a web application offers users the ability to download a collection of SVG logos as a single PDF that can be scaled without pixelation.
+ * 4. When a reporting tool requires embedding SVG diagrams into PDF reports and you want to handle the conversion in C# without external tools.
+ * 5. When a CI/CD pipeline must ensure all SVG icons in a repository are available as PDF files for cross‑platform printing and archiving.
  */
