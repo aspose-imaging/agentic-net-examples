@@ -1,29 +1,88 @@
+// HOW-TO: Create Rotating SVG Animation and Save as APNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Apng;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
-public class Program
+class Program
 {
-    public static void Main(string[] args)
+    static void Main(string[] args)
     {
+        string inputPath = "input.svg";
+        string outputPath = "output.apng";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.png";
-            string outputPath = "output.png";
-
-            if (!File.Exists(inputPath))
+            // Load the SVG image
+            using (Image svgImg = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                SvgImage svgImage = (SvgImage)svgImg;
+                int width = svgImage.Width;
+                int height = svgImage.Height;
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                // Animation parameters
+                const int animationDurationMs = 2000; // total duration
+                const int frameDurationMs = 100;      // per frame
+                int frameCount = animationDurationMs / frameDurationMs;
 
-            using (RasterImage image = (RasterImage)Image.Load(inputPath))
-            {
-                image.Save(outputPath, new PngOptions());
+                // Prepare APNG creation options
+                ApngOptions apngOptions = new ApngOptions
+                {
+                    Source = new FileCreateSource(outputPath, false),
+                    DefaultFrameTime = (uint)frameDurationMs,
+                    ColorType = PngColorType.TruecolorWithAlpha
+                };
+
+                using (ApngImage apng = (ApngImage)Image.Create(apngOptions, width, height))
+                {
+                    apng.RemoveAllFrames();
+
+                    // Vector rasterization options for rendering SVG onto raster frames
+                    SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = new Size(width, height)
+                    };
+
+                    for (int i = 0; i < frameCount; i++)
+                    {
+                        float angle = (float)(360.0 * i / frameCount);
+
+                        // Create a raster canvas for the current frame
+                        PngOptions pngOpts = new PngOptions
+                        {
+                            VectorRasterizationOptions = rasterOptions
+                        };
+
+                        using (RasterImage frame = (RasterImage)Image.Create(pngOpts, width, height))
+                        {
+                            // Draw the SVG onto the raster canvas
+                            Graphics graphics = new Graphics(frame);
+                            graphics.Clear(Color.Transparent);
+                            graphics.DrawImage(svgImage, new Point(0, 0));
+
+                            // Rotate the raster image
+                            frame.Rotate(angle, true, Color.Transparent);
+
+                            // Add the rotated frame to the APNG
+                            apng.AddFrame(frame);
+                        }
+                    }
+
+                    // Save the animated PNG
+                    apng.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -35,9 +94,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to verify that a PNG file exists on disk and then re‑save it with Aspose.Imaging to ensure it conforms to PNG standards before further processing.
- * 2. When a C# application must duplicate an existing PNG image to a new location while applying Aspose.Imaging’s default PNG encoding for consistent compression.
- * 3. When a web service receives a PNG path, creates the target directory if missing, and uses Aspose.Imaging to write the image to a secure output folder.
- * 4. When a batch job iterates over multiple PNG files, loading each with Aspose.Imaging’s RasterImage class to guarantee proper pixel format handling before saving them with standardized PNG options.
- * 5. When a developer wants to catch and log any exceptions that occur during PNG file loading or saving in a .NET environment using Aspose.Imaging for robust error handling.
+ * 1. When you need to turn a static SVG logo into a rotating animated PNG for web banners.
+ * 2. When you want to generate a lightweight APNG sprite from vector graphics for mobile app UI animations.
+ * 3. When you must programmatically create frame‑by‑frame rotation of an SVG diagram for an instructional tutorial.
+ * 4. When you require server‑side rendering of vector icons into an animated PNG with precise frame timing using C#.
+ * 5. When you are building a reporting tool that outputs rotating SVG charts as APNG files for cross‑browser compatibility.
  */
