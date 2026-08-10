@@ -1,3 +1,4 @@
+// HOW-TO: Convert First Three DjVu Pages to PNG and Merge into TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -13,7 +14,12 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\temp\sample.djvu";
-            string pngOutputDir = @"C:\temp\pngs";
+            string[] pngOutputPaths = new string[]
+            {
+                @"C:\temp\page1.png",
+                @"C:\temp\page2.png",
+                @"C:\temp\page3.png"
+            };
             string tiffOutputPath = @"C:\temp\merged.tif";
 
             // Verify input file exists
@@ -24,34 +30,30 @@ class Program
             }
 
             // Ensure output directories exist
-            Directory.CreateDirectory(pngOutputDir);
+            foreach (var pngPath in pngOutputPaths)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
+            }
             Directory.CreateDirectory(Path.GetDirectoryName(tiffOutputPath));
 
-            // Load DjVu document from file stream
+            // Load DjVu document
             using (FileStream stream = File.OpenRead(inputPath))
             using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Convert pages 1‑3 to PNG
-                int pagesToConvert = Math.Min(3, djvuImage.PageCount);
-                for (int i = 0; i < pagesToConvert; i++)
+                // Convert first three pages to PNG
+                for (int i = 0; i < 3 && i < djvuImage.Pages.Length; i++)
                 {
-                    var page = djvuImage.Pages[i];
-                    string pngPath = Path.Combine(pngOutputDir, $"page{i + 1}.png");
-                    // Ensure directory for each PNG (already created above)
-                    page.Save(pngPath, new PngOptions());
+                    var djvuPage = (DjvuPage)djvuImage.Pages[i];
+                    djvuPage.Save(pngOutputPaths[i], new PngOptions());
                 }
 
-                // Merge the first three pages into a single multipage TIFF
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                {
-                    Compression = TiffCompressions.Deflate,
-                    BitsPerSample = new ushort[] { 1 },
-                    MultiPageOptions = new DjvuMultiPageOptions()
-                };
-                // Specify pages to include (zero‑based indices)
-                tiffOptions.MultiPageOptions.Pages = new int[] { 0, 1, 2 };
+                // Prepare TIFF save options for multi‑page output
+                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffOptions.Compression = TiffCompressions.Deflate;
+                tiffOptions.MultiPageOptions = new DjvuMultiPageOptions();
+                tiffOptions.MultiPageOptions.Pages = new int[] { 0, 1, 2 }; // export pages 1‑3 (zero‑based)
 
-                // Save the multipage TIFF
+                // Save merged multi‑page TIFF
                 djvuImage.Save(tiffOutputPath, tiffOptions);
             }
         }
@@ -64,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract the first three pages of a scanned DjVu archive and provide them as high‑resolution PNG files for web preview.
- * 2. When a document‑management system must convert selected DjVu pages into a single multipage TIFF for archival storage with lossless Deflate compression.
- * 3. When an e‑learning platform wants to generate printable PNG images of the initial DjVu chapters while also creating a combined TIFF for batch printing.
- * 4. When a legal‑tech application requires converting specific DjVu pages to PNG for OCR processing and then merging them into a TIFF to maintain page order in a case file.
- * 5. When a desktop utility automates the transformation of a DjVu user manual’s first three pages into PNG thumbnails and a consolidated TIFF for inclusion in a product support package.
+ * 1. When you need to extract individual pages from a DjVu document as high‑quality PNG images for web preview or further editing.
+ * 2. When you must create a single multi‑page TIFF file from selected DjVu pages to archive or print them as a continuous document.
+ * 3. When a workflow requires converting scanned DjVu files into PNG for OCR processing while preserving the original page order.
+ * 4. When integrating legacy DjVu archives into a .NET application that outputs TIFF bundles for compatibility with document management systems.
+ * 5. When automating batch conversion of specific DjVu pages to PNG and then combining them into a compressed TIFF for efficient storage or transmission.
  */
