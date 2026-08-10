@@ -1,42 +1,43 @@
+// HOW-TO: Apply Gaussian Blur Followed By Sharpen to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"c:\temp\input.png";
-            string outputPath = @"c:\temp\output.png";
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output\\result.png";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the PNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering functionality
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
-                // Apply Gaussian blur filter (radius 5, sigma 4.0) to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                // Apply Gaussian blur (radius 5, sigma 4.0)
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
-                // Apply Sharpen filter (kernel size 5, sigma 4.0) to the whole image
-                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
+                // Apply Sharpen filter (kernel size 5, sigma 4.0)
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.SharpenFilterOptions(5, 4.0));
 
-                // Save the processed image to the output path
-                rasterImage.Save(outputPath);
+                // Save the processed image as PNG
+                PngOptions saveOptions = new PngOptions();
+                raster.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -48,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce noise in a high‑resolution PNG screenshot before enhancing edge details for a web gallery, they can apply a Gaussian blur followed by a sharpen filter using Aspose.Imaging for .NET.
- * 2. When preparing product photos in PNG format for an e‑commerce site, a C# application can smooth out background artifacts with a Gaussian blur and then sharpen the product edges to improve visual clarity.
- * 3. When building an automated batch‑processing tool that cleans up scanned PNG documents, applying a Gaussian blur to soften speckles and a subsequent sharpen filter restores text sharpness.
- * 4. When creating a custom thumbnail generator in C#, developers can use Aspose.Imaging to blur a PNG image to remove aliasing and then sharpen it to maintain crispness at smaller sizes.
- * 5. When integrating image preprocessing into a machine‑learning pipeline that expects PNG inputs, a developer can first apply a Gaussian blur to normalize noise and then sharpen the image to highlight features before model inference.
+ * 1. When you need to reduce noise in a PNG photo before enhancing its edges for a web gallery.
+ * 2. When preparing product images for an e‑commerce site, applying blur to smooth backgrounds then sharpening details to make items stand out.
+ * 3. When processing scanned documents in C# to soften artifacts and then sharpen text for better OCR accuracy.
+ * 4. When creating thumbnail previews where a gentle blur removes pixelation and a subsequent sharpen restores clarity.
+ * 5. When automating batch image cleanup in a .NET application, combining Gaussian blur and sharpen filters to improve visual quality of PNG assets.
  */
