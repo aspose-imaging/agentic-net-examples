@@ -1,3 +1,4 @@
+// HOW-TO: Apply Blur, Emboss, and Sharpen Filters to JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,43 +10,39 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.jpg";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the JPEG image
+            // Hardcoded input and output paths
+            string inputPath = "input.jpg";
+            string outputPath = "output.jpg";
+
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the JPEG image as a raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for filtering
-                RasterImage rasterImage = (RasterImage)image;
+                RasterImage raster = (RasterImage)image;
 
                 // Apply a blur box filter (size 5)
-                rasterImage.Filter(rasterImage.Bounds,
-                    new ConvolutionFilterOptions(ConvolutionFilter.GetBlurBox(5)));
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.GetBlurBox(5)));
 
-                // Apply an emboss filter (3x3 kernel)
-                rasterImage.Filter(rasterImage.Bounds,
-                    new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
+                // Apply an emboss filter (3x3 emboss kernel)
+                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(ConvolutionFilter.Emboss3x3));
 
                 // Apply a sharpen filter (kernel size 5, sigma 4.0)
-                rasterImage.Filter(rasterImage.Bounds,
-                    new SharpenFilterOptions(5, 4.0));
+                raster.Filter(raster.Bounds, new SharpenFilterOptions(5, 4.0));
 
                 // Save the processed image as JPEG
                 JpegOptions jpegOptions = new JpegOptions();
-                rasterImage.Save(outputPath, jpegOptions);
+                raster.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -57,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a stylized product catalog where each product photo (JPEG) needs a soft blur, artistic emboss, and crisp sharpening to enhance visual appeal before publishing online.
- * 2. When building a desktop C# application that automatically prepares user‑uploaded JPEG avatars with a subtle blur, embossed texture, and final sharpen to meet a brand’s visual guidelines.
- * 3. When developing a batch‑processing script that applies a complex filter chain (blur box, emboss, sharpen) to a folder of JPEG images for a marketing campaign’s “vintage‑modern” look.
- * 4. When implementing a photo‑editing feature in a .NET web service that lets clients upload JPEGs and returns a version with layered blur, emboss, and sharpen effects using Aspose.Imaging.
- * 5. When optimizing images for an e‑learning platform where JPEG illustrations require a gentle blur to reduce noise, an emboss to highlight edges, and a sharpen step to retain readability after compression.
+ * 1. When you need to create a stylized product photo by blurring, embossing, and sharpening a JPEG before uploading to an e‑commerce site.
+ * 2. When you want to preprocess scanned documents to enhance edges and add artistic texture using Aspose.Imaging filters in a C# batch job.
+ * 3. When building a photo‑editing desktop app that applies a combination of blur, emboss, and sharpen effects to user‑selected images.
+ * 4. When generating thumbnails with a distinctive look for a gallery, applying multiple convolution filters to the original JPEG in .NET.
+ * 5. When automating image preparation for a marketing campaign, chaining blur, emboss, and sharpen filters to achieve a high‑contrast, soft‑focus effect.
  */
