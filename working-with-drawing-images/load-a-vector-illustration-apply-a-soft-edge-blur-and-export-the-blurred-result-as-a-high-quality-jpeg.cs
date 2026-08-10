@@ -1,58 +1,77 @@
+// HOW-TO: Apply Gaussian Blur to SVG and Save as High Quality JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf.EmfPlus.Objects; // EmfPlusBlurEffect
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Wrap the whole logic in a try-catch to report any unexpected errors.
         try
         {
-            // Hard‑coded input and output file paths.
-            string inputPath = @"C:\Images\vector_input.emf";
-            string outputPath = @"C:\Images\blurred_output.jpg";
+            // Hardcoded input and output paths
+            string inputPath = "input.svg";
+            string outputPath = "output.jpg";
+            string tempPngPath = "temp.png";
 
-            // Verify that the input file exists.
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists (creates it if necessary).
+            // Ensure output directories exist
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
 
-            // Load the vector illustration.
-            using (Image image = Image.Load(inputPath))
+            // Load SVG and rasterize to PNG
+            using (Image svgImage = Image.Load(inputPath))
             {
-                // Create a soft‑edge blur effect.
-                var blurEffect = new EmfPlusBlurEffect
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    BlurRadius = 8.0f,   // radius in pixels (soft edge)
-                    ExpandEdge = true    // expand bitmap edges to keep the blur visible
+                    PageSize = svgImage.Size,
+                    BackgroundColor = Color.White,
+                    SmoothingMode = SmoothingMode.AntiAlias
                 };
 
-                // NOTE: Aspose.Imaging does not expose a direct method to attach an
-                // EmfPlusBlurEffect to a generic VectorImage. In a real scenario,
-                // you would apply the effect through the appropriate rendering pipeline.
-                // Here we instantiate the effect to satisfy the requirement.
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                // Prepare high‑quality JPEG save options.
+                svgImage.Save(tempPngPath, pngOptions);
+            }
+
+            // Load rasterized PNG, apply Gaussian blur, and save as high-quality JPEG
+            using (Image rasterImage = Image.Load(tempPngPath))
+            {
+                var raster = (RasterImage)rasterImage;
+
+                // Apply soft-edge Gaussian blur (radius 5, sigma 2.0)
+                raster.Filter(raster.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 2.0));
+
                 var jpegOptions = new JpegOptions
                 {
-                    Quality = 100 // maximum quality
+                    Quality = 95,
+                    // High-quality settings can be adjusted as needed
                 };
 
-                // Save the (potentially blurred) image as JPEG.
-                image.Save(outputPath, jpegOptions);
+                raster.Save(outputPath, jpegOptions);
+            }
+
+            // Optionally delete temporary PNG file
+            if (File.Exists(tempPngPath))
+            {
+                File.Delete(tempPngPath);
             }
         }
         catch (Exception ex)
         {
-            // Report any error without crashing the application.
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -60,9 +79,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a marketing team needs to generate blurred background images from EMF vector logos for website hero sections while preserving high‑quality JPEG output.
- * 2. When a desktop publishing application must convert vector illustrations to raster JPEGs with a soft‑edge blur for print‑ready brochures.
- * 3. When an e‑learning platform wants to create visually appealing thumbnail previews of vector diagrams by applying a gentle blur and saving them as high‑quality JPEG files.
- * 4. When a GIS system requires rendering vector map overlays with a subtle blur effect before exporting them as JPEG tiles for faster web delivery.
- * 5. When a photo‑editing tool integrates a C# workflow that loads EMF vector assets, adds a soft‑edge blur, and outputs a maximum‑quality JPEG for client‑side display.
+ * 1. When a web application needs to convert scalable SVG icons into blurred JPEG banners for faster loading on browsers.
+ * 2. When an e‑commerce platform wants to generate soft‑edge background images from vector product illustrations for promotional emails.
+ * 3. When a reporting tool requires high‑quality JPEG snapshots of vector diagrams with a subtle blur effect for PDF export.
+ * 4. When a mobile app creates stylized preview thumbnails from SVG assets by rasterizing, applying Gaussian blur, and compressing to JPEG.
+ * 5. When a digital signage system preprocesses vector artwork into blurred JPEGs to achieve a smooth visual transition on large displays.
  */
