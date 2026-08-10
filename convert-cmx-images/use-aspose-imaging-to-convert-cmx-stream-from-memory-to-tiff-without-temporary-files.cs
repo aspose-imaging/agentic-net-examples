@@ -1,36 +1,44 @@
+// HOW-TO: Convert CMX Stream To TIFF In Memory With Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cmx;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "sample.cmx";
+        // Hardcoded input and output paths
+        string inputPath = "input.cmx";
         string outputPath = "output.tif";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
+            // Validate input file existence
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load CMX data into memory
             byte[] cmxData = File.ReadAllBytes(inputPath);
             using (MemoryStream ms = new MemoryStream(cmxData))
             {
+                // Load CMX image from the memory stream
                 using (CmxImage cmxImage = (CmxImage)Image.Load(ms))
                 {
+                    // Prepare TIFF save options
                     TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                     tiffOptions.Source = new FileCreateSource(outputPath, false);
+
+                    // Save CMX as TIFF directly from memory
                     cmxImage.Save(outputPath, tiffOptions);
                 }
             }
@@ -44,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD application receives a CMX drawing as a byte array from a web service and must generate a TIFF preview for display in a browser without writing intermediate files.
- * 2. When an automated document processing pipeline reads CMX files stored in a database BLOB and needs to convert them to multi‑page TIFF for archival while keeping the conversion entirely in memory.
- * 3. When a Windows service monitors a network share, loads CMX files into memory, and creates high‑resolution TIFF images for OCR engines without creating temporary disk files.
- * 4. When a cloud‑based microservice receives CMX data via an API request and must return a TIFF response stream to the client, using Aspose.Imaging to avoid filesystem I/O.
- * 5. When a batch job processes large volumes of CMX drawings stored in memory buffers and converts them to TIFF for printing, ensuring performance by eliminating temporary file overhead.
+ * 1. When you need to transform a CorelDRAW CMX file received as a byte array into a TIFF image without writing intermediate files to disk.
+ * 2. When a web service processes uploaded CMX documents in memory and must return a high‑resolution TIFF for downstream reporting.
+ * 3. When a batch job reads CMX files from a network share, converts them to TIFF, and stores the results in a different folder while preserving the original directory structure.
+ * 4. When you want to integrate CMX‑to‑TIFF conversion into a C# application that runs in a sandboxed environment where file‑system access is limited.
+ * 5. When you must ensure the output TIFF is created with Aspose.Imaging’s default options and avoid temporary storage for performance or security reasons.
  */
