@@ -1,11 +1,9 @@
+// HOW-TO: Batch Apply Edge Detection to SVG Files and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -13,9 +11,11 @@ class Program
     {
         try
         {
+            // Hardcoded input and output directories
             string inputDirectory = "InputSvgs";
             string outputDirectory = "OutputPngs";
 
+            // Validate input directory
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -23,30 +23,31 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
+            // Get all SVG files in the input directory
             string[] files = Directory.GetFiles(inputDirectory, "*.svg");
+
             foreach (string inputPath in files)
             {
+                // Check if the file exists (redundant after GetFiles but follows the rule)
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileName + ".png");
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+                // Load the SVG image
                 using (Image svgImage = Image.Load(inputPath))
                 {
+                    // Set up rasterization options for SVG to PNG conversion
                     var rasterOptions = new SvgRasterizationOptions
                     {
-                        PageSize = svgImage.Size,
-                        BackgroundColor = Aspose.Imaging.Color.White
+                        PageSize = svgImage.Size
                     };
 
                     var pngOptions = new PngOptions
@@ -54,28 +55,44 @@ class Program
                         VectorRasterizationOptions = rasterOptions
                     };
 
+                    // Rasterize SVG to a memory stream (PNG format)
                     using (MemoryStream ms = new MemoryStream())
                     {
                         svgImage.Save(ms, pngOptions);
                         ms.Position = 0;
 
-                        using (RasterImage raster = (RasterImage)Image.Load(ms))
+                        // Load the rasterized PNG as a RasterImage
+                        using (Image rasterImageContainer = Image.Load(ms))
                         {
-                            double[,] sobelKernel = new double[,]
+                            var rasterImage = (RasterImage)rasterImageContainer;
+
+                            // Edge detection kernel (simple Laplacian)
+                            double[,] kernel = new double[,]
                             {
-                                { -1, 0, 1 },
-                                { -2, 0, 2 },
-                                { -1, 0, 1 }
+                                { -1, -1, -1 },
+                                { -1,  8, -1 },
+                                { -1, -1, -1 }
                             };
 
-                            var filterOptions = new ConvolutionFilterOptions(sobelKernel);
-                            raster.Filter(raster.Bounds, filterOptions);
+                            // Apply convolution filter for edge detection
+                            var filterOptions = new ConvolutionFilterOptions(kernel);
+                            rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
-                            var saveOptions = new PngOptions();
-                            raster.Save(outputPath, saveOptions);
+                            // Prepare output path
+                            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
+                            string outputPath = Path.Combine(outputDirectory, outputFileName);
+
+                            // Ensure output directory exists
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                            // Save the processed image as PNG
+                            var finalPngOptions = new PngOptions();
+                            rasterImage.Save(outputPath, finalPngOptions);
                         }
                     }
                 }
+
+                Console.WriteLine($"Processed and saved: {Path.GetFileName(inputPath)}");
             }
         }
         catch (Exception ex)
@@ -87,9 +104,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must batch‑convert SVG illustrations to PNG images while applying edge detection to highlight outlines for a web gallery.
- * 2. When an automated build process needs to generate PNG previews of SVG assets with edge detection filters for visual regression testing.
- * 3. When a data‑science workflow requires extracting edge‑enhanced PNG versions of SVG diagrams to feed into a computer‑vision model.
- * 4. When a reporting system has to embed SVG charts as PNG files with edge detection applied to improve readability in printed PDFs.
- * 5. When a desktop utility needs to process a folder of SVG logos, run an edge detection convolution, and save the results as PNG files for offline use.
+ * 1. When a developer needs to automatically convert a folder of vector SVG icons into raster PNG images with edge detection for use in web thumbnails.
+ * 2. When a batch image processing pipeline must prepare SVG diagrams for machine‑learning models that require edge‑enhanced PNG inputs.
+ * 3. When an application generates SVG charts and wants to export them as high‑contrast PNGs for inclusion in PDF reports.
+ * 4. When a CI/CD build step must transform design assets from SVG to PNG while highlighting edges for visual regression testing.
+ * 5. When a desktop tool needs to bulk‑process user‑uploaded SVG files, apply edge detection, and store the results as PNGs for faster rendering on low‑power devices.
  */
