@@ -1,20 +1,21 @@
+// HOW-TO: Convert EPS With Text To Searchable PDF/A-1b In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input/Sample.eps";
-        string outputPath = "output/Sample.pdf";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.eps";
+            string outputPath = "output.pdf";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -25,19 +26,18 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image
+            // Load EPS image and convert to searchable PDF
             using (var image = (EpsImage)Image.Load(inputPath))
             {
-                // Configure PDF saving options (PDF/A-1b compliance)
                 var pdfOptions = new PdfOptions
                 {
                     PdfCoreOptions = new PdfCoreOptions
                     {
+                        // Set PDF compliance (e.g., PDF/A-1b) to ensure searchable text
                         PdfCompliance = PdfComplianceVersion.PdfA1b
                     }
                 };
 
-                // Save as searchable PDF preserving text objects
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -50,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy EPS artwork that includes editable text into a PDF/A‑1b compliant searchable PDF for archival or compliance purposes.
- * 2. When an automated document‑processing pipeline must transform vector‑based EPS files into searchable PDFs while retaining the original text objects for indexing by search engines.
- * 3. When a C# application generates reports in EPS format and must provide end‑users with a searchable PDF version without rasterizing the text.
- * 4. When a digital asset management system imports EPS logos and diagrams and requires searchable PDFs to enable text‑based retrieval and accessibility compliance.
- * 5. When a batch‑processing tool needs to validate the existence of EPS files, create output directories, and reliably save them as searchable PDFs using Aspose.Imaging in a .NET environment.
+ * 1. When you need to archive vector graphics from design tools as searchable PDF/A‑1b documents for compliance.
+ * 2. When an application must programmatically transform EPS logos that contain selectable text into PDF files that can be indexed by search engines.
+ * 3. When a document management system requires converting incoming EPS files into searchable PDFs while preserving the original text objects.
+ * 4. When generating printable reports that include EPS diagrams and you want the final PDF to allow text selection and copying.
+ * 5. When automating batch processing of EPS assets to create PDF/A‑1b files that meet accessibility and long‑term preservation standards.
  */
