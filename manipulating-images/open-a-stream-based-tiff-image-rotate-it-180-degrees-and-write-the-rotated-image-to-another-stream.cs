@@ -1,40 +1,36 @@
+// HOW-TO: Rotate a TIFF Image 180 Degrees From Stream and Save in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output file paths
             string inputPath = "input.tif";
             string outputPath = "output.tif";
 
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Open the input file as a stream and load it as a TiffImage
             using (FileStream inputStream = new FileStream(inputPath, FileMode.Open, FileAccess.Read))
             using (TiffImage tiffImage = (TiffImage)Image.Load(inputStream))
             {
-                // Rotate the image 180 degrees around its centre, resizing proportionally
-                tiffImage.Rotate(180f, true, Aspose.Imaging.Color.Black);
+                tiffImage.RotateFlip(RotateFlipType.Rotate180FlipNone);
 
-                // Save the rotated image to the output stream
-                using (FileStream outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                {
-                    tiffImage.Save(outputStream);
-                }
+                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                tiffImage.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system receives a scanned DICOM‑derived TIFF file that was stored upside‑down and needs to rotate it 180° before displaying it to clinicians.
- * 2. When a document management workflow processes multi‑page TIFF invoices that were scanned in reverse orientation and must be corrected using a stream‑based rotation before archiving.
- * 3. When a GIS application imports aerial photography stored as TIFF, rotates the image to match north‑up orientation, and writes the result to a memory or file stream for further analysis.
- * 4. When an e‑commerce platform generates product catalog pages as TIFF files, needs to flip them for right‑to‑left language layouts, and saves the rotated images directly to an output stream.
- * 5. When a batch processing service reads large TIFF files from a network share, rotates each image 180 degrees to correct scanner misalignment, and streams the corrected files to a cloud storage bucket.
+ * 1. When a document management system receives multi‑page TIFF files via a network stream and needs to flip them upside down before archiving them.
+ * 2. When a medical imaging application must rotate scanned radiology TIFF images by 180° while reading them directly from a file stream to preserve memory usage.
+ * 3. When a batch‑processing service processes large TIFF files from cloud storage, rotates them, and writes the result to another stream for further downstream processing.
+ * 4. When a desktop utility needs to correct orientation of user‑uploaded TIFF photos without loading the entire image into memory, using Aspose.Imaging’s stream‑based API.
+ * 5. When an automated workflow converts incoming TIFF scans into a standardized orientation before embedding them into PDF reports, handling the files as streams for performance.
  */
