@@ -1,3 +1,4 @@
+// HOW-TO: Increase Brightness of TIFF Image by 20 and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -33,7 +34,7 @@ class Program
                 // Increase brightness by 20 units (range -255 to 255)
                 tiffImage.AdjustBrightness(20);
 
-                // Save the adjusted image as PNG
+                // Save the result as PNG
                 PngOptions pngOptions = new PngOptions();
                 tiffImage.Save(outputPath, pngOptions);
             }
@@ -47,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to preprocess scanned TIFF documents that are too dark before converting them to PNG for web display, they can use this code to boost brightness by 20 units and save the result.
- * 2. When an automated batch job must normalize the lighting of archival TIFF photographs and output them as PNG thumbnails, the AdjustBrightness method with a +20 offset provides a quick fix.
- * 3. When integrating a C# application that ingests medical imaging TIFF files and presents them in a PNG viewer, increasing brightness ensures better visibility for clinicians.
- * 4. When a document management system requires converting user‑uploaded TIFF scans to PNG while correcting underexposed images, this snippet adjusts brightness and performs the format conversion in one step.
- * 5. When building a .NET service that extracts TIFF images from PDFs, enhances their contrast by raising brightness, and stores the enhanced images as PNG for downstream AI analysis, this code fulfills the requirement.
+ * 1. When a medical imaging system receives low‑contrast TIFF scans and needs a brighter PNG version for web viewing.
+ * 2. When a document management workflow converts scanned TIFF pages to PNG thumbnails and must boost visibility by adjusting brightness.
+ * 3. When a batch script processes satellite TIFF imagery and requires a quick brightness increase before saving as PNG for GIS analysis.
+ * 4. When an e‑commerce platform upgrades product photos from TIFF to PNG and wants to enhance brightness to match catalog standards.
+ * 5. When a desktop application prepares archival TIFF files for presentation and needs to raise brightness by a fixed amount while converting to PNG.
  */
