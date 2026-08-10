@@ -1,3 +1,4 @@
+// HOW-TO: Apply Gaussian Blur to PNG and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,12 +9,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.png";
-        string outputPath = @"C:\Images\sample_blurred.pdf";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\input.png";
+            string outputPath = @"C:\Images\output.pdf";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,16 +28,13 @@ class Program
             // Load the raster image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
                 RasterImage raster = (RasterImage)image;
 
-                // Apply Gaussian blur with radius 5 and sigma 4.0 to the whole image
+                // Apply Gaussian blur (radius 5, sigma 4.0) to the whole image
                 raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Prepare PDF export options
+                // Save the blurred image embedded in a PDF page
                 var pdfOptions = new PdfOptions();
-
-                // Save the blurred image as a PDF page
                 raster.Save(outputPath, pdfOptions);
             }
         }
@@ -49,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a PDF report that includes a blurred version of a PNG logo to protect brand identity while still showing its shape.
- * 2. When an e‑commerce site wants to embed a softened product thumbnail into a PDF invoice to reduce visual distraction.
- * 3. When a medical imaging application must anonymize patient photos by applying a Gaussian blur before archiving them as PDF documents.
- * 4. When a marketing tool automatically converts user‑uploaded images into PDF flyers with a subtle blur effect for background visuals.
- * 5. When a document management system requires batch processing of raster images, applying a Gaussian blur for aesthetic purposes, and saving them directly as PDF pages using C# and Aspose.Imaging.
+ * 1. When you need to generate a PDF report that includes a softened version of a product photo for a marketing brochure.
+ * 2. When you want to preprocess scanned documents by blurring sensitive details before embedding them into a PDF for secure sharing.
+ * 3. When creating printable PDFs where background images require a Gaussian blur to reduce visual noise and improve text readability.
+ * 4. When automating a workflow that converts PNG assets to PDF while applying a blur effect to meet branding style guidelines.
+ * 5. When developing an application that archives images as PDFs and needs to apply a consistent blur filter to all images for aesthetic consistency.
  */
