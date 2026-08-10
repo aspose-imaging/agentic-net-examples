@@ -1,8 +1,9 @@
+// HOW-TO: Add Custom EXIF Thumbnail to JPEG and Verify Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Exif;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -10,10 +11,10 @@ class Program
     {
         try
         {
-            // Hard‑coded paths
+            // Hardcoded paths
             string inputPath = "input.jpg";
             string thumbnailPath = "thumb.jpg";
-            string outputPath = "output\\output.jpg";
+            string outputPath = "output.jpg";
 
             // Verify input files exist
             if (!File.Exists(inputPath))
@@ -31,42 +32,27 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the main JPEG image
-            using (JpegImage image = (JpegImage)Image.Load(inputPath))
+            using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
             {
-                // Load the thumbnail image
+                // Load the thumbnail image (any supported format)
                 using (RasterImage thumb = (RasterImage)Image.Load(thumbnailPath))
                 {
-                    // Ensure ExifData container exists
-                    if (image.ExifData == null)
-                    {
-                        image.ExifData = new JpegExifData();
-                    }
-
-                    // Cast to JpegExifData to access the Thumbnail property
-                    var jpegExif = image.ExifData as JpegExifData;
-                    if (jpegExif != null)
-                    {
-                        // Assign the thumbnail
-                        jpegExif.Thumbnail = thumb;
-                    }
+                    // Assign the thumbnail to the EXIF data
+                    jpegImage.ExifData.Thumbnail = thumb;
                 }
 
-                // Save the image with the new EXIF thumbnail
-                image.Save(outputPath);
-            }
-
-            // Verify that the thumbnail was written
-            using (JpegImage result = (JpegImage)Image.Load(outputPath))
-            {
-                var jpegExif = result.ExifData as JpegExifData;
-                if (jpegExif != null && jpegExif.Thumbnail != null)
+                // Verify that the thumbnail was set
+                if (jpegImage.ExifData.Thumbnail != null)
                 {
-                    Console.WriteLine($"Thumbnail size: {jpegExif.Thumbnail.Width}x{jpegExif.Thumbnail.Height}");
+                    Console.WriteLine($"Thumbnail set: {jpegImage.ExifData.Thumbnail.Width}x{jpegImage.ExifData.Thumbnail.Height}");
                 }
                 else
                 {
-                    Console.WriteLine("Thumbnail not found in saved image.");
+                    Console.WriteLine("Thumbnail not set.");
                 }
+
+                // Save the JPEG with updated EXIF data
+                jpegImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -78,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When building a photo‑gallery web app that needs to embed low‑resolution preview images in the EXIF thumbnail field of high‑resolution JPEGs so browsers can display quick thumbnails without loading the full file.
- * 2. When creating a digital asset management system that programmatically adds custom thumbnail images to JPEG files to improve search indexing and preview generation using C# and Aspose.Imaging.
- * 3. When developing a desktop photo‑organizer that must replace missing or corrupted EXIF thumbnails with a user‑selected image and then verify the thumbnail was saved correctly.
- * 4. When implementing an automated workflow that processes batches of product photos, inserting brand‑specific thumbnail graphics into the JPEG EXIF segment before uploading to an e‑commerce platform.
- * 5. When writing a forensic‑analysis tool that needs to inject a reference thumbnail into a JPEG’s EXIF data and later read back the metadata to confirm integrity using JpegImage and JpegExifData classes.
+ * 1. When you need to embed a small preview image in a JPEG’s EXIF data so photo‑gallery apps can display a thumbnail without loading the full image.
+ * 2. When preparing images for a digital asset management system that requires an EXIF thumbnail for quick browsing and indexing.
+ * 3. When creating JPEG files for mobile devices that read the EXIF thumbnail to show a low‑resolution preview before the full‑size picture is downloaded.
+ * 4. When adding a custom thumbnail to email attachments so the recipient’s mail client can show a miniature preview of the picture.
+ * 5. When you must verify that the thumbnail was correctly written to the JPEG’s EXIF segment to ensure compliance with metadata standards.
  */
