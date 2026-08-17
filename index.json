@@ -3,7 +3,7 @@
   "platform": "net",
   "framework": "net9.0",
   "package_version": "26.8.0",
-  "total_examples": 2902,
+  "total_examples": 2900,
   "total_categories": 17,
   "last_updated": "2026-08-17",
   "categories": [
@@ -2427,10 +2427,8 @@
     },
     {
       "name": "manipulate-different-image-file-formats",
-      "file_count": 604,
+      "file_count": 602,
       "all_files": [
-        "29613-batch-process-a-directory-of-svg-files-extracting-embedded-raster-images-and-converting-them-to-png.cs",
-        "29674-recover-a-partially-corrupted-tiff-using-both-recovery-modes-and-generate-a-report-of-recovered-frame.cs",
         "access-clipping-paths-of-a-tiff-frame-via-pathresources-and-export-them-as-svg-files.cs",
         "add-a-custom-thumbnail-to-the-exif-segment-of-a-jpeg-image-and-verify-metadata.cs",
         "add-a-custom-thumbnail-to-the-jfif-segment-of-a-jpeg-image-before-saving.cs",
@@ -3035,8 +3033,6 @@
         "write-custom-exif-gps-latitude-and-longitude-tags-into-a-jpeg-image-for-geotagging.cs"
       ],
       "files": [
-        "29613-batch-process-a-directory-of-svg-files-extracting-embedded-raster-images-and-converting-them-to-png.cs",
-        "29674-recover-a-partially-corrupted-tiff-using-both-recovery-modes-and-generate-a-report-of-recovered-frame.cs",
         "access-clipping-paths-of-a-tiff-frame-via-pathresources-and-export-them-as-svg-files.cs",
         "add-a-custom-thumbnail-to-the-exif-segment-of-a-jpeg-image-and-verify-metadata.cs",
         "add-a-custom-thumbnail-to-the-jfif-segment-of-a-jpeg-image-before-saving.cs",
@@ -3064,7 +3060,9 @@
         "apply-a-sepia-tone-effect-to-an-emf-illustration-and-export-as-png.cs",
         "apply-a-sharpening-filter-with-strength-three-to-a-tga-texture-and-export-as-bmp.cs",
         "apply-a-solid-background-color-to-a-png-image-with-transparency-replacing-its-alpha-channel-uniformly.cs",
-        "apply-a-vignette-effect-around-the-edges-of-a-tga-picture-and-save-as-jpeg.cs"
+        "apply-a-vignette-effect-around-the-edges-of-a-tga-picture-and-save-as-jpeg.cs",
+        "apply-additional-resizing-operations-to-a-dicom-image-while-maintaining-full-dicom-format-compliance.cs",
+        "apply-coordinate-offsets-to-crop-a-dicom-image-outputting-the-result-as-a-dicom-file.cs"
       ],
       "required_namespaces": [
         "System",
@@ -3178,7 +3176,7 @@
         "WmfRasterizationOptions"
       ],
       "more_files": {
-        "count": 574,
+        "count": 572,
         "url": "https://github.com/aspose-imaging/agentic-net-examples/tree/26.8.0/manipulate-different-image-file-formats"
       }
     },
