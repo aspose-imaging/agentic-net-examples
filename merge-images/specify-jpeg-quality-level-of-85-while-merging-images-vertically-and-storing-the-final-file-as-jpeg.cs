@@ -1,7 +1,9 @@
+// HOW-TO: Merge Multiple JPEG Images Vertically With Quality 85 In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
@@ -13,18 +15,12 @@ class Program
         try
         {
             // Hardcoded input image paths
-            string[] inputPaths = new string[]
-            {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
-            };
+            string[] inputPaths = { "Input\\image1.jpg", "Input\\image2.jpg", "Input\\image3.jpg" };
+            // Hardcoded output path
+            string outputPath = "Output\\merged.jpg";
 
-            // Hardcoded output image path
-            string outputPath = "output.jpg";
-
-            // Validate each input file exists
-            foreach (var path in inputPaths)
+            // Validate input files
+            foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -37,42 +33,42 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Collect sizes of all input images
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
-            foreach (var path in inputPaths)
+            List<Size> sizes = new List<Size>();
+            foreach (string path in inputPaths)
             {
-                using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
+                using (RasterImage img = (RasterImage)Image.Load(path))
                 {
                     sizes.Add(img.Size);
                 }
             }
 
-            // Determine canvas dimensions for vertical merge
+            // Calculate canvas dimensions for vertical merge
             int canvasWidth = sizes.Max(s => s.Width);
             int canvasHeight = sizes.Sum(s => s.Height);
 
-            // Create JPEG options with quality 85
-            var source = new FileCreateSource(outputPath, false);
-            JpegOptions jpegOptions = new JpegOptions()
+            // Prepare JPEG options with quality 85
+            Source src = new FileCreateSource(outputPath, false);
+            JpegOptions jpegOptions = new JpegOptions
             {
-                Source = source,
+                Source = src,
                 Quality = 85
             };
 
             // Create JPEG canvas bound to the output file
-            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
-                foreach (var path in inputPaths)
+                foreach (string path in inputPaths)
                 {
-                    using (Aspose.Imaging.RasterImage img = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(path))
+                    using (RasterImage img = (RasterImage)Image.Load(path))
                     {
-                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(0, offsetY, img.Width, img.Height);
+                        Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
                         offsetY += img.Height;
                     }
                 }
 
-                // Save the bound JPEG image
+                // Save the bound canvas to the output file
                 canvas.Save();
             }
         }
@@ -85,9 +81,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a printable photo collage from multiple portrait images, a developer can merge them vertically and output a single JPEG with quality 85 to balance file size and visual fidelity.
- * 2. When generating a multi‑page product catalog preview where each page is a separate JPEG, the code can stack the pages vertically into one JPEG for quick web preview while preserving acceptable compression.
- * 3. When building an automated receipt‑scanning pipeline that combines scanned receipt images into a single vertical JPEG for archival storage, setting quality to 85 ensures readable text without excessive storage cost.
- * 4. When developing a social‑media content scheduler that merges a series of story images into one vertical JPEG for platforms that accept only single images, the code provides consistent compression quality.
- * 5. When creating a vertical banner from several banner fragments for an email newsletter, a developer can use this code to stitch the fragments together and save the result as a JPEG with a controlled 85 quality level.
+ * 1. When you need to combine several scanned JPEG receipts into a single vertical image while controlling the compression quality for efficient storage.
+ * 2. When creating a vertical photo strip for a social media post and you want the final JPEG saved with a specific quality level to balance file size and visual fidelity.
+ * 3. When generating a printable catalog page by stacking product photos vertically and you must set the JPEG quality to meet print vendor specifications.
+ * 4. When developing a server‑side image service that merges user‑uploaded JPEGs into one image for download, enforcing a consistent quality setting across all outputs.
+ * 5. When automating the preparation of before‑and‑after comparison images by placing them one above the other in a single JPEG with a defined compression quality.
  */
