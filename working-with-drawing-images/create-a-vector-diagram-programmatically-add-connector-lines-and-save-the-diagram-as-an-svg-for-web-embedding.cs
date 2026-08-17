@@ -1,64 +1,57 @@
+// HOW-TO: Create SVG Diagram With Connectors Programmatically In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.Brushes;
 using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Svg.Graphics;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded paths
-        string outputPath = @"C:\temp\vector_diagram.svg";
-
         try
         {
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Output SVG file path (hard‑coded)
+            string outputPath = "diagram.svg";
 
-            // Create an SVG canvas
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
+            // Canvas dimensions
             int width = 800;
             int height = 600;
             int dpi = 96;
+
+            // Create the SVG graphics canvas
             SvgGraphics2D graphics = new SvgGraphics2D(width, height, dpi);
 
-            // Draw a border around the canvas
-            graphics.DrawRectangle(new Pen(Color.Black, 1), 0, 0, width, height);
+            // Define pens and brushes
+            Pen nodePen = new Pen(Color.Black, 2);
+            SolidBrush nodeFill = new SolidBrush(Color.LightGray);
+            Pen connectorPen = new Pen(Color.Blue, 2);
 
-            // Define two rectangles that will act as diagram nodes
-            int nodeWidth = 120;
-            int nodeHeight = 80;
+            // Draw first node (rectangle)
+            graphics.FillRectangle(nodePen, nodeFill, 100, 100, 150, 100);
 
-            // First node at (150,200)
-            int node1X = 150;
-            int node1Y = 200;
-            graphics.DrawRectangle(new Pen(Color.DarkBlue, 2), node1X, node1Y, nodeWidth, nodeHeight);
-            graphics.DrawString(
-                new Font("Arial", 14, FontStyle.Regular),
-                "Node A",
-                new Point(node1X + 20, node1Y + 30),
-                Color.DarkBlue);
+            // Draw second node (rectangle)
+            graphics.FillRectangle(nodePen, nodeFill, 550, 350, 150, 100);
 
-            // Second node at (500,200)
-            int node2X = 500;
-            int node2Y = 200;
-            graphics.DrawRectangle(new Pen(Color.DarkGreen, 2), node2X, node2Y, nodeWidth, nodeHeight);
-            graphics.DrawString(
-                new Font("Arial", 14, FontStyle.Regular),
-                "Node B",
-                new Point(node2X + 20, node2Y + 30),
-                Color.DarkGreen);
+            // Compute centers of the rectangles
+            int x1 = 100 + 150 / 2;
+            int y1 = 100 + 100 / 2;
+            int x2 = 550 + 150 / 2;
+            int y2 = 350 + 100 / 2;
 
-            // Draw a connector line between the centers of the two nodes
-            int node1CenterX = node1X + nodeWidth / 2;
-            int node1CenterY = node1Y + nodeHeight / 2;
-            int node2CenterX = node2X + nodeWidth / 2;
-            int node2CenterY = node2Y + nodeHeight / 2;
-            graphics.DrawLine(new Pen(Color.Gray, 1), node1CenterX, node1CenterY, node2CenterX, node2CenterY);
+            // Draw connector line between the nodes
+            graphics.DrawLine(connectorPen, x1, y1, x2, y2);
 
-            // Finalize the SVG image and save it
+            // Add text labels to the nodes
+            Font labelFont = new Font("Arial", 24, FontStyle.Regular);
+            graphics.DrawString(labelFont, "Node A", new Point(120, 130), Color.Black);
+            graphics.DrawString(labelFont, "Node B", new Point(570, 380), Color.Black);
+
+            // Finalize and save the SVG image
             using (SvgImage svgImage = graphics.EndRecording())
             {
                 svgImage.Save(outputPath);
@@ -73,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a dynamic flowchart or network diagram on the fly in a web application and embed it as an SVG without relying on client‑side drawing libraries.
- * 2. When an automated reporting tool must create printable architecture diagrams with labeled nodes and connector lines and export them as scalable SVG files for inclusion in HTML dashboards.
- * 3. When a SaaS platform wants to render real‑time organizational charts server‑side using C# and Aspose.Imaging, then serve the SVG to browsers for responsive scaling.
- * 4. When a documentation generator has to programmatically add labeled rectangles and arrows to illustrate API call sequences and save the result as an SVG for embedding in Markdown or Confluence pages.
- * 5. When a CI/CD pipeline needs to produce visual dependency graphs from build metadata, using Aspose.Imaging to draw node boxes, connect them, and store the output as an SVG for version‑controlled assets.
+ * 1. When you need to generate a flowchart or network diagram on the fly in a web application and embed it as scalable SVG without using external design tools.
+ * 2. When an automated reporting system must create labeled nodes with lines to visualize relationships between entities and export them as SVG for responsive web pages.
+ * 3. When a SaaS platform wants to render dynamic architecture diagrams in real time, using C# code to draw rectangles, connectors, and text, then serve the SVG to browsers.
+ * 4. When you are building a diagramming feature that stores diagram definitions in a database and recreates them as SVG images for download or preview.
+ * 5. When you need to programmatically produce lightweight vector graphics for documentation or tutorials, ensuring the output scales cleanly on high‑DPI displays.
  */

@@ -1,20 +1,22 @@
+// HOW-TO: Rotate EPS Image 45 Degrees and Save as JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\source.eps";
+        string outputPath = @"C:\Images\result.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.eps";
-            string outputPath = "output.jpg";
-
-            // Verify input file exists
+            // Verify that the input EPS file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -25,14 +27,14 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EPS image
-            using (var epsImage = (EpsImage)Image.Load(inputPath))
+            using (EpsImage image = (EpsImage)Image.Load(inputPath))
             {
-                // Rotate the image by 45 degrees
-                epsImage.Rotate(45f);
+                // Rotate the image by 45 degrees around its center
+                image.Rotate(45f);
 
                 // Save the rotated image as JPEG
-                var jpegOptions = new JpegOptions();
-                epsImage.Save(outputPath, jpegOptions);
+                var jpegOptions = new JpegOptions(); // default JPEG options
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -44,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a vector EPS logo into a raster JPEG thumbnail while rotating it 45 degrees for a web gallery.
- * 2. When an automated build script must generate rotated preview images from EPS artwork for a print‑to‑digital workflow using C# and Aspose.Imaging.
- * 3. When a desktop application has to display a rotated version of a technical diagram stored as EPS by converting it to JPEG for faster rendering.
- * 4. When a batch processing tool processes incoming EPS files from designers, applies a 45‑degree rotation to align them, and saves them as JPEGs for email attachments.
- * 5. When a content management system imports EPS illustrations, rotates them to match layout requirements, and stores them as JPEGs for browser compatibility.
+ * 1. When you need to display a vector EPS logo at a specific angle on a web page that only supports JPEG images.
+ * 2. When converting printed artwork stored as EPS into a rotated raster JPEG for inclusion in a PDF brochure.
+ * 3. When preprocessing EPS diagrams for a machine‑learning pipeline that requires JPEG inputs with a fixed orientation.
+ * 4. When generating thumbnails of EPS files with a 45° rotation for a gallery view in a C# desktop application.
+ * 5. When automating batch processing of EPS drawings to create rotated JPEG previews for an e‑commerce product catalog.
  */

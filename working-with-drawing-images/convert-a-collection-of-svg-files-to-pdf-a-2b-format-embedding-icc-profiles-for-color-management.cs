@@ -1,12 +1,12 @@
+// HOW-TO: Convert Multiple SVG Files to PDF/A-2b with ICC Profiles in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
@@ -26,22 +26,42 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string inputPath = Path.Combine(inputDirectory, "sample.png");
-            if (!File.Exists(inputPath))
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (var inputPath in files)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
+                if (!inputPath.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (!File.Exists(inputPath))
+                {
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
+                }
+
+                string fileName = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileName + ".pdf");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+                {
+                    var pdfOptions = new PdfOptions
+                    {
+                        PdfCoreOptions = new PdfCoreOptions(),
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Aspose.Imaging.Color.White,
+                            PageWidth = image.Width,
+                            PageHeight = image.Height,
+                            TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = Aspose.Imaging.SmoothingMode.None
+                        }
+                    };
+
+                    image.Save(outputPath, pdfOptions);
+                }
             }
-
-            string outputPath = Path.Combine(outputDirectory, "sample.pdf");
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
-            {
-                image.Save(outputPath, new PdfOptions());
-            }
-
-            Console.WriteLine($"Converted {inputPath} to {outputPath}");
         }
         catch (Exception ex)
         {
@@ -52,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a publishing system must archive a collection of SVG graphics as PDF/A‑2b documents with embedded ICC profiles to guarantee color consistency and long‑term preservation.
- * 2. When an e‑commerce platform needs to batch‑convert designer‑provided SVG logos into PDF/A‑2b files that meet archival standards and retain accurate colors via ICC profiles.
- * 3. When a regulatory compliance tool requires transforming SVG schematics into PDF/A‑2b reports with embedded ICC color profiles to satisfy industry‑mandated color management rules.
- * 4. When a digital asset management (DAM) solution automates the ingestion of SVG artwork and stores each file as a PDF/A‑2b document with an ICC profile for consistent rendering in downstream workflows.
- * 5. When a medical imaging application embeds SVG anatomical diagrams into PDF/A‑2b case files, preserving exact colors through ICC profiles for reliable diagnostic review.
+ * 1. When a developer needs to batch‑process vector graphics from a design system and produce archival‑ready PDF/A‑2b documents that preserve exact colors.
+ * 2. When an application must generate printable PDFs from SVG logos while embedding an ICC profile to ensure consistent color across different printers.
+ * 3. When a web service receives user‑uploaded SVG diagrams and must return PDF/A files that comply with regulatory document standards.
+ * 4. When a reporting tool converts chart SVGs into PDF/A‑2b pages for inclusion in long‑term storage archives with proper color management.
+ * 5. When a desktop utility automates the conversion of a folder of SVG assets into PDF/A‑2b files for distribution to clients who require PDF/A compliance.
  */

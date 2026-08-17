@@ -1,3 +1,4 @@
+// HOW-TO: Convert EMF to PDF with Embedded Fonts and Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,31 +11,26 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.emf";
-            string outputPath = "output.pdf";
+            string outputPath = "output\\output.pdf";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                var vectorOptions = new VectorRasterizationOptions
+                // Prepare PDF options with embedded fonts
+                PdfOptions pdfOptions = new PdfOptions
                 {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None
-                };
-
-                var pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = vectorOptions,
                     PdfDocumentInfo = new PdfDocumentInfo
                     {
                         Author = "Author Name",
@@ -42,6 +38,22 @@ class Program
                     }
                 };
 
+                // Configure vector rasterization to preserve fonts
+                if (image is VectorImage)
+                {
+                    var vectorOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    };
+
+                    pdfOptions.VectorRasterizationOptions = vectorOptions;
+                }
+
+                // Save as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -54,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate printable PDF reports from vector EMF diagrams created by a Windows application, preserving font fidelity and embedding author and title metadata.
- * 2. When an enterprise workflow requires automatic conversion of EMF assets such as logos or schematics to PDF for archiving, ensuring embedded fonts prevent missing characters.
- * 3. When a web service must deliver downloadable PDFs that contain EMF‑based charts, adding PDF metadata for search indexing and compliance reporting.
- * 4. When a batch script converts a library of EMF files into PDF brochures, using C# and Aspose.Imaging to retain vector quality and embed fonts for consistent rendering on any device.
- * 5. When a desktop application exports user‑created EMF drawings to PDF for electronic signatures, inserting author and title information to meet legal document standards.
+ * 1. When you need to generate a searchable PDF from vector EMF graphics while preserving the original fonts for accurate rendering.
+ * 2. When a reporting system must embed author and title information into PDFs created from EMF diagrams for document management.
+ * 3. When converting legacy Windows Metafile images to PDF for archiving, ensuring the output file size stays small by embedding fonts instead of rasterizing text.
+ * 4. When automating batch processing of EMF assets in a C# application and you require consistent PDF metadata for indexing in content repositories.
+ * 5. When building a document workflow that transforms design sketches saved as EMF into PDF files with proper metadata for compliance and audit trails.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Draw Semi Transparent Shapes on BMP Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,32 +12,30 @@ class Program
     {
         try
         {
-            string outputPath = Path.Combine(Directory.GetCurrentDirectory(), "output.bmp");
+            string outputPath = "output.bmp";
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            using (Image image = Image.Create(bmpOptions, 400, 300))
+            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
             {
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
-
-                using (SolidBrush redBrush = new SolidBrush(Color.Red))
+                BmpOptions bmpOptions = new BmpOptions();
+                bmpOptions.Source = new StreamSource(stream);
+                using (Image image = Image.Create(bmpOptions, 500, 500))
                 {
-                    redBrush.Opacity = 0.5f;
-                    graphics.FillRectangle(redBrush, new Rectangle(50, 50, 200, 150));
-                }
-                graphics.DrawRectangle(new Pen(Color.Black, 2), new Rectangle(50, 50, 200, 150));
+                    Graphics graphics = new Graphics(image);
 
-                using (SolidBrush blueBrush = new SolidBrush(Color.Blue))
-                {
-                    blueBrush.Opacity = 0.5f;
-                    graphics.FillEllipse(blueBrush, new Rectangle(150, 100, 200, 150));
-                }
-                graphics.DrawEllipse(new Pen(Color.Black, 2), new Rectangle(150, 100, 200, 150));
+                    using (SolidBrush brush = new SolidBrush(Color.FromArgb(128, 255, 0, 0)))
+                    {
+                        brush.Opacity = 0.5f;
+                        graphics.FillRectangle(brush, new Rectangle(50, 50, 200, 150));
+                    }
 
-                image.Save();
+                    using (SolidBrush brush2 = new SolidBrush(Color.FromArgb(128, 0, 0, 255)))
+                    {
+                        brush2.Opacity = 0.5f;
+                        graphics.FillEllipse(brush2, new Rectangle(150, 100, 200, 150));
+                    }
+
+                    image.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -48,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP report thumbnail that overlays semi‑transparent warning icons on a white background using Aspose.Imaging’s Graphics with SourceOver compositing.
- * 2. When creating custom watermarks for scanned documents where a translucent red rectangle and blue ellipse must be drawn onto a BMP file in a C# application.
- * 3. When building a UI mock‑up tool that programmatically draws overlapping shapes with adjustable opacity on a BMP canvas for previewing design concepts.
- * 4. When automating the production of badge images that combine semi‑transparent colored shapes and outlines in a BMP format for use in legacy Windows applications.
- * 5. When implementing a batch process that adds semi‑transparent highlight regions to BMP screenshots to indicate areas of interest before archiving them.
+ * 1. When you need to generate a BMP thumbnail with semi‑transparent overlays for a reporting dashboard.
+ * 2. When you want to add a watermark rectangle and ellipse to a BMP image without affecting the original background.
+ * 3. When creating custom UI icons in BMP format that require blended shapes for a Windows desktop application.
+ * 4. When producing layered graphics for a game asset pipeline where BMP files must retain alpha‑blended shapes.
+ * 5. When automating the preparation of printable BMP assets that include translucent highlights for visual emphasis.
  */

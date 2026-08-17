@@ -1,8 +1,9 @@
+// HOW-TO: Convert Multiple SVG Files to PDF with Title Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Svg;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
@@ -27,32 +28,35 @@ class Program
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+            string[] files = Directory.GetFiles(inputDirectory, "*.svg");
 
-            foreach (var filePath in files)
+            foreach (var inputPath in files)
             {
-                if (!filePath.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                string inputPath = filePath;
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                string outputFileName = Path.ChangeExtension(Path.GetFileName(inputPath), ".pdf");
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".pdf");
+
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    using (PdfOptions pdfOptions = new PdfOptions())
+                    PdfOptions pdfOptions = new PdfOptions
                     {
-                        pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
-                        pdfOptions.PdfDocumentInfo.Title = Path.GetFileNameWithoutExtension(inputPath);
-                        image.Save(outputPath, pdfOptions);
-                    }
+                        PdfDocumentInfo = new PdfDocumentInfo(),
+                        VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            PageSize = image.Size
+                        }
+                    };
+                    pdfOptions.PdfDocumentInfo.Title = fileNameWithoutExt;
+
+                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -65,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a library of SVG icons into searchable PDF catalogs, preserving each icon’s name as the PDF title metadata.
- * 2. When an automated build pipeline must generate printable PDF reports from SVG diagrams and embed the diagram name as the document title for easier indexing.
- * 3. When a web service offers users the ability to download their SVG artwork as PDF files, and the service must set the PDF metadata title to match the original file name.
- * 4. When a document management system imports SVG assets and requires each PDF version to carry the original SVG filename in the PDF document info for compliance tracking.
- * 5. When a desktop utility processes a folder of SVG floor plans, converting them to PDF while using the floor plan’s filename as the PDF title to aid search and retrieval.
+ * 1. When a developer needs to batch‑convert a library of SVG icons into searchable PDF reports while preserving each graphic’s title as PDF metadata.
+ * 2. When generating printable catalogs from SVG product illustrations and wanting the PDF file’s Title property to match the original SVG name for easier indexing.
+ * 3. When automating a document workflow that extracts vector graphics from a design folder and creates PDF assets with embedded titles for downstream content‑management systems.
+ * 4. When building a C# service that receives SVG uploads, converts them to PDF, and stores the PDFs with proper metadata for compliance or archival purposes.
+ * 5. When creating a desktop utility that scans an input directory of SVG diagrams, converts each to a PDF page‑size match, and sets the PDF title to the diagram’s filename for quick search in file explorers.
  */

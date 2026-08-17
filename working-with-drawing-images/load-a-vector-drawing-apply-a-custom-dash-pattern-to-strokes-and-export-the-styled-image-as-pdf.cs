@@ -1,19 +1,19 @@
+// HOW-TO: Apply Custom Dashed Border to SVG and Export as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.svg";
+        string outputPath = "output/output.pdf";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input/input.svg";
-            string outputPath = "output/output.pdf";
-
             // Validate input file existence
             if (!File.Exists(inputPath))
             {
@@ -24,28 +24,33 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the vector image
-            using (Image image = Image.Load(inputPath))
+            // Load the vector drawing
+            using (Image vectorImage = Image.Load(inputPath))
             {
-                // Create a Graphics instance for drawing
-                Graphics graphics = new Graphics(image);
+                int width = vectorImage.Width;
+                int height = vectorImage.Height;
 
-                // Define a pen with custom dash pattern
-                Pen pen = new Pen(Color.Black, 2);
-                pen.DashPattern = new float[] { 5f, 3f }; // 5 units dash, 3 units space
-
-                // Create a path (e.g., a rectangle) to apply the dash pattern
-                GraphicsPath path = new GraphicsPath();
-                Figure figure = new Figure();
-                figure.AddShape(new RectangleShape(new RectangleF(50, 50, 200, 200)));
-                path.AddFigure(figure);
-
-                // Draw the path with the dashed pen
-                graphics.DrawPath(pen, path);
-
-                // Save the styled image as PDF
+                // Create a PDF canvas with the same dimensions
                 PdfOptions pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                using (Image pdfImage = Image.Create(pdfOptions, width, height))
+                {
+                    // Obtain graphics object for drawing
+                    Graphics graphics = new Graphics(pdfImage);
+                    graphics.Clear(Color.White);
+
+                    // Render the loaded vector image onto the PDF canvas
+                    graphics.DrawImage(vectorImage, new Rectangle(0, 0, width, height));
+
+                    // Create a pen with a custom dash pattern
+                    Pen dashPen = new Pen(Color.Black, 2);
+                    dashPen.DashPattern = new float[] { 5f, 2f, 1f, 2f }; // dash, space, dash, space
+
+                    // Draw a rectangle border using the custom dashed pen
+                    graphics.DrawRectangle(dashPen, new Rectangle(0, 0, width - 1, height - 1));
+
+                    // Save the styled PDF
+                    pdfImage.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -57,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG floor‑plan into a PDF brochure while highlighting walls with a custom dashed stroke.
- * 2. When an engineering application must export circuit diagrams from SVG with a 5‑pixel dash and 3‑pixel gap to emphasize signal paths in a PDF report.
- * 3. When a web service generates printable invoices that contain vector logos and adds a dashed border around the logo before saving as PDF.
- * 4. When a GIS tool loads a vector map, applies a dash pattern to road polylines to differentiate highways, and saves the styled map as a PDF for distribution.
- * 5. When a desktop utility creates PDF certificates from SVG templates and uses a custom dash pattern to underline the recipient’s name for visual emphasis.
+ * 1. When you need to generate a printable PDF from an SVG diagram and highlight its edges with a custom dashed border.
+ * 2. When you want to programmatically add a stylized rectangle around a vector logo before embedding it in a PDF report.
+ * 3. When a web service must convert user‑uploaded SVG files to PDF while applying brand‑specific dash patterns to the artwork.
+ * 4. When automating batch processing of engineering drawings, you require a consistent dashed frame around each PDF output for visual reference.
+ * 5. When creating PDF invoices that include scalable SVG icons with a custom dash style to match corporate design guidelines.
  */

@@ -1,20 +1,19 @@
+// HOW-TO: Convert WMF to SVG and Change Black Strokes to Blue in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Reflection;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Wmf;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Wmf;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded input and output paths
+        // Hardcoded input and output paths
         string inputPath = @"C:\Images\input.wmf";
         string outputPath = @"C:\Images\output.svg";
 
-        // Verify input file exists
+        // Path safety checks
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
@@ -29,42 +28,39 @@ class Program
             // Load the WMF image
             using (WmfImage wmfImage = (WmfImage)Image.Load(inputPath))
             {
-                // Replace every black pen stroke with blue
-                var records = wmfImage.Records;
-                if (records != null)
-                {
-                    foreach (var record in records)
-                    {
-                        // Many record types expose a PenColor property; use reflection to handle them safely
-                        PropertyInfo penColorProp = record.GetType().GetProperty("PenColor");
-                        if (penColorProp != null && penColorProp.CanRead && penColorProp.CanWrite)
-                        {
-                            var currentColor = (Color)penColorProp.GetValue(record);
-                            if (currentColor.ToArgb() == Color.Black.ToArgb())
-                            {
-                                penColorProp.SetValue(record, Color.Blue);
-                            }
-                        }
-                    }
-                }
-
                 // Prepare SVG save options
-                SvgOptions svgOptions = new SvgOptions
+                var svgOptions = new SvgOptions
                 {
                     TextAsShapes = true
                 };
 
-                WmfRasterizationOptions rasterOptions = new WmfRasterizationOptions
+                var rasterOptions = new WmfRasterizationOptions
                 {
-                    BackgroundColor = Color.White,
+                    BackgroundColor = Aspose.Imaging.Color.WhiteSmoke,
                     PageSize = wmfImage.Size,
                     RenderMode = Aspose.Imaging.FileFormats.Wmf.WmfRenderMode.Auto
                 };
 
                 svgOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save as SVG
-                wmfImage.Save(outputPath, svgOptions);
+                // Save to a memory stream first
+                using (var ms = new MemoryStream())
+                {
+                    wmfImage.Save(ms, svgOptions);
+                    ms.Position = 0;
+
+                    // Read SVG content as text
+                    string svgContent = new StreamReader(ms).ReadToEnd();
+
+                    // Replace black strokes with blue
+                    svgContent = svgContent
+                        .Replace("#000000", "#0000FF")
+                        .Replace("stroke:black", "stroke:blue")
+                        .Replace("stroke:#000", "stroke:#00F");
+
+                    // Write the modified SVG to the output file
+                    File.WriteAllText(outputPath, svgContent);
+                }
             }
         }
         catch (Exception ex)
@@ -76,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy WMF diagrams to scalable SVG files while changing black line colors to brand‑specific blue for web display.
- * 2. When an automation script must batch‑process engineering drawings stored as WMF, replace all black strokes with a corporate color, and output SVG for responsive UI integration.
- * 3. When a reporting tool generates vector charts in WMF and the developer wants to recolor the outlines to improve accessibility before embedding the graphics as SVG in PDF reports.
- * 4. When a migration project requires updating old Windows Metafile assets by programmatically swapping black pen colors for blue and saving them as SVG to support modern browsers.
- * 5. When a C# application needs to load a WMF logo, replace its black outlines with a brand‑approved blue hue, and export the result as SVG for use in responsive web pages.
+ * 1. When you need to modernize legacy WMF diagrams for web display by converting them to scalable SVG files while recoloring black lines to match a brand’s blue palette.
+ * 2. When generating printable vector assets from old Windows Metafile icons and you must replace default black outlines with a custom color to integrate with a UI theme.
+ * 3. When automating batch processing of engineering schematics stored as WMF and you want to output SVG versions with blue strokes for better visibility on dark backgrounds.
+ * 4. When creating an SVG export feature in a C# application that loads WMF graphics, changes their stroke color, and saves them for use in responsive web pages.
+ * 5. When integrating Aspose.Imaging into a workflow that converts legacy vector files to SVG and needs to programmatically adjust stroke colors without manual editing.
  */

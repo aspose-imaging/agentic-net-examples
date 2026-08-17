@@ -1,21 +1,22 @@
+// HOW-TO: Convert EPS to JPEG with sRGB Color Profile in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
-        // Hard‑coded paths
-        string inputPath = "input.eps";
-        string outputPath = "output.jpg";
-        string srgbProfilePath = "sRGB.icc";
-
         try
         {
+            // Hardcoded input, output and ICC profile paths
+            string inputPath = "input.eps";
+            string outputPath = "output.jpg";
+            string iccPath = "sRGB.icc";
+
             // Verify input EPS file exists
             if (!File.Exists(inputPath))
             {
@@ -23,10 +24,10 @@ class Program
                 return;
             }
 
-            // Verify sRGB ICC profile exists
-            if (!File.Exists(srgbProfilePath))
+            // Verify ICC profile file exists
+            if (!File.Exists(iccPath))
             {
-                Console.Error.WriteLine($"File not found: {srgbProfilePath}");
+                Console.Error.WriteLine($"File not found: {iccPath}");
                 return;
             }
 
@@ -34,17 +35,19 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load EPS image
-            using (var epsImage = (EpsImage)Image.Load(inputPath))
+            using (EpsImage image = (EpsImage)Image.Load(inputPath))
             {
-                // Prepare JPEG save options with sRGB profile
-                var jpegOptions = new JpegOptions();
-
-                using (var srgbStream = File.OpenRead(srgbProfilePath))
+                // Load sRGB ICC profile and set it for JPEG saving
+                using (Stream iccStream = File.OpenRead(iccPath))
                 {
-                    jpegOptions.RgbColorProfile = new StreamSource(srgbStream);
+                    var jpegOptions = new JpegOptions
+                    {
+                        // Assign the sRGB profile as the destination RGB profile
+                        RgbColorProfile = new StreamSource(iccStream)
+                    };
 
-                    // Save as JPEG
-                    epsImage.Save(outputPath, jpegOptions);
+                    // Save the image as JPEG with the specified color profile
+                    image.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -57,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to convert a print‑ready EPS logo to a web‑friendly JPEG while ensuring the colors match the sRGB profile for consistent display across browsers.
- * 2. When a digital asset manager must batch‑process EPS artwork from a designer, replace its embedded color profile with the standard sRGB ICC profile, and save the results as JPEGs for inclusion in a product catalog.
- * 3. When an e‑commerce platform requires converting vendor‑supplied EPS product illustrations to JPEG thumbnails with accurate sRGB colors to prevent color shifts on consumer devices.
- * 4. When a publishing workflow automates the preparation of EPS cover art for online preview, applying an sRGB profile before exporting to JPEG to maintain color fidelity on mobile readers.
- * 5. When a software engineer integrates a C# service that validates the existence of an EPS file and an sRGB ICC file, then replaces the EPS’s color profile and outputs a JPEG for archival or sharing purposes.
+ * 1. When you need to generate web‑ready JPEG thumbnails from EPS artwork while ensuring the colors match the sRGB standard.
+ * 2. When a printing workflow requires converting EPS logos to JPEG for email previews and must embed an sRGB ICC profile to avoid color shifts.
+ * 3. When an e‑commerce platform imports vector product designs in EPS and must store them as JPEG images with consistent color across browsers.
+ * 4. When a digital asset management system processes incoming EPS files and needs to replace their embedded color profile with sRGB before archiving as JPEG.
+ * 5. When a batch script converts EPS files to JPEG for mobile apps and must guarantee the output uses the sRGB profile for accurate display on consumer devices.
  */

@@ -1,52 +1,53 @@
+// HOW-TO: Create High DPI BMP with Custom Resolution and Draw Shapes in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Output BMP file path
-            string outputPath = @"C:\temp\highdpi_output.bmp";
+            // Hardcoded output path
+            string outputPath = @"C:\Temp\highdpi_output.bmp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure BMP options with high DPI resolution
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.ResolutionSettings = new ResolutionSetting(300.0, 300.0);
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a new BMP image with the specified options
-            using (Image image = Image.Create(bmpOptions, 800, 600))
+            // Configure BMP options with high DPI (e.g., 300)
+            BmpOptions bmpOptions = new BmpOptions
             {
-                // Initialize graphics for drawing
+                BitsPerPixel = 24,
+                Compression = BitmapCompression.Rgb,
+                ResolutionSettings = new ResolutionSetting(300.0, 300.0),
+                Source = new FileCreateSource(outputPath, false)
+            };
+
+            // Create a 200x200 BMP image using the options
+            using (Image image = Image.Create(bmpOptions, 200, 200))
+            {
+                // Obtain a graphics object for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Clear background to white
-                graphics.Clear(Color.White);
+                // Fill the background with light gray
+                SolidBrush backgroundBrush = new SolidBrush(Color.LightGray);
+                graphics.FillRectangle(backgroundBrush, image.Bounds);
 
-                // Draw a black rectangle
-                Pen blackPen = new Pen(Color.Black, 5);
-                graphics.DrawRectangle(blackPen, new Rectangle(100, 100, 600, 400));
+                // Draw a red ellipse
+                SolidBrush redBrush = new SolidBrush(Color.Red);
+                graphics.FillEllipse(redBrush, new Rectangle(20, 20, 160, 160));
 
-                // Fill an ellipse with blue color
-                using (SolidBrush blueBrush = new SolidBrush(Color.Blue))
-                {
-                    graphics.FillEllipse(blueBrush, new Rectangle(200, 150, 400, 300));
-                }
+                // Draw a blue rectangle
+                SolidBrush blueBrush = new SolidBrush(Color.Blue);
+                graphics.FillRectangle(blueBrush, new Rectangle(50, 150, 100, 30));
 
-                // Draw a red diagonal line
-                Pen redPen = new Pen(Color.Red, 3);
-                graphics.DrawLine(redPen, new Point(0, 0), new Point(image.Width, image.Height));
-
-                // Save the image (source is already bound to the file)
+                // Save the image (FileCreateSource handles the file path)
                 image.Save();
             }
         }
@@ -59,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a high‑DPI BMP file for printing brochures, setting ResolutionSetting to 300 dpi ensures crisp output while drawing vector shapes.
- * 2. When creating a printable diagram or technical illustration in a Windows desktop application, using BmpOptions with 24‑bit color and custom resolution lets the image retain detail on large‑format printers.
- * 3. When exporting a CAD‑style drawing from a .NET service to a BMP that must match a specific DPI for integration with legacy imaging pipelines, the code provides precise control over image size and resolution.
- * 4. When producing high‑resolution thumbnails for a document management system that require exact DPI metadata for downstream OCR processing, the BmpOptions approach guarantees consistent scaling.
- * 5. When generating a rasterized report chart in a server‑side C# process that will be embedded in a PDF with defined print quality, setting the BMP resolution before drawing shapes ensures the chart appears sharp at 300 dpi.
+ * 1. When you need to generate a print‑ready 300 DPI BMP file programmatically for high‑quality brochures or flyers.
+ * 2. When you must embed vector‑like graphics such as ellipses and rectangles into a BMP for use in legacy Windows applications.
+ * 3. When an automated reporting tool has to produce high‑resolution bitmap charts that match a specific DPI setting.
+ * 4. When a desktop utility creates thumbnails or watermarked BMP images while preserving the original resolution for downstream processing.
+ * 5. When a batch conversion service needs to set the DPI of BMP files before saving them to a network share for archival purposes.
  */

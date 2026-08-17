@@ -1,6 +1,6 @@
+// HOW-TO: Check If GraphicsPath Keeps Source Image Reference After Disposal In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
@@ -11,44 +11,52 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.bmp";
-            string outputPath = "output.png";
+            string inputPath = "input.png";
+            string outputPath1 = "output1.png";
+            string outputPath2 = "output2.png";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath1) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath2) ?? ".");
 
-            // Load source image (used only to obtain dimensions)
-            using (RasterImage source = (RasterImage)Image.Load(inputPath))
+            // Load a source image (only to demonstrate that the path does not keep a reference to it)
+            Aspose.Imaging.GraphicsPath path;
+            using (Aspose.Imaging.Image srcImage = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Create a new canvas image bound to the output file
-                PngOptions pngOptions = new PngOptions();
-                pngOptions.Source = new FileCreateSource(outputPath, false);
-                using (Image canvas = Image.Create(pngOptions, source.Width, source.Height))
-                {
-                    // Initialize graphics for the canvas
-                    Graphics graphics = new Graphics(canvas);
-                    graphics.Clear(Color.White);
+                // Create a simple rectangle shape and add it to a figure
+                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
+                figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(50f, 50f, 200f, 200f)));
 
-                    // Build a graphics path (rectangle shape)
-                    GraphicsPath path = new GraphicsPath();
-                    Figure figure = new Figure();
-                    figure.AddShape(new RectangleShape(new RectangleF(10f, 10f, source.Width - 20f, source.Height - 20f)));
-                    path.AddFigure(figure);
+                // Create a GraphicsPath and add the figure
+                path = new Aspose.Imaging.GraphicsPath();
+                path.AddFigure(figure);
+            } // srcImage is disposed here
 
-                    // Render the path onto the canvas
-                    graphics.DrawPath(new Pen(Color.Black, 2), path);
+            // First canvas: draw the path while the source image was still alive
+            PngOptions pngOptions1 = new PngOptions();
+            pngOptions1.Source = new FileCreateSource(outputPath1, false);
+            using (Aspose.Imaging.Image canvas1 = Aspose.Imaging.Image.Create(pngOptions1, 300, 300))
+            {
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas1);
+                graphics.Clear(Aspose.Imaging.Color.White);
+                graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Blue, 3), path);
+                canvas1.Save(); // bound to file source
+            }
 
-                    // Save the canvas; output is already bound via FileCreateSource
-                    canvas.Save();
-                }
+            // Second canvas: reuse the same GraphicsPath after the source image has been disposed
+            PngOptions pngOptions2 = new PngOptions();
+            pngOptions2.Source = new FileCreateSource(outputPath2, false);
+            using (Aspose.Imaging.Image canvas2 = Aspose.Imaging.Image.Create(pngOptions2, 300, 300))
+            {
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas2);
+                graphics.Clear(Aspose.Imaging.Color.White);
+                graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Red, 3), path);
+                canvas2.Save();
             }
         }
         catch (Exception ex)
@@ -60,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to convert a BMP file to a PNG with a black rectangular border while guaranteeing that the GraphicsPath releases the original bitmap so large images can be processed without excessive memory usage.
- * 2. When generating a blank‑canvas PNG of the same size as an existing image for watermarking or annotation, and you want to confirm that the drawing operations (GraphicsPath) do not keep the source image alive after rendering.
- * 3. When building a batch image‑processing pipeline that reads BMP files, draws simple shapes, and writes PNG output, this pattern validates that the source image can be disposed immediately after its dimensions are used.
- * 4. When creating a thumbnail or preview image that only needs the original dimensions and a drawn rectangle, the code demonstrates how to avoid lingering references that could prevent the source file from being deleted or overwritten.
- * 5. When implementing a server‑side service that receives user‑uploaded BMPs, adds a decorative frame, and returns a PNG, using this approach ensures the GraphicsPath does not retain the uploaded image, allowing the temporary file to be cleaned up promptly.
+ * 1. When you need to reuse a GraphicsPath after the original PNG image has been disposed to avoid memory leaks in a C# Aspose.Imaging workflow.
+ * 2. When generating multiple PNG canvases from shapes extracted from a source image without keeping the source file loaded in memory.
+ * 3. When verifying that disposing an Image object does not corrupt subsequent DrawPath calls in an Aspose.Imaging graphics pipeline.
+ * 4. When building a server‑side thumbnail service that creates vector overlays from a source image and must release the source file promptly.
+ * 5. When debugging errors caused by hidden references to a closed image while drawing vector figures with Aspose.Imaging in .NET.
  */

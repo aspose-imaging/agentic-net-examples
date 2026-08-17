@@ -1,51 +1,49 @@
+// HOW-TO: Add Rectangle and Ellipse Figure to PNG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded output path
-        string outputPath = @"c:\temp\output.tiff";
+        string inputPath = "input.png";
+        string outputPath = "output\\result.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Set up Tiff options with a bound file source
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create the image canvas
-            using (Image image = Image.Create(tiffOptions, 500, 500))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.Wheat);
+                // Initialize graphics for the loaded image
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
                 // Create a graphics path and a figure
-                GraphicsPath graphicPath = new GraphicsPath();
-                Figure figure = new Figure();
+                Aspose.Imaging.GraphicsPath graphicPath = new Aspose.Imaging.GraphicsPath();
+                Aspose.Imaging.Figure figure = new Aspose.Imaging.Figure();
 
                 // Add shapes to the figure
-                figure.AddShape(new RectangleShape(new RectangleF(10f, 10f, 300f, 300f)));
-                figure.AddShape(new EllipseShape(new RectangleF(50f, 50f, 300f, 300f)));
-                figure.AddShape(new PieShape(new RectangleF(new PointF(250f, 250f), new SizeF(200f, 200f)), 0f, 45f));
+                figure.AddShape(new RectangleShape(new Aspose.Imaging.RectangleF(10f, 10f, 200f, 200f)));
+                figure.AddShape(new EllipseShape(new Aspose.Imaging.RectangleF(50f, 50f, 150f, 150f)));
 
                 // Add the completed figure to the graphics path
                 graphicPath.AddFigure(figure);
 
                 // Draw the path onto the image
-                graphics.DrawPath(new Pen(Color.Black, 2), graphicPath);
+                graphics.DrawPath(new Aspose.Imaging.Pen(Aspose.Imaging.Color.Black, 2), graphicPath);
 
-                // Save the bound image
-                image.Save();
+                // Save the modified image
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -57,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a multi‑shape diagram (rectangle, ellipse, pie slice) and save it as a high‑resolution TIFF file for printing or archival purposes.
- * 2. When an application must programmatically create a composite vector graphic on a 500×500 canvas, combine several shapes into a single Figure, and render it with a black outline using Aspose.Imaging for .NET.
- * 3. When a reporting tool requires dynamic generation of chart‑like graphics (e.g., a pie segment inside a bounding box) that are stored in a TIFF image stream for later inclusion in PDF or Word documents.
- * 4. When a GIS or CAD system needs to export custom shape collections as a rasterized TIFF image while preserving the original vector layout through GraphicsPath and Figure objects.
- * 5. When an automated batch process must create placeholder images with geometric placeholders (rectangle, ellipse, pie) for UI mock‑ups, using C# and Aspose.Imaging to ensure consistent file format and color background.
+ * 1. When you need to overlay a rectangle and an ellipse as a single figure onto an existing PNG image in a C# application.
+ * 2. When you want to programmatically create a composite figure and draw it on a bitmap for custom graphics or UI elements.
+ * 3. When you must clear an image background and then add vector shapes for generating reports or diagrams.
+ * 4. When building a server‑side image processing service that annotates uploaded PNG files with combined shapes.
+ * 5. When you need to save the modified image with lossless PNG options after drawing complex path figures.
  */

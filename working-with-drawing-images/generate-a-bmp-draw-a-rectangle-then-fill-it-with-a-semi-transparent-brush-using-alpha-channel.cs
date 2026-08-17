@@ -1,9 +1,10 @@
+// HOW-TO: Create BMP With Semi Transparent Filled Rectangle In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,42 +12,41 @@ class Program
     {
         try
         {
-            // Output file path (hard‑coded)
-            string outputPath = @"C:\Temp\output.bmp";
+            // Output file path
+            string outputPath = @"c:\temp\output.bmp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set BMP options and bind the output file
+            // Set BMP options with 32 bits per pixel to support alpha
             BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.BitsPerPixel = 32;
             bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a 500x500 BMP image
-            using (Image image = Image.Create(bmpOptions, 500, 500))
+            // Create a 200x200 image canvas
+            using (Image image = Image.Create(bmpOptions, 200, 200))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
 
-                // Optional: clear background to white
+                // Clear background to white
                 graphics.Clear(Color.White);
 
-                // Define rectangle area
-                Rectangle rect = new Rectangle(100, 100, 300, 200);
+                // Define rectangle bounds
+                Rectangle rect = new Rectangle(50, 50, 100, 100);
 
                 // Draw rectangle outline
                 Pen pen = new Pen(Color.Black, 2);
                 graphics.DrawRectangle(pen, rect);
 
-                // Fill rectangle with a semi‑transparent blue brush
-                using (SolidBrush brush = new SolidBrush())
+                // Fill rectangle with semi‑transparent blue brush
+                using (SolidBrush brush = new SolidBrush(Color.Blue))
                 {
-                    brush.Color = Color.Blue;
-                    brush.Opacity = 0.5f; // 50 % opacity
+                    brush.Opacity = 0.5f; // 50% opacity
                     graphics.FillRectangle(brush, rect);
                 }
 
-                // Save the image (output file already bound)
+                // Save the image (output is already bound to the file)
                 image.Save();
             }
         }
@@ -59,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a BMP thumbnail for a Windows desktop application and highlight a region with a semi‑transparent overlay.
- * 2. When generating a printable bitmap report where a colored rectangle indicates a grade band with 50 % opacity.
- * 3. When building a game asset pipeline that requires BMP sprites with translucent selection boxes for UI elements.
- * 4. When producing a diagnostic BMP image for medical imaging software that marks an area of interest using a semi‑transparent brush.
- * 5. When automating the creation of BMP watermarks for scanned documents by drawing a rectangle with a translucent color to protect copyrighted sections.
+ * 1. When you need to generate a 32‑bit BMP badge that includes a semi‑transparent overlay for a desktop application UI.
+ * 2. When you want to programmatically add a translucent colored rectangle to a bitmap for highlighting regions in a medical imaging report.
+ * 3. When you are creating custom map tiles where a semi‑transparent rectangle marks an area of interest on a BMP background.
+ * 4. When you need to produce a BMP watermark with adjustable opacity to protect images before publishing them online.
+ * 5. When you are building a batch process that draws and fills shapes on BMP files for automated label printing with alpha‑blended graphics.
  */

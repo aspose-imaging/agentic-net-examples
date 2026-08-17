@@ -1,20 +1,22 @@
+// HOW-TO: Convert Multi-Page EMF to High-Resolution TIFF Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Input\multi.emf";
-            string outputDirectory = @"C:\Output";
+            string inputPath = "input.emf";
+            string outputDir = "output";
 
-            // Verify input file exists
+            // Validate input file
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,46 +24,42 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(outputDir);
 
             // Load the EMF document
             using (Image image = Image.Load(inputPath))
             {
-                // Check if the loaded image supports multiple pages
-                if (image is IMultipageImage multipageImage)
+                // Determine page count (if multipage)
+                int pageCount = 1;
+                if (image is IMultipageImage multipage && multipage.PageCount > 0)
                 {
-                    int pageCount = multipageImage.PageCount;
-
-                    for (int i = 0; i < pageCount; i++)
-                    {
-                        // Build output file path for the current page
-                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.tif");
-
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Configure TIFF save options
-                        var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
-                        {
-                            // Example: use LZW compression
-                            Compression = TiffCompressions.Lzw,
-
-                            // Set high resolution (e.g., 300 DPI)
-                            ResolutionSettings = new ResolutionSetting(300, 300)
-                        };
-
-                        // Restrict saving to the current page only
-                        var multiPageOpts = new MultiPageOptions();
-                        multiPageOpts.Pages = new int[] { i };
-                        tiffOptions.MultiPageOptions = multiPageOpts;
-
-                        // Save the current page as a separate TIFF file
-                        image.Save(outputPath, tiffOptions);
-                    }
+                    pageCount = multipage.PageCount;
                 }
-                else
+
+                // Process each page separately
+                for (int i = 0; i < pageCount; i++)
                 {
-                    Console.Error.WriteLine("The loaded image does not support multiple pages.");
+                    string outputPath = Path.Combine(outputDir, $"page_{i + 1}.tif");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Configure TIFF options with high DPI (e.g., 300)
+                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
+                    tiffOptions.ResolutionSettings = new ResolutionSetting(300, 300);
+
+                    // Set vector rasterization options for high-quality rendering
+                    var vectorOptions = new VectorRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+                    tiffOptions.VectorRasterizationOptions = vectorOptions;
+
+                    // Export only the current page
+                    tiffOptions.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
+
+                    // Save the page as a separate TIFF file
+                    image.Save(outputPath, tiffOptions);
                 }
             }
         }
@@ -74,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must extract each page of a multi‑page EMF vector drawing and save them as high‑resolution (e.g., 300 DPI) TIFF files for archival or printing, this code provides a C# solution using Aspose.Imaging.
- * 2. When an engineering application needs to convert complex EMF schematics into separate TIFF images with LZW compression for faster loading in a web viewer, the example demonstrates the required steps.
- * 3. When a document‑management system requires batch processing of EMF reports into individual TIFF pages at a specific DPI to meet regulatory image‑quality standards, the code shows how to automate the conversion in .NET.
- * 4. When a GIS or mapping tool must preserve the detail of vector‑based EMF map layers by rendering each page to a 300 DPI TIFF for downstream raster analysis, this snippet handles the conversion.
- * 5. When a medical‑imaging workflow needs to transform multi‑page EMF charts into separate high‑resolution TIFF files for integration with DICOM archives, the sample illustrates the necessary C# implementation.
+ * 1. When you need to split a multi-page vector EMF report into individual high‑DPI TIFF images for printing or archival.
+ * 2. When a document-management system requires each page of an EMF diagram to be stored as a separate raster TIFF with 300 dpi resolution.
+ * 3. When generating thumbnails or previews of each EMF page for a web gallery and you want lossless TIFF output.
+ * 4. When integrating legacy EMF drawings into a workflow that only accepts TIFF files for OCR or image analysis.
+ * 5. When automating batch conversion of EMF files to high-quality TIFFs to meet regulatory image-quality standards.
  */

@@ -1,7 +1,9 @@
+// HOW-TO: Handle ImageSaveException When Saving BMP to Read‑Only Stream in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.CoreExceptions.ImageFormats;
 using Aspose.Imaging.CoreExceptions;
 
@@ -10,10 +12,9 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "readonly_output.bmp";
+        string inputPath = @"C:\Images\input.bmp";
+        string outputPath = @"C:\Images\readonly_output.bmp";
 
-        // Global exception handling
         try
         {
             // Verify input file exists
@@ -24,44 +25,47 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Create an empty file and mark it as read‑only to simulate a read‑only stream scenario
+            using (FileStream temp = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+            {
+                // No content needed; just create the file
+            }
+            File.SetAttributes(outputPath, FileAttributes.ReadOnly);
 
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare BMP save options (default)
-                BmpOptions saveOptions = new BmpOptions();
-
-                // Open the output file as a read‑only stream
-                using (FileStream readOnlyStream = new FileStream(
-                    outputPath,
-                    FileMode.OpenOrCreate,
-                    FileAccess.Read,
-                    FileShare.Read))
+                // Open the output file as a read‑only stream (FileAccess.Read)
+                using (FileStream readOnlyStream = new FileStream(outputPath, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     try
                     {
                         // Attempt to save the image to the read‑only stream
-                        image.Save(readOnlyStream, saveOptions);
-                        Console.WriteLine("Image saved successfully (unexpected).");
+                        image.Save(readOnlyStream);
                     }
-                    catch (BmpImageException bmpEx)
+                    catch (ImageSaveException ex)
                     {
-                        Console.Error.WriteLine($"BMP image error: {bmpEx.Message}");
+                        // Specific handling for image save failures
+                        Console.Error.WriteLine($"ImageSaveException: {ex.Message}");
                     }
-                    catch (ImageSaveException saveEx)
+                    catch (BmpImageException ex)
                     {
-                        Console.Error.WriteLine($"Image save error: {saveEx.Message}");
+                        // Specific handling for BMP format errors
+                        Console.Error.WriteLine($"BmpImageException: {ex.Message}");
                     }
                     catch (Exception ex)
                     {
-                        Console.Error.WriteLine($"General error while saving: {ex.Message}");
+                        // General fallback for any other errors during save
+                        Console.Error.WriteLine($"Unexpected error while saving: {ex.Message}");
                     }
                 }
             }
         }
         catch (Exception ex)
         {
+            // Global error handling for any unexpected exceptions
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -69,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an application generates BMP thumbnails and attempts to write them to a network share that is configured as read‑only, the code can catch the save exception and log a meaningful error.
- * 2. When a Windows service processes scanned documents and tries to overwrite a protected BMP file, the error handling prevents the service from crashing and allows fallback to an alternate folder.
- * 3. When a desktop utility updates image metadata but the target BMP file is opened by another program in read‑only mode, the try‑catch block reports the ImageSaveException to the user.
- * 4. When a batch conversion tool runs on a server with limited write permissions and encounters a read‑only stream for BMP output, the code captures BmpImageException to inform administrators.
- * 5. When a cloud‑based image processing pipeline stores BMP results in a read‑only blob storage container, the exception handling ensures graceful degradation and retries with a writable stream.
+ * 1. When you need to programmatically save a BMP image but the destination file is marked read‑only, and you want to catch the failure gracefully.
+ * 2. When processing batch image conversions and some output files have read‑only attributes, requiring error handling to avoid application crashes.
+ * 3. When integrating Aspose.Imaging into a document management system that enforces read‑only permissions on stored images.
+ * 4. When validating that your C# code correctly reports permission‑related errors during image export operations.
+ * 5. When developing a backup utility that attempts to overwrite existing read‑only BMP files and must log specific ImageSaveException details.
  */

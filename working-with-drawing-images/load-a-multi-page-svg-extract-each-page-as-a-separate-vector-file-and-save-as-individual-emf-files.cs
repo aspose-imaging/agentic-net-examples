@@ -1,51 +1,61 @@
+// HOW-TO: Extract Each Page From Multi‑Page SVG and Save as EMF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Emf;
-using Aspose.Imaging.FileFormats.Emf.Graphics;
+using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hard‑coded input and output locations
+        string inputPath = @"C:\Temp\multpage.svg";
+        string outputDirectory = @"C:\Temp\Output";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists (creates even if null)
+        Directory.CreateDirectory(outputDirectory);
+
         try
         {
-            string inputPath = @"C:\Images\multi_page.svg";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
+            // Load the SVG (or any vector image) using the unified loader
             using (Image image = Image.Load(inputPath))
             {
+                // Determine if the image supports multiple pages
                 IMultipageImage multipage = image as IMultipageImage;
-                if (multipage == null)
-                {
-                    Console.Error.WriteLine("The input image is not a multipage vector image.");
-                    return;
-                }
-
-                int pageCount = multipage.PageCount;
+                int pageCount = multipage?.PageCount ?? 1; // fallback to 1 for single‑page images
 
                 for (int i = 0; i < pageCount; i++)
                 {
-                    string outputPath = $@"C:\Images\output_page_{i + 1}.emf";
+                    // Build a distinct output file name for each page
+                    string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.emf");
 
+                    // Ensure the directory for this file exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    EmfOptions exportOptions = new EmfOptions
+                    // Prepare EMF save options with vector rasterization settings
+                    var emfOptions = new EmfOptions
                     {
-                        MultiPageOptions = new MultiPageOptions(new IntRange(i, 1)),
+                        // Preserve the original page size
                         VectorRasterizationOptions = new EmfRasterizationOptions
                         {
                             PageSize = image.Size
-                        }
+                        },
+
+                        // Export only the current page
+                        MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1))
                     };
 
-                    image.Save(outputPath, exportOptions);
+                    // Save the current page as an EMF file
+                    image.Save(outputPath, emfOptions);
                 }
             }
         }
@@ -58,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a multi‑page SVG diagram into separate Windows Metafile (EMF) files for use in Office documents or CAD applications, they can use this C# Aspose.Imaging code.
- * 2. When an automated publishing pipeline must extract each page of a multi‑page vector illustration and save them as individual EMF assets for high‑quality printing, the example shows how to do it.
- * 3. When a web service generates multi‑page SVG reports and the client requires each page as a separate vector file for embedding in PowerPoint slides, this code provides the conversion logic.
- * 4. When a legacy system only supports EMF vector graphics and receives SVG assets with multiple pages, developers can employ this snippet to split and rasterize each page to EMF using Aspose.Imaging for .NET.
- * 5. When a batch processing tool needs to archive each page of a multi‑page SVG map as an independent EMF file for version control and downstream GIS processing, the provided C# example handles the extraction and saving.
+ * 1. When you need to convert a multi‑page SVG diagram into separate EMF files for use in Microsoft Office documents.
+ * 2. When you want to programmatically split a vector graphic into individual pages to edit or print each page separately.
+ * 3. When an application must generate high‑quality vector thumbnails for each page of an SVG for a web preview gallery.
+ * 4. When a reporting tool requires each SVG page as an EMF vector to preserve scalability in PDF or XPS exports.
+ * 5. When automating batch processing of SVG assets to create page‑by‑page EMF resources for a CAD workflow.
  */

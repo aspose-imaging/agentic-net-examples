@@ -1,58 +1,75 @@
+// HOW-TO: Batch Convert EPS to PDF with Confidential Watermark in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Shapes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputEps";
-            string outputDirectory = @"C:\OutputPdf";
+            string inputDir = "input_eps";
+            string outputDir = "output_pdf";
 
-            // Get all EPS files in the input directory
-            string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
-
-            foreach (string inputPath in epsFiles)
+            if (!Directory.Exists(inputDir))
             {
-                // Verify the input file exists
-                if (!File.Exists(inputPath))
+                Directory.CreateDirectory(inputDir);
+                Console.WriteLine($"Input directory created at: {inputDir}. Add EPS files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
+
+            var epsFiles = Directory.GetFiles(inputDir, "*.eps");
+            foreach (var epsPath in epsFiles)
+            {
+                if (!File.Exists(epsPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {epsPath}");
                     continue;
                 }
 
-                // Determine the output PDF path
-                string outputPath = Path.Combine(
-                    outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
+                string fileName = Path.GetFileNameWithoutExtension(epsPath);
+                string pdfPath = Path.Combine(outputDir, fileName + ".pdf");
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Ensure output directory exists before saving PDF
+                Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
 
-                // Load the EPS image
-                using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+                // Convert EPS to PDF
+                using (var epsImage = (EpsImage)Image.Load(epsPath))
                 {
-                    // Configure PDF options with compliance and a confidential watermark in metadata
-                    var pdfOptions = new PdfOptions
-                    {
-                        PdfCoreOptions = new PdfCoreOptions
-                        {
-                            PdfCompliance = PdfComplianceVersion.PdfA1b
-                        },
-                        PdfDocumentInfo = new PdfDocumentInfo
-                        {
-                            Title = "Confidential"
-                        }
-                    };
+                    var pdfOptions = new PdfOptions();
+                    epsImage.Save(pdfPath, pdfOptions);
+                }
 
-                    // Save the EPS as a PDF
-                    epsImage.Save(outputPath, pdfOptions);
+                // Load the generated PDF to add watermark
+                using (var pdfImage = Image.Load(pdfPath))
+                {
+                    var raster = (RasterImage)pdfImage;
+
+                    // Draw watermark text
+                    var graphics = new Graphics(raster);
+                    var font = new Font("Arial", 48);
+                    var brush = new SolidBrush(Color.Red);
+                    var position = new PointF(10, 10);
+                    graphics.DrawString("CONFIDENTIAL", font, brush, position);
+
+                    // Ensure output directory exists before saving final PDF
+                    Directory.CreateDirectory(Path.GetDirectoryName(pdfPath));
+                    var saveOptions = new PdfOptions();
+                    raster.Save(pdfPath, saveOptions);
                 }
             }
         }
@@ -65,9 +82,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design studio needs to batch‑convert a folder of Adobe Illustrator EPS artwork into PDF/A‑1b compliant PDFs while automatically adding a “Confidential” watermark in the document metadata.
- * 2. When a legal department must archive EPS‑based contract diagrams as secure PDFs, embedding a confidentiality flag to satisfy record‑keeping regulations.
- * 3. When an engineering firm wants to automate the transformation of EPS schematics into searchable PDF files for client distribution, with a built‑in “Confidential” title for each document.
- * 4. When a publishing house processes thousands of EPS illustrations for print, converting them to PDFs that meet PDF compliance standards and include a confidential watermark for internal review.
- * 5. When a corporate intranet tool programmatically reads EPS files from a directory, generates PDF versions using Aspose.Imaging, and adds a “Confidential” watermark to prevent unauthorized sharing.
+ * 1. When a company needs to archive multiple EPS design files as PDF documents while marking them as confidential.
+ * 2. When an automated publishing pipeline must transform vector EPS artwork into PDF format and embed a security watermark before distribution.
+ * 3. When a legal department wants to batch‑process client‑submitted EPS drawings, convert them to PDF, and label each file as confidential for internal review.
+ * 4. When a cloud service generates PDF reports from EPS charts and must add a "Confidential" overlay to comply with data‑privacy policies.
+ * 5. When a desktop utility is required to convert a folder of EPS logos into PDFs and apply a watermark to prevent unauthorized reuse.
  */

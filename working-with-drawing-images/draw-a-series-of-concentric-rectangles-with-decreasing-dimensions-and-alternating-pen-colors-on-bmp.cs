@@ -1,3 +1,4 @@
+// HOW-TO: Create Concentric Colored Rectangles in a BMP with Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,47 +7,46 @@ using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Output BMP file path (hard‑coded)
+            // Output file path (hardcoded)
             string outputPath = @"C:\temp\concentric_rectangles.bmp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Configure BMP options
-            BmpOptions bmpOptions = new BmpOptions
-            {
-                BitsPerPixel = 24,
-                Source = new FileCreateSource(outputPath, false)
-            };
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a 500×500 BMP image
+            // Create the image canvas
             using (Image image = Image.Create(bmpOptions, 500, 500))
             {
                 // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White); // White background
+                graphics.Clear(Color.White);
 
                 // Colors to alternate between
-                Color[] colors = { Color.Red, Color.Blue };
-                int penWidth = 5;
-                int rectCount = 5;          // Number of concentric rectangles
-                int offsetStep = 20;        // Gap between rectangles
+                Color[] colors = new Color[] { Color.Red, Color.Blue, Color.Green, Color.Orange, Color.Purple };
 
-                // Draw each rectangle
+                int rectCount = 10;          // Number of concentric rectangles
+                int marginStep = 20;         // Decrease size by this amount each step
+
                 for (int i = 0; i < rectCount; i++)
                 {
-                    int offset = i * offsetStep;
-                    int size = 500 - 2 * offset;
-                    Rectangle rect = new Rectangle(offset, offset, size, size);
-                    Pen pen = new Pen(colors[i % colors.Length], penWidth);
+                    int margin = i * marginStep;
+                    int size = 500 - 2 * margin;
+                    if (size <= 0) break;
+
+                    Rectangle rect = new Rectangle(margin, margin, size, size);
+                    Pen pen = new Pen(colors[i % colors.Length], 3);
                     graphics.DrawRectangle(pen, rect);
                 }
 
-                // Save the image (writes to the path supplied in FileCreateSource)
+                // Save the image (output path already bound via FileCreateSource)
                 image.Save();
             }
         }
@@ -59,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP thumbnail that visualizes nested boundaries, such as a UI layout preview, they can use this code to draw concentric rectangles with alternating colors.
- * 2. When creating test images for automated image‑processing pipelines that require known geometric patterns in a BMP file, this example provides a quick way to produce such patterns.
- * 3. When building a reporting tool that embeds simple schematic diagrams (e.g., floor‑plan sections) directly into BMP files, the code can be used to render layered rectangles with configurable pen width and colors.
- * 4. When preparing sample data for computer‑vision algorithms that detect edges or shapes, developers can generate a series of concentric rectangles in a BMP image to evaluate detection accuracy.
- * 5. When a developer wants to programmatically produce a printable BMP badge or label with decorative borders, the code demonstrates how to draw multiple rectangles with alternating pen colors using Aspose.Imaging for .NET.
+ * 1. When you need to generate a BMP placeholder image with a pattern of nested rectangles for UI testing or documentation.
+ * 2. When you want to programmatically create a decorative frame or badge by drawing multiple colored borders around a canvas in C#.
+ * 3. When an application must produce a series of concentric shapes for visualizing scaling or zoom levels in a bitmap file.
+ * 4. When you need to export a simple vector‑style illustration, such as a multi‑color grid, to a 24‑bit BMP for legacy systems.
+ * 5. When you are building a graphics benchmark that draws repetitive shapes with alternating pens to measure rendering performance in Aspose.Imaging.
  */

@@ -1,42 +1,48 @@
+// HOW-TO: Handle Unsupported Image Formats When Creating Graphics In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.svg";
-        string outputPath = "output.png";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = @"C:\temp\input.jpg";
+        string outputPath = @"C:\temp\output.png";
 
         try
         {
-            using (Image inputImage = Image.Load(inputPath))
+            if (!File.Exists(inputPath))
             {
-                Graphics graphics;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            using (Image image = Image.Load(inputPath))
+            {
+                Graphics graphics = null;
                 try
                 {
-                    graphics = new Graphics(inputImage);
+                    graphics = new Graphics(image);
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine($"Graphics creation failed: {ex.Message}");
+                    Console.Error.WriteLine($"Failed to create Graphics: {ex.Message}");
+                    // Save the original image without drawing
+                    image.Save(outputPath, new PngOptions());
                     return;
                 }
 
-                graphics.Clear(Color.White);
-                graphics.DrawRectangle(new Pen(Color.Blue, 3), new Rectangle(20, 20, 200, 150));
+                // Perform simple drawing operations
+                graphics.Clear(Color.Wheat);
+                graphics.DrawRectangle(new Pen(Color.Blue, 3), new Rectangle(10, 10, image.Width - 20, image.Height - 20));
 
-                inputImage.Save(outputPath, new PngOptions());
+                // Save the modified image
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -48,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service receives user‑uploaded SVG files and must convert them to PNG thumbnails while safely handling formats that Aspose.Imaging cannot render.
- * 2. When an automated report generator needs to overlay shapes on vector images (e.g., SVG logos) and must catch exceptions if the source image type is not supported by the Graphics class.
- * 3. When a desktop application processes batch image conversions from various formats and wants to log a clear error instead of crashing when an unsupported file like PDF is encountered.
- * 4. When a CI/CD pipeline validates image assets by drawing diagnostic rectangles on each file and must gracefully skip files that cannot be loaded into a Graphics object.
- * 5. When a cloud function creates PNG previews of uploaded design files and requires robust error handling for unsupported formats such as EPS or AI to prevent runtime failures.
+ * 1. When you need to load a JPEG, draw shapes, and safely fallback if the format cannot be used with Aspose.Imaging Graphics.
+ * 2. When converting images to PNG while ensuring the application does not crash on unsupported source formats.
+ * 3. When processing user‑uploaded photos and must validate that Graphics can be created before applying annotations.
+ * 4. When automating batch image manipulation and want to log errors for files that Aspose.Imaging cannot render.
+ * 5. When building a C# service that draws borders around images and must gracefully handle formats that do not support drawing operations.
  */

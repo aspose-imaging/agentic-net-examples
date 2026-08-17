@@ -1,6 +1,6 @@
+// HOW-TO: Create BMP with Concentric Red and Blue Ellipses in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
 
@@ -10,48 +10,34 @@ class Program
     {
         try
         {
-            // Define output path
             string outputPath = @"c:\temp\concentric_ellipses.bmp";
-
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set BMP options
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.BitsPerPixel = 24;
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            var source = new FileCreateSource(outputPath, false);
+            BmpOptions options = new BmpOptions { Source = source };
 
-            // Create image canvas (500x500)
-            using (Image image = Image.Create(bmpOptions, 500, 500))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Create(options, 500, 500))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(image);
-                graphics.Clear(Color.White);
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(image);
+                graphics.Clear(Aspose.Imaging.Color.White);
 
-                // Parameters for concentric ellipses
                 int centerX = 250;
                 int centerY = 250;
                 int maxRadius = 200;
-                int step = 40;
-                int ellipseCount = 5;
+                int step = 20;
+                bool toggle = true;
 
-                // Draw ellipses with alternating colors
-                for (int i = 0; i < ellipseCount; i++)
+                for (int radius = maxRadius; radius > 0; radius -= step)
                 {
-                    int radius = maxRadius - i * step;
-                    int x = centerX - radius;
-                    int y = centerY - radius;
+                    Aspose.Imaging.Color color = toggle ? Aspose.Imaging.Color.Red : Aspose.Imaging.Color.Blue;
+                    Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(color, 2);
+                    int left = centerX - radius;
+                    int top = centerY - radius;
                     int diameter = radius * 2;
-
-                    // Alternate between Red and Blue
-                    Color penColor = (i % 2 == 0) ? Color.Red : Color.Blue;
-                    Pen pen = new Pen(penColor, 3);
-
-                    // Draw the ellipse
-                    graphics.DrawEllipse(pen, x, y, diameter, diameter);
+                    graphics.DrawEllipse(pen, new Aspose.Imaging.Rectangle(left, top, diameter, diameter));
+                    toggle = !toggle;
                 }
 
-                // Save the image (output file is already bound via FileCreateSource)
                 image.Save();
             }
         }
@@ -64,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 24‑bit BMP file that visualizes data as concentric ellipses with alternating red and blue colors for a scientific report, this code provides a ready‑to‑use solution.
- * 2. When creating a simple placeholder image for UI testing that requires a 500 × 500 bitmap with layered ellipses, the snippet automates the drawing and saving process using Aspose.Imaging.
- * 3. When building a custom charting component that represents hierarchical levels with nested ellipses, this example demonstrates how to render each level with alternating colors via the Graphics API.
- * 4. When a game developer wants to programmatically generate texture assets such as target symbols stored as BMP images, the code shows how to draw the target’s rings with alternating colors in C#.
- * 5. When automating the production of printable badges that include a decorative concentric‑ellipse background, this code can be integrated into a C# workflow to create the BMP background on the fly.
+ * 1. When you need to generate a BMP file that visualizes nested circles for a scientific diagram or UI element using Aspose.Imaging in a C# application.
+ * 2. When an automated report requires a simple graphic of alternating colored rings to illustrate data ranges or thresholds.
+ * 3. When a game developer wants to create a background texture of concentric ellipses for a level‑design asset without using external design tools.
+ * 4. When a testing framework needs to produce placeholder images with predictable patterns for validating image‑processing pipelines.
+ * 5. When a desktop utility must programmatically draw and save custom badge icons that consist of layered ellipses in BMP format.
  */

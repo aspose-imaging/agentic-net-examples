@@ -1,3 +1,4 @@
+// HOW-TO: How To Convert JPEG To PNG With Lossless Compression In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -26,11 +27,11 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG export options for lossless compression
-                var pngOptions = new PngOptions
+                // Configure PNG export options (lossless compression)
+                PngOptions pngOptions = new PngOptions
                 {
-                    // Compression level 0 = no compression (still lossless)
-                    PngCompressionLevel = 0
+                    // Use the default compression level (lossless)
+                    PngCompressionLevel = PngOptions.DefaultCompressionLevel
                 };
 
                 // Save the image as PNG
@@ -46,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must archive scanned JPEG documents by converting them to lossless PNG using Aspose.Imaging’s PngOptions for reliable long‑term storage.
- * 2. When a web service receives user‑uploaded JPEG images and needs to preserve every pixel by saving them as PNG with zero compression via Aspose.Imaging before adding them to a digital asset library.
- * 3. When building a forensic evidence system that requires immutable image files, developers can use this code to transform JPEG evidence into lossless PNG format with Aspose.Imaging for courtroom admissibility.
- * 4. When generating high‑quality thumbnails in a .NET application, the code lets developers convert the source JPEG to a PNG with no compression, ensuring the thumbnail retains the original detail.
- * 5. When a company’s compliance policy mandates all archived graphics be stored as lossless PNG, developers can employ this snippet to batch‑convert existing JPEG files using Aspose.Imaging in C#.
+ * 1. When you need to archive original photographs by converting high‑resolution JPEGs to lossless PNG files using C# and Aspose.Imaging.
+ * 2. When a web application must store user‑uploaded JPEG images in a format that preserves every pixel for future editing.
+ * 3. When a digital asset management system requires consistent PNG assets for thumbnails while keeping the source image quality intact.
+ * 4. When you want to ensure regulatory compliance by saving medical imaging scans as lossless PNGs instead of lossy JPEGs.
+ * 5. When a batch processing script has to convert a folder of JPEG files to PNG with default lossless compression for long‑term storage.
  */

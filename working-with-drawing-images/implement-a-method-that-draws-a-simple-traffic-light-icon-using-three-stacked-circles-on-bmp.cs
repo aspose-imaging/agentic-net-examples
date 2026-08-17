@@ -1,3 +1,4 @@
+// HOW-TO: Create a Traffic Light BMP Image with Three Circles in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,58 +12,47 @@ class Program
     {
         try
         {
-            // Output file path
-            string outputPath = "output\\traffic_light.bmp";
+            // Output path for the traffic light BMP image
+            string outputPath = "output/traffic_light.bmp";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up BMP options with a file source
-            Source source = new FileCreateSource(outputPath, false);
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = source;
-            bmpOptions.BitsPerPixel = 24; // 24‑bpp for true color
+            // Create a file source bound to the output path
+            FileCreateSource source = new FileCreateSource(outputPath, false);
 
-            // Canvas dimensions
-            int width = 100;
-            int height = 300;
+            // Set BMP options with the source
+            BmpOptions options = new BmpOptions() { Source = source };
 
-            // Create a bound BMP canvas
-            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, width, height))
+            // Create a BMP canvas (width: 100, height: 300) for three stacked circles
+            using (Image image = Image.Create(options, 100, 300))
             {
-                // Graphics object for drawing
-                Graphics graphics = new Graphics(canvas);
+                // Initialize graphics for drawing
+                Graphics graphics = new Graphics(image);
 
-                // Fill background with black
-                graphics.Clear(Color.Black);
+                // Clear background to white
+                graphics.Clear(Color.White);
 
-                // Circle size and horizontal offset
-                int circleDiameter = 80;
-                int offsetX = (width - circleDiameter) / 2;
-
-                // Red circle (top)
+                // Draw red circle (top)
                 using (SolidBrush redBrush = new SolidBrush(Color.Red))
                 {
-                    int offsetYRed = 10;
-                    graphics.FillEllipse(redBrush, new Rectangle(offsetX, offsetYRed, circleDiameter, circleDiameter));
+                    graphics.FillEllipse(redBrush, new Rectangle(25, 10, 50, 50));
                 }
 
-                // Yellow circle (middle)
+                // Draw yellow circle (middle)
                 using (SolidBrush yellowBrush = new SolidBrush(Color.Yellow))
                 {
-                    int offsetYYellow = 10 + circleDiameter + 10;
-                    graphics.FillEllipse(yellowBrush, new Rectangle(offsetX, offsetYYellow, circleDiameter, circleDiameter));
+                    graphics.FillEllipse(yellowBrush, new Rectangle(25, 110, 50, 50));
                 }
 
-                // Green circle (bottom)
+                // Draw green circle (bottom)
                 using (SolidBrush greenBrush = new SolidBrush(Color.Green))
                 {
-                    int offsetYGreen = 10 + (circleDiameter + 10) * 2;
-                    graphics.FillEllipse(greenBrush, new Rectangle(offsetX, offsetYGreen, circleDiameter, circleDiameter));
+                    graphics.FillEllipse(greenBrush, new Rectangle(25, 210, 50, 50));
                 }
 
                 // Save the bound image
-                canvas.Save();
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -74,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a simple traffic‑light icon as a 24‑bpp BMP file for embedding in a Windows desktop UI, they can use this code to draw three stacked circles with solid brushes.
- * 2. When creating test assets for image‑processing pipelines that require known shapes and colors, this snippet quickly produces a BMP image with red, yellow, and green circles.
- * 3. When building a simulation that visualizes signal states and must export the result to a file‑system‑compatible bitmap, the code demonstrates how to use Aspose.Imaging’s RasterImage and Graphics objects to render the traffic light.
- * 4. When a developer wants to programmatically generate icons for a traffic‑control dashboard and needs to control canvas size, background clearing, and circle positioning using C# and Aspose.Imaging, this example provides the necessary steps.
- * 5. When producing sample BMP files for documentation or unit tests that validate color handling and ellipse drawing in Aspose.Imaging, the code offers a reproducible method to create the traffic‑light image.
+ * 1. When you need to generate a simple traffic‑light icon for a UI dashboard without using external graphics files.
+ * 2. When you want to programmatically create a BMP file that can be embedded in legacy Windows applications that only support BMP.
+ * 3. When you need to produce a quick visual representation of signal states (red, yellow, green) for testing or documentation purposes.
+ * 4. When you are building a simulation or game that requires dynamically drawn traffic‑light symbols at runtime.
+ * 5. When you must generate a small, low‑resolution image for printing on labels or reports where BMP format is required.
  */

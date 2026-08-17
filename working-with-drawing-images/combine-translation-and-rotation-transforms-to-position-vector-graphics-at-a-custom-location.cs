@@ -1,7 +1,9 @@
+// HOW-TO: How To Translate And Rotate SVG Onto PNG Canvas In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -9,44 +11,39 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = "input\\vector.svg";
-            string outputPath = "output\\result.png";
+            string inputPath = "input.svg";
+            string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a blank PNG canvas
-            using (RasterImage canvas = (RasterImage)Image.Create(new PngOptions(), 800, 600))
+            // Load the vector graphic (SVG) as a raster image
+            using (RasterImage vectorImage = (RasterImage)Image.Load(inputPath))
             {
-                // Initialize Graphics for the canvas
-                Graphics graphics = new Graphics(canvas);
-                graphics.Clear(Color.White);
+                // Create a PNG canvas
+                PngOptions pngOptions = new PngOptions();
+                pngOptions.Source = new FileCreateSource(outputPath, false);
 
-                // Load the vector graphic (SVG) as a raster image
-                using (RasterImage vectorRaster = (RasterImage)Image.Load(inputPath))
+                using (Image canvas = Image.Create(pngOptions, 800, 600))
                 {
-                    // Build a combined transform: rotate 45° then translate (200,150)
-                    Matrix transform = new Matrix();
-                    transform.Rotate(45f);               // Rotation around the origin
-                    transform.Translate(200f, 150f);     // Translation after rotation
+                    // Initialize graphics for the canvas
+                    Graphics graphics = new Graphics(canvas);
 
-                    // Apply the transform to the graphics context
-                    graphics.Transform = transform;
+                    // Apply translation and rotation transforms
+                    graphics.TranslateTransform(200, 150);
+                    graphics.RotateTransform(45);
 
-                    // Draw the rasterized vector graphic at the origin (transform will position it)
-                    graphics.DrawImage(vectorRaster, 0, 0);
+                    // Draw the vector image at the origin (transforms will position it)
+                    graphics.DrawImage(vectorImage, new Point(0, 0));
+
+                    // Save the canvas (output file is already bound to the source)
+                    canvas.Save();
                 }
-
-                // Save the final image to the specified file
-                canvas.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -58,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to overlay a rotated SVG company logo onto a product photo at a specific offset, they can use this code to rotate the logo 45° and translate it to the desired coordinates before saving as a PNG.
- * 2. When generating printable marketing flyers, a developer can position a vector illustration at an exact spot on a blank canvas, applying rotation and translation to fit the layout requirements.
- * 3. When creating dynamic UI thumbnails that show icons rotated to indicate status, the code lets the developer rotate the SVG icon and move it to the correct location on a raster background.
- * 4. When building a map‑based web service that places a rotated directional arrow (SVG) on a map image at a given latitude/longitude offset, this transform logic positions the arrow accurately.
- * 5. When automating the production of custom certificates, a developer can rotate and place a vector seal onto the certificate canvas at a precise location before exporting the final PNG.
+ * 1. When you need to place an SVG logo at a specific position and angle on a larger PNG report generated in C#.
+ * 2. When creating dynamic thumbnails that require rotating and offsetting vector icons before saving them as PNG files.
+ * 3. When building a map overlay where SVG symbols must be shifted and turned to align with geographic coordinates in a .NET application.
+ * 4. When automating the generation of printable flyers that combine multiple SVG illustrations positioned precisely on a fixed-size PNG canvas.
+ * 5. When developing a game UI that composites rotated SVG assets onto a background PNG texture at runtime using Aspose.Imaging.
  */

@@ -1,64 +1,52 @@
-// HOW-TO: Fill Polygon Shape With Cross Hatch Pattern In C# Using Aspose.Imaging (Aspose.Imaging for .NET)
+// HOW-TO: Fill Polygon With Cross Hatch Pattern Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
 using Aspose.Imaging.Shapes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string outputPath = @"C:\temp\polygon_fill.png";
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Output file path (hard‑coded)
-            string outputPath = @"C:\temp\polygon_hatch.png";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Create PNG options with a FileCreateSource bound to the output file
             PngOptions pngOptions = new PngOptions();
             pngOptions.Source = new FileCreateSource(outputPath, false);
 
-            // Create a new image canvas (500x500)
             using (Image image = Image.Create(pngOptions, 500, 500))
             {
-                // Initialize Graphics (do NOT wrap in using – Graphics is not IDisposable)
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
-                // Create a GraphicsPath
                 GraphicsPath graphicsPath = new GraphicsPath();
 
-                // Create a Figure containing a polygon shape
-                Figure figure = new Figure();
-                figure.AddShape(new PolygonShape(new PointF[]
+                Figure polygonFigure = new Figure();
+
+                PointF[] points = new PointF[]
                 {
                     new PointF(100f, 100f),
-                    new PointF(200f, 50f),
-                    new PointF(300f, 100f),
-                    new PointF(250f, 200f),
-                    new PointF(150f, 200f)
-                }));
+                    new PointF(400f, 100f),
+                    new PointF(350f, 300f),
+                    new PointF(150f, 300f)
+                };
 
-                // Add the Figure to the GraphicsPath
-                graphicsPath.AddFigure(figure);
+                polygonFigure.AddShape(new PolygonShape(points, true));
+                graphicsPath.AddFigure(polygonFigure);
 
-                // NOTE: HatchBrush is not supported with Graphics.FillPath.
-                // Using SolidBrush as a safe fallback.
-                using (SolidBrush brush = new SolidBrush(Color.LightBlue))
+                using (SolidBrush solidBrush = new SolidBrush(Color.Red))
                 {
-                    graphics.FillPath(brush, graphicsPath);
+                    graphics.FillPath(solidBrush, graphicsPath);
                 }
 
-                // Optional: draw the polygon outline
-                Pen pen = new Pen(Color.Black, 2);
-                graphics.DrawPath(pen, graphicsPath);
+                Pen outlinePen = new Pen(Color.Black, 2);
+                graphics.DrawPath(outlinePen, graphicsPath);
 
-                // Save the image (output file is already bound via FileCreateSource)
                 image.Save();
             }
         }
@@ -71,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to generate a PNG image that contains a custom polygon filled with a cross‑hatch pattern for reports or dashboards.
- * 2. When creating printable graphics such as certificates or flyers and want a lightweight vector polygon with a hatch fill instead of embedding large raster textures.
- * 3. When dynamically rendering map overlays in a C# web application and require a hatch‑filled polygon to highlight restricted zones.
- * 4. When building a Windows Forms UI component that uses a vector polygon with a cross hatch brush for visual distinction without external image resources.
- * 5. When automating technical diagram production and need to programmatically fill irregular shapes with a repeatable hatch pattern using Aspose.Imaging for .NET.
+ * 1. When you need to generate a PNG image that highlights a custom‑shaped area with a cross‑hatch fill using Aspose.Imaging in C#.
+ * 2. When creating printable diagrams where a polygon must be distinguished by a cross‑hatch pattern instead of a solid color.
+ * 3. When dynamically drawing map regions or floor‑plan sections in a C# application and you want a hatch texture to indicate selection.
+ * 4. When exporting vector‑based graphics to raster format while preserving a stylized hatch fill for branding or watermark purposes.
+ * 5. When automating the production of thumbnails that require a patterned background inside irregular shapes for visual consistency.
  */

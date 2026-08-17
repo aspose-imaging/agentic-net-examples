@@ -1,8 +1,8 @@
+// HOW-TO: Create 500x300 BMP Image With Blue Diagonal Line In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -12,16 +12,25 @@ class Program
         try
         {
             string outputPath = "output.bmp";
+
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
+            // Create a file source for the BMP image
             Source source = new FileCreateSource(outputPath, false);
-            BmpOptions bmpOptions = new BmpOptions() { Source = source };
+            BmpOptions options = new BmpOptions() { Source = source };
 
-            using (RasterImage canvas = (RasterImage)Image.Create(bmpOptions, 500, 300))
+            // Create a 500x300 BMP canvas
+            using (RasterImage canvas = (RasterImage)Image.Create(options, 500, 300))
             {
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(canvas);
+
+                // Draw a blue line from (50,50) to (450,250)
                 Pen pen = new Pen(Color.Blue, 1);
                 graphics.DrawLine(pen, 50, 50, 450, 250);
+
+                // Save the image
                 canvas.Save();
             }
         }
@@ -34,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a simple BMP diagram for a legacy Windows application that only accepts BMP files, they can use Aspose.Imaging for .NET to create a 500 × 300 canvas and draw a blue line as a visual guide.
- * 2. When building automated image‑processing unit tests, a developer can programmatically produce a BMP image with a known blue line from (50,50) to (450,250) to validate line‑detection algorithms.
- * 3. When exporting chart data to a printer that requires non‑compressed BMP format, a developer can use the C# code to create a 500 × 300 bitmap and draw a blue trend line for the report.
- * 4. When designing custom UI assets for embedded devices that only support BMP images, a developer can employ Aspose.Imaging to draw a blue line on a 500 × 300 canvas for icons or separators.
- * 5. When automating the creation of placeholder graphics for documentation or mock‑ups, the code can quickly generate a BMP file with a blue line to illustrate layout concepts without using external design tools.
+ * 1. When you need to generate a simple BMP placeholder image with a custom line for UI mockups.
+ * 2. When you want to programmatically draw a guide or annotation on a bitmap for engineering diagrams.
+ * 3. When creating test images for image‑processing algorithms that require a known line pattern.
+ * 4. When exporting a line drawing from a C# application to a BMP file for legacy systems that only support BMP.
+ * 5. When automating the production of graphics for reports where a blue line indicates a trend or direction.
  */

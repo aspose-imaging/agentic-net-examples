@@ -1,3 +1,4 @@
+// HOW-TO: Convert JPEG to High‑Resolution 24‑Bit PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,34 +11,37 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = @"C:\Images\input.jpg";
             string outputPath = @"C:\Images\output.png";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG options for 24‑bit truecolor (lossless)
+                // Configure PNG options for 24‑bit (Truecolor) output
                 PngOptions pngOptions = new PngOptions
                 {
                     // Truecolor = 24‑bit (8 bits per channel, no alpha)
                     ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.Truecolor,
                     BitDepth = 8,
-                    // Optional: set a high resolution (e.g., 300 DPI) for high‑resolution output
-                    ResolutionSettings = new ResolutionSetting(300, 300)
+                    // High resolution (e.g., 300 DPI) for high‑resolution result
+                    ResolutionSettings = new ResolutionSetting(300.0, 300.0),
+                    // Optional: best compression and progressive loading
+                    CompressionLevel = 9,
+                    Progressive = true
                 };
 
-                // Save the image as PNG using the specified options
+                // Save the image as PNG with the specified options
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -50,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must convert user‑uploaded JPEG photos to lossless 24‑bit PNG files for archival storage while preserving 300 DPI resolution.
- * 2. When an e‑commerce platform needs to generate high‑resolution product images in PNG format to ensure crisp display on retina screens without introducing compression artifacts.
- * 3. When a medical imaging application requires exporting scanned documents as true‑color PNGs to meet regulatory standards for lossless image preservation.
- * 4. When a desktop publishing tool automates the batch conversion of source JPEG assets into 24‑bit PNGs for print‑ready PDFs that demand exact color fidelity.
- * 5. When a GIS system prepares map tiles by loading JPEG source maps and saving them as high‑resolution PNGs with 8‑bit per channel color depth for seamless web rendering.
+ * 1. When you need to archive photographic assets as lossless PNG files while preserving the original 300 DPI resolution for printing.
+ * 2. When a web application must generate high‑quality PNG thumbnails from user‑uploaded JPEGs without introducing color banding.
+ * 3. When a desktop tool converts scanned JPEG documents into true‑color PNGs for archival compliance with industry standards.
+ * 4. When an automated pipeline prepares images for GIS or CAD systems that require 24‑bit PNG with exact resolution settings.
+ * 5. When you want to reduce JPEG file size by re‑encoding to PNG with maximum compression while keeping full color fidelity for digital catalogs.
  */

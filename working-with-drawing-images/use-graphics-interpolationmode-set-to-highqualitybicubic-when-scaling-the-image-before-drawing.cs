@@ -1,3 +1,4 @@
+// HOW-TO: Resize JPEG to PNG with High Quality Bicubic Scaling in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,39 +10,31 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.jpg";
             string outputPath = "output.png";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load source image
             using (RasterImage sourceImage = (RasterImage)Image.Load(inputPath))
             {
-                // Define new canvas size (e.g., double the original dimensions)
-                int canvasWidth = sourceImage.Width * 2;
-                int canvasHeight = sourceImage.Height * 2;
+                int newWidth = sourceImage.Width * 2;
+                int newHeight = sourceImage.Height * 2;
 
-                // Create a PNG canvas
                 PngOptions pngOptions = new PngOptions();
-                using (Image canvas = Image.Create(pngOptions, canvasWidth, canvasHeight))
+
+                using (Image canvas = Image.Create(pngOptions, newWidth, newHeight))
                 {
-                    // Initialize graphics for the canvas
                     Graphics graphics = new Graphics(canvas);
                     graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-                    // Draw the source image scaled to the canvas size
-                    graphics.DrawImage(sourceImage, new Rectangle(0, 0, canvasWidth, canvasHeight));
+                    graphics.DrawImage(sourceImage, new Rectangle(0, 0, newWidth, newHeight));
 
-                    // Save the resulting image
                     canvas.Save(outputPath, pngOptions);
                 }
             }
@@ -55,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate high‑resolution thumbnails from user‑uploaded JPEG photos and save them as lossless PNG files for display on retina screens.
- * 2. When a desktop publishing tool must enlarge scanned documents while preserving smooth edges by using HighQualityBicubic interpolation before embedding them in a PDF.
- * 3. When an e‑commerce platform wants to create double‑size product images from original photos to improve zoom‑in quality without introducing pixelation.
- * 4. When a batch‑processing script converts legacy JPEG assets to PNG format and scales them to a larger canvas for use in print‑ready marketing materials.
- * 5. When a mobile app prepares background images by upscaling them to fit larger device resolutions while maintaining color fidelity and anti‑aliasing.
+ * 1. When you need to double the dimensions of a JPEG photo while preserving detail and save the result as a PNG for web use.
+ * 2. When you want to generate high‑resolution thumbnails from user‑uploaded JPEGs and store them in lossless PNG format.
+ * 3. When you are preparing product images for print by upscaling JPEGs with bicubic interpolation to avoid pixelation before converting to PNG.
+ * 4. When you need to convert legacy JPEG assets to PNG with smoother scaling for inclusion in a mobile app’s UI.
+ * 5. When you are building an image processing pipeline that requires consistent high‑quality resizing of JPEGs before applying further graphics operations.
  */

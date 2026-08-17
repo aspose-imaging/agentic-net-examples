@@ -1,9 +1,8 @@
+// HOW-TO: Create BMP Image With Dark Gray Background And Yellow Diagonal Line In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
@@ -11,33 +10,23 @@ class Program
     {
         try
         {
-            // Output file path (hard‑coded)
-            string outputPath = "output/output.bmp";
+            string outputPath = "output.bmp";
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            var source = new FileCreateSource(outputPath, false);
+            BmpOptions options = new BmpOptions() { Source = source };
 
-            // Set up BMP options with a bound file source
-            BmpOptions bmpOptions = new BmpOptions();
-            bmpOptions.Source = new FileCreateSource(outputPath, false);
+            int width = 500;
+            int height = 500;
 
-            int width = 200;
-            int height = 200;
-
-            // Create the BMP canvas (bound to the output file)
-            using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, width, height))
+            using (Aspose.Imaging.RasterImage canvas = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Create(options, width, height))
             {
-                // Obtain a graphics object for drawing
-                Graphics graphics = new Graphics(canvas);
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(canvas);
+                graphics.Clear(Aspose.Imaging.Color.DarkGray);
 
-                // Clear the canvas to dark gray
-                graphics.Clear(Color.DarkGray);
+                Aspose.Imaging.Pen pen = new Aspose.Imaging.Pen(Aspose.Imaging.Color.Yellow, 5);
+                graphics.DrawLine(pen, new Aspose.Imaging.Point(0, 0), new Aspose.Imaging.Point(width - 1, height - 1));
 
-                // Draw a bright yellow diagonal line
-                Pen pen = new Pen(Color.Yellow, 2);
-                graphics.DrawLine(pen, new Point(0, 0), new Point(width - 1, height - 1));
-
-                // Save the bound image
                 canvas.Save();
             }
         }
@@ -50,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. Developers generate a simple BMP placeholder image with a dark gray background and a bright yellow diagonal line for UI mockups.
- * 2. Engineers create a diagnostic test image to verify BMP file creation, color clearing, and line drawing operations in a C# imaging pipeline.
- * 3. Designers produce a low‑resolution watermark template in BMP format where the diagonal yellow line serves as a visual guide for later overlay.
- * 4. Developers automate the generation of thumbnail icons for a file‑explorer application that require a consistent dark gray background and a highlighted diagonal marker.
- * 5. Game developers prepare a BMP asset for a loading screen where the bright yellow diagonal line indicates progress direction during development testing.
+ * 1. When generating a simple placeholder graphic for a Windows desktop application, you can use this code to create a BMP with a dark gray canvas and a bright yellow diagonal line.
+ * 2. When preparing test images for image‑processing algorithms that require a known pattern, the snippet quickly produces a BMP with a contrasting line for edge‑detection validation.
+ * 3. When automating the creation of custom icons or badges for a reporting tool, you can programmatically draw a colored diagonal line on a BMP background using Aspose.Imaging.
+ * 4. When building a batch process that adds a visual watermark to a series of BMP files, the example shows how to clear the image and draw a colored line as a simple watermark.
+ * 5. When teaching beginners how to work with the Aspose.Imaging Graphics API in C#, this code demonstrates basic canvas initialization, background clearing, and line drawing on a BMP image.
  */

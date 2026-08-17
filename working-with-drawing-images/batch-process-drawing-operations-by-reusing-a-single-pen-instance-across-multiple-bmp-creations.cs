@@ -1,70 +1,61 @@
+// HOW-TO: Create Multiple BMP Images with Shared Pen in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Define output file paths (hardcoded)
-            string outputPath1 = @"C:\Temp\output1.bmp";
-            string outputPath2 = @"C:\Temp\output2.bmp";
-            string outputPath3 = @"C:\Temp\output3.bmp";
+            // Define output file paths (hard‑coded literals as required)
+            string[] outputPaths = {
+                @"C:\temp\output1.bmp",
+                @"C:\temp\output2.bmp",
+                @"C:\temp\output3.bmp"
+            };
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath1));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath2));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath3));
+            // Reuse a single Pen instance for all drawing operations
+            var sharedPen = new Pen(Color.Blue, 3f);
 
-            // Create a single reusable Pen instance
-            Pen pen = new Pen(Color.Blue, 5);
-
-            // ---------- First BMP ----------
-            BmpOptions bmpOptions1 = new BmpOptions();
-            bmpOptions1.BitsPerPixel = 24;
-            bmpOptions1.Source = new FileCreateSource(outputPath1, false);
-            using (Image image1 = Image.Create(bmpOptions1, 400, 300))
+            foreach (string outputPath in outputPaths)
             {
-                Graphics graphics = new Graphics(image1);
-                graphics.Clear(Color.White);
-                // Draw a rectangle using the shared Pen
-                graphics.DrawRectangle(pen, new Rectangle(50, 50, 300, 200));
-                // Save the bound file
-                image1.Save();
-            }
+                // Ensure the output directory exists (unconditional call)
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // ---------- Second BMP ----------
-            BmpOptions bmpOptions2 = new BmpOptions();
-            bmpOptions2.BitsPerPixel = 24;
-            bmpOptions2.Source = new FileCreateSource(outputPath2, false);
-            using (Image image2 = Image.Create(bmpOptions2, 400, 300))
-            {
-                Graphics graphics = new Graphics(image2);
-                graphics.Clear(Color.White);
-                // Draw an ellipse using the same Pen
-                graphics.DrawEllipse(pen, new Rectangle(100, 75, 200, 150));
-                image2.Save();
-            }
+                // Set BMP creation options
+                var bmpOptions = new BmpOptions
+                {
+                    BitsPerPixel = 24
+                };
 
-            // ---------- Third BMP ----------
-            BmpOptions bmpOptions3 = new BmpOptions();
-            bmpOptions3.BitsPerPixel = 24;
-            bmpOptions3.Source = new FileCreateSource(outputPath3, false);
-            using (Image image3 = Image.Create(bmpOptions3, 400, 300))
-            {
-                Graphics graphics = new Graphics(image3);
-                graphics.Clear(Color.White);
-                // Draw a diagonal line using the shared Pen
-                graphics.DrawLine(pen, new Point(0, 0), new Point(399, 299));
-                image3.Save();
+                // Create a new BMP image (500x500 pixels)
+                using (Image image = Image.Create(bmpOptions, 500, 500))
+                {
+                    // Initialize graphics object for drawing
+                    var graphics = new Graphics(image);
+
+                    // Clear background to white
+                    graphics.Clear(Color.White);
+
+                    // Draw a rectangle using the shared Pen
+                    graphics.DrawRectangle(sharedPen, 50, 50, 400, 400);
+
+                    // Draw an ellipse using the same Pen
+                    graphics.DrawEllipse(sharedPen, new Rectangle(100, 100, 300, 200));
+
+                    // Save the image to the specified output path
+                    image.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -72,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate multiple BMP reports with consistent line styling, such as drawing rectangles and ellipses on separate bitmap files for a dashboard.
- * 2. When creating a set of thumbnail images for a photo gallery where each thumbnail requires the same border thickness and color, reusing a single Pen improves performance.
- * 3. When automating the production of printable forms (e.g., invoices or certificates) that contain repeated graphic elements like boxes and circles across several BMP pages.
- * 4. When building a batch image processing tool that adds watermarks or decorative shapes to a series of BMP files while maintaining a uniform pen width and color.
- * 5. When developing a game asset pipeline that programmatically draws collision boxes and hit‑area circles onto multiple BMP sprites using a shared Pen instance to ensure visual consistency.
+ * 1. When you need to generate a series of BMP files that contain the same styled shapes, such as rectangles and ellipses, without recreating the Pen for each image.
+ * 2. When automating the production of placeholder graphics for UI mockups, reusing a single Pen improves performance while drawing consistent outlines across multiple images.
+ * 3. When building a batch job that creates printable BMP assets for a catalog, sharing the Pen instance reduces memory overhead during the loop.
+ * 4. When generating test images for computer‑vision algorithms, you can quickly produce several BMP samples with identical drawing parameters using Aspose.Imaging.
+ * 5. When exporting diagram elements to BMP format in a server‑side C# service, reusing the Pen ensures consistent line thickness and color across all exported files.
  */

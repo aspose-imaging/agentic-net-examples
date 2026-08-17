@@ -1,7 +1,9 @@
+// HOW-TO: Batch Convert Vector Images to PDF with Embedded Fonts in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -9,23 +11,24 @@ class Program
     {
         try
         {
-            string inputDir = Path.Combine(Directory.GetCurrentDirectory(), "Input");
-            string outputDir = Path.Combine(Directory.GetCurrentDirectory(), "Output");
+            string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
+            string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
 
-            if (!Directory.Exists(inputDir))
+            if (!Directory.Exists(inputDirectory))
             {
-                Directory.CreateDirectory(inputDir);
-                Console.WriteLine($"Input directory created at: {inputDir}. Add files and rerun.");
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
                 return;
             }
 
-            if (!Directory.Exists(outputDir))
+            if (!Directory.Exists(outputDirectory))
             {
-                Directory.CreateDirectory(outputDir);
+                Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDir, "*.*", SearchOption.TopDirectoryOnly);
-            foreach (var inputPath in files)
+            string[] files = Directory.GetFiles(inputDirectory, "*.*");
+
+            foreach (string inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -33,14 +36,28 @@ class Program
                     continue;
                 }
 
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + ".pdf");
-
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".pdf");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    image.Save(outputPath, new PdfOptions());
+                    pdfOptions.PdfCoreOptions = new PdfCoreOptions
+                    {
+                        PdfCompliance = PdfComplianceVersion.PdfA1b
+                    };
+
+                    if (image is VectorImage)
+                    {
+                        pdfOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                        {
+                            BackgroundColor = Color.White,
+                            TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                            SmoothingMode = SmoothingMode.None
+                        };
+                    }
+
+                    image.Save(outputPath, pdfOptions);
                 }
             }
         }
@@ -53,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design studio needs to automatically convert a folder of SVG or EPS illustrations into PDF files that preserve the original typography by embedding fonts and comply with PDF 1.6 for client delivery.
- * 2. When an e‑learning platform must generate printable PDF handouts from a batch of vector diagrams stored in AI or WMF format, ensuring the PDFs are version‑compatible with older viewers.
- * 3. When a legal document automation system has to transform vector‑based court exhibits into searchable PDFs with embedded fonts to meet filing standards and maintain visual fidelity.
- * 4. When a marketing department wants to mass‑export brand assets such as icons and logos from various vector formats to PDF for inclusion in brochures, while guaranteeing the PDFs use PDF 1.6 and contain all required fonts.
- * 5. When a cloud‑based image processing service offers an API that receives a zip of vector files and returns PDFs with embedded fonts, using C# and Aspose.Imaging to process the batch efficiently.
+ * 1. When you need to automatically convert a folder of SVG or EPS files into PDF/A‑1b documents with fonts embedded for archival compliance using C#.
+ * 2. When a reporting system must generate printable PDFs from vector charts created on the fly, ensuring consistent rendering across platforms.
+ * 3. When a document management workflow requires batch processing of vector artwork to create PDF files that meet PDF 1.6 standards for downstream processing.
+ * 4. When you want to integrate Aspose.Imaging into a .NET service that transforms designer‑provided vector assets into searchable PDFs with a white background and single‑bit text rendering.
+ * 5. When a SaaS application needs to prepare client‑uploaded vector logos for inclusion in contracts, converting them to PDF with embedded fonts to prevent font substitution issues.
  */

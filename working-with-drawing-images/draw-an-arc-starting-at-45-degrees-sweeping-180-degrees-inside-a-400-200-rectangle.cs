@@ -1,3 +1,4 @@
+// HOW-TO: Draw a 180 Degree Arc in a 400x200 Rectangle with C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,30 +11,32 @@ class Program
     {
         try
         {
-            string outputPath = @"C:\temp\arc_output.png";
+            // Output file path (hardcoded)
+            string outputPath = @"C:\temp\arc.png";
 
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Set up PNG options with a file source bound to the output path
-            PngOptions pngOptions = new PngOptions();
-            pngOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a canvas larger than the rectangle to accommodate the drawing
-            using (Image image = Image.Create(pngOptions, 500, 300))
+            // Create a PNG image with a canvas size larger than the rectangle
+            using (FileStream stream = new FileStream(outputPath, FileMode.Create))
             {
-                // Initialize graphics for the image
-                Graphics graphics = new Graphics(image);
+                var pngOptions = new PngOptions();
+                pngOptions.Source = new StreamSource(stream);
 
-                // Optional: clear background
-                graphics.Clear(Color.White);
+                using (Image image = Image.Create(pngOptions, 500, 300))
+                {
+                    // Initialize graphics for drawing
+                    var graphics = new Graphics(image);
+                    graphics.Clear(Color.White);
 
-                // Draw the arc inside a 400×200 rectangle starting at 45° sweeping 180°
-                Pen pen = new Pen(Color.Black, 2);
-                graphics.DrawArc(pen, new Rectangle(0, 0, 400, 200), 45, 180);
+                    // Define the rectangle and draw the arc
+                    var pen = new Pen(Color.Black, 2);
+                    var rect = new Rectangle(50, 50, 400, 200); // x, y, width, height
+                    graphics.DrawArc(pen, rect, 45, 180);
 
-                // Save the image (already bound to the output file)
-                image.Save();
+                    // Save the image
+                    image.Save();
+                }
             }
         }
         catch (Exception ex)
@@ -45,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating a PNG badge that includes a semi‑circular progress indicator, a developer can use this code to draw a 180° arc inside a 400 × 200 rectangle.
- * 2. When creating a custom chart image in a C# web service, the arc drawing routine can render a quarter‑circle segment for a gauge or dial visualization.
- * 3. When producing printable PDF assets that require a decorative curved border, the code can generate a PNG overlay with a 45°‑started arc to be merged later.
- * 4. When building a game UI component that shows a rotating compass needle, a developer can pre‑draw the static arc background using Aspose.Imaging’s Graphics.DrawArc method.
- * 5. When automating the generation of marketing banners that need a stylized arc motif, this snippet creates the required PNG file with precise angle and size control.
+ * 1. When you need to generate a PNG diagram that includes a semi‑circular shape positioned within a specific rectangular area, such as a gauge or progress indicator.
+ * 2. When creating dynamic report graphics where an arc represents a range of values, like a temperature range on a dashboard.
+ * 3. When producing custom UI assets programmatically, for example drawing a curved underline or decorative element in a 400 × 200 canvas.
+ * 4. When automating the generation of printable schematics that require precise arc angles, such as engineering diagrams or architectural plans.
+ * 5. When building a server‑side image service that returns PNG images with arcs based on user‑provided parameters for web or mobile applications.
  */

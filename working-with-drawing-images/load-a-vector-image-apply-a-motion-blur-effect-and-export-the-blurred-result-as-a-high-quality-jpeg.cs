@@ -1,7 +1,10 @@
+// HOW-TO: Apply Motion Blur to SVG and Save as High Quality JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -10,7 +13,6 @@ class Program
         try
         {
             string inputPath = "input.svg";
-            string tempPngPath = "temp.png";
             string outputPath = "output.jpg";
 
             if (!File.Exists(inputPath))
@@ -20,35 +22,29 @@ class Program
             }
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(tempPngPath));
 
             using (Image vectorImage = Image.Load(inputPath))
             {
-                var rasterOptions = new VectorRasterizationOptions
+                var rasterOptions = new SvgRasterizationOptions
                 {
                     PageWidth = vectorImage.Width,
                     PageHeight = vectorImage.Height,
-                    BackgroundColor = Aspose.Imaging.Color.White
+                    BackgroundColor = Color.White
                 };
 
-                var pngOptions = new PngOptions
+                using (Image rasterImage = Image.Create(
+                    new PngOptions { VectorRasterizationOptions = rasterOptions },
+                    vectorImage.Width,
+                    vectorImage.Height))
                 {
-                    VectorRasterizationOptions = rasterOptions
-                };
+                    RasterImage raster = (RasterImage)rasterImage;
 
-                vectorImage.Save(tempPngPath, pngOptions);
-            }
+                    raster.Filter(raster.Bounds,
+                        new Aspose.Imaging.ImageFilters.FilterOptions.MotionWienerFilterOptions(15, 1.0, 45.0));
 
-            using (Image rasterImageContainer = Image.Load(tempPngPath))
-            {
-                RasterImage rasterImage = (RasterImage)rasterImageContainer;
-
-                var jpegOptions = new JpegOptions
-                {
-                    Quality = 95
-                };
-
-                rasterImage.Save(outputPath, jpegOptions);
+                    var jpegOptions = new JpegOptions { Quality = 100 };
+                    raster.Save(outputPath, jpegOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -60,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG logo into a high‑quality JPEG for email newsletters or web pages that only support raster image formats.
- * 2. When an application must generate JPEG previews of user‑uploaded vector graphics while preserving the original dimensions and a white background.
- * 3. When a batch‑processing tool has to transform a collection of SVG icons into JPEG thumbnails with 95 % quality for a product catalog.
- * 4. When a reporting system requires embedding vector diagrams as JPEG images in PDF reports, ensuring consistent color and resolution across platforms.
- * 5. When a legacy system only accepts JPEG files, a developer can rasterize SVG assets to PNG first and then save them as high‑quality JPEGs for compatibility.
+ * 1. When you need to add a realistic motion‑blur effect to a vector logo (SVG) before delivering it as a high‑resolution JPEG for web or print.
+ * 2. When an e‑commerce platform wants to generate stylized product thumbnails by blurring SVG icons and exporting them as compressed, quality‑preserved JPEGs.
+ * 3. When a desktop application must convert user‑uploaded SVG diagrams into JPEG previews with a motion‑blur filter applied for visual emphasis.
+ * 4. When a marketing automation script creates dynamic banner images by rasterizing SVG graphics, applying motion blur, and saving them as 100‑quality JPEG files.
+ * 5. When a reporting tool requires fast processing of vector charts, adding motion blur for artistic effect, and outputting them as JPEGs compatible with legacy viewers.
  */

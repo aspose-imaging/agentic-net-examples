@@ -1,8 +1,9 @@
+// HOW-TO: Batch Convert SVG Icons to 32‑Bit PNGs in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -10,14 +11,16 @@ class Program
     {
         try
         {
-            string inputFolder = @"C:\InputSvgs";
-            string outputFolder = @"C:\OutputPngs";
+            string inputFolder = "C:\\icons\\svg";
+            string outputFolder = "C:\\icons\\png";
 
+            // Ensure output directory exists
             Directory.CreateDirectory(outputFolder);
 
-            string[] svgFiles = Directory.GetFiles(inputFolder, "*.svg");
+            // Get all SVG files in the input folder
+            string[] files = Directory.GetFiles(inputFolder, "*.svg");
 
-            foreach (string inputPath in svgFiles)
+            foreach (var inputPath in files)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -28,11 +31,51 @@ class Program
                 string fileName = Path.GetFileNameWithoutExtension(inputPath);
                 string outputPath = Path.Combine(outputFolder, fileName + ".png");
 
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                using (Image image = Image.Load(inputPath))
+                // Load the SVG image
+                using (Image svgImage = Image.Load(inputPath))
                 {
-                    image.Save(outputPath, new PngOptions());
+                    int width = svgImage.Width;
+                    int height = svgImage.Height;
+                    int offsetX = 5;
+                    int offsetY = 5;
+
+                    // Rasterize SVG to an in‑memory PNG
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        var rasterOptions = new SvgRasterizationOptions { PageSize = svgImage.Size };
+                        var pngOptions = new PngOptions
+                        {
+                            VectorRasterizationOptions = rasterOptions,
+                            BitDepth = 32
+                        };
+                        svgImage.Save(ms, pngOptions);
+                        ms.Position = 0;
+
+                        using (RasterImage rasterSvg = (RasterImage)Image.Load(ms))
+                        {
+                            // Create a canvas larger than the original to accommodate the shadow
+                            using (Image canvas = Image.Create(pngOptions, width + offsetX, height + offsetY))
+                            {
+                                Graphics graphics = new Graphics(canvas);
+                                graphics.Clear(Color.Transparent);
+
+                                // Draw a semi‑transparent black rectangle as a simple drop shadow
+                                using (SolidBrush shadowBrush = new SolidBrush(Color.FromArgb(128, 0, 0, 0)))
+                                {
+                                    graphics.FillRectangle(shadowBrush, offsetX, offsetY, width, height);
+                                }
+
+                                // Draw the rasterized SVG on top of the shadow
+                                graphics.DrawImage(rasterSvg, new Point(0, 0));
+
+                                // Save the final PNG
+                                canvas.Save(outputPath, pngOptions);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -45,9 +88,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a large collection of SVG icons stored in a folder into high‑quality 32‑bit PNG files for use in a web application, they can use this batch conversion code.
- * 2. When an automated build pipeline must generate raster PNG assets from source SVG graphics to ensure compatibility with legacy browsers, the script can process all files in one step.
- * 3. When a design team exports vector icons from a design tool and wants a quick C# utility to create PNG thumbnails for documentation or UI mockups, this code handles the folder‑to‑folder conversion.
- * 4. When a desktop application requires runtime conversion of user‑provided SVG files into PNG images for printing or PDF embedding, the loop can load each SVG and save it as a PNG on demand.
- * 5. When a CI/CD process needs to validate that every SVG asset in a repository can be successfully rasterized without errors, the try‑catch block logs missing or corrupt files while converting them to PNG.
+ * 1. When you need to automatically rasterize a large collection of SVG icons into high‑quality 32‑bit PNG files for a web or mobile UI.
+ * 2. When you want to generate PNG assets from SVG source files in a build pipeline without manually opening each file.
+ * 3. When you are preparing icon sets for a game engine that requires PNG images with full alpha channel support.
+ * 4. When you must ensure consistent image dimensions while converting SVG vectors to raster PNGs using Aspose.Imaging in C#.
+ * 5. When you need to script a folder‑to‑folder conversion that creates PNGs with 32‑bit color depth for print‑ready graphics.
  */

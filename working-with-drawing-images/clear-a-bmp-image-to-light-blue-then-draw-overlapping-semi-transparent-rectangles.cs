@@ -1,9 +1,10 @@
+// HOW-TO: Create Light Blue BMP With Overlapping Transparent Rectangles In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Sources;
 using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -11,41 +12,49 @@ class Program
     {
         try
         {
-            // Output file path
+            // Output BMP file path
             string outputPath = @"C:\temp\output.bmp";
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create a bound BMP image canvas
-            Source source = new FileCreateSource(outputPath, false);
-            BmpOptions bmpOptions = new BmpOptions() { Source = source };
-            using (Image canvas = Image.Create(bmpOptions, 400, 400))
+            // Set BMP options
+            BmpOptions bmpOptions = new BmpOptions();
+            bmpOptions.BitsPerPixel = 24;
+            bmpOptions.Source = new FileCreateSource(outputPath, false);
+
+            // Create a 500x500 BMP image
+            using (Image image = Image.Create(bmpOptions, 500, 500))
             {
-                // Initialize graphics for drawing
-                Graphics graphics = new Graphics(canvas);
+                // Initialize graphics for the image
+                Graphics graphics = new Graphics(image);
 
                 // Clear the canvas to light blue
-                graphics.Clear(Color.FromArgb(255, 173, 216, 230)); // LightBlue
+                graphics.Clear(Color.LightBlue);
 
                 // First semi‑transparent red rectangle
-                using (SolidBrush brush1 = new SolidBrush())
+                using (SolidBrush brush1 = new SolidBrush(Color.Red))
                 {
-                    brush1.Color = Color.FromArgb(255, 255, 0, 0); // Red
-                    brush1.Opacity = 128; // 50% opacity
-                    graphics.FillRectangle(brush1, new Rectangle(50, 50, 200, 200));
+                    brush1.Opacity = 0.5f; // 50% opacity
+                    graphics.FillRectangle(brush1, new Rectangle(50, 50, 200, 150));
                 }
 
-                // Second semi‑transparent blue rectangle overlapping the first
-                using (SolidBrush brush2 = new SolidBrush())
+                // Second semi‑transparent green rectangle overlapping the first
+                using (SolidBrush brush2 = new SolidBrush(Color.Green))
                 {
-                    brush2.Color = Color.FromArgb(255, 0, 0, 255); // Blue
-                    brush2.Opacity = 128; // 50% opacity
-                    graphics.FillRectangle(brush2, new Rectangle(150, 150, 200, 200));
+                    brush2.Opacity = 0.5f;
+                    graphics.FillRectangle(brush2, new Rectangle(150, 100, 200, 150));
                 }
 
-                // Save the bound image
-                canvas.Save();
+                // Third semi‑transparent blue rectangle overlapping the others
+                using (SolidBrush brush3 = new SolidBrush(Color.Blue))
+                {
+                    brush3.Opacity = 0.5f;
+                    graphics.FillRectangle(brush3, new Rectangle(250, 150, 200, 150));
+                }
+
+                // Save the image
+                image.Save();
             }
         }
         catch (Exception ex)
@@ -57,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP report thumbnail with a light‑blue background and overlay semi‑transparent colored shapes for visual emphasis, they can use this Aspose.Imaging C# code.
- * 2. When creating a custom placeholder image for a Windows desktop application that requires a 400×400 BMP file with overlapping translucent rectangles to indicate loading progress, this code provides a quick solution.
- * 3. When building an automated testing suite that validates rendering of alpha‑blended graphics in BMP files, developers can employ this example to produce known‑output images with controlled opacity.
- * 4. When a game developer wants to pre‑render UI elements such as buttons or panels as BMP assets with a light‑blue canvas and semi‑transparent red and blue overlays, the code demonstrates how to draw them programmatically.
- * 5. When a reporting tool must embed a simple diagram showing intersecting regions in a BMP chart, this snippet shows how to clear the canvas, set background color, and draw overlapping semi‑transparent rectangles using Aspose.Imaging for .NET.
+ * 1. When you need to generate a BMP placeholder image with a colored background and semi‑transparent overlays for UI mockups or documentation.
+ * 2. When creating custom map legends where overlapping colored shapes indicate different data layers and require opacity blending.
+ * 3. When producing test images for verifying image‑processing pipelines that must handle BMP files with simulated transparency.
+ * 4. When building a simple graphics editor that lets users add translucent shapes on a solid‑color canvas using Aspose.Imaging in C#.
+ * 5. When automating the creation of watermark‑style graphics that combine multiple colored rectangles over a uniform background for branding purposes.
  */

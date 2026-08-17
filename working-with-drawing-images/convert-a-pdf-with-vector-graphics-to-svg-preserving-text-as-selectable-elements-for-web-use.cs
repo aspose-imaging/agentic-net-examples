@@ -1,3 +1,4 @@
+// HOW-TO: Convert PDF with Vector Graphics to SVG Keeping Text Selectable in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -5,15 +6,15 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input\\sample.pdf";
-            string outputPath = "Output\\sample.svg";
+            string inputPath = @"C:\Input\sample.pdf";
+            string outputPath = @"C:\Output\sample.svg";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -26,23 +27,21 @@ class Program
             // Load the PDF document
             using (Image image = Image.Load(inputPath))
             {
-                // Configure SVG save options
-                using (SvgOptions saveOptions = new SvgOptions())
+                // Configure rasterization options (page size matches source)
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    // Preserve text as selectable (do not convert to shapes)
-                    saveOptions.TextAsShapes = false;
+                    PageSize = image.Size
+                };
 
-                    // Set vector rasterization options (optional, e.g., background color)
-                    var vectorOptions = new VectorRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageSize = image.Size
-                    };
-                    saveOptions.VectorRasterizationOptions = vectorOptions;
+                // Configure SVG save options: keep text as selectable (not shapes)
+                var svgOptions = new SvgOptions
+                {
+                    VectorRasterizationOptions = rasterOptions,
+                    TextAsShapes = false
+                };
 
-                    // Save as SVG
-                    image.Save(outputPath, saveOptions);
-                }
+                // Save as SVG
+                image.Save(outputPath, svgOptions);
             }
         }
         catch (Exception ex)
@@ -54,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed a high‑resolution PDF diagram into a responsive web page and wants the text to remain searchable and selectable, they can use this code to convert the PDF to SVG while preserving text elements.
- * 2. When an e‑learning platform must display printable vector illustrations from PDF lesson materials in browsers without losing accessibility, the conversion to SVG with selectable text enables screen readers to read the content.
- * 3. When a SaaS application generates dynamic reports in PDF and wants to provide an interactive preview that scales on any device, converting the PDF to SVG keeps the vector graphics crisp and the text editable for copy‑paste.
- * 4. When a marketing team requires SEO‑friendly graphics extracted from product brochures in PDF format, this code creates SVG files where the text remains indexable by search engines.
- * 5. When a developer is building a document‑to‑web conversion pipeline that must retain exact layout and allow users to copy text from technical schematics, the Aspose.Imaging PDF‑to‑SVG conversion with TextAsShapes set to false fulfills that need.
+ * 1. When you need to embed a PDF diagram on a website and want the SVG to retain searchable, selectable text for better accessibility.
+ * 2. When converting engineering drawings from PDF to SVG so that the vector shapes stay crisp while the annotations remain editable in the browser.
+ * 3. When creating responsive web graphics from PDF brochures and require the text elements to remain searchable for SEO purposes.
+ * 4. When automating a workflow that extracts vector‑based charts from PDF reports and saves them as SVG files that can be styled with CSS.
+ * 5. When building a .NET application that transforms PDF invoices into SVG format while preserving the text fields for client‑side data extraction.
  */

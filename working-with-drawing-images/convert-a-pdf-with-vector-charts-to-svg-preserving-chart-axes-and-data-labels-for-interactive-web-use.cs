@@ -1,3 +1,4 @@
+// HOW-TO: Convert PDF Vector Chart to Interactive SVG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,41 +9,40 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Data\chart.pdf";
+        string outputPath = @"C:\Data\chart.svg";
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Input\chart.pdf";
-            string outputPath = @"C:\Output\chart.svg";
-
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the PDF (vector image) using Aspose.Imaging
+            // Load the PDF document (vector image)
             using (Image image = Image.Load(inputPath))
             {
-                // Configure SVG export options
+                // Prepare SVG export options
                 var svgOptions = new SvgOptions
                 {
-                    // Keep text as text (axes labels, data labels) for interactivity
-                    TextAsShapes = false
+                    // Preserve text as selectable text (not shapes) for interactivity
+                    TextAsShapes = false,
+                    // No compression to keep the SVG readable
+                    Compress = false,
+                    // Set rasterization options to match source size
+                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    }
                 };
 
-                // Set rasterization options – page size matches the source image size
-                var rasterOptions = new SvgRasterizationOptions
-                {
-                    PageSize = image.Size,
-                    BackgroundColor = Color.White
-                };
-                svgOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Save the image as SVG
+                // Save as SVG
                 image.Save(outputPath, svgOptions);
             }
         }
@@ -55,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to embed a PDF‑generated financial chart into a responsive web dashboard and wants the axes and data labels to remain searchable and interactive, they can use this code to convert the PDF to SVG.
- * 2. When an e‑learning platform requires high‑resolution scientific graphs from PDF lecture notes to be displayed as scalable vector graphics on HTML5 pages, this snippet enables conversion while preserving chart text.
- * 3. When a reporting tool must export quarterly KPI charts from PDF reports to SVG for client‑side manipulation (e.g., tooltip overlays) without losing vector quality, the code provides the needed transformation.
- * 4. When a marketing website wants to showcase product performance diagrams originally created in PDF and needs them as lightweight, searchable SVG files for SEO and accessibility, this example performs the conversion.
- * 5. When a developer is building a data‑visualization library that consumes PDF chart assets and needs to render them as interactive SVG elements with intact axis labels in a C# .NET application, this code handles the conversion process.
+ * 1. When you need to display PDF‑generated charts on a web page with scalable SVG graphics that keep axis labels and data points selectable.
+ * 2. When you want to transform a PDF report containing vector graphs into an SVG file for responsive dashboards without losing text editability.
+ * 3. When a reporting tool exports charts as PDF and you must convert them to SVG for client‑side manipulation in JavaScript.
+ * 4. When you are building an automated pipeline that extracts vector charts from PDFs and stores them as clean, uncompressed SVG files for archival.
+ * 5. When you require a C# solution that loads a PDF, preserves chart text as real text, and saves it as SVG for accessibility compliance.
  */

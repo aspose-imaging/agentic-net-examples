@@ -1,11 +1,11 @@
-// HOW-TO: Convert EPS to JPEG with Maximum Quality Using Aspose.Imaging C# (Aspose.Imaging for .NET)
+// HOW-TO: Invert Colors of EPS and Save as High Quality JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -32,23 +32,37 @@ class Program
                     PageHeight = epsImage.Height
                 };
 
-                using (var pngStream = new MemoryStream())
+                var pngOptions = new PngOptions
                 {
-                    var pngOptions = new PngOptions
-                    {
-                        VectorRasterizationOptions = rasterOptions
-                    };
-                    epsImage.Save(pngStream, pngOptions);
-                    pngStream.Position = 0;
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-                    using (RasterImage raster = (RasterImage)Image.Load(pngStream))
+                using (RasterImage raster = (RasterImage)Image.Create(pngOptions, epsImage.Width, epsImage.Height))
+                {
+                    int[] pixels = raster.LoadArgb32Pixels(raster.Bounds);
+                    for (int i = 0; i < pixels.Length; i++)
                     {
-                        var jpegOptions = new JpegOptions
-                        {
-                            Quality = 100
-                        };
-                        raster.Save(outputPath, jpegOptions);
+                        int argb = pixels[i];
+                        int a = (argb >> 24) & 0xFF;
+                        int r = (argb >> 16) & 0xFF;
+                        int g = (argb >> 8) & 0xFF;
+                        int b = argb & 0xFF;
+
+                        r = 255 - r;
+                        g = 255 - g;
+                        b = 255 - b;
+
+                        pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
                     }
+
+                    raster.SaveArgb32Pixels(raster.Bounds, pixels);
+
+                    var jpegOptions = new JpegOptions
+                    {
+                        Quality = 100
+                    };
+
+                    raster.Save(outputPath, jpegOptions);
                 }
             }
         }
@@ -61,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to render a vector EPS logo as a high‑resolution JPEG for inclusion in a web page or email campaign.
- * 2. When an automated workflow must convert EPS artwork to JPEG thumbnails while preserving maximum image quality for a digital asset management system.
- * 3. When a C# application has to rasterize EPS files to JPEG for printing previews where the original EPS cannot be directly used.
- * 4. When a batch process has to transform a collection of EPS design files into JPEGs for archival or backup in a format supported by most image viewers.
- * 5. When a developer wants to programmatically generate JPEGs from EPS diagrams for use in reports or PowerPoint presentations without losing detail.
+ * 1. When you need to generate a negative‑style preview of a vector EPS logo for a web gallery and deliver it as a high‑quality JPEG.
+ * 2. When an e‑commerce platform must display product illustrations with inverted colors to match a dark theme, converting EPS assets to JPEG on the fly.
+ * 3. When a printing workflow requires a color‑inverted raster version of an EPS artwork for proofing, and the result must be saved with maximum JPEG quality.
+ * 4. When a mobile app downloads EPS icons, applies a color inversion filter for accessibility, and stores them as JPEGs for faster rendering.
+ * 5. When a batch‑processing script has to convert multiple EPS files to JPEG while applying a global color inversion to meet brand guidelines.
  */

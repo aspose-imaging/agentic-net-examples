@@ -1,3 +1,4 @@
+// HOW-TO: Create BMP with Nested Colored Rectangles Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,61 +9,51 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded output path
-        string outputPath = @"C:\temp\nested_rectangles.bmp";
-
-        // Ensure the output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Set up BMP options
+            // Output file path (hard‑coded)
+            string outputPath = @"C:\temp\nested_rectangles.bmp";
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // BMP options
             BmpOptions bmpOptions = new BmpOptions
             {
                 BitsPerPixel = 24,
                 Source = new FileCreateSource(outputPath, false)
             };
 
-            // Image dimensions
-            int width = 500;
-            int height = 500;
-
-            // Create the image
-            using (Image image = Image.Create(bmpOptions, width, height))
+            // Create a 500x500 image
+            using (Image image = Image.Create(bmpOptions, 500, 500))
             {
-                // Initialize graphics
+                // Graphics for drawing
                 Graphics graphics = new Graphics(image);
                 graphics.Clear(Color.White);
 
                 // Parameters for nested rectangles
-                int rectCount = 6;                     // number of rectangles
-                int marginStep = 30;                   // reduction per level
-                int startMargin = 0;                   // initial margin
-                Color[] colors = new Color[]
-                {
-                    Color.Red,
-                    Color.Blue,
-                    Color.Green,
-                    Color.Orange,
-                    Color.Purple,
-                    Color.Brown
-                };
+                int rectCount = 10;
+                int marginStep = 20;
+                int startX = 0, startY = 0, width = image.Width, height = image.Height;
 
-                // Draw each rectangle
+                // Alternate colors
+                Color[] colors = new Color[] { Color.Red, Color.Blue, Color.Green, Color.Orange, Color.Purple };
+
                 for (int i = 0; i < rectCount; i++)
                 {
-                    int margin = startMargin + i * marginStep;
-                    int rectWidth = width - 2 * margin;
-                    int rectHeight = height - 2 * margin;
-                    int x = margin;
-                    int y = margin;
+                    // Choose color cyclically
+                    Pen pen = new Pen(colors[i % colors.Length], 2);
+                    // Draw rectangle
+                    graphics.DrawRectangle(pen, new Rectangle(startX, startY, width, height));
 
-                    // Choose pen color, alternating through the array
-                    Pen pen = new Pen(colors[i % colors.Length], 3f);
-                    graphics.DrawRectangle(pen, new Rectangle(x, y, rectWidth, rectHeight));
+                    // Reduce size for next rectangle
+                    startX += marginStep;
+                    startY += marginStep;
+                    width -= 2 * marginStep;
+                    height -= 2 * marginStep;
                 }
 
-                // Save changes (the output path is already defined in the source)
+                // Save the image (file is already bound to outputPath)
                 image.Save();
             }
         }
@@ -75,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP file that visualizes hierarchical data as a series of nested rectangles with alternating colors for a quick UI preview.
- * 2. When creating test images for automated image‑processing pipelines that require known geometric shapes and color patterns in a 24‑bit BMP using C# and Aspose.Imaging.
- * 3. When producing printable artwork such as a simple mandala or decorative border where each concentric rectangle is drawn with a different pen color and saved as a BMP for downstream design tools.
- * 4. When building a diagnostic tool that renders performance metrics as nested colored boxes in a BMP to help developers spot layout issues in a Windows desktop application.
- * 5. When generating placeholder graphics for documentation or mock‑ups that need a scalable BMP showing multiple layers of rectangles with distinct colors without relying on external image editors.
+ * 1. When you need to generate a BMP placeholder image with concentric colored frames for UI mock‑ups or documentation.
+ * 2. When creating a simple test pattern to verify that BMP export and drawing APIs in Aspose.Imaging work correctly.
+ * 3. When producing a series of nested shapes for a printable report that requires a 24‑bit BMP with alternating colors.
+ * 4. When building a dynamic badge or logo that consists of layered rectangles and must be saved as a BMP file.
+ * 5. When automating the creation of visual guides or tutorials that illustrate margin calculations using C# graphics.
  */
