@@ -1,3 +1,4 @@
+// HOW-TO: Convert DetectedObjectList To AssumedObjectData For Graph Cut Segmentation In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -13,19 +14,19 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.jpg";
+        string outputPath = "output.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = "input.jpg";
-            string outputPath = "output.png";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
                 List<AssumedObjectData> assumedObjects = new List<AssumedObjectData>();
@@ -65,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a DetectedObjectList into AssumedObjectData and apply AutoMaskingGraphCutOptions to automatically remove the background of JPEG product photos and save them as transparent PNGs for e‑commerce catalogs.
- * 2. When a developer wants to feed a list of detected humans into AssumedObjectData to perform graph‑cut segmentation that isolates people in security camera footage while leaving other objects untouched.
- * 3. When a developer builds a medical imaging application that transforms a DetectedObjectList of patient silhouettes into AssumedObjectData to achieve precise graph‑cut separation from scan backgrounds.
- * 4. When a developer adds a feature to an image‑editing app that converts user‑selected objects into AssumedObjectData, runs graph‑cut masking, and replaces the original background with a custom color or transparency.
- * 5. When a developer automates a content‑management pipeline by converting detection results into AssumedObjectData for graph‑cut masking, producing PNG thumbnails with transparent backgrounds for social‑media sharing.
+ * 1. When you need to automatically separate foreground objects like people from a JPEG photo and export the result as a transparent PNG using Graph Cut segmentation.
+ * 2. When you want to provide custom object hints (human, other) to improve mask accuracy for image masking in a .NET application.
+ * 3. When you are building a photo‑editing tool that replaces the background of raster images with transparency while preserving edge quality.
+ * 4. When you require programmatic generation of assumed object data from detection results to feed Aspose.Imaging’s AutoMaskingGraphCutOptions.
+ * 5. When you need to process large images and calculate an appropriate feathering radius automatically for smooth mask edges.
  */

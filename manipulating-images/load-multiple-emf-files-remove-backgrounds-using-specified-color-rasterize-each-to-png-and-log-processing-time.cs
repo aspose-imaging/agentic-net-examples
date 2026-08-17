@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert EMF to PNG with Background Removal and Timing in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Diagnostics;
@@ -11,15 +12,16 @@ class Program
     {
         try
         {
-            // Hardcoded input EMF files
+            // Hardcoded input EMF files (modify as needed)
             string[] inputFiles = new[]
             {
                 @"C:\Images\sample1.emf",
-                @"C:\Images\sample2.emf"
+                @"C:\Images\sample2.emf",
+                @"C:\Images\sample3.emf"
             };
 
-            // Desired background color for rasterization
-            var backgroundColor = Aspose.Imaging.Color.White;
+            // Desired background color to remove (example: white)
+            var backgroundColorToRemove = Aspose.Imaging.Color.White;
 
             foreach (var inputPath in inputFiles)
             {
@@ -30,7 +32,7 @@ class Program
                     return;
                 }
 
-                // Determine output PNG path (same folder, same name with .png extension)
+                // Determine output PNG path (same folder, same name with .png)
                 string outputPath = Path.ChangeExtension(inputPath, ".png");
 
                 // Ensure output directory exists
@@ -42,20 +44,22 @@ class Program
                 // Load EMF image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Cast to EmfImage for specific operations
+                    // Cast to EmfImage for background operations
                     var emfImage = (EmfImage)image;
 
-                    // Optional: remove existing background (if needed)
-                    // emfImage.RemoveBackground();
+                    // Set the background color that should be treated as background
+                    emfImage.BackgroundColor = backgroundColorToRemove;
 
-                    // Set up rasterization options with background color
+                    // Remove the background (makes it transparent)
+                    emfImage.RemoveBackground();
+
+                    // Prepare rasterization options for PNG output
                     var rasterOptions = new EmfRasterizationOptions
                     {
-                        BackgroundColor = backgroundColor,
-                        PageSize = emfImage.Size
+                        PageSize = emfImage.Size,
+                        BackgroundColor = Aspose.Imaging.Color.Transparent
                     };
 
-                    // Set up PNG save options
                     var pngOptions = new PngOptions
                     {
                         VectorRasterizationOptions = rasterOptions
@@ -66,7 +70,7 @@ class Program
                 }
 
                 stopwatch.Stop();
-                Console.WriteLine($"Processed '{inputPath}' to '{outputPath}' in {stopwatch.ElapsedMilliseconds} ms.");
+                Console.WriteLine($"Processed '{inputPath}' -> '{outputPath}' in {stopwatch.ElapsedMilliseconds} ms");
             }
         }
         catch (Exception ex)
@@ -78,9 +82,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a .NET application must convert a batch of vector EMF logos to raster PNG thumbnails while ensuring a white background and measuring conversion speed.
- * 2. When an automated reporting tool needs to replace transparent backgrounds in EMF charts with a solid color before exporting them as PNG images for web publishing.
- * 3. When a document‑generation service processes multiple EMF diagrams, removes any existing background, rasterizes them to PNG, and logs the time taken for performance monitoring.
- * 4. When a Windows desktop utility validates the existence of EMF files, converts them to PNG with a specified background color, and stores the results in the same folder for downstream image processing.
- * 5. When a CI/CD pipeline for a graphics‑intensive project benchmarks the rasterization of EMF assets to PNG using Aspose.Imaging and records the elapsed time for each file.
+ * 1. When you need to convert a set of vector EMF diagrams into web‑ready PNG images while making the white page background transparent.
+ * 2. When an automated build process must generate PNG thumbnails from EMF icons and ensure the background color is removed for seamless UI integration.
+ * 3. When a reporting tool exports charts as EMF files and you want to rasterize them to PNG with transparent backgrounds for inclusion in PDF reports.
+ * 4. When performance monitoring is required while batch processing EMF files, so you log the time taken for each conversion to optimize the workflow.
+ * 5. When migrating legacy Windows Metafile assets to a modern format, you need to programmatically strip unwanted backgrounds and save them as PNG using C# and Aspose.Imaging.
  */

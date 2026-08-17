@@ -1,8 +1,10 @@
+// HOW-TO: How To Render SVG As Anti-Aliased GIF In C# With Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -27,29 +29,28 @@ class Program
             // Load the SVG image
             using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
             {
-                // Configure rasterization options with smoothing (anti‑aliasing)
-                SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions
+                // Configure vector rasterization options with smoothing (anti-aliasing)
+                VectorRasterizationOptions rasterOptions = new VectorRasterizationOptions
                 {
                     // Use the original SVG size
                     PageSize = svgImage.Size,
-                    // Enable anti‑aliasing for smoother rendering
+                    // Apply anti-aliasing to reduce pixelation
                     SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
-                    // Optional: improve text rendering quality
-                    TextRenderingHint = Aspose.Imaging.TextRenderingHint.AntiAlias
+                    // Optional: set background color if needed
+                    BackgroundColor = Aspose.Imaging.Color.White
                 };
 
-                // Configure GIF save options
+                // Set up GIF save options and attach rasterization options
                 GifOptions gifOptions = new GifOptions
                 {
-                    // Enable palette correction for better color fidelity
+                    VectorRasterizationOptions = rasterOptions,
+                    // Enable palette correction for better color quality (optional)
                     DoPaletteCorrection = true,
-                    // Optional: make the GIF interlaced
-                    Interlaced = true,
-                    // Attach the rasterization options
-                    VectorRasterizationOptions = rasterOptions
+                    // Enable interlacing for smoother progressive display (optional)
+                    Interlaced = true
                 };
 
-                // Save the SVG as a GIF with the specified options
+                // Save the image as GIF with the specified options
                 svgImage.Save(outputPath, gifOptions);
             }
         }
@@ -62,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When converting vector‑based SVG icons into animated GIFs for web banners, a developer can use this code to apply anti‑aliasing and produce smooth, non‑pixelated animations.
- * 2. When generating product‑demo GIFs from SVG diagrams in a C# reporting tool, the smoothing mode ensures the rendered frames retain crisp edges and readable text.
- * 3. When creating low‑resolution GIF thumbnails of SVG illustrations for mobile apps, enabling SmoothingMode.AntiAlias prevents jagged edges during rasterization.
- * 4. When automating batch conversion of SVG logos to animated GIFs for email newsletters, the code’s smoothing and palette correction keep colors accurate and animation fluid.
- * 5. When building a server‑side image service that serves GIF previews of user‑uploaded SVG artwork, applying anti‑aliasing guarantees the preview looks professional across browsers.
+ * 1. When you need to convert vector SVG graphics to animated GIFs while preserving smooth edges and avoiding pixelated artifacts in a C# application.
+ * 2. When generating web‑ready GIF previews of SVG icons and want anti‑aliasing to improve visual quality on high‑resolution displays.
+ * 3. When creating a batch process that converts a folder of SVG files to GIFs with consistent background color and palette correction using Aspose.Imaging.
+ * 4. When developing a reporting tool that embeds SVG charts as GIF animations and requires interlaced output for progressive rendering in browsers.
+ * 5. When optimizing GIF assets for email newsletters by applying smoothing mode to reduce jagged lines and ensure the animation looks professional across email clients.
  */

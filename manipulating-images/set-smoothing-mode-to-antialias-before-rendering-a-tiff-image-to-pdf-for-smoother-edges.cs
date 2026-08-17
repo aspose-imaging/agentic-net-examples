@@ -1,21 +1,21 @@
+// HOW-TO: Render TIFF to PDF with Anti-Alias Smoothing in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\input.tif";
+        string outputPath = @"C:\temp\output.pdf";
+
+        // Ensure any runtime exception is reported without crashing
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\temp\input.tif";
-            string outputPath = @"C:\temp\output.pdf";
-
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,22 +27,22 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TIFF image
-            using (Image tiffImage = Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                // Configure PDF export options with anti‑aliasing
-                PdfOptions pdfOptions = new PdfOptions
+                // Prepare PDF save options with vector rasterization settings
+                PdfOptions pdfOptions = new PdfOptions();
+
+                // Create and configure vector rasterization options
+                VectorRasterizationOptions vectorOptions = new VectorRasterizationOptions
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        // Enable smoother edges
-                        SmoothingMode = Aspose.Imaging.SmoothingMode.AntiAlias,
-                        // Match the PDF page size to the source image dimensions
-                        PageSize = new SizeF(tiffImage.Width, tiffImage.Height)
-                    }
+                    // Enable anti-aliasing for smoother edges
+                    SmoothingMode = SmoothingMode.AntiAlias
                 };
 
+                pdfOptions.VectorRasterizationOptions = vectorOptions;
+
                 // Save the image as PDF using the configured options
-                tiffImage.Save(outputPath, pdfOptions);
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -54,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When converting scanned engineering drawings stored as TIFF files to PDF for client review, a developer uses this code to apply AntiAlias smoothing so that fine lines and curves appear crisp and free of jagged edges.
- * 2. When generating printable PDF catalogs from high‑resolution product photos saved as TIFF, the AntiAlias smoothing mode ensures the images retain smooth borders and professional visual quality.
- * 3. When automating the archival of medical imaging reports that include TIFF‑based diagrams, the code renders them to PDF with anti‑aliasing to preserve diagnostic detail without pixelation.
- * 4. When creating PDF invoices that embed TIFF‑formatted company logos, developers enable SmoothingMode.AntiAlias to keep the logo’s edges smooth and visually appealing on any device.
- * 5. When building a batch conversion tool that transforms large batches of TIFF maps into PDF for GIS analysts, the anti‑alias setting guarantees that map lines and symbols render with clean, smooth edges.
+ * 1. When you need to convert high‑resolution scanned TIFF documents to PDF while preserving smooth line edges for professional printing.
+ * 2. When generating PDF reports from medical imaging TIFF files and want to avoid jagged borders in the rendered graphics.
+ * 3. When creating searchable PDF archives from architectural blueprint TIFFs and require anti‑aliased rendering for clearer details.
+ * 4. When automating batch conversion of TIFF invoices to PDF in a C# application and need consistent visual quality across all pages.
+ * 5. When integrating Aspose.Imaging into a document workflow that transforms TIFF graphics into PDF brochures with smooth vector‑rasterized output.
  */

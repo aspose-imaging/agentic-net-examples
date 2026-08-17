@@ -1,19 +1,21 @@
+// HOW-TO: Apply Gaussian Blur to CDR Image, Check Transparency, Save as GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cdr";
-        string outputPath = @"C:\Images\sample_blurred.gif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.cdr";
+            string outputPath = @"C:\Images\sample_blurred.gif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,38 +29,42 @@ class Program
             // Load the CDR image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply filters
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage to apply raster filters
+                RasterImage rasterImage = image as RasterImage;
+                if (rasterImage == null)
+                {
+                    Console.Error.WriteLine("Failed to convert CDR image to raster format.");
+                    return;
+                }
 
                 // Apply Gaussian blur (radius 5, sigma 4.0) to the whole image
-                raster.Filter(raster.Bounds, new GaussianBlurFilterOptions(5, 4.0));
+                rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                // Verify if the image contains any transparent pixels
+                // Verify transparency: check if any pixel has alpha < 255
                 bool hasTransparency = false;
-                for (int y = 0; y < raster.Height && !hasTransparency; y++)
+                int[] argbPixels = rasterImage.GetDefaultArgb32Pixels(rasterImage.Bounds);
+                foreach (int pixel in argbPixels)
                 {
-                    for (int x = 0; x < raster.Width; x++)
+                    int alpha = (pixel >> 24) & 0xFF;
+                    if (alpha < 255)
                     {
-                        int argb = raster.GetArgb32Pixel(x, y);
-                        int alpha = (argb >> 24) & 0xFF;
-                        if (alpha != 255)
-                        {
-                            hasTransparency = true;
-                            break;
-                        }
+                        hasTransparency = true;
+                        break;
                     }
                 }
 
-                Console.WriteLine($"Transparency detected: {hasTransparency}");
+                Console.WriteLine(hasTransparency
+                    ? "The image contains transparent pixels."
+                    : "The image does not contain transparent pixels.");
 
-                // Prepare GIF save options (optional palette correction)
-                GifOptions gifOptions = new GifOptions
+                // Save the blurred image as GIF with palette correction
+                var gifOptions = new GifOptions
                 {
                     DoPaletteCorrection = true
                 };
 
-                // Save the blurred image as GIF
-                raster.Save(outputPath, gifOptions);
+                rasterImage.Save(outputPath, gifOptions);
+                Console.WriteLine($"Blurred GIF saved to: {outputPath}");
             }
         }
         catch (Exception ex)
@@ -70,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to import a CorelDRAW (CDR) illustration, apply a Gaussian blur effect, and export the result as an animated‑compatible GIF while preserving any transparent regions.
- * 2. When a web application must generate blurred thumbnail previews of user‑uploaded CDR files and ensure the thumbnails retain alpha transparency for overlay use.
- * 3. When an e‑commerce platform wants to automatically soften product mock‑ups stored in CDR format and save them as lightweight GIFs for faster page loading.
- * 4. When a digital‑marketing tool requires batch processing of CDR assets to create blurred background images with transparent cut‑outs for email newsletters.
- * 5. When a desktop utility needs to verify whether a blurred CDR image contains any semi‑transparent pixels before converting it to a GIF with palette correction for legacy browsers.
+ * 1. When you need to programmatically soften a CorelDRAW (CDR) illustration while preserving any transparent areas before converting it to a GIF for web use.
+ * 2. When you must verify that a CDR file contains alpha channel data after processing, ensuring that the resulting GIF will retain intended transparency effects.
+ * 3. When automating a batch workflow that converts multiple CDR designs into blurred GIF thumbnails for preview galleries in a .NET application.
+ * 4. When integrating image preprocessing steps such as Gaussian blur into a C# service that prepares graphics for email newsletters, requiring GIF output with correct transparency handling.
+ * 5. When building a desktop tool that allows users to apply custom blur radius and sigma values to vector drawings, then export the result as a GIF while confirming transparent pixel integrity.
  */

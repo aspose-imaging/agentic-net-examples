@@ -1,3 +1,4 @@
+// HOW-TO: Align Horizontal and Vertical DPI of a TIFF Image in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.tif";
-        string outputPath = @"C:\temp\aligned_sample.tif";
+        string inputPath = @"C:\Images\sample.tif";
+        string outputPath = @"C:\Images\aligned_sample.tif";
 
         try
         {
@@ -23,48 +24,43 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image
+            // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access resolution properties
-                RasterImage raster = image as RasterImage;
-                if (raster == null)
+                // Cast to TiffImage to access AlignResolutions
+                TiffImage tiffImage = image as TiffImage;
+                if (tiffImage == null)
                 {
-                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    Console.Error.WriteLine("The loaded image is not a TIFF image.");
                     return;
                 }
 
-                // Record resolutions before alignment
-                double beforeH = raster.HorizontalResolution;
-                double beforeV = raster.VerticalResolution;
-                Console.WriteLine($"Before AlignResolutions: Horizontal DPI = {beforeH}, Vertical DPI = {beforeV}");
+                // Capture resolutions before alignment
+                double horizBefore = tiffImage.HorizontalResolution;
+                double vertBefore = tiffImage.VerticalResolution;
+                Console.WriteLine($"Before AlignResolutions: Horizontal DPI = {horizBefore}, Vertical DPI = {vertBefore}");
 
-                // Call AlignResolutions if the type provides it
-                if (image is TiffImage tiffImg)
+                // Align horizontal and vertical resolutions
+                tiffImage.AlignResolutions();
+
+                // Capture resolutions after alignment
+                double horizAfter = tiffImage.HorizontalResolution;
+                double vertAfter = tiffImage.VerticalResolution;
+                Console.WriteLine($"After AlignResolutions: Horizontal DPI = {horizAfter}, Vertical DPI = {vertAfter}");
+
+                // Validate that both DPI values are now identical
+                if (Math.Abs(horizAfter - vertAfter) < 0.0001)
                 {
-                    tiffImg.AlignResolutions();
-                }
-                else if (image is TiffFrame tiffFrame)
-                {
-                    tiffFrame.AlignResolutions();
+                    Console.WriteLine("Validation passed: Horizontal and vertical DPI are identical.");
                 }
                 else
                 {
-                    // Fallback: make resolutions equal using SetResolution
-                    raster.SetResolution(beforeH, beforeH);
+                    Console.WriteLine("Validation failed: DPI values differ after alignment.");
                 }
 
-                // Record resolutions after alignment
-                double afterH = raster.HorizontalResolution;
-                double afterV = raster.VerticalResolution;
-                Console.WriteLine($"After AlignResolutions: Horizontal DPI = {afterH}, Vertical DPI = {afterV}");
-
-                // Validate that horizontal and vertical DPI are now identical (within a tiny tolerance)
-                bool aligned = Math.Abs(afterH - afterV) < 0.0001;
-                Console.WriteLine($"Resolutions aligned: {aligned}");
-
-                // Save the possibly modified image
-                image.Save(outputPath);
+                // Save the aligned image
+                tiffImage.Save(outputPath);
+                Console.WriteLine($"Aligned image saved to: {outputPath}");
             }
         }
         catch (Exception ex)
@@ -76,9 +72,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When converting scanned documents stored as multi‑page TIFF files to a PDF, a developer can use AlignResolutions to ensure the horizontal and vertical DPI are identical, preventing distortion in the final PDF layout.
- * 2. When preparing high‑resolution satellite imagery for GIS applications, aligning the DPI values guarantees that spatial measurements derived from the image are accurate across both axes.
- * 3. When integrating a C# image‑processing pipeline that resizes or rotates TIFF images, calling AlignResolutions before the transformation avoids unexpected scaling artifacts caused by mismatched DPI.
- * 4. When archiving medical DICOM images exported as TIFF, a developer can use AlignResolutions to standardize the resolution metadata, ensuring consistent display on different diagnostic workstations.
- * 5. When building a batch‑processing tool that normalizes printer‑ready TIFF files, AlignResolutions helps maintain uniform print quality by making the horizontal and vertical DPI identical before sending the files to the printer.
+ * 1. When you need to ensure a scanned TIFF document has consistent DPI for accurate printing.
+ * 2. When converting multi‑resolution TIFF files to a single resolution before archiving.
+ * 3. When preparing TIFF images for OCR engines that require matching horizontal and vertical DPI.
+ * 4. When normalizing image metadata to avoid distortion in GIS or CAD applications.
+ * 5. When validating that image processing pipelines preserve resolution integrity after manipulation.
  */

@@ -1,34 +1,55 @@
+// HOW-TO: Create PNG With Alpha Channel And Embed Digital Signature In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.png";
+        string outputPath = "output.png";
+
         try
         {
-            string outputPath = "Output/output.png";
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Create a PNG image with alpha channel (200x200)
-            using (PngImage png = new PngImage(200, 200, PngColorType.TruecolorWithAlpha))
+            if (!File.Exists(inputPath))
             {
-                // Embed digital signature with a valid password
-                png.EmbedDigitalSignature("secure123");
-
-                // Save the image
-                png.Save(outputPath);
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
             }
 
-            // Load the saved image and verify the digital signature
-            using (PngImage loaded = (PngImage)Image.Load(outputPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            PngOptions pngOptions = new PngOptions
             {
-                bool isSigned = loaded.IsDigitalSigned("secure123");
-                Console.WriteLine($"Signature verified: {isSigned}");
+                Source = new FileCreateSource(outputPath, false),
+                ColorType = PngColorType.TruecolorWithAlpha
+            };
+
+            int width = 200;
+            int height = 200;
+
+            using (Image image = Image.Create(pngOptions, width, height))
+            {
+                PngImage pngImage = (PngImage)image;
+
+                Graphics graphics = new Graphics(pngImage);
+                graphics.Clear(Color.Transparent);
+
+                RasterImage raster = (RasterImage)pngImage;
+                raster.EmbedDigitalSignature("secure123");
+
+                pngImage.Save();
+            }
+
+            using (Image loadedImage = Image.Load(outputPath))
+            {
+                RasterImage rasterLoaded = (RasterImage)loadedImage;
+                bool isSigned = rasterLoaded.IsDigitalSigned("secure123");
+                Console.WriteLine($"Signature valid: {isSigned}");
             }
         }
         catch (Exception ex)
@@ -40,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a transparent PNG logo for a web application and ensure its authenticity by embedding a digital signature that can be verified later.
- * 2. When an e‑commerce platform wants to create product images with alpha channels and protect them from tampering by signing the PNG files with a password.
- * 3. When a document management system must store confidential diagrams as PNGs and later confirm their integrity by checking the embedded digital signature confidence.
- * 4. When a mobile app generates user‑customized stickers with transparency and requires a secure way to validate that the stickers have not been altered after download.
- * 5. When a compliance‑focused reporting tool exports charts as PNG images with alpha transparency and embeds a password‑protected digital signature to meet audit trail requirements.
+ * 1. When you need to generate a transparent PNG thumbnail and ensure its authenticity by embedding a digital signature that can be verified later.
+ * 2. When a web application must produce PNG assets with alpha transparency and protect them against tampering using Aspose.Imaging’s digital signing feature.
+ * 3. When a document management system stores PNG images and requires a built‑in signature to confirm the source before allowing downloads.
+ * 4. When an e‑commerce platform creates product images with transparent backgrounds and wants to embed a secret key to detect unauthorized modifications.
+ * 5. When a secure reporting tool saves charts as PNG files with alpha channels and needs to validate the signature confidence after the file is written.
  */

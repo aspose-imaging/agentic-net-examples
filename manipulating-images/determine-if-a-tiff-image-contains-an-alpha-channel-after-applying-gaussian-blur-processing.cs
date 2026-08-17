@@ -1,3 +1,4 @@
+// HOW-TO: Check If TIFF Has Alpha Channel After Gaussian Blur in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,8 +10,8 @@ class Program
     static void Main(string[] args)
     {
         // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output.png";
+        string inputPath = @"C:\Images\input.tif";
+        string outputPath = @"C:\Images\output.png";
 
         try
         {
@@ -27,18 +28,24 @@ class Program
             // Load the TIFF image
             using (Image image = Image.Load(inputPath))
             {
-                var tiffImage = (TiffImage)image;
+                TiffImage tiffImage = (TiffImage)image;
 
-                // Apply Gaussian blur filter to the entire image
-                tiffImage.Filter(tiffImage.Bounds,
+                // Check alpha channel before processing
+                bool hasAlphaBefore = tiffImage.HasAlpha;
+
+                // Apply Gaussian blur filter to the whole image
+                tiffImage.Filter(
+                    tiffImage.Bounds,
                     new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
-                // Determine if the image has an alpha channel after processing
-                bool hasAlpha = tiffImage.HasAlpha;
-                Console.WriteLine($"HasAlpha after blur: {hasAlpha}");
-
                 // Save the processed image as PNG
-                tiffImage.Save(outputPath, new PngOptions());
+                PngOptions pngOptions = new PngOptions();
+                tiffImage.Save(outputPath, pngOptions);
+
+                // Check alpha channel after processing
+                bool hasAlphaAfter = tiffImage.HasAlpha;
+
+                Console.WriteLine($"HasAlpha before blur: {hasAlphaBefore}, after blur: {hasAlphaAfter}");
             }
         }
         catch (Exception ex)
@@ -50,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to preprocess a high‑resolution scanned TIFF document by applying a Gaussian blur to reduce noise before OCR and must verify whether the blur introduced an alpha channel before converting it to PNG.
- * 2. When building a medical imaging workflow that receives TIFF radiology images, applies a Gaussian blur for anonymization, and checks for an alpha channel to ensure the resulting PNG can be displayed correctly in web viewers.
- * 3. When creating a batch conversion tool that smooths satellite TIFF imagery with a Gaussian blur, determines if any transparency (alpha) was added, and then saves the cleaned image as a PNG for GIS applications.
- * 4. When developing a document management system that accepts user‑uploaded TIFF files, applies a Gaussian blur to mask sensitive details, and needs to confirm the presence of an alpha channel before storing the image as a PNG thumbnail.
- * 5. When implementing a graphics pipeline that converts legacy TIFF assets to PNG, applies a Gaussian blur for artistic effect, and checks the HasAlpha property to decide whether additional compositing steps are required.
+ * 1. When you need to verify whether a multi‑page TIFF retains its transparency after applying a Gaussian blur before converting it to PNG.
+ * 2. When a workflow requires detecting alpha channel changes in medical imaging TIFF files after noise‑reduction filtering in a C# application.
+ * 3. When you want to ensure that a scanned document’s transparency is preserved after blur processing for watermarking purposes.
+ * 4. When building an automated batch job that blurs satellite TIFF images and must log if the blur operation removes or adds an alpha channel before saving as PNG.
+ * 5. When debugging image‑processing pipelines to compare the presence of an alpha channel in a TIFF before and after applying a Gaussian blur filter using Aspose.Imaging for .NET.
  */

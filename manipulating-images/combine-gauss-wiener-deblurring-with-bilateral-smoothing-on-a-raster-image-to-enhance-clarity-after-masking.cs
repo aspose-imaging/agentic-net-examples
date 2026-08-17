@@ -1,5 +1,7 @@
+// HOW-TO: Apply Gauss Wiener Deblurring and Bilateral Smoothing After Masking in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
@@ -24,30 +26,47 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.RasterImage image = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
+            using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
+                // Export options for masking (transparent PNG in memory)
+                var exportOptions = new PngOptions
+                {
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    Source = new StreamSource(new MemoryStream())
+                };
+
+                // Configure auto graph‑cut masking
                 var maskingOptions = new AutoMaskingGraphCutOptions
                 {
                     CalculateDefaultStrokes = true,
                     FeatheringRadius = (Math.Max(image.Width, image.Height) / 500) + 1,
                     Method = SegmentationMethod.GraphCut,
                     Decompose = false,
-                    ExportOptions = new PngOptions
-                    {
-                        ColorType = PngColorType.TruecolorWithAlpha,
-                        Source = new StreamSource(new MemoryStream())
-                    },
-                    BackgroundReplacementColor = Aspose.Imaging.Color.Transparent
+                    ExportOptions = exportOptions,
+                    BackgroundReplacementColor = Color.Transparent
                 };
 
-                using (MaskingResult results = new ImageMasking(image).Decompose(maskingOptions))
+                // Perform masking to obtain foreground mask
+                using (MaskingResult maskingResult = new ImageMasking(image).Decompose(maskingOptions))
                 {
-                    using (Aspose.Imaging.RasterImage foreground = (Aspose.Imaging.RasterImage)results[1].GetImage())
+                    using (RasterImage foregroundMask = (RasterImage)maskingResult[1].GetMask())
                     {
-                        foreground.Save(outputPath, new PngOptions
+                        // Apply mask to original image to isolate foreground
+                        using (RasterImage foreground = (RasterImage)Image.Load(inputPath))
                         {
-                            ColorType = PngColorType.TruecolorWithAlpha
-                        });
+                            ImageMasking.ApplyMask(foreground, foregroundMask, maskingOptions);
+
+                            // Gauss‑Wiener deblurring
+                            foreground.Filter(foreground.Bounds,
+                                new Aspose.Imaging.ImageFilters.FilterOptions.GaussWienerFilterOptions(5, 4.0));
+
+                            // Bilateral smoothing
+                            foreground.Filter(foreground.Bounds,
+                                new Aspose.Imaging.ImageFilters.FilterOptions.BilateralSmoothingFilterOptions(5));
+
+                            // Save enhanced image
+                            foreground.Save(outputPath, exportOptions);
+                        }
                     }
                 }
             }
@@ -61,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract a subject from a noisy JPEG photograph, apply Gauss‑Wiener deblurring, then use bilateral smoothing to preserve edges before saving the transparent foreground as a PNG with Aspose.Imaging in C#.
- * 2. When an e‑commerce platform must automatically remove background from product images while sharpening blurred details, the code can mask the object, deblur with Gauss‑Wiener, smooth with bilateral filtering, and export a high‑quality PNG for web use.
- * 3. When a medical imaging application requires isolating tissue regions from scanned slides, the developer can use Aspose.Imaging’s graph‑cut masking together with deblurring and edge‑preserving smoothing to improve diagnostic clarity.
- * 4. When a mobile app processes user‑uploaded selfies to create stickers, the code enables background removal, restores sharpness via Gauss‑Wiener, smooths skin tones with bilateral smoothing, and generates a transparent PNG for overlay.
- * 5. When a digital archivist wants to clean up historic photographs by separating foreground elements, reducing motion blur, and smoothing grain while keeping fine details, this C# routine provides the complete masking‑deblur‑smooth workflow.
+ * 1. When you need to extract the foreground of a noisy JPEG photo, save it as a transparent PNG, and improve its sharpness with Gauss‑Wiener deblurring and bilateral smoothing.
+ * 2. When you want to automatically segment an image using graph‑cut masking in C# and then enhance the isolated subject’s details for product photography.
+ * 3. When you are building a .NET application that removes blur from scanned documents after separating text from the background with Aspose.Imaging.
+ * 4. When you require a workflow to clean up blurry wildlife pictures by masking the animal and applying edge‑preserving smoothing to retain natural textures.
+ * 5. When you need to prepare images for machine‑learning datasets by isolating objects, de‑blurring them, and exporting the result as a PNG with an alpha channel.
  */

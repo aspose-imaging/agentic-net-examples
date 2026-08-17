@@ -1,3 +1,4 @@
+// HOW-TO: Increase TIFF Image Contrast by 30% and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,18 +11,18 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.tif";
-            string outputPath = @"C:\temp\output.pdf";
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\temp\sample.tif";
+            string outputPath = @"C:\temp\sample_high_contrast.pdf";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TIFF image
@@ -30,7 +31,7 @@ class Program
                 // Cast to TiffImage to access AdjustContrast
                 TiffImage tiffImage = (TiffImage)image;
 
-                // Increase contrast by 30%
+                // Increase contrast by 30 %
                 tiffImage.AdjustContrast(30f);
 
                 // Save the result as PDF
@@ -46,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system uses Aspose.Imaging for .NET to enhance the visibility of details in scanned X‑ray TIFF files by raising contrast and then archives them as PDF reports.
- * 2. When a document management workflow employs Aspose.Imaging for .NET to improve the readability of old scanned contracts stored as TIFF, increases contrast by 30 % and converts them to PDF for electronic filing.
- * 3. When a publishing platform processes high‑resolution TIFF artwork, uses Aspose.Imaging for .NET to boost contrast to meet print standards, and outputs a PDF proof for client review.
- * 4. When a GIS application prepares satellite TIFF imagery, applies Aspose.Imaging for .NET to adjust contrast and highlight terrain features before saving the map sheet as a PDF.
- * 5. When an e‑learning content creator cleans up scanned textbook pages in TIFF format, leverages Aspose.Imaging for .NET to raise contrast for better on‑screen legibility and bundles the pages into a PDF handbook.
+ * 1. When you need to enhance the readability of scanned TIFF documents by boosting contrast before archiving them as PDF files.
+ * 2. When a web service must convert high‑resolution TIFF scans into searchable PDFs with improved visual quality.
+ * 3. When preparing medical imaging files for patient reports, increasing contrast helps highlight diagnostic details before generating a PDF.
+ * 4. When automating batch processing of archival photographs, adjusting contrast ensures the resulting PDFs display vivid colors.
+ * 5. When integrating document workflows, you may need to programmatically raise TIFF contrast and output a PDF for downstream printing.
  */

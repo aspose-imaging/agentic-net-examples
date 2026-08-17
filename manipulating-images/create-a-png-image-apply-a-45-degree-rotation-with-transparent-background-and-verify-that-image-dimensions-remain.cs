@@ -1,3 +1,4 @@
+// HOW-TO: Rotate PNG Image 45 Degrees With Transparent Background In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,22 +11,15 @@ class Program
     {
         try
         {
-            // Define output path (relative)
+            // Define output path
             string outputPath = "Output/output.png";
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Define image size
-            int width = 200;
-            int height = 200;
-
-            // Create a new PNG image
-            using (PngImage png = new PngImage(width, height))
+            // Create a PNG image of 200x200 pixels
+            using (PngImage png = new PngImage(200, 200))
             {
-                // Optional: fill the image with a solid color
+                // Fill the image with a solid color for visibility
                 Graphics graphics = new Graphics(png);
-                SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.Red);
+                SolidBrush brush = new SolidBrush(Color.Blue);
                 graphics.FillRectangle(brush, png.Bounds);
 
                 // Store original dimensions
@@ -33,13 +27,20 @@ class Program
                 int originalHeight = png.Height;
 
                 // Rotate 45 degrees without resizing, using transparent background
-                png.Rotate(45f, false, Aspose.Imaging.Color.Transparent);
+                png.Rotate(45f, false, Color.Transparent);
 
-                // Verify that dimensions remain unchanged
-                bool dimensionsUnchanged = (png.Width == originalWidth) && (png.Height == originalHeight);
-                Console.WriteLine(dimensionsUnchanged
-                    ? "Dimensions unchanged after rotation."
-                    : $"Dimensions changed: {originalWidth}x{originalHeight} -> {png.Width}x{png.Height}");
+                // Verify dimensions remain unchanged
+                if (png.Width == originalWidth && png.Height == originalHeight)
+                {
+                    Console.WriteLine("Dimensions unchanged after rotation.");
+                }
+                else
+                {
+                    Console.WriteLine($"Dimensions changed: {originalWidth}x{originalHeight} -> {png.Width}x{png.Height}");
+                }
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Save the rotated image
                 png.Save(outputPath);
@@ -54,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When generating product thumbnails for an e‑commerce site, a developer can create a 200 × 200 PNG, rotate it 45° with a transparent background, and confirm the canvas size stays the same to maintain layout consistency.
- * 2. When preparing assets for a mobile game UI, a developer may need to rotate icon images by 45 degrees without resizing the PNG so that hit‑testing and sprite sheets remain aligned.
- * 3. When automating the creation of watermark overlays, a developer can produce a PNG, apply a 45‑degree rotation with transparency, and verify unchanged dimensions to ensure the watermark fits the original document size.
- * 4. When converting scanned documents to PNG for archival, a developer might rotate each page 45 degrees to correct skew while preserving the original width and height for downstream processing.
- * 5. When building a reporting tool that embeds rotated charts into PDF reports, a developer can generate a PNG, rotate it 45° with a transparent background, and check that the image dimensions are unchanged to avoid layout shifts in the final PDF.
+ * 1. When you need to generate a 200×200 PNG thumbnail and rotate it 45 degrees for a UI component while keeping the canvas size unchanged.
+ * 2. When a logo must be displayed at a diagonal angle on a website but the layout requires the original PNG dimensions to remain constant.
+ * 3. When creating a game sprite that needs a 45‑degree tilt yet must retain its original bounding box for collision calculations.
+ * 4. When processing a batch of PNG assets to apply a uniform transparent‑background rotation without resizing each image.
+ * 5. When you want to programmatically verify that rotating an image does not alter its width and height before saving it to disk.
  */

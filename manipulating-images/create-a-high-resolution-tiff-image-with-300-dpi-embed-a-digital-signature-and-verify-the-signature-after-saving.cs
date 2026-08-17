@@ -1,11 +1,10 @@
+// HOW-TO: Create High Resolution 300 DPI TIFF with Digital Signature in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Brushes;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -13,36 +12,56 @@ class Program
     {
         try
         {
-            // Define output path
-            string outputPath = "high_res_output.tif";
+            // Output file path
+            string outputPath = "output\\highres.tif";
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Create TIFF options with 300 DPI resolution
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.BitsPerSample = new ushort[] { 8, 8, 8 };
-            tiffOptions.Compression = TiffCompressions.Lzw;
-            tiffOptions.Photometric = TiffPhotometrics.Rgb;
-            tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
-            tiffOptions.ResolutionSettings = new ResolutionSetting(300, 300);
-            tiffOptions.ResolutionUnit = TiffResolutionUnits.Inch;
-            tiffOptions.Source = new FileCreateSource(outputPath, false);
-
-            // Create a 1000x1000 pixel TIFF image
-            using (TiffImage tiffImage = (TiffImage)Image.Create(tiffOptions, 1000, 1000))
+            // Configure TIFF options
+            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
             {
-                // Fill the image with a gradient
-                LinearGradientBrush gradientBrush = new LinearGradientBrush(
-                    new Point(0, 0),
-                    new Point(tiffImage.Width, tiffImage.Height),
-                    Color.Blue,
-                    Color.Yellow);
-                Graphics graphics = new Graphics(tiffImage);
-                graphics.FillRectangle(gradientBrush, tiffImage.Bounds);
+                BitsPerSample = new ushort[] { 8, 8, 8 },
+                Compression = TiffCompressions.Lzw,
+                Photometric = TiffPhotometrics.Rgb,
+                PlanarConfiguration = TiffPlanarConfigs.Contiguous
+            };
 
-                // Save the image (output path already bound)
-                tiffImage.Save();
+            int width = 1000;
+            int height = 1000;
+
+            // Create a new TIFF image
+            using (Image image = Image.Create(tiffOptions, width, height))
+            {
+                // Set resolution to 300 DPI
+                ((RasterImage)image).SetResolution(300, 300);
+
+                // Fill the canvas with white
+                Graphics graphics = new Graphics(image);
+                graphics.Clear(Color.White);
+
+                // Embed a digital signature with a valid password
+                ((RasterCachedImage)image).EmbedDigitalSignature("secure123");
+
+                // Save the image
+                image.Save(outputPath);
+            }
+
+            // Verify the digital signature
+            string inputPath = outputPath;
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            using (Image loadedImage = Image.Load(inputPath))
+            {
+                bool isSigned = ((RasterCachedImage)loadedImage).IsDigitalSigned("secure123", 80);
+                Console.WriteLine($"Signature verification (valid password): {isSigned}");
+
+                bool isSignedInvalid = ((RasterCachedImage)loadedImage).IsDigitalSigned("123", 80);
+                Console.WriteLine($"Signature verification (invalid password): {isSignedInvalid}");
             }
         }
         catch (Exception ex)
@@ -54,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a 300‑DPI TIFF file for high‑quality print production, such as brochures or posters, and wants to ensure the image retains color fidelity with LZW compression.
- * 2. When an application must create a large raster image (e.g., 1000 × 1000 pixels) for archival storage in a lossless TIFF format that can be opened by legacy imaging software.
- * 3. When a GIS or mapping tool requires a high‑resolution, georeferenced TIFF canvas to overlay vector data and the developer wants to pre‑fill it with a gradient background for visual reference.
- * 4. When a medical‑imaging system needs to export diagnostic scans as 300‑DPI TIFF files with consistent resolution metadata for compliance with DICOM standards.
- * 5. When a document‑management workflow automates the creation of TIFF images with embedded resolution settings so that downstream OCR or digital‑signature verification processes can rely on accurate DPI information.
+ * 1. When you need to generate a printable 300 DPI TIFF for archival documents and ensure its authenticity with a password‑protected digital signature.
+ * 2. When a medical imaging system must produce high‑resolution TIFF scans and embed a signature to comply with regulatory audit trails.
+ * 3. When a publishing workflow requires creating large TIFF images for print and later verifying that the files have not been tampered with.
+ * 4. When a legal document management app creates TIFF evidence files and needs to embed and later confirm a digital signature for court admissibility.
+ * 5. When an automated batch process generates high‑quality TIFF assets and must programmatically check the embedded signature before distribution.
  */

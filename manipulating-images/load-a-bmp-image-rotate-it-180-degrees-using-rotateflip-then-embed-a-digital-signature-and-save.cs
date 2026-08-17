@@ -1,25 +1,27 @@
+// HOW-TO: Rotate BMP 180 Degrees And Embed Digital Signature In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.bmp";
-        string outputPath = @"C:\temp\output_rotated_signed.bmp";
-
-        // Ensure any runtime exception is reported cleanly
         try
         {
-            // Verify that the input file exists
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.bmp";
+            string outputPath = @"C:\temp\output_rotated_signed.bmp";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
@@ -28,15 +30,15 @@ class Program
                 image.RotateFlip(RotateFlipType.Rotate180FlipNone);
 
                 // Embed a digital signature using a password
-                // The EmbedDigitalSignature method is defined on RasterCachedImage,
-                // which is a base class for raster images such as BMP.
+                // The method is defined on RasterCachedImage and RasterCachedMultipageImage
                 if (image is RasterCachedImage rasterImage)
                 {
-                    rasterImage.EmbedDigitalSignature("myPassword");
+                    rasterImage.EmbedDigitalSignature("myPassword123");
                 }
-
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                else if (image is RasterCachedMultipageImage multiPageImage)
+                {
+                    multiPageImage.EmbedDigitalSignature("myPassword123");
+                }
 
                 // Save the processed image
                 image.Save(outputPath);
@@ -51,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When an industrial automation system captures BMP screenshots of machine panels and needs to rotate them 180 degrees and embed a password‑protected digital signature before archiving for compliance.
- * 2. When a medical imaging application receives BMP scans from legacy devices, must correct the orientation by rotating 180°, and securely sign the image to guarantee patient data integrity.
- * 3. When a document management workflow processes scanned BMP forms, rotates them to match the original page layout, and adds a digital signature to verify that the file has not been altered.
- * 4. When a game development tool exports BMP textures, flips them upside down for the engine’s coordinate system and embeds a signature to prevent unauthorized modification of assets.
- * 5. When a security‑focused desktop utility batch‑processes BMP screenshots, rotates each image 180°, applies a password‑protected digital signature, and saves the result for tamper‑evident storage.
+ * 1. When you need to rotate a scanned BMP file 180° and protect it with a password‑based digital signature before storing it in an archive.
+ * 2. When a medical imaging system must flip BMP X‑ray images upside down and embed a signature to verify that the image has not been altered.
+ * 3. When an e‑commerce platform prepares product photos in BMP format for printing, rotates them to match packaging orientation, and signs them to guarantee authenticity.
+ * 4. When a compliance‑driven application signs BMP screenshots after rotating them to meet regulatory requirements for tamper‑evidence.
+ * 5. When a document management workflow automatically processes BMP scans, rotates them for correct viewing, and embeds a digital signature to ensure traceability.
  */

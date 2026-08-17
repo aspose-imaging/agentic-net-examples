@@ -1,3 +1,4 @@
+// HOW-TO: Export EMF to PDF with Vector Shapes and Anti‑Alias Smoothing in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,23 +9,43 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "Input\\sample.emf";
+        string outputPath = "Output\\sample.pdf";
+
+        // Validate input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            string inputPath = @"C:\Temp\input.emf";
-            string outputPath = @"C:\Temp\output.pdf";
-
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+            // Load the EMF image
             using (Image image = Image.Load(inputPath))
             {
-                PdfOptions pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                // Configure vector rasterization options with smoothing and text rendering as shapes
+                var vectorOptions = new VectorRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageWidth = image.Width,
+                    PageHeight = image.Height,
+                    SmoothingMode = SmoothingMode.AntiAlias,
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel
+                };
+
+                // Set up PDF export options
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    pdfOptions.VectorRasterizationOptions = vectorOptions;
+
+                    // Save the image as PDF
+                    image.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -36,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert Windows Metafile (EMF) files containing text and graphics into high‑resolution PDF documents for printing or archival, this C# code using Aspose.Imaging can load the EMF and export it as vector shapes in a PDF.
- * 2. When an application must generate PDF reports that include vector‑based diagrams or logos originally created as EMF files, the code enables seamless conversion while preserving editability of text and shapes.
- * 3. When a batch processing service has to automate the migration of legacy EMF assets to PDF format for a document management system, the snippet demonstrates how to load each EMF, apply PdfOptions, and save the result as a searchable PDF.
- * 4. When a developer wants to embed EMF‑based technical drawings into a PDF manual and ensure smooth rendering of text by using smoothing mode settings in Aspose.Imaging, this example provides the core load‑and‑save workflow.
- * 5. When a web API receives user‑uploaded EMF files and must return a PDF with vector fidelity and improved rendering quality, the code shows the essential C# operations—Image.Load, PdfOptions, and Image.Save—to perform the conversion on the server side.
+ * 1. When you need to convert a Windows Metafile (EMF) containing text into a searchable PDF while preserving the text as scalable vector shapes.
+ * 2. When you want to improve the visual quality of EMF graphics in a PDF by applying anti‑alias smoothing during rasterization.
+ * 3. When generating PDF reports from legacy EMF assets and you require consistent background color and page dimensions matching the original image.
+ * 4. When automating a batch process that validates EMF files exist, creates output folders, and exports them to PDF using Aspose.Imaging in a .NET application.
+ * 5. When you must control text rendering hints for EMF‑to‑PDF conversion to ensure crisp, single‑bit per pixel text rendering in the final document.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Export PSD to PNG with Custom Fonts Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,6 +12,7 @@ class Program
         {
             string inputPath = "input.psd";
             string outputPath = "output.png";
+            string fontsFolder = "Fonts";
 
             if (!File.Exists(inputPath))
             {
@@ -20,13 +22,15 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (var image = Image.Load(inputPath))
+            FontSettings.SetFontsFolder(fontsFolder);
+            FontSettings.UpdateFonts();
+
+            using (Image image = Image.Load(inputPath))
             {
                 var vectorOpts = new VectorRasterizationOptions
                 {
                     PageWidth = image.Width,
                     PageHeight = image.Height,
-                    BackgroundColor = Color.White,
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                     SmoothingMode = SmoothingMode.None
                 };
@@ -48,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application uses Aspose.Imaging for .NET to generate thumbnail previews of PSD files that contain custom fonts, ensuring the PNG output matches the original design.
- * 2. When an e‑commerce platform leverages Aspose.Imaging for .NET to convert product mockups stored as PSDs into PNGs for fast loading, while preserving brand‑specific typography supplied via user‑defined fonts.
- * 3. When a digital asset management system batch‑processes PSD artwork with non‑standard fonts using Aspose.Imaging for .NET and exports them as PNGs for compatibility with downstream tools.
- * 4. When a desktop publishing workflow automates the creation of print‑ready PNG assets from PSD source files that rely on licensed fonts not installed on the server, by configuring FontSettings in Aspose.Imaging for .NET.
- * 5. When a mobile app backend renders user‑uploaded PSD designs containing custom typefaces into PNGs for preview on devices that only support raster images, using Aspose.Imaging for .NET’s vector rasterization options.
+ * 1. When a web service needs to generate thumbnail PNGs from PSD designs that use brand‑specific fonts stored in a custom folder.
+ * 2. When an automated build pipeline converts layered Photoshop files to PNG for documentation while preserving exact text appearance with user‑defined fonts.
+ * 3. When a desktop application batch‑processes PSD assets and must embed non‑system fonts to ensure consistent rendering across different machines.
+ * 4. When a SaaS platform offers on‑the‑fly image previews of user‑uploaded PSD files and must load fonts from a dedicated directory to avoid missing‑glyph errors.
+ * 5. When a migration script extracts vector text from PSDs and rasterizes it to PNG with precise rendering settings such as single‑bit per pixel and no smoothing.
  */

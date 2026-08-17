@@ -1,46 +1,39 @@
+// HOW-TO: Dither TIFF Image and Apply Gaussian Blur Then Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 
-class Program
+public class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.tif";
-        string outputPath = "output.png";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the TIFF image
+            string inputPath = "input.tif";
+            string outputPath = "output.png";
+
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to TiffImage for TIFF-specific operations
-                var tiffImage = (Aspose.Imaging.FileFormats.Tiff.TiffImage)image;
+                TiffImage tiff = (TiffImage)image;
 
-                // Apply Floyd‑Steinberg dithering with 1‑bit palette
-                tiffImage.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 1);
+                // Dither the image using Floyd‑Steinberg dithering with a 1‑bit palette
+                tiff.Dither(DitheringMethod.FloydSteinbergDithering, 1);
 
                 // Apply Gaussian blur (radius 5, sigma 4.0) to the whole image
-                tiffImage.Filter(
-                    tiffImage.Bounds,
-                    new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
+                tiff.Filter(tiff.Bounds, new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
                 // Save the processed image as PNG
-                var pngOptions = new PngOptions();
-                tiffImage.Save(outputPath, pngOptions);
+                tiff.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -52,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a high‑resolution scanned TIFF document to a web‑friendly PNG while reducing file size with 1‑bit Floyd‑Steinberg dithering and smoothing edges using a Gaussian blur.
- * 2. When an application must prepare archival TIFF images for printing on low‑resolution printers by dithering to a binary palette and applying blur to remove speckle noise before saving as PNG.
- * 3. When a batch‑processing tool has to transform medical imaging TIFF files into PNG thumbnails, using dithering to preserve contrast and Gaussian blur to soften artifacts.
- * 4. When a graphics pipeline requires converting multi‑page TIFF pages to PNG sprites, applying Floyd‑Steinberg dithering for monochrome styling and a Gaussian blur for a subtle vignette effect.
- * 5. When a developer is building a document‑to‑web service that needs to serve TIFF scans as PNGs with reduced color depth and a smooth blur filter to improve visual consistency across browsers.
+ * 1. When you need to convert a high‑resolution scanned TIFF document into a web‑friendly PNG while reducing file size with 1‑bit dithering and smoothing edges using a Gaussian blur.
+ * 2. When preparing archival images for low‑color‑depth devices, applying Floyd‑Steinberg dithering and blur to improve visual quality before saving as PNG in a C# application.
+ * 3. When generating thumbnails of TIFF graphics that require both binary dithering for contrast and a soft blur effect for a polished look.
+ * 4. When processing medical or engineering TIFF scans to emphasize structures by dithering and then applying a Gaussian blur before exporting to PNG for inclusion in reports.
+ * 5. When building an automated image pipeline that ingests TIFF files, applies dithering and Gaussian blur to meet branding guidelines, and outputs PNGs for use on websites.
  */

@@ -1,6 +1,6 @@
+// HOW-TO: Use Aspose.Imaging to Median Filter and Sharpen PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Drawing;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 
@@ -10,9 +10,10 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\input.png";
-            string outputPath = @"C:\Images\output_sharpened.png";
+            // Hard‑coded input and output paths
+            string inputPath = @"C:\Images\sample.png";
+            string medianOutputPath = @"C:\Images\sample.MedianFilter.png";
+            string sharpenOutputPath = @"C:\Images\sample.Sharpened.png";
 
             // Verify that the input file exists
             if (!File.Exists(inputPath))
@@ -21,23 +22,32 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(medianOutputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(sharpenOutputPath));
 
-            // Load the image
+            // Load the original image and apply a median filter
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering methods
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply a median filter (size = 5) to reduce noise
+                // Apply median filter with a kernel size of 5
                 rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
-                // Apply a sharpen filter (kernel size = 5, sigma = 4.0) to accentuate edges
+                // Save the median‑filtered result
+                rasterImage.Save(medianOutputPath);
+            }
+
+            // Load the median‑filtered image and apply a sharpen filter
+            using (Image image = Image.Load(medianOutputPath))
+            {
+                RasterImage rasterImage = (RasterImage)image;
+
+                // Apply sharpen filter with kernel size 5 and sigma 4.0
                 rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(5, 4.0));
 
-                // Save the processed image
-                rasterImage.Save(outputPath);
+                // Save the final sharpened image
+                rasterImage.Save(sharpenOutputPath);
             }
         }
         catch (Exception ex)
@@ -49,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to clean up a noisy PNG screenshot and then enhance its edges for clearer visual inspection, they can apply a median filter followed by a sharpen filter using Aspose.Imaging for .NET.
- * 2. When preparing scanned documents in PNG format for OCR, a developer can reduce speckle noise with a median filter and then sharpen the text edges to improve character recognition accuracy.
- * 3. When generating thumbnails of product photos, a developer may first remove background grain with a median filter and then apply a sharpen filter to make the product details stand out in the small image.
- * 4. When processing medical imaging data saved as raster PNG files, a developer can use the median filter to suppress sensor noise and the sharpen filter to highlight anatomical edges for better diagnostic viewing.
- * 5. When creating visual assets for a game UI, a developer can clean up hand‑drawn PNG assets with a median filter and then accentuate outlines with a sharpen filter to ensure crisp edges on different screen resolutions.
+ * 1. When you need to remove noise from a scanned PNG before enhancing edges for OCR preprocessing.
+ * 2. When preparing product photos for an e‑commerce site, you can clean up speckles and then sharpen details using Aspose.Imaging in C#.
+ * 3. When converting raw camera captures to a cleaner PNG for a medical imaging application, applying median then sharpen filters improves visual clarity.
+ * 4. When automating a batch process that cleans up scanned documents and accentuates text edges before archiving, this code provides the needed filters.
+ * 5. When developing a desktop utility that lets users improve low‑quality screenshots by denoising and sharpening them programmatically.
  */

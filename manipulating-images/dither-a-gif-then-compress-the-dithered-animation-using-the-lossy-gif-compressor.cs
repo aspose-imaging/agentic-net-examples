@@ -1,3 +1,4 @@
+// HOW-TO: How To Dither A GIF And Save With Lossy Compression In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,39 +9,40 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\input.gif";
-        string outputPath = @"C:\temp\output.lossy.gif";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hard‑coded input and output paths
+            string inputPath = @"C:\temp\input.gif";
+            string outputPath = @"C:\temp\output.lossy.gif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to GifImage to access GIF-specific methods
                 GifImage gifImage = (GifImage)image;
 
-                // Apply Floyd‑Steinberg dithering with 8‑bit palette
+                // Apply Floyd‑Steinberg dithering with an 8‑bit palette
                 gifImage.Dither(DitheringMethod.FloydSteinbergDithering, 8, null);
 
-                // Configure lossy GIF compression
-                GifOptions saveOptions = new GifOptions
+                // Configure lossy GIF compression options
+                GifOptions options = new GifOptions
                 {
-                    MaxDiff = 80 // Recommended value for optimal lossy compression
+                    MaxDiff = 80,               // Enable lossy compression
+                    DoPaletteCorrection = true,
+                    Interlaced = false
                 };
 
                 // Save the dithered image using lossy compression
-                gifImage.Save(outputPath, saveOptions);
+                gifImage.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -52,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to shrink an animated GIF for faster web page loading while preserving visual fidelity by applying Floyd‑Steinberg dithering and lossy GIF compression in C#.
- * 2. When a mobile app must generate low‑bandwidth GIF stickers from high‑resolution sources, using Aspose.Imaging to dither frames to an 8‑bit palette and then compress them with a MaxDiff setting.
- * 3. When an email marketing system wants to embed animated GIFs that stay under a strict size limit, the code can dither the animation and apply lossy compression to meet the constraint.
- * 4. When a game developer creates sprite animations and needs to export them as optimized GIFs for in‑game cutscenes, this example shows how to dither and compress the GIF in .NET.
- * 5. When a content management platform automatically processes user‑uploaded GIFs to ensure they are web‑friendly, this routine can be used to dither and compress each animation before storage.
+ * 1. When you need to reduce the file size of an animated GIF while preserving visual quality by applying Floyd‑Steinberg dithering before lossy compression in a C# application.
+ * 2. When you want to convert a high‑color GIF into an 8‑bit palette animation for web delivery and then compress it with a configurable MaxDiff setting using Aspose.Imaging for .NET.
+ * 3. When you are building an image‑processing pipeline that must generate smaller GIF assets for mobile apps by dither‑reducing colors and applying Aspose’s lossy GIF encoder.
+ * 4. When you have legacy GIF animations that require palette correction and interlacing control before saving them as optimized, bandwidth‑friendly files in a .NET service.
+ * 5. When you need to automate batch processing of GIFs to apply dithering and lossily compress them for email newsletters or social media posts using C# code.
  */

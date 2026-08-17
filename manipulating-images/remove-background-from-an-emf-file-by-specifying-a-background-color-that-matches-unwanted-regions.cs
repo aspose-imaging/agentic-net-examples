@@ -1,3 +1,4 @@
+// HOW-TO: Remove Unwanted Background from EMF by Adding Matching Color Rectangle in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,7 +12,7 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\input.emf";
-        string outputPath = @"C:\Images\output\ChangedBackground_input.emf";
+        string outputPath = @"C:\Images\output.emf";
 
         try
         {
@@ -28,11 +29,14 @@ class Program
             // Load EMF image
             using (MetaImage metaImage = (MetaImage)Image.Load(inputPath))
             {
-                // Add background rectangle with the desired color (e.g., White)
-                AddBackgroundRectangleEmf((EmfImage)metaImage, Color.White);
+                // Cast to EmfImage for record manipulation
+                EmfImage emfImage = (EmfImage)metaImage;
+
+                // Add a background rectangle with the desired color (e.g., white)
+                AddBackgroundRectangleEmf(emfImage, Color.White);
 
                 // Save the modified image
-                metaImage.Save(outputPath);
+                emfImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -41,23 +45,24 @@ class Program
         }
     }
 
-    // Helper method to insert a background rectangle into the EMF image
+    // Inserts a rectangle filled with the specified color at the beginning of the EMF records
     public static void AddBackgroundRectangleEmf(EmfImage image, Color color)
     {
         // Ensure records are loaded
         image.CacheData();
 
-        // If there are no records, nothing to modify
         if (image.Records.Count < 1)
+        {
             return;
+        }
 
-        // Create a rectangle covering the entire image bounds
+        // Create rectangle covering the whole image bounds
         EmfRectangle rectangle = new EmfRectangle
         {
             Box = image.Header.EmfHeader.Bounds
         };
 
-        // Create a brush with the specified background color
+        // Create a brush with the desired background color
         EmfCreateBrushIndirect brush = new EmfCreateBrushIndirect
         {
             LogBrush = new EmfLogBrushEx(),
@@ -71,13 +76,13 @@ class Program
             ObjectHandle = 1
         };
 
-        // Delete the brush after use
+        // Delete the brush after drawing the rectangle
         EmfDeleteObject deleteObject = new EmfDeleteObject
         {
             ObjectHandle = 1
         };
 
-        // Insert records at the beginning of the record list
+        // Insert records at the beginning (index 1 because index 0 is reserved for the header)
         image.Records.Insert(1, brush);
         image.Records.Insert(2, selectObject);
         image.Records.Insert(3, rectangle);
@@ -87,9 +92,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer using Aspose.Imaging for .NET needs to replace an unwanted white background in a vector‑based EMF logo with a custom‑colored canvas before embedding it into a PDF report.
- * 2. When an application must preprocess scanned EMF diagrams by adding a matching background rectangle to hide legacy printer marks that interfere with OCR analysis.
- * 3. When a Windows desktop tool generates EMF charts and the developer wants to ensure the chart’s background blends with the UI theme by programmatically setting the background color via C#.
- * 4. When a batch conversion service processes legacy EMF files and must remove inconsistent background colors to maintain visual consistency across exported PNG thumbnails.
- * 5. When a GIS mapping solution imports EMF map overlays and the developer needs to eliminate the default background so the overlay integrates seamlessly with satellite imagery.
+ * 1. When a developer needs to clean up scanned vector graphics that contain a solid‑colored border they want to hide before further processing.
+ * 2. When generating reports that embed EMF logos and the logo background must match the document’s white page color.
+ * 3. When converting EMF drawings to other formats and the original background interferes with transparent rendering.
+ * 4. When preparing EMF assets for a web application that requires a uniform background color to avoid visual artifacts.
+ * 5. When automating batch processing of EMF files to replace unwanted colored regions with a specified color using Aspose.Imaging in C#.
  */

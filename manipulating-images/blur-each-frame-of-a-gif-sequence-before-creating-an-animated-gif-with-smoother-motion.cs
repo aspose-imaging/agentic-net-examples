@@ -1,3 +1,4 @@
+// HOW-TO: Apply Gaussian Blur to Each Frame of a GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,7 +13,7 @@ class Program
         try
         {
             string inputPath = "input.gif";
-            string outputPath = "output/blurred.gif";
+            string outputPath = "output.gif";
 
             if (!File.Exists(inputPath))
             {
@@ -20,11 +21,15 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            using (Image image = Image.Load(inputPath))
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                GifImage gif = (GifImage)image;
+                Directory.CreateDirectory(outputDir);
+            }
+
+            using (Image img = Image.Load(inputPath))
+            {
+                GifImage gif = (GifImage)img;
 
                 for (int i = 0; i < gif.PageCount; i++)
                 {
@@ -45,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to reduce visual noise in each frame of an animated GIF before publishing it on a website, they can use this code to apply a Gaussian blur to every frame and save a smoother‑motion GIF.
- * 2. When creating a GIF preview for a mobile app where bandwidth is limited, a developer can blur each frame to soften details and then save the animated GIF with reduced perceived flicker.
- * 3. When generating a stylized slideshow GIF from a series of photographs, a developer can use this code to apply a consistent blur filter across all frames, giving the animation a cohesive soft‑focus effect.
- * 4. When processing user‑uploaded GIFs for a social‑media platform to comply with content guidelines, a developer can automatically blur each frame to obscure sensitive details before storing the animated GIF.
- * 5. When building a diagnostic tool that visualizes motion blur in video frames converted to GIF, a developer can employ this code to programmatically apply a Gaussian blur to each frame and export the result as an animated GIF for analysis.
+ * 1. When you need to soften the visual noise of each frame in an animated GIF before publishing it on a website.
+ * 2. When creating a GIF slideshow where a subtle blur transition improves the perceived motion smoothness.
+ * 3. When preparing GIF assets for a mobile app and want to reduce sharp edges to save bandwidth and improve rendering.
+ * 4. When automating a batch process that adds a Gaussian blur to every frame of user‑uploaded GIFs to meet brand style guidelines.
+ * 5. When integrating Aspose.Imaging in a C# service that generates animated GIFs with a consistent blur effect for marketing emails.
  */

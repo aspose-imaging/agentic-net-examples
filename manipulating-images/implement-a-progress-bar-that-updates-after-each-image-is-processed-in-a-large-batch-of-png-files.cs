@@ -1,7 +1,9 @@
+// HOW-TO: How to Add a Progress Bar While Converting PNG Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -10,65 +12,50 @@ class Program
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\input";
-            string outputDirectory = @"C:\output";
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-            // Verify input directory exists
-            if (!Directory.Exists(inputDirectory))
-            {
-                Console.Error.WriteLine($"Input directory not found: {inputDirectory}");
-                return;
-            }
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
 
             // Get all PNG files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDirectory, "*.png", SearchOption.TopDirectoryOnly);
-            int totalFiles = inputFiles.Length;
-            if (totalFiles == 0)
-            {
-                Console.WriteLine("No PNG files found to process.");
-                return;
-            }
+            string[] pngFiles = Directory.GetFiles(inputDir, "*.png");
 
-            // Process each file
-            for (int i = 0; i < totalFiles; i++)
+            int total = pngFiles.Length;
+            for (int i = 0; i < total; i++)
             {
-                string inputPath = inputFiles[i];
-
-                // Input file existence check
+                string inputPath = pngFiles[i];
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output path
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileName(inputPath));
+                // Build output path
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_processed.png";
+                string outputPath = Path.Combine(outputDir, outputFileName);
 
-                // Ensure output directory exists
+                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Set progressive PNG options
+                    // Save with progressive PNG options
                     var pngOptions = new PngOptions
                     {
                         Progressive = true
                     };
-
-                    // Save the image with progressive option
                     image.Save(outputPath, pngOptions);
                 }
 
-                // Update progress bar
-                int processed = i + 1;
-                double percent = (processed / (double)totalFiles) * 100;
-                Console.Write($"\rProcessed {processed}/{totalFiles} ({percent:0.##}%)");
+                // Update simple progress bar
+                Console.Write($"\rProcessed {i + 1}/{total} images");
             }
 
-            // Move to next line after progress bar completes
+            // Move to next line after processing
             Console.WriteLine();
-            Console.WriteLine("Batch processing completed successfully.");
         }
         catch (Exception ex)
         {
@@ -79,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a large collection of PNG files to progressive PNG format using Aspose.Imaging in a C# console application and display a real‑time progress bar for each image processed.
- * 2. When an e‑commerce site must optimize product images for faster web loading by converting existing PNG assets to progressive PNGs while providing users with a visual progress indicator during the bulk operation.
- * 3. When a desktop utility is created to migrate legacy PNG resources to progressive PNGs for mobile apps, and the developer wants a command‑line progress bar that updates after each file is saved.
- * 4. When an automated CI/CD pipeline includes an image‑processing step that transforms PNG resources to progressive PNGs and requires a progress bar to monitor the batch conversion time.
- * 5. When a photographer’s workflow script processes hundreds of high‑resolution PNG photos with Aspose.Imaging and needs a progress bar to track the conversion status of each image.
+ * 1. When you need to process thousands of PNG images and show real‑time progress in a console application.
+ * 2. When you want to convert standard PNGs to progressive PNGs for faster web loading using Aspose.Imaging in C#.
+ * 3. When you must ensure output folders exist before saving processed images in an automated batch workflow.
+ * 4. When you require a simple console feedback loop that reports the number of images processed out of the total.
+ * 5. When you are building a command‑line tool that validates input files, applies image options, and writes the results to a separate directory.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Apply Per‑Channel Gamma to PSD and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -27,12 +28,12 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Apply per‑channel gamma correction (R=1.1, G=1.0, B=0.9)
-                if (image is RasterImage raster)
+                if (image is RasterImage rasterImage)
                 {
-                    raster.AdjustGamma(1.1f, 1.0f, 0.9f);
+                    rasterImage.AdjustGamma(1.1f, 1.0f, 0.9f);
                 }
 
-                // Export to PDF
+                // Export the image to PDF
                 PdfOptions pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
@@ -46,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to correct color balance of a Photoshop PSD by applying different gamma values to the red, green, and blue channels before generating a printable PDF document.
- * 2. When an automated image‑processing pipeline must batch‑process PSD files, adjust per‑channel gamma to match brand color guidelines, and export the results as PDF reports.
- * 3. When a web service receives user‑uploaded PSD artwork, applies subtle gamma tweaks to enhance contrast per channel, and returns a PDF preview for client review.
- * 4. When a desktop application converts layered PSD designs into PDF portfolios while ensuring that each color channel is calibrated with specific gamma settings for accurate on‑screen rendering.
- * 5. When a quality‑control script validates that a PSD file exists, performs per‑channel gamma correction, and saves the final output as a PDF for archival or compliance purposes.
+ * 1. When you need to adjust the brightness of individual color channels in a Photoshop PSD before generating a printable PDF report.
+ * 2. When a web service must convert uploaded PSD files to PDF while applying custom gamma values to match brand color standards.
+ * 3. When automating a batch workflow that prepares design assets by correcting channel gamma and exporting them as PDF for client review.
+ * 4. When integrating Aspose.Imaging into a C# application to ensure accurate color reproduction of PSD layers in the final PDF document.
+ * 5. When creating a desktop utility that validates PSD files, applies per‑channel gamma correction, and saves the result as a PDF for archival purposes.
  */

@@ -1,39 +1,47 @@
+// HOW-TO: Deskew CDR Image and Save as Lossy GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = @"C:\Images\input.cdr";
-            string outputPath = @"C:\Images\output.gif";
+            // Hardcoded input and output paths
+            string inputPath = "input.cdr";
+            string outputPath = "output\\deskewed.gif";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            // Load the CDR image
+            using (Image image = Image.Load(inputPath))
             {
-                GifOptions gifOptions = new GifOptions
+                // Deskew the image by normalizing its angle
+                if (image is RasterImage rasterImage)
                 {
-                    VectorRasterizationOptions = new CdrRasterizationOptions
-                    {
-                        PageWidth = cdr.Width,
-                        PageHeight = cdr.Height
-                    }
+                    rasterImage.NormalizeAngle();
+                }
+
+                // Prepare GIF save options with reduced color resolution (lossy compression)
+                var gifOptions = new GifOptions
+                {
+                    ColorResolution = 8 // reduces the number of colors, resulting in lossy compression
                 };
 
-                cdr.Save(outputPath, gifOptions);
+                // Save the processed image as a GIF
+                image.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -45,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a marketing automation system receives scanned CorelDRAW brochures that are slightly tilted, a developer can use Aspose.Imaging for .NET to deskew the CDR files and export them as smaller lossy GIFs for fast email distribution.
- * 2. When an e‑learning platform needs to display legacy vector illustrations on low‑bandwidth mobile devices, a developer can straighten the original CDR artwork and compress it into a lossy GIF to reduce file size while preserving visual fidelity.
- * 3. When a document management workflow must archive design assets as web‑ready images, a developer can automatically correct the orientation of each CDR page and save it as a lossy GIF to meet storage quotas.
- * 4. When a batch‑processing script prepares product catalogs for online catalogs, a developer can deskew the CorelDRAW drawings and apply lossy GIF compression to ensure quick page loads on the storefront.
- * 5. When a digital signage system imports vector graphics from CorelDRAW and needs them in a lightweight format, a developer can use the code to straighten the images and generate lossy GIFs that load instantly on the display hardware.
+ * 1. When you need to automatically straighten scanned CorelDRAW (CDR) drawings before publishing them as small GIF files for web pages.
+ * 2. When a batch process must convert legacy CDR assets into GIFs with reduced color depth to meet email attachment size limits.
+ * 3. When an application has to correct skewed vector artwork from a CDR source and store it in a lossy GIF format for faster loading on mobile devices.
+ * 4. When you want to integrate Aspose.Imaging into a C# service that prepares CDR diagrams for documentation by deskewing and applying lossy compression.
+ * 5. When a workflow requires extracting a CDR page, normalizing its orientation, and saving it as a low‑size GIF for archival or thumbnail generation.
  */

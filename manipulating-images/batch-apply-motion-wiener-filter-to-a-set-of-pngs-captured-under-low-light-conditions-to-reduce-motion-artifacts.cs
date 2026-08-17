@@ -1,3 +1,4 @@
+// HOW-TO: Apply Motion Wiener Filter to Multiple PNG Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,17 +8,32 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDir = @"C:\Images\Input";
-        string outputDir = @"C:\Images\Output";
-
+        // Wrap the whole processing in a try-catch to handle unexpected errors gracefully
         try
         {
-            // Get all PNG files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDir, "*.png");
+            // Hard‑coded input and output directories
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
-            foreach (string inputPath in inputFiles)
+            // List of PNG files to process (add or remove file names as needed)
+            string[] files = new string[]
             {
+                "image1.png",
+                "image2.png",
+                "image3.png"
+            };
+
+            // Parameters for the Motion Wiener filter
+            int size = 10;          // Gaussian kernel size (must be odd)
+            double sigma = 1.0;    // Smoothing factor
+            double angle = 90.0;   // Angle in degrees
+
+            foreach (string fileName in files)
+            {
+                // Build full input and output paths
+                string inputPath = Path.Combine(inputDir, fileName);
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(fileName) + ".MotionWiener.png");
+
                 // Verify that the input file exists
                 if (!File.Exists(inputPath))
                 {
@@ -25,22 +41,19 @@ class Program
                     return;
                 }
 
-                // Build the output file path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_motion.png";
-                string outputPath = Path.Combine(outputDir, outputFileName);
-
-                // Ensure the output directory exists
+                // Ensure the output directory exists (creates it if necessary)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the image, apply the Motion Wiener filter, and save the result
+                // Load the image, apply the filter, and save the result
                 using (Image image = Image.Load(inputPath))
                 {
                     // Cast to RasterImage to access the Filter method
                     RasterImage rasterImage = (RasterImage)image;
 
-                    // Apply MotionWienerFilterOptions: size=10, sigma=1.0, angle=90.0
-                    var options = new MotionWienerFilterOptions(10, 1.0, 90.0);
-                    rasterImage.Filter(rasterImage.Bounds, options);
+                    // Apply Motion Wiener filter to the whole image
+                    rasterImage.Filter(
+                        rasterImage.Bounds,
+                        new MotionWienerFilterOptions(size, sigma, angle));
 
                     // Save the processed image
                     rasterImage.Save(outputPath);
@@ -49,6 +62,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Output any runtime errors without crashing the program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -56,9 +70,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to automatically clean up a large collection of low‑light PNG photos taken with a shaky camera, they can use this C# code with Aspose.Imaging to batch apply a Motion Wiener filter and remove motion artifacts.
- * 2. When an image‑processing pipeline must convert raw surveillance PNG frames captured at night into clearer visuals, the code provides a simple way to filter each frame and save the enhanced results.
- * 3. When a photo‑editing application requires a one‑click “reduce motion blur” feature for user‑uploaded PNGs, the developer can integrate this loop to process all selected files on the server side.
- * 4. When a scientific research project collects PNG microscopy images under dim lighting and needs consistent de‑blurring across dozens of files, the script automates the filter application using RasterImage and MotionWienerFilterOptions.
- * 5. When a batch‑export tool for a mobile app must improve the quality of exported PNG screenshots taken in low‑light conditions, this C# example shows how to iterate through a folder, apply the filter, and store the corrected images.
+ * 1. When you need to clean up motion blur in a series of low‑light PNG photos captured by a security camera.
+ * 2. When you want to automatically process dozens of PNG snapshots from a night‑time microscopy experiment to improve clarity.
+ * 3. When you must integrate a batch image‑enhancement step into a C# workflow that prepares PNG assets for a mobile app.
+ * 4. When you are building a server‑side service that receives PNG uploads from users and must reduce motion artifacts before storage.
+ * 5. When you require a repeatable script to apply the same motion‑Wiener parameters to multiple PNG files during automated testing of image‑processing pipelines.
  */

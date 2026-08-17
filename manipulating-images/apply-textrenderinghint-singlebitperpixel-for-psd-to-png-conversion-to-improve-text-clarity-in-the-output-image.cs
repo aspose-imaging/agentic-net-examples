@@ -1,42 +1,46 @@
+// HOW-TO: Convert PSD to PNG with SingleBitPerPixel Text Rendering in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.psd";
-        string outputPath = @"C:\Images\output.png";
-
-        // Ensure input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output file paths
+            string inputPath = "C:\\Images\\input.psd";
+            string outputPath = "C:\\Images\\output.png";
+
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the PSD image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG save options with SingleBitPerPixel text rendering
-                PngOptions pngOptions = new PngOptions
+                // Configure rasterization options with SingleBitPerPixel text rendering
+                var rasterOptions = new VectorRasterizationOptions
                 {
-                    VectorRasterizationOptions = new VectorRasterizationOptions
-                    {
-                        TextRenderingHint = Aspose.Imaging.TextRenderingHint.SingleBitPerPixel
-                    }
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel
                 };
 
-                // Save as PNG
+                // Set PNG options to use the rasterization options
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save the image as PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -49,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert layered Photoshop PSD files containing crisp vector text into PNG thumbnails for a web gallery while preserving text sharpness.
- * 2. When an e‑commerce platform must generate product label images from PSD designs and ensure the printed text remains legible after conversion to PNG for display on mobile devices.
- * 3. When a digital asset management system automates batch conversion of PSD marketing assets to PNG previews and wants to avoid blurry text by using SingleBitPerPixel rendering.
- * 4. When a desktop publishing application exports PSD‑based flyers to PNG for email newsletters and requires the embedded text to stay clear at small sizes.
- * 5. When a CI/CD pipeline validates UI mockups by converting PSD mockups to PNG and needs accurate text rendering for visual regression testing.
+ * 1. When you need to export layered Photoshop files to PNG while preserving crisp vector text for web thumbnails.
+ * 2. When generating product catalog images from PSD designs and require sharp, readable labels in the PNG output.
+ * 3. When automating batch conversion of PSD assets to PNG for a mobile app and want to avoid blurry text rendering.
+ * 4. When creating printable marketing materials from PSD sources and need high‑contrast text in the final PNG files.
+ * 5. When integrating Aspose.Imaging into a C# service that converts user‑uploaded PSD files to PNG and must maintain text legibility for accessibility compliance.
  */

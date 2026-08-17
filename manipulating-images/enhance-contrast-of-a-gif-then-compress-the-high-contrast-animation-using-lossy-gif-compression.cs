@@ -1,19 +1,20 @@
+// HOW-TO: Increase GIF Contrast and Apply Lossy Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Gif;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample.gif";
-        string outputPath = @"c:\temp\sample_contrast_lossy.gif";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "C:\\temp\\input.gif";
+            string outputPath = "C:\\temp\\output.lossy.gif";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,18 +28,21 @@ class Program
             // Load the GIF image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to GifImage to access GIF-specific functionality
                 GifImage gifImage = (GifImage)image;
 
                 // Increase contrast (value range: -100 to 100)
                 gifImage.AdjustContrast(50f);
 
-                // Configure lossy GIF compression
+                // Configure lossy GIF compression options
                 GifOptions saveOptions = new GifOptions
                 {
-                    MaxDiff = 80 // recommended value for optimal lossy compression
+                    MaxDiff = 80,               // Enable lossy compression
+                    DoPaletteCorrection = true, // Improve palette quality
+                    ColorResolution = 7         // Bits per color minus 1
                 };
 
-                // Save the high‑contrast GIF with lossy compression
+                // Save the enhanced GIF with lossy compression
                 gifImage.Save(outputPath, saveOptions);
             }
         }
@@ -51,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer wants to improve the visual clarity of an animated GIF for a marketing banner and reduce its file size for faster page loads, they can use this C# code with Aspose.Imaging to boost contrast and apply lossy GIF compression.
- * 2. When a mobile app needs to display high‑contrast animated icons while keeping the download size low, the code can adjust the GIF contrast and save it with a MaxDiff setting for efficient bandwidth usage.
- * 3. When an e‑learning platform processes user‑uploaded GIF tutorials and wants to enhance readability of the frames without exceeding storage quotas, the developer can run this routine to increase contrast and compress the animation lossily.
- * 4. When a social‑media scheduling tool automatically optimizes GIF memes for better visual impact and quicker sharing, the script provides a C# solution to adjust contrast and apply lossy compression using Aspose.Imaging.
- * 5. When a digital signage system prepares animated GIF advertisements that must be bright and crisp on large screens yet fit within limited memory, this code enables contrast enhancement and size reduction through lossy GIF encoding.
+ * 1. When you need to make an animated GIF more vivid for a web banner while reducing its file size for faster loading.
+ * 2. When you want to preprocess user‑uploaded GIFs by boosting contrast before storing them in a content‑delivery network.
+ * 3. When you are building a C# tool that automatically optimizes GIF animations for email newsletters with lossy compression.
+ * 4. When you need to improve the visual quality of low‑contrast GIFs and shrink them for mobile app assets using Aspose.Imaging.
+ * 5. When you are creating a batch script that adjusts GIF contrast and applies palette correction to meet strict bandwidth limits.
  */

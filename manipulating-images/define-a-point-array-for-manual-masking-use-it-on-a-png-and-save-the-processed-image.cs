@@ -5,28 +5,29 @@ using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
-using Aspose.Imaging.Masking;
-using Aspose.Imaging.Masking.Options;
-using Aspose.Imaging.Masking.Result;
 using Aspose.Imaging.Shapes;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.png";
             string outputPath = "output.png";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Define a point array for manual masking
             PointF[] maskPoints = new PointF[]
             {
                 new PointF(50, 50),
@@ -35,39 +36,44 @@ class Program
                 new PointF(50, 150)
             };
 
+            // Build the manual mask using the point array
             GraphicsPath manualMask = new GraphicsPath();
             Figure figure = new Figure();
             figure.AddShape(new PolygonShape(maskPoints));
             manualMask.AddFigure(figure);
 
-            ManualMaskingArgs argsMask = new ManualMaskingArgs
+            // Set up manual masking arguments
+            Aspose.Imaging.Masking.Options.ManualMaskingArgs args = new Aspose.Imaging.Masking.Options.ManualMaskingArgs
             {
                 Mask = manualMask
             };
 
+            // Configure PNG export options
             PngOptions exportOptions = new PngOptions
             {
                 ColorType = PngColorType.TruecolorWithAlpha,
                 Source = new StreamSource(new MemoryStream())
             };
 
+            // Configure masking options
+            Aspose.Imaging.Masking.Options.MaskingOptions maskingOptions = new Aspose.Imaging.Masking.Options.MaskingOptions
+            {
+                Method = Aspose.Imaging.Masking.Options.SegmentationMethod.Manual,
+                Decompose = false,
+                Args = args,
+                BackgroundReplacementColor = Color.Transparent,
+                ExportOptions = exportOptions
+            };
+
+            // Load the source image and apply manual masking
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                MaskingOptions maskingOptions = new MaskingOptions
+                Aspose.Imaging.Masking.ImageMasking masking = new Aspose.Imaging.Masking.ImageMasking(image);
+                using (Aspose.Imaging.Masking.Result.MaskingResult result = masking.Decompose(maskingOptions))
                 {
-                    Method = SegmentationMethod.Manual,
-                    Decompose = false,
-                    Args = argsMask,
-                    BackgroundReplacementColor = Color.Transparent,
-                    ExportOptions = exportOptions
-                };
-
-                ImageMasking masking = new ImageMasking(image);
-                using (MaskingResult maskingResult = masking.Decompose(maskingOptions))
-                {
-                    using (RasterImage resultImage = (RasterImage)maskingResult[1].GetImage())
+                    using (Image processed = result[1].GetImage())
                     {
-                        resultImage.Save(outputPath, exportOptions);
+                        processed.Save(outputPath, exportOptions);
                     }
                 }
             }
@@ -82,8 +88,8 @@ class Program
 /*
  * Real-World Use Cases:
  * 1. When you need to hide or remove a specific rectangular area of a PNG by defining custom polygon coordinates in C#.
- * 2. When you want to replace the background of a PNG with transparency after manually selecting the region to keep.
- * 3. When you are building a batch tool that programmatically masks logos or watermarks on images using a predefined set of points.
- * 4. When you need to export a masked PNG with truecolor with alpha channel while preserving image quality in a .NET application.
- * 5. When you are integrating Aspose.Imaging to create custom-shaped cutouts for UI assets or game sprites based on manual point arrays.
+ * 2. When you want to highlight a region of a PNG for a web thumbnail by applying a manual mask with Aspose.Imaging.
+ * 3. When you must protect sensitive information in a PNG by masking it with a user‑defined shape before publishing.
+ * 4. When you are generating product images that require a consistent cut‑out shape, such as a square or custom polygon, using a point array in C#.
+ * 5. When you need to programmatically apply a transparent overlay to a PNG based on precise coordinates for automated reporting or UI assets.
  */

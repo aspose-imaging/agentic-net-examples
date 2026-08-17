@@ -1,3 +1,4 @@
+// HOW-TO: Apply Gauss Wiener Filter to Rasterized Vector PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,27 +10,28 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.svg";
-            string outputPath = "output.png";
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Images\vectorRasterized.png";
+            string outputPath = @"C:\Images\vectorRasterized_GaussWiener.png";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image (vector or raster) and cast to RasterImage
+            // Load the rasterized vector image
             using (Image image = Image.Load(inputPath))
             {
+                // Cast to RasterImage to access filtering capabilities
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gauss‑Wiener filter with default size 5 and sigma 4.0
-                rasterImage.Filter(rasterImage.Bounds, new GaussWienerFilterOptions(5, 4.0));
+                // Apply Gauss‑Wiener filter with default parameters
+                rasterImage.Filter(rasterImage.Bounds, new GaussWienerFilterOptions());
 
                 // Save the filtered image
                 rasterImage.Save(outputPath);
@@ -37,6 +39,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -44,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an SVG vector graphic to a PNG raster image and automatically reduce conversion blur using the Gauss‑Wiener filter with default parameters.
- * 2. When a C# application must load a vector file, rasterize it, and improve visual sharpness before saving it for web display or reporting.
- * 3. When an automated image‑processing pipeline processes batch SVG assets and requires a simple way to apply noise‑reduction and de‑blurring without manually tuning filter size or sigma.
- * 4. When a developer is building a document‑generation tool that embeds vector diagrams as PNGs and wants to ensure the output looks crisp by applying the built‑in Gauss‑Wiener filter in Aspose.Imaging.
- * 5. When troubleshooting image quality issues after rasterizing vector artwork, a programmer can use this code to quickly test the effect of the default Gauss‑Wiener filter on the resulting PNG file.
+ * 1. When a developer converts a vector graphic to PNG and notices blur, they can use this code to sharpen the image with a Gauss‑Wiener filter.
+ * 2. When preparing rasterized illustrations for print, the filter helps restore edge clarity after anti‑aliasing.
+ * 3. When building an automated image‑processing pipeline that receives vector‑to‑raster conversions, the code ensures consistent visual quality across files.
+ * 4. When optimizing UI assets generated from SVGs for mobile apps, the filter reduces softening caused by scaling.
+ * 5. When performing batch cleanup of scanned PDFs that were exported as raster images, the filter can improve readability without manual editing.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Increase GIF Brightness and Save with Lossy Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,12 +9,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.gif";
+        string outputPath = @"C:\temp\output.lossy.gif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.gif";
-            string outputPath = @"C:\temp\output_bright_lossy.gif";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -30,21 +31,17 @@ class Program
                 // Cast to GifImage to access GIF-specific methods
                 GifImage gifImage = (GifImage)image;
 
-                // Increase brightness (value range: -255 to 255)
+                // Enhance brightness (value range: -255 to 255)
                 gifImage.AdjustBrightness(50);
 
-                // Configure lossy GIF compression options
+                // Configure lossy GIF saving options
                 GifOptions saveOptions = new GifOptions
                 {
-                    // Enable lossy compression by setting a positive MaxDiff
-                    MaxDiff = 80,
-                    // Optional: improve palette quality
-                    DoPaletteCorrection = true,
-                    // Optional: interlaced output
-                    Interlaced = false
+                    DoPaletteCorrection = true, // improve palette quality
+                    MaxDiff = 80                 // enable lossy compression (recommended value)
                 };
 
-                // Save the brighter GIF using lossy compression
+                // Save the brighter image with lossy compression
                 gifImage.Save(outputPath, saveOptions);
             }
         }
@@ -57,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to brighten a user‑uploaded animated GIF before reducing its file size for faster web page loading, they can use this code to adjust brightness and apply lossy GIF compression.
- * 2. When an e‑commerce platform wants to enhance product demo animations by increasing visibility in low‑light scenes while keeping bandwidth low, the snippet shows how to boost brightness and save the result with a lossy palette.
- * 3. When a social‑media app must generate a brighter preview thumbnail from an animated GIF and store it in a size‑constrained cache, the code demonstrates the C# AdjustBrightness call followed by GifOptions with MaxDiff.
- * 4. When a digital marketing team needs to prepare a series of animated GIF banners with consistent brightness and optimized file size for email campaigns, this example illustrates using Aspose.Imaging to modify brightness and compress with lossy GIF settings.
- * 5. When a mobile game developer wants to improve the visual clarity of in‑game animated GIF assets on dark backgrounds while minimizing download size, the provided C# routine shows how to increase brightness and save using lossy GIF compression options.
+ * 1. When you need to brighten a low‑light animated GIF before embedding it on a website while keeping file size small.
+ * 2. When you want to preprocess user‑uploaded GIFs by increasing visibility and then apply lossy compression to meet email attachment limits.
+ * 3. When you are generating marketing banners that require a brighter animation and must be optimized for fast mobile loading.
+ * 4. When you automate a batch job that enhances the contrast of GIF assets and stores them using Aspose.Imaging’s lossy GIF encoder to reduce storage costs.
+ * 5. When you create a social‑media sharing tool that adjusts GIF brightness for better display and compresses the result to stay within platform size restrictions.
  */

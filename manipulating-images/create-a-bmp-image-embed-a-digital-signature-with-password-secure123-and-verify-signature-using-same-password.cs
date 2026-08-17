@@ -1,44 +1,48 @@
+// HOW-TO: Embed and Verify Password Protected Digital Signature in BMP with C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Define output path (ensure it includes a directory)
-            string outputPath = "output\\signed.bmp";
+            // Define paths
+            string outputPath = "output.bmp";
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Create a BMP image of size 200x200 (minimum for digital signature)
-            using (BmpImage bmpImage = new BmpImage(200, 200))
+            // Create a new BMP image (100x100 pixels)
+            var bmpOptions = new BmpOptions
             {
-                // Fill the image with a simple gradient
-                int width = bmpImage.Width;
-                int height = bmpImage.Height;
-                for (int y = 0; y < height; y++)
-                {
-                    for (int x = 0; x < width; x++)
-                    {
-                        int hue = (255 * x) / width;
-                        bmpImage.SetPixel(x, y, Color.FromArgb(255, hue, 0, 0));
-                    }
-                }
+                BitsPerPixel = 24
+            };
+            using (Image image = Image.Create(bmpOptions, 100, 100))
+            {
+                // Cast to RasterImage to access digital signature methods
+                var rasterImage = (RasterImage)image;
 
-                // Embed digital signature with password "Secure123"
-                bmpImage.EmbedDigitalSignature("Secure123");
+                // Embed digital signature with the specified password
+                rasterImage.EmbedDigitalSignature("Secure123");
 
-                // Verify the signature using the same password
-                bool isSigned = bmpImage.IsDigitalSigned("Secure123");
-                Console.WriteLine($"Digital signature embedded: {isSigned}");
+                // Save the signed image
+                image.Save(outputPath);
+            }
 
-                // Save the signed BMP image
-                bmpImage.Save(outputPath);
+            // Load the saved image to verify the signature
+            using (Image loadedImage = Image.Load(outputPath))
+            {
+                var rasterLoaded = (RasterImage)loadedImage;
+
+                // Verify the digital signature using the same password
+                bool isSigned = rasterLoaded.IsDigitalSigned("Secure123");
+
+                Console.WriteLine($"Signature verification result: {isSigned}");
             }
         }
         catch (Exception ex)
@@ -50,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a BMP thumbnail for a document management system and ensure its authenticity by embedding a password‑protected digital signature using Aspose.Imaging for .NET.
- * 2. When a C# application must create a simple gradient BMP image for a UI preview and protect it against tampering by adding and later verifying a digital signature with a known password.
- * 3. When an automated reporting tool has to produce BMP charts that can be validated later by auditors, embedding a secure signature with the password “Secure123” and checking it before distribution.
- * 4. When a software solution stores BMP icons in a shared folder and wants to guarantee that only authorized users can confirm the image’s integrity by verifying the embedded digital signature in C#.
- * 5. When a developer is building a compliance‑focused image processing pipeline that creates BMP files, embeds a password‑protected digital signature, and programmatically verifies the signature before archiving the files.
+ * 1. When you need to protect a BMP file from unauthorized changes by adding a password‑protected digital signature in a C# application.
+ * 2. When you must ensure the integrity of a generated image before sending it to a client, by embedding and later verifying a signature using Aspose.Imaging.
+ * 3. When a document management system stores raster images and requires cryptographic verification of each BMP to meet compliance standards.
+ * 4. When an automated reporting tool creates charts as BMPs and you want to embed a secret password signature to detect tampering later.
+ * 5. When a security‑focused workflow signs images with a known password and later validates them during batch processing in .NET.
  */
