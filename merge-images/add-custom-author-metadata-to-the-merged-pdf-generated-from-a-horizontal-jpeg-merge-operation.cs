@@ -1,3 +1,4 @@
+// HOW-TO: Add Author Metadata to Horizontally Merged JPEG PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -13,11 +14,15 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string[] inputPaths = new string[] { "input1.jpg", "input2.jpg", "input3.jpg" };
-            string outputPath = "merged.pdf";
+            // Hardcoded input JPEG files
+            string[] inputPaths = new string[]
+            {
+                "input1.jpg",
+                "input2.jpg",
+                "input3.jpg"
+            };
 
-            // Validate input files
+            // Validate each input file
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -27,10 +32,13 @@ class Program
                 }
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Output PDF file
+            string outputPdfPath = "merged.pdf";
 
-            // Collect image sizes
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
+
+            // Collect sizes of all input images
             List<Size> sizes = new List<Size>();
             foreach (string path in inputPaths)
             {
@@ -49,10 +57,15 @@ class Program
                 if (sz.Height > canvasHeight) canvasHeight = sz.Height;
             }
 
-            // Create temporary JPEG canvas bound to a file
-            string tempCanvasPath = "temp_canvas.jpg";
-            Source tempSource = new FileCreateSource(tempCanvasPath, true);
-            JpegOptions jpegOptions = new JpegOptions() { Source = tempSource, Quality = 100 };
+            // Temporary JPEG file that will hold the merged image
+            string tempJpegPath = "temp_merged.jpg";
+            Directory.CreateDirectory(Path.GetDirectoryName(tempJpegPath));
+
+            // Create source for JPEG canvas
+            Source jpegSource = new FileCreateSource(tempJpegPath, false);
+            JpegOptions jpegOptions = new JpegOptions() { Source = jpegSource, Quality = 100 };
+
+            // Create JPEG canvas bound to the source
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 // Merge images horizontally onto the canvas
@@ -67,19 +80,22 @@ class Program
                     }
                 }
 
-                // Set PDF metadata (author)
-                PdfOptions pdfOptions = new PdfOptions();
-                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo();
-                pdfOptions.PdfDocumentInfo.Author = "Custom Author";
-
-                // Save the merged canvas as PDF
-                canvas.Save(outputPath, pdfOptions);
+                // Save the bound JPEG canvas
+                canvas.Save();
             }
 
-            // Cleanup temporary canvas file
-            if (File.Exists(tempCanvasPath))
+            // Load the merged JPEG and save as PDF with custom author metadata
+            using (Image pdfSource = Image.Load(tempJpegPath))
             {
-                File.Delete(tempCanvasPath);
+                PdfOptions pdfOptions = new PdfOptions();
+                pdfOptions.PdfDocumentInfo = new PdfDocumentInfo() { Author = "Custom Author" };
+                pdfSource.Save(outputPdfPath, pdfOptions);
+            }
+
+            // Optionally delete the temporary JPEG file
+            if (File.Exists(tempJpegPath))
+            {
+                File.Delete(tempJpegPath);
             }
         }
         catch (Exception ex)
@@ -91,9 +107,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to combine multiple product photos into a single horizontally‑stitched PDF and embed the photographer’s name as the Author metadata for brand compliance.
- * 2. When an e‑learning platform wants to merge scanned lecture slides (JPEGs) into one PDF and automatically set the course instructor as the Author field for searchable course catalogs.
- * 3. When a legal firm creates a single PDF dossier from scanned evidence images and must add the attorney’s name as Author metadata to satisfy document‑tracking requirements.
- * 4. When a marketing automation tool assembles campaign banner images into a horizontal PDF brochure and includes the campaign manager’s name in the PDF metadata for audit trails.
- * 5. When a real‑estate application merges property interior photos into a PDF flyer and records the listing agent as the Author metadata to improve document indexing in property management systems.
+ * 1. When a developer needs to combine several product photos side‑by‑side into a single PDF report and embed the creator’s name for compliance.
+ * 2. When an application must generate a printable catalog by stitching landscape images horizontally and tag the PDF with author information for digital rights management.
+ * 3. When a workflow requires converting a series of scanned receipts (JPEG) into one PDF document while preserving the author metadata for audit trails.
+ * 4. When a web service creates a combined brochure from multiple JPEG banners and needs to set the PDF author field so the document can be searched by author in document management systems.
+ * 5. When an automated script assembles marketing banners into a single PDF and adds custom author metadata to satisfy corporate branding guidelines.
  */
