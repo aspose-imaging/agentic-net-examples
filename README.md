@@ -4,7 +4,7 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Examples | 2902 |
+| Total Examples | 2900 |
 | Categories | 17 |
 | Overall Pass Rate | 100.0% |
 | Last Updated | 2026-08-17 |
@@ -50,7 +50,7 @@ README.md
 | [Converting WMF and EMF](./converting-wmf-and-emf/) | 29 | 100.0% | [agents.md](./converting-wmf-and-emf/agents.md) |
 | [Image and Photo Filters](./image-and-photo-filters/) | 148 | 100.0% | [agents.md](./image-and-photo-filters/agents.md) |
 | [Kernel Filters](./kernel-filters/) | 465 | 100.0% | [agents.md](./kernel-filters/agents.md) |
-| [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 604 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
+| [Manipulate Different Image File Formats](./manipulate-different-image-file-formats/) | 602 | 100.0% | [agents.md](./manipulate-different-image-file-formats/agents.md) |
 | [Manipulating Images](./manipulating-images/) | 425 | 100.0% | [agents.md](./manipulating-images/agents.md) |
 | [Merge Images](./merge-images/) | 135 | 100.0% | [agents.md](./merge-images/agents.md) |
 | [Working With Drawing Images](./working-with-drawing-images/) | 401 | 100.0% | [agents.md](./working-with-drawing-images/agents.md) |
@@ -110,7 +110,7 @@ The agent exposes a public REST API for programmatic access:
 
 All examples are compiler-validated against the target NuGet version before being committed. The benchmark is a 100% build pass rate across all generated examples.
 
-| Version | Total Examples | 2902 | Framework |
+| Version | Total Examples | 2900 | Framework |
 |---------|---------------|-----------|----------|
 | 26.6.0 | 2909 | 100.0% | net9.0 |
 
