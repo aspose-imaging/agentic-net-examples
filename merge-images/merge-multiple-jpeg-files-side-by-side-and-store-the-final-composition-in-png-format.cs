@@ -1,3 +1,4 @@
+// HOW-TO: Merge Multiple JPEG Images Horizontally Into a PNG With C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -10,15 +11,14 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string[] inputPaths = new[] { "image1.jpg", "image2.jpg", "image3.jpg" };
+        string outputPath = "merged.png";
+
         try
         {
-            // Hardcoded input JPEG file paths
-            string[] inputPaths = { "image1.jpg", "image2.jpg", "image3.jpg" };
-            // Hardcoded output PNG file path
-            string outputPath = "merged.png";
-
-            // Validate each input file exists
-            foreach (var path in inputPaths)
+            // Validate each input file
+            foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
                 {
@@ -27,12 +27,9 @@ class Program
                 }
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Collect sizes of all input images
             List<Size> sizes = new List<Size>();
-            foreach (var path in inputPaths)
+            foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
@@ -41,19 +38,21 @@ class Program
             }
 
             // Calculate canvas dimensions for horizontal merge
-            int canvasWidth = sizes.Sum(s => s.Width);
-            int canvasHeight = sizes.Max(s => s.Height);
+            int newWidth = sizes.Sum(s => s.Width);
+            int newHeight = sizes.Max(s => s.Height);
 
-            // Prepare PNG creation options with bound output source
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Prepare PNG options with bound source
             Source src = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions { Source = src };
+            PngOptions pngOptions = new PngOptions() { Source = src };
 
-            // Create the output canvas
-            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
+            // Create canvas and merge images side by side
+            using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, newWidth, newHeight))
             {
                 int offsetX = 0;
-                // Merge each JPEG onto the canvas side by side
-                foreach (var path in inputPaths)
+                foreach (string path in inputPaths)
                 {
                     using (RasterImage img = (RasterImage)Image.Load(path))
                     {
@@ -62,7 +61,8 @@ class Program
                         offsetX += img.Width;
                     }
                 }
-                // Save the bound canvas (output path already set in source)
+
+                // Save the bound canvas (output path already bound via FileCreateSource)
                 canvas.Save();
             }
         }
@@ -75,9 +75,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a product catalog thumbnail that combines multiple JPEG photos side by side into a single PNG for web display.
- * 2. When generating a before‑and‑after comparison image by stitching two JPEG shots horizontally and exporting the result as a lossless PNG for documentation.
- * 3. When building a photo‑strip collage for a social‑media post where several JPEG snapshots need to be merged into one PNG banner using C# and Aspose.Imaging.
- * 4. When preparing a printable proof sheet that aligns several JPEG scans on a single canvas and saves it as a high‑resolution PNG for quality control.
- * 5. When developing an automated report that assembles chart images captured as JPEGs into a single side‑by‑side PNG diagram for inclusion in PDF reports.
+ * 1. When you need to create a single panoramic preview by stitching several product photos (JPEG) side by side and outputting a PNG for web display.
+ * 2. When generating a composite thumbnail that combines multiple camera snapshots into one image for reporting dashboards using C# and Aspose.Imaging.
+ * 3. When building an automated workflow that concatenates scanned document pages saved as JPEG into a single PNG file for archival or printing.
+ * 4. When developing a photo‑gallery application that shows a series of user‑uploaded JPEGs in a horizontal strip without losing quality, saved as PNG.
+ * 5. When preparing side‑by‑side before‑after comparisons of images by merging two JPEGs into one PNG for marketing materials.
  */
