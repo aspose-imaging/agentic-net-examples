@@ -1,4 +1,4 @@
-// HOW-TO: Vertically Merge JPEG Images With 4:2:0 Subsampling In C# (Aspose.Imaging for .NET)
+// HOW-TO: Merge Two JPEG Images Vertically With 4:2:0 Subsampling In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -13,41 +13,38 @@ class Program
     {
         try
         {
-            // Hardcoded input image paths
-            string[] inputPaths = new string[]
-            {
-                "input1.jpg",
-                "input2.jpg",
-                "input3.jpg"
-            };
+            // Hardcoded input and output paths
+            string inputPath1 = "input1.jpg";
+            string inputPath2 = "input2.jpg";
+            string outputPath = "output.jpg";
 
-            // Hardcoded output image path
-            string outputPath = "merged_output.jpg";
-
-            // Validate each input file exists
-            foreach (string inputPath in inputPaths)
+            // Validate input files
+            if (!File.Exists(inputPath1))
             {
-                if (!File.Exists(inputPath))
-                {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
-                }
+                Console.Error.WriteLine($"File not found: {inputPath1}");
+                return;
+            }
+            if (!File.Exists(inputPath2))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath2}");
+                return;
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Collect sizes of all input images
+            // Collect image sizes
             List<Size> sizes = new List<Size>();
-            foreach (string inputPath in inputPaths)
+            string[] inputPaths = new string[] { inputPath1, inputPath2 };
+            foreach (string path in inputPaths)
             {
-                using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                using (RasterImage img = (RasterImage)Image.Load(path))
                 {
                     sizes.Add(img.Size);
                 }
             }
 
-            // Calculate canvas size for vertical merge
+            // Calculate canvas dimensions for vertical merge
             int canvasWidth = 0;
             int canvasHeight = 0;
             foreach (Size sz in sizes)
@@ -56,21 +53,23 @@ class Program
                 canvasHeight += sz.Height;
             }
 
-            // Prepare JPEG options
+            // Create JPEG options with 4:2:0 subsampling
             Source src = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions()
             {
                 Source = src,
-                Quality = 90
+                Quality = 90,
+                HorizontalSampling = new byte[] { 2, 1, 1 },
+                VerticalSampling = new byte[] { 2, 1, 1 }
             };
 
-            // Create JPEG canvas bound to the output file
+            // Create bound JPEG canvas using Image.Create
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = 0;
-                foreach (string inputPath in inputPaths)
+                foreach (string path in inputPaths)
                 {
-                    using (RasterImage img = (RasterImage)Image.Load(inputPath))
+                    using (RasterImage img = (RasterImage)Image.Load(path))
                     {
                         Rectangle bounds = new Rectangle(0, offsetY, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
@@ -78,7 +77,7 @@ class Program
                     }
                 }
 
-                // Save the bound image (no path needed)
+                // Save the merged image (bound image, so just Save())
                 canvas.Save();
             }
         }
@@ -91,9 +90,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When you need to combine several scanned pages into a single JPEG while keeping the file size low by applying 4:2:0 chroma subsampling.
- * 2. When generating a long vertical banner from multiple product photos and want to optimize bandwidth for web delivery using Aspose.Imaging in C#.
- * 3. When creating a printable PDF preview that requires a single high‑resolution JPEG composed of stacked images with reduced color data to meet email attachment limits.
- * 4. When automating the preparation of image sprites for mobile apps, merging icons vertically and using subsampling to satisfy strict storage constraints.
- * 5. When processing camera burst shots into one continuous image for a gallery view, and you need to preserve visual quality while minimizing storage using JPEG options in .NET.
+ * 1. When you need to combine multiple JPEG photos into a single tall image while keeping the output file size low by applying 4:2:0 chroma subsampling.
+ * 2. When generating printable photo strips or receipts that require vertically stacked JPEGs with consistent width and optimized compression.
+ * 3. When creating a web‑ready collage of product images where the combined JPEG must meet bandwidth constraints through reduced chroma resolution.
+ * 4. When automating the preparation of scanned document pages saved as JPEGs into one continuous page without sacrificing visual quality.
+ * 5. When building a C# service that merges user‑uploaded JPEG avatars into a single banner and wants to use Aspose.Imaging to control JPEG quality and subsampling.
  */
