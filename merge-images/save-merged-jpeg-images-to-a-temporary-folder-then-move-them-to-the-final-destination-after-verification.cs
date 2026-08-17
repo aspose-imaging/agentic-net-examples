@@ -1,101 +1,76 @@
+// HOW-TO: Merge Multiple JPEGs to One File Using Temp Folder in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Hardcoded paths
-            string[] inputPaths = new[]
-            {
-                "Input\\image1.jpg",
-                "Input\\image2.jpg",
-                "Input\\image3.jpg"
+            // Hard‑coded input JPEG file paths
+            string[] inputPaths = {
+                @"C:\Images\img1.jpg",
+                @"C:\Images\img2.jpg"
             };
-            string tempFolder = "Temp";
-            string finalFolder = "Output";
-            string tempOutputPath = Path.Combine(tempFolder, "merged_temp.jpg");
-            string finalOutputPath = Path.Combine(finalFolder, "merged.jpg");
 
-            // Verify input files
-            foreach (string path in inputPaths)
+            // Hard‑coded final output path
+            string finalOutputPath = @"C:\Output\merged.jpg";
+
+            // Verify each input file exists
+            foreach (string inputPath in inputPaths)
             {
-                if (!File.Exists(path))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {path}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
             }
 
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(tempOutputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(finalOutputPath));
-
-            // Collect sizes of all input images
-            List<Size> sizes = new List<Size>();
-            foreach (string path in inputPaths)
+            // Load each JPEG image
+            Image[] images = new Image[inputPaths.Length];
+            for (int i = 0; i < inputPaths.Length; i++)
             {
-                using (RasterImage img = (RasterImage)Image.Load(path))
+                images[i] = Image.Load(inputPaths[i]);
+            }
+
+            // Create a multipage image from the loaded images
+            using (Image merged = Image.Create(images))
+            {
+                // Prepare temporary folder and file
+                string tempFolder = Path.Combine(Path.GetTempPath(), "AsposeMergeTemp");
+                Directory.CreateDirectory(tempFolder); // unconditional per requirements
+                string tempPath = Path.Combine(tempFolder, "merged_temp.jpg");
+
+                // Save the merged image to the temporary location
+                merged.Save(tempPath, new JpegOptions());
+
+                // Verify the temporary file was created
+                if (!File.Exists(tempPath))
                 {
-                    sizes.Add(img.Size);
+                    Console.Error.WriteLine($"Failed to create temporary file: {tempPath}");
+                    return;
                 }
-            }
 
-            // Calculate canvas dimensions for horizontal merge
-            int canvasWidth = 0;
-            int canvasHeight = 0;
-            foreach (Size sz in sizes)
-            {
-                canvasWidth += sz.Width;
-                if (sz.Height > canvasHeight) canvasHeight = sz.Height;
-            }
+                // Ensure the final output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(finalOutputPath));
 
-            // Prepare JPEG options with temporary file source
-            Source tempSource = new FileCreateSource(tempOutputPath, false);
-            JpegOptions jpegOptions = new JpegOptions
-            {
-                Source = tempSource,
-                Quality = 90
-            };
-
-            // Create canvas and merge images horizontally
-            using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, canvasWidth, canvasHeight))
-            {
-                int offsetX = 0;
-                foreach (string path in inputPaths)
-                {
-                    using (RasterImage img = (RasterImage)Image.Load(path))
-                    {
-                        Rectangle bounds = new Rectangle(offsetX, 0, img.Width, img.Height);
-                        canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                        offsetX += img.Width;
-                    }
-                }
-                // Save the bound image (file already bound via Source)
-                canvas.Save();
-            }
-
-            // Verify temporary file was created and move to final destination
-            if (File.Exists(tempOutputPath))
-            {
-                // Overwrite if final file already exists
+                // If a file already exists at the final location, delete it
                 if (File.Exists(finalOutputPath))
                 {
                     File.Delete(finalOutputPath);
                 }
-                File.Move(tempOutputPath, finalOutputPath);
-                Console.WriteLine($"Merged image saved to: {finalOutputPath}");
+
+                // Move the verified temporary file to the final destination
+                File.Move(tempPath, finalOutputPath);
             }
-            else
+
+            // Dispose loaded source images
+            foreach (var img in images)
             {
-                Console.Error.WriteLine("Failed to create the merged image.");
+                img.Dispose();
             }
         }
         catch (Exception ex)
@@ -107,9 +82,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service needs to combine multiple user‑uploaded JPEG photos into a single panoramic image, it can first write the merged file to a temporary folder, verify its integrity, and then move it to the final output directory.
- * 2. When an automated batch job processes scanned documents, merges them side‑by‑side as a JPEG, and must ensure the merged file is successfully created before publishing it to a document management system, using a temp folder prevents incomplete files from being exposed.
- * 3. When a desktop application creates a composite product thumbnail from several JPEG assets and wants to avoid displaying a partially rendered image, it can generate the thumbnail in a Temp directory, run a checksum verification, and then relocate it to the user‑visible Output folder.
- * 4. When a CI/CD pipeline builds marketing assets by stitching together campaign JPEG images, storing the intermediate merged image in a temporary location allows the pipeline to roll back if the verification step fails before committing the final image to the release folder.
- * 5. When a cloud‑based image processing API merges client‑provided JPEGs horizontally and must guarantee that only fully verified images are stored in the persistent storage bucket, it can write the result to a temporary path, perform validation, and then move the file to the final destination.
+ * 1. When you need to combine several JPEG photos into a single image while ensuring the output is only saved after confirming the temporary file was created correctly.
+ * 2. When a batch process must verify each source JPEG exists before merging to avoid runtime errors in a C# application.
+ * 3. When you want to write the merged JPEG to a secure location only after successful creation in a temporary directory, reducing the risk of corrupted files.
+ * 4. When an automated workflow requires creating a combined JPEG and moving it to a final output folder that may not yet exist.
+ * 5. When you must isolate the merge operation in a sandboxed temp folder to comply with file‑system permissions or cleanup policies before publishing the result.
  */

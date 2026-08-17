@@ -1,8 +1,12 @@
+// HOW-TO: Merge JPEG Images Horizontally And Add Logo Watermark In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
+using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
 
 class Program
@@ -11,12 +15,16 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string[] inputPaths = { "input1.jpg", "input2.jpg" };
+            // Input image paths (hardcoded)
+            string[] inputPaths = new string[]
+            {
+                "image1.jpg",
+                "image2.jpg"
+            };
             string logoPath = "logo.png";
-            string outputPath = "output/merged.png";
+            string outputPath = "merged.png";
 
-            // Validate input files
+            // Validate input images
             foreach (string path in inputPaths)
             {
                 if (!File.Exists(path))
@@ -25,6 +33,8 @@ class Program
                     return;
                 }
             }
+
+            // Validate logo image
             if (!File.Exists(logoPath))
             {
                 Console.Error.WriteLine($"File not found: {logoPath}");
@@ -35,30 +45,27 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Collect sizes of input images
-            List<Size> sizes = new List<Size>();
+            List<Aspose.Imaging.Size> sizeList = new List<Aspose.Imaging.Size>();
             foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    sizes.Add(img.Size);
+                    sizeList.Add(img.Size);
                 }
             }
 
             // Calculate canvas dimensions (horizontal merge)
-            int canvasWidth = 0;
-            int canvasHeight = 0;
-            foreach (Size sz in sizes)
-            {
-                canvasWidth += sz.Width;
-                if (sz.Height > canvasHeight) canvasHeight = sz.Height;
-            }
+            int canvasWidth = sizeList.Sum(s => s.Width);
+            int canvasHeight = sizeList.Max(s => s.Height);
 
-            // Create bound PNG canvas
-            Source src = new FileCreateSource(outputPath, false);
-            PngOptions pngOptions = new PngOptions() { Source = src };
+            // Create output source and PNG options
+            Source outputSource = new FileCreateSource(outputPath, false);
+            PngOptions pngOptions = new PngOptions() { Source = outputSource };
+
+            // Create canvas bound to output file
             using (RasterImage canvas = (RasterImage)Image.Create(pngOptions, canvasWidth, canvasHeight))
             {
-                // Merge input images side by side
+                // Merge images horizontally
                 int offsetX = 0;
                 foreach (string path in inputPaths)
                 {
@@ -70,16 +77,16 @@ class Program
                     }
                 }
 
-                // Overlay logo at bottom‑right corner
+                // Load logo image
                 using (RasterImage logo = (RasterImage)Image.Load(logoPath))
                 {
-                    int posX = canvas.Width - logo.Width;
-                    int posY = canvas.Height - logo.Height;
-                    Rectangle logoBounds = new Rectangle(posX, posY, logo.Width, logo.Height);
+                    int logoPosX = canvas.Width - logo.Width;
+                    int logoPosY = canvas.Height - logo.Height;
+                    Rectangle logoBounds = new Rectangle(logoPosX, logoPosY, logo.Width, logo.Height);
                     canvas.SaveArgb32Pixels(logoBounds, logo.LoadArgb32Pixels(logo.Bounds));
                 }
 
-                // Save the bound image
+                // Save the bound canvas
                 canvas.Save();
             }
         }
@@ -92,9 +99,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a product catalog thumbnail by stitching multiple JPEG photos side‑by‑side and adding the company’s PNG logo in the bottom‑right corner before exporting as a PNG for web display.
- * 2. When an e‑commerce platform wants to generate promotional banners that combine several JPEG advertisements into one image and brand them with a transparent PNG logo overlay at the lower‑right edge.
- * 3. When a photo‑sharing app must merge user‑uploaded JPEG snapshots into a single collage and automatically watermark the collage with a PNG logo positioned at the bottom‑right before saving as PNG for sharing.
- * 4. When a marketing automation script prepares email newsletters by concatenating multiple JPEG images of offers and appends the corporate PNG logo in the bottom‑right corner to ensure brand consistency in the final PNG attachment.
- * 5. When a digital signage system assembles multiple JPEG slides into one widescreen image and overlays a transparent PNG sponsor logo at the bottom‑right before rendering the output as a PNG file for display.
+ * 1. When you need to combine product photos side‑by‑side and brand the result with a company logo before publishing online.
+ * 2. When creating a single promotional banner from multiple JPEG ads and want the logo placed automatically at the bottom‑right corner.
+ * 3. When generating a composite image for a PDF report that merges scanned pages and adds a confidential watermark logo.
+ * 4. When building a web service that receives several JPEG uploads, stitches them together, and returns a PNG with a logo for brand consistency.
+ * 5. When preparing images for an e‑commerce catalog where each merged photo must include a trademark logo in the corner to prevent unauthorized use.
  */

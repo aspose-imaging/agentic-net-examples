@@ -1,3 +1,4 @@
+// HOW-TO: Load JPEG Images with Memory Limit and Merge Horizontally in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -14,7 +15,12 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
+            string[] inputPaths = new string[]
+            {
+                "input1.jpg",
+                "input2.jpg"
+                // Add more input files as needed
+            };
             string outputPath = "output.jpg";
 
             // Validate input files
@@ -30,9 +36,11 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load each image to collect sizes (memory‑limited loading)
-            var sizes = new List<Size>();
-            var loadOptions = new LoadOptions { BufferSizeHint = 50 };
+            // Load options with memory limit (e.g., 50 MB)
+            LoadOptions loadOptions = new LoadOptions { BufferSizeHint = 50 };
+
+            // Collect sizes of all input images
+            List<Size> sizes = new List<Size>();
             foreach (string path in inputPaths)
             {
                 using (RasterImage img = (RasterImage)Image.Load(path, loadOptions))
@@ -41,19 +49,19 @@ class Program
                 }
             }
 
-            // Calculate canvas dimensions for horizontal merge
+            // Calculate canvas size for horizontal merge
             int newWidth = sizes.Sum(s => s.Width);
             int newHeight = sizes.Max(s => s.Height);
 
-            // Prepare output canvas with JPEG options
+            // Create JPEG options with bound output source
             Source src = new FileCreateSource(outputPath, false);
             JpegOptions jpegOptions = new JpegOptions
             {
                 Source = src,
-                Quality = 90,
-                BufferSizeHint = 50
+                Quality = 90 // Adjust quality as needed
             };
 
+            // Create canvas bound to the output file
             using (JpegImage canvas = (JpegImage)Image.Create(jpegOptions, newWidth, newHeight))
             {
                 int offsetX = 0;
@@ -67,7 +75,7 @@ class Program
                     }
                 }
 
-                // Save the bound image
+                // Save the bound canvas
                 canvas.Save();
             }
         }
@@ -80,9 +88,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service must stitch several high‑resolution JPEG product images into a single horizontal banner while running on a low‑memory VM, this code uses ImageLoadOptions with BufferSizeHint to limit RAM consumption during loading.
- * 2. When an automated reporting tool needs to merge daily scanned JPEG receipts side‑by‑side into one file without exhausting server memory, the example demonstrates how to load each image with a memory‑friendly buffer and create a combined JpegImage.
- * 3. When a mobile‑backend API creates a panoramic view from user‑uploaded JPEG photos on a device‑restricted server, the BufferSizeHint option ensures each RasterImage is loaded efficiently before the horizontal merge.
- * 4. When a batch‑processing job consolidates multiple JPEG thumbnails into a single wide catalog image on a shared hosting environment, the code shows how to calculate canvas size and merge images while keeping memory usage low.
- * 5. When an e‑commerce platform generates a combined promotional JPEG banner from several promotional images on a container with limited RAM, the example illustrates using JpegOptions and LoadOptions to safely load and merge the files horizontally.
+ * 1. When processing a large batch of high‑resolution JPEG photos on a server with limited RAM, you can load each image with a buffer size hint to prevent out‑of‑memory errors and stitch them side‑by‑side into a single output file.
+ * 2. When creating a panoramic view from several JPEG tiles in a desktop application, the code lets you safely load each tile using Aspose.Imaging’s LoadOptions while keeping memory consumption under a defined threshold.
+ * 3. When generating a composite advertisement banner from multiple product JPEG images on a low‑memory IoT device, the approach ensures each image is loaded efficiently before being merged horizontally.
+ * 4. When building an automated image‑processing pipeline that concatenates scanned JPEG pages into a single wide image, you can control the memory footprint by specifying BufferSizeHint during loading.
+ * 5. When developing a web service that receives user‑uploaded JPEGs and returns a combined side‑by‑side preview, the snippet shows how to limit memory usage while assembling the final JPEG with Aspose.Imaging.
  */
