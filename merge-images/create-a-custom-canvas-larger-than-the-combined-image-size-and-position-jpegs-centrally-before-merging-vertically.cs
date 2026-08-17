@@ -1,7 +1,9 @@
+// HOW-TO: Create a Larger Canvas and Center JPEG Images Vertically in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.Sources;
@@ -12,14 +14,16 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input JPEG files
             string[] inputPaths = new string[]
             {
                 "input1.jpg",
                 "input2.jpg",
                 "input3.jpg"
             };
-            string outputPath = "output.jpg";
+
+            // Hardcoded output file
+            string outputPath = "output/merged.jpg";
 
             // Validate input files
             foreach (string path in inputPaths)
@@ -35,41 +39,44 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Collect sizes of all input images
-            List<Aspose.Imaging.Size> sizes = new List<Aspose.Imaging.Size>();
+            List<Size> sizes = new List<Size>();
             foreach (string path in inputPaths)
             {
-                using (JpegImage img = (JpegImage)Aspose.Imaging.Image.Load(path))
+                using (RasterImage img = (RasterImage)Image.Load(path))
                 {
-                    sizes.Add(new Aspose.Imaging.Size(img.Width, img.Height));
+                    sizes.Add(img.Size);
                 }
             }
 
-            // Determine canvas dimensions (add 20px padding on each side)
+            // Determine canvas dimensions (larger than combined size)
             int maxWidth = sizes.Max(s => s.Width);
             int totalHeight = sizes.Sum(s => s.Height);
-            int padding = 20;
-            int canvasWidth = maxWidth + padding * 2;
-            int canvasHeight = totalHeight + padding * 2;
+            int padding = 20; // extra space around and between images
 
-            // Create JPEG options with bound source
+            int canvasWidth = maxWidth + padding * 2;
+            int canvasHeight = totalHeight + padding * (inputPaths.Length + 1);
+
+            // Create JPEG options with bound output source
             JpegOptions jpegOptions = new JpegOptions
             {
                 Source = new FileCreateSource(outputPath, false),
                 Quality = 100
             };
 
-            // Create canvas image
-            using (JpegImage canvas = (JpegImage)Aspose.Imaging.Image.Create(jpegOptions, canvasWidth, canvasHeight))
+            // Create canvas bound to the output file
+            using (JpegImage canvas = new JpegImage(jpegOptions, canvasWidth, canvasHeight))
             {
                 int offsetY = padding;
+
+                // Merge each image vertically, centered horizontally
                 foreach (string path in inputPaths)
                 {
-                    using (JpegImage img = (JpegImage)Aspose.Imaging.Image.Load(path))
+                    using (RasterImage img = (RasterImage)Image.Load(path))
                     {
                         int offsetX = (canvasWidth - img.Width) / 2; // center horizontally
-                        Aspose.Imaging.Rectangle bounds = new Aspose.Imaging.Rectangle(offsetX, offsetY, img.Width, img.Height);
+                        Rectangle bounds = new Rectangle(offsetX, offsetY, img.Width, img.Height);
                         canvas.SaveArgb32Pixels(bounds, img.LoadArgb32Pixels(img.Bounds));
-                        offsetY += img.Height;
+                        offsetY += img.Height + padding;
                     }
                 }
 
@@ -86,9 +93,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a printable photo collage that stacks multiple JPEG portraits vertically with uniform white borders, they can use this code to create a larger canvas, center each image, and merge them into a single high‑quality JPEG.
- * 2. When building an e‑commerce product catalog where each product’s thumbnail must be displayed one after another on a single page with consistent spacing, the code provides a way to pad and vertically combine JPEG images into one document‑ready file.
- * 3. When creating a mobile app splash screen that showcases a series of tutorial screenshots stacked vertically with equal margins, developers can employ this routine to center each JPEG on a padded canvas before exporting the final image.
- * 4. When automating the preparation of before‑and‑after medical imaging slides where each JPEG needs to be aligned centrally on a common background for side‑by‑side comparison, this approach merges the images vertically with precise padding.
- * 5. When generating a social‑media story graphic that combines several JPEG memes into a single tall image with centered alignment and consistent border space, the code enables developers to assemble the final picture efficiently.
+ * 1. When you need to combine multiple product photos into a single high‑resolution JPEG with uniform padding for an online catalog.
+ * 2. When generating a printable collage of scanned documents where each page must be centered on a larger background canvas.
+ * 3. When preparing a vertical banner that stacks several advertisement JPEGs with consistent margins for a web page.
+ * 4. When creating a composite image for a report that requires all source JPEGs aligned centrally on a common canvas.
+ * 5. When automating the assembly of receipt images into one file while preserving original dimensions and adding whitespace around them.
  */
