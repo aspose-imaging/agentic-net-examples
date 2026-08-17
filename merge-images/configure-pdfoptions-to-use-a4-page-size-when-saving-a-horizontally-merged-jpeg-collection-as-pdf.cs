@@ -1,10 +1,13 @@
+// HOW-TO: Save Horizontally Merged JPEG Images As A4 PDF In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,19 +15,26 @@ class Program
     {
         try
         {
-            // Hardcoded input JPEG files and output PDF path
-            string[] inputPaths = { "input1.jpg", "input2.jpg", "input3.jpg" };
-            string outputPath = "merged.pdf";
-
-            // Validate input files
-            foreach (string path in inputPaths)
+            // Input JPEG files (hardcoded relative paths)
+            string[] inputPaths = new string[]
             {
-                if (!File.Exists(path))
+                "Input\\image1.jpg",
+                "Input\\image2.jpg",
+                "Input\\image3.jpg"
+            };
+
+            // Validate each input file
+            foreach (string inputPath in inputPaths)
+            {
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {path}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
             }
+
+            // Output PDF file (hardcoded relative path)
+            string outputPath = "Output\\merged.pdf";
 
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
@@ -40,17 +50,12 @@ class Program
             }
 
             // Calculate canvas dimensions for horizontal merge
-            int newWidth = 0;
-            int newHeight = 0;
-            foreach (Size sz in sizes)
-            {
-                newWidth += sz.Width;
-                if (sz.Height > newHeight) newHeight = sz.Height;
-            }
+            int canvasWidth = sizes.Sum(s => s.Width);
+            int canvasHeight = sizes.Max(s => s.Height);
 
-            // Create an unbound JPEG canvas
+            // Create a raster canvas (no source bound)
             JpegOptions canvasOptions = new JpegOptions();
-            using (JpegImage canvas = (JpegImage)Image.Create(canvasOptions, newWidth, newHeight))
+            using (RasterImage canvas = (RasterImage)Image.Create(canvasOptions, canvasWidth, canvasHeight))
             {
                 int offsetX = 0;
                 foreach (string path in inputPaths)
@@ -63,10 +68,13 @@ class Program
                     }
                 }
 
-                // Configure PDF options (default settings)
-                PdfOptions pdfOptions = new PdfOptions();
+                // Configure PDF options with A4 page size (595x842 points)
+                PdfOptions pdfOptions = new PdfOptions
+                {
+                    PageSize = new SizeF(595f, 842f)
+                };
 
-                // Save the merged image as PDF
+                // Save the merged canvas as PDF
                 canvas.Save(outputPath, pdfOptions);
             }
         }
@@ -79,9 +87,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to combine multiple product photos stored as JPEG files into a single A4‑sized PDF catalog page for printing or distribution.
- * 2. When an application must generate a printable PDF report that stitches together scanned receipts (JPEG) side‑by‑side on an A4 sheet for accounting audits.
- * 3. When a web service creates a PDF portfolio of horizontally aligned JPEG artwork thumbnails, ensuring the output matches standard A4 dimensions for client review.
- * 4. When an automated workflow merges daily camera snapshots (JPEG) into an A4 PDF timeline for archival or compliance purposes.
- * 5. When a desktop utility converts a series of JPEG screenshots into a single A4 PDF slide deck, using Aspose.Imaging’s PdfOptions to control page size.
+ * 1. When you need to combine multiple product photos placed side‑by‑side into a single A4‑sized PDF brochure for printing or distribution.
+ * 2. When an application must generate a printable catalog page by stitching landscape‑oriented JPEG screenshots into one PDF document.
+ * 3. When a reporting tool has to create an A4 PDF report that merges several scanned receipts horizontally for audit review.
+ * 4. When a web service converts a set of JPEG banners into a single A4 PDF flyer without losing image quality.
+ * 5. When an automated workflow assembles daily camera snapshots into an A4 PDF sheet for archival or email attachment.
  */
