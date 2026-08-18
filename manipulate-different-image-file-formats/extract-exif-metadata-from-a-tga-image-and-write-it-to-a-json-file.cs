@@ -1,9 +1,9 @@
+// HOW-TO: Extract EXIF Metadata From TGA Image To JSON In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Text.Json;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tga;
-using Aspose.Imaging.Exif;
 
 class Program
 {
@@ -13,7 +13,6 @@ class Program
         string inputPath = "input.tga";
         string outputPath = "output.json";
 
-        // Ensure any runtime exception is caught and reported
         try
         {
             // Verify input file exists
@@ -24,20 +23,24 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the TGA image
-            using (TgaImage tgaImage = (TgaImage)Image.Load(inputPath))
+            using (TgaImage image = (TgaImage)Image.Load(inputPath))
             {
-                // Access EXIF data
-                ExifData exifData = tgaImage.ExifData;
+                // Extract EXIF data
+                var exifData = image.ExifData;
 
-                // Serialize EXIF data to JSON (null-safe)
-                string json = exifData != null
-                    ? JsonSerializer.Serialize(exifData, new JsonSerializerOptions { WriteIndented = true })
-                    : "{}";
+                // Serialize EXIF data to JSON (null handling)
+                string json = JsonSerializer.Serialize(exifData, new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    // Ignore cycles or unsupported members
+                    IgnoreReadOnlyProperties = true,
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                });
 
-                // Write JSON to the output file
+                // Write JSON to output file
                 File.WriteAllText(outputPath, json);
             }
         }
@@ -50,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a game developer needs to catalog camera settings stored in TGA textures for a 3‑D asset pipeline, they can extract the EXIF metadata and save it as JSON for easy indexing.
- * 2. When a digital archivist wants to preserve the original capture information of scanned artwork saved as TGA files, extracting EXIF data to a JSON file enables searchable metadata in a content management system.
- * 3. When a photo‑processing service processes batch TGA images from a drone, extracting EXIF tags to JSON allows automated generation of flight logs and compliance reports.
- * 4. When a forensic analyst examines TGA screenshots for tampering, converting the embedded EXIF metadata to JSON provides a readable audit trail for legal documentation.
- * 5. When a C# application integrates with a cloud‑based image catalog, serializing TGA EXIF information to JSON simplifies transmission via REST APIs and downstream analytics.
+ * 1. When you need to read camera and creation details from a TGA file and store them in a JSON file for cataloging or search indexing.
+ * 2. When you want to export EXIF tags from TGA images to JSON so a web service can consume the metadata for image management.
+ * 3. When you are auditing a batch of TGA assets and require a machine‑readable JSON report of all embedded EXIF information.
+ * 4. When you need to migrate legacy TGA metadata into a database and use JSON as the intermediate format for easy parsing in C#.
+ * 5. When you are building a photo‑metadata viewer that loads TGA files and displays their EXIF data by first serializing it to JSON.
  */
