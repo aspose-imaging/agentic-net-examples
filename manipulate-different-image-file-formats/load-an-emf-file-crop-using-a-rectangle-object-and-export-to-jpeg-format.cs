@@ -1,37 +1,42 @@
+// HOW-TO: Crop EMF Image to Specific Area and Save as JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.emf";
-        string outputPath = "output.jpg";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\input.emf";
+        string outputPath = @"C:\Images\output.jpg";
 
         try
         {
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the EMF image
             using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
             {
-                // Example crop rectangle: top-left quarter of the image
-                Rectangle cropRect = new Rectangle(0, 0, emfImage.Width / 2, emfImage.Height / 2);
+                // Define the cropping rectangle (x, y, width, height)
+                Rectangle cropRect = new Rectangle(50, 50, 200, 200);
+
+                // Crop the image
                 emfImage.Crop(cropRect);
 
-                JpegOptions jpegOptions = new JpegOptions
-                {
-                    Quality = 90
-                };
-
+                // Save the cropped image as JPEG
+                JpegOptions jpegOptions = new JpegOptions();
                 emfImage.Save(outputPath, jpegOptions);
             }
         }
@@ -44,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a thumbnail of a specific region from a Windows Metafile (EMF) for a web preview, they can load the EMF, crop a rectangle, and save it as a JPEG.
- * 2. When an application must extract the logo area from a vector‑based EMF logo file and convert it to a high‑quality JPEG for email signatures, this code performs the crop and conversion.
- * 3. When a reporting tool has to embed only the top‑left quarter of a large EMF chart into a PDF as a raster image, the developer can use this snippet to crop and export to JPEG.
- * 4. When a document management system needs to create a preview image of a selected page region from an EMF diagram for thumbnail galleries, the code loads, crops, and saves the region as a JPEG.
- * 5. When a migration script must convert legacy EMF icons into compressed JPEG assets while keeping only the relevant icon area, this code provides the necessary cropping and format conversion.
+ * 1. When you need to extract a portion of a vector‑based EMF diagram and deliver it as a lightweight JPEG for web display.
+ * 2. When generating thumbnails of selected regions from engineering drawings stored as EMF files for inclusion in reports.
+ * 3. When converting a cropped section of a Windows Metafile into a raster format to embed in email newsletters.
+ * 4. When automating batch processing that trims unnecessary margins from EMF logos before saving them as JPEG assets.
+ * 5. When creating a preview image of a specific area of a CAD‑exported EMF file for a mobile application.
  */
