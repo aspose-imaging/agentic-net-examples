@@ -1,3 +1,4 @@
+// HOW-TO: Extract EPS Preview and Save as JPEG in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "sample.eps";
+        string outputPath = "preview.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.eps";
-            string outputPath = "output.jpg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,23 +22,22 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load EPS image
             using (var epsImage = (EpsImage)Image.Load(inputPath))
             {
                 // Retrieve the preview image (default format)
-                using (var preview = epsImage.GetPreviewImage())
-                {
-                    if (preview == null)
-                    {
-                        Console.Error.WriteLine("No preview image found in the EPS file.");
-                        return;
-                    }
+                var preview = epsImage.GetPreviewImage();
 
-                    // Save preview as JPEG with default settings
-                    preview.Save(outputPath);
+                if (preview == null)
+                {
+                    Console.Error.WriteLine("No preview image found in the EPS file.");
+                    return;
                 }
+
+                // Save preview as JPEG using default settings
+                preview.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -49,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to display a thumbnail of an uploaded EPS logo without rendering the full vector, a developer can extract the EPS preview and save it as a JPEG for fast browser rendering.
- * 2. When generating product catalogs that include vector artwork, a developer can convert the EPS preview to JPEG to embed low‑resolution images in PDF or HTML pages.
- * 3. When building an automated email system that attaches a preview of a designer's EPS file, a developer can use this code to create a JPEG attachment that most email clients can display.
- * 4. When migrating legacy design assets to a content management system that only accepts raster formats, a developer can extract the EPS preview and store it as a JPEG for indexing and search.
- * 5. When creating a batch processing script that validates incoming EPS files by checking their preview images, a developer can save the preview as JPEG to compare against expected visual standards.
+ * 1. When you need to generate a thumbnail JPEG from an EPS file for a web gallery.
+ * 2. When you want to quickly display a preview of a vector EPS logo in a Windows application without rendering the full vector.
+ * 3. When an automated workflow must convert embedded EPS previews to JPEG for email attachments.
+ * 4. When a document processing service extracts the low‑resolution preview from EPS files to create preview pages in a PDF viewer.
+ * 5. When a batch job validates that EPS files contain a preview image by saving it as JPEG for further analysis.
  */
