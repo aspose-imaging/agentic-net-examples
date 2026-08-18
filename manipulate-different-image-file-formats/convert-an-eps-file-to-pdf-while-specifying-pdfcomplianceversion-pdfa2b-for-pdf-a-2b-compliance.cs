@@ -1,4 +1,4 @@
-// HOW-TO: Convert EPS to PDF with PDF/A‑2b Compliance in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS to PDF with PDF/A-2b Compliance in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,19 +10,23 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.eps";
-        string outputPath = "Output/sample.pdf";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/sample.pdf";
+
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load EPS image and convert to PDF
             using (var image = (EpsImage)Image.Load(inputPath))
             {
                 var options = new PdfOptions();
@@ -38,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate archival‑ready PDF/A‑2b documents from vector EPS artwork for long‑term storage.
- * 2. When an application must batch‑process EPS logos and embed them into PDF reports that must meet PDF/A‑2b standards.
- * 3. When a print workflow requires converting EPS files to PDF while ensuring the output complies with PDF/A‑2b for regulatory submission.
- * 4. When a document management system imports EPS diagrams and needs to store them as PDF/A‑2b files for consistent viewing across platforms.
- * 5. When a C# service creates PDF/A‑2b compliant PDFs from EPS templates for electronic invoicing or legal documents.
+ * 1. When a publishing workflow requires converting vector EPS artwork to PDF files that meet PDF/A‑2b archival standards using C#.
+ * 2. When an automated document processing system must generate PDF/A‑2b compliant PDFs from EPS logos for long‑term storage.
+ * 3. When a print‑ready pipeline needs to ensure EPS designs are transformed into PDF/A‑2b PDFs to satisfy regulatory compliance before printing.
+ * 4. When a cloud service needs to batch‑convert user‑uploaded EPS files to PDF/A‑2b PDFs for legal document submission.
+ * 5. When a .NET application integrates Aspose.Imaging to create searchable, standards‑compliant PDFs from EPS diagrams for archival databases.
  */
