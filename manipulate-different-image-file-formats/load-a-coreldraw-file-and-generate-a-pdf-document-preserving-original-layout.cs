@@ -1,3 +1,4 @@
+// HOW-TO: Convert CorelDRAW CDR to PDF Preserving Original Layout in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,9 +11,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Data\sample.cdr";
-            string outputPath = @"C:\Data\sample.cdr.pdf";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Input\sample.cdr";
+            string outputPath = @"C:\Output\sample.cdr.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,10 +28,10 @@ class Program
             // Load the CorelDRAW file
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PDF export options
+                // Configure PDF export options
                 var pdfOptions = new PdfOptions();
 
-                // Configure rasterization options for CDR vector content
+                // Configure rasterization options specific to CDR
                 var rasterOptions = new CdrRasterizationOptions
                 {
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
@@ -53,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design studio needs to automatically convert client‑supplied CorelDRAW (.cdr) artwork into PDF files for review while keeping the original layout intact.
- * 2. When a document management system must ingest CDR files and store them as searchable PDFs without manually opening each file in CorelDRAW.
- * 3. When a batch‑processing service generates printable PDFs from a folder of CorelDRAW drawings for a print‑on‑demand workflow.
- * 4. When a web application allows users to upload .cdr files and instantly provides a PDF preview that matches the vector layout of the source file.
- * 5. When an archival tool needs to preserve legacy CorelDRAW graphics by rasterizing them with specific rendering hints and saving them as PDF for long‑term storage.
+ * 1. When you need to programmatically convert a CorelDRAW CDR design into a PDF for client delivery while keeping the exact layout and text rendering.
+ * 2. When an automated build process must generate PDF documentation from CDR files without manual export in CorelDRAW.
+ * 3. When a web service receives CDR uploads and must return a PDF preview that matches the original vector appearance.
+ * 4. When migrating legacy CDR assets to a PDF archive and require precise positioning and smoothing settings via C#.
+ * 5. When integrating Aspose.Imaging into a desktop application to batch‑convert multiple CDR drawings to PDFs while preserving their original design fidelity.
  */
