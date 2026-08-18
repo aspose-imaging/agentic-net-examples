@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert TIFF Files to JPEG While Preserving Filenames in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,38 +8,34 @@ class Program
 {
     static void Main()
     {
-        // Wrap the whole logic in a try-catch to handle unexpected errors gracefully
         try
         {
             // Hardcoded input and output directories
-            string inputDirectory = @"C:\Images\Input";
-            string outputDirectory = @"C:\Images\Output";
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            string inputDir = @"C:\Images\Input";
+            string outputDir = @"C:\Images\Output";
 
             // Get all TIFF files in the input directory
-            string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
-            // Also include .tiff extension
-            string[] tiffFilesAlt = Directory.GetFiles(inputDirectory, "*.tiff");
-            string[] allTiffFiles = new string[tiffFiles.Length + tiffFilesAlt.Length];
-            tiffFiles.CopyTo(allTiffFiles, 0);
-            tiffFilesAlt.CopyTo(allTiffFiles, tiffFiles.Length);
+            string[] tiffFiles = Directory.GetFiles(inputDir, "*.tif");
+            // Also include .tiff extension if needed
+            string[] tiffFilesAlt = Directory.GetFiles(inputDir, "*.tiff");
+            string[] allFiles = new string[tiffFiles.Length + tiffFilesAlt.Length];
+            tiffFiles.CopyTo(allFiles, 0);
+            tiffFilesAlt.CopyTo(allFiles, tiffFiles.Length);
 
-            foreach (string inputPath in allTiffFiles)
+            foreach (string inputPath in allFiles)
             {
-                // Verify the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the output path with the same filename but .jpg extension
+                // Build output path with same filename but .jpg extension
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".jpg");
+                string outputPath = Path.Combine(outputDir, fileNameWithoutExt + ".jpg");
 
-                // Ensure the output directory exists (unconditional as per requirements)
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the TIFF image
@@ -51,7 +48,6 @@ class Program
         }
         catch (Exception ex)
         {
-            // Output any unexpected error message
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -59,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system needs to batch‑convert high‑resolution TIFF scans of patient records into smaller JPEG files for faster web viewing while keeping the original file names.
- * 2. When a document management workflow must archive scanned TIFF documents as JPEGs to reduce storage costs, using C# file I/O and Aspose.Imaging to process all files in a folder.
- * 3. When a photography studio wants to generate web‑ready JPEG previews of a large collection of TIFF RAW images, preserving the original filenames for easy cross‑reference.
- * 4. When an e‑commerce platform imports product catalogs supplied as TIFF files and automatically converts them to JPEG format for display on the website, using a loop to handle every file in the input directory.
- * 5. When a GIS application exports map layers as TIFF and later needs to create JPEG thumbnails for a mobile app, employing Aspose.Imaging’s Image.Load and JpegOptions while maintaining the source naming convention.
+ * 1. When you need to prepare a large collection of scanned TIFF documents for web publishing by converting them to smaller JPEG files without changing the original file names.
+ * 2. When an automated workflow must transform incoming TIFF images from a scanner into JPEGs for storage in a content‑management system while keeping the naming convention consistent.
+ * 3. When a desktop application has to batch‑process user‑uploaded TIFF photos and save them as JPEGs for faster preview generation.
+ * 4. When a migration script moves legacy TIFF assets to a new platform that only accepts JPEG images, requiring each file to retain its original identifier.
+ * 5. When a scheduled service converts nightly TIFF backups into JPEG format for quick visual inspection by non‑technical staff.
  */
