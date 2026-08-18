@@ -1,8 +1,10 @@
+// HOW-TO: Convert Specific DjVu Pages to Animated GIF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Gif;
 
 class Program
 {
@@ -10,8 +12,8 @@ class Program
     {
         try
         {
-            string inputPath = "input.djvu";
-            string outputPath = "Output\\output.gif";
+            string inputPath = "Input\\sample.djvu";
+            string outputPath = "Output\\pages_4_6.gif";
 
             if (!File.Exists(inputPath))
             {
@@ -21,14 +23,14 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
                 var gifOptions = new GifOptions
                 {
                     MultiPageOptions = new DjvuMultiPageOptions(new int[] { 3, 4, 5 })
                 };
 
-                djvuImage.Save(outputPath, gifOptions);
+                djvu.Save(outputPath, gifOptions);
             }
         }
         catch (Exception ex)
@@ -40,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to use C# and Aspose.Imaging to extract pages 4‑6 from a multi‑page DjVu file and create an animated GIF with a 100 ms frame delay for embedding in a web tutorial.
- * 2. When an e‑learning platform wants to convert scanned lecture notes stored as DjVu into a lightweight GIF slideshow, applying a custom 100 ms delay between frames to improve mobile loading speed.
- * 3. When a digital archivist must generate a preview animation of selected DjVu pages, using Aspose.Imaging to produce a GIF that loops with a consistent 100 ms frame interval for quick manuscript browsing.
- * 4. When a marketing application automatically transforms specific pages of a DjVu product catalog into a looping GIF banner, setting a 100 ms delay per frame to create a smooth visual effect.
- * 5. When a document‑processing pipeline in C# batch‑converts chosen DjVu pages into GIF animations for inclusion in email newsletters, ensuring each frame displays for exactly 100 ms.
+ * 1. When you need to extract pages 4‑6 from a DjVu file and create an animated GIF for quick web preview.
+ * 2. When you want to generate a lightweight GIF animation from selected DjVu pages to embed in documentation or tutorials.
+ * 3. When you have a multi‑page DjVu e‑book and must produce a short GIF preview of a chapter for mobile users.
+ * 4. When you need to convert scanned DjVu pages into a single GIF file to attach to an email without sending the large original document.
+ * 5. When you are building a batch process that converts specific DjVu pages into GIFs for archival or content‑management systems.
  */
