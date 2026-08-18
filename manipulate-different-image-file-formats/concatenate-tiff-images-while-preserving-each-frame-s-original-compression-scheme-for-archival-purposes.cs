@@ -1,3 +1,4 @@
+// HOW-TO: Combine Multiple TIFF Files Preserving Original Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,42 +8,41 @@ class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output file paths
+        string inputPath1 = @"c:\temp\input1.tif";
+        string inputPath2 = @"c:\temp\input2.tif";
+        string outputPath = @"c:\temp\output.tif";
+
         try
         {
-            // Hard‑coded input and output paths
-            string[] inputPaths = new string[] { "input1.tif", "input2.tif", "input3.tif" };
-            string outputPath = "output.tif";
-
-            // Verify each input file exists
-            foreach (var path in inputPaths)
+            // Verify that each input file exists
+            if (!File.Exists(inputPath1))
             {
-                if (!File.Exists(path))
-                {
-                    Console.Error.WriteLine($"File not found: {path}");
-                    return;
-                }
+                Console.Error.WriteLine($"File not found: {inputPath1}");
+                return;
+            }
+            if (!File.Exists(inputPath2))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath2}");
+                return;
             }
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the first TIFF as the base image
-            using (Image firstImg = Image.Load(inputPaths[0]))
+            // Load the first TIFF image – this will become the combined image
+            using (TiffImage combined = (TiffImage)Image.Load(inputPath1))
             {
-                var baseTiff = (TiffImage)firstImg;
-
-                // Append frames from the remaining TIFF files
-                for (int i = 1; i < inputPaths.Length; i++)
+                // Load the second TIFF image
+                using (TiffImage second = (TiffImage)Image.Load(inputPath2))
                 {
-                    using (Image img = Image.Load(inputPaths[i]))
-                    {
-                        var tiff = (TiffImage)img;
-                        baseTiff.Add(tiff); // Preserves each frame's original compression
-                    }
+                    // Append all frames from the second image to the combined image.
+                    // The original compression of each frame is preserved.
+                    combined.Add(second);
                 }
 
-                // Save the concatenated multi‑page TIFF
-                baseTiff.Save(outputPath);
+                // Save the concatenated TIFF image
+                combined.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -54,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to merge multiple scanned TIFF documents into a single multi‑page TIFF for archival while preserving each page’s original compression scheme (e.g., LZW, CCITT).
- * 2. When building a C# application that consolidates medical imaging reports exported as TIFF files into one file for easier storage and compliance auditing without re‑encoding the images.
- * 3. When creating a digital library system that combines separate high‑resolution TIFF photographs into a single catalog file while keeping each image’s native compression intact.
- * 4. When automating the generation of multi‑page TIFF invoices from individual page TIFFs, ensuring the original compression is retained to minimize file size.
- * 5. When developing a document management workflow that appends newly scanned TIFF pages to an existing TIFF archive without losing the original compression settings.
+ * 1. When you need to merge scanned document pages saved as separate TIFF files into a single multi‑page TIFF for archival while keeping each page’s original LZW or CCITT compression.
+ * 2. When a medical imaging system produces individual TIFF slices and you must concatenate them into one file without re‑encoding to maintain lossless quality.
+ * 3. When a digital preservation workflow requires combining TIFF images from different sources into a single archive file while preserving each frame’s original compression for authenticity.
+ * 4. When an automated batch process has to append new TIFF pages to an existing multi‑page TIFF without recompressing the existing frames.
+ * 5. When a GIS application stores raster layers as separate TIFF tiles and you need to stitch them into a single TIFF while retaining each tile’s compression for efficient storage.
  */
