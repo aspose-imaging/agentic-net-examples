@@ -1,3 +1,4 @@
+// HOW-TO: Convert EMF Byte Array To PDF Directly In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -5,38 +6,32 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Temp\sample.emf";
+        string outputPath = @"C:\Temp\Result\sample.pdf";
+
+        // Ensure any runtime exception is caught and reported
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = Path.Combine("Input", "sample.emf");
-            string outputPath = Path.Combine("Output", "sample.pdf");
-
-            // Validate input file existence
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Create the output directory unconditionally
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Read EMF file into a byte array
-            byte[] emfData = File.ReadAllBytes(inputPath);
-
-            // Load EMF from the byte array
-            using (MemoryStream ms = new MemoryStream(emfData))
+            // Load the EMF image from a byte array (memory stream)
+            byte[] emfBytes = File.ReadAllBytes(inputPath);
+            using (MemoryStream ms = new MemoryStream(emfBytes))
+            using (Image image = Image.Load(ms))
             {
-                using (Image image = Image.Load(ms))
-                {
-                    // Save directly to PDF format
-                    using (PdfOptions pdfOptions = new PdfOptions())
-                    {
-                        image.Save(outputPath, pdfOptions);
-                    }
-                }
+                // Save the image directly to PDF format
+                image.Save(outputPath, new PdfOptions());
             }
         }
         catch (Exception ex)
@@ -48,9 +43,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to convert user‑uploaded EMF vector graphics stored in a database as a byte array into PDF reports for printing or archiving.
- * 2. When an automated document pipeline must read EMF files from a network share, load them from memory, and generate PDF versions without creating intermediate files on disk.
- * 3. When a web service receives EMF data via an API request, loads it from a byte array, and returns a PDF stream to the client for preview in browsers.
- * 4. When a batch job processes a large collection of EMF assets, loading each file into a MemoryStream and saving directly to PDF to reduce I/O overhead and improve performance.
- * 5. When a legacy Windows application exports charts as EMF and a modern .NET component needs to transform those byte‑array images into PDF for cross‑platform distribution.
+ * 1. When you need to generate a PDF report from a vector EMF logo stored in memory without writing intermediate files.
+ * 2. When a web service receives an EMF image as a byte stream and must return a PDF document to the client.
+ * 3. When automating batch conversion of EMF drawings saved in a database to PDF for archival purposes.
+ * 4. When integrating with a third‑party API that supplies EMF data and expects PDF output for printing.
+ * 5. When creating a PDF invoice that embeds an EMF‑based chart that is only available as a byte array.
  */
