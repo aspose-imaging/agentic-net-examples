@@ -1,3 +1,4 @@
+// HOW-TO: Load EPS File and Convert to PNG in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,29 +10,33 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "sample.eps";
-        string outputPath = "output.png";
+        string inputPath = @"C:\Images\sample.eps";
+        string outputPath = @"C:\Images\output.png";
+
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            // Load the EPS image
+            using (Image image = Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Load EPS image with default load options
-            var loadOptions = new EpsLoadOptions();
-            using (Image image = Image.Load(inputPath, loadOptions))
-            {
-                // Example processing: output basic info
-                Console.WriteLine($"Loaded EPS image. Width: {image.Width}, Height: {image.Height}");
+                // Cast to EpsImage to access EPS‑specific properties (optional)
+                EpsImage epsImage = image as EpsImage;
+                if (epsImage != null)
+                {
+                    Console.WriteLine($"EPS Creation Date: {epsImage.CreationDate}");
+                    Console.WriteLine($"Width: {epsImage.Width}, Height: {epsImage.Height}");
+                }
 
                 // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Save the image as PNG
+                // Save as PNG using default options
                 var pngOptions = new PngOptions();
                 image.Save(outputPath, pngOptions);
             }
@@ -45,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an EPS vector file to a PNG raster image for web display, they can use Image.Load with EpsLoadOptions and save with PngOptions.
- * 2. When a developer wants to verify that an EPS file exists on disk and retrieve its width and height before performing further image processing, this code provides a simple C# solution.
- * 3. When a developer automates a batch job in a .NET build pipeline to transform multiple EPS logos into PNGs, the Image.Load and Save pattern can be applied repeatedly.
- * 4. When a developer extracts basic metadata such as dimensions from an EPS file to generate thumbnail previews, the loaded Image object supplies the required information.
- * 5. When a developer integrates EPS to PNG conversion into a desktop application that previews vector graphics, this code demonstrates the necessary C# operations and file‑format handling.
+ * 1. When you need to read an EPS vector logo from disk, extract its dimensions and creation date, and generate a raster PNG for web display using C#.
+ * 2. When a batch processing tool must verify that an EPS file exists before converting it to a PNG thumbnail for a product catalog.
+ * 3. When you want to programmatically convert legacy EPS artwork to PNG while preserving image quality without manually opening design software.
+ * 4. When an automated workflow requires loading an EPS file, accessing its metadata, and saving it in a different format for downstream image analysis.
+ * 5. When a .NET application must ensure the output folder exists and safely handle errors while converting EPS to PNG with Aspose.Imaging.
  */

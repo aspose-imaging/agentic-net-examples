@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert BMP Files to PNG with Parallel Processing in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -8,39 +9,36 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputFolder = @"C:\InputBmp";
-        string outputFolder = @"C:\OutputPng";
-
         try
         {
-            // Get all BMP files in the input folder (non-recursive)
-            string[] bmpFiles = Directory.GetFiles(inputFolder, "*.bmp");
+            // Hardcoded input and output directories
+            string inputFolder = @"C:\Images\BmpInput";
+            string outputFolder = @"C:\Images\PngOutput";
 
+            // Get all BMP files in the input folder
+            string[] bmpFiles = Directory.GetFiles(inputFolder, "*.bmp", SearchOption.TopDirectoryOnly);
             // Process files in parallel
-            Parallel.ForEach(bmpFiles, bmpPath =>
+            Parallel.ForEach(bmpFiles, bmpFilePath =>
             {
+                // Preserve original file name
+                string fileName = Path.GetFileName(bmpFilePath);
+                string inputPath = Path.Combine(inputFolder, fileName);
                 // Verify input file exists
-                if (!File.Exists(bmpPath))
+                if (!File.Exists(inputPath))
                 {
-                    Console.Error.WriteLine($"File not found: {bmpPath}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output file path with .png extension
-                string fileName = Path.GetFileNameWithoutExtension(bmpPath);
-                string outputPath = Path.Combine(outputFolder, fileName + ".png");
-
+                // Determine output path with .png extension
+                string outputPath = Path.Combine(outputFolder, Path.ChangeExtension(fileName, ".png"));
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load BMP image
-                using (Image image = Image.Load(bmpPath))
+                // Load BMP and save as PNG
+                using (Image image = Image.Load(inputPath))
                 {
-                    // Set PNG save options (default)
-                    PngOptions pngOptions = new PngOptions();
-
-                    // Save as PNG
+                    var pngOptions = new PngOptions();
                     image.Save(outputPath, pngOptions);
                 }
             });
@@ -54,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy collection of BMP assets to PNG for web delivery while preserving original filenames, using C# and Aspose.Imaging with multithreaded batch conversion.
- * 2. When an automated build pipeline must convert scanned BMP documents into lossless PNG files to reduce storage size and improve compatibility across browsers, leveraging Parallel.ForEach for faster processing.
- * 3. When a desktop application has to generate PNG thumbnails from a folder of BMP images on the fly, ensuring the output folder structure is created automatically and the conversion runs concurrently.
- * 4. When a server‑side service processes user‑uploaded BMP pictures and stores them as PNG in a separate directory, using Aspose.Imaging’s Image.Load and PngOptions to maintain image quality while handling many files in parallel.
- * 5. When a migration script needs to batch convert BMP graphics from an old Windows application to PNG for a cross‑platform .NET project, employing C# file I/O and Aspose.Imaging’s multithreaded processing to speed up the task.
+ * 1. When you need to quickly convert a large collection of legacy BMP assets to PNG for web delivery while keeping the original file names.
+ * 2. When an automated build pipeline must generate optimized PNG thumbnails from BMP source images stored in a specific folder.
+ * 3. When a desktop application processes user‑uploaded BMP pictures and must save them as PNG in a separate output directory using parallel threads for speed.
+ * 4. When migrating a legacy imaging system to .NET and you require a simple script to batch‑convert BMP files to PNG without manual intervention.
+ * 5. When performing a nightly batch job that transforms BMP scans into lossless PNG files, ensuring the output folder structure mirrors the input.
  */

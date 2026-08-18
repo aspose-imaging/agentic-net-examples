@@ -1,17 +1,17 @@
+// HOW-TO: Extract EXIF Thumbnail From JPEG and Save As PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.Exif;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.jpg";
-        string outputPath = @"C:\Images\thumbnail.png";
+        string inputPath = "sample.jpg";
+        string outputPath = "thumbnail.png";
 
         try
         {
@@ -23,14 +23,13 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load JPEG image
             using (JpegImage jpegImage = (JpegImage)Image.Load(inputPath))
             {
-                // Access EXIF thumbnail
+                // Get EXIF thumbnail
                 RasterImage thumbnail = jpegImage.ExifData?.Thumbnail;
-
                 if (thumbnail == null)
                 {
                     Console.Error.WriteLine("No EXIF thumbnail found in the image.");
@@ -38,8 +37,10 @@ class Program
                 }
 
                 // Save thumbnail as PNG
-                var pngOptions = new PngOptions();
-                thumbnail.Save(outputPath, pngOptions);
+                using (thumbnail)
+                {
+                    thumbnail.Save(outputPath, new PngOptions());
+                }
             }
         }
         catch (Exception ex)
@@ -51,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to create a quick preview for a photo gallery, they can extract the embedded EXIF thumbnail from a JPEG and save it as a lightweight PNG file.
- * 2. When building a digital asset management system that displays thumbnail icons, this code lets the application pull the original EXIF thumbnail and store it in a PNG format for consistent rendering.
- * 3. When optimizing a mobile app’s image loading speed, developers can use the EXIF thumbnail extraction to generate low‑resolution PNG placeholders without re‑encoding the full‑size JPEG.
- * 4. When archiving photographs and preserving their original preview images, the code extracts the JPEG’s EXIF thumbnail and saves it as a separate PNG for easy catalog browsing.
- * 5. When implementing a batch‑processing tool that converts embedded JPEG thumbnails to PNG for compatibility with web standards, this snippet handles the loading, extraction, and conversion in C#.
+ * 1. When you need to generate lightweight preview images for a photo gallery by extracting embedded EXIF thumbnails from high‑resolution JPEG files and converting them to PNG format.
+ * 2. When building a digital asset management system that must display quick thumbnails without re‑encoding the original JPEG, using the stored EXIF thumbnail to improve performance.
+ * 3. When creating a backup script that extracts and stores the original camera‑generated thumbnails from JPEG photos as separate PNG files for archival or analysis.
+ * 4. When developing a mobile app that requires small PNG icons derived from the EXIF thumbnail of user‑uploaded JPEGs to reduce bandwidth and memory usage.
+ * 5. When implementing a batch process that validates the presence of EXIF thumbnails in JPEGs and saves any found thumbnails as PNGs for further processing or quality checks.
  */

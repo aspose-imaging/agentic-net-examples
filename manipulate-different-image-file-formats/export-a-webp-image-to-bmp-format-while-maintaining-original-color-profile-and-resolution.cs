@@ -1,14 +1,15 @@
+// HOW-TO: Convert WebP to BMP Preserving Color Profile and Resolution in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "input.webp";
-        string outputPath = "output.bmp";
+        string inputPath = @"C:\Images\sample.webp";
+        string outputPath = @"C:\Images\sample.bmp";
 
         try
         {
@@ -20,14 +21,18 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (WebPImage webpImage = new WebPImage(inputPath))
             {
-                BmpOptions options = new BmpOptions();
-                options.KeepMetadata = true;
-                // Preserve original resolution if needed:
-                // options.ResolutionSettings = image.ResolutionSettings;
+                double hRes = webpImage.HorizontalResolution;
+                double vRes = webpImage.VerticalResolution;
 
-                image.Save(outputPath, options);
+                BmpOptions bmpOptions = new BmpOptions
+                {
+                    KeepMetadata = true,
+                    ResolutionSettings = new Aspose.Imaging.ResolutionSetting(hRes, vRes)
+                };
+
+                webpImage.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -39,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert WebP images received from a web service into BMP files for legacy Windows applications while preserving the original color profile and resolution.
- * 2. When an e‑learning platform must batch‑process user‑uploaded WebP graphics into BMP format for compatibility with older PDF generation tools that only accept BMP inputs.
- * 3. When a medical imaging system stores scans as WebP to save bandwidth but requires BMP output for integration with third‑party diagnostic software that expects uncompressed bitmap data.
- * 4. When a game development pipeline receives texture assets in WebP and must export them as BMP with metadata intact for use in a legacy engine that reads BMP resolution settings.
- * 5. When an automated document conversion service needs to transform WebP icons into BMP thumbnails for inclusion in reports, ensuring the original DPI and color information are retained.
+ * 1. When you need to convert WebP assets to BMP for legacy Windows applications while keeping the original DPI and color information.
+ * 2. When a batch‑processing tool must export user‑uploaded WebP photos to BMP for printing workflows that require exact resolution settings.
+ * 3. When integrating image conversion in a C# service that stores BMP thumbnails but must retain the source image’s metadata and color profile.
+ * 4. When migrating a web gallery from WebP to BMP format for compatibility with software that only reads BMP files yet demands unchanged image quality.
+ * 5. When developing a desktop utility that reads WebP files and saves them as BMP without losing resolution, enabling accurate scaling in downstream graphics editors.
  */

@@ -1,54 +1,50 @@
+// HOW-TO: Convert BMP to Grayscale TIFF for Archival Storage in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded paths
-        string inputPath = @"C:\temp\input.bmp";
-        string tempTiffPath = @"C:\temp\temp.tif";
-        string outputPath = @"C:\temp\output.tif";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.bmp";
+        string outputPath = @"C:\Images\output.tif";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directories exist
-            Directory.CreateDirectory(Path.GetDirectoryName(tempTiffPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load BMP image
             using (Image bmpImage = Image.Load(inputPath))
             {
-                // Save BMP as temporary TIFF
-                var tiffSaveOptions = new TiffOptions(TiffExpectedFormat.Default)
-                {
-                    BitsPerSample = new ushort[] { 8, 8, 8 },
-                    Photometric = TiffPhotometrics.Rgb,
-                    Compression = TiffCompressions.Lzw,
-                    Predictor = TiffPredictor.Horizontal,
-                    PlanarConfiguration = TiffPlanarConfigs.Contiguous,
-                    ByteOrder = TiffByteOrder.LittleEndian
-                };
-
-                bmpImage.Save(tempTiffPath, tiffSaveOptions);
+                // Save as TIFF (initial conversion)
+                bmpImage.Save(outputPath, new TiffOptions(Aspose.Imaging.FileFormats.Tiff.Enums.TiffExpectedFormat.Default));
             }
 
-            // Load the temporary TIFF, apply grayscale, and save final TIFF
-            using (Image tiffBase = Image.Load(tempTiffPath))
+            // Ensure output directory exists again (unconditional as required)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the newly created TIFF image
+            using (Image tiffBase = Image.Load(outputPath))
             {
-                var tiffImage = (TiffImage)tiffBase;
+                // Cast to TiffImage to access Grayscale method
+                TiffImage tiffImage = (TiffImage)tiffBase;
+
+                // Convert to grayscale
                 tiffImage.Grayscale();
+
+                // Save the grayscale TIFF (overwrites the previous file)
                 tiffImage.Save(outputPath);
             }
         }
@@ -61,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy BMP scans of engineering drawings into LZW‑compressed grayscale TIFF files for long‑term archival in a document management system.
- * 2. When an application must ingest user‑uploaded BMP photos, apply a grayscale filter, and store them as TIFFs to meet regulatory requirements for medical imaging records.
- * 3. When a batch‑processing service has to transform color BMP assets from a legacy database into grayscale TIFFs for inclusion in a searchable digital library that only supports TIFF format.
- * 4. When a developer is building a backup utility that preserves original BMP graphics by converting them to lossless grayscale TIFFs with LZW compression to save disk space while maintaining image fidelity.
- * 5. When a workflow automates the preparation of BMP‑based product labels for printing, applying a grayscale conversion and exporting to TIFF to ensure consistent rendering across different printing pipelines.
+ * 1. When you need to archive legacy BMP scans as lossless grayscale TIFF files for long‑term storage.
+ * 2. When a document management system requires all incoming images to be in a single grayscale TIFF format.
+ * 3. When you must convert color BMP screenshots to grayscale TIFF to reduce file size while preserving detail for legal records.
+ * 4. When integrating a C# batch job that standardizes various bitmap assets into archival‑ready TIFF images.
+ * 5. When preparing medical or engineering drawings originally in BMP for compliance with TIFF‑only archival standards.
  */

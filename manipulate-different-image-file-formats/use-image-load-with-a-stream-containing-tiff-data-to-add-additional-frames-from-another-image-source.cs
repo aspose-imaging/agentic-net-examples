@@ -1,3 +1,4 @@
+// HOW-TO: Add PNG Frame to Existing TIFF Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,45 +11,47 @@ class Program
     {
         // Hardcoded paths
         string inputTiffPath = "input.tif";
-        string additionalImagePath = "frame.png";
+        string frameImagePath = "frame.png";
         string outputPath = "output.tif";
 
         try
         {
-            // Validate input TIFF file
+            // Validate input files
             if (!File.Exists(inputTiffPath))
             {
                 Console.Error.WriteLine($"File not found: {inputTiffPath}");
                 return;
             }
-
-            // Validate additional image file
-            if (!File.Exists(additionalImagePath))
+            if (!File.Exists(frameImagePath))
             {
-                Console.Error.WriteLine($"File not found: {additionalImagePath}");
+                Console.Error.WriteLine($"File not found: {frameImagePath}");
                 return;
             }
 
             // Load the existing TIFF image from a stream
-            using (FileStream tiffStream = new FileStream(inputTiffPath, FileMode.Open, FileAccess.Read))
-            using (TiffImage tiffImage = (TiffImage)Image.Load(tiffStream))
+            using (FileStream tiffFileStream = new FileStream(inputTiffPath, FileMode.Open, FileAccess.Read))
             {
-                // Load the additional image (e.g., PNG) from a stream
-                using (FileStream imgStream = new FileStream(additionalImagePath, FileMode.Open, FileAccess.Read))
-                using (RasterImage rasterImage = (RasterImage)Image.Load(imgStream))
+                // Image.Load returns a generic Image; cast to TiffImage
+                using (TiffImage tiffImage = (TiffImage)Image.Load(tiffFileStream))
                 {
-                    // Create a TiffFrame from the raster image
-                    TiffFrame newFrame = new TiffFrame(rasterImage);
+                    // Load the additional frame (e.g., a PNG) from a stream
+                    using (FileStream frameFileStream = new FileStream(frameImagePath, FileMode.Open, FileAccess.Read))
+                    {
+                        using (Image frameImage = Image.Load(frameFileStream))
+                        {
+                            // Create a TiffFrame from the loaded raster image
+                            TiffFrame newFrame = new TiffFrame((RasterImage)frameImage);
+                            // Add the new frame to the TIFF image
+                            tiffImage.AddFrame(newFrame);
+                        }
+                    }
 
-                    // Add the new frame to the TIFF image
-                    tiffImage.AddFrame(newFrame);
+                    // Ensure the output directory exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the modified TIFF image
+                    tiffImage.Save(outputPath);
                 }
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
-
-                // Save the modified TIFF image
-                tiffImage.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -60,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to merge a scanned TIFF document with a PNG logo to create a multi‑page TIFF archive for long‑term storage.
- * 2. When an application must programmatically append a dynamically generated PNG chart to an existing TIFF image without creating temporary files.
- * 3. When a batch‑processing service reads TIFF files from a network stream and adds watermark PNG frames before saving the final TIFF.
- * 4. When a document management system receives TIFF attachments via a web API and needs to attach a signature PNG as an additional frame using C# and Aspose.Imaging.
- * 5. When a photo‑editing tool loads a multi‑page TIFF from a memory stream and inserts a thumbnail PNG as a new frame to produce a composite TIFF for printing.
+ * 1. When you need to combine a scanned document (TIFF) with a logo or watermark stored as a PNG into a multi‑page TIFF file.
+ * 2. When you want to programmatically append additional pages to an existing TIFF archive without loading the whole file into memory.
+ * 3. When you must merge image assets from different formats into a single TIFF for printing or archival purposes.
+ * 4. When a web service receives TIFF data as a stream and you need to insert a dynamically generated PNG frame before returning the updated file.
+ * 5. When you are building a document processing pipeline that adds preview thumbnails (PNG) as extra frames to a multi‑page TIFF.
  */

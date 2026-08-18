@@ -1,39 +1,42 @@
+// HOW-TO: Sharpen TGA Texture With Strength 3 And Save As BMP In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageFilters.FilterOptions;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output paths
+        string inputPath = "input.tga";
+        string outputPath = "output.bmp";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\texture.tga";
-            string outputPath = @"C:\Images\texture_sharpened.bmp";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the TGA image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access filtering capabilities
+                // Cast to RasterImage to access filtering functionality
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply a sharpen filter with size 3 and sigma 1.0 (strength three)
-                rasterImage.Filter(rasterImage.Bounds, new SharpenFilterOptions(3, 1.0));
+                // Apply a sharpen filter with strength three (size = 3, sigma = 1.0)
+                var sharpenOptions = new SharpenFilterOptions(3, 1.0);
+                rasterImage.Filter(rasterImage.Bounds, sharpenOptions);
 
-                // Save the processed image as BMP
-                rasterImage.Save(outputPath);
+                // Save the result as BMP
+                rasterImage.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)
@@ -45,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a game developer needs to enhance the visual clarity of a TGA texture before converting it to BMP for use in a legacy engine that only supports BMP assets.
- * 2. When a UI designer wants to programmatically sharpen a high‑resolution TGA sprite by applying a strength‑three filter and save it as BMP for inclusion in a Windows desktop application.
- * 3. When an automated build pipeline processes texture assets, applying a SharpenFilterOptions(3,1.0) to each TGA file and exporting the result as BMP to meet the quality standards of a publishing workflow.
- * 4. When a digital artist exports a TGA map from a 3D modeling tool, then uses C# and Aspose.Imaging to sharpen the map and convert it to BMP for compatibility with a GIS system that requires BMP input.
- * 5. When a software tool needs to batch‑process game textures, loading TGA images, applying a size‑3 sharpen filter to improve edge definition, and saving the output as BMP for legacy hardware rendering.
+ * 1. When you need to enhance the details of a game asset stored as a TGA file before converting it to BMP for legacy engine compatibility.
+ * 2. When processing textures for a 3D rendering pipeline that requires sharpened images in BMP format for faster loading on older hardware.
+ * 3. When preparing UI icons saved as TGA for a Windows desktop application that only supports BMP, and you want to improve their clarity.
+ * 4. When batch‑optimizing scanned TGA screenshots by applying a moderate sharpen filter and exporting them as BMP for archival purposes.
+ * 5. When integrating an image‑processing step in a C# build script that sharpens TGA textures and outputs BMP files for use in a printing workflow.
  */

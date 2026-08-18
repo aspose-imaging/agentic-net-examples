@@ -1,3 +1,4 @@
+// HOW-TO: Convert DjVu Document to PDF with Author Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,28 +9,33 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
         string inputPath = "Input\\sample.djvu";
         string outputPath = "Output\\output.pdf";
 
+        // Verify input file exists
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
+        // Ensure output directory exists
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
         try
         {
-            using (Aspose.Imaging.FileFormats.Djvu.DjvuImage djvu = (Aspose.Imaging.FileFormats.Djvu.DjvuImage)Image.Load(inputPath))
+            // Load the DjVu document
+            using (Image image = Image.Load(inputPath))
             {
+                // Prepare PDF options with author metadata
                 var pdfOptions = new PdfOptions
                 {
-                    MultiPageOptions = new DjvuMultiPageOptions(),
                     PdfDocumentInfo = new PdfDocumentInfo { Author = "Automated" }
                 };
 
-                djvu.Save(outputPath, pdfOptions);
+                // Save all pages to a single PDF file
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -41,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a company needs to batch‑convert archived DjVu scans of historical documents into searchable PDF files and automatically set the PDF author metadata to “Automated” for consistent cataloging.
- * 2. When an engineering team wants to generate PDF reports from multi‑page DjVu technical drawings in a C# application while embedding author information for compliance tracking.
- * 3. When a digital library migrates its DjVu e‑books to PDF format using Aspose.Imaging for .NET and requires uniform author metadata for library management systems.
- * 4. When a server‑side service receives DjVu files, converts each page to a single PDF document, and tags the PDF with the author “Automated” to integrate with downstream workflow automation.
- * 5. When a desktop utility processes DjVu invoices, converts them to PDF, and embeds the author metadata to indicate the files were produced by an automated process.
+ * 1. When you need to archive scanned DjVu files as searchable PDFs and automatically tag them with an author name.
+ * 2. When a document management system must programmatically convert multi‑page DjVu reports into a single PDF for downstream workflows.
+ * 3. When generating PDF invoices from DjVu templates and you want to embed the creator’s name in the PDF metadata.
+ * 4. When automating a migration of legacy DjVu manuals to PDF while preserving author information for compliance audits.
+ * 5. When building a C# service that receives DjVu uploads, converts them to PDF, and sets consistent metadata for indexing in a content repository.
  */

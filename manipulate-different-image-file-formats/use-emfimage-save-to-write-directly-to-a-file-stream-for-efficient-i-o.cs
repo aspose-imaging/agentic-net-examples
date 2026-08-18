@@ -1,18 +1,20 @@
+// HOW-TO: Save EMF Image Directly to File Stream in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Emf;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\input.emf";
-        string outputPath = @"C:\temp\output.emf";
-
         try
         {
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\input.emf";
+            string outputPath = @"C:\temp\output.emf";
+
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -23,17 +25,24 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image
+            // Load the image (unified loader works for all formats, including EMF)
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare EMF save options (default settings)
-                var saveOptions = new EmfOptions();
+                // Cast to EmfImage to access EMF‑specific functionality
+                EmfImage emfImage = image as EmfImage;
+                if (emfImage == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not an EMF image.");
+                    return;
+                }
 
-                // Open a file stream for efficient writing
+                // Prepare EMF save options (default options are sufficient for a direct copy)
+                EmfOptions saveOptions = new EmfOptions();
+
+                // Open a file stream for the output file and save directly to it
                 using (FileStream outStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
                 {
-                    // Save the image directly to the stream
-                    image.Save(outStream, saveOptions);
+                    emfImage.Save(outStream, saveOptions);
                 }
             }
         }
@@ -47,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must copy or convert an EMF vector graphic from one location to another on a server while minimizing memory usage by streaming the output directly to a file.
- * 2. When a Windows service generates dynamic EMF reports and needs to write them to a network share in real time without loading the entire image into memory.
- * 3. When a batch processing tool handles thousands of EMF files and wants to save each processed image to disk efficiently using a FileStream to avoid performance bottlenecks.
- * 4. When an ASP.NET web API receives an EMF image upload, modifies it, and streams the result back to the client’s file system without creating temporary buffers.
- * 5. When a desktop application integrates with a legacy printing system that requires EMF files saved directly to a specific folder using stream‑based I/O for faster write operations.
+ * 1. When you need to copy or modify an EMF file without loading the entire image into memory, you can stream it directly to disk using Aspose.Imaging in C#.
+ * 2. When building a server‑side service that receives EMF graphics and must store them efficiently, writing the image to a FileStream avoids extra buffering.
+ * 3. When processing large batches of EMF drawings in a background job, streaming each save operation reduces memory pressure and speeds up I/O.
+ * 4. When integrating with legacy Windows applications that generate EMF files and require the files to be saved to a specific folder, the code lets you write them directly from C#.
+ * 5. When you want to preserve the original EMF metadata while re‑saving the file after applying Aspose.Imaging transformations, using EmfImage.Save with a stream ensures a lossless copy.
  */

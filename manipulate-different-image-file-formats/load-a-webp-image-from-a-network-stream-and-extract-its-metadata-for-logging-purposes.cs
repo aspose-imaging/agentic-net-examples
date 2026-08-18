@@ -1,43 +1,60 @@
+// HOW-TO: Download WebP Image From URL and Log Metadata In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Net.Http;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input URL and output file path
-        string url = "https://example.com/sample.webp";
-        string outputPath = @"C:\temp\metadata.txt";
-
         try
         {
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Hardcoded input URL and temporary file paths
+            string url = "https://example.com/sample.webp";
+            string tempFilePath = "temp\\downloaded.webp";
+            string logFilePath = "output\\metadata.txt";
 
-            // Download the WebP image as a stream
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(tempFilePath));
+            Directory.CreateDirectory(Path.GetDirectoryName(logFilePath));
+
+            // Download the WebP image to a temporary file
             using (HttpClient client = new HttpClient())
-            using (Stream networkStream = client.GetStreamAsync(url).Result)
-            // Load the WebP image from the network stream
-            using (WebPImage webPImage = new WebPImage(networkStream))
+            using (HttpResponseMessage response = client.GetAsync(url).Result)
+            using (Stream downloadStream = response.Content.ReadAsStreamAsync().Result)
+            using (FileStream fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write))
             {
-                // Extract basic metadata
+                downloadStream.CopyTo(fileStream);
+            }
+
+            // Verify the temporary file exists
+            if (!File.Exists(tempFilePath))
+            {
+                Console.Error.WriteLine($"File not found: {tempFilePath}");
+                return;
+            }
+
+            // Load the WebP image from the temporary file stream
+            using (FileStream stream = File.OpenRead(tempFilePath))
+            using (WebPImage webPImage = new WebPImage(stream))
+            {
+                // Extract metadata
                 string fileFormat = webPImage.FileFormat.ToString();
                 int width = webPImage.Width;
                 int height = webPImage.Height;
 
-                // Write metadata to the output file
-                using (StreamWriter writer = new StreamWriter(outputPath))
-                {
-                    writer.WriteLine($"URL: {url}");
-                    writer.WriteLine($"File Format: {fileFormat}");
-                    writer.WriteLine($"Width: {width}");
-                    writer.WriteLine($"Height: {height}");
-                }
+                // Log metadata to console
+                Console.WriteLine($"File Format: {fileFormat}");
+                Console.WriteLine($"Dimensions: {width}x{height}");
 
-                Console.WriteLine("Metadata extracted and saved to: " + outputPath);
+                // Write metadata to a log file
+                using (StreamWriter writer = new StreamWriter(logFilePath, false))
+                {
+                    writer.WriteLine($"File Format: {fileFormat}");
+                    writer.WriteLine($"Dimensions: {width}x{height}");
+                }
             }
         }
         catch (Exception ex)
@@ -49,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service must audit incoming WebP assets, a developer can download the image via HttpClient, load it with Aspose.Imaging’s WebPImage, and log its format, width, and height for compliance reporting.
- * 2. When building a CDN health‑check tool that validates image dimensions without fully decoding the file, the code can stream a remote WebP image and extract its metadata for quick verification.
- * 3. When integrating a digital asset management system that records source image properties, a developer can fetch a WebP file from a URL, read its metadata, and store the information in a database or log file.
- * 4. When creating a monitoring script that tracks changes in image size for SEO purposes, the code enables retrieval of a WebP image over the network and logging of its dimensions to detect unexpected alterations.
- * 5. When implementing a security audit that records file format details of externally hosted images, the developer can stream the WebP image, read its format and dimensions with Aspose.Imaging, and write the data to a secure log for later analysis.
+ * 1. When you need to record the format and dimensions of WebP images downloaded from external APIs for audit logs.
+ * 2. When a media management system must verify that incoming WebP files meet size requirements before further processing.
+ * 3. When you want to capture image metadata to populate a database of assets retrieved over HTTP.
+ * 4. When debugging a web scraper that pulls WebP pictures and you need to confirm the files were downloaded correctly.
+ * 5. When generating a summary report of image characteristics for a batch of WebP files fetched from remote servers.
  */

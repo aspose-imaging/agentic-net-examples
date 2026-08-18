@@ -1,3 +1,4 @@
+// HOW-TO: Convert TIFF Image to JPEG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\input.tif";
+        string outputPath = @"C:\temp\output.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.tif";
-            string outputPath = @"C:\temp\output.jpg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -39,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert scanned TIFF documents to JPEG for web preview using C# and Aspose.Imaging.
- * 2. When an application must reduce storage costs by loading a high‑resolution TIFF image and saving it as a JPEG with default compression via Image.Load and JpegOptions.
- * 3. When a legacy system outputs TIFF files and a modern .NET service has to deliver them as JPEG to browsers, requiring file existence checks and directory creation.
- * 4. When a photo‑management tool imports TIFF photos and stores them as JPEG for mobile compatibility, leveraging Aspose.Imaging's Image.Save method.
- * 5. When an automated workflow validates the presence of a TIFF file, ensures the output folder exists, and converts the image to JPEG using C# and Aspose.Imaging default settings.
+ * 1. When you need to reduce the file size of high‑resolution TIFF scans for web display by converting them to JPEG in a C# application.
+ * 2. When a document management system receives TIFF uploads and must store them as JPEG thumbnails using Aspose.Imaging.
+ * 3. When automating migration of legacy TIFF assets to a JPEG‑based media library without custom compression settings.
+ * 4. When integrating image conversion into a C# service that validates the source file exists and creates the output folder automatically.
+ * 5. When building a simple utility to batch‑process scanned TIFF files into JPEG format with default quality settings.
  */

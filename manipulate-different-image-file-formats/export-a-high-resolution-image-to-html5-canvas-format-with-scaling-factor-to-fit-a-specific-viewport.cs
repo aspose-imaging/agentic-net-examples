@@ -1,3 +1,4 @@
+// HOW-TO: Export Scaled SVG to HTML5 Canvas with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,52 +9,44 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\input.svg";
-        string outputPath = @"C:\Images\output.html";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
-            // Load the SVG image
-            using (SvgImage svgImage = (SvgImage)Image.Load(inputPath))
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.svg";
+            string outputPath = @"C:\Images\output.html";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Desired viewport size (example: 800x600)
-                const int viewportWidth = 800;
-                const int viewportHeight = 600;
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Calculate scaling factors to fit the viewport while preserving aspect ratio
-                float scaleX = (float)viewportWidth / svgImage.Width;
-                float scaleY = (float)viewportHeight / svgImage.Height;
-                float scale = Math.Min(scaleX, scaleY); // uniform scaling
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Configure rasterization options with the calculated scale
-                var rasterizationOptions = new SvgRasterizationOptions
+            // Load the SVG image
+            using (SvgImage image = (SvgImage)Image.Load(inputPath))
+            {
+                // Configure rasterization options with scaling to fit a specific viewport
+                var rasterOptions = new SvgRasterizationOptions
                 {
-                    ScaleX = scale,
-                    ScaleY = scale,
-                    // Preserve original size as the base for scaling
-                    PageSize = svgImage.Size
+                    // Example: scale to 50% of original size (adjust as needed)
+                    ScaleX = 0.5f,
+                    ScaleY = 0.5f,
+                    // Preserve original page size
+                    PageSize = image.Size
                 };
 
-                // Configure HTML5 Canvas export options
+                // Set HTML5 Canvas export options
                 var canvasOptions = new Html5CanvasOptions
                 {
-                    VectorRasterizationOptions = rasterizationOptions,
+                    VectorRasterizationOptions = rasterOptions,
                     FullHtmlPage = true // generate a full HTML page
                 };
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the image as an HTML5 Canvas file
-                svgImage.Save(outputPath, canvasOptions);
+                // Export to HTML5 Canvas format
+                image.Save(outputPath, canvasOptions);
             }
         }
         catch (Exception ex)
@@ -65,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to embed a high‑resolution SVG diagram into an HTML5 Canvas element that automatically scales to fit a fixed 800×600 viewport, they can use this C# Aspose.Imaging code to rasterize and export the image with uniform scaling.
- * 2. When an e‑learning platform must convert vector illustrations stored as SVG files into responsive HTML5 Canvas pages for offline viewing on tablets, the code provides the necessary rasterization options and viewport‑aware scaling.
- * 3. When a digital signage system requires pre‑rendered HTML5 Canvas assets from SVG logos that adapt to different screen sizes while preserving aspect ratio, this Aspose.Imaging snippet generates the scaled HTML output programmatically.
- * 4. When a reporting tool generates PDF‑like reports that include SVG charts and needs to embed them as HTML5 Canvas elements sized to a specific page layout, the code ensures the SVG is rasterized with the correct scale and saved as a full HTML page.
- * 5. When a mobile app backend processes user‑uploaded SVG icons and must deliver them as HTML5 Canvas snippets that fit within a predefined UI component, the C# example shows how to calculate the scaling factor and export the image accordingly.
+ * 1. When you need to embed a high‑resolution SVG in a web page using an HTML5 canvas that automatically scales to a specific viewport size.
+ * 2. When you want to generate a full HTML page from an SVG for offline viewing while preserving vector quality with a custom scaling factor.
+ * 3. When a web application must convert user‑uploaded SVG files to canvas‑based graphics to ensure consistent rendering across browsers.
+ * 4. When you are building a reporting tool that exports charts stored as SVG into HTML5 canvas elements sized to fit printable page dimensions.
+ * 5. When you need to programmatically resize and rasterize SVG assets for responsive design without losing detail, using C# and Aspose.Imaging.
  */

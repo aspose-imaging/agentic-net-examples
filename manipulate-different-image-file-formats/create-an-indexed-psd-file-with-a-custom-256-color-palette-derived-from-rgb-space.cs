@@ -1,19 +1,21 @@
+// HOW-TO: Create Indexed PSD with Custom 256‑Color Palette from PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Psd;
+using Aspose.Imaging.FileFormats;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.bmp";
-        string outputPath = @"c:\temp\output.psd";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.png";
+            string outputPath = "output/output.psd";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,20 +29,23 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage for palette generation
-                RasterImage raster = (RasterImage)image;
+                // Cast to RasterImage to work with palettes
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
+                {
+                    Console.Error.WriteLine("Loaded image is not a raster image.");
+                    return;
+                }
 
-                // Create PSD save options
+                // Configure PSD save options with a custom 256‑color palette
                 PsdOptions psdOptions = new PsdOptions
                 {
-                    // Use RGB color mode
+                    // 8 bits per channel (standard for PSD)
+                    ChannelBitsCount = 8,
+                    // Use RGB color mode; the palette will be applied on top of it
                     ColorMode = ColorModes.Rgb,
-
-                    // Generate a uniform 256‑color palette from the RGB space
-                    Palette = ColorPaletteHelper.GetUniformColorPalette(raster),
-
-                    // Set channel bits count to 8 (standard for 8‑bit per channel)
-                    ChannelBitsCount = 8
+                    // Create a uniform 256‑color palette derived from the RGB space
+                    Palette = ColorPaletteHelper.GetUniformColorPalette(raster)
                 };
 
                 // Save the image as an indexed PSD file
@@ -56,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert high‑resolution BMP assets into a compact indexed PSD for use in legacy Photoshop workflows that require an 8‑bit per channel palette.
- * 2. When a graphics pipeline must generate web‑ready PSD files with a uniform 256‑color palette to reduce file size while preserving the original RGB color distribution.
- * 3. When an automation script has to batch‑process scanned documents, converting them from BMP to indexed PSD to enable faster layer‑based editing in Photoshop.
- * 4. When a game‑development toolchain requires exporting sprite sheets as indexed PSD files with a custom 256‑color palette for efficient texture memory usage.
- * 5. When a digital‑printing application needs to create PSD files with a fixed 256‑color palette to ensure consistent color output across different printers and RIP software.
+ * 1. When a developer needs to convert a high‑resolution PNG into an indexed PSD with a 256‑color palette to meet size constraints for web‑based Photoshop previews.
+ * 2. When building an automated asset pipeline that generates Photoshop‑compatible files from source images while ensuring consistent color mapping across all assets.
+ * 3. When preparing graphics for a legacy printing workflow that only accepts PSD files in indexed color mode with a fixed palette.
+ * 4. When creating game UI textures that must be stored as PSD files with a limited palette to simplify color‑matching and reduce memory usage.
+ * 5. When a content management system must store uploaded images as PSDs with a uniform 256‑color palette for easy editing in Photoshop without losing the original color relationships.
  */

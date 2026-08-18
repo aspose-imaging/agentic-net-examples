@@ -1,3 +1,4 @@
+// HOW-TO: Convert DICOM Image to PDF in C# with Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,26 +12,22 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input\\sample.dcm";
-            string outputPath = "Output\\sample.pdf";
+            string inputPath = "Input/sample.dcm";
+            string outputPdfPath = "Output/output.pdf";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
 
-            // Load DICOM image and save as PDF
             using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
             {
-                using (PdfOptions pdfOptions = new PdfOptions())
+                using (var pdfOptions = new PdfOptions())
                 {
-                    dicomImage.Save(outputPath, pdfOptions);
+                    dicomImage.Save(outputPdfPath, pdfOptions);
                 }
             }
         }
@@ -43,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology department wants to convert DICOM X‑ray images to PDF files for easy viewing and printing using C# and Aspose.Imaging.
- * 2. When a medical research application must batch‑process DICOM scans and store them as PDF documents for inclusion in study reports.
- * 3. When a healthcare web service needs to expose a REST endpoint that receives a DICOM file and returns a PDF version for integration with electronic health record (EHR) systems.
- * 4. When a desktop utility is built to let clinicians select a DICOM file and instantly generate a PDF that can be attached to patient discharge summaries.
- * 5. When a compliance tool requires converting DICOM images to PDF to archive them in a non‑proprietary format that can be indexed by document management systems.
+ * 1. When a healthcare application must embed a radiology scan into a patient report, developers can convert the DICOM file to a PDF for easy viewing and printing.
+ * 2. When integrating a PACS system with a document management workflow, the code enables automatic transformation of DICOM images into PDF documents for archival compliance.
+ * 3. When building a web portal that allows clinicians to download imaging studies, converting DICOM to PDF provides a universally accessible format without requiring specialized viewers.
+ * 4. When generating electronic health records that combine text and images, developers can use this snippet to embed diagnostic images as PDF pages alongside other patient data.
+ * 5. When creating a batch processing job to migrate legacy DICOM files to a PDF‑based repository, the example shows how to programmatically perform the conversion in C#.
  */

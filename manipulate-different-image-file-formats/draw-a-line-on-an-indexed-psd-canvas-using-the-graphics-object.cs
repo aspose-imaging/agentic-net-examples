@@ -1,29 +1,39 @@
+// HOW-TO: Draw Red Line on Indexed PSD Canvas Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Psd;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Psd;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string outputPath = "output.psd";
-
         try
         {
+            string outputPath = @"output\output.psd";
+
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Set up PSD options for an indexed image
             PsdOptions options = new PsdOptions();
-            options.ColorMode = ColorModes.Indexed;
-            options.Palette = new ColorPalette(new Color[] { Color.Black, Color.White });
             options.Source = new FileCreateSource(outputPath, false);
+            options.ColorMode = ColorModes.Indexed;
+            // Simple palette with two colors (required for indexed mode)
+            options.Palette = new ColorPalette(new Color[] { Color.Black, Color.White });
 
-            using (Image image = Image.Create(options, 200, 200))
+            // Create the PSD canvas
+            using (Image image = Image.Create(options, 500, 500))
             {
+                // Initialize graphics for drawing
                 Graphics graphics = new Graphics(image);
-                graphics.DrawLine(new Pen(Color.Black, 2), new Point(10, 10), new Point(190, 190));
+
+                // Draw a red line
+                graphics.DrawLine(new Pen(Color.Red, 5), new Point(50, 50), new Point(450, 450));
+
+                // Save the image (source is already bound to the file)
                 image.Save();
             }
         }
@@ -36,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to use Aspose.Imaging for .NET to generate an indexed‑color PSD file with a black diagonal line as a thumbnail preview in a design workflow.
- * 2. When an application must programmatically create a 200 × 200 PSD canvas with a limited palette and draw a line using the Graphics object to illustrate vector guides for a printing pipeline.
- * 3. When a graphics tool wants to export a simple indexed PSD containing a diagonal line for inclusion in a sprite sheet or game asset using C# and Aspose.Imaging.
- * 4. When an automated report generator has to embed a basic line diagram into an indexed PSD that will later be edited in Photoshop, leveraging the DrawLine method.
- * 5. When a batch process creates placeholder PSD files with a black line to test color mode handling, palette support, and Graphics rendering in an image‑processing pipeline.
+ * 1. When you need to generate a PSD file with a limited color palette and add simple vector graphics such as a colored line programmatically in C#.
+ * 2. When you are building a web service that creates indexed‑color Photoshop files for thumbnails and must draw annotation lines on the image.
+ * 3. When you have to export design mock‑ups from a .NET application to PSD format while preserving a two‑color palette for compatibility with older Photoshop versions.
+ * 4. When you want to automate the creation of printable guides inside a PSD by drawing precise lines on an indexed canvas without using Photoshop manually.
+ * 5. When you are testing image‑processing pipelines and require a reproducible PSD containing a known line shape to validate downstream filters.
  */

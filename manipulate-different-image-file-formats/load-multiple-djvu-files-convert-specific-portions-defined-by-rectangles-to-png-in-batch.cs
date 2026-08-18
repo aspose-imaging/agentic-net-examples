@@ -1,11 +1,11 @@
+// HOW-TO: Batch Convert DjVu Pages to PNG Using Rectangle Crop in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
-using Aspose.Imaging.FileFormats.Png;
 
-public class Program
+class Program
 {
     static void Main(string[] args)
     {
@@ -33,26 +33,24 @@ public class Program
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
+                using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
                 {
-                    int pageCount = djvuImage.PageCount;
-                    for (int i = 0; i < pageCount; i++)
-                    {
-                        Rectangle exportArea = new Rectangle(100, 100, 300, 300);
-                        string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{i}.png";
-                        string outputPath = Path.Combine(outputDirectory, outputFileName);
+                    // Define the region to export (example values)
+                    Rectangle exportArea = new Rectangle(0, 0, 500, 500);
+                    int pageIndex = 0; // first page
 
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    PngOptions options = new PngOptions();
+                    options.MultiPageOptions = new DjvuMultiPageOptions(pageIndex, exportArea);
 
-                        using (PngOptions pngOptions = new PngOptions())
-                        {
-                            pngOptions.MultiPageOptions = new DjvuMultiPageOptions(i, exportArea);
-                            djvuImage.Save(outputPath, pngOptions);
-                        }
-                    }
+                    string outputPath = Path.Combine(outputDirectory,
+                        $"{Path.GetFileNameWithoutExtension(inputPath)}_page{pageIndex}.png");
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    djvu.Save(outputPath, options);
                 }
             }
         }
@@ -65,9 +63,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract specific rectangular regions from multiple DjVu documents and automatically generate PNG thumbnails for each page in a batch workflow.
- * 2. When an archival system must convert selected areas of scanned DjVu files into high‑resolution PNG images for web preview without manual file handling.
- * 3. When a document‑management application requires programmatically saving only a defined portion of each DjVu page as separate PNG files for downstream OCR processing.
- * 4. When a publishing pipeline needs to create page‑by‑page PNG assets from a collection of DjVu files, focusing on a particular region such as a logo or watermark.
- * 5. When a GIS or mapping tool must batch‑process DjVu maps, extracting a fixed viewport rectangle from each page and exporting it as PNG for integration into other .NET services.
+ * 1. When you need to extract a specific region from scanned DjVu documents and save it as PNG thumbnails for a web gallery.
+ * 2. When processing a batch of DjVu files to generate preview images of the first page for a document management system.
+ * 3. When automating the creation of PNG assets from DjVu archives for inclusion in a mobile app that only supports PNG.
+ * 4. When you want to programmatically extract a defined rectangle from each DjVu file to feed into an OCR pipeline that requires PNG input.
+ * 5. When converting multiple DjVu files on a server into PNGs with consistent dimensions for printing or further image analysis.
  */

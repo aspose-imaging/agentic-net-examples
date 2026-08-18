@@ -1,40 +1,47 @@
+// HOW-TO: Rotate BMP Image by Arbitrary Degrees with Transparent Background in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        string inputPath = "input.bmp";
-        string outputPath = "output.bmp";
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.bmp";
+        string outputPath = @"C:\Images\output_rotated.bmp";
 
         try
         {
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+            // Load the BMP image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                if (!image.IsCached)
-                    image.CacheData();
+                // Rotate by arbitrary angle (e.g., 45 degrees) with proportional resize
+                // and transparent background for empty areas
+                float angle = 45f; // change as needed
+                image.Rotate(angle, true, Color.Transparent);
 
-                // Rotate 45 degrees, resize canvas proportionally, fill background with transparent color
-                image.Rotate(45f, true, Color.FromArgb(0, 0, 0, 0));
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                BmpOptions options = new BmpOptions
+                // Save the rotated image preserving transparency (Bitfields compression)
+                var bmpOptions = new BmpOptions
                 {
+                    // Bitfields compression retains alpha channel
                     Compression = BitmapCompression.Bitfields
                 };
-
-                image.Save(outputPath, options);
+                image.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -46,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# developer needs to rotate a BMP file by an arbitrary angle, such as 45°, while preserving the original dimensions and filling the newly created empty corners with a transparent background for later compositing.
- * 2. When an application must programmatically adjust the orientation of legacy BMP assets in a Windows desktop UI and ensure the rotated image remains compatible with BMP compression settings like Bitfields.
- * 3. When a game engine imports BMP textures that require precise angular alignment and the developer wants to use Aspose.Imaging to rotate them and keep the transparent padding for seamless tiling.
- * 4. When a batch‑processing tool processes scanned BMP diagrams, rotates each page to correct skew, and needs the background to be transparent so the diagrams can be overlaid on other graphics without visible borders.
- * 5. When a document‑generation service creates custom BMP icons, rotates them to match user‑specified angles, and saves the result with transparent fill to maintain visual consistency across different output formats.
+ * 1. When you need to display a rotated bitmap in a UI without black corners, you can rotate the BMP and fill empty space with transparency.
+ * 2. When generating game sprites that require arbitrary orientation, this code lets you rotate BMP assets while preserving alpha.
+ * 3. When preparing images for a PDF or web page where the background must be invisible, you can rotate the BMP and keep a transparent background.
+ * 4. When processing scanned documents that need to be aligned at non‑standard angles, the routine rotates the BMP and avoids unwanted background color.
+ * 5. When converting legacy BMP graphics for use in modern applications that support alpha channels, this method adds transparency after rotation.
  */

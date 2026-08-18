@@ -1,19 +1,21 @@
+// HOW-TO: Rotate WebP Image 90 Degrees and Save as BMP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\input.webp";
-        string outputPath = @"c:\temp\output.bmp";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\temp\input.webp";
+            string outputPath = @"C:\temp\output.bmp";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,10 +29,10 @@ class Program
             // Load the WebP image, rotate 90 degrees clockwise, and save as BMP
             using (WebPImage webPImage = new WebPImage(inputPath))
             {
-                // Rotate 90 degrees without flipping
+                // Rotate 90 degrees clockwise without flipping
                 webPImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
-                // Save the transformed image to BMP format
+                // Save to BMP format
                 webPImage.Save(outputPath, new BmpOptions());
             }
         }
@@ -43,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to convert user‑uploaded WebP avatars into BMP thumbnails for legacy Windows components.
- * 2. When a desktop tool must rotate scanned WebP documents ninety degrees clockwise before saving them as BMP for compatibility with older printing software.
- * 3. When an e‑learning platform processes WebP graphics, rotates them to correct orientation, and exports them to BMP to embed in PowerPoint slides.
- * 4. When a game asset pipeline receives WebP textures, needs to re‑orient them and store them as BMP for a legacy engine that only supports BMP files.
- * 5. When an automated batch job validates image orientation, rotates WebP images, and converts them to BMP for archival in a system that requires uncompressed bitmap format.
+ * 1. When you need to display a WebP graphic in a legacy Windows application that only supports BMP, you can rotate it and convert it to BMP using C#.
+ * 2. When processing user‑uploaded WebP photos taken in portrait mode, you may rotate them 90° and save as BMP for further analysis.
+ * 3. When generating thumbnails for a reporting system that requires BMP files, you can rotate the original WebP image before conversion.
+ * 4. When integrating with a third‑party library that only accepts BMP images, you can pre‑rotate a WebP asset to the correct orientation in C#.
+ * 5. When preparing images for printing on devices that require BMP format and specific orientation, you can rotate the WebP file and export it as BMP.
  */

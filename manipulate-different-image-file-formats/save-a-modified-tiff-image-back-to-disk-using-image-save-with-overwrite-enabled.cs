@@ -1,9 +1,11 @@
+// HOW-TO: Save Modified TIFF Overwrite Existing File Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.Brushes;
+using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Brushes;
 
 class Program
 {
@@ -11,28 +13,37 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "input.tif";
             string outputPath = "output.tif";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            // Load the TIFF image
+            using (TiffImage image = (TiffImage)Image.Load(inputPath))
             {
-                RasterImage raster = image as RasterImage;
-                if (raster != null)
-                {
-                    Graphics graphics = new Graphics(raster);
-                    SolidBrush brush = new SolidBrush(Color.Red);
-                    graphics.FillRectangle(brush, new Rectangle(10, 10, 100, 100));
-                }
+                // Modify the image: fill a rectangle with a red gradient
+                Graphics graphics = new Graphics(image);
+                LinearGradientBrush brush = new LinearGradientBrush(
+                    new Point(0, 0),
+                    new Point(image.Width, image.Height),
+                    Color.Red,
+                    Color.Transparent);
+                Rectangle rect = new Rectangle(10, 10, image.Width - 20, image.Height - 20);
+                graphics.FillRectangle(brush, rect);
 
+                // Prepare save options (default format)
                 TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+
+                // Save the modified image, overwriting if the file exists
                 image.Save(outputPath, saveOptions);
             }
         }
@@ -45,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to programmatically add a red highlight rectangle to a scanned TIFF invoice and overwrite the original file for downstream accounting systems.
- * 2. When a medical imaging application must annotate a TIFF X‑ray by drawing a colored region and save the modified image back to disk without creating a duplicate file.
- * 3. When an engineering workflow requires stamping a TIFF blueprint with a warning box using C# graphics and then overwriting the source file for version control.
- * 4. When a document management system wants to batch‑process multi‑page TIFF files, draw a marker on each page, and replace the existing files to conserve storage.
- * 5. When a GIS tool needs to overlay a red rectangle on a TIFF satellite tile and save the updated tile using Aspose.Imaging’s Image.Save with overwrite enabled for immediate map rendering.
+ * 1. When you need to programmatically add a gradient overlay to a TIFF and replace the original file on disk.
+ * 2. When a batch process must edit multi‑page TIFF documents and save the changes without creating duplicate files.
+ * 3. When an application generates watermarks on scanned TIFF images and must overwrite the source to conserve storage.
+ * 4. When a server‑side service updates TIFF metadata or graphics and needs to write the updated image back safely.
+ * 5. When you want to automate image preprocessing, such as drawing shapes on TIFFs, and ensure the output overwrites any previous version.
  */

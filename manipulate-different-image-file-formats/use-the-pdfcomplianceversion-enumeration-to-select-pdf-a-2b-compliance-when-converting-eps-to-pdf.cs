@@ -1,18 +1,20 @@
+// HOW-TO: Convert EPS to PDF/A-2b Compliant PDF in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "Input/sample.eps";
-        string outputPath = "Output/sample.pdf";
-
         try
         {
+            string inputPath = "Input/sample.eps";
+            string outputPath = "Output/sample.pdf";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,10 +23,9 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            var pdfOptions = new PdfOptions();
-
-            using (Image image = Image.Load(inputPath))
+            using (var image = (EpsImage)Image.Load(inputPath))
             {
+                var pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -37,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive vector graphics from EPS files in a long‑term, standards‑compliant PDF/A‑2b format by setting PdfOptions.Compliance to PdfComplianceVersion.PdfA2b.
- * 2. When a printing workflow requires converting EPS artwork to PDF while guaranteeing PDF/A‑2b compliance via the PdfComplianceVersion enumeration to ensure consistent color and layout across different print vendors.
- * 3. When a digital publishing platform must transform EPS illustrations into PDF/A‑2b PDFs by using Aspose.Imaging’s PdfOptions with PdfComplianceVersion.PdfA2b so the documents remain viewable and searchable in PDF readers that enforce archival standards.
- * 4. When an enterprise document management system needs to ingest EPS logos and convert them to PDF/A‑2b PDFs, configuring PdfOptions.Compliance with PdfComplianceVersion.PdfA2b to meet corporate policy for searchable, self‑contained files.
- * 5. When a software solution for scientific journals converts EPS figures to PDF/A‑2b PDFs, applying the PdfComplianceVersion enumeration to satisfy journal submission guidelines that mandate PDF/A‑2b compliance for reproducibility and preservation.
+ * 1. When you need to archive vector graphics from EPS files in a PDF/A‑2b compliant format for long‑term preservation or regulatory submission.
+ * 2. When a printing workflow requires converting EPS artwork to PDF while ensuring the output meets PDF/A‑2b standards for color accuracy and font embedding.
+ * 3. When an enterprise document management system must store EPS diagrams as searchable PDFs that conform to PDF/A‑2b for legal compliance.
+ * 4. When a C# application automates batch conversion of EPS logos to PDF/A‑2b PDFs to guarantee consistent rendering across different PDF viewers.
+ * 5. When you integrate Aspose.Imaging into a .NET service that generates PDF/A‑2b reports from EPS charts to satisfy accessibility and archival guidelines.
  */

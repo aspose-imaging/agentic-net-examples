@@ -1,3 +1,4 @@
+// HOW-TO: Convert JPEG to CMYK JPEG in C# With Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output_cmyk.jpg";
+            string inputPath = @"C:\temp\input.jpg";
+            string outputPath = @"C:\temp\output.cmyk.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -25,17 +26,15 @@ class Program
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the JPEG image
-            using (Image image = Image.Load(inputPath))
+            using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                // Prepare JPEG save options with CMYK color type
+                // Set up save options to convert to CMYK
                 JpegOptions saveOptions = new JpegOptions
                 {
-                    ColorType = JpegCompressionColorMode.Cmyk,
-                    // Optional: preserve quality
-                    Quality = 100
+                    ColorType = JpegCompressionColorMode.Cmyk
                 };
 
-                // Save the image as CMYK JPEG
+                // Save the image with CMYK color type
                 image.Save(outputPath, saveOptions);
             }
         }
@@ -48,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When preparing print‑ready marketing materials, a developer can load a JPEG, convert it to CMYK, and save it to ensure colors match the printing press.
- * 2. When migrating a web‑based photo gallery to a workflow that requires CMYK images for offline catalogs, the code can be used to batch‑convert JPEGs to the correct color space.
- * 3. When integrating a digital asset management system that must store images in CMYK for consistent color reproduction across devices, this snippet shows how to perform the conversion in C# with Aspose.Imaging.
- * 4. When validating that a third‑party image processing pipeline preserves color fidelity, a developer can use the example to load a JPEG, change its ColorType to CMYK, and compare the output.
- * 5. When automating a pre‑press quality check that requires all JPEG files to be saved with 100 % quality in CMYK, the code provides a straightforward way to enforce those settings programmatically.
+ * 1. When you need to prepare a JPEG for professional printing that requires CMYK color space.
+ * 2. When converting images from screen RGB to CMYK to ensure color consistency across print workflows.
+ * 3. When a web service must receive a JPEG, change its color mode to CMYK, and return the modified file.
+ * 4. When validating that a JPEG’s color profile has been correctly changed before sending it to a publisher.
+ * 5. When automating batch processing of photos to meet a printer’s CMYK JPEG specifications using C#.
  */

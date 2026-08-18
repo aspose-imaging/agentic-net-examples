@@ -1,3 +1,4 @@
+// HOW-TO: Flip DjVu Pages Horizontally and Convert to TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,39 +9,32 @@ using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "Input/sample.djvu";
-        string outputPath = "Output/output.tiff";
-
         try
         {
-            // Verify input file exists
+            string inputPath = "sample.djvu";
+            string outputDirectory = "output";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(outputDirectory);
 
-            // Load the DjVu document
-            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
             {
-                // Flip each page horizontally
-                foreach (Image pageImage in djvu.Pages)
+                foreach (DjvuPage page in djvuImage.Pages)
                 {
-                    if (pageImage is DjvuPage djvuPage)
-                    {
-                        djvuPage.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                    }
-                }
+                    page.RotateFlip(RotateFlipType.RotateNoneFlipX);
 
-                // Save the modified document as a multi-page TIFF
-                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                djvu.Save(outputPath, tiffOptions);
+                    string outputPath = Path.Combine(outputDirectory, $"page_{page.PageNumber}.tiff");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    page.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
+                }
             }
         }
         catch (Exception ex)
@@ -52,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert scanned DjVu documents into multi‑page TIFF files while horizontally flipping each page for correct orientation in archival systems.
- * 2. When an application must batch‑process DjVu files from a legacy scanning workflow, apply a mirror flip to every page, and output a single TIFF for compatibility with document management software.
- * 3. When a .NET service is required to validate the existence of a DjVu source, ensure the output folder exists, and transform the pages into a flipped TIFF for printing on devices that expect mirrored images.
- * 4. When integrating Aspose.Imaging into a C# project to programmatically rotate‑flip DjVu pages before saving them as a TIFF to meet regulatory standards for document presentation.
- * 5. When automating the conversion of DjVu e‑books into flipped multi‑page TIFFs for use in OCR pipelines that only accept TIFF input.
+ * 1. When you need to batch‑process scanned DjVu documents, flip each page for correct orientation and archive them as high‑quality TIFF files using C#.
+ * 2. When preparing DjVu files for OCR engines that require left‑to‑right page layout, you can horizontally flip the pages before converting them to TIFF.
+ * 3. When migrating legacy DjVu archives to a TIFF‑based workflow, this code lets you automatically correct mirrored pages during the conversion.
+ * 4. When building a document‑viewing application that displays pages in TIFF format, you may need to flip DjVu pages to match the viewer’s coordinate system.
+ * 5. When creating print‑ready TIFF images from DjVu sources that were originally scanned upside‑down, the code ensures each page is mirrored correctly before saving.
  */

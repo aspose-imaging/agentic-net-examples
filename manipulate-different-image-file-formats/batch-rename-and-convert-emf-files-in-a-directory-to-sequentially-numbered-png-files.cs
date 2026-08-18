@@ -1,3 +1,4 @@
+// HOW-TO: Batch Rename and Convert EMF Files to Sequential PNGs in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -13,6 +14,7 @@ class Program
             string inputDirectory = Path.Combine(baseDir, "Input");
             string outputDirectory = Path.Combine(baseDir, "Output");
 
+            // Validate input directory
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
@@ -20,34 +22,39 @@ class Program
                 return;
             }
 
+            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.*");
-            int counter = 1;
+            string[] files = Directory.GetFiles(inputDirectory, "*.emf");
+            int index = 1;
 
-            foreach (string inputPath in files)
+            foreach (var inputPath in files)
             {
-                if (!Path.GetExtension(inputPath).Equals(".emf", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                string outputPath = Path.Combine(outputDirectory, $"{counter}.png");
-                counter++;
-
+                string outputPath = Path.Combine(outputDirectory, $"image_{index}.png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
                 {
-                    image.Save(outputPath, new PngOptions());
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = new EmfRasterizationOptions
+                        {
+                            PageSize = image.Size
+                        }
+                    };
+                    image.Save(outputPath, pngOptions);
                 }
+
+                index++;
             }
         }
         catch (Exception ex)
@@ -59,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy collection of vector EMF diagrams into web‑friendly PNG images with sequential filenames for easy indexing.
- * 2. When an automated build process must generate thumbnail PNG previews from EMF assets stored in a source folder for inclusion in documentation portals.
- * 3. When a data‑import routine has to standardize incoming EMF files from multiple vendors by renaming them to numeric order and converting them to a common raster format for downstream analytics.
- * 4. When a Windows desktop application must batch process user‑uploaded EMF charts, renaming each file sequentially and saving them as PNGs for display in a gallery view.
- * 5. When a CI/CD pipeline requires converting EMF icons to PNG sprites and assigning them incremental names to simplify asset management in a cross‑platform UI project.
+ * 1. When you need to process a folder of vector EMF drawings and generate numbered PNG thumbnails for a web gallery.
+ * 2. When an automated build script must rename and rasterize EMF icons into PNG assets with consistent naming for a mobile app.
+ * 3. When migrating legacy EMF reports to a modern system that only accepts PNG images and requires sequential file names.
+ * 4. When creating batch image conversion tools that read EMF files from an input directory and output PNGs for further processing in machine‑learning pipelines.
+ * 5. When preparing documentation assets by converting multiple EMF diagrams to PNG format and naming them automatically for inclusion in PDF manuals.
  */

@@ -1,7 +1,8 @@
+// HOW-TO: Convert DICOM to TIFF With Fixed Threshold Binarization In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
@@ -10,26 +11,21 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.dcm";
-            string outputPath = "Output/sample.tif";
+            string inputPath = "Input\\sample.dcm";
+            string outputPath = "Output\\sample.tiff";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DICOM image, apply fixed threshold binarization, and save as TIFF
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                var dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)image;
+                DicomImage dicomImage = (DicomImage)image;
                 dicomImage.BinarizeFixed(128);
-
                 var tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
                 dicomImage.Save(outputPath, tiffOptions);
             }
@@ -43,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a hospital IT system needs to convert radiology DICOM scans into high‑contrast black‑and‑white TIFF files for integration with legacy PACS viewers that only support TIFF.
- * 2. When a research lab wants to preprocess MRI DICOM images by applying a fixed threshold of 128 to create binary masks before statistical analysis in C#.
- * 3. When a medical billing service must generate printable TIFF copies of DICOM X‑ray images with consistent binarization for inclusion in insurance claim documents.
- * 4. When a telemedicine platform requires automated conversion of incoming DICOM ultrasound images to TIFF format with fixed‑threshold binarization to reduce file size for faster network transmission.
- * 5. When a forensic imaging tool needs to load DICOM CT scans, apply a 128‑level binary threshold to highlight bone structures, and save the result as a TIFF for use in courtroom presentations.
+ * 1. When a medical imaging application needs to transform DICOM scans into high‑contrast black‑and‑white TIFF files for archival or further analysis.
+ * 2. When a radiology workflow requires applying a fixed 128‑level threshold to highlight structures before sending images to a PACS system that only accepts TIFF.
+ * 3. When a C# program must batch‑process DICOM X‑ray images into binarized TIFFs for use in machine‑learning models that expect binary input.
+ * 4. When a developer wants to generate printable, lossless TIFF copies of DICOM images with consistent thresholding for quality‑controlled reports.
+ * 5. When integrating Aspose.Imaging into a .NET service that converts incoming DICOM files to TIFF while simplifying the image to a binary mask for downstream image‑processing pipelines.
  */

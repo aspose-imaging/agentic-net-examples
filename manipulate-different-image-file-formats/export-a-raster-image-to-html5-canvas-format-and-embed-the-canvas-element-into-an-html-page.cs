@@ -1,3 +1,4 @@
+// HOW-TO: Export PNG to HTML5 Canvas and Embed in HTML with C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -5,11 +6,12 @@ using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.html";
+        // Hardcoded paths
+        string inputPath = @"C:\Images\sample.png";
+        string canvasPath = @"C:\Output\canvas.html";
+        string finalHtmlPath = @"C:\Output\final.html";
 
         try
         {
@@ -20,21 +22,37 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directories exist
+            Directory.CreateDirectory(Path.GetDirectoryName(canvasPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(finalHtmlPath));
 
-            // Load the raster image
-            using (Image image = Image.Load(inputPath))
+            // Load raster image and export only the canvas tag
+            using (var image = Image.Load(inputPath))
             {
-                // Configure HTML5 Canvas export options
-                Html5CanvasOptions options = new Html5CanvasOptions
+                var options = new Html5CanvasOptions
                 {
-                    FullHtmlPage = true // Generate a full HTML page with the canvas element
+                    FullHtmlPage = false // generate only the <canvas> element
                 };
-
-                // Save the image as an HTML5 Canvas file
-                image.Save(outputPath, options);
+                image.Save(canvasPath, options);
             }
+
+            // Read the generated canvas tag
+            string canvasTag = File.ReadAllText(canvasPath);
+
+            // Build a full HTML page that embeds the canvas
+            string finalHtml = @"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""UTF-8"">
+    <title>Canvas Embed</title>
+</head>
+<body>
+" + canvasTag + @"
+</body>
+</html>";
+
+            // Write the final HTML page
+            File.WriteAllText(finalHtmlPath, finalHtml);
         }
         catch (Exception ex)
         {
@@ -45,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to embed a JPEG photo directly into a web page without separate image files, they can export the raster image to an HTML5 Canvas page using Aspose.Imaging for .NET.
- * 2. When building a cross‑platform reporting tool that needs to embed generated charts as canvas elements, the code converts raster chart images into a self‑contained HTML file for easy distribution.
- * 3. When creating an offline documentation viewer that must render images inside a single HTML file, exporting the image to a full HTML5 Canvas page simplifies packaging and loading.
- * 4. When integrating image previews into a C# WinForms or WPF application that uses a WebBrowser control, the developer can generate an HTML5 Canvas file to render the preview without additional image resources.
- * 5. When automating the conversion of a batch of JPEG assets into web‑ready canvas elements for a responsive UI, this code provides a programmatic way to produce HTML files that embed the images as canvas graphics.
+ * 1. When you need to convert a server‑side PNG file into a lightweight <canvas> element for inclusion in a web page without loading the full image file.
+ * 2. When generating dynamic HTML reports that display raster graphics using HTML5 Canvas to ensure consistent rendering across browsers.
+ * 3. When building an image preview feature in a C# web application that embeds the picture directly into the page via a canvas tag instead of an <img> element.
+ * 4. When creating automated documentation that requires embedding raster images as canvas elements to reduce page size and improve load times.
+ * 5. When migrating legacy image assets to modern HTML5 Canvas format using Aspose.Imaging for .NET to simplify client‑side drawing operations.
  */

@@ -1,6 +1,8 @@
+// HOW-TO: Batch Convert EMF Files to SVG with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Emf;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Emf;
 
@@ -26,19 +28,17 @@ class Program
                     return;
                 }
 
-                // Build output SVG path
-                string outputPath = Path.Combine(
-                    outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".svg");
+                // Prepare output path (same file name with .svg extension)
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".svg");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load EMF image
+                // Load the EMF image
                 using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
                 {
-                    // Prepare SVG save options
-                    SvgOptions saveOptions = new SvgOptions
+                    // Set up SVG save options
+                    SvgOptions svgOptions = new SvgOptions
                     {
                         TextAsShapes = true
                     };
@@ -46,17 +46,17 @@ class Program
                     // Configure rasterization options for EMF
                     EmfRasterizationOptions rasterOptions = new EmfRasterizationOptions
                     {
-                        BackgroundColor = Color.WhiteSmoke,
+                        BackgroundColor = Aspose.Imaging.Color.WhiteSmoke,
                         PageSize = emfImage.Size,
                         RenderMode = Aspose.Imaging.FileFormats.Emf.EmfRenderMode.Auto,
-                        BorderX = 50,
-                        BorderY = 50
+                        BorderX = 0,
+                        BorderY = 0
                     };
 
-                    saveOptions.VectorRasterizationOptions = rasterOptions;
+                    svgOptions.VectorRasterizationOptions = rasterOptions;
 
                     // Save as SVG
-                    emfImage.Save(outputPath, saveOptions);
+                    emfImage.Save(outputPath, svgOptions);
                 }
             }
         }
@@ -69,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy collection of Windows Metafile (EMF) diagrams to web‑friendly SVG files for a corporate intranet portal, they can use this C# batch conversion code with Aspose.Imaging.
- * 2. When an automated build pipeline must generate scalable icons from EMF assets while preserving embedded raster images as external references, the code provides the necessary rasterization and SVG save options.
- * 3. When a document management system requires converting engineering schematics stored as EMF into searchable SVG vectors for indexing and preview, the batch process simplifies the task.
- * 4. When a marketing team wants to create responsive graphics by converting a folder of EMF logos into SVG format with consistent background color and borders, developers can employ this script.
- * 5. When a GIS application needs to export map overlays saved as EMF into SVG for integration with web mapping libraries, the code enables bulk conversion with proper handling of external image files.
+ * 1. When you need to automatically transform a folder of Windows Metafile (EMF) graphics into scalable SVG files for web display.
+ * 2. When you want to preserve text as vector shapes during conversion to ensure crisp rendering at any resolution.
+ * 3. When you must apply a uniform background color to all converted SVGs to match a corporate style guide.
+ * 4. When you need to process multiple EMF assets in a batch job without manually opening each file.
+ * 5. When you are integrating image conversion into a C# build pipeline that outputs SVGs for downstream vector editing tools.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Extract DjVu Pages to Separate LZW Compressed TIFF Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,12 +10,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"c:\temp\sample.djvu";
-        string outputDir = @"c:\temp\output";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"c:\temp\sample.djvu";
+            string outputDir = @"c:\temp\output\";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,13 +23,13 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists (creates if missing)
+            // Ensure output directory exists
             Directory.CreateDirectory(outputDir);
 
-            // Open the DjVu file as a stream
+            // Open the DjVu file stream
             using (Stream stream = File.OpenRead(inputPath))
             {
-                // Load DjVu image from the stream
+                // Load DjVu image
                 using (DjvuImage djvuImage = new DjvuImage(stream))
                 {
                     // Prepare TIFF save options with LZW compression
@@ -38,13 +39,12 @@ class Program
                     // Iterate through each page and save as separate TIFF
                     foreach (DjvuPage djvuPage in djvuImage.Pages)
                     {
-                        // Build output file path for the current page
-                        string outputPath = Path.Combine(outputDir, $"sample.{djvuPage.PageNumber}.tif");
+                        string outputPath = Path.Combine(outputDir, $"sample_page_{djvuPage.PageNumber}.tif");
 
-                        // Ensure the directory for the output file exists (already created above)
+                        // Ensure the directory for the output file exists
                         Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                        // Save the page as TIFF using the specified options
+                        // Save the page as TIFF
                         djvuPage.Save(outputPath, tiffOptions);
                     }
                 }
@@ -59,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a legal firm needs to convert scanned DjVu case files into lossless TIFF images with LZW compression for archival in a document management system.
- * 2. When a publishing company wants to split a multi‑page DjVu manuscript into individual TIFF pages for high‑quality print proofs.
- * 3. When a government agency must transform DjVu maps into separate TIFF tiles to feed into GIS software that only accepts TIFF input.
- * 4. When a medical records department requires each page of a DjVu patient chart to be saved as a compressed TIFF for secure electronic health record storage.
- * 5. When an e‑learning platform extracts DjVu lecture slides into individual TIFF files to generate thumbnails and support offline viewing.
+ * 1. When you need to convert each page of a scanned DjVu archive into individual TIFF images for archival or printing, preserving lossless LZW compression.
+ * 2. When a document workflow requires splitting a multi‑page DjVu file into separate TIFF files to feed into OCR or image analysis pipelines.
+ * 3. When integrating legacy DjVu documents into a .NET application that only supports TIFF, you can extract pages and save them with LZW compression for compatibility.
+ * 4. When preparing DjVu pages for inclusion in a PDF or Word report, converting each page to a high‑quality TIFF ensures consistent rendering across platforms.
+ * 5. When automating batch processing of DjVu files on a server, this code extracts pages and stores them as compressed TIFFs to reduce storage while maintaining image fidelity.
  */

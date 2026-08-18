@@ -1,3 +1,4 @@
+// HOW-TO: Convert CorelDRAW CDR to LZW Compressed TIFF with Horizontal Flip in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,39 +10,44 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cdr";
-        string outputPath = @"C:\Images\output.tif";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the CDR file
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.cdr";
+            string outputPath = @"C:\Images\output.tif";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the CDR image
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to CdrImage to access RotateFlip
-                if (image is CdrImage cdrImage)
+                var cdrImage = image as CdrImage;
+                if (cdrImage != null)
                 {
-                    // Apply a horizontal flip (you can change the type as needed)
+                    // Apply a horizontal flip
                     cdrImage.RotateFlip(RotateFlipType.RotateNoneFlipX);
                 }
 
-                // Prepare TIFF save options with LZW compression
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                // Configure TIFF options with LZW compression
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
                 {
-                    Compression = TiffCompressions.Lzw
+                    Compression = TiffCompressions.Lzw,
+                    BitsPerSample = new ushort[] { 8, 8, 8 },
+                    Photometric = TiffPhotometrics.Rgb,
+                    PlanarConfiguration = TiffPlanarConfigs.Contiguous,
+                    ByteOrder = TiffByteOrder.LittleEndian
                 };
 
-                // Save the image as TIFF using the specified options
+                // Save the image as TIFF using the configured options
                 image.Save(outputPath, tiffOptions);
             }
         }
@@ -54,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to convert a CorelDRAW (.cdr) illustration to a loss‑less TIFF for archival, applying a horizontal flip to correct orientation before saving with LZW compression.
- * 2. When an automated batch‑processing service must read CDR files, mirror the artwork, and generate compressed TIFF files for downstream printing workflows.
- * 3. When a document management system imports CDR assets, flips them to match page layout conventions, and stores them as TIFF images with LZW to reduce file size while preserving quality.
- * 4. When a C# application integrates Aspose.Imaging to transform vector CDR drawings into TIFF for compatibility with legacy GIS software, using RotateFlip and LZW compression.
- * 5. When a web API receives user‑uploaded CDR files, needs to programmatically flip the image and return a TIFF response optimized with LZW compression for faster download.
+ * 1. When a developer needs to generate a lossless, LZW‑compressed TIFF from a CorelDRAW CDR file for archival or printing workflows.
+ * 2. When an application must programmatically mirror a CDR image horizontally before saving it in a format supported by downstream systems.
+ * 3. When integrating Aspose.Imaging into a batch‑processing pipeline that converts legacy CDR graphics to TIFF for compatibility with document management platforms.
+ * 4. When a web service receives CDR uploads and must return a TIFF with LZW compression to reduce file size while preserving image quality.
+ * 5. When automating the preparation of CDR assets for GIS or medical imaging applications that require TIFF with specific photometric and planar settings.
  */

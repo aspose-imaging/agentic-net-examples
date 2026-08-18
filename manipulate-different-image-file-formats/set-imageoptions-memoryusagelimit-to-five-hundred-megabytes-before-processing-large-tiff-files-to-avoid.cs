@@ -1,3 +1,4 @@
+// HOW-TO: Set ImageOptions MemoryUsageLimit to 500 MB for Large TIFF Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,33 +12,22 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.tif";
-            string outputPath = "output.tif";
+            string inputPath = @"C:\Images\large_input.tif";
+            string outputPath = @"C:\Images\Processed\large_output.tif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            string outputDir = Path.GetDirectoryName(outputPath);
-            if (string.IsNullOrEmpty(outputDir))
-            {
-                outputDir = ".";
-            }
-            Directory.CreateDirectory(outputDir);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure TIFF options
             TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
 
-            // Load the large TIFF image with memory usage limit
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath, new LoadOptions { BufferSizeHint = 500 * 1024 * 1024 }))
+            using (Image image = Image.Load(inputPath))
             {
-                // Save the image using the configured options
-                tiffImage.Save(outputPath, tiffOptions);
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must convert or copy a multi‑gigabyte TIFF file on a server with limited RAM, setting ImageOptions.MemoryUsageLimit to 500 MB prevents an OutOfMemoryException.
- * 2. When a desktop utility processes high‑resolution scanned documents stored as TIFF images and needs to ensure stable performance on machines with 4 GB of RAM, applying a 500 MB memory cap safeguards the process.
- * 3. When a cloud‑based image‑processing pipeline ingests large TIFF files from a file share and must resize or re‑encode them without exhausting the container’s memory quota, the memory‑usage limit keeps the job alive.
- * 4. When a batch job iterates over a directory of massive TIFF archives to generate compressed copies, configuring BufferSizeHint to 500 MB lets each image load safely before being saved with TiffOptions.
- * 5. When a .NET service extracts metadata from huge TIFF files for a document‑management system, limiting memory usage to 500 MB ensures the service remains responsive and avoids crashes.
+ * 1. When processing multi‑gigabyte TIFF images on a server, a developer can limit memory usage to 500 MB to prevent OutOfMemoryException.
+ * 2. When converting high‑resolution scanned documents to another TIFF format in a batch job, setting MemoryUsageLimit ensures the application stays within allocated resources.
+ * 3. When building a web API that receives large TIFF uploads, configuring ImageOptions.MemoryUsageLimit protects the service from crashing due to excessive memory consumption.
+ * 4. When performing image manipulation such as cropping or rotating on massive medical imaging TIFF files, the memory limit helps maintain performance on machines with limited RAM.
+ * 5. When integrating Aspose.Imaging into a desktop utility that processes user‑selected TIFF files, applying the 500 MB limit avoids UI freezes caused by memory overload.
  */

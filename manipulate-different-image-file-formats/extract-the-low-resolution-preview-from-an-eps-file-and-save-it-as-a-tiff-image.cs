@@ -1,41 +1,42 @@
+// HOW-TO: Extract Low Resolution EPS Preview and Save as TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
-using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
         string inputPath = "input.eps";
         string outputPath = "output.tiff";
 
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the EPS image
             using (var epsImage = (EpsImage)Image.Load(inputPath))
             {
-                Image preview = epsImage.GetPreviewImage(EpsPreviewFormat.TIFF);
+                // Retrieve the TIFF preview (low‑resolution)
+                var preview = epsImage.GetPreviewImage(EpsPreviewFormat.TIFF);
                 if (preview == null)
                 {
-                    Console.Error.WriteLine("No TIFF preview available.");
+                    Console.Error.WriteLine("No TIFF preview available in the EPS file.");
                     return;
                 }
 
-                using (preview)
-                {
-                    preview.Save(outputPath, new TiffOptions(TiffExpectedFormat.Default));
-                }
+                // Save the preview as a TIFF file
+                preview.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -47,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate quick thumbnail previews of uploaded EPS vector files for display in a gallery, a developer can extract the low‑resolution TIFF preview using Aspose.Imaging for .NET.
- * 2. When an automated document processing pipeline must convert EPS artwork into a TIFF format for legacy printing systems that only accept raster images, this code provides a simple C# solution.
- * 3. When a desktop publishing tool wants to show a low‑resolution preview of an EPS logo before the user decides to embed the full vector, the developer can use the GetPreviewImage method to create a TIFF snapshot.
- * 4. When a content management system indexes graphic assets and stores a small TIFF preview of each EPS file for faster search result rendering, this snippet demonstrates how to generate and save that preview.
- * 5. When a batch conversion utility processes a folder of EPS files and needs to create low‑resolution TIFF versions for email attachments or quick previews, the code shows the required C# operations with Aspose.Imaging.
+ * 1. When a publishing workflow needs to generate quick thumbnail previews of EPS artwork for catalog listings without rendering the full vector image.
+ * 2. When a document management system must store a low‑resolution raster version of an EPS file for faster web preview while keeping the original vector file intact.
+ * 3. When a batch process extracts embedded TIFF previews from legacy EPS files to create printable low‑quality drafts in a C# application.
+ * 4. When a graphic designer wants to preview EPS logos in a Windows file explorer thumbnail view by converting the preview to a TIFF image.
+ * 5. When an automated reporting tool requires converting EPS chart files to TIFF format for inclusion in PDF reports where only low‑resolution images are needed.
  */

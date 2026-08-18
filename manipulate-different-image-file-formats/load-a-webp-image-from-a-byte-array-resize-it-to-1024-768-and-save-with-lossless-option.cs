@@ -1,8 +1,10 @@
+// HOW-TO: Resize WebP Image From Byte Array To 1024x768 Losslessly In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Webp;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
@@ -12,39 +14,38 @@ class Program
         string inputPath = @"C:\temp\input.webp";
         string outputPath = @"C:\temp\output.webp";
 
+        // Input file existence check
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the WebP image from a byte array
-            byte[] imageBytes = File.ReadAllBytes(inputPath);
-            using (var memoryStream = new MemoryStream(imageBytes))
-            using (var webPImage = new WebPImage(memoryStream))
+            byte[] imageData = File.ReadAllBytes(inputPath);
+            using (MemoryStream ms = new MemoryStream(imageData))
+            using (WebPImage webPImage = new WebPImage(ms))
             {
-                // Resize to 1024 × 768 using bilinear resampling
+                // Resize to 1024x768 using bilinear resampling
                 webPImage.Resize(1024, 768, ResizeType.BilinearResample);
 
-                // Set lossless compression options
-                var saveOptions = new WebPOptions
+                // Prepare lossless WebP save options
+                WebPOptions saveOptions = new WebPOptions
                 {
                     Lossless = true
                 };
 
-                // Save the resized image
+                // Save the resized image with lossless compression
                 webPImage.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -52,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application receives uploaded WebP images as byte streams and must generate standardized 1024 × 768 thumbnails without quality loss for display in a product gallery.
- * 2. When a mobile app syncs photos to a server, converting the raw WebP byte data into a fixed‑resolution lossless image to ensure consistent rendering across devices.
- * 3. When an e‑commerce platform needs to batch‑process vendor‑supplied WebP assets stored in a database, resizing them to 1024 × 768 and saving them losslessly for high‑resolution print catalogs.
- * 4. When a digital asset management system imports WebP files from external APIs, transforms them to a uniform size while preserving lossless compression before archiving.
- * 5. When a content delivery network (CDN) script prepares WebP images from byte arrays for on‑the‑fly resizing to 1024 × 768, ensuring lossless quality for premium users.
+ * 1. When you need to downscale a WebP photo received as a byte stream for a responsive web page while preserving exact visual quality.
+ * 2. When an API returns WebP images in memory and you must resize them to a standard 1024×768 thumbnail without introducing compression artifacts.
+ * 3. When processing user‑uploaded WebP files on a server, you want to store a lossless, resized version for archival or further editing.
+ * 4. When generating product‑catalog images from WebP assets stored in a database, you must convert the byte data to a fixed size for consistent layout.
+ * 5. When building a C# microservice that transforms raw WebP byte arrays into uniformly sized, losslessly compressed files for downstream image pipelines.
  */

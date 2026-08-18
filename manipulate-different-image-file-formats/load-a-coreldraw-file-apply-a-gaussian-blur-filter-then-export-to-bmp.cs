@@ -1,9 +1,10 @@
+// HOW-TO: Apply Gaussian Blur to CorelDRAW File and Save as BMP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -11,37 +12,41 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = "sample.cdr";
-        string outputPath = "output.bmp";
+        string outputPath = "output\\result.bmp";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+        // Ensure any runtime exception is reported cleanly
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the CorelDRAW (CDR) file
             using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Rasterize the vector image to a PNG in memory
+                // Render the vector image to a BMP in memory
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    cdrImage.Save(ms, new PngOptions());
-                    ms.Position = 0; // Reset stream position for reading
+                    // Save the CDR image as BMP to the memory stream
+                    cdrImage.Save(ms, new BmpOptions());
 
-                    // Load the rasterized image
+                    // Reset stream position for reading
+                    ms.Position = 0;
+
+                    // Load the rendered BMP as a raster image
                     using (RasterImage rasterImage = (RasterImage)Image.Load(ms))
                     {
                         // Apply Gaussian blur filter to the entire image
                         rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
-                        // Save the processed image as BMP
-                        rasterImage.Save(outputPath, new BmpOptions());
+                        // Save the processed image to the final BMP file
+                        rasterImage.Save(outputPath);
                     }
                 }
             }
@@ -55,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a designer needs to convert a CorelDRAW (CDR) illustration into a BMP thumbnail with a soft‑focus Gaussian blur for a product catalog.
- * 2. When an automated batch job must rasterize vector CDR files, apply a Gaussian blur to obscure proprietary details, and save the result as BMP for legacy systems.
- * 3. When a web service receives CDR artwork, generates a blurred preview image in BMP format, and serves it quickly in a content‑management portal.
- * 4. When a migration script has to transform old CorelDRAW assets into BMP files with a consistent blur to match a new branding style across marketing materials.
- * 5. When a testing framework validates that applying a Gaussian blur filter to rasterized CDR content produces the expected BMP output for quality assurance.
+ * 1. When you need to convert a vector CorelDRAW design into a raster BMP while adding a soft blur for print previews.
+ * 2. When generating blurred thumbnails of CDR artwork for web galleries without using external graphics tools.
+ * 3. When preprocessing CorelDRAW illustrations with a Gaussian blur before feeding them into a machine‑learning model that expects bitmap input.
+ * 4. When automating a batch workflow that renders CDR files to BMP and applies a uniform blur to meet branding guidelines.
+ * 5. When creating a blurred background layer from a CorelDRAW logo to overlay on UI components in a C# application.
  */

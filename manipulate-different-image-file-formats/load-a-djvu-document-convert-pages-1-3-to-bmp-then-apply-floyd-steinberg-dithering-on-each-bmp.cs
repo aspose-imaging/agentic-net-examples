@@ -1,19 +1,19 @@
+// HOW-TO: Convert First Three DjVu Pages to Dithered BMP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input path
-            string inputPath = "input\\sample.djvu";
+            // Hardcoded input DjVu file path
+            string inputPath = "sample.djvu";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -21,25 +21,25 @@ class Program
             }
 
             // Load the DjVu document
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                DjvuImage djvuImage = (DjvuImage)image;
+                var djvuImage = (DjvuImage)image;
+                int pagesToProcess = Math.Min(3, djvuImage.PageCount);
 
-                // Process pages 1‑3 (indices 0‑2)
-                for (int i = 0; i < 3 && i < djvuImage.PageCount; i++)
+                for (int i = 0; i < pagesToProcess; i++)
                 {
-                    DjvuPage page = (DjvuPage)djvuImage.Pages[i];
+                    var page = (DjvuPage)djvuImage.Pages[i];
 
-                    // Apply Floyd‑Steinberg dithering with a 1‑bit palette
-                    page.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 1);
+                    // Apply Floyd‑Steinberg dithering with 1‑bit palette
+                    page.Dither(Aspose.Imaging.DitheringMethod.FloydSteinbergDithering, 1, null);
 
-                    // Define output BMP path
-                    string outputPath = $"output\\page{i + 1}.bmp";
+                    // Define output BMP file path
+                    string outputPath = Path.Combine("output", $"page{i + 1}.bmp");
 
-                    // Ensure the output directory exists
+                    // Ensure output directory exists
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the page as BMP
+                    // Save the dithered page as BMP
                     page.Save(outputPath, new BmpOptions());
                 }
             }
@@ -53,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a document management system needs to extract the first three pages of a DjVu file and store them as high‑contrast BMP images for archival or OCR processing, this code can automate the conversion and apply Floyd‑Steinberg dithering to preserve detail.
- * 2. When a web application must generate thumbnail previews of DjVu pages in a 1‑bit bitmap format for fast loading on low‑bandwidth devices, the snippet loads the DjVu, dithers each page, and saves them as BMP files.
- * 3. When a printing workflow requires converting selected DjVu pages to BMP with binary color depth to meet legacy printer specifications, the code performs the page extraction, Floyd‑Steinberg dithering, and BMP output in C#.
- * 4. When a digital forensics tool needs to create exact visual replicas of the first three pages of a DjVu document while reducing file size using 1‑bit dithering, this example demonstrates the necessary Aspose.Imaging operations.
- * 5. When a batch‑processing script must programmatically read a DjVu file, apply Floyd‑Steinberg dithering to enhance edge definition, and save the result as BMP images for further analysis, the provided code fulfills that requirement.
+ * 1. When you need to extract the first few pages of a DjVu document and save them as BMP files for legacy systems that only support BMP.
+ * 2. When you want to reduce the color depth of DjVu pages to 1‑bit using Floyd‑Steinberg dithering for printing on monochrome printers.
+ * 3. When you are building a batch conversion tool that processes DjVu archives and creates low‑size BMP thumbnails for quick preview.
+ * 4. When you must ensure consistent output by creating a dedicated output folder and handling missing input files gracefully in a C# application.
+ * 5. When you are integrating Aspose.Imaging into a document‑processing pipeline that requires page‑by‑page manipulation and custom dithering before further analysis.
  */

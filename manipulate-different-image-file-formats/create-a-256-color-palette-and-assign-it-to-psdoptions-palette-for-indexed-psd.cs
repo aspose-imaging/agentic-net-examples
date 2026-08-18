@@ -1,3 +1,4 @@
+// HOW-TO: Create 256 Color Palette for Indexed PSD in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,37 +9,48 @@ class Program
 {
     static void Main()
     {
+        // Hard‑coded input and output file paths
+        string inputPath = @"C:\Temp\input.png";
+        string outputPath = @"C:\Temp\output.psd";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.png";
-            string outputPath = @"C:\temp\output.psd";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Obtain a 256‑color palette from the source image
-                var raster = (RasterImage)image;
-                var palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256);
-
-                // Configure PSD save options for indexed (bitmap) mode
-                var psdOptions = new PsdOptions
+                // Cast to RasterImage to be able to generate a palette
+                RasterImage raster = image as RasterImage;
+                if (raster == null)
                 {
-                    ColorMode = ColorModes.Bitmap, // indexed color mode
-                    Palette = palette
+                    Console.Error.WriteLine("The loaded image is not a raster image.");
+                    return;
+                }
+
+                // Generate a 256‑color palette based on the source image
+                IColorPalette palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256);
+
+                // Prepare PSD save options and assign the palette
+                PsdOptions psdOptions = new PsdOptions
+                {
+                    Palette = palette,
+                    // Use indexed (bitmap) color mode for an indexed PSD
+                    ColorMode = ColorModes.Bitmap,
+                    // Optional: set bits per channel and channels count for typical 8‑bit indexed PSD
+                    ChannelBitsCount = 8,
+                    ChannelsCount = 1
                 };
 
-                // Save as PSD with the specified options
+                // Save the image as an indexed PSD
                 image.Save(outputPath, psdOptions);
             }
         }
@@ -51,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a high‑color PNG into an indexed‑color Photoshop PSD file with a 256‑color palette for compatibility with older design tools.
- * 2. When a web‑to‑print workflow requires reducing image size by saving PNG assets as PSDs using bitmap color mode and a custom palette generated from the source image.
- * 3. When an automated batch process must generate PSD files that use a limited palette to meet file‑size constraints for mobile app assets.
- * 4. When a digital asset management system needs to store thumbnails as indexed PSDs to preserve color fidelity while keeping storage overhead low.
- * 5. When a legacy Photoshop plugin only supports indexed PSD files, and a C# application must create those files by extracting a 256‑color palette from existing raster images.
+ * 1. When you need to convert a PNG to an indexed‑color PSD with a custom 256‑color palette for compatibility with older Photoshop versions.
+ * 2. When you want to reduce file size by saving a raster image as an 8‑bit indexed PSD while preserving the most representative colors.
+ * 3. When you are building a batch‑processing tool that generates PSD files with a limited palette for printing or web‑delivery constraints.
+ * 4. When you need to programmatically create a Photoshop document that uses bitmap color mode and a specific palette for game asset pipelines.
+ * 5. When you must ensure that a source image is transformed into a PSD with a defined palette to maintain consistent colors across multiple design tools.
  */

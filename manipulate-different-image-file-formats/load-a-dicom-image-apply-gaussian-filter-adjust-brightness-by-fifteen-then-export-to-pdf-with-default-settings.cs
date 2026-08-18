@@ -1,6 +1,9 @@
+// HOW-TO: Apply Gaussian Blur and Brightness Adjustment to DICOM and Export as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
@@ -8,27 +11,38 @@ class Program
     {
         try
         {
-            string inputPath = "Input/sample.dcm";
-            string outputPath = "Output/result.pdf";
+            // Hardcoded input and output paths
+            string inputPath = "Input\\sample.dicom";
+            string outputPath = "Output\\result.pdf";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            // Load the DICOM image
+            using (Image image = Image.Load(inputPath))
             {
                 var dicomImage = (Aspose.Imaging.FileFormats.Dicom.DicomImage)image;
 
-                dicomImage.Filter(dicomImage.Bounds,
+                // Apply Gaussian blur filter to the whole image
+                dicomImage.Filter(
+                    dicomImage.Bounds,
                     new Aspose.Imaging.ImageFilters.FilterOptions.GaussianBlurFilterOptions(5, 4.0));
 
+                // Adjust brightness by +15
                 dicomImage.AdjustBrightness(15);
 
-                dicomImage.Save(outputPath, new PdfOptions());
+                // Save the result as PDF with default options
+                using (PdfOptions pdfOptions = new PdfOptions())
+                {
+                    dicomImage.Save(outputPath, pdfOptions);
+                }
             }
         }
         catch (Exception ex)
@@ -40,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to clean up noisy DICOM scans, apply a Gaussian blur, enhance visibility by increasing brightness, and generate a printable PDF report for clinicians.
- * 2. When a radiology research tool must batch‑process DICOM files, reduce artifact noise, adjust contrast levels, and archive the results as PDF documents for easy sharing.
- * 3. When a hospital’s PACS integration requires converting a single DICOM image into a PDF after smoothing and brightening it to meet diagnostic documentation standards.
- * 4. When a telemedicine platform wants to prepare a DICOM X‑ray for remote review by applying a blur filter, brightening the image, and exporting it to a PDF that can be viewed in any browser.
- * 5. When a healthcare compliance system automates the creation of PDF records from DICOM images, using Gaussian filtering and brightness adjustment to ensure the final PDF meets visual quality guidelines.
+ * 1. When a medical imaging application needs to preprocess DICOM scans by smoothing and brightening them before generating a PDF report.
+ * 2. When a radiology workflow requires converting DICOM files to a universally viewable PDF while applying a Gaussian filter to reduce noise.
+ * 3. When a developer wants to automate the creation of printable PDFs from DICOM images with consistent brightness enhancement.
+ * 4. When integrating Aspose.Imaging into a C# service that prepares DICOM images for archival by applying blur and brightness adjustments prior to PDF storage.
+ * 5. When building a diagnostic tool that visualizes DICOM scans with improved clarity and exports them as PDFs for sharing with clinicians.
  */

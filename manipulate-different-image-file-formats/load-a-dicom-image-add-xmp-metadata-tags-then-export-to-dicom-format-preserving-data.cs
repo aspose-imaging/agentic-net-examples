@@ -1,19 +1,18 @@
+// HOW-TO: Add XMP Metadata to DICOM Image and Save with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.Sources;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "input.dcm";
+        string outputPath = "output.dcm";
+
         try
         {
-            string inputPath = "input.dcm";
-            string outputPath = "output.dcm";
-
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,10 +21,13 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
                 var options = new DicomOptions();
-                // Example: add XMP metadata here using options.XmpData if needed
+
+                var xmp = new Aspose.Imaging.Xmp.XmpPacketWrapper();
+                options.XmpData = xmp;
+
                 image.Save(outputPath, options);
             }
         }
@@ -38,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology application must embed patient‑specific XMP metadata into a DICOM file before transmitting it to a PACS system, a developer can use this code to load the image, add the tags, and save it without losing any pixel data.
- * 2. When a healthcare research project needs to batch‑process DICOM scans to include study identifiers as XMP metadata while preserving the original image quality, this C# snippet provides a straightforward way to automate the task.
- * 3. When a medical device manufacturer must generate DICOM files that contain custom XMP metadata for regulatory‑compliance audits, the code demonstrates how to load the source file, attach the metadata, and export it in the DICOM format.
- * 4. When a cloud‑based imaging service wants to enrich uploaded DICOM images with XMP tags for searchable annotations without altering the underlying image data, developers can apply this example to perform the operation in .NET.
- * 5. When a hospital IT team needs to convert legacy DICOM files to a newer version while adding XMP metadata for integration with a digital asset management system, this code shows how to load, tag, and save the files safely.
+ * 1. When a medical imaging system needs to embed custom XMP tags into DICOM files without altering pixel data.
+ * 2. When a radiology workflow requires adding provenance information to DICOM scans before archiving.
+ * 3. When a developer must programmatically insert metadata into DICOM images for compliance with PACS standards.
+ * 4. When an application converts incoming DICOM files to include XMP metadata for downstream analytics.
+ * 5. When a healthcare app needs to preserve original DICOM data while augmenting the file with additional metadata.
  */

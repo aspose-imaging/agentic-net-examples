@@ -1,73 +1,50 @@
+// HOW-TO: Apply Vignette Effect to TGA Image and Save as JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Tga;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.Brushes;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "input.tga";
             string outputPath = "output.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TGA image
-            using (TgaImage image = new TgaImage(inputPath))
+            using (Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)Aspose.Imaging.Image.Load(inputPath))
             {
-                int width = image.Width;
-                int height = image.Height;
+                Aspose.Imaging.Graphics graphics = new Aspose.Imaging.Graphics(raster);
+                int steps = 10;
+                int width = raster.Width;
+                int height = raster.Height;
 
-                // Center of the image
-                double cx = width / 2.0;
-                double cy = height / 2.0;
-
-                // Maximum distance from center to a corner
-                double maxDist = Math.Sqrt(cx * cx + cy * cy);
-
-                // Apply a simple vignette by darkening pixels based on distance from center
-                for (int y = 0; y < height; y++)
+                for (int i = 0; i < steps; i++)
                 {
-                    for (int x = 0; x < width; x++)
-                    {
-                        int argb = image.GetArgb32Pixel(x, y);
-
-                        byte a = (byte)((argb >> 24) & 0xFF);
-                        byte r = (byte)((argb >> 16) & 0xFF);
-                        byte g = (byte)((argb >> 8) & 0xFF);
-                        byte b = (byte)(argb & 0xFF);
-
-                        double dx = x - cx;
-                        double dy = y - cy;
-                        double dist = Math.Sqrt(dx * dx + dy * dy);
-
-                        // Vignette factor: 1.0 at center, decreasing towards edges
-                        double factor = 1.0 - 0.5 * (dist / maxDist);
-                        if (factor < 0.5) factor = 0.5; // clamp to avoid excessive darkening
-
-                        r = (byte)(r * factor);
-                        g = (byte)(g * factor);
-                        b = (byte)(b * factor);
-
-                        int newArgb = (a << 24) | (r << 16) | (g << 8) | b;
-                        image.SetArgb32Pixel(x, y, newArgb);
-                    }
+                    double factor = (double)i / steps;
+                    int insetX = (int)(factor * width / 2);
+                    int insetY = (int)(factor * height / 2);
+                    Aspose.Imaging.Rectangle rect = new Aspose.Imaging.Rectangle(insetX, insetY, width - 2 * insetX, height - 2 * insetY);
+                    int alpha = (int)(255 * (1 - factor));
+                    SolidBrush brush = new SolidBrush(Aspose.Imaging.Color.FromArgb(alpha, 0, 0, 0));
+                    graphics.FillEllipse(brush, rect);
                 }
 
-                // Save the processed image as JPEG
-                image.Save(outputPath, new JpegOptions());
+                var jpegOptions = new JpegOptions
+                {
+                    Source = new FileCreateSource(outputPath, false)
+                };
+                raster.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -79,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a game developer wants to convert high‑resolution TGA textures into web‑friendly JPEGs with a subtle vignette to focus player attention on the center of the sprite.
- * 2. When a digital artist needs to batch‑process TGA screenshots from a rendering pipeline, adding a darkened border effect and exporting them as JPEGs for portfolio presentation.
- * 3. When an e‑commerce platform receives product images in TGA format from manufacturers and wants to apply a vignette for a professional look before storing them as JPEG thumbnails.
- * 4. When a scientific imaging application must reduce file size of TGA microscopy images while emphasizing the region of interest by applying a vignette and saving the result as JPEG.
- * 5. When a mobile app developer prepares TGA assets for an iOS app, using C# and Aspose.Imaging to add a vignette effect and convert the files to JPEG for faster loading on devices.
+ * 1. When you need to add a subtle dark border to a TGA texture before publishing it as a JPEG for web galleries.
+ * 2. When converting legacy TGA assets from a game project to JPEG while automatically applying a vignette to improve visual focus.
+ * 3. When generating thumbnail previews of high‑resolution TGA files with a vignette effect for a photo‑management application.
+ * 4. When preparing TGA screenshots for email newsletters and want a smooth dark fade around the edges without manual editing.
+ * 5. When automating batch processing of TGA graphics to JPEG with a built‑in vignette for consistent branding across marketing materials.
  */

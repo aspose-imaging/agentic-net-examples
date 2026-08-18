@@ -1,49 +1,42 @@
+// HOW-TO: Export Each Frame of Multi‑Page TIFF to Separate BMP Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\multi.tif";
-            string outputDirectory = @"C:\Images\Frames";
+            string inputPath = @"C:\Images\multipage.tif";
+            string outputDir = @"C:\Images\Frames";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(outputDir);
 
-            // Load the multi‑page TIFF
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                TiffFrame[] frames = tiffImage.Frames;
-
-                for (int i = 0; i < frames.Length; i++)
+                for (int i = 0; i < tiff.Frames.Length; i++)
                 {
-                    TiffFrame frame = frames[i];
-
-                    // Prepare BMP save options (default options are sufficient)
-                    BmpOptions bmpOptions = new BmpOptions();
-
-                    // Build output file path
-                    string outputPath = Path.Combine(outputDirectory, $"frame_{i + 1}.bmp");
-
-                    // Ensure the directory for the output file exists
+                    tiff.ActiveFrame = tiff.Frames[i];
+                    string outputPath = Path.Combine(outputDir, $"frame_{i + 1}.bmp");
                     Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Save the frame as BMP while preserving DPI
-                    frame.Save(outputPath, bmpOptions);
+                    BmpOptions bmpOptions = new BmpOptions
+                    {
+                        Source = new FileCreateSource(outputPath, false)
+                    };
+
+                    tiff.Save(outputPath, bmpOptions);
                 }
             }
         }
@@ -56,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each page of a scanned multi‑page TIFF invoice into individual high‑resolution BMP files for legacy accounting software that only accepts BMP input while keeping the original DPI for accurate scaling.
- * 2. When a developer must convert a multi‑page TIFF medical image (e.g., DICOM‑derived TIFF) into separate BMP frames for integration with a diagnostic tool that requires BMP format and precise DPI metadata for measurements.
- * 3. When a developer wants to split a multi‑page TIFF architectural blueprint into separate BMP layers so that each floor plan can be displayed in a CAD viewer that reads BMP files and respects the original DPI for correct dimensions.
- * 4. When a developer is preparing a batch of multi‑page TIFF photographs for a printing pipeline that only processes BMP images, ensuring each frame retains its DPI to maintain print quality.
- * 5. When a developer needs to archive each page of a multi‑page TIFF legal document as an individual BMP file for a document management system that indexes BMP files and relies on DPI information for searchable metadata.
+ * 1. When you need to split a scanned multi‑page document saved as TIFF into individual BMP images for legacy Windows applications that only accept BMP format.
+ * 2. When preserving the original DPI of each page is required for accurate printing or measurement after converting a multi‑page TIFF into separate bitmap files.
+ * 3. When automating a batch process that extracts every frame from a multi‑page TIFF archive and stores them as BMP files for further analysis in a .NET image‑processing pipeline.
+ * 4. When integrating Aspose.Imaging in a C# service that converts medical imaging TIFF stacks into BMP frames while keeping the resolution metadata intact.
+ * 5. When creating thumbnails or rasterized copies of each page in a multi‑page TIFF for a document management system that stores images as BMP to ensure compatibility with older viewers.
  */

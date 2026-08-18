@@ -1,3 +1,4 @@
+// HOW-TO: Convert BMP to PSD with 8‑Bit Indexed Palette in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +12,8 @@ class Program
         try
         {
             // Hard‑coded input and output file paths
-            string inputPath = @"c:\temp\input.bmp";
-            string outputPath = @"c:\temp\output.psd";
+            string inputPath = @"C:\temp\input.bmp";
+            string outputPath = @"C:\temp\output.psd";
 
             // Verify that the input file exists
             if (!File.Exists(inputPath))
@@ -27,28 +28,24 @@ class Program
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Create a custom 8‑bit palette (example: red and green)
+                // Prepare PSD save options
+                PsdOptions psdOptions = new PsdOptions();
+
+                // Set 8‑bit indexed color mode
+                psdOptions.ColorMode = ColorModes.Indexed;          // Indexed palette mode
+                psdOptions.ChannelBitsCount = 8;                    // 8 bits per channel
+
+                // Create a custom palette (example: red, green, blue)
                 Aspose.Imaging.Color[] paletteColors = new Aspose.Imaging.Color[]
                 {
                     Aspose.Imaging.Color.Red,
-                    Aspose.Imaging.Color.Green
+                    Aspose.Imaging.Color.Green,
+                    Aspose.Imaging.Color.Blue
                 };
-                IColorPalette customPalette = new Aspose.Imaging.ColorPalette(paletteColors);
+                IColorPalette customPalette = new ColorPalette(paletteColors);
+                psdOptions.Palette = customPalette;
 
-                // Configure PSD save options for 8‑bit indexed mode
-                PsdOptions psdOptions = new PsdOptions
-                {
-                    // Use RLE compression (optional)
-                    CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
-                    // Set the color mode to Indexed (palette‑based)
-                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Indexed,
-                    // 8 bits per channel
-                    ChannelBitsCount = 8,
-                    // Assign the custom palette
-                    Palette = customPalette
-                };
-
-                // Save the image as PSD with the specified options
+                // Save the image as PSD using the configured options
                 image.Save(outputPath, psdOptions);
             }
         }
@@ -61,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy BMP assets into Photoshop‑compatible PSD files while preserving a limited 8‑bit indexed color palette for use in game UI design.
- * 2. When an automated build pipeline must generate PSD mock‑ups from BMP screenshots and apply a custom two‑color palette for branding consistency.
- * 3. When a web service processes user‑uploaded BMP images and stores them as PSD files with RLE compression and indexed color mode to reduce file size for downstream editing.
- * 4. When a desktop application migrates a batch of BMP icons to PSD format with a specific palette to maintain visual fidelity in a design system that only supports 8‑bit indexed colors.
- * 5. When a C# utility needs to programmatically create PSD layers from BMP sources and enforce a custom palette for printing workflows that require indexed color separation.
+ * 1. When you need to import legacy BMP graphics into Photoshop while preserving a limited color set, you can convert them to PSD with an 8‑bit indexed palette using C#.
+ * 2. When generating assets for a game that requires PSD files with a specific palette for layer masks, this code creates the required PSD from a BMP source.
+ * 3. When automating a batch workflow that standardizes image colors for printing, you can load BMP files and save them as PSD with a custom red‑green‑blue palette.
+ * 4. When integrating a .NET application with a design pipeline that only accepts indexed‑color PSD files, this snippet converts incoming BMP images accordingly.
+ * 5. When you want to reduce file size by limiting colors before editing in Photoshop, the code converts BMP to an 8‑bit indexed PSD with a custom palette in C#.
  */

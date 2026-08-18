@@ -1,50 +1,58 @@
+// HOW-TO: Batch Convert TIFF Files to WebP with Timestamped Filenames in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Linq;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Webp;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input TIFF files
-            string[] inputPaths = new string[]
-            {
-                @"C:\Images\sample1.tif",
-                @"C:\Images\sample2.tif",
-                @"C:\Images\sample3.tif"
-            };
+            string baseDir = Directory.GetCurrentDirectory();
+            string inputDirectory = Path.Combine(baseDir, "Input");
+            string outputDirectory = Path.Combine(baseDir, "Output");
 
-            // Output directory for WebP files
-            string outputDirectory = @"C:\Images\WebP";
-
-            foreach (string inputPath in inputPaths)
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.*")
+                .Where(f => f.EndsWith(".tif", StringComparison.OrdinalIgnoreCase) ||
+                            f.EndsWith(".tiff", StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            foreach (var inputPath in files)
+            {
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Load the TIFF image
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                string outputPath = Path.Combine(outputDirectory, $"{fileNameWithoutExt}_{timestamp}.webp");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Build output file name with timestamp suffix
-                    string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                    string outputFileName = $"{fileNameWithoutExt}_{timestamp}.webp";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save as WebP
-                    image.Save(outputPath, new WebPOptions());
+                    var options = new WebPOptions();
+                    image.Save(outputPath, options);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -56,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to compress a batch of high‑resolution TIFF scans into smaller WebP files for faster page loads while preserving unique timestamps for version control.
- * 2. When an e‑commerce platform automates the conversion of product catalog TIFF images to WebP format and appends a timestamp to avoid cache conflicts during nightly uploads.
- * 3. When a digital archiving system processes scanned documents in TIFF, converts them to WebP for web preview, and uses the timestamp suffix to track when each file was generated.
- * 4. When a photo‑editing application offers a one‑click export feature that transforms multiple TIFF photos into WebP thumbnails, naming each output with a precise timestamp for easy sorting.
- * 5. When a content management workflow batches legacy TIFF assets into WebP for mobile optimization and adds a timestamp to each filename to ensure unique identifiers across deployments.
+ * 1. When a developer needs to compress a large set of high‑resolution TIFF scans for faster web delivery, they can batch convert them to WebP and add a timestamp to avoid filename clashes.
+ * 2. When an automated nightly job must archive newly received TIFF documents as space‑efficient WebP images while preserving the original capture time in the filename.
+ * 3. When integrating a document management system that stores incoming TIFF files, a developer can use this code to generate timestamped WebP thumbnails for quick preview in a web UI.
+ * 4. When migrating legacy medical imaging archives from TIFF to a modern format, the batch conversion with timestamped names ensures each converted file remains uniquely identifiable.
+ * 5. When building a C# utility that processes user‑uploaded TIFF images and stores them in a CDN, adding a timestamp suffix guarantees unique WebP filenames across multiple uploads.
  */

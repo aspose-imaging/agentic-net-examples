@@ -1,3 +1,4 @@
+// HOW-TO: Convert BMP Image to JPEG with Quality 85 in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\temp\sample.bmp";
+        string outputPath = @"C:\temp\sample_converted.jpg";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\input.bmp";
-            string outputPath = @"C:\temp\output.jpg";
-
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -38,6 +39,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -45,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to batch‑convert legacy BMP screenshots to smaller JPEG files for email attachments while keeping the original width and height and using a quality setting of 85.
- * 2. When a web service written in C# must receive user‑uploaded BMP images, compress them to JPEG with a controlled quality level, and store them in a file system without altering their dimensions.
- * 3. When an automated build script has to generate preview thumbnails from BMP assets by saving them as JPEGs at 85 % quality to reduce storage costs while preserving the exact pixel size.
- * 4. When a migration tool moves image data from an old Windows application that saved BMP files to a modern platform that requires JPEG format, ensuring the images retain their original resolution and a consistent quality factor.
- * 5. When a reporting engine creates charts as BMP files and then needs to embed them in PDF reports as JPEGs, using Aspose.Imaging in C# to convert the format with quality 85 and unchanged dimensions.
+ * 1. When you need to reduce the file size of a BMP photo for web upload while keeping its original dimensions.
+ * 2. When a legacy system provides images in BMP format and you must convert them to JPEG for compatibility with modern browsers.
+ * 3. When generating thumbnails for a gallery and you want to store them as JPEG with a specific quality setting of 85.
+ * 4. When automating a batch process that reads BMP files from a folder and saves them as JPEG to meet storage constraints.
+ * 5. When integrating image conversion into a C# application that must handle missing files gracefully and ensure the output directory exists.
  */

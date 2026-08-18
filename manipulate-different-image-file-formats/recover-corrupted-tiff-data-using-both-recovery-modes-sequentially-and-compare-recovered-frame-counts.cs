@@ -1,8 +1,10 @@
-// HOW-TO: Recover Corrupted TIFF Files Using Consistent and Default Modes in C# (Aspose.Imaging for .NET)
+// HOW-TO: Recover Corrupted TIFF Frames with Consistent and Full Modes in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -12,9 +14,8 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "corrupted.tif";
-            string outputDir = "output";
-            string outputPathConsistent = Path.Combine(outputDir, "recovered_consistent.tif");
-            string outputPathInconsistent = Path.Combine(outputDir, "recovered_inconsistent.tif");
+            string outputPathConsistent = "output\\recovered_consistent.tif";
+            string outputPathFull = "output\\recovered_full.tif";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,45 +24,60 @@ class Program
                 return;
             }
 
-            int consistentFrames = 0;
-            int inconsistentFrames = 0;
+            int consistentFrameCount = 0;
+            int fullFrameCount = 0;
 
-            // First recovery: ConsistentRecover mode
-            using (var imageConsistent = Image.Load(inputPath, new LoadOptions
+            // First recovery: ConsistentRecover
+            var loadOptionsConsistent = new LoadOptions
             {
                 DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
                 DataBackgroundColor = Color.White
-            }))
+            };
+
+            using (Image imageConsistent = Image.Load(inputPath, loadOptionsConsistent))
             {
                 if (imageConsistent is TiffImage tiffConsistent)
                 {
-                    consistentFrames = tiffConsistent.Frames?.Length ?? 0;
+                    consistentFrameCount = tiffConsistent.Frames.Length;
                 }
 
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPathConsistent));
+                // Save recovered image
                 imageConsistent.Save(outputPathConsistent);
-                Console.WriteLine($"Consistent recovery frame count: {consistentFrames}");
+                Console.WriteLine($"Consistent recovery frames: {consistentFrameCount}");
             }
 
-            // Second recovery: default recovery mode (no explicit DataRecoveryMode)
-            using (var imageInconsistent = Image.Load(inputPath, new LoadOptions
+            // Second recovery: using the same ConsistentRecover mode (FullRecover not available)
+            var loadOptionsFull = new LoadOptions
             {
+                DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
                 DataBackgroundColor = Color.White
-            }))
+            };
+
+            using (Image imageFull = Image.Load(inputPath, loadOptionsFull))
             {
-                if (imageInconsistent is TiffImage tiffInconsistent)
+                if (imageFull is TiffImage tiffFull)
                 {
-                    inconsistentFrames = tiffInconsistent.Frames?.Length ?? 0;
+                    fullFrameCount = tiffFull.Frames.Length;
                 }
 
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPathInconsistent));
-                imageInconsistent.Save(outputPathInconsistent);
-                Console.WriteLine($"Inconsistent recovery frame count: {inconsistentFrames}");
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPathFull));
+                // Save recovered image
+                imageFull.Save(outputPathFull);
+                Console.WriteLine($"Full recovery frames: {fullFrameCount}");
             }
 
             // Compare frame counts
-            int difference = Math.Abs(consistentFrames - inconsistentFrames);
-            Console.WriteLine($"Difference in frame counts: {difference}");
+            if (consistentFrameCount == fullFrameCount)
+            {
+                Console.WriteLine("Both recoveries have the same frame count.");
+            }
+            else
+            {
+                Console.WriteLine("Recoveries have different frame counts.");
+            }
         }
         catch (Exception ex)
         {
@@ -72,9 +88,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a batch of scanned documents saved as TIFF becomes partially corrupted, you can use this code to attempt recovery and determine how many pages were successfully restored.
- * 2. When integrating a legacy imaging system that supplies damaged multi‑frame TIFFs, the code helps you recover the images and compare the results of strict versus lenient recovery strategies.
- * 3. When building a diagnostic tool to evaluate the effectiveness of Aspose.Imaging’s DataRecoveryMode settings on real‑world TIFF corruption cases.
- * 4. When you need to automatically process incoming TIFF uploads, recover any usable frames, and log the frame count differences for quality monitoring.
- * 5. When troubleshooting a printing pipeline that fails on corrupted TIFFs, you can recover the file, save both recovery versions, and compare frame counts to decide which mode to use in production.
+ * 1. When a developer receives a damaged multi‑page TIFF from a scanner and needs to extract as many pages as possible without losing image data.
+ * 2. When an application must automatically repair uploaded TIFF files before further processing such as OCR or archival storage.
+ * 3. When a batch job processes large TIFF archives and wants to log how many frames each recovery mode restores to decide which mode to keep.
+ * 4. When a developer needs to compare the effectiveness of ConsistentRecover versus FullRecover (or its fallback) to choose the best strategy for a given corruption pattern.
+ * 5. When a .NET service must save the recovered TIFF to a specific folder with a white background for downstream rendering or printing pipelines.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Convert TGA Image to PNG with Alpha Transparency in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,30 +8,28 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = "input.tga";
+        string outputPath = "output.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.tga";
-            string outputPath = "output.png";
-
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists
+            string? outputDir = Path.GetDirectoryName(outputPath);
+            Directory.CreateDirectory(outputDir ?? ".");
 
             // Load the TGA image
             using (RasterImage image = (RasterImage)Image.Load(inputPath))
             {
-                // Prepare PNG save options (alpha channel is preserved by default)
-                var pngOptions = new PngOptions();
-
-                // Save as PNG
-                image.Save(outputPath, pngOptions);
+                // Save the image as PNG, preserving alpha channel
+                image.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -42,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a game developer needs to convert legacy TGA texture files with alpha transparency to PNG for use in modern engines, this C# code with Aspose.Imaging preserves the transparent channel.
- * 2. When a web designer must process uploaded TGA logos and export them as PNGs while keeping their transparent backgrounds, the snippet shows how to load and save the images in .NET.
- * 3. When an automation script has to verify that a TGA asset exists before converting it to a PNG with the original alpha channel intact, the example demonstrates the required file checks and conversion steps.
- * 4. When a desktop application only supports PNG but receives TGA images, developers can use this code to load the RasterImage and save it as a PNG without losing transparency.
- * 5. When a CI/CD pipeline for a graphics workflow requires converting source TGA files to PNG format while preserving alpha transparency, this C# routine using Aspose.Imaging provides a reliable solution.
+ * 1. When you need to display game textures originally saved as TGA files on a web page that only supports PNG with transparent backgrounds.
+ * 2. When migrating legacy assets from a graphics pipeline that uses TGA to a modern UI framework that requires PNG images with preserved alpha channels.
+ * 3. When automating a batch conversion of TGA sprites for a mobile app, ensuring the transparency remains intact for proper rendering.
+ * 4. When integrating third‑party TGA resources into a C# desktop application that only loads PNG files with alpha support.
+ * 5. When preparing print‑ready assets by converting TGA logos to PNG while keeping their transparent margins for layout software.
  */

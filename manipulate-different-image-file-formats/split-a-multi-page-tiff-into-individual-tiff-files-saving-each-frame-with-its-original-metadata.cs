@@ -1,49 +1,41 @@
+// HOW-TO: Split Multi‑Page TIFF into Separate Files with Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hard‑coded input and output locations
-        string inputPath = @"C:\temp\multipage.tif";
-        string outputDirectory = @"C:\temp\output";
-
         try
         {
-            // Verify that the source file exists
+            string inputPath = "input.tif";
+            string outputDir = "output_frames";
+
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            Directory.CreateDirectory(outputDir);
 
-            // Load the multi‑page TIFF
-            using (TiffImage multiPage = (TiffImage)Image.Load(inputPath))
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                // Iterate over each frame in the source image
-                for (int i = 0; i < multiPage.Frames.Length; i++)
+                int pageCount = tiff.PageCount;
+
+                for (int i = 0; i < pageCount; i++)
                 {
-                    // Retrieve the current frame
-                    TiffFrame frame = multiPage.Frames[i];
+                    string outputPath = Path.Combine(outputDir, $"frame_{i + 1}.tif");
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                    // Create a new TiffImage that contains only this frame
-                    using (TiffImage singlePage = new TiffImage(frame))
-                    {
-                        // Build the output file path (preserves original metadata)
-                        string outputPath = Path.Combine(outputDirectory, $"page_{i + 1}.tif");
+                    TiffOptions options = new TiffOptions(TiffExpectedFormat.Default);
+                    options.MultiPageOptions = new MultiPageOptions(new IntRange(i, i + 1));
 
-                        // Ensure the directory for the output file exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                        // Save the single‑frame TIFF
-                        singlePage.Save(outputPath);
-                    }
+                    tiff.Save(outputPath, options);
                 }
             }
         }
@@ -56,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system receives a multi‑page DICOM‑converted TIFF scan and needs to store each slice as a separate TIFF file with its original metadata for PACS integration.
- * 2. When a document management application must extract individual pages from a scanned multi‑page TIFF contract so each page can be indexed, searched, and archived separately while preserving EXIF and TIFF tags.
- * 3. When a printing workflow requires splitting a high‑resolution multi‑page TIFF brochure into single‑page TIFFs to feed each page into a printer that only accepts one image per job, keeping color profile metadata intact.
- * 4. When a GIS developer wants to separate each layer stored as a frame in a multi‑page TIFF satellite image into distinct TIFF files for independent analysis, ensuring geospatial metadata is retained.
- * 5. When an e‑learning platform needs to convert a multi‑page TIFF textbook into individual page images for web delivery, using C# and Aspose.Imaging to preserve page‑level metadata such as resolution and compression settings.
+ * 1. When you need to extract each scanned page from a multi‑page TIFF document for individual processing or distribution while keeping the original EXIF and TIFF tags.
+ * 2. When a medical imaging system must separate DICOM‑converted TIFF frames into single‑page files for patient‑specific analysis without losing metadata.
+ * 3. When an archival workflow requires breaking down large multi‑page TIFFs of historical newspapers into per‑page files for easier indexing and search.
+ * 4. When a printing service wants to generate separate TIFF files for each page of a multi‑page artwork to send to different printers while preserving color profiles.
+ * 5. When a cloud‑based image‑processing pipeline needs to split uploaded multi‑page TIFFs into individual images for parallel processing, ensuring each output retains its original metadata.
  */

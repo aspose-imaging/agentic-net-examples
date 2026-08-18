@@ -1,3 +1,4 @@
+// HOW-TO: Convert DjVu Document to PDF with Custom Author Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,39 +12,31 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.djvu";
-            string outputPath = "Output/output.pdf";
+            // Hardcoded input and output file paths
+            string inputPath = "input.djvu";
+            string outputPath = "output.pdf";
 
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists (creates if null/empty safely)
             string outputDir = Path.GetDirectoryName(outputPath);
-            if (!string.IsNullOrWhiteSpace(outputDir))
-            {
-                Directory.CreateDirectory(outputDir);
-            }
+            Directory.CreateDirectory(outputDir);
 
-            // Load DjVu document
+            // Load the DjVu document
             using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                // Configure PDF options with custom author metadata
-                PdfOptions pdfOptions = new PdfOptions
+                // Prepare PDF options with custom author metadata
+                var pdfOptions = new PdfOptions
                 {
-                    PdfDocumentInfo = new PdfDocumentInfo
-                    {
-                        Author = "Custom Author"
-                    },
-                    // Export all pages
-                    MultiPageOptions = new DjvuMultiPageOptions()
+                    PdfDocumentInfo = new PdfDocumentInfo { Author = "Custom Author" }
                 };
 
-                // Save all pages to a single PDF file
+                // Export all pages to PDF (default behavior)
                 djvu.Save(outputPath, pdfOptions);
             }
         }
@@ -56,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer uses Aspose.Imaging for .NET to convert scanned archival DjVu files into a single PDF while embedding a custom author name for compliance.
- * 2. When an application built with C# and Aspose.Imaging must batch‑process multi‑page DjVu documents and generate a PDF with author metadata for digital publishing workflows.
- * 3. When a legal‑tech solution employing Aspose.Imaging needs to preserve page order from a DjVu case file and add author information before storing the PDF in a document management system.
- * 4. When a C# service leverages Aspose.Imaging to transform DjVu e‑books into PDF format with author attribution for e‑reader compatibility.
- * 5. When a desktop utility uses Aspose.Imaging to load a DjVu image, set PDF document info, and export all pages to one PDF for easy sharing and printing.
+ * 1. When you need to archive scanned DjVu files as PDFs while embedding the author’s name for document management.
+ * 2. When a publishing workflow requires converting multi‑page DjVu illustrations into a single PDF and setting author metadata for copyright tracking.
+ * 3. When integrating Aspose.Imaging into a C# application that processes user‑uploaded DjVu files and outputs PDFs with consistent author information.
+ * 4. When automating batch conversion of DjVu manuals to PDFs for distribution, ensuring each PDF contains the correct author tag for compliance reporting.
+ * 5. When creating a digital library that stores original DjVu scans but provides PDF versions with author metadata for easier indexing and retrieval.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert Multiple TIFF Files to WebP with Quality 90 in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,21 +10,18 @@ class Program
     {
         try
         {
-            // Hardcoded list of TIFF input files
+            // Hardcoded list of TIFF files to process
             string[] inputPaths = new string[]
             {
-                @"C:\Images\Input1.tif",
-                @"C:\Images\Input2.tif",
-                @"C:\Images\Input3.tif"
+                @"C:\Images\image1.tif",
+                @"C:\Images\image2.tif",
+                @"C:\Images\image3.tif"
             };
 
-            // Hardcoded output directory
-            string outputDirectory = @"C:\Images\WebPOutput";
+            // Hardcoded output directory for WebP files
+            string outputDir = @"C:\Images\WebP";
 
-            // Ensure the output directory exists once (unconditional as per rule)
-            Directory.CreateDirectory(outputDirectory);
-
-            foreach (string inputPath in inputPaths)
+            foreach (var inputPath in inputPaths)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -33,22 +31,18 @@ class Program
                 }
 
                 // Build output path with .webp extension
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".webp");
+                string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".webp");
 
-                // Ensure the directory for the output file exists (unconditional)
+                // Ensure the output directory exists before saving
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the TIFF image
+                // Load the TIFF image and save as WebP with quality 90
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Set WebP options with quality 90
                     var webpOptions = new WebPOptions
                     {
                         Quality = 90
                     };
-
-                    // Save as WebP
                     image.Save(outputPath, webpOptions);
                 }
 
@@ -65,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a collection of high‑resolution TIFF scans to WebP images with a quality setting of 90 for faster web loading, this code provides a simple C# solution.
- * 2. When an e‑commerce platform must automatically generate lightweight WebP thumbnails from product TIFF photos stored on a server, the script can process each file and log the results.
- * 3. When a digital archiving system requires periodic conversion of TIFF documents to WebP to reduce storage costs while maintaining visual fidelity, the code handles the file existence checks and directory creation.
- * 4. When a content management workflow demands that newly uploaded TIFF assets be instantly transformed into WebP format for responsive design, this C# loop performs the conversion and reports success.
- * 5. When a developer is building a command‑line utility to migrate legacy TIFF image libraries to modern WebP format with consistent quality and error handling, the example demonstrates the necessary image loading, option setting, and logging steps.
+ * 1. When you need to reduce storage size of scanned TIFF documents by converting them to high‑quality WebP images in a .NET batch process.
+ * 2. When an application must automatically generate WebP versions of a set of TIFF assets for faster web delivery while preserving visual fidelity.
+ * 3. When a server‑side service processes a predefined list of TIFF files and logs each successful conversion for audit or troubleshooting.
+ * 4. When you want to ensure the output directory exists and create it on‑the‑fly while converting TIFF to WebP in C#.
+ * 5. When you require a simple error‑handling loop that skips missing TIFF files and reports conversion errors during bulk image processing.
  */

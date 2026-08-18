@@ -1,6 +1,6 @@
+// HOW-TO: Recover Corrupted TIFF Using Consistent Recovery Mode in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
 
@@ -8,35 +8,30 @@ class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "corrupted.tif";
+        string outputPath = "recovered.tif";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input\\corrupted.tif";
-            string outputPath = "output\\recovered.tif";
-
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the corrupted TIFF with recovery mode
-            using (TiffImage image = (TiffImage)Image.Load(
-                inputPath,
-                new LoadOptions
-                {
-                    DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
-                    DataBackgroundColor = Color.White
-                }))
+            var loadOptions = new Aspose.Imaging.LoadOptions
             {
-                // Example further processing: output image dimensions
+                DataRecoveryMode = Aspose.Imaging.DataRecoveryMode.ConsistentRecover,
+                DataBackgroundColor = Aspose.Imaging.Color.White
+            };
+
+            using (TiffImage image = (TiffImage)Aspose.Imaging.Image.Load(inputPath, loadOptions))
+            {
+                // Example processing: output image dimensions
                 Console.WriteLine($"Recovered image size: {image.Width}x{image.Height}");
 
-                // Save the recovered image
                 image.Save(outputPath);
             }
         }
@@ -49,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system receives a corrupted DICOM‑derived TIFF scan, a developer can use this code to recover the image with Aspose.Imaging’s ConsistentRecover mode and then extract its dimensions for further analysis.
- * 2. When an archival workflow encounters damaged high‑resolution TIFF photographs, the snippet enables automatic recovery and saving of a clean TIFF so the files can be indexed by a digital asset management system.
- * 3. When a document management application needs to open user‑uploaded TIFF attachments that may be partially corrupted, the code restores the image and provides its width and height for layout calculations.
- * 4. When a batch‑processing service must sanitize scanned TIFF invoices with missing data, the recovery mode fills background gaps with white and saves a repaired file for OCR processing.
- * 5. When a GIS platform imports satellite imagery stored as TIFF and some files are corrupted during transfer, this example recovers the raster, confirms its size, and writes a repaired file for subsequent geospatial analysis.
+ * 1. When a batch of scanned documents in TIFF format becomes partially corrupted and you need to automatically restore them before further analysis.
+ * 2. When you need to load a damaged TIFF into memory to read its dimensions for validation or reporting purposes.
+ * 3. When an archival system must recover and re‑save TIFF images with a white background to ensure consistent display across viewers.
+ * 4. When a document processing pipeline encounters a broken TIFF and requires a programmatic way to salvage the image without manual intervention.
+ * 5. When you want to integrate Aspose.Imaging’s ConsistentRecover mode into a C# application to fix TIFF files before applying additional image‑processing operations.
  */

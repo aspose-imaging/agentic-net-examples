@@ -1,3 +1,4 @@
+// HOW-TO: How To Flip A DICOM Image Vertically And Save As PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,8 +10,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output file paths
-        string inputPath = @"c:\temp\sample.dcm";
-        string outputPath = @"c:\temp\sample_flipped.png";
+        string inputPath = "sample.dcm";
+        string outputPath = "sample_flipped.png";
 
         try
         {
@@ -22,15 +23,15 @@ class Program
             }
 
             // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the DICOM image, flip vertically, and save as PNG
+            // Load the DICOM image
             using (DicomImage image = (DicomImage)Image.Load(inputPath))
             {
-                // Flip vertically (no rotation, vertical flip)
+                // Flip the image vertically
                 image.RotateFlip(RotateFlipType.RotateNoneFlipY);
 
-                // Save the transformed image to PNG format
+                // Save the result as PNG
                 image.Save(outputPath, new PngOptions());
             }
         }
@@ -44,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to display a DICOM X‑ray that was captured upside‑down, a developer can load the .dcm file, flip it vertically, and save it as a PNG for web viewing.
- * 2. When integrating radiology data into a patient portal, a programmer can convert DICOM scans to PNG thumbnails after applying a vertical flip to match the orientation of other images.
- * 3. When preparing DICOM images for machine‑learning preprocessing, a developer may need to normalize orientation by flipping the image vertically and exporting it to PNG for the training pipeline.
- * 4. When generating printable reports that require standard image formats, a developer can use Aspose.Imaging to load a DICOM file, perform a vertical flip, and save the result as a PNG for inclusion in PDFs.
- * 5. When troubleshooting mismatched image orientation in a PACS system, a developer can quickly flip the DICOM image vertically in C# and export it to PNG to verify the correction visually.
+ * 1. When a medical imaging application needs to display a DICOM scan in a different orientation, developers can flip the image vertically and convert it to PNG for web viewing.
+ * 2. When integrating DICOM files into a patient portal, you may need to transform the image to a widely supported PNG format after correcting its orientation.
+ * 3. When preparing radiology images for machine‑learning pipelines that require PNG inputs, flipping the DICOM vertically ensures consistent orientation across the dataset.
+ * 4. When generating printable reports from DICOM studies, converting the flipped image to PNG simplifies embedding the graphic in PDF or Word documents.
+ * 5. When troubleshooting orientation issues in a PACS viewer, developers can use this code to quickly flip and export a DICOM slice to PNG for side‑by‑side comparison.
  */

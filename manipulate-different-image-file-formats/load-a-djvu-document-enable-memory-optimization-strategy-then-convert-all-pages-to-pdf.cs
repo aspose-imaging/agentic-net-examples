@@ -1,3 +1,4 @@
+// HOW-TO: Convert DjVu Document To Multi‑Page PDF With Memory Optimization In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,12 +7,13 @@ using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input DjVu file path
-            string inputPath = @"C:\Temp\sample.djvu";
+            // Hardcoded input and output paths
+            string inputPath = "Input/sample.djvu";
+            string outputPath = "Output/output.pdf";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,35 +22,27 @@ class Program
                 return;
             }
 
-            // Hardcoded output directory for PDF pages
-            string outputDir = @"C:\Temp\PdfPages";
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Ensure the output directory exists (unconditional)
-            Directory.CreateDirectory(outputDir);
-
-            // Set memory optimization options (limit internal buffers to 1 MB)
+            // Configure memory optimization (buffer size hint)
             LoadOptions loadOptions = new LoadOptions
             {
                 BufferSizeHint = 1 * 1024 * 1024 // 1 MB
             };
 
-            // Load the DjVu document with the specified load options
+            // Load DjVu image with the specified load options
             using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = DjvuImage.LoadDocument(stream, loadOptions))
+            using (DjvuImage djvuImage = new DjvuImage(stream, loadOptions))
             {
-                // Iterate through each page and save it as a separate PDF file
-                foreach (DjvuPage page in djvuImage.Pages)
+                // Set up PDF save options to export all pages
+                PdfOptions pdfOptions = new PdfOptions
                 {
-                    // Build output file path for the current page
-                    string outputPath = Path.Combine(outputDir, $"page_{page.PageNumber}.pdf");
+                    MultiPageOptions = new DjvuMultiPageOptions() // export all pages
+                };
 
-                    // Ensure the directory for the output file exists (unconditional)
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the page as PDF using PdfOptions
-                    PdfOptions pdfOptions = new PdfOptions();
-                    page.Save(outputPath, pdfOptions);
-                }
+                // Save the DjVu document as a PDF
+                djvuImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -60,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a multi‑page DjVu document to individual PDF files while running on a server with limited RAM, they can use Aspose.Imaging for .NET with a 1 MB BufferSizeHint to optimize memory usage.
- * 2. When an archival system must extract each page of a scanned DjVu file and store it as a separate searchable PDF for compliance reporting, this code provides a straightforward C# solution.
- * 3. When a desktop application processes large DjVu ebooks on low‑end machines and must prevent out‑of‑memory exceptions, the LoadOptions.BufferSizeHint setting ensures efficient page‑by‑page conversion to PDF.
- * 4. When an automated workflow needs to transform incoming DjVu submissions into PDF pages for downstream OCR or indexing services, the Aspose.Imaging API can load the document, iterate over DjvuPage objects, and save them as PDFs.
- * 5. When a cloud‑based microservice receives DjVu uploads and must deliver each page as an individual PDF document without consuming excessive memory, the provided C# code demonstrates the optimal approach using DjvuImage.LoadDocument and PdfOptions.
+ * 1. When you need to transform a multi‑page DjVu file into a single PDF for easier distribution while keeping memory usage low.
+ * 2. When processing large DjVu archives on a server and want to limit RAM consumption by specifying a buffer size.
+ * 3. When integrating document conversion into a .NET application that must support both DjVu input and PDF output.
+ * 4. When automating batch conversion of scanned books stored as DjVu into searchable PDF files.
+ * 5. When preparing DjVu‑based technical manuals for printing or archiving in PDF format without loading the entire document into memory.
  */
