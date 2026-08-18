@@ -1,3 +1,4 @@
+// HOW-TO: How To Save EMF With Compression Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,12 +9,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Input\sample.emf";
+        string outputPath = @"C:\Output\sample_output.emf";
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\sample.emf";
-            string outputPath = @"C:\Images\sample_converted.emf";
-
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,28 +25,29 @@ class Program
             // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image
+            // Load the source image (EMF or any supported format)
             using (Image image = Image.Load(inputPath))
             {
-                // Configure rasterization options (e.g., page size)
+                // Prepare rasterization options matching the source image size
                 var rasterOptions = new EmfRasterizationOptions
                 {
                     PageSize = image.Size
                 };
 
-                // Set EMF save options, enabling compression for better quality/size trade‑off
-                var saveOptions = new EmfOptions
+                // Configure EMF save options (e.g., enable compression)
+                var emfOptions = new EmfOptions
                 {
                     VectorRasterizationOptions = rasterOptions,
-                    Compress = true
+                    Compress = true // control output quality by compressing the EMF
                 };
 
-                // Save the image using the specified options
-                image.Save(outputPath, saveOptions);
+                // Save the image using the EMF options
+                image.Save(outputPath, emfOptions);
             }
         }
         catch (Exception ex)
         {
+            // Report any unexpected errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -53,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an existing EMF file to a new EMF with compression enabled to reduce file size while preserving vector quality for inclusion in a PDF report.
- * 2. When a developer wants to ensure that an EMF image is rasterized to match its original dimensions before saving, useful for generating thumbnails that retain exact layout.
- * 3. When a developer must programmatically validate the existence of source EMF files and create output directories before performing batch processing of corporate branding assets.
- * 4. When a developer is integrating Aspose.Imaging into a C# application to export user‑drawn diagrams as compressed EMF files for faster web transmission.
- * 5. When a developer needs to handle exceptions gracefully while loading and saving EMF images with custom EmfOptions to maintain stability in an automated document generation pipeline.
+ * 1. When you need to reduce the file size of vector‑based EMF drawings before storing them in a database or sending them over a network.
+ * 2. When you must generate EMF reports from a C# application and want to enable compression to keep the documents lightweight.
+ * 3. When you are converting legacy EMF assets to a compressed format to meet storage quotas in an enterprise document management system.
+ * 4. When you want to programmatically rasterize an EMF to match its original dimensions while preserving vector quality and applying compression.
+ * 5. When you are building an automated pipeline that validates the existence of source files, creates output folders, and saves compressed EMF files using Aspose.Imaging.
  */
