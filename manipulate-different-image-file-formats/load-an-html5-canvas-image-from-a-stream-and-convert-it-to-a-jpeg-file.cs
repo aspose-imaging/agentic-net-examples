@@ -1,3 +1,4 @@
+// HOW-TO: Convert HTML5 Canvas Image Stream To JPEG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,12 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.html";
-        string outputPath = "output.jpg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.html";
+            string outputPath = "output.jpg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,29 +21,21 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
 
-            // Load the HTML5 Canvas image from a file stream
+            // Load the image from a file stream
             using (FileStream inputStream = File.OpenRead(inputPath))
             {
-                // Optional: verify that the stream can be loaded as an image
-                if (!Image.CanLoad(inputStream))
-                {
-                    Console.Error.WriteLine($"Cannot load image from: {inputPath}");
-                    return;
-                }
-
-                // Reset stream position after CanLoad check
-                inputStream.Position = 0;
-
-                // Load the image
                 using (Image image = Image.Load(inputStream))
                 {
-                    // Prepare JPEG save options (default settings)
-                    var jpegOptions = new JpegOptions();
+                    // Configure JPEG save options (optional settings)
+                    JpegOptions jpegOptions = new JpegOptions
+                    {
+                        Quality = 90 // Set desired quality (1-100)
+                    };
 
-                    // Save the image as JPEG to the specified output path
+                    // Save the image as JPEG
                     image.Save(outputPath, jpegOptions);
                 }
             }
@@ -56,9 +49,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application generates dynamic graphics on an HTML5 Canvas and needs to store them as JPEG files on the server using C# and Aspose.Imaging.
- * 2. When a desktop utility processes uploaded HTML5 Canvas files from a file stream and converts them to JPEG for archival or printing purposes.
- * 3. When an automated batch job scans a folder of .html canvas exports, validates each file, and saves them as JPEG images with default compression settings via Aspose.Imaging in .NET.
- * 4. When a content management system receives canvas snapshots from browsers, loads them from a stream, and creates JPEG thumbnails for fast preview in a gallery.
- * 5. When a developer wants to ensure the output directory exists, verify the input HTML5 Canvas can be loaded, and then convert the canvas to a JPEG using Image.Load and JpegOptions in a try‑catch block.
+ * 1. When you need to generate a JPEG thumbnail from an HTML5 canvas that is stored in a file or received as a stream in a C# web service.
+ * 2. When you want to save a dynamically created canvas drawing from a browser‑based editor to a JPEG file on the server using Aspose.Imaging.
+ * 3. When you have to batch‑process HTML5 canvas files and convert them to JPEG for archival or reporting purposes in a .NET application.
+ * 4. When you need to ensure the output JPEG meets a specific quality level (e.g., 90) while converting canvas graphics for email attachments.
+ * 5. When you are building an API that accepts canvas data via a stream and must return a JPEG image for downstream systems or third‑party services.
  */
