@@ -68,7 +68,7 @@ Examples and tasks in this folder:
 | [apply-a-blur-filter-to-an-avif-image-and-write-the-processed-image-back-to-storage.cs](./apply-a-blur-filter-to-an-avif-image-and-write-the-processed-image-back-to-storage.cs) |
 | [apply-a-blur-filter-to-an-emf-image-and-persist-the-processed-output-to-a-file.cs](./apply-a-blur-filter-to-an-emf-image-and-persist-the-processed-output-to-a-file.cs) |
 | [apply-a-blur-filter-to-an-emz-image-and-store-the-processed-output-file.cs](./apply-a-blur-filter-to-an-emz-image-and-store-the-processed-output-file.cs) |
-[**View all 464 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/kernel-filters)
+[**View all 465 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/kernel-filters)
 
 ## Requirements
 - **Aspose.Imaging for .NET** – install via NuGet: `Install-Package Aspose.Imaging`
