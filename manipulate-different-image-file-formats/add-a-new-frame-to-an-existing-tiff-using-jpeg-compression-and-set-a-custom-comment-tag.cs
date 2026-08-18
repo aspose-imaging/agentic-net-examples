@@ -1,10 +1,10 @@
+// HOW-TO: Add JPEG Compressed Frame to Existing TIFF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
-using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -12,35 +12,35 @@ class Program
     {
         try
         {
-            string inputTiffPath = "input.tif";
-            string newFramePath = "newframe.jpg";
-            string outputTiffPath = "output.tif";
+            string inputPath = "input.tif";
+            string outputPath = "output.tif";
 
-            if (!File.Exists(inputTiffPath))
+            if (!File.Exists(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputTiffPath}");
-                return;
-            }
-            if (!File.Exists(newFramePath))
-            {
-                Console.Error.WriteLine($"File not found: {newFramePath}");
+                Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputTiffPath));
-
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputTiffPath))
+            string outputDir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(outputDir))
             {
-                using (RasterImage raster = (RasterImage)Image.Load(newFramePath))
-                {
-                    TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    frameOptions.Compression = TiffCompressions.Jpeg;
+                Directory.CreateDirectory(outputDir);
+            }
 
-                    TiffFrame newFrame = new TiffFrame(raster, frameOptions);
-                    tiffImage.AddFrame(newFrame);
-                }
+            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            {
+                TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
+                frameOptions.Compression = TiffCompressions.Jpeg;
+                int width = tiffImage.Width;
+                int height = tiffImage.Height;
+                TiffFrame newFrame = new TiffFrame(frameOptions, width, height);
 
-                tiffImage.Save(outputTiffPath);
+                tiffImage.AddFrame(newFrame);
+
+                TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                saveOptions.Compression = TiffCompressions.Jpeg;
+
+                tiffImage.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to append a newly captured JPEG photograph to an existing multi‑page TIFF archive while using JPEG compression to keep the overall file size low.
- * 2. When building a digital asset management system that stores high‑resolution scans as TIFF and must programmatically add additional images without re‑encoding the entire document.
- * 3. When generating multi‑page medical imaging reports where each new X‑ray image (provided as a JPEG) is inserted into an existing TIFF series for DICOM‑compatible workflows.
- * 4. When creating a multi‑page invoice PDF that is first converted to TIFF and later requires extra pages (such as supplemental terms saved as JPEG) to be appended in a C# application.
- * 5. When a document‑processing service updates an archival TIFF file with a newly scanned page while preserving JPEG compression and ensuring the file remains compatible with downstream image‑processing tools.
+ * 1. When you need to create a multi‑page TIFF by appending a new JPEG‑compressed image to an existing file in a C# application.
+ * 2. When you want to reduce the file size of added pages in a TIFF document by using JPEG compression while preserving the original dimensions.
+ * 3. When a document‑management system requires each page of a scanned TIFF to be stored as a separate frame with consistent compression settings.
+ * 4. When you are building a batch‑processing tool that updates legacy TIFF archives by inserting additional pages without re‑encoding the whole file.
+ * 5. When you need to programmatically generate a TIFF portfolio where new frames are added on the fly using Aspose.Imaging for .NET.
  */
