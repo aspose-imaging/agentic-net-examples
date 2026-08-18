@@ -1,41 +1,34 @@
+// HOW-TO: Extract a Rectangular Area from DjVu and Convert to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Djvu;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main(string[] args)
     {
+        string inputPath = "sample.djvu";
+        string outputPath = "Output\\sample.png";
+
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input\\sample.djvu";
-            string outputPath = "Output\\portion.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
+            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load DjVu document from a file stream
-            using (FileStream stream = File.OpenRead(inputPath))
-            using (DjvuImage djvuImage = new DjvuImage(stream))
-            {
-                // Get the first page of the document
-                DjvuPage page = djvuImage.FirstPage;
-
-                // Define the rectangle area to extract (x, y, width, height)
-                Rectangle rect = new Rectangle(50, 50, 300, 300);
-
-                // Save the specified portion as PNG
-                page.Save(outputPath, new PngOptions(), rect);
+                Rectangle area = new Rectangle(50, 50, 300, 300);
+                djvu.Crop(area);
+                PngOptions options = new PngOptions();
+                djvu.Save(outputPath, options);
             }
         }
         catch (Exception ex)
@@ -47,9 +40,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract a specific region from a multi‑page DjVu document and save it as a PNG thumbnail for a web preview.
- * 2. When an application must generate a high‑resolution PNG snippet of a scanned map stored in DjVu format for GIS analysis.
- * 3. When a document management system requires converting a selected area of a DjVu invoice into a PNG image for OCR processing.
- * 4. When a digital publishing workflow extracts a logo or diagram from a DjVu manuscript and outputs it as a PNG asset for reuse.
- * 5. When a C# service creates a PNG preview of a user‑defined rectangle within a DjVu file to display a focused view in a UI.
+ * 1. When you need to generate a thumbnail of a specific region from a DjVu document for a web preview.
+ * 2. When extracting a diagram or chart from a large DjVu file to embed it as a PNG in a report.
+ * 3. When isolating a confidential section of a scanned DjVu file before sharing only the cropped PNG with stakeholders.
+ * 4. When converting a selected area of a DjVu map into a high‑resolution PNG for use in a GIS application.
+ * 5. When preprocessing DjVu pages by cropping and saving them as PNGs for batch image analysis in C#.
  */
