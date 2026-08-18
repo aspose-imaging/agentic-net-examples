@@ -1,3 +1,4 @@
+// HOW-TO: Extract TIFF Preview Image From EPS File Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,42 +8,44 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.eps";
-        string outputPath = "output.tiff";
-
         try
         {
-            // Verify input file exists
+            // Hardcoded input and output file paths
+            string inputPath = "input.eps";
+            string outputPath = "output.tiff";
+
+            // Verify that the input EPS file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image
+            // Load the EPS image
             using (var epsImage = (EpsImage)Image.Load(inputPath))
             {
-                // Check for raster preview
+                // Check if a raster preview is present
                 if (!epsImage.HasRasterPreview)
                 {
                     Console.Error.WriteLine("No raster preview available in the EPS file.");
                     return;
                 }
 
-                // Retrieve TIFF preview image
-                var previewImage = epsImage.GetPreviewImage(EpsPreviewFormat.TIFF);
-                if (previewImage == null)
+                // Retrieve the TIFF preview image
+                using (var preview = epsImage.GetPreviewImage(EpsPreviewFormat.TIFF))
                 {
-                    Console.Error.WriteLine("TIFF preview not found.");
-                    return;
-                }
+                    if (preview == null)
+                    {
+                        Console.Error.WriteLine("Failed to retrieve TIFF preview.");
+                        return;
+                    }
 
-                // Save the preview image as TIFF
-                previewImage.Save(outputPath);
+                    // Save the preview as a TIFF file
+                    preview.Save(outputPath);
+                }
             }
         }
         catch (Exception ex)
@@ -54,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract the embedded raster preview from an EPS file and save it as a TIFF for high‑resolution printing workflows.
- * 2. When integrating a C# application that converts EPS artwork into TIFF thumbnails for preview in a document management system.
- * 3. When automating batch processing to verify that EPS files contain raster previews and generate TIFF copies for archival in a digital asset repository.
- * 4. When building a graphics pipeline that reads EPS files, checks for preview availability, and outputs TIFF images for compatibility with legacy imaging software.
- * 5. When creating a server‑side service that receives EPS uploads, extracts the TIFF preview, and stores it for fast web display in a .NET web application.
+ * 1. When a designer needs to generate a low‑resolution TIFF thumbnail of an EPS artwork for quick preview in a web gallery.
+ * 2. When a printing workflow requires extracting the embedded raster preview from an EPS file to verify colors before sending to a printer.
+ * 3. When a document management system stores EPS vectors but must provide TIFF previews for users on devices that cannot render PostScript.
+ * 4. When a batch conversion tool must extract TIFF previews from multiple EPS files to create preview PDFs without rendering the full vector data.
+ * 5. When a legacy application only accepts TIFF images, developers can pull the EPS preview and save it as TIFF to maintain compatibility.
  */
