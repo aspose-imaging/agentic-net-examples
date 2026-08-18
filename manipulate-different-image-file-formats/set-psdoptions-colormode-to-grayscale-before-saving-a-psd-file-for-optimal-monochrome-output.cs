@@ -1,3 +1,4 @@
+// HOW-TO: Save BMP as Grayscale PSD Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,12 +9,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"c:\temp\sample.bmp";
+        string outputPath = @"c:\temp\output.psd";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Temp\sample.bmp";
-            string outputPath = @"C:\Temp\output.psd";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,13 +28,14 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD save options with Grayscale color mode
+                // Configure PSD saving options
                 PsdOptions psdOptions = new PsdOptions
                 {
+                    // Set color mode to Grayscale for monochrome output
                     ColorMode = ColorModes.Grayscale
                 };
 
-                // Save the image as PSD using the configured options
+                // Save the image as PSD with the specified options
                 image.Save(outputPath, psdOptions);
             }
         }
@@ -46,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When converting a high‑resolution BMP scan of a printed photograph to a Photoshop PSD for further editing, and the final artwork must be monochrome, a developer can set PsdOptions.ColorMode to Grayscale before saving.
- * 2. When generating printable proof files from a batch of color images in a C# application and the printer only accepts grayscale PSDs, the code ensures the output uses the Grayscale color mode.
- * 3. When creating a web service that receives user‑uploaded BMP images and returns a PSD version optimized for black‑and‑white magazine layouts, the developer uses this snippet to enforce grayscale conversion.
- * 4. When automating the archival of legacy bitmap assets into Photoshop PSD format while reducing file size by removing color data, setting ColorMode to Grayscale before saving achieves the desired result.
- * 5. When building a desktop utility that converts scanned documents to PSD files for designers who need a non‑color layer structure, the code guarantees the PSD is saved in Grayscale mode for consistent monochrome editing.
+ * 1. When you need to convert a color BMP scan into a grayscale PSD for printing press workflows that require monochrome files.
+ * 2. When an application must generate PSD assets from user‑uploaded images while ensuring the output uses a grayscale color mode to reduce file size.
+ * 3. When preparing archival graphics, you may want to store original BMPs as PSDs with grayscale mode to preserve detail without color information.
+ * 4. When building a batch‑processing tool that converts a folder of BMP files to PSD format for designers who work only with grayscale layers.
+ * 5. When integrating Aspose.Imaging into a C# service that creates PSD mock‑ups from BMP logos and needs the result in monochrome for branding guidelines.
  */
