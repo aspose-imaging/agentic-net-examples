@@ -67,7 +67,7 @@ Examples and tasks in this folder:
 | [batch-convert-svg-logos-to-ico-files-generating-windows-icon-sizes-of-16-32-48-and-256-pixels.cs](./batch-convert-svg-logos-to-ico-files-generating-windows-icon-sizes-of-16-32-48-and-256-pixels.cs) |
 | [batch-convert-wmf-graphics-to-png-applying-a-uniform-background-color-to-replace-transparent-areas.cs](./batch-convert-wmf-graphics-to-png-applying-a-uniform-background-color-to-replace-transparent-areas.cs) |
 | [batch-create-bmp-files-each-containing-a-rotated-version-of-the-same-base-shape.cs](./batch-create-bmp-files-each-containing-a-rotated-version-of-the-same-base-shape.cs) |
-[**View all 397 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/working-with-drawing-images)
+[**View all 401 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/working-with-drawing-images)
 
 ## Requirements
 - **Aspose.Imaging** NuGet package (latest version)  
