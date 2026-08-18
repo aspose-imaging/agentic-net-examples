@@ -1,8 +1,9 @@
+// HOW-TO: Crop Central 500x500 Area From CDR And Save As PDF In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
@@ -11,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.cdr";
-            string outputPath = "output/output.pdf";
+            string inputPath = "Input/sample.cdr";
+            string outputPath = "Output/output.pdf";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -24,41 +25,32 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load CDR image
+            // Load the CDR image
             using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
             {
-                // Assume first page for processing
-                CdrImagePage page = (CdrImagePage)cdr.Pages[0];
-                page.CacheData();
-
-                // Desired crop size
+                // Determine central 500x500 rectangle
                 int cropWidth = 500;
                 int cropHeight = 500;
+                int left = Math.Max((cdr.Width - cropWidth) / 2, 0);
+                int top = Math.Max((cdr.Height - cropHeight) / 2, 0);
+                Rectangle cropRect = new Rectangle(left, top, cropWidth, cropHeight);
 
-                // Adjust crop size if image is smaller
-                if (cropWidth > page.Width) cropWidth = page.Width;
-                if (cropHeight > page.Height) cropHeight = page.Height;
+                // Crop the image
+                cdr.Crop(cropRect);
 
-                // Calculate top-left corner for central crop
-                int x = (page.Width - cropWidth) / 2;
-                int y = (page.Height - cropHeight) / 2;
-                if (x < 0) x = 0;
-                if (y < 0) y = 0;
-
-                // Perform cropping
-                page.Crop(new Rectangle(x, y, cropWidth, cropHeight));
-
-                // Prepare PDF options with rasterization settings
+                // Prepare PDF options with default rasterization settings
                 PdfOptions pdfOptions = new PdfOptions();
                 CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
-                    PageWidth = page.Width,
-                    PageHeight = page.Height
+                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                    SmoothingMode = SmoothingMode.None,
+                    PageWidth = cdr.Width,
+                    PageHeight = cdr.Height
                 };
                 pdfOptions.VectorRasterizationOptions = rasterOptions;
 
-                // Save cropped page as PDF
-                page.Save(outputPath, pdfOptions);
+                // Save the cropped image as PDF
+                cdr.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -70,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract the central 500 × 500 pixels of a CorelDRAW (CDR) illustration and embed it in a PDF report using Aspose.Imaging for .NET.
- * 2. When an application must automatically validate the existence of a CDR file, create missing output folders, and convert the first page to a PDF with default rasterization settings.
- * 3. When a batch‑processing service has to crop the middle region of each CDR document to a fixed size before generating searchable PDF files for archival.
- * 4. When a C# program must handle CDR images that may be smaller than the target crop size, adjust dimensions dynamically, and produce a PDF without manual image editing.
- * 5. When a developer wants to use Aspose.Imaging’s CdrImage and PdfOptions classes to rasterize a CorelDRAW page and save it as a PDF while preserving the original page dimensions.
+ * 1. When you need to extract a specific central region of a CorelDRAW file and deliver it as a PDF report.
+ * 2. When automating batch processing to generate PDFs that only contain the most important part of each CDR artwork.
+ * 3. When integrating Aspose.Imaging into a web service that receives CDR uploads and returns a cropped PDF preview.
+ * 4. When creating thumbnails or printable sections from large CDR designs without manually opening the file in CorelDRAW.
+ * 5. When converting legacy CDR assets to PDF while ensuring the output matches a fixed 500‑pixel square area for consistency.
  */
