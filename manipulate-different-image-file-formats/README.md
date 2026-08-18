@@ -72,7 +72,7 @@ Examples and tasks in this folder:
 | [apply-a-vignette-effect-around-the-edges-of-a-tga-picture-and-save-as-jpeg.cs](./apply-a-vignette-effect-around-the-edges-of-a-tga-picture-and-save-as-jpeg.cs) |
 | [apply-additional-resizing-operations-to-a-dicom-image-while-maintaining-full-dicom-format-compliance.cs](./apply-additional-resizing-operations-to-a-dicom-image-while-maintaining-full-dicom-format-compliance.cs) |
 | [apply-coordinate-offsets-to-crop-a-dicom-image-outputting-the-result-as-a-dicom-file.cs](./apply-coordinate-offsets-to-crop-a-dicom-image-outputting-the-result-as-a-dicom-file.cs) |
-[**View all 600 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/manipulate-different-image-file-formats)
+[**View all 602 examples →**](https://github.com/aspose-imaging/agentic-net-examples/tree/main/manipulate-different-image-file-formats)
 
 ## Requirements
 - **Aspose.Imaging** NuGet package (`dotnet add package Aspose.Imaging`)
