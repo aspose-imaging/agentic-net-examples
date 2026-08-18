@@ -1,41 +1,52 @@
+// HOW-TO: Convert EPS to High‑Resolution PNG with Resizing in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.eps";
+        string outputPath = "output.png";
+
+        // Validate input file existence
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\SourceImage.eps";
-            string outputPath = @"C:\Images\Result\HighResImage.png";
-
-            // Verify that the input EPS file exists
-            if (!File.Exists(inputPath))
+            // Load EPS image
+            using (EpsImage image = (EpsImage)Image.Load(inputPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                // Define high‑resolution rasterization options
+                var rasterOptions = new EpsRasterizationOptions
+                {
+                    PageWidth = 2000,   // desired width in pixels
+                    PageHeight = 2000   // desired height in pixels
+                };
 
-            // Ensure the output directory exists (creates it if necessary)
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Configure PNG export options with the rasterization settings
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
 
-            // Load the EPS image, resize it, and save as a high‑resolution PNG
-            using (Image image = Image.Load(inputPath))
-            {
-                // Desired dimensions for the high‑resolution output
-                int targetWidth = 2000;   // example width
-                int targetHeight = 2000;  // example height
+                // Optional explicit resize using a high‑quality resample mode
+                image.Resize(2000, 2000, ResizeType.LanczosResample);
 
-                // Resize using a high‑quality interpolation method
-                image.Resize(targetWidth, targetHeight, ResizeType.Mitchell);
-
-                // Save the resized image as PNG
-                image.Save(outputPath, new PngOptions());
+                // Save as high‑resolution PNG
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a vector EPS logo into a high‑resolution PNG for web display, they can use this code to resize and export the image in a single step.
- * 2. When generating print‑ready assets from EPS artwork, the code enables automated scaling to the required DPI and saving as PNG for downstream workflows.
- * 3. When building a batch‑processing tool that ingests EPS files from a legacy design system and outputs PNG thumbnails at 2000×2000 pixels, this method provides the core conversion logic.
- * 4. When a C# application must ensure that an EPS diagram fits within a fixed layout size before embedding it in a PDF report, the code resizes the EPS and saves it as a PNG for easy inclusion.
- * 5. When creating a responsive UI that loads vector EPS icons and needs them rasterized at high quality for retina displays, the snippet performs the resize and PNG export in one operation.
+ * 1. When a developer needs to generate a print‑ready PNG from a vector EPS logo and ensure it matches a specific pixel dimension for web or UI display.
+ * 2. When an application must batch‑process EPS artwork files, rasterize them at 2000 × 2000 pixels, and save the results as high‑quality PNGs for downstream image pipelines.
+ * 3. When a C# service has to embed EPS diagrams into a PDF or report that only supports raster images, requiring on‑the‑fly conversion to a high‑resolution PNG.
+ * 4. When a designer’s workflow requires scaling vector EPS illustrations to a fixed size while preserving detail, using Aspose.Imaging’s Lanczos resample before exporting to PNG.
+ * 5. When an automated build script validates that EPS assets are correctly rasterized and saved as PNGs with consistent dimensions before publishing to a content delivery network.
  */
