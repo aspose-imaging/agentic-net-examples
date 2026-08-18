@@ -1,34 +1,48 @@
+// HOW-TO: Scale EPS Image by 1.5 and Save as High Quality JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "Input/sample.eps";
-            string outputPath = "Output/sample.jpg";
+            // Hardcoded input and output paths
+            string inputPath = "input.eps";
+            string outputPath = "output.jpg";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (EpsImage image = (EpsImage)Aspose.Imaging.Image.Load(inputPath))
+            // Load EPS image
+            using (EpsImage image = (EpsImage)Image.Load(inputPath))
             {
-                int newWidth = (int)(image.Width * 1.5);
-                int newHeight = (int)(image.Height * 1.5);
+                // Calculate new dimensions with a scaling factor of 1.5
+                int newWidth = (int)Math.Round(image.Width * 1.5);
+                int newHeight = (int)Math.Round(image.Height * 1.5);
 
-                image.Resize(newWidth, newHeight, Aspose.Imaging.ResizeType.LanczosResample);
+                // Resize using a high‑quality resampling method
+                image.Resize(newWidth, newHeight, ResizeType.LanczosResample);
 
-                JpegOptions jpegOptions = new JpegOptions();
+                // Prepare high‑quality JPEG options
+                var jpegOptions = new JpegOptions
+                {
+                    Quality = 100 // maximum quality
+                };
+
+                // Save as JPEG
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -41,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a larger, high‑resolution preview of a vector EPS logo for a web thumbnail by scaling it 1.5× and saving as a JPEG.
- * 2. When an e‑commerce platform must convert product artwork stored as EPS files into high‑quality JPEG images with a custom scaling factor for better display on high‑DPI screens.
- * 3. When a print‑to‑digital workflow requires up‑scaling EPS page layouts before exporting them as JPEGs for client review.
- * 4. When a mobile app backend processes uploaded EPS graphics, enlarges them by 150 % using Lanczos resampling, and stores the result as a JPEG for fast loading.
- * 5. When a document management system automatically creates JPEG previews of EPS files with a 1.5× size increase to improve visual clarity in search results.
+ * 1. When you need to enlarge a vector EPS logo to fit a larger layout while preserving detail and then deliver it as a high‑resolution JPEG for web or print.
+ * 2. When a printing workflow requires converting EPS artwork to JPEG with a custom 1.5× scale to match a specific DPI requirement.
+ * 3. When an e‑commerce platform must generate product thumbnails from EPS source files at a larger size with maximum JPEG quality for product pages.
+ * 4. When a desktop application automates batch processing of EPS diagrams, scaling each by 150 % and saving them as lossless‑quality JPEGs for archival.
+ * 5. When a reporting tool needs to embed EPS charts into PDF reports by first scaling them and converting to high‑quality JPEG images for compatibility.
  */
