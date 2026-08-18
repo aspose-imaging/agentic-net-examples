@@ -1,3 +1,4 @@
+// HOW-TO: Create Scanned TIFF with Custom Size and CCITT Group 4 Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,40 +10,36 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded paths
-        string outputPath = @"c:\temp\custom_scanned.tif";
-
         try
         {
-            // Ensure output directory exists
+            // Hardcoded output path
+            string outputPath = "C:\\Temp\\scanned.tif";
+
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Configure TIFF options for a 1‑bit B/W image with CCITT Group 4 compression
-            TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-            tiffOptions.BitsPerSample = new ushort[] { 1 };                     // 1 bit per pixel
-            tiffOptions.Compression = TiffCompressions.CcittFax4;               // CCITT Group 4
-            tiffOptions.Photometric = TiffPhotometrics.MinIsBlack;             // 0 = black, 1 = white
-            tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;    // single plane
+            // Configure TIFF options for the frame
+            TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
+            frameOptions.BitsPerSample = new ushort[] { 1 };                     // 1‑bit B/W
+            frameOptions.Compression = TiffCompressions.CcittFax4;               // CCITT Group 4
+            frameOptions.Photometric = TiffPhotometrics.MinIsBlack;             // 0 = black
+            frameOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;    // single plane
 
-            // Create a frame with custom dimensions (e.g., 2480 × 3508 for A4 at 300 dpi)
-            int frameWidth = 2480;   // width in pixels
-            int frameHeight = 3508;  // height in pixels
-            TiffFrame frame = new TiffFrame(tiffOptions, frameWidth, frameHeight);
+            // Custom dimensions (example: A4 at 300 DPI)
+            int width = 2480;   // 8.27 in × 300 dpi
+            int height = 3508;  // 11.69 in × 300 dpi
 
-            // Set DPI (resolution) for scanning quality
-            frame.HorizontalResolution = 300; // 300 dpi horizontal
-            frame.VerticalResolution = 300;   // 300 dpi vertical
+            // Create the TIFF frame with the specified options and size
+            TiffFrame scanFrame = new TiffFrame(frameOptions, width, height);
 
-            // Optionally fill the frame with white (background) – not required for B/W
-            // using (Graphics g = new Graphics(frame))
-            // {
-            //     g.Clear(Color.White);
-            // }
-
-            // Create a TIFF image containing the single frame
-            using (TiffImage tiffImage = new TiffImage(frame))
+            // Create a TIFF image containing the frame
+            using (TiffImage tiffImage = new TiffImage(scanFrame))
             {
-                // Save the TIFF image to the specified path
+                // Set DPI values for scanning quality
+                tiffImage.HorizontalResolution = 300;
+                tiffImage.VerticalResolution = 300;
+
+                // Save the TIFF image
                 tiffImage.Save(outputPath);
             }
         }
@@ -55,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a high‑resolution black‑and‑white scanned document (e.g., an A4 page at 300 dpi) in TIFF format with CCITT Group 4 compression for efficient storage or fax transmission.
- * 2. When a C# application must create a custom‑sized TIFF frame (e.g., 2480 × 3508 pixels) that matches a specific paper size and embeds exact horizontal and vertical DPI values for downstream printing or OCR pipelines.
- * 3. When a developer is building a document‑management system that stores scanned images as 1‑bit B/W TIFF files with MinIsBlack photometric interpretation to ensure consistent rendering across different viewers.
- * 4. When an imaging service needs to programmatically produce single‑frame TIFF files with contiguous planar configuration and CCITT Fax 4 compression to meet archival standards for legal or medical records.
- * 5. When a .NET solution integrates Aspose.Imaging to automate the creation of scan‑quality TIFF images that can be directly saved to a file system, preserving precise resolution metadata for later image analysis.
+ * 1. When you need to generate a high‑resolution black‑and‑white scanned document such as a legal contract as a single‑page TIFF with CCITT Group 4 compression to minimize file size.
+ * 2. When you must produce a TIFF image that matches a specific paper size (for example A4) at a defined DPI for archival or printing workflows.
+ * 3. When integrating a document‑scanning module that requires setting horizontal and vertical resolution metadata to ensure consistent display across devices.
+ * 4. When building a batch‑processing tool that converts raw scan data into a standards‑compliant TIFF with 1‑bit per pixel and contiguous planar configuration.
+ * 5. When developing a medical‑imaging application that stores X‑ray or microscope images as compressed black‑and‑white TIFFs with precise dimensions and resolution.
  */
