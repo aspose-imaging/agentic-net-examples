@@ -1,3 +1,4 @@
+// HOW-TO: Extract a Rectangular Region from DjVu and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,10 +12,10 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "Input/sample.djvu";
-            string outputPath = "Output/portion.pdf";
+            string inputPath = "sample.djvu";
+            string outputPath = "output.pdf";
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -22,22 +23,23 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the DjVu document
-            using (DjvuImage djvu = (DjvuImage)Image.Load(inputPath))
+            // Load DjVu document
+            using (Stream stream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(stream))
             {
-                // Define the export rectangle (x, y, width, height)
-                var exportArea = new Rectangle(20, 20, 250, 250);
+                // Define export rectangle (x, y, width, height)
+                Aspose.Imaging.Rectangle exportArea = new Aspose.Imaging.Rectangle(20, 20, 250, 250);
 
-                // Set up PDF save options with DjVu multi‑page export settings
+                // Set up PDF save options with page index 0 and export area
                 var pdfOptions = new PdfOptions
                 {
-                    MultiPageOptions = new DjvuMultiPageOptions(0, exportArea) // page index 0
+                    MultiPageOptions = new DjvuMultiPageOptions(0, exportArea)
                 };
 
                 // Save the specified portion to PDF
-                djvu.Save(outputPath, pdfOptions);
+                djvuImage.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract a specific region of a scanned DjVu document (e.g., a diagram or signature) and save it as a standalone PDF for easy sharing.
- * 2. When an application must generate a PDF preview of a selected area from a multi‑page DjVu file without converting the entire document.
- * 3. When a workflow requires converting a portion of a DjVu image (defined by coordinates) into a PDF to embed in a report or email attachment.
- * 4. When a document management system needs to isolate and archive a particular rectangular section of a DjVu file as a searchable PDF for compliance purposes.
- * 5. When a C# service automates the extraction of a defined rectangle from a DjVu page and outputs it as a PDF to integrate with downstream PDF processing tools.
+ * 1. When you need to embed only a specific part of a scanned DjVu page into a PDF report.
+ * 2. When you want to programmatically generate PDF thumbnails from selected areas of DjVu documents.
+ * 3. When you must extract a region of a DjVu blueprint to share with collaborators in PDF format.
+ * 4. When you are building a document conversion service that converts user‑selected DjVu sections to PDF for easier viewing.
+ * 5. When you need to automate the creation of PDF excerpts from large DjVu files for archival or compliance purposes.
  */
