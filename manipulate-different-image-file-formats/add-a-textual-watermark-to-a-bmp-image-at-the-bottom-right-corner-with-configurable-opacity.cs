@@ -1,3 +1,4 @@
+// HOW-TO: Add Semi Transparent Text Watermark to BMP Image in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,7 +12,6 @@ class Program
     {
         string inputPath = "input.bmp";
         string outputPath = "output.bmp";
-        float opacity = 0.5f;
 
         try
         {
@@ -25,24 +25,35 @@ class Program
 
             using (var image = Image.Load(inputPath))
             {
-                using (var brush = new SolidBrush(Color.White))
+                var bmpImage = (BmpImage)image;
+                int width = bmpImage.Width;
+                int height = bmpImage.Height;
+
+                Graphics graphics = new Graphics(bmpImage);
+
+                string watermarkText = "Sample Watermark";
+                float opacity = 0.5f;
+
+                Font font = new Font("Arial", 24);
+
+                var textSize = graphics.MeasureString(
+                    watermarkText,
+                    font,
+                    new SizeF(width, height),
+                    new StringFormat());
+
+                float margin = 10f;
+                float x = width - textSize.Width - margin;
+                float y = height - textSize.Height - margin;
+
+                using (var brush = new SolidBrush())
                 {
+                    brush.Color = Color.White;
                     brush.Opacity = opacity;
-
-                    string watermarkText = "Sample Watermark";
-                    Font font = new Font("Arial", 24);
-
-                    Graphics graphics = new Graphics(image);
-
-                    var textSize = graphics.MeasureString(watermarkText, font, new SizeF(image.Width, image.Height), null);
-                    float margin = 10f;
-                    float x = image.Width - textSize.Width - margin;
-                    float y = image.Height - textSize.Height - margin;
-
                     graphics.DrawString(watermarkText, font, brush, new PointF(x, y));
-
-                    image.Save(outputPath, new BmpOptions());
                 }
+
+                bmpImage.Save(outputPath, new BmpOptions());
             }
         }
         catch (Exception ex)
@@ -54,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. Use this code to add a semi‑transparent text watermark to a BMP image in a C# application using Aspose.Imaging before publishing the image online.
- * 2. Use this code to embed a copyright notice in the bottom‑right corner of scanned BMP documents, adjusting the brush opacity for legal compliance.
- * 3. Use this code to generate watermarked BMP thumbnails for a desktop C# app that displays user‑uploaded images, ensuring the watermark remains readable at any size.
- * 4. Use this code to prepare BMP assets for a game, adding a developer‑defined label with configurable opacity to each sprite using Aspose.Imaging graphics.
- * 5. Use this code to automate batch processing of BMP screenshots, applying a faint brand logo at the corner with adjustable opacity via a SolidBrush.
+ * 1. When you need to protect BMP graphics with a subtle copyright notice before publishing them online.
+ * 2. When you want to embed a brand name as a faint text overlay on scanned BMP documents for internal distribution.
+ * 3. When you must add a timestamp or user identifier to BMP screenshots to track usage while keeping the image readable.
+ * 4. When you are preparing BMP assets for a game and need to mark test versions with a low‑opacity watermark at the bottom‑right corner.
+ * 5. When you are automating batch processing of BMP files and require a configurable opacity watermark for compliance reporting.
  */
