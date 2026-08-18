@@ -1,45 +1,36 @@
+// HOW-TO: Apply Gamma Correction to HTML Canvas and Save as JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\canvas.png";
-            string outputPath = @"C:\temp\canvas_gamma.jpg";
+            string inputPath = "input.html";
+            string outputPath = "output.jpg";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the image from the HTML5 canvas (assumed PNG format)
-            using (Image image = Image.Load(inputPath))
+            using (RasterImage raster = (RasterImage)Image.Load(inputPath))
             {
-                // Apply gamma correction of 2.2 if the image supports it
-                if (image is RasterImage rasterImage)
-                {
-                    rasterImage.AdjustGamma(2.2f);
-                }
+                raster.AdjustGamma(2.2f);
 
-                // Prepare JPEG options with quality 90
-                var jpegOptions = new JpegOptions
-                {
-                    Quality = 90
-                };
+                FileCreateSource src = new FileCreateSource(outputPath, false);
+                JpegOptions jpegOptions = new JpegOptions { Source = src, Quality = 90 };
 
-                // Save the processed image as JPEG
-                image.Save(outputPath, jpegOptions);
+                raster.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -51,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web app captures an HTML5 canvas as a PNG and must adjust its brightness for standard monitors, a developer can apply a 2.2 gamma correction and save the result as a high‑quality JPEG.
- * 2. When an e‑learning platform generates client‑side diagrams on a canvas and needs to deliver them as compressed JPEGs for email, this C# code loads the PNG, corrects gamma, and exports with 90 % quality.
- * 3. When a digital asset management system receives user‑uploaded canvas drawings and wants to normalize their gamma before archiving them as JPEG thumbnails, the snippet shows how to perform the adjustment using Aspose.Imaging.
- * 4. When a marketing automation tool creates promotional graphics on an HTML5 canvas and must ensure consistent color rendering across browsers before uploading to a CDN, the example demonstrates applying gamma correction and outputting a JPEG with controlled compression.
- * 5. When a desktop utility converts canvas‑generated PNG screenshots to JPEG for printing, applying a 2.2 gamma curve guarantees accurate tonal reproduction, and this code illustrates the complete process in .NET.
+ * 1. When you need to convert a web‑generated canvas image to a high‑quality JPEG for email attachments.
+ * 2. When you must adjust the brightness perception of a canvas screenshot by applying a 2.2 gamma curve before storage.
+ * 3. When an e‑commerce site wants to generate product thumbnails from HTML5 canvas drawings with consistent color rendering.
+ * 4. When a reporting tool exports charts drawn on a canvas to JPEG files with specific compression quality for PDF embedding.
+ * 5. When a mobile app backend processes user‑drawn canvas images, applies gamma correction, and saves them as JPEGs for efficient delivery.
  */
