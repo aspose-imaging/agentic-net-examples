@@ -1,3 +1,4 @@
+// HOW-TO: Convert Even‑Numbered DjVu Pages To PNG Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,21 +11,39 @@ class Program
     {
         try
         {
-            string inputPath = "Input\\sample.djvu";
-            string outputPath = "Output\\sample.png";
+            // Hardcoded input and output paths
+            string inputPath = "sample.djvu";
+            string outputDirectory = "Output";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
 
-            using (DjvuImage image = (DjvuImage)Image.Load(inputPath))
+            // Load the DjVu document
+            using (DjvuImage djvuImage = (DjvuImage)Image.Load(inputPath))
             {
-                var options = new PngOptions();
-                image.Save(outputPath, options);
+                // Iterate through pages
+                for (int i = 0; i < djvuImage.Pages.Length; i++)
+                {
+                    // Process only even-numbered pages (0‑based index)
+                    if (i % 2 == 0)
+                    {
+                        DjvuPage page = (DjvuPage)djvuImage.Pages[i];
+                        string outputPath = Path.Combine(outputDirectory, $"page_{i}.png");
+
+                        // Ensure the directory for the output file exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the page as PNG
+                        page.Save(outputPath, new PngOptions());
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -36,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract and archive only the even‑numbered pages of a multi‑page DjVu file as high‑quality PNG images for a digital library, they can use Aspose.Imaging with IntRange selection in C#.
- * 2. When a document processing pipeline must generate thumbnail previews for every second page of scanned contracts stored in DjVu format, the code can load the DjVu document and save those pages as PNG files.
- * 3. When an e‑learning platform wants to display only the answer sheets (typically on even pages) from DjVu exam papers as PNG images for web viewers, developers can apply an IntRange filter during conversion.
- * 4. When a batch conversion tool needs to reduce storage by converting only the even pages of large DjVu manuals to PNG while ignoring odd pages, the Aspose.Imaging API provides the necessary page‑range handling.
- * 5. When a mobile app requires fast loading of selected pages from a DjVu comic book, converting just the even‑numbered pages to PNG using C# and Aspose.Imaging improves performance and bandwidth usage.
+ * 1. When you need to extract only the even pages from a multi‑page DjVu file and save them as separate PNG images for web preview.
+ * 2. When an archival system stores scanned documents in DjVu format but the downstream application only processes PNG files from every second page.
+ * 3. When generating thumbnails for a digital library and you want to skip odd pages to reduce processing time.
+ * 4. When converting a DjVu comic book where only the left‑hand pages (even numbers) should be exported to PNG for printing.
+ * 5. When automating a batch job that extracts even‑numbered pages from DjVu reports and stores them in a folder for further analysis.
  */
