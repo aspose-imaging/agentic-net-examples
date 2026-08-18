@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert TIFF Files to JPEG with 90% Quality in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,37 +8,32 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = @"C:\InputTiffs";
-        string outputDirectory = @"C:\OutputJpegs";
-
         try
         {
-            // Ensure the output directory exists (creates parent directories if needed)
-            Directory.CreateDirectory(outputDirectory);
+            // Hardcoded input and output directories
+            string inputDirectory = @"C:\Images\Input";
+            string outputDirectory = @"C:\Images\Output";
 
-            // Get all TIFF files in the input directory
+            // Get all TIFF files (both .tif and .tiff) in the input directory
             string[] tiffFiles = Directory.GetFiles(inputDirectory, "*.tif");
-            // Also include *.tiff files
             string[] tiffFilesAlt = Directory.GetFiles(inputDirectory, "*.tiff");
-            string[] allFiles = new string[tiffFiles.Length + tiffFilesAlt.Length];
-            tiffFiles.CopyTo(allFiles, 0);
-            tiffFilesAlt.CopyTo(allFiles, tiffFiles.Length);
+            string[] allTiffFiles = new string[tiffFiles.Length + tiffFilesAlt.Length];
+            tiffFiles.CopyTo(allTiffFiles, 0);
+            tiffFilesAlt.CopyTo(allTiffFiles, tiffFiles.Length);
 
-            foreach (string inputPath in allFiles)
+            foreach (string inputPath in allTiffFiles)
             {
-                // Verify the input file exists
+                // Verify that the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output JPEG path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".jpg";
-                string outputPath = Path.Combine(outputDirectory, outputFileName);
+                // Determine output path with .jpg extension
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".jpg");
 
-                // Ensure the output directory exists (creates parent directories if needed)
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the TIFF image
@@ -54,12 +50,11 @@ class Program
                 }
 
                 // Log successful conversion
-                Console.WriteLine($"Converted \"{inputPath}\" to \"{outputPath}\"");
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
         {
-            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -67,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer must batch‑convert a folder of scanned TIFF documents to web‑ready JPEGs with 90 % quality for faster page loads using C# and Aspose.Imaging.
- * 2. When a developer needs to automate the migration of legacy TIFF assets in a digital archive to JPEG format while preserving image fidelity and logging each conversion result.
- * 3. When a developer wants to prepare high‑resolution TIFF photographs for an e‑commerce catalog by converting them to JPEGs with controlled compression in a single C# routine.
- * 4. When a developer is building a document management system that ingests multi‑page TIFF files and stores each page as a JPEG thumbnail for quick preview, using Aspose.Imaging’s ImageOptions.
- * 5. When a developer requires a simple C# script to process all *.tif and *.tiff files in a directory, convert them to JPEG with 90 % quality, and record success or failure for each file in a log.
+ * 1. When you need to automatically convert a large collection of scanned TIFF documents into smaller JPEG files for web publishing.
+ * 2. When you want to process all TIFF images in a folder and save them as JPEGs with a specific compression level to reduce storage costs.
+ * 3. When you must generate JPEG previews of multi‑page TIFF files for a document management system while logging each conversion.
+ * 4. When you are building a nightly batch job that transforms incoming TIFF scans into JPEGs for downstream image‑processing pipelines.
+ * 5. When you need to ensure the output directory exists and record successful conversions while handling missing files gracefully.
  */
