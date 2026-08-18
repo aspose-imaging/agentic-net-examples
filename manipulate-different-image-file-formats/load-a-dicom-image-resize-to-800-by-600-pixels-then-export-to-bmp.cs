@@ -1,16 +1,17 @@
+// HOW-TO: Resize DICOM Image to 800x600 and Save as BMP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "sample.dicom";
-        string outputPath = "resized.bmp";
+        string inputPath = @"C:\temp\input.dcm";
+        string outputPath = @"C:\temp\output.bmp";
 
         try
         {
@@ -24,9 +25,8 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load DICOM image from file stream
-            using (var stream = File.OpenRead(inputPath))
-            using (var dicomImage = new DicomImage(stream))
+            // Load the DICOM image
+            using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
             {
                 // Resize to 800x600 using bilinear resampling
                 dicomImage.Resize(800, 600, ResizeType.BilinearResample);
@@ -44,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert high‑resolution DICOM scans into smaller BMP thumbnails for quick preview in a patient portal.
- * 2. When a radiology workflow requires batch processing of DICOM files to a uniform 800×600 size before embedding them into a PDF report.
- * 3. When a healthcare data‑integration service must transform DICOM images into BMP format for compatibility with legacy Windows imaging tools.
- * 4. When a telemedicine platform wants to downscale DICOM X‑ray images to reduce bandwidth while preserving visual quality for remote diagnosis.
- * 5. When a research project needs to extract DICOM images, resize them, and save as BMP to feed into a machine‑learning model that only accepts BMP inputs.
+ * 1. When a hospital IT system needs to convert high‑resolution DICOM scans into smaller BMP thumbnails for quick preview in a web portal.
+ * 2. When a research application must batch‑process DICOM files, resize them to a standard 800×600 size, and store them as BMP for compatibility with legacy analysis tools.
+ * 3. When a medical imaging workflow requires exporting patient scans to BMP format for inclusion in printed reports while maintaining a consistent image dimension.
+ * 4. When a C# desktop program has to display DICOM images on screens with limited resolution, it can resize the images to 800×600 and save them as BMP for fast rendering.
+ * 5. When integrating Aspose.Imaging into a PACS system to generate BMP copies of DICOM images that fit a predefined UI layout without losing aspect ratio.
  */
