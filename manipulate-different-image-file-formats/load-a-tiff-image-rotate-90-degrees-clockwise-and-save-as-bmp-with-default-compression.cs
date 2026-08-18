@@ -1,3 +1,4 @@
+// HOW-TO: Rotate TIFF Image 90 Degrees Clockwise and Save as BMP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.tif";
-            string outputPath = @"C:\temp\output.bmp";
+            string inputPath = @"C:\temp\sample.tif";
+            string outputPath = @"C:\temp\sample_rotated.bmp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -24,13 +25,11 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the TIFF image, rotate 90° clockwise, and save as BMP
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            // Load the TIFF image, rotate, and save as BMP
+            using (Image image = Image.Load(inputPath))
             {
-                // Rotate 90 degrees clockwise without flipping
+                TiffImage tiffImage = (TiffImage)image;
                 tiffImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
-
-                // Save as BMP using default options
                 tiffImage.Save(outputPath, new BmpOptions());
             }
         }
@@ -43,9 +42,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a scanned TIFF file to BMP using C# and Aspose.Imaging so that legacy Windows software that only reads BMP can display the image.
- * 2. When an image‑processing workflow must rotate a portrait‑oriented TIFF image 90° clockwise before saving it as a BMP with default compression for downstream analysis.
- * 3. When a batch job processes medical TIFF scans, rotates them to the correct orientation, and outputs BMP files to provide fast, low‑memory previews in a web portal.
- * 4. When a desktop utility built with C# has to ensure a TIFF image is correctly oriented and saved as a BMP thumbnail for printing on older printers that require BMP format.
- * 5. When a C# application uses Aspose.Imaging to accept user‑uploaded TIFF photos, automatically rotate them 90° clockwise, and store them as BMP files for a gallery that only supports BMP images.
+ * 1. When a document management system receives scanned TIFF pages that need to be displayed in portrait orientation on Windows, you can rotate them 90° clockwise and convert them to BMP for fast rendering.
+ * 2. When generating thumbnails for a legacy printing workflow that only accepts BMP files, you can rotate the original TIFF and save it as a BMP with default compression.
+ * 3. When integrating with a GIS application that requires BMP images oriented correctly, you can use this code to reorient TIFF map tiles before import.
+ * 4. When automating batch processing of scanned invoices stored as TIFF, rotating them to match the company’s standard layout and converting to BMP simplifies downstream OCR processing.
+ * 5. When preparing medical imaging data for a diagnostic tool that only reads BMP format, rotating the TIFF scans ensures the images appear upright without losing quality.
  */
