@@ -1,3 +1,4 @@
+// HOW-TO: Resize JPEG to Maximum Width 1200 Pixels While Preserving Aspect Ratio in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output_resized.jpg";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input.jpg";
-            string outputPath = @"C:\Images\output_resized.jpg";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -26,9 +27,8 @@ class Program
             // Load the JPEG image
             using (JpegImage jpegImage = new JpegImage(inputPath))
             {
-                const int maxWidth = 1200;
-
                 // Determine new dimensions while preserving aspect ratio
+                const int maxWidth = 1200;
                 int newWidth = jpegImage.Width;
                 int newHeight = jpegImage.Height;
 
@@ -57,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate thumbnail previews of user‑uploaded JPEG photos so that the images never exceed 1200 px in width, preserving the original aspect ratio.
- * 2. When an e‑commerce platform must automatically downsize product photos stored as JPEG files before publishing them to a CDN to reduce bandwidth while keeping the images proportional.
- * 3. When a desktop utility written in C# has to batch‑process high‑resolution JPEG scans, resizing each to a maximum width of 1200 px to fit within email attachment limits.
- * 4. When a content management system integrates Aspose.Imaging to ensure that editorial JPEG images are resized on upload, maintaining aspect ratio to avoid distortion in responsive layouts.
- * 5. When a mobile backend service uses C# to resize incoming JPEG uploads to a standard width of 1200 px, guaranteeing consistent display across devices without stretching the image.
+ * 1. When you need to generate web‑optimized JPEG thumbnails that never exceed 1200 px in width while keeping the original proportions.
+ * 2. When uploading user‑submitted photos to a server and you must downscale large JPEGs to a consistent maximum width before storage.
+ * 3. When preparing product images for an e‑commerce site and you want to ensure all JPEGs fit within a 1200 px width constraint without distortion.
+ * 4. When creating a batch script that processes a folder of high‑resolution JPEGs, resizing each to a maximum width for faster page load times.
+ * 5. When integrating image handling into a C# desktop application that must automatically resize selected JPEG files to a standard width for printing or sharing.
  */
