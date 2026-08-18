@@ -1,3 +1,4 @@
+// HOW-TO: Convert CMX to SVG with Vector Shapes and Text Preservation in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,13 +7,13 @@ using Aspose.Imaging.FileFormats.Cmx;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output file paths
-            string inputPath = "input/input.cmx";
-            string outputPath = "output/output.svg";
+            string inputPath = "sample.cmx";
+            string outputPath = "sample.svg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,30 +22,27 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
 
             // Load the CMX image
-            using (Image image = Image.Load(inputPath))
+            using (CmxImage cmxImage = (CmxImage)Image.Load(inputPath))
             {
-                CmxImage cmxImage = (CmxImage)image;
-
                 // Configure SVG save options
-                SvgOptions svgOptions = new SvgOptions
+                SvgOptions saveOptions = new SvgOptions
                 {
-                    TextAsShapes = true // Preserve text as vector shapes
+                    // Render text as vector shapes to preserve appearance
+                    TextAsShapes = true,
+                    // Set rasterization options specific to CMX
+                    VectorRasterizationOptions = new CmxRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageSize = cmxImage.Size
+                    }
                 };
 
-                // Set up CMX rasterization options to retain vector data
-                CmxRasterizationOptions rasterOptions = new CmxRasterizationOptions
-                {
-                    PageSize = cmxImage.Size
-                };
-
-                svgOptions.VectorRasterizationOptions = rasterOptions;
-
-                // Save as SVG
-                cmxImage.Save(outputPath, svgOptions);
+                // Save the image as SVG
+                cmxImage.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -56,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy CorelDRAW CMX files to modern SVG format while preserving vector shapes and text as scalable paths for web display.
- * 2. When an application must batch‑process engineering diagrams stored as CMX and output them as SVG for integration into HTML5 dashboards without losing vector fidelity.
- * 3. When a document‑management system requires automated conversion of CMX artwork to SVG so that search engines can index the vector content and maintain searchable text.
- * 4. When a C# service needs to generate printable SVG assets from CMX source files, ensuring text is saved as shapes to avoid font‑dependency issues.
- * 5. When a graphics pipeline has to import CMX drawings and export them as SVG using Aspose.Imaging, preserving exact page size and vector data for downstream CAD tools.
+ * 1. When you need to migrate legacy CorelDRAW CMX artwork to scalable SVG for web display while keeping the original text appearance intact.
+ * 2. When an automated C# batch job must convert dozens of CMX files to SVG for inclusion in a responsive UI.
+ * 3. When preserving the exact vector geometry of technical drawings from CMX is required for high‑quality printing or further editing in vector editors.
+ * 4. When generating SVG assets from CMX for use in mobile applications that only support SVG rendering.
+ * 5. When integrating CMX‑to‑SVG conversion into a C# backend service that validates, stores, and serves vector graphics in a database.
  */
