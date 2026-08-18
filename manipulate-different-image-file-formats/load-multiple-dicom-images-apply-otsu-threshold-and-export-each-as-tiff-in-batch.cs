@@ -1,6 +1,6 @@
+// HOW-TO: Batch Convert DICOM to TIFF with Otsu Threshold in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
 using Aspose.Imaging.FileFormats.Tiff.Enums;
@@ -11,7 +11,6 @@ class Program
     {
         try
         {
-            // Define input and output directories (relative paths)
             string inputDirectory = "Input";
             string outputDirectory = "Output";
 
@@ -20,27 +19,28 @@ class Program
 
             foreach (string inputPath in dicomFiles)
             {
-                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Prepare output path with .tiff extension
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".tiff");
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".tiff";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure output directory exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load DICOM image, apply Otsu threshold, and save as TIFF
-                using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
+                using (DicomImage dicomImage = (DicomImage)Aspose.Imaging.Image.Load(inputPath))
                 {
+                    // Apply Otsu threshold binarization
                     dicomImage.BinarizeOtsu();
 
-                    TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    dicomImage.Save(outputPath, tiffOptions);
+                    // Save as TIFF
+                    using (TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default))
+                    {
+                        dicomImage.Save(outputPath, tiffOptions);
+                    }
                 }
             }
         }
@@ -53,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application needs to convert a batch of DICOM scans into TIFF files for archival or further analysis while applying Otsu thresholding to enhance contrast.
- * 2. When a radiology workflow requires automated preprocessing of multiple DICOM images to produce binary TIFF outputs for integration with legacy PACS systems that only accept TIFF.
- * 3. When a research project must extract region‑of‑interest masks from a folder of DICOM X‑ray images by binarizing them with Otsu and saving the results as TIFF for downstream machine‑learning pipelines.
- * 4. When a hospital IT script has to generate printable, high‑contrast TIFF copies of DICOM ultrasound frames in bulk for inclusion in patient reports.
- * 5. When a developer is building a batch conversion tool that reads DICOM files from a directory, applies Otsu binarization to each image, and writes the processed images as TIFF to a separate output folder for compliance auditing.
+ * 1. When a medical imaging system needs to process a folder of DICOM scans, apply automatic Otsu binarization, and store the results as TIFF files for archival or further analysis.
+ * 2. When a radiology workflow requires converting raw DICOM images to a widely supported format like TIFF while enhancing contrast through thresholding for downstream AI models.
+ * 3. When a developer builds a batch processing tool that reads multiple DICOM files from a directory, applies binary segmentation, and outputs ready‑to‑print TIFF images for reporting.
+ * 4. When integrating Aspose.Imaging into a C# application to automate the transformation of DICOM datasets into TIFF for compatibility with legacy PACS viewers that only support TIFF.
+ * 5. When creating a script to ensure all DICOM images in a study are uniformly thresholded and saved as lossless TIFFs for regulatory compliance and long‑term storage.
  */
