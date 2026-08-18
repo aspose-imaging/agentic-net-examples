@@ -1,3 +1,4 @@
+// HOW-TO: Load TIFF From Memory Stream, Add Blank Frame, and Save in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,29 +10,45 @@ class Program
 {
     static void Main(string[] args)
     {
-        string inputPath = "C:\\temp\\input.tif";
-        string outputPath = "C:\\temp\\output.tif";
-
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        // Hardcoded input and output file paths
+        string inputPath = "input.tif";
+        string outputPath = "output.tif";
 
         try
         {
-            byte[] data = File.ReadAllBytes(inputPath);
-            using (MemoryStream ms = new MemoryStream(data))
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                using (TiffImage tiffImage = (TiffImage)Image.Load(ms))
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Load the TIFF image from a memory stream
+            byte[] fileBytes = File.ReadAllBytes(inputPath);
+            using (MemoryStream memoryStream = new MemoryStream(fileBytes))
+            {
+                using (Image image = Image.Load(memoryStream))
                 {
-                    var frameOptions = new TiffOptions(TiffExpectedFormat.Default);
-                    using (TiffFrame newFrame = new TiffFrame(frameOptions, tiffImage.Width, tiffImage.Height))
+                    // Ensure the loaded image is a TIFF image
+                    if (image is TiffImage tiffImage)
                     {
+                        // Create a new blank frame (100x100 pixels) with default options
+                        TiffOptions frameOptions = new TiffOptions(TiffExpectedFormat.Default);
+                        TiffFrame newFrame = new TiffFrame(frameOptions, 100, 100);
+
+                        // Add the new frame to the TIFF image
                         tiffImage.AddFrame(newFrame);
-                        tiffImage.Save(outputPath);
+
+                        // Ensure the output directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                        // Save the modified TIFF image
+                        TiffOptions saveOptions = new TiffOptions(TiffExpectedFormat.Default);
+                        tiffImage.Save(outputPath, saveOptions);
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("The loaded image is not a TIFF image.");
                     }
                 }
             }
@@ -45,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to read a multi‑page TIFF from a byte array, add an extra blank frame, and save the updated image to disk using Aspose.Imaging for .NET.
- * 2. When an application receives a scanned document as a memory stream, must append a cover page as a new TIFF frame, and then write the combined file as a .tif.
- * 3. When a service processes uploaded TIFF images entirely in memory to avoid temporary files, adds an additional frame, and persists the result with Image.Save.
- * 4. When a batch job loads existing TIFF files stored as blobs in a database, inserts a metadata frame for OCR information, and writes the modified TIFF back to the file system.
- * 5. When a cloud function reads a TIFF from an HTTP request body, appends an extra page for a signature, and returns the updated image as a downloadable .tif file.
+ * 1. When you need to programmatically insert an empty page into an existing multi‑page TIFF without writing the file to disk first.
+ * 2. When you want to process a TIFF received as a byte array (for example from a web API) and modify its frames entirely in memory.
+ * 3. When you must ensure the output directory exists before saving a modified TIFF to avoid runtime errors.
+ * 4. When you are using Aspose.Imaging in C# to add custom frames to scanned documents for archival or printing purposes.
+ * 5. When you need to verify that a loaded image is a TIFF before performing TIFF‑specific operations such as adding frames.
  */
