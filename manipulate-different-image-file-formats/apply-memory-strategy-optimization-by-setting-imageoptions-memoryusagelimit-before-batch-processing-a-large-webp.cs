@@ -1,3 +1,4 @@
+// HOW-TO: How To Convert Multiple WebP Images To PNG With Memory Limit In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,37 +11,39 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\Images\Input";
-            string outputDir = @"C:\Images\Output";
-
-            // Get all WebP files in the input directory
-            string[] inputFiles = Directory.GetFiles(inputDir, "*.webp");
-
-            foreach (string inputPath in inputFiles)
+            // Hard‑coded list of WebP files to process
+            string[] inputPaths = new[]
             {
-                // Verify that the input file exists
+                @"c:\temp\image1.webp",
+                @"c:\temp\image2.webp"
+            };
+
+            // Memory limit for internal buffers (in megabytes)
+            const int memoryLimitMb = 50;
+
+            foreach (string inputPath in inputPaths)
+            {
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build the corresponding output file path (PNG format)
-                string fileName = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDir, fileName + ".png");
+                // Determine output path (same folder, .png extension)
+                string outputPath = Path.ChangeExtension(inputPath, ".png");
 
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Set a memory usage limit (buffer size hint) for loading the image
-                var loadOptions = new LoadOptions { BufferSizeHint = 100 }; // limit to 100 MB
+                // Set memory limit when loading the image
+                var loadOptions = new LoadOptions { BufferSizeHint = memoryLimitMb };
 
                 // Load the WebP image with the specified memory limit
-                using (WebPImage webPImage = new WebPImage(inputPath, loadOptions))
+                using (Image image = Image.Load(inputPath, loadOptions))
                 {
-                    // Save the image as PNG
-                    webPImage.Save(outputPath, new PngOptions());
+                    // Save as PNG using default options
+                    image.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -53,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a large collection of WebP images to PNG for broader compatibility while enforcing a memory‑usage limit to prevent out‑of‑memory crashes.
- * 2. When an automated C# image‑processing pipeline must load high‑resolution WebP files on a server with limited RAM, using Aspose.Imaging’s LoadOptions.BufferSizeHint to cap memory consumption.
- * 3. When a desktop application processes thousands of user‑uploaded WebP assets for a game and must ensure each image is loaded and saved as PNG without exceeding a 100 MB memory budget.
- * 4. When a cloud‑based microservice receives WebP images from a CDN and needs to batch‑convert them to PNG before storing them in Azure Blob Storage, applying a memory‑usage limit to keep the service stable.
- * 5. When a scheduled maintenance script on a Windows file server archives legacy WebP graphics into PNG format and must enforce a memory limit to avoid impacting other shared resources.
+ * 1. When processing thousands of high‑resolution WebP files on a server with limited RAM, you can set a memory limit while loading each image to prevent out‑of‑memory crashes during batch conversion to PNG.
+ * 2. When a desktop application needs to generate PNG thumbnails from user‑uploaded WebP images without exhausting the application's memory pool, applying a memory usage cap ensures smooth performance.
+ * 3. When automating image migration for a website that stores assets in WebP format and wants to serve PNG to older browsers, limiting memory usage keeps the bulk conversion job stable.
+ * 4. When integrating Aspose.Imaging into a CI/CD pipeline that processes image assets, setting a memory limit helps keep the build agent responsive during large‑scale conversions.
+ * 5. When developing a cloud function or microservice that receives WebP images and returns PNG responses, configuring a memory usage limit ensures the service stays within its allocated container memory.
  */
