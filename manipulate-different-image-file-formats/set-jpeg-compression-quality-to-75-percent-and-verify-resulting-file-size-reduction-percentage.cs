@@ -1,7 +1,9 @@
+// HOW-TO: Compress BMP to JPEG With 75% Quality And Get Size Reduction In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -10,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\temp\sample.bmp";
-            string outputPath = @"C:\temp\sample_75.jpg";
+            string inputPath = @"C:\Images\sample.bmp";
+            string outputPath = @"C:\Images\output_75.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,13 +25,10 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Get original file size
-            long originalSize = new FileInfo(inputPath).Length;
-
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG options with 75% quality
+                // Configure JPEG save options with 75% quality
                 JpegOptions jpegOptions = new JpegOptions
                 {
                     Quality = 75
@@ -39,20 +38,19 @@ class Program
                 image.Save(outputPath, jpegOptions);
             }
 
-            // Get compressed file size
+            // Calculate file sizes and reduction percentage
+            long originalSize = new FileInfo(inputPath).Length;
             long compressedSize = new FileInfo(outputPath).Length;
 
-            // Calculate reduction percentage
-            double reductionPercent = 0;
+            double reduction = 0;
             if (originalSize > 0)
             {
-                reductionPercent = (originalSize - compressedSize) * 100.0 / originalSize;
+                reduction = ((double)(originalSize - compressedSize) / originalSize) * 100;
             }
 
-            // Output the results
             Console.WriteLine($"Original size: {originalSize} bytes");
             Console.WriteLine($"Compressed size: {compressedSize} bytes");
-            Console.WriteLine($"Size reduction: {reductionPercent:F2}%");
+            Console.WriteLine($"Size reduction: {reduction:F2}%");
         }
         catch (Exception ex)
         {
@@ -63,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce storage costs by converting high‑resolution BMP files to JPEG with a specific quality setting (75 %) and wants to log the percentage of size reduction.
- * 2. When an image‑processing pipeline must generate web‑friendly JPEG thumbnails from source images while ensuring the compression level meets a quality threshold and reporting the saved bytes.
- * 3. When a batch‑conversion tool for legacy bitmap assets requires verifying that applying a 75 % JPEG quality actually shrinks the file size before uploading to a content delivery network.
- * 4. When a desktop application needs to let users compress scanned documents to JPEG at a known quality and display how much space was reclaimed on the local drive.
- * 5. When an automated build script compresses product screenshots to JPEG with 75 % quality and validates the compression ratio to enforce size limits for documentation PDFs.
+ * 1. When you need to reduce storage costs by converting large BMP files to smaller JPEGs with a specific 75% quality setting in a .NET application.
+ * 2. When you want to generate web‑optimized images and need to verify how much the file size shrinks after applying JPEG compression.
+ * 3. When building an automated batch‑processing pipeline that must save images as JPEG at a controlled quality level and log the compression savings.
+ * 4. When creating a photo‑upload feature that enforces a maximum file size by compressing incoming BMPs to JPEG at 75% quality and checking the reduction percentage.
+ * 5. When testing different JPEG quality values to compare visual quality versus file size, and you need a quick C# snippet to measure the results.
  */
