@@ -1,19 +1,18 @@
+// HOW-TO: Resize BMP Image to Fit Specific Dimensions While Preserving Aspect Ratio in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.bmp";
-        string outputPath = "output\\resized.bmp";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.bmp";
+            string outputPath = "output.bmp";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,14 +23,14 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load BMP image
-            using (BmpImage image = (BmpImage)Image.Load(inputPath))
-            {
-                // Desired maximum dimensions
-                int targetWidth = 800;
-                int targetHeight = 600;
+            // Desired dimensions (maintain aspect ratio)
+            int targetWidth = 800;   // example width
+            int targetHeight = 600;  // example height
 
-                // Calculate scaling factor to maintain aspect ratio
+            // Load the BMP image
+            using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
+            {
+                // Calculate scaling factor to preserve aspect ratio
                 double widthRatio = (double)targetWidth / image.Width;
                 double heightRatio = (double)targetHeight / image.Height;
                 double scale = Math.Min(widthRatio, heightRatio);
@@ -39,10 +38,10 @@ class Program
                 int newWidth = (int)(image.Width * scale);
                 int newHeight = (int)(image.Height * scale);
 
-                // Resize while preserving aspect ratio
-                image.Resize(newWidth, newHeight);
+                // Resize using nearest neighbour resampling (default)
+                image.Resize(newWidth, newHeight, Aspose.Imaging.ResizeType.NearestNeighbourResample);
 
-                // Save resized image as BMP
+                // Save as BMP
                 BmpOptions options = new BmpOptions();
                 image.Save(outputPath, options);
             }
@@ -56,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate thumbnail previews of user‑uploaded BMP files for a web gallery while preserving the original aspect ratio.
- * 2. When an application must downscale large BMP scans to fit within a printable page size of 800×600 pixels without distortion.
- * 3. When a Windows desktop utility converts high‑resolution BMP screenshots into smaller files for faster email attachment.
- * 4. When a batch‑processing service prepares BMP assets for a mobile game by resizing them to a maximum width and height while keeping their proportions.
- * 5. When a legacy system requires BMP images to be resized to fit into a fixed‑size UI panel, ensuring the image does not appear stretched.
+ * 1. When you need to generate thumbnail previews of BMP files for a file‑manager UI without distorting the images.
+ * 2. When preparing BMP assets for a legacy Windows application that only supports images up to a certain resolution.
+ * 3. When batch‑processing scanned documents to fit within a printable page size while keeping the original proportions.
+ * 4. When converting high‑resolution BMP screenshots to a smaller size for faster web upload but still require the BMP format.
+ * 5. When integrating image resizing into an automated build pipeline that validates BMP dimensions before packaging.
  */
