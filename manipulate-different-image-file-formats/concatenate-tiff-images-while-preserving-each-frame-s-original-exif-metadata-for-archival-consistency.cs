@@ -1,3 +1,4 @@
+// HOW-TO: Combine Multiple TIFF Files Into a Multi-Page TIFF With EXIF Metadata In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,19 +10,19 @@ class Program
     {
         try
         {
-            // Hardcoded input TIFF file paths
-            string[] inputPaths = new string[]
+            // Hard‑coded input TIFF files
+            string[] inputPaths = new[]
             {
                 @"C:\Images\input1.tif",
                 @"C:\Images\input2.tif",
                 @"C:\Images\input3.tif"
             };
 
-            // Hardcoded output TIFF file path
-            string outputPath = @"C:\Images\output_combined.tif";
+            // Hard‑coded output TIFF file
+            string outputPath = @"C:\Images\output.tif";
 
             // Verify each input file exists
-            foreach (var inputPath in inputPaths)
+            foreach (string inputPath in inputPaths)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -30,20 +31,21 @@ class Program
                 }
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the first TIFF as the base image
+            // Load the first TIFF image – it will become the base of the concatenated image
             using (TiffImage result = (TiffImage)Image.Load(inputPaths[0]))
             {
-                // Append frames from remaining TIFF files
+                // Append frames from the remaining TIFF images
                 for (int i = 1; i < inputPaths.Length; i++)
                 {
                     using (TiffImage src = (TiffImage)Image.Load(inputPaths[i]))
                     {
-                        result.Add(src); // Preserves each frame's EXIF metadata
+                        // Add all frames (including their EXIF metadata) from src to result
+                        result.Add(src);
                     }
                 }
+
+                // Ensure the output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Save the combined multi‑page TIFF
                 result.Save(outputPath);
@@ -58,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system must merge separate DICOM‑exported TIFF scans into a single multi‑page TIFF while keeping each frame’s original EXIF tags for regulatory compliance.
- * 2. When a digital archiving workflow needs to combine scanned historical documents stored as individual TIFF files into one searchable archive file without losing the capture date and camera settings stored in EXIF metadata.
- * 3. When a publishing platform assembles multiple high‑resolution TIFF illustrations into a single multi‑page TIFF for print proofs, preserving each illustration’s color profile and metadata for consistent reproduction.
- * 4. When a construction project management tool consolidates site‑photography TIFF images taken at different times into one file, retaining GPS coordinates and timestamps in EXIF for later geospatial analysis.
- * 5. When a legal e‑discovery process concatenates TIFF evidence pages while maintaining each page’s original metadata to ensure chain‑of‑custody integrity in court filings.
+ * 1. When archiving scanned documents that include camera information, you can merge several single‑page TIFFs into one multi‑page file while keeping each page’s original EXIF data.
+ * 2. When preparing a digital submission for a museum, you may need to combine high‑resolution TIFF images of artwork into a single file without losing the embedded shooting details.
+ * 3. When building a batch processing tool that consolidates medical imaging scans, you can concatenate the TIFF frames and retain patient‑specific EXIF metadata for regulatory compliance.
+ * 4. When creating a printable PDF from a series of TIFF photographs, you first combine them into a multi‑page TIFF that preserves exposure and orientation metadata for later conversion.
+ * 5. When developing a backup script for field‑collected TIFF images, you can merge them into one archive file while ensuring each image’s EXIF tags remain intact for future reference.
  */
