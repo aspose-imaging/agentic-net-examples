@@ -1,60 +1,54 @@
+// HOW-TO: Overlay Semi Transparent PNG Logo onto BMP Image in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Bmp;
 using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Paths (hard‑coded)
+            string backgroundPath = "background.bmp";
             string logoPath = "logo.png";
-            string[] backgroundPaths = { "bg1.bmp", "bg2.bmp", "bg3.bmp" };
-            string outputDirectory = "output";
+            string outputPath = "output.bmp";
 
-            // Validate logo file
+            if (!File.Exists(backgroundPath))
+            {
+                Console.Error.WriteLine($"File not found: {backgroundPath}");
+                return;
+            }
             if (!File.Exists(logoPath))
             {
                 Console.Error.WriteLine($"File not found: {logoPath}");
                 return;
             }
 
-            // Load the semi‑transparent logo once
-            using (RasterImage logo = (RasterImage)Image.Load(logoPath))
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            Source outputSource = new FileCreateSource(outputPath, false);
+            BmpOptions bmpOptions = new BmpOptions() { Source = outputSource };
+
+            using (BmpImage background = (BmpImage)Image.Load(backgroundPath))
             {
-                // Process each background image
-                foreach (string bgPath in backgroundPaths)
+                using (BmpImage canvas = (BmpImage)Image.Create(bmpOptions, background.Width, background.Height))
                 {
-                    // Validate background file
-                    if (!File.Exists(bgPath))
+                    // Copy background onto canvas
+                    canvas.SaveArgb32Pixels(new Rectangle(0, 0, background.Width, background.Height),
+                                            background.LoadArgb32Pixels(background.Bounds));
+
+                    // Load logo
+                    using (RasterImage logo = (RasterImage)Image.Load(logoPath))
                     {
-                        Console.Error.WriteLine($"File not found: {bgPath}");
-                        return;
+                        // Overlay logo at position (50,50) with 50% opacity
+                        canvas.Blend(new Point(50, 50), logo, 128);
                     }
 
-                    // Prepare output path
-                    string outputPath = Path.Combine(outputDirectory,
-                        Path.GetFileNameWithoutExtension(bgPath) + "_branded.bmp");
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Load background BMP
-                    using (RasterImage background = (RasterImage)Image.Load(bgPath))
-                    {
-                        // Overlay logo at (0,0) with 50% opacity (128 out of 255)
-                        background.Blend(new Point(0, 0), logo, 128);
-
-                        // Save the result as BMP
-                        BmpOptions bmpOptions = new BmpOptions
-                        {
-                            Source = new FileCreateSource(outputPath, false)
-                        };
-                        background.Save(outputPath, bmpOptions);
-                    }
+                    // Save the bound image
+                    canvas.Save();
                 }
             }
         }
@@ -67,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a marketing team wants to automatically brand a batch of BMP product images with a semi‑transparent PNG logo using C# and Aspose.Imaging.
- * 2. When a software vendor needs to embed a watermark logo onto legacy BMP screenshots before distributing them to customers.
- * 3. When an e‑commerce platform must add a corporate logo to multiple background images during a nightly build pipeline with .NET image processing.
- * 4. When a game developer wants to overlay a transparent logo onto BMP textures for in‑game branding without altering the original files.
- * 5. When a document management system requires batch processing of scanned BMP pages to include a semi‑transparent logo for compliance purposes.
+ * 1. When you need to brand a series of BMP product images by stamping a semi‑transparent PNG logo at a fixed position using C# and Aspose.Imaging.
+ * 2. When you want to add a watermark to legacy BMP files without converting them to another format, preserving the original dimensions and color depth.
+ * 3. When you are generating printable assets that require a consistent logo overlay on BMP backgrounds for marketing materials.
+ * 4. When you must programmatically combine a high‑resolution PNG logo with a BMP canvas while controlling opacity for a corporate branding pipeline.
+ * 5. When you need to automate the creation of BMP files with a logo overlay for use in embedded systems that only support BMP graphics.
  */
