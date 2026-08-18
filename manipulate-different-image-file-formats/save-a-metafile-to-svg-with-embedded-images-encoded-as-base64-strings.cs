@@ -1,17 +1,18 @@
+// HOW-TO: Convert EMF to SVG with Embedded Base64 Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Svg;
 
-class MySvgResourceKeeperCallback : SvgResourceKeeperCallback
+class MySvgCallback : SvgResourceKeeperCallback
 {
-    // Use embedded image data (Base64) for all image resources.
+    // Embed all image resources as Base64 strings.
     public override string OnImageResourceReady(byte[] imageData, SvgImageType imageType,
         string suggestedFileName, ref bool useEmbeddedImage)
     {
-        useEmbeddedImage = true;               // request embedding
-        return null;                           // no external file needed
+        useEmbeddedImage = true;               // Request embedding.
+        return null;                           // No external file needed.
     }
 
     // No special handling for the SVG document itself.
@@ -25,36 +26,41 @@ class Program
 {
     static void Main()
     {
-        // Hard‑coded paths
-        string inputPath = @"C:\input\sample.emf";
-        string outputPath = @"C:\output\sample.svg";
-
         try
         {
-            // Verify input file existence
+            // Hard‑coded input and output paths.
+            string inputPath = @"C:\Images\sample.emf";
+            string outputPath = @"C:\Images\sample.svg";
+
+            // Verify input file exists.
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure output directory exists.
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the metafile
+            // Load the metafile.
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare SVG options with embedded resources
+                // Prepare SVG options with the custom callback for embedding images.
                 var svgOptions = new SvgOptions
                 {
-                    Callback = new MySvgResourceKeeperCallback(),
-                    VectorRasterizationOptions = new SvgRasterizationOptions
-                    {
-                        PageSize = image.Size
-                    }
+                    Callback = new MySvgCallback()
                 };
 
-                // Save as SVG with embedded images (Base64)
+                // Optional: set vector rasterization options to preserve page size.
+                if (image is VectorImage vectorImage)
+                {
+                    svgOptions.VectorRasterizationOptions = new SvgRasterizationOptions
+                    {
+                        PageSize = vectorImage.Size
+                    };
+                }
+
+                // Save as SVG with embedded images.
                 image.Save(outputPath, svgOptions);
             }
         }
@@ -67,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert Windows Metafile (EMF) drawings into web‑ready SVG files with all raster images embedded as Base64 strings to avoid external image dependencies.
- * 2. When a .NET application must generate a single‑file SVG report from legacy vector assets so that the output can be displayed in browsers or email clients without requiring separate image files.
- * 3. When an automated build pipeline processes design assets and requires embedding raster resources directly into the SVG to ensure consistent rendering across different operating systems.
- * 4. When a developer is creating a portable SVG export feature for a CAD or diagramming tool that must preserve the original image quality by rasterizing pages at the original size and embedding them in the SVG.
- * 5. When a cloud‑based service needs to store vector graphics in a database as a self‑contained SVG string, using Aspose.Imaging for .NET to embed all bitmap resources as Base64 to simplify retrieval and display.
+ * 1. When you need to embed raster images from an EMF file directly into an SVG for web delivery without external image files.
+ * 2. When you want to preserve the original page size of a vector metafile while converting it to scalable SVG for printing or reporting.
+ * 3. When you are building a C# application that must generate self‑contained SVG assets for email newsletters or offline documentation.
+ * 4. When you need to ensure that all image resources inside a metafile are encoded as Base64 so that the SVG can be stored in a database as a single string.
+ * 5. When you are automating batch conversion of multiple EMF graphics to SVG and want each output file to be portable across different platforms.
  */
