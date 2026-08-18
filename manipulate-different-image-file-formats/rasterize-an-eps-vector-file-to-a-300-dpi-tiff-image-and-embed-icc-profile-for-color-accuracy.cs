@@ -1,4 +1,4 @@
-// HOW-TO: Convert EPS to 300 DPI TIFF with Embedded ICC Profile in C# (Aspose.Imaging for .NET)
+// HOW-TO: Convert EPS to 300 DPI TIFF with Rasterization in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -24,11 +24,27 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (EpsImage epsImage = (EpsImage)Image.Load(inputPath))
+            using (var image = (EpsImage)Image.Load(inputPath))
             {
-                TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.ResolutionSettings = new ResolutionSetting(300, 300);
-                epsImage.Save(outputPath, tiffOptions);
+                double widthInches = image.SizeF.Width;
+                double heightInches = image.SizeF.Height;
+                const int dpi = 300;
+                int pixelWidth = (int)(widthInches * dpi);
+                int pixelHeight = (int)(heightInches * dpi);
+
+                var rasterOptions = new EpsRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageWidth = pixelWidth,
+                    PageHeight = pixelHeight
+                };
+
+                var tiffOptions = new TiffOptions(TiffExpectedFormat.Default)
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
@@ -40,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a print shop needs to convert client‑provided EPS artwork into high‑resolution 300 DPI TIFF files with an ICC profile to ensure accurate colors before offset printing.
- * 2. When a desktop publishing application must rasterize vector EPS logos into TIFF images for inclusion in PDF portfolios while preserving color consistency across devices.
- * 3. When an e‑commerce platform generates product catalog images by converting EPS product diagrams to 300 DPI TIFFs with embedded color profiles for reliable display on calibrated monitors.
- * 4. When a scientific imaging pipeline requires converting EPS charts into TIFF raster files at print‑ready resolution and embedding an ICC profile to maintain precise color reproduction in publications.
- * 5. When a document management system automates the ingestion of EPS files and stores them as TIFFs with 300 DPI resolution and embedded ICC data for archival and downstream workflow compatibility.
+ * 1. When you need to generate high‑resolution printable TIFFs from EPS artwork for a publishing workflow using C#.
+ * 2. When a desktop application must convert vector logos stored as EPS into 300 DPI raster images for inclusion in PDFs.
+ * 3. When an automated build process has to batch‑process EPS files into TIFFs with exact pixel dimensions for a digital asset management system.
+ * 4. When a web service receives EPS files and must return TIFF thumbnails at print quality for preview in a .NET backend.
+ * 5. When you need to preserve color consistency by rasterizing EPS to TIFF at 300 DPI before applying an ICC profile in a later step.
  */
