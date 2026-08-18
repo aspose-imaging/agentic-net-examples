@@ -1,3 +1,4 @@
+// HOW-TO: Convert 24‑Bit BMP to 8‑Bit Indexed BMP with Dithering in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\Images\input24bit.bmp";
-            string outputPath = @"C:\Images\output8bit.bmp";
+            string inputPath = @"C:\temp\input24.bmp";
+            string outputPath = @"C:\temp\output8.bmp";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,29 +22,28 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the 24‑bit BMP image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to access dithering
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Floyd‑Steinberg dithering to reduce to 8‑bit palette
+                // Apply Floyd‑Steinberg dithering to reduce to an 8‑bit palette
                 rasterImage.Dither(DitheringMethod.FloydSteinbergDithering, 8);
 
-                // Prepare BMP save options for 8‑bit indexed image
+                // Configure BMP save options for 8‑bpp indexed image
                 BmpOptions saveOptions = new BmpOptions
                 {
                     BitsPerPixel = 8,
-                    // Generate a palette that best matches the source image
                     Palette = ColorPaletteHelper.GetCloseImagePalette(rasterImage, 256),
-                    // Keep default compression (RGB) and resolution
+                    Compression = BitmapCompression.Rgb,
+                    ResolutionSettings = new ResolutionSetting(96.0, 96.0)
                 };
 
                 // Save the palettized image
-                image.Save(outputPath, saveOptions);
+                rasterImage.Save(outputPath, saveOptions);
             }
         }
         catch (Exception ex)
@@ -55,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to shrink a 24‑bit BMP file for a legacy Windows application that only accepts 8‑bit indexed images, this code applies Floyd‑Steinberg dithering and creates an optimal palette.
- * 2. When preparing graphics for an embedded device or handheld that requires BMPs limited to 256 colors, the snippet converts the high‑color source to an 8‑bit indexed BMP while preserving visual fidelity.
- * 3. When exporting screenshots from a .NET tool to a game engine that only supports 8‑bit BMP textures, this example automates the palette generation and dithering needed for compatibility.
- * 4. When optimizing BMP assets for web delivery under bandwidth constraints, a developer can use the code to downgrade 24‑bit images to 8‑bit indexed BMPs with Floyd‑Steinberg dithering to retain detail and reduce file size.
- * 5. When archiving scanned documents as BMPs but must stay within a strict storage quota, the code enables conversion from 24‑bit to 8‑bit indexed BMP with a custom palette, ensuring the files remain readable and compact.
+ * 1. When you need to shrink a high‑color BMP for use on legacy systems that only support 256‑color palettes.
+ * 2. When preparing BMP assets for a retro‑style game that requires 8‑bit indexed images with dithering to preserve visual quality.
+ * 3. When reducing the file size of large 24‑bit BMP screenshots for faster loading in desktop applications.
+ * 4. When converting scanned color BMP documents to an 8‑bit palette to meet printing or archival format constraints.
+ * 5. When automating batch processing of BMP files in a C# service to generate web‑friendly, low‑color versions with consistent resolution.
  */
