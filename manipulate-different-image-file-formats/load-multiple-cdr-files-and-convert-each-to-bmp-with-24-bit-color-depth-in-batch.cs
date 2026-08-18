@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert Multiple CDR Files to 24‑Bit BMP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -6,32 +7,24 @@ using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
-        // Hardcoded input and output directories
-        string inputDirectory = "Input";
-        string outputDirectory = "Output";
-
         try
         {
-            // Ensure input directory exists; if not, create it and exit
-            if (!Directory.Exists(inputDirectory))
+            // Hard‑coded input CDR files
+            string[] inputPaths = new[]
             {
-                Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add CDR files and rerun.");
-                return;
-            }
+                @"C:\Images\sample1.cdr",
+                @"C:\Images\sample2.cdr"
+            };
 
-            // Ensure output directory exists
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
+            // Hard‑coded output directory
+            string outputDirectory = @"C:\Images\Converted";
 
-            // Get all CDR files in the input directory
-            string[] cdrFiles = Directory.GetFiles(inputDirectory, "*.cdr");
+            // Ensure the output directory exists (will also work if GetDirectoryName returns null)
+            Directory.CreateDirectory(outputDirectory);
 
-            foreach (string inputPath in cdrFiles)
+            foreach (string inputPath in inputPaths)
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -40,35 +33,25 @@ class Program
                     return;
                 }
 
-                // Prepare output file path with .bmp extension
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".bmp");
+                // Build the output BMP path (same name, .bmp extension)
+                string outputPath = Path.Combine(outputDirectory,
+                    Path.GetFileNameWithoutExtension(inputPath) + ".bmp");
 
-                // Ensure the output directory for this file exists
+                // Ensure the output directory exists (unconditional as required)
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 // Load the CDR image
                 using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
                 {
-                    // Configure BMP options with 24‑bit color depth
-                    using (BmpOptions bmpOptions = new BmpOptions())
+                    // Set BMP options to 24‑bit color depth
+                    BmpOptions bmpOptions = new BmpOptions
                     {
-                        bmpOptions.BitsPerPixel = 24;
+                        BitsPerPixel = 24
+                    };
 
-                        // Set vector rasterization options for proper conversion
-                        bmpOptions.VectorRasterizationOptions = new VectorRasterizationOptions
-                        {
-                            BackgroundColor = Color.White,
-                            PageWidth = cdrImage.Width,
-                            PageHeight = cdrImage.Height
-                        };
-
-                        // Save the rasterized BMP image
-                        cdrImage.Save(outputPath, bmpOptions);
-                    }
+                    // Save as BMP
+                    cdrImage.Save(outputPath, bmpOptions);
                 }
-
-                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -80,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design studio needs to automate the batch conversion of multiple CorelDRAW (CDR) files to 24‑bit BMP images for legacy Windows applications, they can use this C# code with Aspose.Imaging for .NET.
- * 2. When a document management system must ingest vector CDR assets and store them as raster BMP files with full color fidelity for archival or printing pipelines, the example shows how to process the files in a folder.
- * 3. When a developer is building a server‑side image processing service that receives CDR uploads and returns BMP thumbnails at 24‑bit depth, the code demonstrates loading each CDR and saving it as BMP in bulk.
- * 4. When an automation script needs to prepare CDR artwork for a CNC machine that only accepts BMP format, this batch conversion routine ensures every file in the input directory is converted with the correct color depth.
- * 5. When a QA team wants to verify visual consistency by converting a set of CorelDRAW designs to BMP for pixel‑by‑pixel comparison against expected outputs, the sample provides a straightforward C# loop using Aspose.Imaging.
+ * 1. When you need to migrate a collection of CorelDRAW (CDR) assets to 24‑bit BMP format for legacy Windows applications that only accept BMP images.
+ * 2. When an automated build process must generate high‑color‑depth bitmap previews of multiple CDR designs for quality‑control reports.
+ * 3. When a server‑side service has to batch‑convert client‑uploaded CDR files into BMPs to embed them in PDF documents that require raster images.
+ * 4. When you are archiving graphic files and require a lossless 24‑bit BMP version of each CDR to ensure consistent rendering across different operating systems.
+ * 5. When a desktop utility needs to read several CDR drawings and export them as BMPs for use in hardware‑accelerated printing pipelines that only support BMP input.
  */
