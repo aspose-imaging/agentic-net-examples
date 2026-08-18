@@ -1,47 +1,50 @@
+// HOW-TO: Crop a BMP Image by Pixel Coordinates and Save in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.Bmp;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
+        // Hard‑coded input and output file paths
         string inputPath = @"C:\Images\input.bmp";
         string outputPath = @"C:\Images\output_cropped.bmp";
 
-        // Verify that the input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
         try
         {
+            // Verify that the input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the BMP image
             using (Image image = Image.Load(inputPath))
             {
                 // Define the rectangle to crop (left, top, width, height)
-                // Adjust these values as needed for the desired region
-                int left = 50;
-                int top = 50;
-                int width = 200;
-                int height = 150;
-                Rectangle cropArea = new Rectangle(left, top, width, height);
+                int left = 100;   // X coordinate of the left edge
+                int top = 50;     // Y coordinate of the top edge
+                int width = 200;  // Width of the cropped area
+                int height = 150; // Height of the cropped area
 
-                // Perform the cropping operation
+                var cropArea = new Rectangle(left, top, width, height);
+
+                // Perform the crop operation
                 image.Crop(cropArea);
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Save the cropped image (format inferred from file extension)
+                // Save the cropped image to the output path
                 image.Save(outputPath);
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -49,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract a specific UI element from a large BMP screenshot for automated testing, they can use this C# code to crop the element by pixel coordinates and save it as a separate BMP file.
- * 2. When generating thumbnails of scanned documents stored as BMP files, the code can crop a defined region to create a smaller preview image for a web gallery.
- * 3. When preprocessing satellite imagery in BMP format to isolate a region of interest before applying further analysis, developers can use this snippet to crop the exact pixel rectangle and export it.
- * 4. When creating custom icons from a BMP sprite sheet, the code allows developers to select the icon’s bounding box using left, top, width, and height values and save the cropped icon as an individual BMP file.
- * 5. When sanitizing confidential information by removing surrounding content and keeping only a specific portion of a BMP diagram, the code can crop the required area and store the result for compliance reporting.
+ * 1. When you need to extract a specific region from a large BMP file for a thumbnail or preview in a C# desktop application.
+ * 2. When you want to isolate a portion of a scanned BMP document to focus on a particular form field before further analysis.
+ * 3. When you are generating sprite sheets and must crop individual sprite frames from a master BMP image using exact pixel coordinates.
+ * 4. When you need to remove unwanted borders or margins from BMP images automatically during a batch processing workflow.
+ * 5. When you are preparing BMP assets for a game engine and must crop them to fit required texture dimensions without losing quality.
  */
