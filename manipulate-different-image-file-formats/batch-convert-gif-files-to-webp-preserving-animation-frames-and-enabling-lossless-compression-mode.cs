@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert Animated GIFs to Lossless WebP in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,17 +8,19 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output directories
+        string inputDirectory = @"C:\InputGifs";
+        string outputDirectory = @"C:\OutputWebp";
+
         try
         {
-            // Hardcoded input and output directories
-            string inputDirectory = @"C:\InputGifs";
-            string outputDirectory = @"C:\OutputWebp";
-
-            // Ensure the output directory exists
+            // Ensure the output directory exists (creates parent directories as needed)
             Directory.CreateDirectory(outputDirectory);
 
-            // Process each GIF file in the input directory
-            foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.gif"))
+            // Get all GIF files in the input directory
+            string[] gifFiles = Directory.GetFiles(inputDirectory, "*.gif");
+
+            foreach (string inputPath in gifFiles)
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -26,24 +29,22 @@ class Program
                     continue;
                 }
 
-                // Build the output WebP file path
-                string outputPath = Path.Combine(outputDirectory,
-                    Path.GetFileNameWithoutExtension(inputPath) + ".webp");
+                // Build the output file path with .webp extension
+                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".webp";
+                string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                // Ensure the output directory exists (unconditional as required)
+                // Ensure the directory for the output file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the GIF image (preserves animation frames)
+                // Load the GIF (including animation frames) and save as lossless WebP
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Configure WebP options for lossless compression
                     var webpOptions = new WebPOptions
                     {
                         Lossless = true,
-                        Quality = 100 // Quality is ignored for lossless but set for completeness
+                        Quality = 100 // Maximum quality for lossless mode
                     };
 
-                    // Save as animated WebP
                     image.Save(outputPath, webpOptions);
                 }
 
@@ -59,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to reduce page load times by converting a folder of animated GIF advertisements into lossless WebP files for faster web delivery.
- * 2. When an e‑commerce platform wants to preserve product animation frames while migrating legacy GIF assets to WebP to improve SEO image performance.
- * 3. When a mobile app team automates the batch conversion of user‑generated GIF stickers into lossless WebP to save storage space without losing animation quality.
- * 4. When a digital marketing agency prepares a large collection of animated GIF banners for email campaigns and requires lossless WebP conversion using C# and Aspose.Imaging.
- * 5. When a game developer needs to convert animated GIF UI elements into lossless WebP sprites in bulk to maintain visual fidelity while optimizing asset size.
+ * 1. When you need to shrink a collection of animated GIF advertisements for faster web page loading while keeping every frame intact, you can batch convert them to lossless WebP using C#.
+ * 2. When preparing assets for a mobile game that requires high‑quality, animation‑preserving textures, this code lets you transform multiple GIF sprites into lossless WebP files in one step.
+ * 3. When migrating a legacy e‑learning platform’s animated tutorials from GIF to the more efficient WebP format, the script automates the conversion of all files while preserving animation.
+ * 4. When building an automated CI/CD pipeline that optimizes image assets, you can use this code to convert newly added GIFs to lossless WebP before deployment.
+ * 5. When creating a digital marketing email campaign and want to reduce attachment size without losing animation quality, the batch converter processes all GIFs to lossless WebP with a single C# routine.
  */
