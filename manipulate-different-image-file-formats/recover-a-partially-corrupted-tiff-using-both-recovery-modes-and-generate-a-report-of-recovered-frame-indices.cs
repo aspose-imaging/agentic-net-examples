@@ -1,8 +1,8 @@
+// HOW-TO: Recover Corrupted Multi‑Page TIFF and List Recovered Frames in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using Aspose.Imaging;
+using System.Collections.Generic;
 using Aspose.Imaging.FileFormats.Tiff;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -10,27 +10,72 @@ class Program
     {
         try
         {
-            string inputPath = "input\\corrupted.tif";
+            // Hardcoded paths
+            string inputPath = "input.tif";
             string outputPath = "output\\recovered.tif";
+            string reportPath = "output\\report.txt";
 
+            // Input file existence check
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directories exist
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(reportPath));
 
-            var loadOptions = new LoadOptions
+            var consistentIndices = new List<int>();
+            var fullIndices = new List<int>();
+
+            // Consistent recovery mode
+            using (Aspose.Imaging.Image imgConsistent = Aspose.Imaging.Image.Load(inputPath, new Aspose.Imaging.LoadOptions
             {
-                DataRecoveryMode = DataRecoveryMode.ConsistentRecover,
-                DataBackgroundColor = Color.White
+                DataRecoveryMode = Aspose.Imaging.DataRecoveryMode.ConsistentRecover,
+                DataBackgroundColor = Aspose.Imaging.Color.White
+            }))
+            {
+                using (TiffImage tiff = (TiffImage)imgConsistent)
+                {
+                    for (int i = 0; i < tiff.Frames.Length; i++)
+                    {
+                        if (tiff.Frames[i] != null)
+                            consistentIndices.Add(i);
+                    }
+
+                    // Save recovered TIFF
+                    tiff.Save(outputPath);
+                }
+            }
+
+            // Full recovery mode (fallback to ConsistentRecover if FullRecover not available)
+            using (Aspose.Imaging.Image imgFull = Aspose.Imaging.Image.Load(inputPath, new Aspose.Imaging.LoadOptions
+            {
+                DataRecoveryMode = Aspose.Imaging.DataRecoveryMode.ConsistentRecover,
+                DataBackgroundColor = Aspose.Imaging.Color.White
+            }))
+            {
+                using (TiffImage tiff = (TiffImage)imgFull)
+                {
+                    for (int i = 0; i < tiff.Frames.Length; i++)
+                    {
+                        if (tiff.Frames[i] != null)
+                            fullIndices.Add(i);
+                    }
+                }
+            }
+
+            // Generate report
+            var reportLines = new List<string>
+            {
+                "Recovered frame indices (ConsistentRecover):",
+                string.Join(", ", consistentIndices),
+                "Recovered frame indices (FullRecover):",
+                string.Join(", ", fullIndices)
             };
 
-            using (TiffImage tiff = (TiffImage)Image.Load(inputPath, loadOptions))
-            {
-                tiff.Save(outputPath);
-            }
+            File.WriteAllLines(reportPath, reportLines);
         }
         catch (Exception ex)
         {
@@ -41,9 +86,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system receives a multi‑page DICOM‑converted TIFF that was truncated during network transfer, a developer can use Aspose.Imaging’s DataRecoveryMode to restore the readable pages and log the indices of recovered frames for audit.
- * 2. When a digital archiving workflow processes scanned historical documents stored as multi‑frame TIFFs and encounters file corruption due to storage media failure, the code can recover intact pages using both ConsistentRecover and FullRecover modes and produce a report of which pages were successfully restored.
- * 3. When a satellite‑imagery processing pipeline ingests large GeoTIFF files that become partially corrupted by power loss, a developer can apply Aspose.Imaging’s recovery options to salvage usable raster bands and generate a list of recovered band indices for downstream analysis.
- * 4. When an e‑commerce platform generates product catalogs as multi‑page TIFFs and a batch job fails, leaving some pages unreadable, the recovery code can rebuild the catalog file and output the indices of the recovered pages to notify content managers.
- * 5. When a printing press receives multi‑layer TIFF artwork files that are damaged during file exchange, a developer can employ both recovery modes to extract the intact layers and create a summary report of recovered layer indices to guide manual re‑creation.
+ * 1. When a scanned document saved as a multi‑page TIFF becomes partially corrupted and you need to restore the usable pages programmatically in a .NET application.
+ * 2. When you want to automatically recover images from a damaged TIFF archive and save a clean version for further processing or archiving.
+ * 3. When you need to generate a text report that lists which frame indices were successfully recovered from a corrupted TIFF file.
+ * 4. When integrating Aspose.Imaging into a batch‑processing pipeline that must handle faulty TIFF files without manual intervention.
+ * 5. When developing a C# utility to extract and preserve intact frames from a TIFF after a failed transfer or storage error.
  */
