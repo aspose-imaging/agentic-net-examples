@@ -1,3 +1,4 @@
+// HOW-TO: Adjust Brightness Contrast and Gamma of DICOM and Save as PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,9 +9,9 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.dcm";
-        string outputPath = "output.pdf";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.dcm";
+        string outputPath = @"C:\Images\output.pdf";
 
         // Verify input file exists
         if (!File.Exists(inputPath))
@@ -30,10 +31,14 @@ class Program
                 // Cast to DicomImage to access adjustment methods
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Adjust brightness, contrast, and gamma sequentially
-                dicomImage.AdjustBrightness(30);      // Increase brightness
-                dicomImage.AdjustContrast(20f);       // Increase contrast
-                dicomImage.AdjustGamma(1.2f);         // Apply gamma correction
+                // Adjust brightness (range -255 to 255)
+                dicomImage.AdjustBrightness(30);
+
+                // Adjust contrast (range -100 to 100)
+                dicomImage.AdjustContrast(20f);
+
+                // Adjust gamma (single value applied to all channels)
+                dicomImage.AdjustGamma(1.2f);
 
                 // Save the processed image as PDF
                 dicomImage.Save(outputPath, new PdfOptions());
@@ -48,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology application needs to convert a DICOM X‑ray image to a PDF report while enhancing visibility by increasing brightness, contrast, and applying gamma correction using Aspose.Imaging for .NET.
- * 2. When a healthcare IT system must automatically preprocess CT scan slices—adjusting brightness, contrast, and gamma—to improve diagnostic clarity before embedding them in a PDF document for patient records.
- * 3. When a medical imaging workflow requires batch conversion of DICOM ultrasound images to searchable PDF files with standardized visual adjustments for consistent presentation across devices.
- * 4. When a telemedicine platform wants to generate PDF summaries of DICOM MRI images with optimized visual settings so clinicians can view them easily in web browsers without specialized DICOM viewers.
- * 5. When a hospital’s archival solution needs to store DICOM images as PDF files with enhanced contrast and gamma correction to ensure long‑term readability and compliance with electronic health record standards.
+ * 1. When a medical imaging application needs to enhance a DICOM X‑ray by increasing brightness, contrast, and gamma before generating a PDF report for clinicians.
+ * 2. When a radiology workflow requires converting processed DICOM scans into PDF files for easy sharing with patients who cannot view DICOM viewers.
+ * 3. When a healthcare integration service must programmatically adjust image quality of DICOM files to meet visual standards before archiving them as PDFs.
+ * 4. When a diagnostic software needs to batch‑process DICOM images, apply consistent visual adjustments, and store the results in a portable PDF format for electronic health records.
+ * 5. When a developer wants to demonstrate image‑processing capabilities by loading a DICOM, tweaking its visual parameters, and exporting the result as a PDF document in a .NET application.
  */
