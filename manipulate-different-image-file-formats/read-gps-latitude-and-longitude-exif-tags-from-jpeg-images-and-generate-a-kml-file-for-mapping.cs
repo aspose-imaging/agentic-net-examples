@@ -1,7 +1,8 @@
+// HOW-TO: Extract GPS Coordinates from JPEG and Create KML in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Jpeg;
 
 class Program
 {
@@ -9,8 +10,8 @@ class Program
     {
         try
         {
-            string inputPath = "input\\photo.jpg";
-            string outputPath = "output\\photo.jpg";
+            string inputPath = "Input\\photo.jpg";
+            string outputPath = "Output\\photo.kml";
 
             if (!File.Exists(inputPath))
             {
@@ -20,10 +21,45 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (Image image = Image.Load(inputPath))
+            using (JpegImage image = (JpegImage)Image.Load(inputPath))
             {
-                JpegOptions jpegOptions = new JpegOptions();
-                image.Save(outputPath, jpegOptions);
+                var exif = image.ExifData as Aspose.Imaging.Exif.JpegExifData;
+                if (exif == null)
+                {
+                    Console.Error.WriteLine("No EXIF data found.");
+                    return;
+                }
+
+                double latitude = 0;
+                double longitude = 0;
+                bool hasLat = double.TryParse(exif.GPSLatitude?.ToString(), out latitude);
+                bool hasLon = double.TryParse(exif.GPSLongitude?.ToString(), out longitude);
+
+                if (!hasLat || !hasLon)
+                {
+                    Console.Error.WriteLine("GPS coordinates not available.");
+                    return;
+                }
+
+                string latRef = exif.GPSLatitudeRef?.ToString();
+                string lonRef = exif.GPSLongitudeRef?.ToString();
+
+                if (!string.IsNullOrEmpty(latRef) && latRef.Equals("S", StringComparison.OrdinalIgnoreCase))
+                    latitude = -latitude;
+                if (!string.IsNullOrEmpty(lonRef) && lonRef.Equals("W", StringComparison.OrdinalIgnoreCase))
+                    longitude = -longitude;
+
+                string kml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                             "<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n" +
+                             "  <Document>\n" +
+                             "    <Placemark>\n" +
+                             "      <name>Photo Location</name>\n" +
+                             $"      <Point><coordinates>{longitude},{latitude},0</coordinates></Point>\n" +
+                             "    </Placemark>\n" +
+                             "  </Document>\n" +
+                             "</kml>";
+
+                File.WriteAllText(outputPath, kml);
             }
         }
         catch (Exception ex)
@@ -35,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a travel‑blogger wants to automatically plot the locations where their JPEG photos were taken, they can use Aspose.Imaging for .NET to read GPS latitude and longitude EXIF tags and create a KML file that can be opened in Google Earth.
- * 2. When a real‑estate company needs to generate a property‑listing map from a batch of property‑site photos, they can extract the embedded GPS coordinates from each JPEG and produce a KML overlay showing each house’s exact position.
- * 3. When a field‑service organization wants to audit the routes of its technicians, they can process the JPEG images captured on site, read the EXIF GPS data, and output a KML file that visualizes all service locations on a map.
- * 4. When a wildlife researcher collects camera‑trap images, they can programmatically read the GPS EXIF tags from each JPEG and generate a KML file to visualize animal sightings across a conservation area.
- * 5. When a logistics company needs to verify delivery proof, they can extract GPS coordinates from delivery‑confirmation photos and compile them into a KML file that maps every drop‑off point for compliance reporting.
+ * 1. When a travel app needs to plot user‑taken photos on a map, developers can read the JPEG EXIF GPS tags and generate a KML file for Google Earth using Aspose.Imaging in C#.
+ * 2. When a real‑estate website wants to display property photos with their exact locations, the code extracts latitude/longitude from images and creates KML placemarks for integration with GIS tools.
+ * 3. When a drone‑mapping solution processes aerial JPEGs, developers can automatically convert embedded GPS coordinates into KML to visualize flight paths in mapping software.
+ * 4. When a wildlife research project collects camera‑trap images, the script reads the GPS metadata and produces a KML file to map animal sightings across a reserve.
+ * 5. When a logistics company audits delivery proof‑of‑service photos, the program pulls GPS data from each JPEG and builds a KML report to verify routes and stops.
  */
