@@ -1,3 +1,4 @@
+// HOW-TO: Split a BigTIFF Into Four PNG Quadrants Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,16 +9,11 @@ class Program
 {
     static void Main()
     {
-        // Wrap the whole logic in a try-catch to handle unexpected errors gracefully
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\bigimage.tif";
-
-            string outputPathTopLeft     = @"C:\Images\quadrant_0.png";
-            string outputPathTopRight    = @"C:\Images\quadrant_1.png";
-            string outputPathBottomLeft  = @"C:\Images\quadrant_2.png";
-            string outputPathBottomRight = @"C:\Images\quadrant_3.png";
+            // Hard‑coded input and output paths
+            string inputPath = @"C:\Images\big.tif";
+            string outputDir = @"C:\Images\output";
 
             // Verify that the input file exists
             if (!File.Exists(inputPath))
@@ -26,39 +22,46 @@ class Program
                 return;
             }
 
-            // Load the BigTIFF image using Aspose.Imaging.Image.Load (the standard load rule)
+            // Ensure the output directory exists (creates it if necessary)
+            Directory.CreateDirectory(outputDir);
+
+            // Define output file paths for the four quadrants
+            string outputPath1 = Path.Combine(outputDir, "quadrant1.png");
+            string outputPath2 = Path.Combine(outputDir, "quadrant2.png");
+            string outputPath3 = Path.Combine(outputDir, "quadrant3.png");
+            string outputPath4 = Path.Combine(outputDir, "quadrant4.png");
+
+            // Ensure the directory for each output file exists (unconditional as required)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath1));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath2));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath3));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath4));
+
+            // Load the BigTIFF image
             using (Image image = Image.Load(inputPath))
             {
-                // Determine half dimensions for quadrant calculation
-                int halfWidth  = image.Width / 2;
+                // Determine half dimensions
+                int halfWidth = image.Width / 2;
                 int halfHeight = image.Height / 2;
 
                 // Define the four quadrant rectangles
-                var rectTopLeft     = new Rectangle(0, 0, halfWidth, halfHeight);
-                var rectTopRight    = new Rectangle(halfWidth, 0, halfWidth, halfHeight);
-                var rectBottomLeft  = new Rectangle(0, halfHeight, halfWidth, halfHeight);
-                var rectBottomRight = new Rectangle(halfWidth, halfHeight, halfWidth, halfHeight);
+                var rect1 = new Rectangle(0, 0, halfWidth, halfHeight);                     // Top‑left
+                var rect2 = new Rectangle(halfWidth, 0, halfWidth, halfHeight);            // Top‑right
+                var rect3 = new Rectangle(0, halfHeight, halfWidth, halfHeight);           // Bottom‑left
+                var rect4 = new Rectangle(halfWidth, halfHeight, halfWidth, halfHeight);  // Bottom‑right
 
-                // Prepare PNG save options (default options are sufficient)
+                // PNG save options (default)
                 var pngOptions = new PngOptions();
 
-                // Ensure output directories exist before each save
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPathTopLeft) ?? ".");
-                image.Save(outputPathTopLeft, pngOptions, rectTopLeft);
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPathTopRight) ?? ".");
-                image.Save(outputPathTopRight, pngOptions, rectTopRight);
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPathBottomLeft) ?? ".");
-                image.Save(outputPathBottomLeft, pngOptions, rectBottomLeft);
-
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPathBottomRight) ?? ".");
-                image.Save(outputPathBottomRight, pngOptions, rectBottomRight);
+                // Save each quadrant as a separate PNG file
+                image.Save(outputPath1, pngOptions, rect1);
+                image.Save(outputPath2, pngOptions, rect2);
+                image.Save(outputPath3, pngOptions, rect3);
+                image.Save(outputPath4, pngOptions, rect4);
             }
         }
         catch (Exception ex)
         {
-            // Output any runtime exception message without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -66,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a GIS analyst needs to break a massive BigTIFF satellite image into four smaller PNG tiles for faster web map rendering.
- * 2. When a medical imaging system must extract the four quadrants of a high‑resolution pathology slide stored as a BigTIFF and save them as PNGs for separate diagnostic review.
- * 3. When a digital archivist wants to split a large scanned manuscript saved in BigTIFF format into equal quadrants to create manageable PNG previews for online browsing.
- * 4. When a game developer has a huge texture atlas in BigTIFF format and needs to divide it into four PNG quadrants to feed into the engine’s asset pipeline.
- * 5. When an e‑commerce platform processes large product photographs stored as BigTIFF and needs to generate four PNG sections for targeted zoom‑in sections on the product page.
+ * 1. When you need to display portions of a very large TIFF on a web map, you can split the BigTIFF into four PNG tiles for faster loading.
+ * 2. When a printing workflow requires separate high‑resolution sections of a massive scan, the code extracts each quadrant as an individual PNG file.
+ * 3. When a scientific imaging pipeline must analyze different regions of a gigapixel image independently, dividing the BigTIFF into quadrants simplifies region‑based processing.
+ * 4. When a mobile app can only handle small images, converting each quadrant of a large TIFF to PNG reduces memory usage and improves performance.
+ * 5. When archiving large satellite imagery, saving each quadrant as a compressed PNG enables easier storage management and selective retrieval.
  */
