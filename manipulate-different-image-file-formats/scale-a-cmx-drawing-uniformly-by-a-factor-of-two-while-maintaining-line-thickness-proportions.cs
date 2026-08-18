@@ -1,3 +1,4 @@
+// HOW-TO: Scale CMX Drawing by Factor Two While Preserving Line Thickness in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,13 +8,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cmx";
-        string outputPath = @"C:\Images\sample_scaled.cmx";
-
-        // Ensure any runtime exception is reported cleanly
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.cmx";
+            string outputPath = "output.cmx";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -22,17 +22,19 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the CMX image
             using (CmxImage image = (CmxImage)Image.Load(inputPath))
             {
-                // Scale uniformly by a factor of 2
+                // Calculate new dimensions (scale by factor of 2)
                 int newWidth = image.Width * 2;
                 int newHeight = image.Height * 2;
+
+                // Resize the vector image; this scales drawing and line thickness proportionally
                 image.Resize(newWidth, newHeight);
 
-                // Save the scaled image
+                // Save the scaled CMX drawing
                 image.Save(outputPath);
             }
         }
@@ -45,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD system needs to double the size of a CMX drawing for printing on larger paper while keeping line thickness proportional, a developer can use this code to resize the image uniformly.
- * 2. When an engineering workflow requires generating high‑resolution previews of legacy CorelDRAW CMX files for a web portal, the code scales the drawing by a factor of two without distorting line weights.
- * 3. When a batch‑processing tool must prepare CMX drawings for laser‑cutting machines that operate at a larger scale, developers can apply this C# snippet to enlarge the artwork while preserving stroke thickness.
- * 4. When a documentation generator needs to embed enlarged CMX schematics into PDF reports, the code provides a simple way to double the dimensions and maintain visual fidelity.
- * 5. When a legacy design archive is being migrated to a modern system that expects larger rasterized assets, this example shows how to programmatically resize CMX files in .NET while keeping line thickness consistent.
+ * 1. When you need to double the size of a CorelDRAW CMX file for high‑resolution printing while keeping the original line weights unchanged.
+ * 2. When a CAD‑to‑CMX conversion pipeline requires uniform scaling of vector drawings before embedding them in a larger layout.
+ * 3. When an automated batch process must enlarge legacy CMX schematics for display on large‑format monitors without distorting line thickness.
+ * 4. When integrating Aspose.Imaging in a C# application to resize CMX artwork for a printable poster while preserving visual fidelity.
+ * 5. When preparing CMX graphics for a zoom‑in feature in a web viewer, ensuring lines remain proportionally thick after scaling.
  */
