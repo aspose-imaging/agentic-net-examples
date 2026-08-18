@@ -1,18 +1,20 @@
+// HOW-TO: Convert DjVu Pages to Interlaced GIF Images in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Djvu;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Djvu;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\temp\sample.djvu";
+        string outputDir = @"C:\temp\output";
+
         try
         {
-            // Hardcoded input path
-            string inputPath = "input.djvu";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,39 +22,34 @@ class Program
                 return;
             }
 
-            // Open the DjVu file stream
-            using (Stream stream = File.OpenRead(inputPath))
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDir);
+
+            // Load the DjVu document from a file stream
+            using (FileStream inputStream = File.OpenRead(inputPath))
+            using (DjvuImage djvuImage = new DjvuImage(inputStream))
             {
-                // Load DjVu image from stream
-                using (DjvuImage djvuImage = new DjvuImage(stream))
+                // Iterate through each page and save as an interlaced GIF
+                foreach (DjvuPage page in djvuImage.Pages)
                 {
+                    string outputPath = Path.Combine(outputDir, $"page{page.PageNumber}.gif");
+
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                     // Configure GIF options with interlacing enabled
                     GifOptions gifOptions = new GifOptions
                     {
                         Interlaced = true
                     };
 
-                    // Iterate through each page in the DjVu document
-                    foreach (var page in djvuImage.Pages)
-                    {
-                        // Cast to DjvuPage to access PageNumber
-                        var djvuPage = (Aspose.Imaging.FileFormats.Djvu.DjvuPage)page;
-
-                        // Build output file name for the current page
-                        string outputPath = $"output_page_{djvuPage.PageNumber}.gif";
-
-                        // Ensure the output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? string.Empty);
-
-                        // Save the page as a GIF using the configured options
-                        djvuPage.Save(outputPath, gifOptions);
-                    }
+                    // Save the current page as a GIF file
+                    page.Save(outputPath, gifOptions);
                 }
             }
         }
         catch (Exception ex)
         {
-            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -60,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each page of a multi‑page DjVu document and generate web‑friendly interlaced GIF images for faster progressive loading in browsers.
- * 2. When an archival system must convert scanned DjVu files into GIF format with interlacing enabled to preserve image quality while reducing file size for online viewing.
- * 3. When a C# application processes legacy DjVu manuals and creates separate GIF files per page to integrate with a content management system that only supports GIF assets.
- * 4. When a batch‑processing script has to read DjVu streams, apply custom GifOptions such as Interlaced = true, and save each page as an interlaced GIF for email newsletters.
- * 5. When a developer wants to programmatically verify the existence of DjVu pages, convert them to interlaced GIFs, and store the results in a structured folder hierarchy using Aspose.Imaging for .NET.
+ * 1. When you need to extract each page of a multi‑page DjVu document and save them as web‑friendly interlaced GIFs for faster progressive loading.
+ * 2. When generating thumbnail previews of DjVu files for a web gallery that requires GIF format with interlacing to improve perceived load time.
+ * 3. When converting scanned archival DjVu files into GIF images for legacy applications that only support GIF and benefit from interlaced rendering.
+ * 4. When creating a batch process that reads DjVu reports and outputs each page as an interlaced GIF to be embedded in email newsletters.
+ * 5. When preparing DjVu e‑books for platforms that accept only GIF images, ensuring each page is saved with interlacing to reduce bandwidth usage.
  */
