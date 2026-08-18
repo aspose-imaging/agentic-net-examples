@@ -1,17 +1,19 @@
+// HOW-TO: Crop Specific Region From EMF to PNG Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Emf;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.emf";
-            string outputPath = "output\\output_cropped.emf";
+            string inputPath = @"C:\Images\sample.emf";
+            string outputPath = @"C:\Images\output\cropped.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -23,13 +25,25 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the EMF image, crop, and save
-            using (EmfImage emfImage = (EmfImage)Image.Load(inputPath))
+            // Load the EMF image
+            using (Image image = Image.Load(inputPath))
             {
-                // Define the cropping rectangle (x, y, width, height)
-                Rectangle cropRect = new Rectangle(50, 50, 200, 150);
-                emfImage.Crop(cropRect);
-                emfImage.Save(outputPath);
+                // Cast to EmfImage
+                EmfImage emfImage = image as EmfImage;
+                if (emfImage == null)
+                {
+                    Console.Error.WriteLine("The loaded file is not an EMF image.");
+                    return;
+                }
+
+                // Define the crop rectangle (left, top, width, height)
+                Rectangle cropArea = new Rectangle(100, 50, 200, 150);
+
+                // Perform cropping
+                emfImage.Crop(cropArea);
+
+                // Save the cropped image as PNG
+                emfImage.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -41,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract a specific portion of a vector‑based EMF diagram, such as a logo or chart, they can load the EMF with Aspose.Imaging for .NET, define a Rectangle with exact coordinates, and use Crop to isolate that region.
- * 2. When generating printable reports that contain large EMF graphics, a developer can crop out only the relevant area to reduce file size and improve rendering performance.
- * 3. When integrating legacy Windows Metafile (EMF) assets into a modern web application, a developer can programmatically select a region using a Rectangle and save the cropped result for display as a smaller image.
- * 4. When automating the preparation of EMF icons for a UI toolkit, a developer can use EmfImage.Crop with precise coordinates to isolate each icon from a composite EMF file.
- * 5. When performing batch processing of scanned engineering drawings stored as EMF files, a developer can crop out individual sections, such as a specific component view, by specifying the region in C# and saving the output for further analysis.
+ * 1. When you need to extract a logo or diagram from a large EMF vector file and save it as a PNG for web display.
+ * 2. When generating thumbnails of specific sections of engineering drawings stored in EMF format for inclusion in reports.
+ * 3. When automating the removal of unwanted margins from EMF charts before embedding them into a PowerPoint presentation.
+ * 4. When processing batch EMF files to isolate and export particular data regions as high‑resolution PNG assets.
+ * 5. When creating a custom preview of a selected area of a vector map stored as EMF for a GIS application.
  */
