@@ -1,3 +1,4 @@
+// HOW-TO: Crop TGA Image To Circular Region And Save As PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,38 +9,38 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.tga";
-        string outputPath = @"C:\Images\sample_cropped.png";
-
-        // Validate input file existence
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the TGA image as a raster image
-            using (RasterImage rasterImage = (RasterImage)Image.Load(inputPath))
+            // Hardcoded input and output paths
+            string inputPath = "input.tga";
+            string outputPath = "output.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
             {
-                // Determine the center of the image
-                int centerX = rasterImage.Width / 2;
-                int centerY = rasterImage.Height / 2;
-                int radius = 100; // Desired radius
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
 
-                // Create a circular mask with the specified center and radius
-                var circleMask = new CircleMask(centerX, centerY, radius);
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Apply the mask to the raster image (makes pixels outside the circle transparent)
-                circleMask.ApplyTo(rasterImage);
+            // Load the TGA image as a raster image
+            using (Image img = Image.Load(inputPath))
+            {
+                RasterImage raster = (RasterImage)img;
 
-                // Save the resulting image as PNG
-                rasterImage.Save(outputPath, new PngOptions());
+                // Determine center of the image
+                int centerX = raster.Width / 2;
+                int centerY = raster.Height / 2;
+                int radius = 100;
+
+                // Create a circular mask and apply it to the raster image
+                CircleMask mask = new CircleMask(centerX, centerY, radius);
+                mask.ApplyTo(raster);
+
+                // Save the result as PNG
+                raster.Save(outputPath, new PngOptions());
             }
         }
         catch (Exception ex)
@@ -51,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a game developer needs to extract a circular avatar from a high‑resolution TGA sprite sheet and export it as a transparent PNG for use in UI overlays.
- * 2. When a graphics pipeline requires converting legacy TGA textures into PNG thumbnails with a fixed 100‑pixel radius circular crop for preview generation.
- * 3. When an e‑commerce platform wants to display product logos stored as TGA files as round icons on a web page, needing C# code that masks and saves them as PNG with transparency.
- * 4. When a scientific imaging application must isolate a circular region of interest from a TGA microscopy image and store the result as a lossless PNG for further analysis.
- * 5. When a mobile app developer needs to create circular profile pictures from TGA assets, using Aspose.Imaging’s CircleMask in C# to produce PNG files that retain transparent backgrounds.
+ * 1. When you need to extract a round thumbnail from a TGA sprite sheet for use in a game UI.
+ * 2. When preparing circular profile pictures from high‑resolution TGA assets for a web application.
+ * 3. When converting legacy TGA graphics into PNG format while masking out everything outside a specific radius.
+ * 4. When generating circular masks for scientific visualizations that require precise pixel‑level cropping.
+ * 5. When automating batch processing of TGA files to create round icons for mobile app resources.
  */
