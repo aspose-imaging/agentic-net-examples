@@ -1,3 +1,4 @@
+// HOW-TO: Convert EPS to PDF with Custom File Name in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,8 +12,11 @@ class Program
     {
         try
         {
-            // Hardcoded input EPS file path
-            string inputPath = "Sample.eps";
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Input\sample.eps";
+            string outputPath = Path.Combine(
+                @"C:\Output",
+                $"{Path.GetFileNameWithoutExtension(inputPath)}_converted.pdf");
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -21,28 +25,22 @@ class Program
                 return;
             }
 
-            // Build output PDF path using custom pattern: <original name>_converted.pdf
-            string inputDirectory = Path.GetDirectoryName(inputPath) ?? "";
-            string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_converted.pdf";
-            string outputPath = Path.Combine(inputDirectory, outputFileName);
-
             // Ensure output directory exists
-            Directory.CreateDirectory(inputDirectory);
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load EPS image
             using (var image = (EpsImage)Image.Load(inputPath))
             {
-                // Set PDF options (optional compliance can be set here)
+                // Configure PDF options with desired compliance (optional)
                 var pdfOptions = new PdfOptions
                 {
                     PdfCoreOptions = new PdfCoreOptions
                     {
-                        // Example compliance setting; adjust as needed
                         PdfCompliance = PdfComplianceVersion.PdfA1b
                     }
                 };
 
-                // Save as PDF with the specified options
+                // Save as PDF using the custom output path
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -55,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop publishing workflow needs to batch‑convert incoming EPS artwork into PDF files with a naming convention that appends “_converted” to the original file name.
- * 2. When an automated document generation service must ensure that vector EPS logos are saved as PDF/A‑1b compliant files for long‑term archival while preserving the original file’s location.
- * 3. When a C# application processes user‑uploaded EPS files and stores the resulting PDFs in the same directory using a predictable pattern for easy retrieval by downstream systems.
- * 4. When a print‑ready pipeline validates the existence of an EPS source, converts it to PDF with specific PdfCoreOptions, and creates the output folder on‑the‑fly to avoid path errors.
- * 5. When a .NET backend needs to programmatically rename and convert EPS design assets to PDF for inclusion in email attachments or web previews without manual file handling.
+ * 1. When you need to archive vector EPS artwork as PDF/A‑1b compliant files while preserving the original file name for easy reference.
+ * 2. When an automated workflow must convert incoming EPS design files to PDFs and store them in a specific output folder with a “_converted” suffix.
+ * 3. When a printing service requires PDFs generated from EPS logos and wants the output files to follow a consistent naming convention for batch processing.
+ * 4. When a document management system imports EPS diagrams and you must save them as PDFs with a predictable filename pattern for indexing.
+ * 5. When you are building a C# application that validates the existence of EPS files, creates missing directories, and converts them to PDFs using Aspose.Imaging.
  */
