@@ -1,3 +1,4 @@
+// HOW-TO: Convert BMP to Grayscale PSD with RLE Compression and Verify in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,12 +9,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.bmp";
-        string outputPath = @"C:\temp\output.psd";
-
         try
         {
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\temp\sample.bmp";
+            string outputPath = @"C:\temp\output.psd";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,24 +28,22 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PSD save options
+                // Configure PSD saving options
                 PsdOptions psdOptions = new PsdOptions
                 {
-                    CompressionMethod = CompressionMethod.RLE,
-                    ColorMode = ColorModes.Rgb,
-                    ChannelBitsCount = 8,
-                    ChannelsCount = 4,
-                    Version = 6
+                    CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
+                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Grayscale
                 };
 
                 // Save as PSD
                 image.Save(outputPath, psdOptions);
             }
 
-            // Attempt to load the saved PSD to validate it opens correctly
+            // Attempt to load the saved PSD to verify it can be opened
             using (Image psdImage = Image.Load(outputPath))
             {
-                Console.WriteLine("PSD file loaded successfully and is valid.");
+                // Simple validation: output dimensions
+                Console.WriteLine($"PSD loaded successfully. Size: {psdImage.Width}x{psdImage.Height}");
             }
         }
         catch (Exception ex)
@@ -56,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy BMP assets to Photoshop‑compatible PSD files with RLE compression and verify the resulting file can be opened in Adobe Photoshop.
- * 2. When an automated image‑processing pipeline must generate PSD files from various source formats and ensure the output is valid before passing it to a design team.
- * 3. When a C# application has to batch‑process user‑uploaded bitmap images, save them as layered PSDs with specific color mode and channel settings, and confirm the files are readable.
- * 4. When a software integration test requires loading a saved PSD to detect any corruption after using Aspose.Imaging’s PsdOptions configuration.
- * 5. When a digital asset management system needs to store high‑quality PSD versions of BMP images and must programmatically validate that Photoshop can open the converted files.
+ * 1. When you need to transform legacy BMP assets into Photoshop‑compatible PSD files while preserving grayscale data and using lossless RLE compression.
+ * 2. When an automated pipeline must generate PSD files from source images and confirm they can be opened by Photoshop before further processing.
+ * 3. When you are building a batch conversion tool that standardizes image color mode to grayscale for consistent editing in Adobe Photoshop.
+ * 4. When you want to ensure that converted PSD files meet size and dimension expectations by loading them immediately after saving.
+ * 5. When integrating Aspose.Imaging into a C# application to replace manual Photoshop imports with programmatic PSD creation and validation.
  */
