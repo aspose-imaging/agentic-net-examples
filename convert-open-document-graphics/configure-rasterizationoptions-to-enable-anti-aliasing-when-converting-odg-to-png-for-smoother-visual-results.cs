@@ -1,19 +1,20 @@
+// HOW-TO: Convert ODG to PNG with Anti‑Aliasing Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\input\sample.odg";
+        string outputPath = @"C:\output\sample.png";
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\Images\sample.odg";
-            string outputPath = @"C:\Images\sample.png";
-
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -55,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate high‑quality PNG previews of OpenDocument graphics (ODG) for a web gallery, enabling anti‑aliasing ensures the edges appear smooth on browsers.
- * 2. When exporting ODG diagrams from a CAD‑like application to PNG for inclusion in PDF reports, configuring SmoothingMode and TextRenderingHint reduces jagged lines and improves readability.
- * 3. When creating thumbnail images of ODG files for a document management system, anti‑aliased rasterization provides visually appealing thumbnails that match the original vector quality.
- * 4. When automating batch conversion of ODG assets to PNG for a mobile app, setting the background color and anti‑aliasing guarantees consistent, artifact‑free images across different screen densities.
- * 5. When integrating ODG charts into an e‑learning platform, using anti‑aliasing during conversion to PNG helps preserve the clarity of text and shapes for better learner experience.
+ * 1. When you need to generate high‑quality PNG thumbnails from ODG graphics for a web gallery while preserving smooth edges.
+ * 2. When you want to convert ODG diagrams to PNG for PDF reports and require anti‑aliased text and shapes for better readability.
+ * 3. When an application must batch‑process multiple ODG files into PNGs with a consistent white background and anti‑aliasing to improve visual appearance.
+ * 4. When you are building a document viewer that renders ODG vector drawings as raster PNG images with crisp, smooth visuals on Windows.
+ * 5. When you need to maintain the original ODG page size in the PNG output and apply anti‑aliasing to enhance visual fidelity.
  */
