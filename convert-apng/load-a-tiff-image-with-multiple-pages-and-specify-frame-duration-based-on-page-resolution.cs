@@ -1,48 +1,45 @@
+// HOW-TO: Read Multi‑Page TIFF and Calculate Frame Duration from Resolution in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.FileFormats.Tiff;
+using Aspose.Imaging.FileFormats.Tiff.Enums;
+using Aspose.Imaging.Sources;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output paths
-            string inputPath = @"C:\Images\input.tif";
-            string outputPath = @"C:\Images\output.tif";
+            string inputPath = "input.tif";
+            string outputPath = "output\\output.tif";
 
-            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the multi‑page TIFF
-            using (TiffImage tiffImage = (TiffImage)Image.Load(inputPath))
+            using (TiffImage tiff = (TiffImage)Image.Load(inputPath))
             {
-                // Iterate through each frame (page)
-                for (int i = 0; i < tiffImage.Frames.Length; i++)
+                int frameIndex = 0;
+                foreach (TiffFrame frame in tiff.Frames)
                 {
-                    TiffFrame frame = tiffImage.Frames[i];
+                    // Compute a simple duration based on frame resolution (pixels per inch)
+                    // Example: duration = (horizontal resolution + vertical resolution) / 2 milliseconds
+                    double hRes = tiff.HorizontalResolution;
+                    double vRes = tiff.VerticalResolution;
+                    int duration = (int)((hRes + vRes) / 2);
 
-                    // Calculate a simple duration based on the frame's resolution.
-                    // Higher DPI → shorter display time (example logic).
-                    double avgDpi = (frame.HorizontalResolution + frame.VerticalResolution) / 2.0;
-                    int durationMs = (int)(1000 / Math.Max(avgDpi, 1)); // duration in milliseconds
-
-                    // If you need to store the duration in the TIFF, you could add a custom tag here.
-                    // Example (placeholder, actual tag name may differ):
-                    // frame.Tags.Add(TiffTag.PageDelay, durationMs);
+                    Console.WriteLine($"Frame {frameIndex}: Duration = {duration} ms");
+                    frameIndex++;
                 }
 
-                // Save the modified TIFF to the output path
-                tiffImage.Save(outputPath);
+                // Save the (unchanged) TIFF to the output path
+                tiff.Save(outputPath);
             }
         }
         catch (Exception ex)
@@ -54,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When creating a digital archive of scanned documents where each page’s display time should adapt to its scan resolution, a developer can load the multi‑page TIFF and set per‑frame durations accordingly.
- * 2. When building a medical imaging viewer that shows high‑resolution radiology slides for a shorter period than lower‑resolution ones, the code can calculate and embed frame delays based on DPI.
- * 3. When generating an animated TIFF slideshow from a set of photographs taken at different resolutions, the developer can use this logic to make sharper images appear faster.
- * 4. When developing a document‑to‑TIFF conversion tool that needs to preserve page‑turn speed proportional to image quality, the snippet provides a way to read each frame’s resolution and assign a custom tag for delay.
- * 5. When implementing a quality‑control dashboard that highlights low‑resolution scans longer for review, the code can load the TIFF, compute average DPI per page, and adjust the display interval accordingly.
+ * 1. When you need to extract each page of a multi‑page TIFF and determine how long each frame should be displayed based on its DPI for creating a timed slideshow.
+ * 2. When building a document viewer that reads scanned PDFs saved as TIFF stacks and adjusts animation speed according to the image resolution.
+ * 3. When converting high‑resolution scanned images into a lightweight animated TIFF where frame delays are derived from the original horizontal and vertical resolution values.
+ * 4. When validating that all pages in a multi‑page TIFF have consistent resolution before processing them further in a C# imaging pipeline.
+ * 5. When generating metadata reports that list each TIFF frame’s calculated display duration for quality‑control or archival purposes.
  */
