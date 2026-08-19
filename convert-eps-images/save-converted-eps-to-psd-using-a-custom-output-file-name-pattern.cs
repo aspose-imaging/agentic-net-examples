@@ -1,3 +1,4 @@
+// HOW-TO: Convert EPS to PSD with Custom Filename Pattern in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,22 +11,20 @@ class Program
     {
         try
         {
-            // Hard‑coded input and output base directories
-            string inputPath = @"C:\input\sample.eps";
-            string outputBaseDir = @"C:\output";
+            // Hardcoded input EPS file path
+            string inputPath = "sample.eps";
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Build the output file name using a custom pattern
-            string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + "_converted.psd";
-            string outputPath = Path.Combine(outputBaseDir, outputFileName);
+            // Custom output file name pattern: original name + "_converted.psd" in an "output" folder
+            string outputPath = "output\\sample_converted.psd";
 
-            // Ensure the output directory exists (creates it unconditionally)
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the EPS image
@@ -34,16 +33,12 @@ class Program
                 // Configure PSD saving options
                 PsdOptions psdOptions = new PsdOptions
                 {
-                    // Example: use RLE compression and grayscale color mode
-                    CompressionMethod = CompressionMethod.RLE,
-                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Grayscale,
-                    // Optional: set version, channel bits, etc.
-                    Version = 6,
-                    ChannelBitsCount = 8,
-                    ChannelsCount = 4
+                    // Example settings – can be adjusted as needed
+                    CompressionMethod = Aspose.Imaging.FileFormats.Psd.CompressionMethod.RLE,
+                    ColorMode = Aspose.Imaging.FileFormats.Psd.ColorModes.Grayscale
                 };
 
-                // Save the image as PSD with the specified options
+                // Save the image as PSD using the configured options
                 image.Save(outputPath, psdOptions);
             }
         }
@@ -56,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must batch‑convert vector EPS artwork into Photoshop PSD files with a custom “_converted” suffix for downstream editing.
- * 2. When an automated workflow needs to verify the existence of an EPS source, create the output folder if missing, and save the result using Aspose.Imaging’s PsdOptions with RLE compression and grayscale mode.
- * 3. When a developer wants to enforce a consistent naming convention for converted images by extracting the original file name and appending a suffix before saving as PSD.
- * 4. When integrating Aspose.Imaging into a .NET service that processes incoming EPS files and outputs PSD files with specific version, channel bits, and channel count settings for compatibility with older Photoshop versions.
- * 5. When handling image conversion errors gracefully in a C# program by catching exceptions and logging missing files or save failures during EPS‑to‑PSD transformation.
+ * 1. When you need to programmatically convert vector EPS artwork into Photoshop PSD files while applying grayscale RLE compression for downstream editing.
+ * 2. When an automated workflow must generate PSD versions of EPS logos and store them in a dedicated output folder with a consistent “_converted” naming convention.
+ * 3. When integrating Aspose.Imaging into a C# application to transform EPS illustrations into PSD layers for further manipulation in Adobe Photoshop.
+ * 4. When building a batch processing tool that reads EPS files, applies specific PSD options, and saves the results using a custom file‑name pattern to avoid overwriting originals.
+ * 5. When creating a server‑side service that receives EPS uploads, converts them to PSD format with grayscale color mode, and saves the output to a predefined directory structure.
  */
