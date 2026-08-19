@@ -1,9 +1,10 @@
+// HOW-TO: Batch Convert Multiple EPS Files to PDF/A-1b in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 using Aspose.Imaging.FileFormats.Pdf;
+using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
@@ -11,34 +12,30 @@ class Program
     {
         try
         {
-            // Hardcoded input and output directories
-            string inputDir = @"C:\InputEps";
-            string outputDir = @"C:\OutputPdf";
-
-            // Collection of EPS file names to process
-            string[] epsFiles = new[]
+            // Hardcoded collection of EPS files to convert
+            string[] inputFiles = new string[]
             {
-                "file1.eps",
-                "file2.eps",
-                "file3.eps"
+                @"C:\Images\Sample1.eps",
+                @"C:\Images\Sample2.eps",
+                @"C:\Images\Sample3.eps"
             };
 
-            foreach (string fileName in epsFiles)
+            foreach (string inputPath in inputFiles)
             {
-                // Build full input path and verify existence
-                string inputPath = Path.Combine(inputDir, fileName);
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output PDF path and ensure its directory exists
-                string outputFileName = Path.ChangeExtension(fileName, ".pdf");
-                string outputPath = Path.Combine(outputDir, outputFileName);
+                // Determine output PDF path (same folder, .pdf extension)
+                string outputPath = Path.ChangeExtension(inputPath, ".pdf");
+
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load EPS image, configure PDF options, and save as PDF
+                // Load EPS image and convert to PDF with required compliance
                 using (EpsImage image = (EpsImage)Image.Load(inputPath))
                 {
                     var pdfOptions = new PdfOptions
@@ -51,6 +48,8 @@ class Program
 
                     image.Save(outputPath, pdfOptions);
                 }
+
+                Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
             }
         }
         catch (Exception ex)
@@ -62,9 +61,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a set of vector EPS artwork files into PDF/A‑1b compliant documents for archival or printing workflows.
- * 2. When an automated build script must generate PDF previews of EPS logos stored in a known folder before they are uploaded to a web portal.
- * 3. When a desktop application processes a predefined list of EPS design assets and saves them as PDF files in a separate output directory for client delivery.
- * 4. When a migration tool reads EPS files from a legacy directory, validates their existence, and converts each to PDF using Aspose.Imaging within a C# foreach loop.
- * 5. When a reporting service creates PDF reports from EPS charts by iterating over file names and applying PDF compliance options during the save operation.
+ * 1. When you need to automatically transform a set of vector EPS artwork into PDF/A‑1b documents for archival or printing workflows using C#.
+ * 2. When a publishing system must generate PDF versions of EPS logos stored in a folder before sending them to a third‑party printer.
+ * 3. When a desktop application processes incoming EPS design files and saves them as PDF to ensure compatibility with PDF viewers without manual conversion.
+ * 4. When you want to verify each EPS file exists, create the output directory, and convert them to PDF in a single loop to simplify batch processing scripts.
+ * 5. When compliance with PDF/A‑1b standards is required for legal or regulatory documents and you need a programmatic way to enforce it during conversion.
  */
