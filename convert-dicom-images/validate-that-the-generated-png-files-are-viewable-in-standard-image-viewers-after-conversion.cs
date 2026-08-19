@@ -1,3 +1,4 @@
+// HOW-TO: Convert BMP to PNG and Verify Output Is Viewable in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,32 +10,31 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\temp\input.jpg";
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\temp\sample.bmp";
             string outputPath = @"C:\temp\output.png";
 
-            // Verify input file exists
+            // Verify the source file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists (creates it if necessary)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image (any supported format)
             using (Image image = Image.Load(inputPath))
             {
-                // Save as PNG with default options
-                var pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                // Save the image as PNG using default PNG options
+                image.Save(outputPath, new PngOptions());
             }
 
-            // Validate that the saved PNG can be loaded (viewable)
+            // Validate that the saved PNG can be loaded (viewable in standard viewers)
             if (Image.CanLoad(outputPath))
             {
-                Console.WriteLine("PNG file saved successfully and is viewable.");
+                Console.WriteLine("PNG file saved and verified successfully.");
             }
             else
             {
@@ -43,6 +43,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Catch any unexpected errors and report them
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -50,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert user‑uploaded JPEG photos to lossless PNG files for storage in a web application and must ensure the resulting files can be opened by standard image viewers.
- * 2. When an automated image‑processing pipeline must generate PNG thumbnails from original JPEG assets and verify that each thumbnail is not corrupted before publishing to a content delivery network.
- * 3. When a desktop utility program has to replace legacy JPEG images with PNG equivalents for compliance with a corporate branding guideline while confirming the new files are viewable in Windows Photo Viewer.
- * 4. When a background service processes scanned documents saved as JPEG, converts them to PNG for OCR preprocessing, and needs to validate that the conversion succeeded without data loss.
- * 5. When a migration script moves product catalog images from a legacy system, converts them from JPEG to PNG for better transparency support, and checks that each converted image can be loaded by the Aspose.Imaging library.
+ * 1. When you need to transform legacy BMP assets to PNG for web delivery while ensuring the resulting files can be opened by standard image viewers.
+ * 2. When an automated batch process must create PNG thumbnails from various source formats and confirm each thumbnail is valid before publishing.
+ * 3. When integrating image conversion into a C# application that must guarantee the saved PNG files are not corrupted and can be re‑loaded for further processing.
+ * 4. When preparing images for a reporting system that only accepts PNG, and you want to programmatically verify the conversion succeeded.
+ * 5. When migrating a file repository from BMP to PNG and you require a quick sanity check that each converted file is readable by typical viewer software.
  */
