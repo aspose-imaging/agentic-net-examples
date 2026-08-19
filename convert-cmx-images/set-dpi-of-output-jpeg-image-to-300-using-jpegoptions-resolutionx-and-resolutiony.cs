@@ -1,3 +1,4 @@
+// HOW-TO: Set JPEG Image DPI to 300 Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,37 +9,37 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.jpg";
+        string outputPath = @"C:\Images\output_300dpi.jpg";
+
+        // Check that the input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure the output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\input.jpg";
-            string outputPath = @"C:\temp\output_300dpi.jpg";
-
-            // Verify that the input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
                 // Configure JPEG save options with 300 DPI resolution
-                JpegOptions saveOptions = new JpegOptions
+                var jpegOptions = new JpegOptions
                 {
-                    // Set desired resolution (horizontal and vertical) to 300 DPI
+                    // Set horizontal and vertical DPI to 300
                     ResolutionSettings = new ResolutionSetting(300.0, 300.0),
                     ResolutionUnit = ResolutionUnit.Inch,
-                    // Optional: set quality to maximum
+                    // Optional: keep default quality (100) and other settings
                     Quality = 100
                 };
 
                 // Save the image as JPEG with the specified DPI
-                image.Save(outputPath, saveOptions);
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -50,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When preparing product photos for high‑resolution print catalogs, a developer can use this code to convert source JPEGs to 300 DPI images so the printed pages maintain sharp detail.
- * 2. When generating printable marketing flyers from web‑uploaded images, the code ensures the saved JPEG meets the 300 DPI requirement of most commercial printers.
- * 3. When integrating a document‑generation workflow that embeds JPEG graphics into PDF/A files, the developer sets the DPI to 300 to comply with archival standards.
- * 4. When building a batch‑processing tool that normalizes scanned documents to a consistent 300 DPI resolution for OCR accuracy, this snippet handles the conversion for each file.
- * 5. When creating a C# application that resizes and re‑exports user‑provided photos for a photo‑book service, the code guarantees the final JPEGs are saved at 300 DPI for high‑quality printing.
+ * 1. When preparing photos for high‑resolution printing, you need to set the JPEG’s DPI to 300 before sending it to the printer.
+ * 2. When converting scanned documents to JPEG for archival, you must ensure the output has a 300 dpi resolution for compliance with industry standards.
+ * 3. When generating thumbnails for a web gallery that require a specific physical size, adjusting the JPEG DPI guarantees consistent print‑size calculations.
+ * 4. When integrating a document‑management system that stores images with metadata, you may need to enforce a 300 dpi setting on each saved JPEG to maintain uniform quality.
+ * 5. When processing batch image uploads in a C# application, you can use Aspose.Imaging to re‑save each JPEG with a 300 dpi resolution to meet downstream workflow requirements.
  */

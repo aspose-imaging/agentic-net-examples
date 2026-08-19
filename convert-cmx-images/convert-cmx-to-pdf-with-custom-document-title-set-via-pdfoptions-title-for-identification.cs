@@ -1,51 +1,59 @@
+// HOW-TO: Convert CMX to PDF with Custom Document Title in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageLoadOptions;
 using Aspose.Imaging.FileFormats.Cmx;
 using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "sample.cmx";
+        string outputPath = "sample.pdf";
+
+        // Verify input file exists
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.cmx";
-            string outputPath = "Output/sample.pdf";
+            // Load CMX image with default load options
+            var loadOptions = new CmxLoadOptions();
 
-            // Validate input file existence
-            if (!File.Exists(inputPath))
+            using (var image = Image.Load(inputPath, loadOptions) as CmxImage)
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
+                if (image == null)
+                {
+                    Console.Error.WriteLine("Failed to load CMX image.");
+                    return;
+                }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-            // Load the CMX vector image
-            using (Image image = Image.Load(inputPath))
-            {
-                // Configure PDF options with custom title
+                // Prepare PDF export options
                 var pdfOptions = new PdfOptions
                 {
-                    PdfDocumentInfo = new PdfDocumentInfo { Title = "Custom Document Title" }
-                };
+                    // Set custom document title
+                    PdfDocumentInfo = new PdfDocumentInfo { Title = "Custom Document Title" },
 
-                // Set up vector rasterization options for CMX conversion
-                var rasterOptions = new CmxRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height,
-                    TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
-                    SmoothingMode = SmoothingMode.None,
-                    Positioning = PositioningTypes.DefinedByDocument
+                    // Configure rasterization for vector content
+                    VectorRasterizationOptions = new CmxRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageWidth = image.Width,
+                        PageHeight = image.Height,
+                        TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
+                        SmoothingMode = SmoothingMode.None
+                    }
                 };
-
-                pdfOptions.VectorRasterizationOptions = rasterOptions;
 
                 // Save as PDF
                 image.Save(outputPath, pdfOptions);
@@ -60,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to archive legacy CorelDRAW CMX vector drawings as searchable PDF files with a custom document title for easy identification in document management systems.
- * 2. When an engineering workflow requires converting CMX schematics to PDF reports while preserving exact page dimensions and setting a specific title for inclusion in automated report generators.
- * 3. When a web application must allow users to upload CMX artwork and instantly generate PDF previews with a predefined title that appears in the PDF metadata for SEO and indexing purposes.
- * 4. When a batch processing script has to transform a folder of CMX files into PDFs, ensuring each PDF carries a consistent title that matches the project naming convention for downstream printing pipelines.
- * 5. When a compliance tool needs to convert CMX legal diagrams to PDF format and embed a custom title in the PDF metadata to satisfy audit trail requirements.
+ * 1. When you need to archive legacy CorelDRAW CMX drawings as searchable PDF files and embed a specific title for easy identification.
+ * 2. When generating PDF reports from CMX assets in an automated C# workflow and want the PDF metadata to reflect a custom document title.
+ * 3. When converting vector CMX illustrations to PDF for printing while preserving exact page dimensions and setting a descriptive title for document management systems.
+ * 4. When building a document conversion service that receives CMX uploads and returns PDFs with consistent metadata for downstream indexing or search.
+ * 5. When migrating a design library from CorelDRAW to PDF format and need to programmatically assign titles to each PDF to match the original project names.
  */

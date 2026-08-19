@@ -1,3 +1,4 @@
+// HOW-TO: Convert CMX Image To JPEG With Quality 90 In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,12 +8,13 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output file paths
-        string inputPath = @"C:\temp\sample.cmx";
-        string outputPath = @"C:\temp\sample.jpg";
-
+        // Wrap the whole logic in a try-catch to handle unexpected errors gracefully
         try
         {
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\temp\sample.cmx";
+            string outputPath = @"C:\temp\sample.jpg";
+
             // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,24 +22,25 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure the output directory exists (creates it if necessary)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the CMX image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure JPEG save options with quality = 90
+                // Configure JPEG save options with the required quality
                 JpegOptions jpegOptions = new JpegOptions
                 {
                     Quality = 90
                 };
 
-                // Save the image as JPEG
+                // Save the image as JPEG using the configured options
                 image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
         {
+            // Output any runtime error without crashing the application
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -45,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert legacy CorelDRAW CMX files to web‑friendly JPEG images with a specific compression quality for display on a website.
- * 2. When an automated batch process must read CMX drawings from a folder, ensure the output directory exists, and save them as JPEG with quality 90 for consistent preview generation.
- * 3. When a C# application uses Aspose.Imaging to create high‑quality JPEG previews of CMX artwork for inclusion in email attachments or PDF reports.
- * 4. When a migration tool has to verify the presence of source CMX files, create missing output folders, and reliably save them as JPEG using JpegOptions to control image fidelity.
- * 5. When a Windows service monitors a drop‑box, loads incoming CMX files, and converts them to JPEG with a 90 % quality setting to maintain visual consistency across downstream systems.
+ * 1. When you need to display a CorelDRAW CMX drawing on a web page that only supports JPEG images.
+ * 2. When you are generating thumbnails for CMX files to store in a database with a specific compression level.
+ * 3. When you are migrating legacy CMX assets to a modern image workflow that requires JPEG with controlled quality.
+ * 4. When you need to batch‑convert CMX files to JPEG for printing services that accept only JPEG at 90 % quality.
+ * 5. When you want to programmatically compress CMX artwork for email attachments while preserving visual fidelity.
  */
