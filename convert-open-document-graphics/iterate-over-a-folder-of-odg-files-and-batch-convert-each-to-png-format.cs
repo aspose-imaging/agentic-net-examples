@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert ODG Files to PNG in C# With Aspose Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -18,32 +19,33 @@ class Program
 
             foreach (string inputPath in odgFiles)
             {
-                // Verify input file exists
+                // Verify that the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Build output PNG path
-                string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-                string outputPath = Path.Combine(outputFolder, outputFileName);
+                // Build the output PNG file path
+                string outputPath = Path.Combine(outputFolder, Path.GetFileNameWithoutExtension(inputPath) + ".png");
 
-                // Ensure output directory exists
+                // Ensure the output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load ODG image and save as PNG
+                // Load the ODG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Set up PNG save options with ODG rasterization
+                    // Prepare PNG save options with rasterization settings
                     var pngOptions = new PngOptions();
                     var rasterOptions = new OdgRasterizationOptions
                     {
+                        // Preserve original size
                         PageSize = image.Size,
                         BackgroundColor = Color.White
                     };
                     pngOptions.VectorRasterizationOptions = rasterOptions;
 
+                    // Save as PNG
                     image.Save(outputPath, pngOptions);
                 }
             }
@@ -57,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to migrate a legacy collection of OpenDocument Graphics (ODG) drawings to web‑friendly PNG images for display in browsers or mobile apps.
- * 2. When an automated build pipeline must generate thumbnail previews of ODG files stored in a shared folder for a document management system.
- * 3. When a batch conversion tool is required to prepare ODG assets for inclusion in a PowerPoint presentation that only supports raster formats like PNG.
- * 4. When a server‑side C# service processes user‑uploaded ODG diagrams and converts them to PNG with a white background for consistent printing.
- * 5. When a Windows desktop utility needs to archive multiple ODG files by converting them to lossless PNG files to reduce storage size and simplify backup.
+ * 1. When you need to automatically generate web‑ready PNG thumbnails from a collection of OpenDocument graphics (ODG) stored in a directory.
+ * 2. When a document management system must migrate legacy ODG diagrams to PNG format for compatibility with browsers and mobile apps.
+ * 3. When a reporting tool requires batch rasterization of vector ODG charts into PNG images before embedding them into PDF reports.
+ * 4. When a CI/CD pipeline has to convert newly added ODG assets to PNG during build time to ensure consistent image assets.
+ * 5. When an archival process needs to preserve the visual appearance of ODG files by exporting them as PNG files with a white background.
  */

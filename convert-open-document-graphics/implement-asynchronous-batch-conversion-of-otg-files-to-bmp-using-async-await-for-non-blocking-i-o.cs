@@ -1,6 +1,8 @@
+// HOW-TO: Asynchronously Convert Multiple OTG Files To BMP In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
@@ -14,31 +16,25 @@ class Program
             // Hardcoded input OTG files
             string[] inputFiles = new[]
             {
-                @"C:\Input\sample1.otg",
-                @"C:\Input\sample2.otg"
+                @"C:\OTG\Input\sample1.otg",
+                @"C:\OTG\Input\sample2.otg"
             };
 
-            // Hardcoded output directory
-            string outputDirectory = @"C:\Output";
+            var tasks = new List<Task>();
 
-            foreach (var inputPath in inputFiles)
+            foreach (string inputPath in inputFiles)
             {
-                // Input file existence check
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    continue;
                 }
 
-                // Determine output BMP path
-                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".bmp");
-
-                // Ensure output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                // Perform asynchronous conversion
-                await ConvertOtgToBmpAsync(inputPath, outputPath);
+                tasks.Add(ProcessFileAsync(inputPath));
             }
+
+            await Task.WhenAll(tasks);
         }
         catch (Exception ex)
         {
@@ -46,24 +42,30 @@ class Program
         }
     }
 
-    private static async Task ConvertOtgToBmpAsync(string inputPath, string outputPath)
+    private static async Task ProcessFileAsync(string inputPath)
     {
-        // Load the OTG image on a background thread
+        // Determine output BMP path
+        string outputPath = Path.ChangeExtension(inputPath, ".bmp");
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+        // Load the OTG image asynchronously
         using (Image image = await Task.Run(() => Image.Load(inputPath)))
         {
-            // Configure rasterization options to match source size
+            // Configure rasterization options based on source image size
             var otgRasterOptions = new OtgRasterizationOptions
             {
                 PageSize = image.Size
             };
 
-            // Set BMP save options and attach rasterization options
+            // Configure BMP save options and attach rasterization options
             var bmpOptions = new BmpOptions
             {
                 VectorRasterizationOptions = otgRasterOptions
             };
 
-            // Save the image as BMP on a background thread
+            // Save the image as BMP asynchronously
             await Task.Run(() => image.Save(outputPath, bmpOptions));
         }
     }
@@ -71,9 +73,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a GIS application needs to generate thumbnail BMP previews of multiple OTG vector maps without freezing the UI, developers can use this async batch conversion code.
- * 2. When an automated document processing pipeline must convert incoming OTG drawings to BMP for legacy reporting tools, the asynchronous method allows non‑blocking I/O and faster throughput.
- * 3. When a cloud‑based microservice receives a batch of OTG files and must store them as BMP images in a shared folder, developers can employ this code to handle the conversions concurrently.
- * 4. When a Windows desktop utility needs to export a series of OTG engineering schematics to BMP for printing on devices that only support raster formats, the async/await pattern keeps the application responsive.
- * 5. When a scheduled background job processes nightly OTG uploads and creates BMP assets for a web gallery, this asynchronous batch conversion ensures the job runs efficiently without blocking other services.
+ * 1. When you need to batch‑process a set of OTG vector drawings into BMP raster images without blocking the UI thread in a C# desktop or web application.
+ * 2. When a server‑side service must convert incoming OTG files to BMP for downstream legacy systems while handling many requests concurrently.
+ * 3. When you want to automate conversion of OTG assets stored on disk to BMP thumbnails using async/await to improve throughput.
+ * 4. When integrating Aspose.Imaging into a CI/CD pipeline that validates OTG files by converting them to BMP in parallel to speed up build times.
+ * 5. When developing a cloud function that receives OTG uploads and must save them as BMP images without tying up compute resources.
  */

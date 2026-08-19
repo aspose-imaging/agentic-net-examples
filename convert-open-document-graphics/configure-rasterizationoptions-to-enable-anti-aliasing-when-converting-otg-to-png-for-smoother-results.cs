@@ -1,3 +1,4 @@
+// HOW-TO: Convert OTG to PNG with Anti‑Aliasing Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,7 +10,7 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
+            // Hardcoded input and output paths (relative)
             string inputPath = "Input/sample.otg";
             string outputPath = "Output/sample.png";
 
@@ -20,28 +21,27 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PNG save options
-                using (PngOptions pngOptions = new PngOptions())
+                // Configure OTG rasterization options with anti-aliasing
+                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
                 {
-                    // Configure rasterization options with anti‑aliasing
-                    OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
-                    {
-                        PageSize = image.Size,
-                        SmoothingMode = SmoothingMode.AntiAlias,
-                        TextRenderingHint = TextRenderingHint.AntiAlias
-                    };
+                    PageSize = image.Size,
+                    SmoothingMode = SmoothingMode.AntiAlias
+                };
 
-                    pngOptions.VectorRasterizationOptions = otgOptions;
+                // Set up PNG save options and assign the rasterization options
+                PngOptions pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = otgOptions
+                };
 
-                    // Save the image as PNG
-                    image.Save(outputPath, pngOptions);
-                }
+                // Save the image as PNG with the configured options
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When converting vector‑based OTG drawings to PNG thumbnails for a web gallery, enabling anti‑aliasing ensures smooth edges.
- * 2. When generating printable PNG assets from OTG CAD files in a C# batch job, anti‑aliasing improves visual fidelity.
- * 3. When creating PNG previews of OTG diagrams for email attachments, rasterization with smoothing prevents jagged lines.
- * 4. When integrating OTG to PNG conversion into a .NET reporting tool, anti‑aliasing makes charts and text appear crisp.
- * 5. When automating the migration of legacy OTG assets to PNG for a mobile app, enabling anti‑aliasing reduces pixelation on high‑resolution screens.
+ * 1. When you need to generate high‑quality PNG thumbnails from OTG vector drawings for web previews, enabling anti‑aliasing for smoother edges.
+ * 2. When exporting CAD‑style OTG files to PNG for inclusion in documentation, and you want the rasterized image to retain crisp, smoothed lines.
+ * 3. When building a batch conversion tool that processes OTG assets into PNG assets for a game engine, using anti‑aliasing to improve visual fidelity.
+ * 4. When integrating Aspose.Imaging into a C# service that converts user‑uploaded OTG diagrams to PNG for email attachments, ensuring the output looks polished.
+ * 5. When creating a reporting system that converts OTG schematics to PNG charts with anti‑aliasing to avoid jagged lines in printed reports.
  */

@@ -1,18 +1,20 @@
+// HOW-TO: Convert OTG to PNG with Progressive Interlacing in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "sample.otg";
+        string outputPath = "sample.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,24 +22,24 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG options with progressive (interlaced) encoding
-                var pngOptions = new PngOptions
+                // Prepare PNG save options with progressive (interlaced) encoding
+                PngOptions pngOptions = new PngOptions
                 {
                     Progressive = true
                 };
 
-                // Set rasterization options for OTG conversion
-                var otgRasterizationOptions = new OtgRasterizationOptions
+                // Configure rasterization to match the source size
+                OtgRasterizationOptions otgRasterization = new OtgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
-                pngOptions.VectorRasterizationOptions = otgRasterizationOptions;
+                pngOptions.VectorRasterizationOptions = otgRasterization;
 
                 // Save as PNG with the specified options
                 image.Save(outputPath, pngOptions);
@@ -52,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to display vector‑based OTG graphics as progressive PNG images for faster page load on slow connections.
- * 2. When an e‑learning platform converts OTG diagrams into interlaced PNGs to allow students to see a low‑resolution preview while the full image loads.
- * 3. When a desktop publishing tool automates batch conversion of OTG assets to PNG with progressive rendering for inclusion in print‑ready PDFs.
- * 4. When a mobile app processes user‑uploaded OTG files and saves them as interlaced PNGs to reduce memory usage during incremental rendering.
- * 5. When a cloud‑based image service provides on‑the‑fly conversion of OTG icons to PNG with interlacing to support responsive UI elements.
+ * 1. When a web application needs to display vector OTG graphics as fast‑loading PNGs that render progressively in browsers.
+ * 2. When a batch processing tool must convert a library of OTG files to PNG while preserving image quality and enabling interlaced encoding for smoother user experience.
+ * 3. When a mobile app requires rasterizing OTG diagrams into PNG assets with progressive rendering to reduce perceived loading time on slow networks.
+ * 4. When an e‑learning platform wants to transform OTG illustrations into PNGs with interlacing so that students see partial images while the rest loads.
+ * 5. When a reporting service generates PNG thumbnails from OTG charts and needs the files to be interlaced for better compatibility with image viewers.
  */

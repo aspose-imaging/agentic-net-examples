@@ -1,19 +1,19 @@
+// HOW-TO: Convert OTG File to SVG with Layer Names Preserved in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.ImageOptions; // For OtgRasterizationOptions and SvgOptions
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\input\sample.otg";
-        string outputPath = @"C:\output\sample.svg";
-
         try
         {
+            // Hard‑coded input and output paths
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\sample.svg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -30,10 +30,10 @@ class Program
                 // Prepare SVG export options
                 var svgOptions = new SvgOptions
                 {
-                    // Preserve original metadata (including layer names)
+                    // Preserve original metadata (including layer names if supported)
                     KeepMetadata = true,
-                    // Configure rasterization to match the source size
-                    VectorRasterizationOptions = new OtgRasterizationOptions
+                    // Configure rasterization to match source size
+                    VectorRasterizationOptions = new SvgRasterizationOptions
                     {
                         PageSize = image.Size
                     }
@@ -52,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD or GIS application needs to export an OTG (OpenThermalGraphics) map with its original layer names into a scalable SVG for web display.
- * 2. When a printing workflow requires converting multi‑layer OTG design files to SVG while keeping layer metadata for downstream color separation.
- * 3. When a mobile app built with C# must dynamically generate SVG icons from OTG assets, preserving layer names for interactive editing.
- * 4. When a documentation system automates the transformation of engineering diagrams stored as OTG files into searchable SVG files that retain their layer structure.
- * 5. When a batch processing script uses Aspose.Imaging for .NET to migrate legacy OTG artwork to SVG format while ensuring layer names are retained for version control.
+ * 1. When you need to export a multi‑layer OTG design to a scalable SVG for web display while keeping the original layer names for later editing.
+ * 2. When an automated pipeline must convert batch OTG files to SVG format and retain metadata so downstream tools can identify each layer.
+ * 3. When a CAD or GIS application stores drawings as OTG and you want to generate SVG maps that preserve layer information for styling in vector editors.
+ * 4. When integrating Aspose.Imaging into a C# service that receives OTG uploads and returns SVGs with intact layer hierarchy for client‑side manipulation.
+ * 5. When creating documentation that requires high‑resolution vector graphics from OTG sources, and you need the SVG to include the original layer names for accurate legends.
  */

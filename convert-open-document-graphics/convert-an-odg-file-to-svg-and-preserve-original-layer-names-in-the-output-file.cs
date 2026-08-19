@@ -1,17 +1,19 @@
+// HOW-TO: Convert ODG to SVG With Layer Names Preserved in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\sample.odg";
-        string outputPath = @"C:\Temp\sample.svg";
+        // Hardcoded input and output file paths
+        string inputPath = @"C:\Images\sample.odg";
+        string outputPath = @"C:\Images\sample.svg";
 
+        // Ensure any runtime exception is reported without crashing
         try
         {
             // Verify input file exists
@@ -21,27 +23,27 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
                 // Prepare SVG export options
-                SvgOptions svgOptions = new SvgOptions
+                var svgOptions = new SvgOptions
                 {
-                    // Preserve original metadata (including layer information if present)
+                    // Preserve original metadata (including layer names) in the SVG
                     KeepMetadata = true,
 
-                    // Configure vector rasterization (page size, background, etc.)
-                    VectorRasterizationOptions = new SvgRasterizationOptions
+                    // Configure rasterization options based on the source image size
+                    VectorRasterizationOptions = new OdgRasterizationOptions
                     {
                         PageSize = image.Size,
                         BackgroundColor = Color.White
                     }
                 };
 
-                // Save as SVG
+                // Save the image as SVG
                 image.Save(outputPath, svgOptions);
             }
         }
@@ -54,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert OpenDocument Graphics (ODG) files to Scalable Vector Graphics (SVG) for web display while keeping the original layer names intact using Aspose.Imaging for .NET in a C# application.
- * 2. When an engineering team wants to automate the migration of legacy ODG drawings into SVG format for inclusion in responsive HTML5 dashboards, ensuring that each drawing’s layers remain identifiable.
- * 3. When a document management system must ingest ODG assets and store them as SVG files with preserved metadata so that downstream tools can reference the original layer structure.
- * 4. When a desktop publishing workflow requires batch processing of ODG illustrations into SVG for high‑resolution printing, and the code must retain layer names for later editing in vector editors.
- * 5. When a GIS or CAD integration project needs to programmatically read ODG map layers and export them as SVG while preserving layer information for accurate rendering in mapping applications.
+ * 1. When a designer needs to export an OpenDocument graphics file to a web‑friendly SVG while keeping the original layer structure for further editing.
+ * 2. When an automated build process must convert batch ODG assets to SVG for inclusion in a responsive UI without losing metadata such as layer names.
+ * 3. When a reporting tool generates diagrams in ODG format and the downstream system requires SVG with identifiable layers for interactive highlighting.
+ * 4. When a migration script moves legacy ODG illustrations to an SVG‑based asset library, preserving layer names to maintain naming conventions.
+ * 5. When a C# application integrates with a vector‑graphics editor that reads SVG layer names to apply custom styling or animations.
  */

@@ -1,40 +1,51 @@
+// HOW-TO: Convert ODG to JPEG With 85% Quality In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "Input\\sample.odg";
-            string outputPath = "Output\\sample.jpg";
+            // Hardcoded input and output paths
+            string inputPath = "sample.odg";
+            string outputPath = "sample.jpg";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
+            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                var jpegOptions = new JpegOptions
+                // Configure JPEG save options with quality 85
+                JpegOptions jpegOptions = new JpegOptions
                 {
                     Quality = 85
                 };
 
-                var rasterOptions = new OdgRasterizationOptions
+                // If the source is a vector image, set rasterization options
+                if (image is VectorImage)
                 {
-                    BackgroundColor = Color.White,
-                    PageSize = image.Size
-                };
+                    var rasterOptions = new OdgRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageSize = image.Size
+                    };
+                    jpegOptions.VectorRasterizationOptions = rasterOptions;
+                }
 
-                jpegOptions.VectorRasterizationOptions = rasterOptions;
-
+                // Save as JPEG
                 image.Save(outputPath, jpegOptions);
             }
         }
@@ -47,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate web‑ready preview images from OpenDocument Graphics (ODG) files, converting them to JPEG with 85 % quality for faster page loads.
- * 2. When an automated document‑processing pipeline must archive vector drawings as compressed JPEG thumbnails while preserving a white background and original page size.
- * 3. When a desktop application allows users to export their ODG diagrams to a common raster format for inclusion in reports or presentations, using C# and Aspose.Imaging to control output quality.
- * 4. When a cloud service processes batch uploads of ODG files and creates JPEG versions with consistent 85 % quality for email attachments or social‑media sharing.
- * 5. When a migration tool converts legacy ODG assets to JPEG images for compatibility with systems that only support raster formats, ensuring the conversion respects the original dimensions and a white background.
+ * 1. When you need to generate a high‑quality preview image from an OpenDocument graphics (ODG) file for web display.
+ * 2. When converting vector‑based ODG drawings to raster JPEGs for inclusion in reports or email attachments.
+ * 3. When you must ensure consistent JPEG compression by setting the quality level to 85 percent during batch processing.
+ * 4. When an application must rasterize ODG pages with a white background before saving them as JPEG files.
+ * 5. When automating a workflow that validates the existence of source ODG files and creates the required output folder structure before conversion.
  */

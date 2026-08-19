@@ -1,5 +1,7 @@
+// HOW-TO: Convert Multiple OTG Files To PDF Concurrently Using C# Parallel.ForEach (Aspose.Imaging for .NET)
 using System;
 using System.IO;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
@@ -11,48 +13,50 @@ class Program
         try
         {
             // Hardcoded list of OTG files to convert
-            string[] inputFiles = new[]
+            string[] inputPaths = new string[]
             {
                 @"C:\Images\Sample1.otg",
                 @"C:\Images\Sample2.otg",
                 @"C:\Images\Sample3.otg"
-                // Add more file paths as needed
             };
 
-            // Process each file in parallel
-            Parallel.ForEach(inputFiles, inputPath =>
+            // Process files in parallel
+            Parallel.ForEach(inputPaths, inputPath =>
             {
-                // Verify the input file exists
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine the output PDF path
-                string outputPath = Path.ChangeExtension(inputPath, ".pdf");
+                // Determine output PDF path
+                string outputPath = inputPath + ".pdf";
 
-                // Ensure the output directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                // Ensure output directory exists
+                string outputDir = Path.GetDirectoryName(outputPath);
+                Directory.CreateDirectory(outputDir);
 
-                // Load the OTG image
+                // Load the OTG image and convert to PDF
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Configure rasterization options for OTG
-                    var otgRasterOptions = new OtgRasterizationOptions
+                    // Configure rasterization options
+                    OtgRasterizationOptions rasterOptions = new OtgRasterizationOptions
                     {
                         PageSize = image.Size
                     };
 
-                    // Set up PDF save options and attach rasterization options
-                    var pdfOptions = new PdfOptions
+                    // Set up PDF save options
+                    PdfOptions pdfOptions = new PdfOptions
                     {
-                        VectorRasterizationOptions = otgRasterOptions
+                        VectorRasterizationOptions = rasterOptions
                     };
 
-                    // Save the image as PDF
+                    // Save as PDF
                     image.Save(outputPath, pdfOptions);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             });
         }
         catch (Exception ex)
@@ -64,9 +68,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a large collection of OTG CAD drawings into searchable PDF documents for a document‑management system, they can use this parallel conversion code to speed up the process.
- * 2. When an engineering web portal must generate PDF previews of user‑uploaded OTG files on the fly, the code enables concurrent rendering so multiple requests are handled efficiently.
- * 3. When a company wants to archive legacy OTG schematics as PDF files for long‑term storage and compliance, the parallel conversion reduces the time required to process thousands of files.
- * 4. When a desktop application provides an “Export All” feature that turns a folder of OTG images into PDF reports for printing, the Task Parallel Library ensures the export completes quickly on multi‑core machines.
- * 5. When an automated build pipeline needs to validate that OTG assets can be rendered to PDF without errors, the code can run the conversions in parallel to keep the CI job fast.
+ * 1. When a batch of OTG vector graphics must be turned into PDFs quickly for archiving or sharing.
+ * 2. When a server‑side service needs to process many OTG design files in parallel to meet performance SLAs.
+ * 3. When an automated build pipeline generates PDF documentation from OTG assets without blocking other tasks.
+ * 4. When a desktop application lets users select multiple OTG images and export them as PDFs in a single operation.
+ * 5. When a cloud function converts incoming OTG uploads to PDF format while scaling across multiple CPU cores.
  */

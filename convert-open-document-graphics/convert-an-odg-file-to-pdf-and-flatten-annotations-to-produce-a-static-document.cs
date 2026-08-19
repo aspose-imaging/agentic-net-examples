@@ -1,46 +1,46 @@
+// HOW-TO: Convert ODG to Flattened PDF with White Background in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Temp\sample.odg";
-        string outputPath = inputPath + ".pdf";
-
         try
         {
-            // Verify input file exists
+            // Hardcoded input and output file paths
+            string inputPath = @"C:\Input\sample.odg";
+            string outputPath = @"C:\Output\sample.pdf";
+
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options for ODG
+                // Set up rasterization options to flatten the vector content
                 OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
                 {
-                    BackgroundColor = Color.White,   // flatten annotations onto white background
-                    PageSize = image.Size            // preserve original page size
+                    BackgroundColor = Color.White,   // White background for the PDF
+                    PageSize = image.Size            // Preserve original page size
                 };
 
-                // Configure PDF save options
+                // Configure PDF save options and attach rasterization options
                 PdfOptions pdfOptions = new PdfOptions
                 {
                     VectorRasterizationOptions = rasterOptions
                 };
 
-                // Save as PDF (flattened)
+                // Save the flattened PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -53,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate a printable PDF from an OpenDocument Graphics (ODG) design while ensuring all drawing annotations are merged into a single static page.
- * 2. When an application must archive ODG diagrams as PDF files for compliance, requiring the annotations to be flattened so they cannot be edited later.
- * 3. When a web service converts user‑uploaded ODG files to PDF for preview in browsers, using C# Image.Load and PdfOptions to preserve the original page size.
- * 4. When a batch‑processing tool needs to automate the conversion of multiple ODG files to PDF on a Windows server, handling missing files and creating output directories programmatically.
- * 5. When a document‑management system stores ODG assets but needs to provide a read‑only PDF version for clients, leveraging Aspose.Imaging rasterization to embed annotations onto a white background.
+ * 1. When you need to archive OpenDocument graphics as a non‑editable PDF for legal or compliance records.
+ * 2. When a reporting system must generate printable PDFs from ODG diagrams while ensuring all vector layers are rasterized into a single static image.
+ * 3. When you want to embed ODG illustrations into a PDF brochure and remove interactive annotations to keep the layout consistent across viewers.
+ * 4. When an automated workflow converts user‑uploaded ODG files to PDF with a white background to match corporate document templates.
+ * 5. When a desktop application needs to batch‑process ODG drawings into flattened PDFs for distribution to clients who only have PDF readers.
  */

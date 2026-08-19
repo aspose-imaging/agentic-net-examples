@@ -1,3 +1,4 @@
+// HOW-TO: Apply Median Filter to OTG Image and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,44 +10,44 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.otg";
-        string outputPath = @"C:\Images\sample.filtered.png";
-
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+        string inputPath = @"C:\input.otg";
+        string outputPath = @"C:\output.png";
 
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the OTG image
             using (Image otgImage = Image.Load(inputPath))
             {
-                // Prepare PNG save options with OTG rasterization settings
-                var pngOptions = new PngOptions();
-                var otgRasterization = new OtgRasterizationOptions
+                // Prepare PNG options with OTG rasterization settings
+                PngOptions pngOptions = new PngOptions();
+                OtgRasterizationOptions otgRasterOptions = new OtgRasterizationOptions
                 {
                     PageSize = otgImage.Size
                 };
-                pngOptions.VectorRasterizationOptions = otgRasterization;
+                pngOptions.VectorRasterizationOptions = otgRasterOptions;
 
-                // Rasterize OTG to a memory stream as PNG
-                using (var memoryStream = new MemoryStream())
+                // Rasterize OTG to a memory stream (PNG format)
+                using (MemoryStream rasterStream = new MemoryStream())
                 {
-                    otgImage.Save(memoryStream, pngOptions);
-                    memoryStream.Position = 0;
+                    otgImage.Save(rasterStream, pngOptions);
+                    rasterStream.Position = 0;
 
-                    // Load the rasterized PNG image
-                    using (Image rasterImg = Image.Load(memoryStream))
+                    // Load the rasterized image (now a RasterImage)
+                    using (Image rasterImageBase = Image.Load(rasterStream))
                     {
-                        var rasterImage = (RasterImage)rasterImg;
+                        RasterImage rasterImage = (RasterImage)rasterImageBase;
 
-                        // Apply median filter to the whole image
+                        // Apply median filter with size 5 to the whole image
                         rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
                         // Save the filtered image as PNG
@@ -64,9 +65,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to clean up noise in a vector‑based OTG diagram before delivering a high‑quality PNG thumbnail for a web gallery.
- * 2. When an engineering application must rasterize an OTG schematic, apply a median filter to smooth jagged edges, and save the result as a PNG for inclusion in a PDF report.
- * 3. When a medical imaging system receives OTG annotations, filters out speckle artifacts with a median filter, and stores the cleaned image as PNG for electronic health records.
- * 4. When a GIS tool converts OTG map layers to PNG tiles, uses a median filter to reduce pixel‑level noise caused by rasterization, and writes the tiles to disk.
- * 5. When an e‑learning platform processes OTG illustrations, applies a median filter to improve visual clarity, and saves the final PNG for responsive mobile delivery.
+ * 1. When you need to reduce noise in a vector OTG file before exporting it as a high‑quality PNG for web display.
+ * 2. When converting CAD‑style OTG drawings to raster PNGs and want to smooth edges with a median filter to improve visual clarity.
+ * 3. When generating thumbnails from OTG images for a gallery and require a quick noise‑removal step to keep the thumbnails clean.
+ * 4. When processing scanned OTG documents that contain speckles and you must apply a median filter before saving them as PNG for archival.
+ * 5. When integrating Aspose.Imaging into a C# batch job that converts multiple OTG files to PNG while automatically denoising each image.
  */

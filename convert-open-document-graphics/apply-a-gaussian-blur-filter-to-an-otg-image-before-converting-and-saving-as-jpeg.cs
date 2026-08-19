@@ -1,8 +1,9 @@
+// HOW-TO: Apply Gaussian Blur to OTG Image and Save as JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -11,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "input.otg";
-            string outputPath = "output.jpg";
+            string inputPath = @"C:\Images\sample.otg";
+            string outputPath = @"C:\Images\sample_blurred.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,15 +28,23 @@ class Program
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to RasterImage to apply raster filters
+                // Cast to RasterImage to apply filter
                 RasterImage rasterImage = (RasterImage)image;
 
-                // Apply Gaussian blur filter (size=5, sigma=4.0) to the whole image
+                // Apply Gaussian blur with size 5 and sigma 4.0 to the whole image
                 rasterImage.Filter(rasterImage.Bounds, new GaussianBlurFilterOptions(5, 4.0));
 
+                // Prepare JPEG save options with vector rasterization for OTG
+                var jpegOptions = new JpegOptions
+                {
+                    VectorRasterizationOptions = new OtgRasterizationOptions
+                    {
+                        PageSize = image.Size
+                    }
+                };
+
                 // Save the processed image as JPEG
-                JpegOptions jpegOptions = new JpegOptions();
-                rasterImage.Save(outputPath, jpegOptions);
+                image.Save(outputPath, jpegOptions);
             }
         }
         catch (Exception ex)
@@ -47,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to soften the details of a high‑resolution OTG vector graphic before delivering it as a compressed JPEG for web preview.
- * 2. When an automated image pipeline must apply a Gaussian blur to an OTG file to reduce noise and then convert it to JPEG for storage in a content‑management system.
- * 3. When a desktop application processes scanned OTG documents, blurs sensitive information, and saves the result as a JPEG for email attachment.
- * 4. When a batch job reads OTG assets, applies a 5‑pixel Gaussian blur with sigma 4.0 to meet branding guidelines, and outputs JPEG files for mobile devices.
- * 5. When a C# service integrates Aspose.Imaging to transform OTG artwork into JPEG thumbnails with a blur effect to improve loading speed on e‑commerce sites.
+ * 1. When you need to soften the details of a vector‑based OTG graphic before delivering it as a compressed JPEG for web thumbnails.
+ * 2. When you want to preprocess an OTG illustration with a Gaussian blur to reduce noise prior to printing or publishing as a raster JPEG.
+ * 3. When an application must convert proprietary OTG drawings to JPEG while applying a blur effect for privacy or artistic styling.
+ * 4. When you are building a batch pipeline that loads OTG files, applies a uniform blur, and outputs JPEGs for mobile devices.
+ * 5. When you need to programmatically rasterize an OTG page, blur the entire image, and save it with JPEG options in a .NET service.
  */

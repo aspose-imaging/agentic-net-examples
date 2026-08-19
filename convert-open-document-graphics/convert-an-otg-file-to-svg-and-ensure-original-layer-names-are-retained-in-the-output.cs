@@ -1,3 +1,4 @@
+// HOW-TO: Convert OTG to SVG with Layer Names Preserved in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -30,7 +31,7 @@ class Program
                 // Configure SVG export options
                 var svgOptions = new SvgOptions
                 {
-                    // Preserve original metadata (including layer names if stored there)
+                    // Preserve original metadata (including layer names)
                     KeepMetadata = true,
 
                     // Set rasterization options specific to OTG
@@ -53,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design team needs to export OpenDocument graphics (OTG) created in LibreOffice Draw to scalable SVG files for web publishing while keeping the original layer names for later editing.
- * 2. When an automated build pipeline must convert batch‑processed OTG assets into SVG format for inclusion in a responsive UI, ensuring metadata such as layer identifiers is retained.
- * 3. When a C# application integrates with a digital asset management system and must transform client‑supplied OTG illustrations into SVG vectors without losing the hierarchical layer structure.
- * 4. When a GIS or CAD workflow requires converting technical diagrams stored as OTG into SVG for overlay on maps, preserving layer names to map features correctly.
- * 5. When a documentation generator needs to programmatically render OTG schematics as SVG diagrams in PDF manuals while maintaining layer names for searchable indexing.
+ * 1. When you need to export an OpenDocument Graphic (OTG) to a scalable SVG file while keeping the original layer structure for further editing.
+ * 2. When a web application must dynamically convert uploaded OTG files to SVG for responsive rendering without losing layer identifiers.
+ * 3. When generating printable vector assets from OTG sources and you require the layer names to map to CSS classes or scripts later.
+ * 4. When automating a batch process that migrates legacy OTG diagrams to SVG format and you need to retain metadata for documentation purposes.
+ * 5. When integrating Aspose.Imaging in a C# service to transform OTG images into SVG while preserving layer metadata for downstream analytics.
  */

@@ -1,46 +1,46 @@
+// HOW-TO: Convert OTG Image to PNG with Metadata Preservation in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hard‑coded input and output file paths
-            string inputPath = @"C:\Images\sample.otg";
-            string outputPath = @"C:\Images\sample.png";
+            // Hardcoded relative input and output paths
+            string inputPath = Path.Combine("Input", "sample.otg");
+            string outputPath = Path.Combine("Output", "sample.png");
 
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare PNG save options
-                var pngOptions = new PngOptions();
-
-                // Configure rasterization so the vector OTG content is rendered correctly
-                var otgRaster = new OtgRasterizationOptions
+                // Prepare PNG save options with metadata preservation
+                var pngOptions = new PngOptions
                 {
-                    PageSize = image.Size // preserve original size
+                    KeepMetadata = true
                 };
-                pngOptions.VectorRasterizationOptions = otgRaster;
 
-                // Preserve metadata (metadata is kept by default; explicit assignment shown for clarity)
-                // pngOptions.Metadata = image.Metadata; // Uncomment if explicit metadata transfer is required
+                // Configure vector rasterization for OTG to PNG conversion
+                var otgRasterOptions = new OtgRasterizationOptions
+                {
+                    PageSize = image.Size
+                };
+                pngOptions.VectorRasterizationOptions = otgRasterOptions;
 
-                // Save the image as PNG
+                // Save as PNG while retaining original metadata
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -53,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert OpenDocument graphics (OTG) files to PNG for web display while preserving embedded metadata such as author and creation date.
- * 2. When an automated image processing pipeline must rasterize vector OTG diagrams into pixel‑perfect PNG thumbnails without losing the original size or metadata.
- * 3. When a document management system imports OTG illustrations and stores them as PNG assets for browser compatibility, ensuring all metadata is retained for audit trails.
- * 4. When a C# desktop application generates reports that include OTG charts and must export them as PNG images for inclusion in PDFs while keeping the original metadata intact.
- * 5. When a batch conversion tool processes a folder of OTG files, converting each to PNG with the same dimensions and preserving metadata for downstream indexing or search.
+ * 1. When you need to generate PNG thumbnails from OTG vector drawings while keeping EXIF and custom metadata for downstream processing.
+ * 2. When a web service must convert uploaded OTG files to PNG format for browser display without losing original author information.
+ * 3. When archiving design assets, you want to store a lossless PNG copy of each OTG file while preserving all embedded metadata for future reference.
+ * 4. When integrating a CAD workflow, you need to rasterize OTG pages to PNG at their original size and keep layer and property data intact.
+ * 5. When building a batch conversion tool that reads OTG files from a folder and saves them as PNG files with all metadata retained for compliance reporting.
  */

@@ -1,61 +1,61 @@
+// HOW-TO: Apply Median Filter to ODG Image and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
+using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\sample_filtered.png";
-
-        // Input file existence check
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "sample.odg";
+            string outputPath = "sample_filtered.png";
+
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             // Load the ODG image
             using (Image odgImage = Image.Load(inputPath))
             {
-                // Prepare rasterization options to convert ODG to raster PNG in memory
-                var pngSaveOptions = new PngOptions();
-                var odgRasterOptions = new OdgRasterizationOptions
-                {
-                    // Preserve original size
-                    PageSize = odgImage.Size,
-                    BackgroundColor = Color.White
-                };
-                pngSaveOptions.VectorRasterizationOptions = odgRasterOptions;
-
-                // Rasterize ODG to a memory stream
+                // Rasterize ODG to a PNG in memory
                 using (var memoryStream = new MemoryStream())
                 {
-                    odgImage.Save(memoryStream, pngSaveOptions);
-                    memoryStream.Position = 0; // Reset stream position for reading
+                    var rasterizationOptions = new OdgRasterizationOptions
+                    {
+                        BackgroundColor = Color.White,
+                        PageSize = odgImage.Size
+                    };
 
-                    // Load the rasterized image
+                    var pngOptions = new PngOptions
+                    {
+                        VectorRasterizationOptions = rasterizationOptions
+                    };
+
+                    odgImage.Save(memoryStream, pngOptions);
+                    memoryStream.Position = 0;
+
+                    // Load the rasterized image as a RasterImage to apply the median filter
                     using (Image rasterImage = Image.Load(memoryStream))
                     {
-                        // Cast to RasterImage to access filtering methods
                         var raster = (RasterImage)rasterImage;
 
                         // Apply median filter with size 5 to the whole image
                         raster.Filter(raster.Bounds, new MedianFilterOptions(5));
 
                         // Save the filtered image as PNG
-                        raster.Save(outputPath);
+                        raster.Save(outputPath, new PngOptions());
                     }
                 }
             }
@@ -69,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a CAD or diagram file in OpenDocument Graphics (ODG) format contains speckle noise and must be displayed on a web page as a clean PNG, a developer can rasterize the ODG and apply a median filter to remove noise before saving.
- * 2. When generating printable assets from ODG drawings for marketing brochures, applying a median filter ensures smooth edges and reduces artifacting before converting to high‑resolution PNG.
- * 3. When an automated document‑processing pipeline extracts ODG charts from LibreOffice files and needs to embed them in a PDF as PNG images, the median filter helps improve visual quality by smoothing out compression artifacts.
- * 4. When a mobile app downloads ODG icons from a server and must cache them as PNG thumbnails, using the median filter removes stray pixels caused by vector‑to‑raster conversion, resulting in sharper thumbnails.
- * 5. When performing batch conversion of legacy ODG diagrams to PNG for archival purposes, applying a median filter programmatically guarantees consistent noise reduction across all converted images.
+ * 1. When you need to reduce noise in a scanned ODG diagram before exporting it as a high‑quality PNG for web publishing.
+ * 2. When you want to preprocess vector‑based ODG drawings with a median filter to improve visual clarity in a PNG thumbnail generator.
+ * 3. When an application must convert OpenDocument graphics to PNG while applying a smoothing filter to meet printing specifications.
+ * 4. When you are building a batch conversion tool that rasterizes ODG files and removes speckle artifacts before saving them as PNG assets.
+ * 5. When you require server‑side image processing in C# to clean up ODG illustrations and store the filtered results as PNG files for further analysis.
  */
