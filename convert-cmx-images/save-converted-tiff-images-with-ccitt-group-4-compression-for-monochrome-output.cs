@@ -1,3 +1,4 @@
+// HOW-TO: Convert PNG to Monochrome TIFF with CCITT Group 4 Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,11 +11,11 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.png";
-            string outputPath = "C:\\temp\\output.tif";
+            // Hard‑coded input and output file paths
+            string inputPath = @"C:\temp\input.png";
+            string outputPath = @"C:\temp\output.tif";
 
-            // Verify input file exists
+            // Verify that the input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -27,18 +28,21 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure TIFF options for CCITT Group 4 (monochrome) compression
+                // Configure TIFF options for CCITT Group 4 (fax) compression
                 TiffOptions tiffOptions = new TiffOptions(TiffExpectedFormat.Default);
-                tiffOptions.Compression = TiffCompressions.CcittFax4;   // CCITT Group 4
-                tiffOptions.BitsPerSample = new ushort[] { 1 };        // 1 bit per pixel
-                tiffOptions.Photometric = TiffPhotometrics.MinIsBlack; // Black = 0
+                tiffOptions.Compression = TiffCompressions.CcittFax4;          // CCITT Group 4
+                tiffOptions.BitsPerSample = new ushort[] { 1 };               // 1‑bit per pixel (monochrome)
+                tiffOptions.Photometric = TiffPhotometrics.MinIsBlack;       // 0 = black, 1 = white
+                tiffOptions.PlanarConfiguration = TiffPlanarConfigs.Contiguous;
+                tiffOptions.MultiPageOptions = null;                         // Single‑page output
 
-                // Save the image as TIFF with the specified options
+                // Save the image as a TIFF with the specified options
                 image.Save(outputPath, tiffOptions);
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -46,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate fax‑compatible monochrome documents by converting PNG scans to TIFF files with CCITT Group 4 compression for minimal file size.
- * 2. When an archival system requires storing black‑and‑white engineering drawings as 1‑bit per pixel TIFF images to preserve quality while reducing storage costs.
- * 3. When a medical imaging workflow must transform scanned pathology slides from PNG to a standard TIFF format with MinIsBlack photometric interpretation for downstream analysis tools.
- * 4. When a printing pipeline needs to create high‑speed, low‑bandwidth print jobs by converting color PNG assets to monochrome TIFF using Aspose.Imaging in a C# application.
- * 5. When a document management solution automates the conversion of user‑uploaded PNG receipts into compact, searchable TIFF files that comply with CCITT Group 4 fax standards.
+ * 1. When you need to generate fax‑compatible black‑and‑white TIFF files from scanned PNG images for archival or transmission.
+ * 2. When a document‑management system requires 1‑bit per pixel TIFFs to reduce storage size while preserving readability.
+ * 3. When converting color or grayscale PNG charts into monochrome TIFFs for inclusion in legacy printing pipelines that only accept CCITT Group 4 compression.
+ * 4. When preparing images for OCR engines that perform better on high‑contrast, single‑bit TIFF files.
+ * 5. When automating batch processing of scanned forms to create single‑page TIFFs that meet industry standards for electronic filing.
  */
