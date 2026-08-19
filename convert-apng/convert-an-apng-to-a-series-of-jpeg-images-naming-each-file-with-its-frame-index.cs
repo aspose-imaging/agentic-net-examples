@@ -1,3 +1,4 @@
+// HOW-TO: Extract APNG Frames to Indexed JPEG Files Using C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,8 +11,9 @@ class Program
     {
         try
         {
-            // Hardcoded input path
+            // Hardcoded input and output paths
             string inputPath = "input.apng";
+            string outputDirectory = "output";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -20,10 +22,13 @@ class Program
                 return;
             }
 
+            // Ensure the output directory exists
+            Directory.CreateDirectory(outputDirectory);
+
             // Load the APNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to ApngImage to access frames
+                // Cast to ApngImage to access frames (pages)
                 ApngImage apng = image as ApngImage;
                 if (apng == null)
                 {
@@ -31,21 +36,20 @@ class Program
                     return;
                 }
 
-                // Iterate through each frame (page) and save as JPEG
+                // Iterate through each frame and save as JPEG
                 for (int i = 0; i < apng.PageCount; i++)
                 {
-                    // Get the current frame as a RasterImage
-                    using (RasterImage frame = (RasterImage)apng.Pages[i])
-                    {
-                        // Construct output file name with frame index
-                        string outputPath = $"frame_{i}.jpg";
+                    // Get the frame (page)
+                    var frame = apng.Pages[i];
 
-                        // Ensure the output directory exists
-                        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+                    // Build output file path
+                    string outputPath = Path.Combine(outputDirectory, $"frame_{i}.jpg");
 
-                        // Save the frame as JPEG
-                        frame.Save(outputPath, new JpegOptions());
-                    }
+                    // Ensure the directory for the output file exists
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                    // Save the frame as JPEG
+                    frame.Save(outputPath, new JpegOptions());
                 }
             }
         }
@@ -58,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each frame from an animated PNG (APNG) and store them as separate JPEG files for compatibility with browsers that only support static JPEG images.
- * 2. When a video processing pipeline requires converting an APNG sprite sheet into individual JPEG frames to create a thumbnail gallery.
- * 3. When an e‑learning platform wants to break down an animated illustration into frame‑by‑frame JPEG images for step‑by‑step instructional content.
- * 4. When a content management system must archive each animation frame as a lossily compressed JPEG to reduce storage size while preserving frame order.
- * 5. When a game developer wants to import APNG character animations into a Unity project by saving each frame as a JPEG asset with an indexed filename.
+ * 1. When you need to break an animated PNG into individual JPEG images for use in a web gallery that only supports static JPEG thumbnails.
+ * 2. When a game developer wants to convert each frame of an APNG sprite sheet into separate JPEG assets for faster loading on low‑memory devices.
+ * 3. When a reporting tool must embed each animation frame as a JPEG in a PDF document that does not support APNG.
+ * 4. When a batch‑processing pipeline extracts frames from user‑uploaded APNG files to generate indexed JPEG files for archival storage.
+ * 5. When a mobile app requires frame‑by‑frame JPEG images from an APNG to apply custom filters or overlays in C#.
  */

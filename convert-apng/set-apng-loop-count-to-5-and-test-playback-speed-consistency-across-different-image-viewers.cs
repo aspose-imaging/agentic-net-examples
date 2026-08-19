@@ -1,3 +1,4 @@
+// HOW-TO: Convert WebP to APNG with 5 Loops and 100ms Frame Delay in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -23,17 +24,16 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the source image (could be animated or single-frame)
+            // Load the source image (could be animated)
             using (Image image = Image.Load(inputPath))
             {
-                // Configure APNG options: set loop count to 5 and a default frame time (e.g., 100 ms)
+                // Save as APNG with 5 loop cycles and a default frame time of 100 ms
                 var apngOptions = new ApngOptions
                 {
-                    NumPlays = 5,                 // Loop the animation 5 times
-                    DefaultFrameTime = 100       // 100 ms per frame to test playback speed
+                    NumPlays = 5,               // Loop count
+                    DefaultFrameTime = 100      // Frame duration in milliseconds
                 };
 
-                // Save as APNG with the specified options
                 image.Save(outputPath, apngOptions);
             }
         }
@@ -46,9 +46,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate an animated PNG (APNG) from a WebP source that loops exactly five times for use in product tutorials, ensuring consistent frame timing across browsers and image viewers.
- * 2. When a developer wants to create a looping banner ad in C# where the animation repeats a fixed number of times (five) and the 100 ms frame delay must be verified on desktop and mobile image viewers.
- * 3. When a developer is building a game UI and must export character sprite animations as APNG files that play five cycles with a uniform playback speed to test synchronization with sound effects.
- * 4. When a developer is implementing an automated quality‑control pipeline that converts animated WebP assets to APNG and checks that the NumPlays property of 5 and DefaultFrameTime of 100 ms render correctly in popular image editors.
- * 5. When a developer needs to produce a diagnostic sample for client support, converting an animated WebP to an APNG that repeats five times so that support staff can compare playback speed consistency across different viewer applications.
+ * 1. When you need to embed an animated image in a web page that repeats exactly five times, you can convert a WebP animation to an APNG with a fixed loop count using C#.
+ * 2. When testing how different browsers or image viewers handle APNG playback speed, you can set a consistent 100 ms frame duration and loop count to compare results.
+ * 3. When creating a game asset that requires a limited number of animation cycles, you can generate an APNG with a predefined number of plays from an existing WebP file.
+ * 4. When preparing marketing GIF alternatives that must comply with APNG specifications and need controlled looping, this code converts and configures the loop count in .NET.
+ * 5. When automating a batch process to standardize animated images for an e‑learning platform, you can ensure each APNG repeats five times with uniform frame timing.
  */

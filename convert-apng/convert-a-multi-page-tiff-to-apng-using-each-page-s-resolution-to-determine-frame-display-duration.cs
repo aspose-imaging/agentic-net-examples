@@ -1,3 +1,4 @@
+// HOW-TO: Convert Multi‑Page TIFF to APNG Using DPI for Frame Timing in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,66 +10,62 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.tif";
+        string outputPath = "output.png";
+
+        // Path safety checks
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"File not found: {inputPath}");
+            return;
+        }
+
+        // Ensure output directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.tif";
-            string outputPath = "output.png";
-
-            // Verify input file exists
-            if (!File.Exists(inputPath))
-            {
-                Console.Error.WriteLine($"File not found: {inputPath}");
-                return;
-            }
-
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
             // Load the multi‑page TIFF
             using (Image image = Image.Load(inputPath))
             {
                 TiffImage tiffImage = (TiffImage)image;
 
-                // Prepare APNG options (default frame time will be overridden per frame)
-                ApngOptions apngOptions = new ApngOptions
+                // Use the first frame to obtain dimensions for the APNG canvas
+                using (RasterImage firstFrame = (RasterImage)tiffImage.Frames[0])
                 {
-                    DefaultFrameTime = 100 // placeholder, will be set per frame
-                };
+                    // Create APNG options (no specific defaults needed here)
+                    ApngOptions apngOptions = new ApngOptions();
 
-                // Create an APNG image with the size of the first frame
-                using (ApngImage apngImage = (ApngImage)Image.Create(
-                    apngOptions,
-                    tiffImage.Frames[0].Width,
-                    tiffImage.Frames[0].Height))
-                {
-                    // Remove the automatically created first frame
-                    apngImage.RemoveAllFrames();
-
-                    // Add each TIFF frame as an APNG frame
-                    foreach (TiffFrame tiffFrame in tiffImage.Frames)
+                    // Create an empty APNG image with the same size as the first frame
+                    using (ApngImage apngImage = (ApngImage)Image.Create(
+                        apngOptions,
+                        firstFrame.Width,
+                        firstFrame.Height))
                     {
-                        // Cast the frame to RasterImage to access resolution properties
-                        RasterImage raster = (RasterImage)tiffFrame;
+                        // Remove the default single frame that exists after creation
+                        apngImage.RemoveAllFrames();
 
-                        // Determine frame duration based on horizontal resolution (fallback to 100 ms)
-                        uint frameDuration = 100;
-                        if (raster.HorizontalResolution > 0)
+                        // Add each TIFF frame as an APNG frame
+                        foreach (TiffFrame tiffFrame in tiffImage.Frames)
                         {
-                            // Example: higher DPI -> shorter display time
-                            frameDuration = (uint)(1000 / raster.HorizontalResolution);
-                            if (frameDuration == 0) frameDuration = 1;
+                            RasterImage rasterFrame = (RasterImage)tiffFrame;
+
+                            // Determine frame duration from the frame's horizontal resolution (DPI)
+                            // If DPI is unavailable or zero, fall back to a default of 100 ms
+                            double dpi = rasterFrame.HorizontalResolution;
+                            uint frameTime = dpi > 0 ? (uint)(1000.0 / dpi) : 100;
+
+                            // Set the default frame time for the next added frame
+                            apngImage.DefaultFrameTime = frameTime;
+
+                            // Add the raster frame to the APNG
+                            apngImage.AddFrame(rasterFrame);
                         }
 
-                        // Set the default frame time for this frame
-                        apngImage.DefaultFrameTime = frameDuration;
-
-                        // Add the frame to the APNG
-                        apngImage.AddFrame(raster);
+                        // Save the resulting APNG
+                        apngImage.Save(outputPath);
                     }
-
-                    // Save the resulting APNG
-                    apngImage.Save(outputPath);
                 }
             }
         }
@@ -81,9 +78,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to turn a multi‑page TIFF scanned document into an animated PNG for web preview, using each page’s DPI to set the display time of each frame.
- * 2. When building a C# application that converts high‑resolution medical imaging TIFF series into an APNG slideshow where the pixel density of each slice determines how long it stays visible.
- * 3. When creating an automated pipeline that transforms multi‑page TIFF receipts into a compact APNG animation, with the horizontal resolution of each page controlling the frame delay for better readability.
- * 4. When developing a digital publishing tool that exports layered TIFF artwork as an animated PNG, leveraging Aspose.Imaging to read the resolution of each layer and assign appropriate frame durations.
- * 5. When implementing a C# utility that generates an APNG from a multi‑page TIFF satellite image stack, using the resolution metadata of each frame to calculate realistic animation timing for GIS applications.
+ * 1. When you need to turn a scanned multi‑page document saved as TIFF into an animated PNG where each page’s display time matches its original DPI, this code automates the conversion.
+ * 2. When generating web‑ready animations from scientific microscopy image stacks stored in TIFF, you can preserve the exposure timing by mapping each frame’s resolution to APNG frame delays.
+ * 3. When creating product‑catalog slideshows from high‑resolution TIFF assets, the script converts them to APNG with per‑frame durations reflecting the intended viewing speed.
+ * 4. When migrating legacy TIFF‑based animation sequences to a modern, lossless format for mobile apps, this approach keeps the original frame timing based on DPI values.
+ * 5. When building an automated pipeline that ingests multi‑page TIFF invoices and outputs animated PNGs for quick preview, the code ensures each page appears for the correct interval derived from its resolution.
  */

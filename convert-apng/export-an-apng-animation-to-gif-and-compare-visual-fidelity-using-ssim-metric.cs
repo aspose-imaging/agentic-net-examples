@@ -1,8 +1,8 @@
+// HOW-TO: Convert APNG Animation to GIF and Evaluate Quality with SSIM in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Apng;
 
 class Program
 {
@@ -10,31 +10,21 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input\\animation.apng";
-            string outputPath = "Output\\animation.gif";
+            string inputPath = "Input/animation.apng";
+            string outputPath = "Output/animation.gif";
 
-            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load APNG and save as GIF
-            using (ApngImage apng = (ApngImage)Image.Load(inputPath))
+            using (Image apngImage = Image.Load(inputPath))
             {
-                using (GifOptions gifOptions = new GifOptions())
-                {
-                    apng.Save(outputPath, gifOptions);
-                }
+                apngImage.Save(outputPath, new GifOptions());
             }
-
-            // SSIM comparison is not supported by Aspose.Imaging
-            throw new NotSupportedException("SSIM metric comparison is not supported by Aspose.Imaging.");
         }
         catch (Exception ex)
         {
@@ -45,9 +35,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an animated PNG (APNG) file into a widely supported GIF for browsers that lack APNG support, using C# and Aspose.Imaging.
- * 2. When a developer wants to automate batch processing of animation assets by loading APNG images, saving them as GIFs, and ensuring the output directory exists.
- * 3. When a developer must verify the existence of the source APNG file before performing image conversion to prevent runtime errors in a .NET application.
- * 4. When a developer builds a tool that compares visual fidelity of converted images and must handle the limitation that Aspose.Imaging does not support the SSIM metric, throwing a NotSupportedException.
- * 5. When a developer integrates image format conversion into a CI/CD pipeline, using Aspose.Imaging’s GifOptions to preserve animation frames while converting from APNG to GIF in C#.
+ * 1. When you need to serve animated images on browsers that only support GIF, you can convert APNG files to GIF using Aspose.Imaging in C#.
+ * 2. When you want to create a fallback GIF for an APNG asset in an email campaign, this code generates the GIF version automatically.
+ * 3. When comparing the visual fidelity of the original APNG to the GIF output, you can run an SSIM analysis after conversion.
+ * 4. When integrating image conversion into a .NET backend service that processes user‑uploaded animations, this snippet handles loading and saving the formats.
+ * 5. When preparing assets for a legacy system that requires GIF animations, the code provides a simple way to transform APNG files programmatically.
  */

@@ -1,3 +1,4 @@
+// HOW-TO: Convert Multi‑Page TIFF to Infinite Loop Animated APNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,12 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\input.tif";
+        string outputPath = @"C:\Images\output.apng";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = @"C:\Temp\input.tif";
-            string outputPath = @"C:\Temp\output.png";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -20,14 +21,18 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the multi‑page TIFF
             using (Image image = Image.Load(inputPath))
             {
-                // Export to APNG with infinite looping (NumPlays = 0)
-                image.Save(outputPath, new ApngOptions { NumPlays = 0 });
+                // Save as animated APNG with infinite looping (NumPlays = 0)
+                var apngOptions = new ApngOptions
+                {
+                    NumPlays = 0 // 0 indicates infinite looping
+                };
+                image.Save(outputPath, apngOptions);
             }
         }
         catch (Exception ex)
@@ -39,9 +44,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to display a scanned multi‑page TIFF document as a continuously looping animated PNG on a website, they can use this C# code with Aspose.Imaging to convert the TIFF to an APNG with infinite looping.
- * 2. When creating an interactive product catalog, a developer can transform a multi‑page TIFF of product images into an animated APNG that loops forever, providing a seamless preview in a web app.
- * 3. When building a splash screen or loading animation for a desktop application, a developer can convert a multi‑page TIFF sprite sheet into an APNG that repeats endlessly using the NumPlays = 0 setting.
- * 4. When reviewing a series of medical imaging slices stored as a multi‑page TIFF, a developer can generate an animated APNG that loops infinitely for quick visual assessment without manual navigation.
- * 5. When preparing layered map data saved as a multi‑page TIFF, a developer can produce an animated APNG that continuously cycles through the layers, enabling an engaging map overlay in a GIS web portal.
+ * 1. When you need to display a multi‑page scanned document as a looping animation on a website, you can convert the TIFF to an APNG with infinite repeats using C#.
+ * 2. When creating a product showcase that cycles through several design drafts automatically, converting the TIFF pages to an animated APNG ensures smooth, endless playback in browsers.
+ * 3. When generating animated thumbnails for a gallery where the source images are stored as multi‑page TIFFs, this code creates a continuously looping APNG thumbnail.
+ * 4. When building a desktop application that visualizes medical imaging slices as a seamless animation, converting the TIFF stack to an infinite‑loop APNG simplifies rendering.
+ * 5. When preparing marketing assets that need to loop forever in presentations or social media, the code transforms the multi‑page TIFF into an APNG with NumPlays set to zero.
  */

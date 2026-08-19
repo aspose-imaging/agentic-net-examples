@@ -1,3 +1,4 @@
+// HOW-TO: Extract First Frame from Animated APNG and Save as PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,13 +9,12 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = "input.apng";
-        string outputPath = "output.png";
-
-        // Ensure any runtime exception is reported cleanly
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = "input.apng";
+            string outputPath = "output\\static.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -29,17 +29,20 @@ class Program
             using (Image image = Image.Load(inputPath))
             {
                 // Cast to ApngImage to access frames
-                if (image is ApngImage apngImage && apngImage.PageCount > 0)
+                ApngImage apng = image as ApngImage;
+                if (apng != null && apng.PageCount > 0)
                 {
-                    // Get the first frame
-                    Image firstFrame = (Image)apngImage.Pages[0];
-
-                    // Save the first frame as a static PNG
-                    firstFrame.Save(outputPath, new PngOptions());
+                    // Extract the first frame
+                    using (RasterImage firstFrame = (RasterImage)apng.Pages[0])
+                    {
+                        // Save the first frame as a static PNG
+                        firstFrame.Save(outputPath, new PngOptions());
+                    }
                 }
                 else
                 {
-                    Console.Error.WriteLine("The loaded image is not an APNG or contains no frames.");
+                    // Fallback: save the whole image as PNG if not an APNG
+                    image.Save(outputPath, new PngOptions());
                 }
             }
         }
@@ -52,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web developer needs to generate a thumbnail for an animated APNG file to display in a product catalog, they can extract the first frame and save it as a static PNG using Aspose.Imaging for .NET.
- * 2. When an e‑learning platform wants to replace animated APNG icons with non‑animated PNG placeholders for email notifications, the code can load the APNG, grab the first frame, and output a PNG image.
- * 3. When a mobile app needs to reduce file size by converting user‑uploaded animated APNGs to a single PNG preview before uploading to a server, the C# snippet performs the conversion efficiently.
- * 4. When a content management system must generate a fallback PNG for browsers that do not support APNG, developers can use this code to extract the initial frame and save it as a static PNG.
- * 5. When an automated image processing pipeline requires extracting the first frame of an APNG to use as a cover image for a video or slideshow, the Aspose.Imaging API can load the APNG and save the frame as a PNG.
+ * 1. When you need to generate a thumbnail from an animated APNG for a website preview.
+ * 2. When you must extract the initial frame of a sprite sheet stored as an APNG to use as a static icon.
+ * 3. When converting user‑uploaded animated PNGs to a single PNG for compatibility with systems that only support static images.
+ * 4. When creating a fallback image for email newsletters that cannot display animated PNGs.
+ * 5. When preprocessing animation assets in a game pipeline to obtain a non‑animated PNG for texture atlases.
  */

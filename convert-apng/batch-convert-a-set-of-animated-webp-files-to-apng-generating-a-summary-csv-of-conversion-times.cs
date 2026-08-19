@@ -1,6 +1,8 @@
+// HOW-TO: Batch Convert Animated WebP to APNG with Timing CSV in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Diagnostics;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 
@@ -15,49 +17,50 @@ class Program
             string outputDirectory = @"C:\OutputApng";
             string csvPath = Path.Combine(outputDirectory, "summary.csv");
 
-            // Ensure output directory exists for CSV
+            // Ensure output directory exists
+            Directory.CreateDirectory(outputDirectory);
             Directory.CreateDirectory(Path.GetDirectoryName(csvPath));
+
+            // Prepare CSV header
+            List<string> csvLines = new List<string>();
+            csvLines.Add("File,TimeMs");
 
             // Get all animated WEBP files
             string[] inputFiles = Directory.GetFiles(inputDirectory, "*.webp");
 
-            // Open CSV writer
-            using (var csvWriter = new StreamWriter(csvPath))
+            foreach (string inputPath in inputFiles)
             {
-                // Write CSV header
-                csvWriter.WriteLine("InputFile,OutputFile,ConversionTimeMs");
-
-                foreach (string inputPath in inputFiles)
+                // Verify input file exists
+                if (!File.Exists(inputPath))
                 {
-                    // Verify input file exists
-                    if (!File.Exists(inputPath))
-                    {
-                        Console.Error.WriteLine($"File not found: {inputPath}");
-                        return;
-                    }
-
-                    // Determine output path (APNG saved as .png)
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".png";
-                    string outputPath = Path.Combine(outputDirectory, outputFileName);
-
-                    // Ensure output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Measure conversion time
-                    var stopwatch = Stopwatch.StartNew();
-
-                    // Load WEBP and save as APNG
-                    using (Image image = Image.Load(inputPath))
-                    {
-                        image.Save(outputPath, new ApngOptions());
-                    }
-
-                    stopwatch.Stop();
-
-                    // Write result to CSV
-                    csvWriter.WriteLine($"{inputPath},{outputPath},{stopwatch.ElapsedMilliseconds}");
+                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    return;
                 }
+
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+                Stopwatch sw = Stopwatch.StartNew();
+
+                // Load WEBP and save as APNG
+                using (Image image = Image.Load(inputPath))
+                {
+                    image.Save(outputPath, new ApngOptions());
+                }
+
+                sw.Stop();
+
+                // Record conversion time
+                csvLines.Add($"{fileNameWithoutExt},{sw.ElapsedMilliseconds}");
+                Console.WriteLine($"Converted {inputPath} to {outputPath} in {sw.ElapsedMilliseconds} ms");
             }
+
+            // Write summary CSV
+            File.WriteAllLines(csvPath, csvLines);
+            Console.WriteLine($"Summary CSV written to {csvPath}");
         }
         catch (Exception ex)
         {
@@ -68,9 +71,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert animated WEBP files to APNG for web animation compatibility while logging each file’s conversion time in a CSV for performance analysis.
- * 2. When a game studio wants to automate the migration of sprite animations from WEBP to APNG across multiple folders using C# and Aspose.Imaging, generating a CSV summary of processing durations.
- * 3. When an e‑learning platform must replace legacy animated WEBP illustrations with APNG for broader browser support and keep a CSV record of each conversion’s speed for QA auditing.
- * 4. When a CI/CD pipeline includes a step that validates image assets by converting all animated WEBP assets to APNG and outputs a CSV of conversion times to detect regressions.
- * 5. When a digital marketing team needs to bulk‑process promotional animated WEBP assets into APNG for email campaigns, using C# code that also produces a CSV log of how long each conversion took.
+ * 1. When you need to convert a large collection of animated WebP advertisements into APNG files for web browsers that only support PNG animation.
+ * 2. When you want to automate the migration of animated assets from a mobile app's WebP format to APNG while tracking how long each conversion takes.
+ * 3. When you are benchmarking image processing performance in a .NET service that processes animated WebP files and need a CSV log of conversion times.
+ * 4. When you must generate APNG sprites from existing animated WebP graphics for inclusion in a game engine that requires PNG sequences.
+ * 5. When you are building a CI pipeline that validates that all animated WebP resources are correctly transformed to APNG and records the processing duration for reporting.
  */
