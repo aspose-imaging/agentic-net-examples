@@ -1,67 +1,77 @@
+// HOW-TO: Create Animated APNG from SVG with Custom Frame Size in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Apng;
-using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.Sources;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            string inputPath = "input.svg";
-            string outputPath = "output.apng";
+            // Hardcoded input SVG and output APNG paths
+            string inputSvgPath = "input.svg";
+            string outputApngPath = "output.apng";
 
-            if (!File.Exists(inputPath))
+            // Verify input file exists
+            if (!File.Exists(inputSvgPath))
             {
-                Console.Error.WriteLine($"File not found: {inputPath}");
+                Console.Error.WriteLine($"File not found: {inputSvgPath}");
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputApngPath));
 
-            // Load SVG vector graphic
-            using (Image svgImage = Image.Load(inputPath))
+            // Define frame size and background color
+            const int frameWidth = 200;
+            const int frameHeight = 200;
+            var backgroundColor = Color.AliceBlue;
+
+            // Load the SVG as a raster image (will be rasterized on load)
+            using (RasterImage sourceImage = (RasterImage)Image.Load(inputSvgPath))
             {
-                int width = svgImage.Width;
-                int height = svgImage.Height;
-
-                // Render SVG to a raster image (PNG in memory)
-                using (MemoryStream ms = new MemoryStream())
+                // Configure APNG creation options
+                var createOptions = new ApngOptions
                 {
-                    svgImage.Save(ms, new PngOptions());
-                    ms.Position = 0;
-                    using (RasterImage raster = (RasterImage)Image.Load(ms))
+                    Source = new FileCreateSource(outputApngPath, false),
+                    DefaultFrameTime = 100, // 100 ms per frame
+                    ColorType = PngColorType.TruecolorWithAlpha,
+                    VectorRasterizationOptions = new VectorRasterizationOptions
                     {
-                        // Create APNG with desired frame size and background color
-                        ApngOptions createOptions = new ApngOptions
-                        {
-                            Source = new FileCreateSource(outputPath, false),
-                            DefaultFrameTime = 100, // 100 ms per frame
-                            ColorType = PngColorType.TruecolorWithAlpha
-                        };
-
-                        using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, width, height))
-                        {
-                            apngImage.BackgroundColor = Color.White;
-                            apngImage.RemoveAllFrames();
-
-                            int totalFrames = 5;
-                            for (int i = 0; i < totalFrames; i++)
-                            {
-                                // Add the same raster frame; adjust gamma for variation
-                                apngImage.AddFrame(raster);
-                                ApngFrame lastFrame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
-                                lastFrame.AdjustGamma(i);
-                            }
-
-                            // Save the APNG (output is already bound via FileCreateSource)
-                            apngImage.Save();
-                        }
+                        PageWidth = frameWidth,
+                        PageHeight = frameHeight,
+                        BackgroundColor = backgroundColor
                     }
+                };
+
+                // Create the APNG image with the specified dimensions
+                using (ApngImage apngImage = (ApngImage)Image.Create(createOptions, frameWidth, frameHeight))
+                {
+                    // Set the overall background color for the animation
+                    apngImage.BackgroundColor = backgroundColor;
+
+                    // Remove the default single frame
+                    apngImage.RemoveAllFrames();
+
+                    // Add multiple frames (here we simply duplicate the SVG raster)
+                    const int totalFrames = 10;
+                    for (int i = 0; i < totalFrames; i++)
+                    {
+                        apngImage.AddFrame(sourceImage);
+
+                        // Example per-frame modification: adjust gamma to create a simple effect
+                        ApngFrame lastFrame = (ApngFrame)apngImage.Pages[apngImage.PageCount - 1];
+                        float gamma = (i % 2 == 0) ? 0.8f : 1.2f;
+                        lastFrame.AdjustGamma(gamma);
+                    }
+
+                    // Save the animated PNG
+                    apngImage.Save();
                 }
             }
         }
@@ -74,9 +84,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to convert a scalable SVG logo into a lightweight animated APNG banner with a white background for use on a website.
- * 2. When an e‑learning platform needs to generate frame‑by‑frame animations from vector illustrations by rendering SVG to raster frames and assembling them into an APNG with defined frame time.
- * 3. When a mobile app requires a high‑resolution animated icon created from an SVG asset, preserving transparency, setting explicit width and height, and applying a solid background color.
- * 4. When a marketing automation tool programmatically creates product showcase animations by loading SVG files, rasterizing them, and exporting a multi‑frame APNG with consistent frame dimensions.
- * 5. When a game UI designer needs to export vector‑based health‑bar animations as an APNG file, specifying background color and frame timing using C# and Aspose.Imaging.
+ * 1. When you need to generate a lightweight animated PNG for web banners from scalable SVG icons while controlling the pixel dimensions.
+ * 2. When you want to programmatically create an APNG slideshow where each frame is a rasterized vector graphic with a consistent background color.
+ * 3. When you are building a C# desktop application that converts user‑uploaded SVG files into animated PNGs for email newsletters.
+ * 4. When you need to automate the production of animated product previews, ensuring each frame matches a specific width and height.
+ * 5. When you require server‑side image processing that turns vector logos into APNGs with a uniform background for consistent branding.
  */
