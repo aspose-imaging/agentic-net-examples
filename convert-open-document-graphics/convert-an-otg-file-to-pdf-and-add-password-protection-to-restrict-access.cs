@@ -1,20 +1,20 @@
+// HOW-TO: Convert OTG to PDF with Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
             // Hardcoded input and output paths
-            string inputPath = @"C:\input\sample.otg";
-            string outputPath = @"C:\output\sample.pdf";
+            string inputPath = Path.Combine("Input", "sample.otg");
+            string outputPath = Path.Combine("Output", "sample.pdf");
 
-            // Verify input file exists
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,28 +24,25 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the OTG image
+            // Load OTG image and convert to PDF
             using (Image image = Image.Load(inputPath))
             {
-                // Set up OTG rasterization options
-                OtgRasterizationOptions otgRasterOptions = new OtgRasterizationOptions
+                // Set rasterization options for OTG
+                OtgRasterizationOptions otgOptions = new OtgRasterizationOptions
                 {
+                    BackgroundColor = Color.White,
                     PageSize = image.Size
                 };
 
                 // Configure PDF save options
                 PdfOptions pdfOptions = new PdfOptions
                 {
-                    VectorRasterizationOptions = otgRasterOptions
+                    VectorRasterizationOptions = otgOptions
                 };
 
-                // Embed a digital signature using a password to restrict access
-                if (image is RasterCachedMultipageImage multiPageImage)
-                {
-                    multiPageImage.EmbedDigitalSignature("SecretPassword123");
-                }
+                // NOTE: Aspose.Imaging does not provide a direct API for PDF password protection.
+                // If password protection is required, consider using Aspose.PDF or another library.
 
-                // Save the image as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -58,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a healthcare application needs to securely share patient diagrams stored as OTG files by converting them to password‑protected PDF reports using Aspose.Imaging for .NET.
- * 2. When an engineering firm wants to archive multi‑page OTG schematics as encrypted PDFs to comply with data‑privacy regulations.
- * 3. When a legal document management system must transform OTG evidence images into PDF files with access restrictions before uploading them to a case‑file repository.
- * 4. When a construction project portal automatically converts OTG site‑plan images to PDF and applies a password to prevent unauthorized viewing by subcontractors.
- * 5. When a desktop utility processes batches of OTG drawings, rasterizes them with Aspose.Imaging, and saves them as PDF files that require a password to open, ensuring confidential design data stays protected.
+ * 1. When you need to archive engineering drawings stored as OTG files by converting them to PDF documents in a C# application.
+ * 2. When you want to generate PDF reports from OTG images while preserving original dimensions and background color using Aspose.Imaging.
+ * 3. When an automated workflow must batch‑process OTG files into PDFs before uploading them to a document management system.
+ * 4. When you need to protect the generated PDF with a password, you can extend this code by integrating Aspose.PDF to add encryption after conversion.
+ * 5. When a desktop utility must validate the existence of OTG files, create output folders, and safely handle conversion errors in .NET.
  */
