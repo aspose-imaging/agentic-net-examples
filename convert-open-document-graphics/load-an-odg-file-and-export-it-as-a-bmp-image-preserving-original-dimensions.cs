@@ -1,18 +1,19 @@
+// HOW-TO: Convert ODG to BMP with Original Size Using Aspose.Imaging C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
+        // Wrap the whole logic in a try-catch to handle unexpected errors gracefully
         try
         {
             // Hardcoded input and output file paths
-            string inputPath = @"C:\temp\sample.odg";
-            string outputPath = @"C:\temp\sample.bmp";
+            string inputPath = @"C:\temp\input.odg";
+            string outputPath = @"C:\temp\output.bmp";
 
             // Verify that the input file exists
             if (!File.Exists(inputPath))
@@ -21,22 +22,25 @@ class Program
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure the output directory exists (creates it if necessary)
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the ODG image
+            // Load the ODG image using Aspose.Imaging
             using (Image image = Image.Load(inputPath))
             {
-                // Configure BMP save options with vector rasterization to preserve original dimensions
+                // Prepare BMP save options
                 BmpOptions bmpOptions = new BmpOptions();
 
-                // Set rasterization options: use the source image size and a white background
+                // Configure rasterization to preserve original dimensions
                 OdgRasterizationOptions rasterOptions = new OdgRasterizationOptions
                 {
-                    PageSize = image.Size,
-                    BackgroundColor = Color.White
+                    // Optional: set a background color if needed
+                    BackgroundColor = Color.White,
+                    // Preserve the original size of the vector image
+                    PageSize = image.Size
                 };
 
+                // Assign the rasterization options to the BMP options
                 bmpOptions.VectorRasterizationOptions = rasterOptions;
 
                 // Save the image as BMP
@@ -45,6 +49,7 @@ class Program
         }
         catch (Exception ex)
         {
+            // Output any error messages without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -52,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must convert OpenDocument graphics (ODG) files into legacy BMP images for compatibility with older Windows software while keeping the original size.
- * 2. When a developer needs to generate thumbnail previews of ODG drawings in BMP format for a file‑explorer UI that only supports raster images.
- * 3. When an automated reporting tool has to embed ODG diagrams into a PDF that requires BMP images with a white background and exact dimensions.
- * 4. When a batch‑processing script must migrate a library of ODG assets to BMP for use in a game engine that does not support vector formats.
- * 5. When a document management system needs to store ODG files as BMP snapshots to enable fast image indexing and search based on pixel dimensions.
+ * 1. When you need to embed an OpenDocument graphic into a Windows application that only supports BMP files, preserving its exact dimensions.
+ * 2. When generating thumbnails for ODG drawings in a document management system that stores images as BMP for compatibility.
+ * 3. When automating a migration of legacy ODG assets to BMP format for use in legacy printing pipelines that require fixed‑size raster images.
+ * 4. When creating a server‑side service that receives ODG uploads and returns BMP copies with the original size for further processing.
+ * 5. When developing a batch conversion tool that converts multiple ODG files to BMP while keeping the original vector dimensions intact.
  */
