@@ -1,15 +1,11 @@
+// HOW-TO: Batch Convert EPS Files to PNG JPG or PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Png;
 using Aspose.Imaging.FileFormats.Jpeg;
-using Aspose.Imaging.FileFormats.Bmp;
-using Aspose.Imaging.FileFormats.Gif;
-using Aspose.Imaging.FileFormats.Tiff;
 using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Webp;
-using Aspose.Imaging.FileFormats.Tiff.Enums;
 
 class Program
 {
@@ -21,10 +17,6 @@ class Program
             string inputDirectory = "Input";
             string outputDirectory = "Output";
 
-            // Ensure directories exist
-            Directory.CreateDirectory(inputDirectory);
-            Directory.CreateDirectory(outputDirectory);
-
             // Get all EPS files in the input directory
             string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
 
@@ -34,68 +26,46 @@ class Program
                 return;
             }
 
-            // Ask user for desired output format
-            Console.WriteLine("Select output format (png/jpg/bmp/gif/tiff/pdf/webp):");
-            string format = Console.ReadLine()?.Trim().ToLowerInvariant();
+            // Prompt user for target format
+            Console.WriteLine("Enter target format (png, jpg, pdf):");
+            string format = Console.ReadLine()?.Trim().ToLower();
 
             foreach (string inputPath in epsFiles)
             {
-                // Validate input file existence
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
+                // Determine output file path based on selected format
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputExtension;
-                ImageOptionsBase options;
-
-                switch (format)
-                {
-                    case "png":
-                        outputExtension = "png";
-                        options = new PngOptions();
-                        break;
-                    case "jpg":
-                    case "jpeg":
-                        outputExtension = "jpg";
-                        options = new JpegOptions();
-                        break;
-                    case "bmp":
-                        outputExtension = "bmp";
-                        options = new BmpOptions();
-                        break;
-                    case "gif":
-                        outputExtension = "gif";
-                        options = new GifOptions();
-                        break;
-                    case "tiff":
-                        outputExtension = "tiff";
-                        options = new TiffOptions(TiffExpectedFormat.Default);
-                        break;
-                    case "pdf":
-                        outputExtension = "pdf";
-                        options = new PdfOptions();
-                        break;
-                    case "webp":
-                        outputExtension = "webp";
-                        options = new WebPOptions();
-                        break;
-                    default:
-                        Console.WriteLine($"Unsupported format '{format}'. Skipping file {inputPath}.");
-                        continue;
-                }
-
-                string outputPath = Path.Combine(outputDirectory, $"{fileNameWithoutExt}.{outputExtension}");
+                string extension = format == "jpg" ? "jpg" : format;
+                string outputPath = Path.Combine(outputDirectory, $"{fileNameWithoutExt}.{extension}");
 
                 // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load EPS image and save in chosen format
+                // Load EPS image and save in the chosen format
                 using (Image image = Image.Load(inputPath))
                 {
-                    image.Save(outputPath, options);
+                    switch (format)
+                    {
+                        case "png":
+                            image.Save(outputPath, new PngOptions());
+                            break;
+                        case "jpg":
+                        case "jpeg":
+                            image.Save(outputPath, new JpegOptions());
+                            break;
+                        case "pdf":
+                            image.Save(outputPath, new PdfOptions());
+                            break;
+                        default:
+                            Console.WriteLine($"Unsupported format: {format}");
+                            return;
+                    }
                 }
 
                 Console.WriteLine($"Converted '{inputPath}' to '{outputPath}'.");
@@ -110,9 +80,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to build a Windows desktop tool that lets graphic designers batch‑convert EPS artwork into PNG, JPEG, BMP, GIF, TIFF, PDF, or WebP for web publishing or print workflows.
- * 2. When a developer wants to integrate Aspose.Imaging into a C# utility that automatically scans a folder, reads multiple EPS files and outputs them in a user‑selected raster format for inclusion in a content‑management system.
- * 3. When a developer must provide a simple UI for marketing teams to select several EPS logos and export them as high‑resolution TIFF or PDF files for brand‑compliant collateral.
- * 4. When a developer is creating a file‑conversion service that receives EPS uploads, lets end‑users pick the desired output format, and uses Aspose.Imaging to generate the corresponding PNG, JPG or WebP images for responsive web design.
- * 5. When a developer needs to implement batch image processing in a .NET application that validates EPS file existence, applies Aspose.Imaging options, and saves the results with appropriate extensions for downstream automation scripts.
+ * 1. When a developer needs a desktop tool that lets users pick multiple EPS files and export them as PNG, JPEG, or PDF for web or print distribution.
+ * 2. When an automated build process must batch‑convert a directory of EPS graphics into raster images to embed them in a reporting dashboard.
+ * 3. When a branding workflow requires converting EPS logos into various image formats to satisfy client specifications across different platforms.
+ * 4. When a migration utility has to transform legacy EPS artwork into PDF documents for long‑term archival and compliance.
+ * 5. When a C# application must generate preview thumbnails from EPS files in several formats for a file‑management user interface.
  */
