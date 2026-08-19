@@ -1,7 +1,9 @@
+// HOW-TO: Convert ODG File to PDF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging;
 
 class Program
 {
@@ -10,8 +12,8 @@ class Program
         try
         {
             // Hardcoded input and output file paths
-            string inputPath = "input/input.odg";
-            string outputPath = "output/output.pdf";
+            string inputPath = "input.odg";
+            string outputPath = "output\\converted.pdf";
 
             // Verify that the input file exists
             if (!File.Exists(inputPath))
@@ -33,14 +35,14 @@ class Program
                     PageSize = image.Size
                 };
 
-                // Configure PDF save options and attach rasterization options
-                PdfOptions saveOptions = new PdfOptions
+                // Set up PDF save options and attach rasterization options
+                PdfOptions pdfOptions = new PdfOptions
                 {
                     VectorRasterizationOptions = rasterizationOptions
                 };
 
                 // Save the image as PDF
-                image.Save(outputPath, saveOptions);
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
@@ -52,9 +54,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert OpenDocument graphics (ODG) diagrams created in LibreOffice into PDF files for easy sharing with clients who only have PDF viewers.
- * 2. When an automated reporting system must batch‑process ODG charts and embed them in PDF reports without manually opening each file.
- * 3. When a web application allows users to upload ODG illustrations and instantly provides a downloadable PDF version for printing or archiving.
- * 4. When a document management workflow requires converting ODG assets to PDF to ensure consistent rendering across different operating systems.
- * 5. When a C# desktop tool integrates Aspose.Imaging to rasterize ODG pages with a white background and save them as PDF for inclusion in legal or compliance documentation.
+ * 1. When you need to programmatically generate printable PDF reports from OpenDocument graphics (ODG) files in a .NET application.
+ * 2. When a document management system must archive ODG drawings as PDF to ensure universal viewing without requiring LibreOffice.
+ * 3. When an automated workflow converts user‑uploaded ODG diagrams into PDF for email attachment or web preview.
+ * 4. When a batch process migrates a library of ODG assets to PDF to reduce file size and simplify distribution.
+ * 5. When a C# service renders ODG artwork with a white background and saves it as PDF for inclusion in larger PDF portfolios.
  */
