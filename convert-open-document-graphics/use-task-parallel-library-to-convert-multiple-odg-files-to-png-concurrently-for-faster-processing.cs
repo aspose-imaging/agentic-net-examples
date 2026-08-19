@@ -1,3 +1,4 @@
+// HOW-TO: Convert Multiple ODG Files to PNG in Parallel with C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -11,8 +12,8 @@ class Program
     {
         try
         {
-            // Hardcoded list of ODG files to convert
-            string[] inputFiles = new string[]
+            // Hard‑coded list of ODG files to convert
+            string[] inputFiles = new[]
             {
                 @"C:\Images\sample1.odg",
                 @"C:\Images\sample2.odg",
@@ -29,17 +30,18 @@ class Program
                     return;
                 }
 
-                // Determine output PNG path (same folder, .png extension)
+                // Determine output PNG path
                 string outputPath = Path.ChangeExtension(inputPath, ".png");
 
-                // Ensure the output directory exists
+                // Ensure output directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load the ODG image
+                // Load ODG image and save as PNG
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Configure PNG save options with rasterization settings
                     var pngOptions = new PngOptions();
+
+                    // Set rasterization options required for vector formats
                     var rasterOptions = new OdgRasterizationOptions
                     {
                         PageSize = image.Size,
@@ -47,7 +49,6 @@ class Program
                     };
                     pngOptions.VectorRasterizationOptions = rasterOptions;
 
-                    // Save the image as PNG
                     image.Save(outputPath, pngOptions);
                 }
             });
@@ -61,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert a large collection of OpenDocument Graphics (ODG) drawings to PNG thumbnails for a web gallery, they can use this parallel C# code to speed up processing.
- * 2. When an automated document‑management system must generate PNG previews of newly uploaded ODG files on a Windows server, the Task Parallel Library loop enables concurrent conversion.
- * 3. When a desktop application has to rasterize multiple ODG diagrams into high‑resolution PNG assets for printing, this code provides fast, multi‑core execution.
- * 4. When a cloud‑based image‑processing pipeline processes user‑submitted ODG files and stores PNG versions in the same directory, the parallel conversion reduces overall latency.
- * 5. When a CI/CD build step validates that all ODG resources in a project are correctly rendered as PNGs before packaging, the parallel approach ensures the checks complete quickly.
+ * 1. When you need to batch‑convert a large collection of OpenDocument graphics (ODG) to PNG images quickly, this parallel code speeds up processing on multi‑core machines.
+ * 2. When an automated workflow must generate raster previews of ODG diagrams for web thumbnails, the example shows how to rasterize each page with a white background using Aspose.Imaging.
+ * 3. When a server‑side service processes user‑uploaded ODG files and must save them as PNGs without blocking other requests, the Parallel.ForEach pattern keeps the API responsive.
+ * 4. When you are building a desktop utility that converts many vector drawings to PNG in one click, the code demonstrates directory handling and error checking for each file.
+ * 5. When you want to leverage the Task Parallel Library to maximize CPU utilization while converting vector formats to raster formats in C#, this sample provides a ready‑to‑use implementation.
  */
