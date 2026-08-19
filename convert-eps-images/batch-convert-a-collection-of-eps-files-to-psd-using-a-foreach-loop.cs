@@ -1,49 +1,61 @@
+// HOW-TO: Batch Convert Multiple EPS Files to PSD Using C# Loop (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 
-class Program
+public class Program
 {
-    static void Main()
+    public static void Main(string[] args)
     {
         try
         {
-            // Hardcoded list of EPS files to convert
-            string[] inputFiles = new string[]
-            {
-                @"C:\Images\Input1.eps",
-                @"C:\Images\Input2.eps",
-                @"C:\Images\Input3.eps"
-            };
+            // Define input and output directories relative to the current directory
+            string inputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Input");
+            string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Output");
 
-            foreach (string inputPath in inputFiles)
+            // Ensure the input directory exists; if not, create it and exit
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                return;
+            }
+
+            // Ensure the output directory exists
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            // Get all EPS files in the input directory
+            string[] files = Directory.GetFiles(inputDirectory, "*.eps");
+
+            foreach (string inputPath in files)
+            {
+                // Verify the input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
                     return;
                 }
 
-                // Determine output path (same folder, .psd extension)
-                string outputPath = Path.ChangeExtension(inputPath, ".psd");
+                // Build the output PSD file path
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
+                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".psd");
 
-                // Ensure output directory exists
+                // Ensure the output directory for this file exists
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                // Load EPS image
-                using (EpsImage image = (EpsImage)Image.Load(inputPath))
+                // Load the EPS image and cast to EpsImage
+                using (Aspose.Imaging.FileFormats.Eps.EpsImage epsImage = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(inputPath))
                 {
-                    // Prepare PSD save options (default settings)
+                    // Create PSD save options
                     var psdOptions = new PsdOptions();
 
-                    // Save as PSD
-                    image.Save(outputPath, psdOptions);
+                    // Save the image as PSD
+                    epsImage.Save(outputPath, psdOptions);
                 }
-
-                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -55,9 +67,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design workflow requires converting multiple Adobe Illustrator EPS assets into Photoshop PSD files for layer‑preserving editing, a developer can use this foreach loop to batch process the conversion in C#.
- * 2. When an automated build pipeline must generate PSD previews of EPS logos stored in a repository, the code enables the pipeline to verify file existence, create output directories, and save each image with Aspose.Imaging.
- * 3. When a web service needs to accept a list of uploaded EPS files and return PSD versions for downstream compositing, the snippet demonstrates how to iterate over the collection and perform the conversion safely.
- * 4. When a legacy printing system provides EPS artwork but the downstream workflow only supports PSD, this batch conversion routine lets developers quickly migrate the files without manual intervention.
- * 5. When a desktop utility is built to let users select multiple EPS files and convert them to PSD with default options, the foreach loop handles the per‑file loading, option setup, and error handling in a concise C# implementation.
+ * 1. When you need to automatically transform a folder of vector EPS artwork into editable Photoshop PSD layers for a design pipeline.
+ * 2. When a print‑to‑digital workflow requires converting client‑supplied EPS logos to PSD files before further editing in Adobe Photoshop.
+ * 3. When you want to script a bulk image migration from legacy EPS assets to PSD format in a C# application without manual intervention.
+ * 4. When integrating Aspose.Imaging into a server‑side service that processes incoming EPS files and stores them as PSDs for downstream processing.
+ * 5. When preparing a batch of EPS illustrations for a web‑based preview system that only supports PSD thumbnails generated via C#.
  */

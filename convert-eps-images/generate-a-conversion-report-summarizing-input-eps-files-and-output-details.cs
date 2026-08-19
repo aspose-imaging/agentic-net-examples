@@ -1,76 +1,64 @@
+// HOW-TO: Generate EPS Image Summary Report With Width Height Bounding Box In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Text;
+using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Eps;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
-            // Hardcoded list of EPS files to process
-            string[] inputPaths = { "sample1.eps", "sample2.eps" };
-            // Hardcoded output directory
-            string outputDir = "converted";
+            // Define input and output directories
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
+            string reportPath = Path.Combine(outputDirectory, "Report.txt");
 
-            var report = new StringBuilder();
-            report.AppendLine("EPS Conversion Report");
-            report.AppendLine("----------------------");
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(reportPath));
 
-            foreach (var inputPath in inputPaths)
+            // Get all EPS files in the input directory
+            string[] epsFiles = Directory.GetFiles(inputDirectory, "*.eps");
+
+            // Prepare report lines
+            List<string> reportLines = new List<string>();
+            reportLines.Add("FileName,Width,Height,BoundingBox,PreviewCount");
+
+            foreach (string filePath in epsFiles)
             {
-                // Verify that the input file exists
-                if (!File.Exists(inputPath))
+                // Verify the input file exists
+                if (!File.Exists(filePath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
+                    Console.Error.WriteLine($"File not found: {filePath}");
                     return;
                 }
 
                 // Load the EPS image
-                using (var image = (EpsImage)Image.Load(inputPath))
+                using (Image image = Image.Load(filePath))
                 {
-                    // Extract useful metadata
-                    string creator = image.Creator ?? "N/A";
-                    DateTime creationDate = image.CreationDate;
-                    string title = image.Title ?? "N/A";
-                    int width = image.Width;
-                    int height = image.Height;
-
-                    // Determine output PNG path
-                    string outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(inputPath) + ".png");
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Configure rasterization options for EPS to PNG conversion
-                    var pngOptions = new PngOptions
+                    var epsImage = image as Aspose.Imaging.FileFormats.Eps.EpsImage;
+                    if (epsImage == null)
                     {
-                        VectorRasterizationOptions = new EpsRasterizationOptions
-                        {
-                            PageWidth = width,
-                            PageHeight = height
-                        }
-                    };
+                        Console.Error.WriteLine($"Not an EPS image: {filePath}");
+                        continue;
+                    }
 
-                    // Save the image as PNG
-                    image.Save(outputPath, pngOptions);
+                    // Extract required details
+                    string fileName = Path.GetFileName(filePath);
+                    int width = epsImage.Width;
+                    int height = epsImage.Height;
+                    string boundingBox = epsImage.BoundingBox.ToString();
+                    int previewCount = epsImage.PreviewImageCount;
 
-                    // Append details to the report
-                    report.AppendLine($"Input: {inputPath}");
-                    report.AppendLine($"  Creator: {creator}");
-                    report.AppendLine($"  CreationDate: {creationDate}");
-                    report.AppendLine($"  Title: {title}");
-                    report.AppendLine($"  Dimensions: {width}x{height}");
-                    report.AppendLine($"  Output: {outputPath}");
-                    report.AppendLine();
+                    // Add a line to the report
+                    reportLines.Add($"{fileName},{width},{height},{boundingBox},{previewCount}");
                 }
             }
 
-            // Output the conversion report
-            Console.WriteLine(report.ToString());
+            // Write the report to the output file
+            File.WriteAllLines(reportPath, reportLines);
         }
         catch (Exception ex)
         {
@@ -81,9 +69,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to batch‑convert company EPS logos into PNGs for a website while capturing creator and creation date information for an audit report.
- * 2. When an e‑commerce platform must transform EPS product illustrations into PNG thumbnails and log each file’s title, dimensions, and source metadata for inventory tracking.
- * 3. When a publishing workflow requires converting EPS artwork to PNG for print‑to‑digital pipelines and generating a summary that records the original page size and author details.
- * 4. When a mobile app team wants to rasterize EPS icons to PNG assets at their native resolution and produce a conversion log to verify that all expected files were processed.
- * 5. When a document management system needs to archive EPS diagrams as PNG previews and store a concise report containing file paths, image dimensions, and metadata for future retrieval.
+ * 1. When you need to batch‑process a folder of EPS files and create a CSV‑style report of each image’s dimensions and bounding box for quality‑control purposes.
+ * 2. When an automated workflow must verify the number of preview images embedded in EPS documents before publishing them to a print‑ready catalog.
+ * 3. When a migration script has to log EPS file metadata such as width, height, and bounding box to compare against a target format’s specifications.
+ * 4. When a desktop application wants to display a summary table of all EPS assets in a project directory for quick inventory management.
+ * 5. When a CI/CD pipeline requires generating a text report of EPS image properties to ensure assets meet predefined size constraints.
  */

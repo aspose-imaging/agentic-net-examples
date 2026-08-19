@@ -1,66 +1,64 @@
+// HOW-TO: Convert SVG to PNG in C# with Aspose.Imaging and File Checks (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Png;
-using Aspose.Imaging.FileFormats.Tiff;
 
-class Program
+namespace AsposeImagingDemo
 {
-    static void Main()
+    // This program demonstrates a typical document conversion workflow using Aspose.Imaging.
+    // It loads an SVG file, converts it to PNG, and saves the result.
+    // The code follows the required safety rules:
+    //   • Hard‑coded input and output paths.
+    //   • Input file existence check without throwing.
+    //   • Output directory creation unconditionally.
+    //   • All logic wrapped in a try/catch that reports errors to the console.
+    class Program
     {
-        try
+        static void Main()
         {
-            // Hardcoded paths
-            string inputPath = @"C:\temp\input.tif";
-            string outputPath = @"C:\temp\output.png";
-            string readmePath = @"C:\temp\README.txt";
+            // Hard‑coded paths – adjust these values for your environment.
+            string inputPath = @"C:\Images\input.svg";
+            string outputPath = @"C:\Images\output.png";
 
-            // Verify input file exists
+            // Verify that the source file exists.
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directories exist
+            // Ensure the output directory exists (creates it if missing).
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-            Directory.CreateDirectory(Path.GetDirectoryName(readmePath));
 
-            // Load the source TIFF image
-            using (var image = (TiffImage)Image.Load(inputPath))
+            try
             {
-                // Prepare PNG options
-                var pngOptions = new PngOptions();
+                // Load the source document. Aspose.Imaging automatically detects the format.
+                using (Image image = Image.Load(inputPath))
+                {
+                    // Prepare PNG save options (default settings are sufficient for most cases).
+                    var pngOptions = new PngOptions();
 
-                // Save the image as PNG
-                image.Save(outputPath, pngOptions);
+                    // Save the image in the desired format.
+                    image.Save(outputPath, pngOptions);
+                }
+
+                Console.WriteLine($"Conversion succeeded. Output saved to: {outputPath}");
             }
-
-            // Write a README file describing the conversion steps
-            string readmeContent = @"README - Aspose.Imaging Conversion Steps
-
-1. Load the source image using Image.Load.
-2. Choose appropriate output format options (e.g., PngOptions for PNG).
-3. Call Image.Save with the output path and options.
-4. Ensure output directories exist before saving.
-5. Handle errors with try/catch and check file existence.
-
-Sample code is provided in Program.cs.";
-            File.WriteAllText(readmePath, readmeContent);
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
+            catch (Exception ex)
+            {
+                // Any unexpected error is reported without crashing the application.
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
         }
     }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a high‑resolution TIFF scan into a PNG thumbnail for a web gallery, they can use this code to load the TIFF, set PngOptions, and save the PNG to a web‑accessible folder.
- * 2. When an automated batch job must verify that source image files exist before processing and create missing output directories, this snippet demonstrates the necessary File.Exists and Directory.CreateDirectory checks.
- * 3. When integrating Aspose.Imaging into a C# application to replace legacy command‑line tools for image format conversion, the example shows how to use Image.Load and Image.Save with format‑specific options.
- * 4. When generating documentation alongside image conversion, the program writes a README.txt that outlines the conversion steps, illustrating how to combine file I/O with image processing in .NET.
- * 5. When handling unexpected errors during image conversion, the try/catch block in this code provides a pattern for logging error messages without crashing the application.
+ * 1. When you need to programmatically transform vector SVG graphics into raster PNG files for web thumbnails or UI assets in a .NET application.
+ * 2. When your automation script must verify the source SVG exists before conversion to avoid runtime errors.
+ * 3. When you want to ensure the destination folder is created automatically so the PNG can be saved without manual directory setup.
+ * 4. When you require a simple try/catch block that logs conversion failures to the console instead of crashing the service.
+ * 5. When you prefer default PNG options but still need explicit control over input and output paths in a C# console utility.
  */

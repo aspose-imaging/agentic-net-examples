@@ -1,21 +1,23 @@
+// HOW-TO: Convert EPS To PDF While Preserving Vector Paths In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
-using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Pdf;      // PdfOptions, PdfCoreOptions, PdfComplianceVersion
+using Aspose.Imaging.FileFormats.Eps;      // EpsImage
 
 class Program
 {
     static void Main()
     {
+        // All runtime errors are caught and reported
         try
         {
-            // Hardcoded input and output file paths
+            // Hard‑coded input and output file paths
             string inputPath = "Sample.eps";
             string outputPath = "Sample.pdf";
 
-            // Verify that the input EPS file exists
+            // Verify that the EPS source file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -28,8 +30,8 @@ class Program
             // Load the EPS image as a vector image
             using (var image = (EpsImage)Image.Load(inputPath))
             {
-                // Configure PDF options to preserve vector data and set compliance
-                var options = new PdfOptions
+                // Configure PDF options – keep vector data and set compliance if needed
+                var pdfOptions = new PdfOptions
                 {
                     PdfCoreOptions = new PdfCoreOptions
                     {
@@ -37,13 +39,13 @@ class Program
                     }
                 };
 
-                // Save the EPS as a PDF while keeping vector paths editable
-                image.Save(outputPath, options);
+                // Save as PDF while preserving vector paths
+                image.Save(outputPath, pdfOptions);
             }
         }
         catch (Exception ex)
         {
-            // Report any runtime errors without crashing
+            // Report any unexpected errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -51,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to batch‑convert EPS artwork to PDF/A‑1b compliant documents while keeping the original vector paths editable for downstream CAD or illustration tools.
- * 2. When a .NET application must generate searchable, high‑resolution PDFs from EPS logos without rasterizing them, ensuring the vectors remain scalable and editable.
- * 3. When an automated publishing workflow requires preserving vector data during EPS‑to‑PDF conversion so that the resulting PDFs can be further annotated or modified in Adobe Illustrator.
- * 4. When a legal compliance system needs to archive EPS technical drawings as PDF/A‑1b files while retaining editability for future regulatory reviews.
- * 5. When a cloud‑based image processing service uses Aspose.Imaging for C# to convert client‑uploaded EPS files to PDFs without losing vector fidelity, enabling seamless integration with PDF viewers and editors.
+ * 1. When you need to generate a PDF from an EPS logo without losing its edit‑able vector quality.
+ * 2. When a printing workflow requires PDF/A‑1b compliance for archival while keeping the original EPS artwork scalable.
+ * 3. When a web application must convert user‑uploaded EPS files to searchable PDFs without rasterizing the graphics.
+ * 4. When automating batch processing of design assets, you want each EPS converted to a vector‑based PDF for downstream editing in Illustrator.
+ * 5. When integrating Aspose.Imaging into a C# service that creates PDF reports from vector illustrations while preserving path data for later modifications.
  */

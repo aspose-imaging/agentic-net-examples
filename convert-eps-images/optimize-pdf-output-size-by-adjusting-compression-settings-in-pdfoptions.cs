@@ -1,3 +1,4 @@
+// HOW-TO: Reduce PDF File Size from PNG Using Flate Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -10,34 +11,34 @@ class Program
     {
         // Hardcoded input and output paths
         string inputPath = @"C:\Images\sample.png";
-        string outputPath = @"C:\Output\sample.pdf";
+        string outputPath = @"C:\Images\sample_output.pdf";
 
         try
         {
-            // Verify that the input file exists
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure the output directory exists
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up PDF options with compression to reduce file size
+                // Configure PDF options with compression to reduce file size
                 var pdfOptions = new PdfOptions
                 {
                     PdfCoreOptions = new PdfCoreOptions
                     {
-                        Compression = PdfImageCompressionOptions.Flate,
-                        JpegQuality = 75 // optional lower JPEG quality for further reduction
+                        // Use Flate compression (lossless and generally provides good compression)
+                        Compression = PdfImageCompressionOptions.Flate
                     }
                 };
 
-                // Save the image as a PDF using the configured options
+                // Save the image as PDF using the configured options
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -50,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to generate downloadable PDFs from PNG screenshots while keeping the file size low for faster user downloads, developers can use this code to apply Flate compression and lower JPEG quality.
- * 2. When an automated reporting system creates PDF invoices from high‑resolution product images and must stay within email attachment size limits, the compression settings in PdfOptions help shrink the PDFs.
- * 3. When a document management workflow converts scanned PNG files to searchable PDFs and wants to reduce storage costs on a cloud server, developers can adjust the PdfCoreOptions to compress the output.
- * 4. When a mobile app generates PDF catalogs from user‑uploaded PNG graphics and must minimize bandwidth usage during sync, the code’s compression configuration ensures compact PDFs.
- * 5. When a batch processing script archives large collections of PNG assets as PDFs for long‑term retention and needs to meet archival size constraints, the Flate compression and JPEG quality settings optimize the resulting PDF size.
+ * 1. When you need to convert high‑resolution PNG screenshots to PDF while keeping the resulting file small for email attachments.
+ * 2. When generating printable PDFs from product images and want lossless compression to preserve quality without bloating file size.
+ * 3. When automating batch processing of PNG assets into PDFs for a web portal that limits upload size.
+ * 4. When integrating Aspose.Imaging into a C# application that must store archived PDFs with minimal storage consumption.
+ * 5. When creating PDF reports from PNG charts and require Flate compression to meet corporate document size policies.
  */
