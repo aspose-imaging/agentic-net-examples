@@ -1,3 +1,4 @@
+// HOW-TO: Load EPS file and convert to PNG using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,8 +9,8 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.eps";
-        string outputPath = "output.png";
+        string inputPath = @"C:\Images\sample.eps";
+        string outputPath = @"C:\Images\result.png";
 
         try
         {
@@ -21,13 +22,14 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load EPS image with default options
             using (Image image = Image.Load(inputPath))
             {
-                // Example: save the loaded image as PNG (optional)
-                image.Save(outputPath, new PngOptions());
+                // Example operation: save as PNG (optional)
+                var pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -39,9 +41,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert a vector EPS file received from a designer into a raster PNG for web display, they can load the EPS with Image.Load and save it as PNG.
- * 2. When an automated batch job must validate that an EPS asset exists before processing it, the code checks the file, loads it with default options, and optionally writes a PNG preview.
- * 3. When integrating a legacy printing workflow that supplies EPS logos, a C# service can use Aspose.Imaging to load the EPS and generate a PNG thumbnail for UI galleries.
- * 4. When building a document conversion tool that extracts embedded EPS images and stores them as PNGs for downstream PDF generation, the developer can employ Image.Load with default settings.
- * 5. When troubleshooting image rendering issues, a developer can quickly load an EPS file using Aspose.Imaging and save it as PNG to compare the raster output against expected results.
+ * 1. When you need to read a vector EPS artwork in a .NET application and render it as a raster PNG for web display.
+ * 2. When you must batch‑process EPS logos and save them as PNG files for use in mobile apps.
+ * 3. When an automated workflow requires validating the existence of an EPS file before converting it to a lossless PNG.
+ * 4. When you want to ensure the output directory is created automatically while converting EPS to PNG with Aspose.Imaging.
+ * 5. When handling user‑uploaded EPS files and need to safely load and re‑encode them to PNG to prevent format‑specific security issues.
  */
