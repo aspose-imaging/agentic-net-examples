@@ -1,9 +1,8 @@
+// HOW-TO: Convert CorelDRAW CDR to PDF with Embedded Fonts in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -11,26 +10,30 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "Input/sample.cdr";
             string outputPath = "Output/sample.pdf";
-            string fontFolderPath = "Fonts";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            var loadOptions = new LoadOptions();
-            loadOptions.AddCustomFontSource(GetFontSource, fontFolderPath);
+            // Set default font to be embedded
+            FontSettings.DefaultFontName = "Arial";
 
-            using (Image image = Image.Load(inputPath, loadOptions))
+            // Load CDR image
+            using (Image image = Image.Load(inputPath))
             {
-                var pdfOptions = new PdfOptions();
+                // Configure PDF options with CDR rasterization settings
+                PdfOptions pdfOptions = new PdfOptions();
 
-                var rasterOptions = new CdrRasterizationOptions
+                CdrRasterizationOptions rasterOptions = new CdrRasterizationOptions
                 {
                     TextRenderingHint = TextRenderingHint.SingleBitPerPixel,
                     SmoothingMode = SmoothingMode.None,
@@ -39,6 +42,7 @@ class Program
 
                 pdfOptions.VectorRasterizationOptions = rasterOptions;
 
+                // Save as PDF with embedded fonts
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -47,31 +51,13 @@ class Program
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
-
-    private static Aspose.Imaging.CustomFontHandler.CustomFontData[] GetFontSource(params object[] args)
-    {
-        string fontsPath = args.Length > 0 ? args[0]?.ToString() : string.Empty;
-        var result = new List<Aspose.Imaging.CustomFontHandler.CustomFontData>();
-
-        if (!string.IsNullOrEmpty(fontsPath) && Directory.Exists(fontsPath))
-        {
-            foreach (var fontFile in Directory.GetFiles(fontsPath))
-            {
-                byte[] fontBytes = File.ReadAllBytes(fontFile);
-                string fontName = Path.GetFileNameWithoutExtension(fontFile);
-                result.Add(new Aspose.Imaging.CustomFontHandler.CustomFontData(fontName, fontBytes));
-            }
-        }
-
-        return result.ToArray();
-    }
 }
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design studio needs to automate the batch conversion of CorelDRAW (.cdr) artwork into print‑ready PDF files with all custom fonts embedded to guarantee consistent typography across devices.
- * 2. When an e‑learning platform must generate PDF handouts from CDR lesson diagrams on the fly, ensuring the embedded fonts preserve the original layout without requiring the end‑user to install the fonts.
- * 3. When a document management system integrates Aspose.Imaging to convert vendor‑supplied CDR marketing assets into searchable PDFs while embedding the corporate typefaces stored in a dedicated Fonts folder.
- * 4. When a cloud‑based printing service processes customer‑uploaded CDR files and needs to embed the selected fonts in the resulting PDF to meet PDF/X‑1a compliance for commercial printing.
- * 5. When a software developer builds a C# utility that extracts vector graphics from CorelDRAW files and saves them as PDFs with embedded fonts to maintain visual fidelity for archival and legal documentation.
+ * 1. When you need to generate a PDF from a CorelDRAW CDR file while ensuring all text uses embedded fonts for consistent printing across devices.
+ * 2. When automating a batch conversion pipeline that transforms design assets into PDF documents with precise rasterization settings in a .NET application.
+ * 3. When creating a web service that receives CDR uploads and returns PDF files with fonts embedded to avoid missing‑font issues on client machines.
+ * 4. When preserving the visual fidelity of vector text in CDR files by rasterizing them with specific smoothing and positioning options before saving as PDF.
+ * 5. When integrating Aspose.Imaging into a C# workflow to programmatically convert legacy CorelDRAW files to PDF for archival or compliance purposes.
  */
