@@ -1,3 +1,4 @@
+// HOW-TO: Convert PNG to JPEG with Safe Disposal and Error Handling in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,30 +9,36 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = "input.jpg";
-        string outputPath = "output.png";
+        string inputPath = "input.png";
+        string outputPath = "output.jpg";
 
-        // Verify input file exists
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
+        // Global exception handling
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
             Image image = null;
             try
             {
                 // Load the source image
                 image = Image.Load(inputPath);
 
-                // Save the image in PNG format
-                var pngOptions = new PngOptions();
-                image.Save(outputPath, pngOptions);
+                // Prepare JPEG save options (adjust quality as needed)
+                var jpegOptions = new JpegOptions
+                {
+                    Quality = 90
+                };
+
+                // Save the image in the desired format
+                image.Save(outputPath, jpegOptions);
             }
             finally
             {
@@ -44,7 +51,7 @@ class Program
         }
         catch (Exception ex)
         {
-            // Report any errors without crashing
+            // Report any unexpected errors
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -52,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a C# application must convert user‑uploaded JPEG photos to PNG for web display while guaranteeing that the Image object is released even if the conversion fails.
- * 2. When an automated batch job processes a directory of images, checking for file existence and creating output folders before safely converting each JPG to PNG without leaking memory.
- * 3. When a desktop utility allows users to select a source image and export it in a different format, using try‑catch‑finally to handle errors and ensure the image stream is disposed.
- * 4. When a server‑side service receives image paths, validates them, and needs to convert the files while handling IO exceptions and guaranteeing cleanup of the Aspose.Imaging Image instance.
- * 5. When integrating Aspose.Imaging into a CI/CD pipeline that transforms test screenshots from JPEG to PNG, employing nested try‑catch‑finally to report conversion issues without crashing the build.
+ * 1. When you need to batch‑convert user‑uploaded PNG images to JPEG for web delivery while guaranteeing the image object is always released even if the save fails.
+ * 2. When an automated service must generate thumbnail JPEGs from PNG sources and must handle missing files or directory creation errors gracefully.
+ * 3. When integrating image conversion into a C# backend that must log errors without crashing the application and ensure resources are cleaned up.
+ * 4. When processing images in a Windows service that converts scanned PNG files to compressed JPEGs with a specific quality setting and needs reliable disposal to avoid memory leaks.
+ * 5. When building a command‑line tool that transforms PNG assets to JPEG for mobile apps, requiring robust exception handling and proper cleanup of the Aspose.Imaging Image instance.
  */
