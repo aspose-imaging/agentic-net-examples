@@ -1,19 +1,20 @@
+// HOW-TO: Convert Single‑Page CDR to High‑Quality JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Cdr;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\input\sample.cdr";
-        string outputPath = @"C:\output\sample.jpg";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.cdr";
+            string outputPath = @"C:\Images\sample.jpg";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -24,27 +25,22 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load the CDR image
+            // Load the CDR file
             using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Ensure the document has at least one page
-                if (cdrImage.PageCount == 0)
-                {
-                    Console.Error.WriteLine("The CDR file contains no pages.");
-                    return;
-                }
+                // Cache data to avoid further stream reads
+                cdrImage.CacheData();
 
-                // Get the first (single) page
-                CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
-                page.CacheData(); // optional caching for performance
+                // Get the first (and only) page
+                var page = (CdrImagePage)cdrImage.Pages[0];
 
-                // Set high‑quality JPEG options
-                JpegOptions jpegOptions = new JpegOptions
+                // Configure high‑quality JPEG options
+                var jpegOptions = new JpegOptions
                 {
                     Quality = 100 // maximum quality
                 };
 
-                // Save the page as JPEG
+                // Save the page as a JPEG file
                 page.Save(outputPath, jpegOptions);
             }
         }
@@ -57,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a design studio needs to generate a high‑resolution preview image of a single‑page CorelDRAW (CDR) artwork for a web gallery, they can use this C# code to load the CDR file and export it as a 100‑quality JPEG.
- * 2. When an e‑commerce platform receives product illustrations in CDR format and must display them as JPEG thumbnails on product pages, the code converts the first page of the CDR to a high‑quality JPEG automatically.
- * 3. When a document management system archives legacy CDR drawings and requires a JPEG snapshot for quick visual search, developers can employ this snippet to read the CDR and save the first page as a high‑quality JPEG image.
- * 4. When a marketing automation tool needs to embed a CorelDRAW logo into email campaigns, the code loads the single‑page CDR and outputs a lossless‑quality JPEG ready for email clients.
- * 5. When a desktop application offers an “Export as JPEG” feature for users working with single‑page CDR files, this C# example provides the exact steps to load the file, set JPEG quality to 100, and save the result.
+ * 1. When a developer needs to generate a high‑resolution JPEG preview of a CorelDRAW (CDR) design for web or print use.
+ * 2. When an application must convert legacy single‑page CDR files to JPEG format for inclusion in a photo gallery or CMS.
+ * 3. When a reporting system requires embedding a high‑quality image of a CDR page into PDF or Word documents.
+ * 4. When a digital asset management workflow needs to create thumbnail JPEGs from single‑page CDR artwork automatically.
+ * 5. When a client wants to export a CorelDRAW illustration as a maximum‑quality JPEG for marketing or presentation materials.
  */

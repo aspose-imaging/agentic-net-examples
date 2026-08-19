@@ -1,3 +1,4 @@
+// HOW-TO: Convert CDR to JPG with Exception Handling in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,9 +9,10 @@ class Program
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cdr";
-        string outputPath = @"C:\Images\output.jpg";
+        string inputPath = "input.cdr";
+        string outputPath = "output.jpg";
 
+        // Global exception handling
         try
         {
             // Verify input file exists
@@ -23,25 +25,24 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Convert CDR to JPG with its own error handling
+            // Load the CDR file and convert to JPG
             try
             {
-                // Load the CDR image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Set JPEG save options (default quality)
-                    JpegOptions jpegOptions = new JpegOptions();
-
-                    // Save as JPEG
+                    var jpegOptions = new JpegOptions
+                    {
+                        Quality = 90
+                    };
                     image.Save(outputPath, jpegOptions);
                 }
-
-                Console.WriteLine($"Conversion successful: {outputPath}");
             }
-            catch (Exception convEx)
+            catch (Exception conversionEx)
             {
-                // Log conversion-specific exceptions
-                Console.Error.WriteLine($"Conversion error: {convEx.Message}");
+                // Log any conversion-specific exceptions
+                Console.Error.WriteLine($"Conversion error: {conversionEx.Message}");
+                // Re-throw to be caught by outer handler if needed
+                throw;
             }
         }
         catch (Exception ex)
@@ -54,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a .NET application must generate JPEG previews of CorelDRAW (CDR) files for a web gallery and needs robust error handling to log missing files or conversion failures.
- * 2. When an automated document processing pipeline converts user‑uploaded CDR designs to JPG thumbnails and must catch and record runtime exceptions to prevent pipeline crashes.
- * 3. When a desktop utility processes a batch of CDR assets stored on a network share, converting each to JPEG while ensuring that file‑system errors and Aspose.Imaging conversion issues are logged for later review.
- * 4. When a cloud‑based microservice receives CDR images via API, transforms them to JPEG for downstream consumption, and requires try‑catch blocks to capture and log any unexpected .NET or Aspose.Imaging errors.
- * 5. When integrating Aspose.Imaging into a Windows service that monitors a folder for new CDR files, converts them to JPG, and needs comprehensive exception handling to diagnose permission or format‑specific problems.
+ * 1. When you need to batch‑convert CorelDRAW (.cdr) files to JPEG images in a .NET service while safely handling missing files and conversion errors.
+ * 2. When an automated build or CI pipeline must generate preview thumbnails from CDR designs and log any runtime exceptions for troubleshooting.
+ * 3. When a desktop application allows users to upload CDR artwork and you must save it as a high‑quality JPG, ensuring the output folder is created if absent.
+ * 4. When integrating Aspose.Imaging into a server‑side API that receives CDR uploads and returns JPG responses, you need robust error handling to return meaningful error messages.
+ * 5. When migrating legacy design assets to web‑friendly formats and you want a C# script that logs conversion failures without crashing the entire process.
  */

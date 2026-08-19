@@ -1,3 +1,4 @@
+// HOW-TO: Convert CDR to JPEG with Custom EXIF Metadata in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,7 +13,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = @"C:\Images\sample.cdr";
-            string outputPath = @"C:\Images\output.jpg";
+            string outputPath = @"C:\Images\output\sample.jpg";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -27,22 +28,22 @@ class Program
             // Load the CDR file
             using (Image image = Image.Load(inputPath))
             {
-                // Prepare JPEG options with EXIF metadata
-                var jpegOptions = new JpegOptions
-                {
-                    Quality = 90, // example quality setting
-                    ExifData = new JpegExifData()
-                };
+                // Prepare JPEG options with custom EXIF metadata
+                JpegOptions jpegOptions = new JpegOptions();
 
-                // Populate some EXIF fields
-                var exif = jpegOptions.ExifData as JpegExifData;
-                if (exif != null)
+                // Create and populate EXIF data
+                JpegExifData exif = new JpegExifData
                 {
-                    exif.Make = "MyCompany";
-                    exif.Model = "CDRtoJPGConverter";
-                    exif.Software = "Aspose.Imaging";
-                    exif.ImageDescription = "Converted from CDR with embedded EXIF";
-                }
+                    Make = "MyCompany",
+                    Model = "MyModel",
+                    Artist = "John Doe",
+                    Copyright = "© MyCompany 2026",
+                    ImageDescription = "Converted from CDR to JPEG with EXIF"
+                };
+                jpegOptions.ExifData = exif;
+
+                // Optionally set quality (e.g., 90)
+                jpegOptions.Quality = 90;
 
                 // Save as JPEG with the specified options
                 image.Save(outputPath, jpegOptions);
@@ -57,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic design studio needs to batch‑convert CorelDRAW (.cdr) artwork to JPEG for web galleries while preserving camera‑like EXIF tags for cataloging.
- * 2. When an e‑commerce platform automatically generates product thumbnails from CDR source files and wants to embed brand and software information in the JPEG EXIF fields for SEO and asset tracking.
- * 3. When a digital archiving system migrates legacy CDR illustrations to JPEG and must include descriptive metadata such as image description and creator in the EXIF block for searchable archives.
- * 4. When a mobile app backend processes user‑uploaded CDR designs, converts them to high‑quality JPEG, and adds custom EXIF data to identify the conversion tool and maintain image provenance.
- * 5. When a printing service prepares print‑ready JPEGs from CDR files and needs to embed EXIF metadata like make, model, and software to ensure downstream workflow tools recognize the source and processing parameters.
+ * 1. When you need to batch‑convert CorelDRAW (CDR) files to JPEGs while preserving camera‑like EXIF tags for downstream cataloguing systems.
+ * 2. When an e‑commerce platform requires product images generated from CDR artwork with embedded author and copyright information for legal compliance.
+ * 3. When a digital asset management workflow must add custom Make, Model, and Artist EXIF fields to JPEGs created from vector designs.
+ * 4. When automating image export in a C# application and you want to control JPEG quality and embed descriptive metadata for SEO purposes.
+ * 5. When integrating Aspose.Imaging into a Windows service that processes incoming CDR files and stores JPEGs with standardized EXIF data for archival.
  */

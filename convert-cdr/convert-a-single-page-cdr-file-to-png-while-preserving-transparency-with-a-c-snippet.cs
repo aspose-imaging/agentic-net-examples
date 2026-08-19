@@ -1,19 +1,20 @@
+// HOW-TO: Convert Single Page CDR to Transparent PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ImageOptions;
 
 class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
-        string inputPath = @"C:\Images\sample.cdr";
-        string outputPath = @"C:\Images\sample.png";
-
         try
         {
+            // Hardcoded input and output paths
+            string inputPath = @"C:\Images\sample.cdr";
+            string outputPath = @"C:\Images\sample.png";
+
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -27,26 +28,11 @@ class Program
             // Load the CDR image
             using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Ensure there is at least one page
-                if (cdrImage.PageCount == 0)
-                {
-                    Console.Error.WriteLine("The CDR file contains no pages.");
-                    return;
-                }
-
-                // Get the first page (single‑page document)
+                // Get the first (single) page
                 CdrImagePage page = (CdrImagePage)cdrImage.Pages[0];
 
-                // Prepare PNG save options with rasterization settings to preserve transparency
-                var pngOptions = new PngOptions
-                {
-                    VectorRasterizationOptions = new CdrRasterizationOptions
-                    {
-                        BackgroundColor = Color.Transparent, // preserve transparency
-                        PageWidth = page.Width,
-                        PageHeight = page.Height
-                    }
-                };
+                // Set PNG options (default preserves transparency)
+                PngOptions pngOptions = new PngOptions();
 
                 // Save the page as PNG
                 page.Save(outputPath, pngOptions);
@@ -61,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to embed a single‑page CorelDRAW (CDR) illustration into a web page and requires a transparent PNG, they can use this C# Aspose.Imaging code to convert the file while keeping the alpha channel intact.
- * 2. When an e‑commerce platform automatically generates product thumbnails from supplier‑provided CDR logos, this snippet converts each single‑page CDR to a PNG with transparent background for seamless overlay on product images.
- * 3. When a document‑management system must archive legacy CDR artwork as lossless PNG files for long‑term storage, developers can employ the code to rasterize the page and preserve transparency in .NET applications.
- * 4. When a mobile app needs to display a CorelDRAW icon on various UI themes, the C# routine converts the single‑page CDR to a transparent PNG that can be tinted or blended without visual artifacts.
- * 5. When a batch‑processing service extracts vector graphics from CDR files for printing proofs and requires PNG output with exact page dimensions and transparent background, this Aspose.Imaging example provides the needed conversion logic.
+ * 1. When a designer provides a CorelDRAW (CDR) logo that needs to be displayed on a website with a transparent background, a developer can use this code to convert the single‑page file to a PNG preserving the transparency.
+ * 2. When an automated build pipeline must generate thumbnail previews of CDR assets for a digital asset management system, the snippet can convert each CDR page to a transparent PNG for quick preview rendering.
+ * 3. When a Windows desktop application imports vector artwork from CorelDRAW and needs to embed it into a PDF or report as a raster image with no background, the code converts the CDR page to PNG while keeping the transparent layers.
+ * 4. When a batch‑processing service processes user‑uploaded CDR files and stores them in a cloud storage bucket as web‑ready PNGs, this example shows how to read the file, ensure the output folder exists, and save the transparent PNG.
+ * 5. When a migration script moves legacy CDR graphics into a modern content management system that only accepts PNG files, the developer can use this code to reliably convert each single‑page CDR while preserving its alpha channel.
  */

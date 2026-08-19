@@ -1,20 +1,21 @@
+// HOW-TO: Convert CDR to PNG with Lossless Compression in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Cdr;
+using Aspose.Imaging.ImageOptions;
 
-public class Program
+class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = @"C:\Images\sample.cdr";
+        string outputPath = @"C:\Images\sample.png";
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "Input/sample.cdr";
-            string outputPath = "Output/sample.png";
-
-            // Validate input file existence
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
@@ -24,24 +25,25 @@ public class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load CDR image and convert to PNG with lossless compression
-            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            // Load the CDR image
+            using (CdrImage cdrImage = (CdrImage)Image.Load(inputPath))
             {
-                // Optional: cache data for performance
-                cdr.CacheData();
-
-                var pngOptions = new PngOptions
+                // Set up rasterization options to keep original dimensions (default scale 1.0)
+                var rasterOptions = new CdrRasterizationOptions
                 {
-                    CompressionLevel = 9, // Maximum lossless compression
-                    VectorRasterizationOptions = new CdrRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageWidth = cdr.Width,
-                        PageHeight = cdr.Height
-                    }
+                    // No explicit page size; defaults preserve original aspect ratio and dimensions
+                    ScaleX = 1.0f,
+                    ScaleY = 1.0f
                 };
 
-                cdr.Save(outputPath, pngOptions);
+                // Configure PNG save options with lossless compression
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save as PNG
+                cdrImage.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -53,9 +55,9 @@ public class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to archive CorelDRAW (CDR) artwork as PNG files for web publishing while keeping the original size and using lossless compression to avoid quality loss.
- * 2. When an e‑learning platform automatically converts user‑uploaded CDR illustrations to PNG thumbnails for course material without altering dimensions and with maximum PNG compression to reduce storage costs.
- * 3. When a print‑to‑digital workflow requires batch processing of CDR pages into PNG images that retain exact page width and height for accurate layout reproduction in a .NET application.
- * 4. When a document management system must store vector‑based CDR drawings as PNG assets for quick preview, ensuring the conversion uses Aspose.Imaging’s CdrRasterizationOptions to preserve background color and dimensions.
- * 5. When a mobile app backend needs to serve high‑resolution PNG versions of CDR logos on demand, employing C# code that applies lossless compression level 9 to minimize bandwidth while keeping the original image size.
+ * 1. When a designer provides CorelDRAW (.cdr) artwork that must be displayed on a website without quality loss, a developer can use this code to convert it to a lossless PNG while keeping the original size.
+ * 2. When an automated build pipeline needs to generate thumbnail previews of CDR files for a digital asset management system, the snippet ensures the PNGs retain exact dimensions and lossless detail.
+ * 3. When migrating legacy graphic assets from CorelDRAW to a modern content management system, this code enables batch conversion to PNG with lossless compression to preserve visual fidelity.
+ * 4. When creating print‑ready PDFs that embed PNG images derived from CDR sources, developers can first convert the CDR to a lossless PNG at original dimensions to avoid scaling artifacts.
+ * 5. When implementing a C# desktop application that lets users export their CorelDRAW drawings as high‑quality PNGs for archival purposes, the example provides the necessary steps to maintain size and compression.
  */

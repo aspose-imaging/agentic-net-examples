@@ -1,8 +1,8 @@
+// HOW-TO: Convert CDR to PSD With 16‑Bit Color Depth In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Cdr;
 using Aspose.Imaging.FileFormats.Psd;
 
 class Program
@@ -22,22 +22,26 @@ class Program
 
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            using (CdrImage cdr = (CdrImage)Image.Load(inputPath))
+            using (Image image = Image.Load(inputPath))
             {
-                PsdOptions psdOptions = new PsdOptions();
-                psdOptions.ChannelBitsCount = (short)16;
-                psdOptions.ChannelsCount = (short)4;
-                psdOptions.ColorMode = ColorModes.Rgb;
-                psdOptions.CompressionMethod = CompressionMethod.Raw;
-                psdOptions.Version = 6;
-
-                psdOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                var psdOptions = new PsdOptions
                 {
-                    PageWidth = cdr.Width,
-                    PageHeight = cdr.Height
+                    ChannelBitsCount = (short)16,
+                    ChannelsCount = (short)4,
+                    ColorMode = ColorModes.Rgb,
+                    CompressionMethod = CompressionMethod.Raw
                 };
 
-                cdr.Save(outputPath, psdOptions);
+                if (image is VectorImage)
+                {
+                    psdOptions.VectorRasterizationOptions = new VectorRasterizationOptions
+                    {
+                        PageWidth = image.Width,
+                        PageHeight = image.Height
+                    };
+                }
+
+                image.Save(outputPath, psdOptions);
             }
         }
         catch (Exception ex)
@@ -49,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert CorelDRAW (CDR) artwork to a Photoshop (PSD) file while preserving 16‑bit per channel color depth for high‑fidelity printing.
- * 2. When a workflow requires batch processing of CDR files into PSD format with exact RGB color mode and four channels for downstream compositing in Adobe Photoshop.
- * 3. When an application must export vector graphics from a CDR document to a PSD using Aspose.Imaging’s VectorRasterizationOptions to maintain the original page dimensions and avoid loss of detail.
- * 4. When a graphics pipeline needs to generate PSD files with raw compression and PSD version 6 compatibility to ensure maximum compatibility with legacy Photoshop versions.
- * 5. When a .NET service has to validate the existence of source CDR files, create output directories, and handle exceptions while converting to 16‑bit PSD to integrate with automated publishing systems.
+ * 1. When a designer needs to preserve high‑quality 16‑bit color information while converting CorelDRAW (CDR) artwork to Photoshop (PSD) files in a C# automation pipeline.
+ * 2. When an application must batch‑process vector CDR files and output PSDs with four channels and raw compression for later editing in Photoshop.
+ * 3. When a developer wants to ensure that rasterized vector graphics retain their original dimensions and color depth during CDR‑to‑PSD conversion using Aspose.Imaging.
+ * 4. When integrating a file‑conversion service that requires creating PSD files with 16‑bit per channel depth to meet print‑ready specifications.
+ * 5. When troubleshooting image‑format compatibility and need to verify that PSD files generated from CDR retain RGB mode and 16‑bit depth for accurate color reproduction.
  */
