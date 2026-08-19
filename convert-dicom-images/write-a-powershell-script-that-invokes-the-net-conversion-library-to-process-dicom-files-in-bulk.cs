@@ -1,3 +1,4 @@
+// HOW-TO: Bulk Convert DICOM Files To PNG Using Aspose.Imaging In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,21 +13,23 @@ class Program
             string inputDirectory = "Input";
             string outputDirectory = "Output";
 
+            // Ensure input directory exists
             if (!Directory.Exists(inputDirectory))
             {
                 Directory.CreateDirectory(inputDirectory);
-                Console.WriteLine($"Input directory created at: {inputDirectory}. Add files and rerun.");
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add DICOM files and rerun.");
                 return;
             }
 
+            // Ensure output directory exists
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string[] files = Directory.GetFiles(inputDirectory, "*.dcm");
+            string[] dicomFiles = Directory.GetFiles(inputDirectory, "*.dcm");
 
-            foreach (string inputPath in files)
+            foreach (string inputPath in dicomFiles)
             {
                 if (!File.Exists(inputPath))
                 {
@@ -34,15 +37,16 @@ class Program
                     continue;
                 }
 
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputPath);
-                string outputPath = Path.Combine(outputDirectory, fileNameWithoutExt + ".png");
-
+                string outputPath = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(inputPath) + ".png");
                 Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
                 using (Image image = Image.Load(inputPath))
+                using (var options = new PngOptions())
                 {
-                    image.Save(outputPath, new PngOptions());
+                    image.Save(outputPath, options);
                 }
+
+                Console.WriteLine($"Converted: {inputPath} -> {outputPath}");
             }
         }
         catch (Exception ex)
@@ -54,9 +58,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a hospital IT team must convert thousands of DICOM radiology scans to PNG for integration with a web‑based viewer, they can use this code to automate the bulk conversion.
- * 2. When a research lab needs to extract image data from a folder of DICOM files and store them as lossless PNGs for machine‑learning preprocessing, this script provides a fast .NET solution.
- * 3. When a medical imaging vendor wants to generate thumbnail previews of patient studies by converting DICOM files to PNG on a scheduled server job, the program handles the directory creation and batch processing automatically.
- * 4. When a compliance auditor requires a portable, non‑proprietary copy of diagnostic images for archival, the code can bulk‑export DICOM files to PNG using Aspose.Imaging without manual intervention.
- * 5. When a developer is building a cross‑platform PowerShell automation that calls a .NET library to transform DICOM files into PNG for downstream reporting tools, this example shows the core conversion logic.
+ * 1. When a hospital needs to export thousands of DICOM scans to PNG for integration with a web‑based viewer.
+ * 2. When a research lab wants to batch‑convert medical images to a lossless format for machine‑learning preprocessing.
+ * 3. When a developer must automate the creation of thumbnail PNGs from DICOM files for a PACS archive UI.
+ * 4. When a radiology software vendor requires a command‑line tool to transform incoming DICOM studies into PNG for reporting tools.
+ * 5. When an IT team needs to ensure all DICOM files in a folder are safely converted to PNG before archiving them to a cloud storage service.
  */
