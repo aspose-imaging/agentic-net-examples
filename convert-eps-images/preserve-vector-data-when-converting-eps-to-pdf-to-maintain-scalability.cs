@@ -1,39 +1,51 @@
+// HOW-TO: Convert EPS to PDF While Preserving Vector Data in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 using Aspose.Imaging.FileFormats.Eps;
+using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         try
         {
-            // Define relative input and output paths
-            string inputPath = "Input/sample.eps";
-            string outputPath = "Output/sample.pdf";
+            // Hardcoded input and output file paths
+            string inputPath = "Sample.eps";
+            string outputPath = "Sample.pdf";
 
-            // Verify input file exists
+            // Verify that the input EPS file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists (creates it if necessary)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load EPS image and save as PDF preserving vector data
-            using (EpsImage image = (EpsImage)Image.Load(inputPath))
+            // Load the EPS image as a vector image
+            using (var image = (EpsImage)Image.Load(inputPath))
             {
-                var pdfOptions = new PdfOptions();
-                image.Save(outputPath, pdfOptions);
+                // Configure PDF options to preserve vector data
+                var options = new PdfOptions
+                {
+                    PdfCoreOptions = new PdfCoreOptions
+                    {
+                        // Set PDF compliance (e.g., PDF/A-1b) as required
+                        PdfCompliance = PdfComplianceVersion.PdfA1b
+                    }
+                };
+
+                // Save the EPS image to PDF using the configured options
+                image.Save(outputPath, options);
             }
         }
         catch (Exception ex)
         {
+            // Output any unexpected errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -41,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to embed a scalable logo stored as an EPS file into a PDF brochure without losing vector quality, they can use this C# code to convert EPS to PDF while preserving vector data.
- * 2. When an automated publishing pipeline must batch‑process EPS illustrations into PDF pages for print‑ready output, the Aspose.Imaging code ensures the vector shapes remain editable and resolution‑independent.
- * 3. When a web application generates downloadable PDF reports that include technical diagrams originally created in EPS, developers can call this snippet to keep the diagrams crisp at any zoom level.
- * 4. When a document management system archives engineering drawings saved as EPS and requires them to be viewable in PDF viewers without rasterization, the code provides a reliable C# conversion preserving vector information.
- * 5. When a CAD‑to‑PDF export tool needs to maintain exact line weights and curves from EPS vector files for compliance documentation, this example demonstrates how to load the EPS image and save it as a vector‑based PDF using Aspose.Imaging.
+ * 1. When you need to generate PDF/A‑1b compliant documents from EPS artwork without rasterizing the graphics, preserving scalability for print‑ready files.
+ * 2. When an automated workflow must batch‑convert EPS logos to PDF for inclusion in reports while keeping the vector paths editable.
+ * 3. When a web service receives EPS files from designers and must return high‑quality PDFs that retain crisp vector edges for downstream editing.
+ * 4. When integrating Aspose.Imaging into a C# application to ensure that converted PDFs maintain the original EPS resolution‑independent quality for archival purposes.
+ * 5. When building a document management system that stores PDFs derived from EPS files and requires the PDFs to remain searchable and scalable on any device.
  */
