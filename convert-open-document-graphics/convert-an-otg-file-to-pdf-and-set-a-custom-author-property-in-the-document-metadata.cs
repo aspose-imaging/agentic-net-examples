@@ -1,3 +1,4 @@
+// HOW-TO: Convert OTG to PDF and Set Custom Author in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -27,14 +28,14 @@ class Program
             // Load the OTG image
             using (Image image = Image.Load(inputPath))
             {
-                // Set up rasterization options for OTG
-                OtgRasterizationOptions otgRasterOptions = new OtgRasterizationOptions
+                // Configure rasterization options for OTG
+                var otgRasterOptions = new OtgRasterizationOptions
                 {
                     PageSize = image.Size
                 };
 
-                // Configure PDF save options and set custom author metadata
-                PdfOptions pdfOptions = new PdfOptions
+                // Prepare PDF save options
+                var pdfOptions = new PdfOptions
                 {
                     VectorRasterizationOptions = otgRasterOptions,
                     PdfDocumentInfo = new PdfDocumentInfo
@@ -56,9 +57,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging system needs to archive OTG vector graphics as searchable PDFs with a specific author name for regulatory compliance.
- * 2. When an engineering design tool exports OTG schematics and wants to bundle them into PDFs that include the designer’s name in the document metadata.
- * 3. When a publishing workflow converts OTG illustrations into PDF brochures while embedding the editor’s name as the author property for branding.
- * 4. When a legal document management solution transforms OTG diagrams into PDFs and records the attorney’s name in the PDF metadata for audit trails.
- * 5. When an automated batch process generates PDF manuals from OTG assets and sets a custom author field to identify the content creator.
+ * 1. When you need to generate a searchable PDF from an OTG vector image while preserving the original page size.
+ * 2. When you must embed a specific author name into the PDF metadata for compliance or branding purposes.
+ * 3. When an automated workflow converts a batch of OTG files to PDFs for archival in a document management system.
+ * 4. When a web service receives OTG uploads and returns PDF files with custom metadata for downstream processing.
+ * 5. When integrating Aspose.Imaging into a C# application to rasterize OTG graphics into PDF format for printing or distribution.
  */
