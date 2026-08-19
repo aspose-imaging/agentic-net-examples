@@ -1,3 +1,4 @@
+// HOW-TO: Convert ODG Vector Image to PNG with Proper Disposal in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,7 +10,7 @@ class Program
     {
         try
         {
-            // Hardcoded input and output file paths
+            // Hardcoded input and output paths
             string inputPath = @"C:\Images\sample.odg";
             string outputPath = @"C:\Images\sample.png";
 
@@ -20,13 +21,26 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load ODG image and save as PNG inside a using block for proper disposal
+            // Load the ODG image and ensure proper disposal
             using (Image image = Image.Load(inputPath))
             {
-                var pngOptions = new PngOptions();
+                // Configure rasterization options for vector to raster conversion
+                var rasterOptions = new OdgRasterizationOptions
+                {
+                    BackgroundColor = Color.White,
+                    PageSize = image.Size
+                };
+
+                // Set PNG save options with the rasterization options
+                var pngOptions = new PngOptions
+                {
+                    VectorRasterizationOptions = rasterOptions
+                };
+
+                // Save the image as PNG
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -39,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a desktop application needs to display OpenDocument graphics (ODG) in a Windows Forms picture box that only supports PNG, a developer can use this code to convert the ODG file to PNG while ensuring resources are released with a using block.
- * 2. When an automated batch‑processing service must generate web‑ready thumbnails from a collection of ODG diagrams, the snippet provides a reliable way to load each ODG, save it as PNG, and automatically dispose of the Image object.
- * 3. When integrating Aspose.Imaging into a C# microservice that receives ODG uploads and returns PNG responses, the code demonstrates how to perform the conversion safely by wrapping Image.Load in a using statement.
- * 4. When a build pipeline includes a step to convert design assets stored as ODG into PNG for inclusion in documentation, this example shows the proper file‑existence checks and resource cleanup needed in .NET.
- * 5. When a developer is writing a plugin for a content‑management system that must transform user‑provided ODG files into PNG for preview thumbnails, the sample illustrates the essential C# operations and disposal pattern.
+ * 1. When you need to transform OpenDocument Graphics (ODG) files into PNG thumbnails for web previews in a C# application.
+ * 2. When you want to ensure memory is released by loading and saving images inside a using block while converting vector drawings to raster format.
+ * 3. When you have to generate white‑background PNGs from ODG pages of varying sizes for reporting or documentation pipelines.
+ * 4. When you must programmatically verify the source ODG exists and create the target folder before performing the conversion in an automated batch process.
+ * 5. When you are integrating Aspose.Imaging into a .NET service that converts user‑uploaded ODG files to PNG for further image analysis or storage.
  */
