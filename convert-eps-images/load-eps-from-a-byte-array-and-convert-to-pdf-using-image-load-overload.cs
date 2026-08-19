@@ -1,8 +1,8 @@
+// HOW-TO: Convert EPS File to PDF Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -10,30 +10,21 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
             string inputPath = "Input/sample.eps";
             string outputPath = "Output/result.pdf";
 
-            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
-            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Load EPS image from byte array
-            byte[] epsData = File.ReadAllBytes(inputPath);
-            using (var memoryStream = new MemoryStream(epsData))
+            using (Image image = Image.Load(inputPath))
             {
-                using (var image = (Aspose.Imaging.FileFormats.Eps.EpsImage)Image.Load(memoryStream))
+                using (PdfOptions pdfOptions = new PdfOptions())
                 {
-                    // Create PDF save options
-                    var pdfOptions = new PdfOptions();
-
-                    // Save as PDF
                     image.Save(outputPath, pdfOptions);
                 }
             }
@@ -47,9 +38,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service receives an EPS logo as a byte array upload and must generate a PDF brochure on the fly.
- * 2. When a desktop application reads EPS files stored in a database BLOB field and needs to export them as printable PDF documents.
- * 3. When an automated batch job processes a folder of EPS artwork files loaded from memory to create PDF versions for archival compliance.
- * 4. When a cloud function converts user‑submitted EPS drawings received via API (as byte streams) into PDF for downstream workflow integration.
- * 5. When a document management system extracts EPS images from email attachments, loads them from a memory stream, and saves them as PDF for unified viewing.
+ * 1. When you need to programmatically turn vector EPS artwork into a PDF for easy sharing or printing in a .NET application.
+ * 2. When a web service receives EPS uploads and must generate PDF previews for users without installing external tools.
+ * 3. When automating a document workflow that archives legacy EPS graphics as PDF files for long‑term storage.
+ * 4. When integrating with a reporting system that only accepts PDF input, requiring conversion of EPS logos or diagrams on the fly.
+ * 5. When building a batch conversion utility that reads EPS files from disk and outputs PDFs using Aspose.Imaging in C#.
  */
