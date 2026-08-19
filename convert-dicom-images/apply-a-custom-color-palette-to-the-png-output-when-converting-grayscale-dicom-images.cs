@@ -1,3 +1,4 @@
+// HOW-TO: Convert Grayscale DICOM to PNG with Custom Palette in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -12,8 +13,8 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "C:\\temp\\input.dcm";
-            string outputPath = "C:\\temp\\output.png";
+            string inputPath = @"C:\temp\input.dcm";
+            string outputPath = @"C:\temp\output.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -28,17 +29,17 @@ class Program
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
-                // Convert to grayscale if not already
-                if (image is DicomImage dicomImage)
-                {
-                    dicomImage.Grayscale();
-                }
+                // Optionally ensure the image is a DICOM image
+                // var dicomImage = image as DicomImage;
+                // if (dicomImage != null) { /* additional processing if needed */ }
 
-                // Configure PNG options with a custom grayscale palette
+                // Prepare PNG options with indexed color and a custom grayscale palette
                 var pngOptions = new PngOptions
                 {
                     ColorType = PngColorType.IndexedColor,
-                    Palette = Aspose.Imaging.ColorPaletteHelper.Create8BitGrayscale(false)
+                    Palette = Aspose.Imaging.ColorPaletteHelper.Create8BitGrayscale(false),
+                    CompressionLevel = 9,
+                    Progressive = true
                 };
 
                 // Save the image as PNG using the custom palette
@@ -54,9 +55,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a medical imaging application must export DICOM scans as PNG files with a standardized 8‑bit grayscale palette for consistent display across web browsers.
- * 2. When a radiology workflow needs to generate lightweight PNG thumbnails from large DICOM series while preserving exact grayscale tones using a custom palette.
- * 3. When a hospital PACS integration requires converting DICOM images to indexed‑color PNGs to meet legacy system constraints that only accept palette‑based PNGs.
- * 4. When a research project processes DICOM brain MRI data and needs to save the results as PNGs with a non‑default grayscale palette to match published figure guidelines.
- * 5. When a diagnostic software tool automates batch conversion of DICOM files to PNG and must ensure the output uses a specific 8‑bit grayscale palette for accurate pixel intensity mapping.
+ * 1. When a medical imaging application needs to export DICOM scans as lightweight PNG files while preserving the original grayscale tones using a specific palette.
+ * 2. When a radiology workflow requires batch conversion of DICOM images to PNG for web viewing, and the developer wants to control compression and progressive rendering.
+ * 3. When integrating Aspose.Imaging into a C# service that generates thumbnail previews of DICOM studies, and a custom 8‑bit grayscale palette is needed for consistent color mapping.
+ * 4. When a hospital information system must archive diagnostic images in PNG format with indexed colors to reduce storage size without losing diagnostic detail.
+ * 5. When a research project processes DICOM datasets and needs to convert them to PNG for machine‑learning pipelines, ensuring the output uses a known grayscale palette for reproducible results.
  */

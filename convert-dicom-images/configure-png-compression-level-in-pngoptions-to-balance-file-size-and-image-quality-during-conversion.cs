@@ -1,3 +1,4 @@
+// HOW-TO: How To Set PNG Compression Level In C# With Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -27,16 +28,18 @@ class Program
             // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Configure PNG options with a balanced compression level
+                // Configure PNG save options with a balanced compression level (0-9)
                 var pngOptions = new PngOptions
                 {
-                    // CompressionLevel range is 0-9; 6 offers a good trade‑off
-                    CompressionLevel = 6,
-                    // Optional: enable progressive loading
-                    Progressive = true
+                    // Progressive loading (optional)
+                    Progressive = true,
+                    // Use truecolor with alpha for full color fidelity
+                    ColorType = Aspose.Imaging.FileFormats.Png.PngColorType.TruecolorWithAlpha,
+                    // Set compression level to 5 (moderate compression, good balance)
+                    CompressionLevel = 5
                 };
 
-                // Save the image as PNG using the configured options
+                // Save the image as PNG with the specified options
                 image.Save(outputPath, pngOptions);
             }
         }
@@ -49,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web application needs to convert user‑uploaded JPEG photos to PNG with a balanced compression level to reduce bandwidth while preserving visual quality.
- * 2. When a desktop utility processes a batch of high‑resolution images and saves them as progressive PNG files for faster incremental rendering in browsers.
- * 3. When an e‑commerce platform generates product thumbnails in PNG format and wants to control the compression level to keep file sizes small without noticeable loss.
- * 4. When a mobile app prepares images for offline storage by converting JPEGs to PNG with a specific CompressionLevel to optimize device storage usage.
- * 5. When a document management system archives scanned documents as PNG and requires consistent compression settings to maintain a predictable archive size.
+ * 1. When you need to convert high‑resolution JPEG photos to PNG for web delivery while keeping file size reasonable, you can adjust the CompressionLevel in PngOptions.
+ * 2. When generating thumbnails that require transparent backgrounds, setting ColorType to TruecolorWithAlpha ensures full color fidelity with alpha channel support.
+ * 3. When building a batch‑processing tool that must create progressive PNGs for faster progressive rendering in browsers, you enable the Progressive flag.
+ * 4. When deploying an application that stores user‑uploaded images on limited storage, balancing CompressionLevel (e.g., 5) helps reduce disk usage without noticeable quality loss.
+ * 5. When automating image conversion in a C# service and you must guarantee the output directory exists before saving, the code creates the folder and saves the PNG with the configured options.
  */

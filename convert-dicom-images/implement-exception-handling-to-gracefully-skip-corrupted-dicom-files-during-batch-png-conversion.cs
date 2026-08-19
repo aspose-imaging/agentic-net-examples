@@ -1,70 +1,74 @@
+// HOW-TO: Convert DICOM to PNG in Batch While Skipping Corrupted Files in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Dicom;
-using Aspose.Imaging.CoreExceptions.ImageFormats;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        // Hardcoded input and output directories
-        string inputDirectory = @"C:\InputDicom";
-        string outputDirectory = @"C:\OutputPng";
-
         try
         {
-            // Ensure the base output directory exists
-            Directory.CreateDirectory(outputDirectory);
+            string inputDirectory = "Input";
+            string outputDirectory = "Output";
 
-            // Process each DICOM file in the input directory
-            foreach (string inputPath in Directory.GetFiles(inputDirectory, "*.dcm"))
+            // Ensure input directory exists
+            if (!Directory.Exists(inputDirectory))
             {
-                // Verify the input file exists
+                Directory.CreateDirectory(inputDirectory);
+                Console.WriteLine($"Input directory created at: {inputDirectory}. Add DICOM files and rerun.");
+                return;
+            }
+
+            // Ensure output directory exists
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+
+            string[] files = Directory.GetFiles(inputDirectory, "*.dcm");
+
+            foreach (string inputPath in files)
+            {
+                // Verify input file exists
                 if (!File.Exists(inputPath))
                 {
                     Console.Error.WriteLine($"File not found: {inputPath}");
-                    continue;
+                    return;
                 }
 
                 try
                 {
-                    // Load the DICOM image
                     using (DicomImage dicomImage = (DicomImage)Image.Load(inputPath))
                     {
                         int pageIndex = 0;
-                        // Convert each page to PNG
-                        foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                        foreach (var dicomPage in dicomImage.DicomPages)
                         {
                             string outputFileName = $"{Path.GetFileNameWithoutExtension(inputPath)}_page{pageIndex}.png";
                             string outputPath = Path.Combine(outputDirectory, outputFileName);
 
-                            // Ensure the output directory exists
+                            // Ensure output directory exists for this file
                             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-                            // Save the page as PNG
+                            // Save page as PNG
                             dicomPage.Save(outputPath, new PngOptions());
 
                             pageIndex++;
                         }
                     }
                 }
-                catch (DicomImageException ex)
-                {
-                    // Skip corrupted DICOM files gracefully
-                    Console.Error.WriteLine($"Skipping corrupted DICOM file: {inputPath}. Reason: {ex.Message}");
-                }
                 catch (Exception ex)
                 {
-                    // Log any other errors for this file and continue
-                    Console.Error.WriteLine($"Error processing file {inputPath}: {ex.Message}");
+                    Console.Error.WriteLine($"Error processing file '{inputPath}': {ex.Message}");
+                    // Continue with next file
                 }
             }
         }
         catch (Exception ex)
         {
-            // Global error handling
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -72,9 +76,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a hospital IT team needs to batch‑convert thousands of DICOM scans to PNG for a web‑based viewer while automatically skipping any corrupted DICOM files that would otherwise halt the process.
- * 2. When a research lab processes multi‑frame DICOM series from MRI studies and wants each frame saved as a separate PNG image, gracefully ignoring unreadable files to keep the analysis pipeline running.
- * 3. When a medical imaging startup runs an automated nightly job that extracts thumbnail PNGs from a directory of DICOM files for a PACS dashboard, and must handle occasional file corruption without manual intervention.
- * 4. When a radiology department creates a backup script that converts archived DICOM files to lossless PNGs for long‑term storage, while logging and skipping any files that raise a DicomImageException.
- * 5. When a cloud‑based image‑processing service ingests user‑uploaded DICOM files, converts each page to PNG for downstream AI analysis, and needs to continue processing the batch even if some uploads are corrupted.
+ * 1. When a hospital needs to generate viewable PNG thumbnails from thousands of DICOM scans but some files are damaged, this code converts the valid images while automatically ignoring the corrupted ones.
+ * 2. When a research lab processes a large dataset of medical images for machine‑learning and must ensure the pipeline continues even if a few DICOM files are unreadable, the example provides robust batch conversion with error handling.
+ * 3. When a PACS integration project requires exporting patient studies to PNG for web display and wants to avoid runtime crashes caused by malformed DICOM files, this snippet safely skips those files.
+ * 4. When a developer builds an automated nightly job that transforms incoming DICOM files into PNG assets for a reporting system and needs the job to complete despite occasional file corruption, the code handles exceptions and proceeds.
+ * 5. When a software vendor creates a bulk image conversion tool that supports Aspose.Imaging and must gracefully handle unexpected DICOM errors while producing PNG outputs, this example demonstrates the required pattern.
  */

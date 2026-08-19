@@ -1,3 +1,4 @@
+// HOW-TO: Save BMP As PNG To MemoryStream For Network Transfer In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,10 +8,12 @@ class Program
 {
     static void Main()
     {
+        // Wrap the whole logic to catch unexpected exceptions
         try
         {
-            // Hardcoded input file path
+            // Hard‑coded input and (unused) output paths
             string inputPath = @"C:\temp\sample.bmp";
+            string outputPath = @"C:\temp\output.png";
 
             // Verify that the input file exists
             if (!File.Exists(inputPath))
@@ -19,30 +22,33 @@ class Program
                 return;
             }
 
-            // Load the image from the file
+            // Ensure the output directory exists (required by the safety rules)
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load the source image
             using (Image image = Image.Load(inputPath))
             {
-                // Example operation: rotate the image 180 degrees
-                image.RotateFlip(RotateFlipType.Rotate180FlipNone);
-
-                // Set up PNG save options
+                // Prepare PNG save options
                 PngOptions pngOptions = new PngOptions();
 
-                // Save the image to a MemoryStream
+                // Save the image to a memory stream for network transmission
                 using (MemoryStream memoryStream = new MemoryStream())
                 {
                     image.Save(memoryStream, pngOptions);
 
-                    // The MemoryStream now contains the PNG data.
-                    // For demonstration, write the size of the PNG data.
-                    Console.WriteLine($"PNG image size (bytes): {memoryStream.Length}");
+                    // The stream now contains the PNG data; reset position if needed
+                    memoryStream.Position = 0;
 
-                    // The MemoryStream can be sent over a network as needed.
+                    // Example usage: output the size of the generated PNG
+                    Console.WriteLine($"PNG image size in bytes: {memoryStream.Length}");
+                    
+                    // At this point the memoryStream can be sent over a network
                 }
             }
         }
         catch (Exception ex)
         {
+            // Report any runtime errors without crashing
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -50,9 +56,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web API needs to return a rotated PNG image directly in the HTTP response without writing a temporary file to disk.
- * 2. When a real‑time chat application must embed a user‑uploaded bitmap, rotate it, and stream the PNG bytes to the client over a WebSocket connection.
- * 3. When a cloud‑based image‑processing microservice processes BMP files, applies transformations, and stores the resulting PNG in a database BLOB via a MemoryStream.
- * 4. When an IoT device captures a BMP sensor image, rotates it for correct orientation, and sends the PNG payload to a remote monitoring server using a TCP socket.
- * 5. When a desktop application generates a thumbnail preview of a rotated image and passes the PNG data in a MemoryStream to another component for further manipulation or printing.
+ * 1. When you need to convert a BMP file to a PNG and send it directly over HTTP without writing a temporary file to disk.
+ * 2. When a web service must return an image generated from a legacy bitmap as a PNG stream to a client application.
+ * 3. When you are building a real‑time image processing pipeline that compresses BMP frames to PNG and streams them to a remote viewer.
+ * 4. When an API endpoint has to embed a PNG image in a JSON payload, requiring the image data to be held in memory first.
+ * 5. When you want to measure the size of a PNG conversion before uploading it to cloud storage, using a MemoryStream to avoid extra I/O.
  */

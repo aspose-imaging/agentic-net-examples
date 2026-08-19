@@ -1,3 +1,4 @@
+// HOW-TO: Apply Median Filter to DICOM and Convert to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -11,9 +12,9 @@ class Program
     {
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.dcm";
-            string outputPath = "output\\filtered.png";
+            // Hardcoded input and output file paths
+            string inputPath = "sample.dicom";
+            string outputPath = "sample.MedianFiltered.png";
 
             // Verify input file exists
             if (!File.Exists(inputPath))
@@ -22,16 +23,15 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            // Ensure the output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
             // Load the DICOM image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to DicomImage to access DICOM-specific methods
                 DicomImage dicomImage = (DicomImage)image;
 
-                // Apply median filter with size 5 to the whole image
+                // Apply a median filter with size 5 to the entire image
                 dicomImage.Filter(dicomImage.Bounds, new MedianFilterOptions(5));
 
                 // Save the filtered image as PNG
@@ -47,9 +47,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology web portal needs to reduce speckle noise in a DICOM X‑ray image before creating a PNG thumbnail for fast browser display.
- * 2. When a medical research workflow must preprocess noisy CT scan DICOM files with a median filter to improve visual clarity before archiving them as lossless PNGs.
- * 3. When a hospital PACS integration project requires converting DICOM ultrasound frames to PNG for inclusion in patient reports, applying a median filter to enhance image quality.
- * 4. When a diagnostic AI model expects clean PNG inputs, developers can apply a median filter to the original DICOM MRI slices and save the results as PNGs for training data.
- * 5. When a mobile health app needs to display DICOM dental images on iOS or Android, the backend can filter the DICOM with a median filter and export a PNG for fast rendering.
+ * 1. When a radiology application needs to reduce speckle noise in DICOM scans before displaying them as PNG thumbnails for web viewers.
+ * 2. When a healthcare data pipeline must preprocess DICOM images with a median filter to improve visual quality before archiving them as lossless PNG files.
+ * 3. When a C# program has to convert noisy DICOM ultrasound frames to PNG for integration with a machine‑learning model that expects clean pixel data.
+ * 4. When a medical imaging system requires batch processing of DICOM files, applying a 5‑pixel median filter and saving the results as PNG for patient reports.
+ * 5. When a developer wants to use Aspose.Imaging to denoise DICOM images and export them to PNG for use in cross‑platform mobile health apps.
  */
