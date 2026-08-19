@@ -1,3 +1,4 @@
+// HOW-TO: Convert ODG to PDF in C# Using Aspose.Imaging (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,32 +10,24 @@ class Program
     {
         try
         {
-            string inputPath = Path.Combine("Input", "sample.odg");
-            string outputPath = Path.Combine("Output", "sample.pdf");
+            // Hardcoded input and output paths
+            string inputPath = "Input\\sample.odg";
+            string outputPath = "Output\\sample.pdf";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the ODG image and save as PDF
             using (Image image = Image.Load(inputPath))
             {
-                var rasterOptions = new VectorRasterizationOptions
-                {
-                    BackgroundColor = Color.White,
-                    PageWidth = image.Width,
-                    PageHeight = image.Height
-                };
-
-                var pdfOptions = new PdfOptions
-                {
-                    VectorRasterizationOptions = rasterOptions
-                };
-
-                image.Save(outputPath, pdfOptions);
+                image.Save(outputPath, new PdfOptions());
             }
         }
         catch (Exception ex)
@@ -46,9 +39,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a graphic designer needs to archive OpenDocument Graphics (ODG) drawings as PDF files with embedded XMP metadata for easy searching in a digital asset management system.
- * 2. When a web application automatically converts user‑uploaded ODG illustrations to PDF for printing while preserving author and copyright information via XMP metadata.
- * 3. When a construction firm generates PDF blueprints from ODG CAD files and embeds project metadata so that project managers can filter documents by date, version, and engineer name.
- * 4. When an e‑learning platform batch‑processes ODG diagrams into searchable PDF handouts, adding XMP metadata to link each diagram to its corresponding course module.
- * 5. When a legal compliance tool transforms ODG contract schematics into PDF records and includes XMP metadata to retain document provenance and audit trails.
+ * 1. When you need to programmatically convert OpenDocument graphics (ODG) files to PDF for cross‑platform viewing in a .NET application.
+ * 2. When generating printable reports from ODG diagrams and exporting them as PDF documents on a server.
+ * 3. When automating batch conversion of design assets stored as ODG into PDF for archival or distribution.
+ * 4. When integrating ODG to PDF conversion into a document management workflow that requires C# code and Aspose.Imaging.
+ * 5. When building a web service that receives ODG uploads and returns PDF files without manual user intervention.
  */
