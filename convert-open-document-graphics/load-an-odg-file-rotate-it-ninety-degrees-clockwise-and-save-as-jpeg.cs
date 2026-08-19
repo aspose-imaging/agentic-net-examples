@@ -1,16 +1,17 @@
+// HOW-TO: Rotate ODG Image 90 Degrees Clockwise and Save as JPEG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.FileFormats.OpenDocument;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
     static void Main()
     {
         // Hardcoded input and output paths
-        string inputPath = @"C:\temp\sample.odg";
-        string outputPath = @"C:\temp\sample_rotated.jpg";
+        string inputPath = "sample.odg";
+        string outputPath = "sample_converted.jpg";
 
         try
         {
@@ -22,13 +23,15 @@ class Program
             }
 
             // Ensure output directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
 
-            // Load the ODG image, rotate, and save as JPEG
+            // Load the ODG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to OdgImage to access RotateFlip
+                // Cast to OdgImage to access ODG-specific methods
                 OdgImage odgImage = (OdgImage)image;
+
+                // Rotate 90 degrees clockwise
                 odgImage.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
                 // Save as JPEG
@@ -45,9 +48,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an OpenDocument Graphics (ODG) diagram into a JPEG thumbnail for a web preview, they can load the ODG file, rotate it 90° clockwise, and save it as a JPEG using Aspose.Imaging for .NET.
- * 2. When integrating a document management system that stores drawings as ODG files but requires rotated JPEG images for printing or reporting, this code provides the necessary image loading, rotation, and format conversion.
- * 3. When building a batch processing tool that standardizes the orientation of ODG assets before publishing them to a content delivery network, the developer can use this snippet to rotate each ODG by 90 degrees and output JPEG files.
- * 4. When creating a desktop application that lets users view ODG illustrations in a photo viewer that only supports JPEG, the code enables loading the ODG, applying a clockwise rotation, and saving it as a JPEG image.
- * 5. When automating the generation of marketing materials where ODG logos must be rotated and embedded as JPEGs in email templates, this C# example demonstrates the required image manipulation with Aspose.Imaging.
+ * 1. When you need to display an OpenDocument graphic in a web gallery that only supports JPEG, you can rotate the ODG file and convert it to JPEG using C#.
+ * 2. When preparing printable assets from ODG drawings that must be oriented correctly for portrait layouts, you can programmatically rotate and save them as JPEGs.
+ * 3. When automating batch processing of ODG diagrams for a reporting system that consumes JPEG thumbnails, this code rotates each diagram and creates the required JPEG files.
+ * 4. When integrating legacy OpenDocument graphics into a mobile app that only renders JPEG images, you can use this snippet to reorient and convert the files on the server side.
+ * 5. When generating image previews for an ODG file viewer that needs the preview rotated to match the original orientation, this C# routine loads, rotates, and saves the image as JPEG.
  */
