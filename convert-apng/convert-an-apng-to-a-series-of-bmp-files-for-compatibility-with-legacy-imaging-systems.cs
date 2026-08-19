@@ -1,3 +1,4 @@
+// HOW-TO: Extract APNG Frames to BMP Images Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,12 +9,16 @@ class Program
 {
     static void Main()
     {
+        // Hardcoded input and output paths
+        string inputPath = "input.apng";
+        string outputDirectory = "output";
+        string outputPattern = Path.Combine(outputDirectory, "frame_{0}.bmp");
+
+        // Ensure output directory exists before any save operation
+        Directory.CreateDirectory(outputDirectory);
+
         try
         {
-            // Hardcoded input and output paths
-            string inputPath = "input.apng";
-            string outputDirectory = "output";
-
             // Verify input file exists
             if (!File.Exists(inputPath))
             {
@@ -21,28 +26,25 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists (creates even if null)
-            Directory.CreateDirectory(outputDirectory);
-
             // Load the APNG image
             using (Image image = Image.Load(inputPath))
             {
-                // Cast to ApngImage to access frames/pages
-                ApngImage apngImage = (ApngImage)image;
-
-                int frameCount = apngImage.PageCount;
+                // Cast to ApngImage to access frames
+                ApngImage apng = image as ApngImage;
+                if (apng == null)
+                {
+                    Console.Error.WriteLine("The provided file is not a valid APNG image.");
+                    return;
+                }
 
                 // Iterate through each frame and save as BMP
-                for (int i = 0; i < frameCount; i++)
+                for (int i = 0; i < apng.PageCount; i++)
                 {
-                    // Get the current frame
-                    Image frame = apngImage.Pages[i];
+                    // Retrieve the frame (each page is an Image)
+                    Image frame = apng.Pages[i];
 
-                    // Build output file path
-                    string outputPath = Path.Combine(outputDirectory, $"frame_{i:D4}.bmp");
-
-                    // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    // Build output file path for the current frame
+                    string outputPath = string.Format(outputPattern, i);
 
                     // Save the frame as BMP using BmpOptions
                     frame.Save(outputPath, new BmpOptions());
@@ -58,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract each frame of an animated PNG (APNG) and save them as individual BMP files for a legacy Windows application that only supports BMP images.
- * 2. When a C# program must preprocess animation assets by converting APNG frames into BMP format to feed into a third‑party image processing pipeline that does not understand PNG transparency.
- * 3. When an automation script has to generate a series of bitmap thumbnails from an APNG for printing on hardware that only accepts BMP files.
- * 4. When a developer is migrating a digital signage system and must replace APNG animations with static BMP frames because the signage firmware cannot decode animated PNGs.
- * 5. When a batch conversion tool written in .NET uses Aspose.Imaging to split an APNG into separate BMP files to archive each animation frame in a format compatible with older archival standards.
+ * 1. When a legacy industrial system only accepts BMP files, developers can extract each frame of an animated PNG and save them as separate BMP images for compatibility.
+ * 2. When creating a frame‑by‑frame video preview for a web application, developers can convert APNG animation frames to BMP to simplify further processing or compositing.
+ * 3. When preparing assets for a printing workflow that does not support animated PNG, developers can turn each APNG frame into a BMP to ensure accurate raster output.
+ * 4. When performing image analysis or computer‑vision tasks on individual animation frames, developers can export the APNG frames to BMP format for easier pixel‑level manipulation.
+ * 5. When archiving animated graphics in a format recognized by older Windows applications, developers can batch‑convert APNG frames to BMP files for long‑term storage.
  */
