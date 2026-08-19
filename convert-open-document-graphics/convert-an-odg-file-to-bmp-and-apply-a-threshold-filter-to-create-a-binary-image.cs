@@ -1,3 +1,4 @@
+// HOW-TO: Convert ODG to BMP and Apply Otsu Threshold in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -8,50 +9,50 @@ class Program
 {
     static void Main()
     {
-        // Hardcoded input and output paths
+        // Hardcoded paths
         string inputPath = @"C:\Images\sample.odg";
-        string outputPath = @"C:\Images\output.bmp";
+        string outputBmpPath = @"C:\Images\sample.bmp";
+        string outputBinaryPath = @"C:\Images\sample_binary.bmp";
 
-        // Path safety checks
+        // Input file existence check
         if (!File.Exists(inputPath))
         {
             Console.Error.WriteLine($"File not found: {inputPath}");
             return;
         }
 
-        // Ensure output directory exists
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
-            // Load the ODG vector image
+            // Load ODG image and rasterize to BMP
             using (Image odgImage = Image.Load(inputPath))
             {
-                // Set up BMP rasterization options for ODG
-                var bmpOptions = new BmpOptions
+                var rasterizationOptions = new OdgRasterizationOptions
                 {
-                    VectorRasterizationOptions = new OdgRasterizationOptions
-                    {
-                        BackgroundColor = Color.White,
-                        PageSize = odgImage.Size
-                    }
+                    BackgroundColor = Color.White,
+                    PageSize = odgImage.Size
                 };
 
-                // Rasterize and save as BMP
-                odgImage.Save(outputPath, bmpOptions);
+                var bmpOptions = new BmpOptions
+                {
+                    VectorRasterizationOptions = rasterizationOptions
+                };
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputBmpPath));
+
+                odgImage.Save(outputBmpPath, bmpOptions);
             }
 
-            // Load the rasterized BMP
-            using (Image bmpImage = Image.Load(outputPath))
+            // Load the generated BMP, apply Otsu threshold to create binary image
+            using (Image bmpImage = Image.Load(outputBmpPath))
             {
-                // Cast to RasterImage to access binarization
-                var raster = (RasterImage)bmpImage;
+                var rasterImage = (RasterImage)bmpImage;
+                rasterImage.BinarizeOtsu();
 
-                // Apply Otsu threshold to create a binary image
-                raster.BinarizeOtsu();
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputBinaryPath));
 
-                // Save the binary BMP (overwrites the previous file)
-                raster.Save(outputPath);
+                rasterImage.Save(outputBinaryPath);
             }
         }
         catch (Exception ex)
@@ -63,9 +64,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to import an OpenDocument Graphics (ODG) diagram into a legacy Windows application that only accepts BMP files, they can rasterize the vector image and save it as BMP.
- * 2. When preparing scanned engineering drawings stored as ODG for OCR processing, converting them to BMP and applying an Otsu threshold creates a high‑contrast binary image that improves text recognition accuracy.
- * 3. When generating printable line art from ODG files for laser cutting, converting to BMP and binarizing the image ensures the cutter receives a clean black‑and‑white bitmap.
- * 4. When archiving vector diagrams as compact, device‑independent raster images, developers can use this code to convert ODG to BMP and then apply a threshold to reduce file size and simplify storage.
- * 5. When integrating ODG assets into a .NET web service that returns binary images for downstream image‑analysis APIs, the code converts the ODG to BMP and produces a binary image ready for analysis.
+ * 1. When you need to turn vector‑based OpenDocument graphics (ODG) into a raster BMP for legacy Windows applications.
+ * 2. When you must generate a high‑contrast black‑and‑white version of a BMP using Otsu’s automatic threshold for OCR preprocessing.
+ * 3. When an automated pipeline has to convert design files to BMP and then binarize them for printing on monochrome devices.
+ * 4. When you are building a C# service that extracts page content from ODG files and stores it as binary images for machine‑learning training.
+ * 5. When you require a simple Aspose.Imaging solution to rasterize ODG pages and create binary BMPs without manually handling pixel data.
  */
