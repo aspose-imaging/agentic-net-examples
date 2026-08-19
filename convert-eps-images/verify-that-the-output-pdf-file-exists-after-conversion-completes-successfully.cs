@@ -1,3 +1,4 @@
+// HOW-TO: Convert JPEG to PDF and Verify Output File Exists in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,27 +10,36 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "Input/sample.jpg";
-            string outputPath = "Output/sample.pdf";
+            string outputPath = "Output/output.pdf";
 
+            // Verify input file exists
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the image and convert to PDF
             using (Image image = Image.Load(inputPath))
             {
                 var pdfOptions = new PdfOptions();
                 image.Save(outputPath, pdfOptions);
             }
 
+            // Verify that the PDF was created
             if (File.Exists(outputPath))
-                Console.WriteLine("PDF file created successfully.");
+            {
+                Console.WriteLine($"PDF file successfully created: {outputPath}");
+            }
             else
-                Console.Error.WriteLine("Failed to create PDF file.");
+            {
+                Console.Error.WriteLine($"Failed to create PDF file: {outputPath}");
+            }
         }
         catch (Exception ex)
         {
@@ -40,9 +50,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert user‑uploaded JPEG photos to PDF documents for archival or printing, and must verify that the PDF file was created successfully.
- * 2. When an automated batch‑processing service transforms image assets from a folder into PDF reports and needs to confirm each output file exists before moving to the next step.
- * 3. When integrating Aspose.Imaging into a C# web API that receives image paths, converts them to PDF, and returns a success response only after the PDF file is confirmed on disk.
- * 4. When building a desktop utility that lets non‑technical staff select a picture and generate a PDF, the code checks the file system to ensure the PDF was generated before displaying a confirmation message.
- * 5. When writing unit tests for image‑to‑PDF conversion logic, the test script runs the conversion and asserts that the expected PDF file exists in the output directory.
+ * 1. When you need to generate a PDF report from a user‑uploaded JPEG image and confirm the file was created successfully.
+ * 2. When automating batch processing of product photos to PDF for archival while ensuring each conversion succeeds.
+ * 3. When integrating image‑to‑PDF conversion into a web service that must return an error if the PDF file is missing.
+ * 4. When building a desktop utility that converts scanned JPEG documents to PDF and validates the output before further processing.
+ * 5. When creating a scheduled task that transforms marketing JPEG assets into PDFs and logs any conversion failures.
  */
