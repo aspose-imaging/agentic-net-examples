@@ -1,7 +1,7 @@
+// HOW-TO: Convert OTG to PDF with Custom Page Size in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Pdf;
 
 class Program
 {
@@ -9,31 +9,36 @@ class Program
     {
         try
         {
+            // Hardcoded input and output paths
             string inputPath = "Input\\sample.otg";
             string outputPath = "Output\\sample.pdf";
 
+            // Validate input file existence
             if (!File.Exists(inputPath))
             {
                 Console.Error.WriteLine($"File not found: {inputPath}");
                 return;
             }
 
+            // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
+            // Load the OTG image
             using (Aspose.Imaging.Image image = Aspose.Imaging.Image.Load(inputPath))
             {
-                var vectorOptions = new VectorRasterizationOptions
+                // Set custom page size (e.g., 800x600 points)
+                var otgOptions = new OtgRasterizationOptions
                 {
-                    BackgroundColor = Aspose.Imaging.Color.White,
-                    PageWidth = 800f,
-                    PageHeight = 600f
+                    PageSize = new Aspose.Imaging.SizeF(800, 600)
                 };
 
+                // Configure PDF save options
                 var pdfOptions = new PdfOptions
                 {
-                    VectorRasterizationOptions = vectorOptions
+                    VectorRasterizationOptions = otgOptions
                 };
 
+                // Save as PDF
                 image.Save(outputPath, pdfOptions);
             }
         }
@@ -46,9 +51,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert an OTG (OpenType Glyph) file into a PDF document with a specific page width and height for inclusion in a printable report using Aspose.Imaging for .NET.
- * 2. When an application must generate PDF brochures from vector‑based OTG graphics while ensuring the output matches a custom page size required by a marketing layout.
- * 3. When a document management system processes uploaded OTG files and needs to store them as PDFs with predefined dimensions for consistent viewing across devices.
- * 4. When a C# service automates the creation of PDF invoices that embed OTG icons and must fit them into a 800 × 600‑pixel page to match the company's template.
- * 5. When a desktop utility converts OTG artwork to PDF for archival purposes, applying a white background and a custom page size to meet archival standards.
+ * 1. When you need to embed an OTG vector graphic into a PDF report and specify the exact page dimensions for consistent layout.
+ * 2. When generating printable PDFs from OTG files for a marketing brochure that requires a custom 800 × 600‑point page size.
+ * 3. When automating batch conversion of OTG assets to PDF for archival purposes while preserving a predefined page size across all documents.
+ * 4. When integrating OTG images into a C# application that creates PDF invoices and must match the invoice page size standards.
+ * 5. When preparing OTG diagrams for legal documentation where the resulting PDF must conform to a specific page size for compliance.
  */
