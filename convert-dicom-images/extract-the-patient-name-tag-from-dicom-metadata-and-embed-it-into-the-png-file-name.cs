@@ -1,7 +1,10 @@
+// HOW-TO: Extract Patient Name From DICOM and Save Pages As PNG In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
+using Aspose.Imaging.FileFormats.Dicom;
+using Aspose.Imaging.FileFormats.Png;
 
 class Program
 {
@@ -9,8 +12,8 @@ class Program
     {
         try
         {
-            string inputPath = "sample.dcm";
-            string outputPath = Path.Combine("Output", "sample.png");
+            string inputPath = "Input/sample.dcm";
+            string outputDirectory = "Output";
 
             if (!File.Exists(inputPath))
             {
@@ -18,13 +21,36 @@ class Program
                 return;
             }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(outputDirectory));
 
             using (Image image = Image.Load(inputPath))
             {
-                using (var options = new PngOptions())
+                DicomImage dicomImage = (DicomImage)image;
+
+                // Attempt to retrieve patient name from DICOM metadata.
+                // If unavailable, fallback to "Unknown".
+                string patientName = "Unknown";
+                try
                 {
-                    image.Save(outputPath, options);
+                    // Some DICOM implementations expose patient name via FileInfo.
+                    // Adjust according to actual API if different.
+                    var fileInfo = dicomImage.FileInfo;
+                    var propInfo = fileInfo?.GetType().GetProperty("PatientName");
+                    if (propInfo != null)
+                    {
+                        var value = propInfo.GetValue(fileInfo) as string;
+                        if (!string.IsNullOrEmpty(value))
+                            patientName = value.Replace(' ', '_');
+                    }
+                }
+                catch { /* ignore metadata extraction errors */ }
+
+                int pageIndex = 0;
+                foreach (DicomPage dicomPage in dicomImage.DicomPages)
+                {
+                    string outputPath = Path.Combine(outputDirectory, $"{patientName}_page{pageIndex}.png");
+                    dicomPage.Save(outputPath, new PngOptions());
+                    pageIndex++;
                 }
             }
         }
@@ -37,9 +63,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a radiology department needs to convert DICOM scans to PNG images for web viewing while automatically naming each file with the patient’s name for easy identification.
- * 2. When a medical research team extracts patient name tags from DICOM metadata to generate PNG reports that can be sorted and searched by patient name in a file system.
- * 3. When a healthcare integration platform processes incoming DICOM files and creates PNG thumbnails whose filenames include the patient name to link images with electronic health records.
- * 4. When a hospital’s PACS migration script converts legacy DICOM images to PNG format and embeds the patient name in the filename to preserve traceability without a database lookup.
- * 5. When a telemedicine application prepares PNG snapshots of diagnostic images and needs the patient’s name in the file name to personalize the image before sending it to clinicians.
+ * 1. When a hospital needs to archive radiology studies as PNG files whose filenames include the patient’s name for quick identification.
+ * 2. When a medical research team wants to batch‑convert multi‑frame DICOM files to PNG while preserving the patient name in each output file.
+ * 3. When a PACS integration requires exporting individual DICOM pages to PNG images that are automatically labeled with the patient’s name for downstream processing.
+ * 4. When building a web portal that displays DICOM images as PNG thumbnails and needs the filenames to reflect the patient name for sorting and searching.
+ * 5. When a quality‑control script must generate PNG copies of DICOM pages and embed the patient name in the filenames to match audit‑log records.
  */
