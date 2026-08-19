@@ -19,61 +19,63 @@ See the root [agents.md](../agents.md) for repository-wide conventions and bound
 
 - `using System;` (120/120 files)
 - `using System.IO;` (120/120 files)
-- `using Aspose.Imaging;` (120/120 files) ← category-specific
-- `using Aspose.Imaging.ImageOptions;` (119/120 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.OpenDocument;` (37/120 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Pdf;` (12/120 files) ← category-specific
+- `using Aspose.Imaging.ImageOptions;` (120/120 files) ← category-specific
+- `using Aspose.Imaging;` (117/120 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.OpenDocument;` (35/120 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Pdf;` (10/120 files) ← category-specific
 - `using Aspose.Imaging.FileFormats.Jpeg;` (9/120 files) ← category-specific
 - `using Aspose.Imaging.ImageFilters.FilterOptions;` (8/120 files) ← category-specific
+- `using Aspose.Imaging.FileFormats.Bmp;` (7/120 files) ← category-specific
 - `using Aspose.Imaging.FileFormats.Png;` (6/120 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Bmp;` (6/120 files) ← category-specific
-- `using Aspose.Imaging.Sources;` (5/120 files) ← category-specific
-- `using Aspose.Imaging.FileFormats.Svg;` (5/120 files) ← category-specific
+- `using Aspose.Imaging.Sources;` (4/120 files) ← category-specific
 - `using System.Threading.Tasks;` (4/120 files)
-- `using System.Xml;` (2/120 files)
-- `using System.Xml.Schema;` (2/120 files)
+- `using System.Collections.Generic;` (2/120 files)
 - `using System.Net.Sockets;` (2/120 files)
+- `using Aspose.Imaging.FileFormats.Svg;` (2/120 files) ← category-specific
 - `using System.Reflection;` (2/120 files)
-- `using System.Text;` (1/120 files)
+- `using Aspose.Imaging.Brushes;` (2/120 files) ← category-specific
+- `using System.Net;` (1/120 files)
+- `using System.Xml;` (1/120 files)
+- `using System.Xml.Schema;` (1/120 files)
 - `using System.Diagnostics;` (1/120 files)
-- `using System.Linq;` (1/120 files)
-- `using System.Xml.Linq;` (1/120 files)
+- `using Aspose.Imaging.FileFormats.OpenDocument.Objects;` (1/120 files) ← category-specific
+- `using System.Text.RegularExpressions;` (1/120 files)
 
 ## Files in this folder
 
 | File | Key APIs | Description |
 |------|----------|-------------|
 | [load-an-odg-file-and-save-it-as-a-png-image-using-image-save.cs](./load-an-odg-file-and-save-it-as-a-png-image-using-image-save.cs) | `PngOptions` | Load an ODG file and save it as a PNG image using Image.Save. |
-| [load-an-odg-file-and-convert-it-to-jpeg-format-with-default-compression-settings.cs](./load-an-odg-file-and-convert-it-to-jpeg-format-with-default-compression-settings.cs) | `JpegOptions`, `VectorRasterizationOptions` | Load an ODG file and convert it to JPEG format with default compression settings... |
+| [load-an-odg-file-and-convert-it-to-jpeg-format-with-default-compression-settings.cs](./load-an-odg-file-and-convert-it-to-jpeg-format-with-default-compression-settings.cs) | `JpegOptions` | Load an ODG file and convert it to JPEG format with default compression settings... |
 | [load-an-odg-file-and-export-it-as-a-bmp-image-preserving-original-dimensions.cs](./load-an-odg-file-and-export-it-as-a-bmp-image-preserving-original-dimensions.cs) | `BmpOptions`, `OdgRasterizationOptions` | Load an ODG file and export it as a BMP image preserving original dimensions. |
 | [load-an-odg-file-and-save-it-as-a-pdf-document-using-default-pdf-options.cs](./load-an-odg-file-and-save-it-as-a-pdf-document-using-default-pdf-options.cs) | `OdgRasterizationOptions`, `PdfOptions` | Load an ODG file and save it as a PDF document using default PDF options. |
-| [load-an-odg-file-and-convert-it-to-svg-while-preserving-vector-information.cs](./load-an-odg-file-and-convert-it-to-svg-while-preserving-vector-information.cs) | `OdgImage`, `SvgOptions`, `SvgRasterizationOptions` | Load an ODG file and convert it to SVG while preserving vector information. |
+| [load-an-odg-file-and-convert-it-to-svg-while-preserving-vector-information.cs](./load-an-odg-file-and-convert-it-to-svg-while-preserving-vector-information.cs) | `OdgRasterizationOptions`, `SvgOptions` | Load an ODG file and convert it to SVG while preserving vector information. |
 | [load-an-otg-file-and-save-it-as-a-png-image-with-default-rasterization-settings.cs](./load-an-otg-file-and-save-it-as-a-png-image-with-default-rasterization-settings.cs) | `OtgRasterizationOptions`, `PngOptions` | Load an OTG file and save it as a PNG image with default rasterization settings. |
 | [load-an-otg-file-and-convert-it-to-jpeg-format-applying-standard-quality-level.cs](./load-an-otg-file-and-convert-it-to-jpeg-format-applying-standard-quality-level.cs) | `JpegOptions`, `OtgRasterizationOptions` | Load an OTG file and convert it to JPEG format applying standard quality level. |
 | [load-an-otg-file-and-export-it-as-a-bmp-image-maintaining-original-size.cs](./load-an-otg-file-and-export-it-as-a-bmp-image-maintaining-original-size.cs) | `BmpOptions`, `OtgRasterizationOptions` | Load an OTG file and export it as a BMP image maintaining original size. |
-| [load-an-otg-file-and-save-it-as-a-pdf-document-using-default-pdf-options.cs](./load-an-otg-file-and-save-it-as-a-pdf-document-using-default-pdf-options.cs) | `PdfOptions`, `VectorRasterizationOptions` | Load an OTG file and save it as a PDF document using default PDF options. |
-| [load-an-otg-file-and-convert-it-to-svg-while-keeping-vector-data-intact.cs](./load-an-otg-file-and-convert-it-to-svg-while-keeping-vector-data-intact.cs) | `OtgRasterizationOptions`, `SvgOptions` | Load an OTG file and convert it to SVG while keeping vector data intact. |
+| [load-an-otg-file-and-save-it-as-a-pdf-document-using-default-pdf-options.cs](./load-an-otg-file-and-save-it-as-a-pdf-document-using-default-pdf-options.cs) | `OtgRasterizationOptions`, `PdfOptions` | Load an OTG file and save it as a PDF document using default PDF options. |
+| [load-an-otg-file-and-convert-it-to-svg-while-keeping-vector-data-intact.cs](./load-an-otg-file-and-convert-it-to-svg-while-keeping-vector-data-intact.cs) | `SvgOptions`, `SvgRasterizationOptions` | Load an OTG file and convert it to SVG while keeping vector data intact. |
 | [create-rasterizationoptions-for-odg-set-resolution-and-save-the-image-as-png.cs](./create-rasterizationoptions-for-odg-set-resolution-and-save-the-image-as-png.cs) | `PngOptions`, `VectorRasterizationOptions` | Create RasterizationOptions for ODG, set resolution, and save the image as PNG. |
 | [create-rasterizationoptions-for-odg-configure-jpeg-quality-and-save-as-jpeg-file.cs](./create-rasterizationoptions-for-odg-configure-jpeg-quality-and-save-as-jpeg-file.cs) | `JpegOptions`, `OdgRasterizationOptions` | Create RasterizationOptions for ODG, configure JPEG quality, and save as JPEG fi... |
 | [create-rasterizationoptions-for-otg-set-background-color-and-save-as-png-image.cs](./create-rasterizationoptions-for-otg-set-background-color-and-save-as-png-image.cs) | `OtgRasterizationOptions`, `PngOptions` | Create RasterizationOptions for OTG, set background color, and save as PNG image... |
 | [create-rasterizationoptions-for-otg-define-jpeg-compression-level-and-save-as-jpeg-file.cs](./create-rasterizationoptions-for-otg-define-jpeg-compression-level-and-save-as-jpeg-file.cs) | `JpegOptions`, `OtgRasterizationOptions` | Create RasterizationOptions for OTG, define JPEG compression level, and save as ... |
 | [load-odg-and-save-as-svg-while-preserving-all-vector-layers-and-attributes.cs](./load-odg-and-save-as-svg-while-preserving-all-vector-layers-and-attributes.cs) | `SvgOptions` | Load ODG and save as SVG while preserving all vector layers and attributes. |
-| [load-otg-and-save-as-svg-while-preserving-all-vector-layers-and-attributes.cs](./load-otg-and-save-as-svg-while-preserving-all-vector-layers-and-attributes.cs) | `OtgRasterizationOptions`, `SvgOptions` | Load OTG and save as SVG while preserving all vector layers and attributes. |
+| [load-otg-and-save-as-svg-while-preserving-all-vector-layers-and-attributes.cs](./load-otg-and-save-as-svg-while-preserving-all-vector-layers-and-attributes.cs) | `SvgOptions`, `SvgRasterizationOptions` | Load OTG and save as SVG while preserving all vector layers and attributes. |
 | [apply-a-median-filter-to-an-odg-image-before-converting-and-saving-it-as-png.cs](./apply-a-median-filter-to-an-odg-image-before-converting-and-saving-it-as-png.cs) | `MedianFilterOptions`, `OdgRasterizationOptions`, `PngOptions` | Apply a median filter to an ODG image before converting and saving it as PNG. |
 | [apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-png.cs](./apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-png.cs) | `MedianFilterOptions`, `OtgRasterizationOptions`, `PngOptions` | Apply a median filter to an OTG image before converting and saving it as PNG. |
-| [apply-a-median-filter-to-an-odg-image-before-converting-and-saving-it-as-bmp.cs](./apply-a-median-filter-to-an-odg-image-before-converting-and-saving-it-as-bmp.cs) | `BmpOptions`, `MedianFilterOptions`, `OdgRasterizationOptions` | Apply a median filter to an ODG image before converting and saving it as BMP. |
+| [apply-a-median-filter-to-an-odg-image-before-converting-and-saving-it-as-bmp.cs](./apply-a-median-filter-to-an-odg-image-before-converting-and-saving-it-as-bmp.cs) | `BmpOptions`, `MedianFilterOptions`, `RasterImage` | Apply a median filter to an ODG image before converting and saving it as BMP. |
 | [apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-bmp.cs](./apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-bmp.cs) | `BmpOptions`, `MedianFilterOptions`, `OtgRasterizationOptions` | Apply a median filter to an OTG image before converting and saving it as BMP. |
 | [iterate-over-a-folder-of-odg-files-and-batch-convert-each-to-png-format.cs](./iterate-over-a-folder-of-odg-files-and-batch-convert-each-to-png-format.cs) | `OdgRasterizationOptions`, `PngOptions` | Iterate over a folder of ODG files and batch convert each to PNG format. |
 | [iterate-over-a-folder-of-otg-files-and-batch-convert-each-to-pdf-format.cs](./iterate-over-a-folder-of-otg-files-and-batch-convert-each-to-pdf-format.cs) | `OtgRasterizationOptions`, `PdfOptions` | Iterate over a folder of OTG files and batch convert each to PDF format. |
 | [convert-an-odg-file-to-pdf-while-specifying-a-custom-page-size-for-the-document.cs](./convert-an-odg-file-to-pdf-while-specifying-a-custom-page-size-for-the-document.cs) | `OdgRasterizationOptions`, `PdfOptions` | Convert an ODG file to PDF while specifying a custom page size for the document. |
-| [convert-an-otg-file-to-pdf-while-specifying-a-custom-page-size-for-the-document.cs](./convert-an-otg-file-to-pdf-while-specifying-a-custom-page-size-for-the-document.cs) | `PdfOptions`, `VectorRasterizationOptions` | Convert an OTG file to PDF while specifying a custom page size for the document. |
+| [convert-an-otg-file-to-pdf-while-specifying-a-custom-page-size-for-the-document.cs](./convert-an-otg-file-to-pdf-while-specifying-a-custom-page-size-for-the-document.cs) | `OtgRasterizationOptions`, `PdfOptions` | Convert an OTG file to PDF while specifying a custom page size for the document. |
 | [convert-an-odg-file-to-jpeg-and-set-the-output-quality-to-85-percent.cs](./convert-an-odg-file-to-jpeg-and-set-the-output-quality-to-85-percent.cs) | `JpegOptions`, `OdgRasterizationOptions` | Convert an ODG file to JPEG and set the output quality to 85 percent. |
 | [convert-an-otg-file-to-jpeg-and-set-the-output-quality-to-85-percent.cs](./convert-an-otg-file-to-jpeg-and-set-the-output-quality-to-85-percent.cs) | `JpegOptions`, `OtgRasterizationOptions` | Convert an OTG file to JPEG and set the output quality to 85 percent. |
-| [convert-an-odg-file-to-bmp-while-preserving-transparency-information-in-the-output-image.cs](./convert-an-odg-file-to-bmp-while-preserving-transparency-information-in-the-output-image.cs) | `BmpOptions` | Convert an ODG file to BMP while preserving transparency information in the outp... |
+| [convert-an-odg-file-to-bmp-while-preserving-transparency-information-in-the-output-image.cs](./convert-an-odg-file-to-bmp-while-preserving-transparency-information-in-the-output-image.cs) | `BmpOptions`, `OdgRasterizationOptions` | Convert an ODG file to BMP while preserving transparency information in the outp... |
 | [convert-an-otg-file-to-bmp-while-preserving-transparency-information-in-the-output-image.cs](./convert-an-otg-file-to-bmp-while-preserving-transparency-information-in-the-output-image.cs) | `BmpOptions`, `OtgRasterizationOptions` | Convert an OTG file to BMP while preserving transparency information in the outp... |
-| [convert-an-odg-file-to-svg-and-ensure-original-layer-names-are-retained-in-the-output.cs](./convert-an-odg-file-to-svg-and-ensure-original-layer-names-are-retained-in-the-output.cs) | `SvgOptions` | Convert an ODG file to SVG and ensure original layer names are retained in the o... |
+| [convert-an-odg-file-to-svg-and-ensure-original-layer-names-are-retained-in-the-output.cs](./convert-an-odg-file-to-svg-and-ensure-original-layer-names-are-retained-in-the-output.cs) | `SvgOptions`, `SvgRasterizationOptions` | Convert an ODG file to SVG and ensure original layer names are retained in the o... |
 | [convert-an-otg-file-to-svg-and-ensure-original-layer-names-are-retained-in-the-output.cs](./convert-an-otg-file-to-svg-and-ensure-original-layer-names-are-retained-in-the-output.cs) | `OtgRasterizationOptions`, `SvgOptions` | Convert an OTG file to SVG and ensure original layer names are retained in the o... |
-| *...and 90 more files* | | [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/26.6.0/convert-open-document-graphics) |
+| *...and 90 more files* | | [View all](https://github.com/aspose-imaging/agentic-net-examples/tree/26.8.0/convert-open-document-graphics) |
 
 ## Category Statistics
 - Total examples: 120
@@ -121,107 +123,6 @@ All tasks passed ✅
 ## Related Categories  
 The Convert Open Document Graphics category complements the **Vector Graphics Conversion** and **Raster Image Processing** sections, where you can find additional examples for handling SVG, EPS, and PDF formats. If you’re working with multi‑page documents, the **Document to Image** category provides guidance on converting PDF or DOCX pages to bitmap images. Together, these categories give a comprehensive toolkit for any .NET developer dealing with diverse image and document workflows.
 
-
-## Developer Q&A
-
-### Q: How to load an ODG file and save it as a PNG image using Image.Save in .NET C#?  
-Use `Image.Load("sample.odg")` to open the ODG and then call `image.Save("output.png", new PngOptions())`. → See: `load-an-odg-file-and-save-it-as-a-png-image-using-image-save.cs`
-
-### Q: How do I convert an ODG file to JPEG with default compression settings in C#?  
-Load the ODG with `Image.Load` and save it using `new JpegOptions()` without modifying any properties. → See: `load-an-odg-file-and-convert-it-to-jpeg-format-with-default-compression-settings.cs`
-
-### Q: How to export an OTG file as a PDF document using default PDF options in .NET?  
-Open the OTG via `Image.Load` and call `image.Save("result.pdf", new PdfOptions())`. → See: `load-an-otg-file-and-save-it-as-a-pdf-document-using-default-pdf-options.cs`
-
-### Q: How do I convert an ODG file to SVG while preserving all vector layers and attributes in C#?  
-Load the ODG with `Image.Load` and save it using `new SvgOptions()` (or `SvgRasterizationOptions`) to retain vector information. → See: `load-odg-and-save-as-svg-while-preserving-all-vector-layers-and-attributes.cs`
-
-### Q: How to apply a median filter to an OTG image before converting and saving it as a BMP in .NET?  
-Create a `MedianFilterOptions` object, assign it to `OtgRasterizationOptions`, and then save the image with `new BmpOptions()`. → See: `apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-bmp.cs`
-
-
-
-### Q: How can I apply a Gaussian blur filter to an ODG image before saving it as a JPEG using Aspose.Imaging in C#?  
-Use `Image.Load` to open the ODG, add a `GaussianBlurFilterOption` to the image’s `FilterOptions`, and then call `image.Save` with `JpegOptions`. → See: `apply-a-gaussian-blur-filter-to-an-odg-image-before-converting-and-saving-as-jpeg.cs`
-
-### Q: How do I set the JPEG output quality to 85 % when converting an ODG file to JPEG with Aspose.Imaging in .NET?  
-Create a `JpegOptions` instance, set its `Quality` property to 85, and pass it to `image.Save`. → See: `convert-an-odg-file-to-jpeg-and-set-the-output-quality-to-85-percent.cs`
-
-### Q: How can I embed XMP metadata into a PDF generated from an ODG file using Aspose.Imaging for .NET?  
-Load the ODG with `Image.Load`, create a `PdfOptions` object, assign the XMP XML string to its `XmpMetadata` property, and save the image as PDF. → See: `convert-an-odg-file-to-pdf-and-embed-xmp-metadata-for-enhanced-document-information.cs`
-
-### Q: How do I define custom DPI and page margins when converting an ODG document to PDF with Aspose.Imaging in C#?  
-Set `PdfOptions.DpiX`/`DpiY` and `PdfOptions.PageMargins` before calling `image.Save` with the `PdfOptions` instance. → See: `convert-an-odg-file-to-pdf-set-custom-dpi-and-define-page-margins-for-layout.cs`
-
-### Q: How can I preserve transparency while converting an OTG file to BMP using Aspose.Imaging in .NET?  
-Load the OTG image, use `BmpOptions` with `ColorType = PngColorType.TruecolorWithAlpha` (or the default preserving alpha), and save the image as BMP. → See: `convert-an-otg-file-to-bmp-while-preserving-transparency-information-in-the-output-image.cs`
-
-### Q: How do I apply a threshold filter to an ODG image before saving it as a BMP using Aspose.Imaging in C#?  
-Use `Image.Load` to open the ODG, call `image.Filter(new ThresholdFilter())`, and then save with `BmpOptions` via `image.Save(outputPath, new BmpOptions())`. → See: `convert-an-odg-file-to-bmp-and-apply-a-threshold-filter-to-create-a-binary-image.cs`
-
-### Q: How can I set the PNG compression level to maximum when converting an ODG file to PNG with Aspose.Imaging for .NET?  
-Create a `PngOptions` object, set `CompressionLevel = PngCompressionLevel.Maximum`, and pass it to `image.Save(outputPath, pngOptions)`. → See: `convert-an-odg-file-to-png-and-set-lossless-compression-level-to-maximum-for-smallest-size.cs`
-
-### Q: How do I preserve original layer names when converting an ODG file to SVG using Aspose.Imaging in C#?  
-Load the ODG with `Image.Load`, configure `SvgOptions` with `KeepLayerNames = true`, and save the image using `image.Save(outputPath, svgOptions)`. → See: `convert-an-odg-file-to-svg-and-preserve-original-layer-names-in-the-output-file.cs`
-
-### Q: How can I add password protection to a PDF generated from an OTG file with Aspose.Imaging for .NET?  
-Load the OTG, create a `PdfOptions` instance, set `Password = "yourPassword"`, and save the document using `image.Save(outputPath, pdfOptions)`. → See: `convert-an-otg-file-to-pdf-and-add-password-protection-to-restrict-access.cs`
-
-### Q: How do I apply a median filter to an OTG image before converting and saving it as JPEG in C# with Aspose.Imaging?  
-After loading the OTG via
-
-### Q: How can I set the radius of a Gaussian blur filter when converting an ODG to JPEG with Aspose.Imaging in C#?  
-Use `GaussianBlurFilterOptions` to specify the `Radius` before calling `image.ApplyFilter` and then save with `Image.Save`. → See: `apply-a-gaussian-blur-filter-to-an-odg-image-before-converting-and-saving-as-jpeg.cs`
-
-### Q: How do I specify the kernel size for a median filter while converting an OTG to JPEG using Aspose.Imaging in C#?  
-Create a `MedianFilterOptions` instance, set its `Size` property, apply it via `image.ApplyFilter`, and then save the image as JPEG. → See: `apply-a-median-filter-to-an-otg-image-before-converting-and-saving-it-as-jpeg.cs`
-
-### Q: How can I set a custom threshold value when converting an ODG to a binary BMP with Aspose.Imaging in C#?  
-Instantiate `ThresholdFilterOptions`, assign the desired `Threshold` value, apply the filter with `image.ApplyFilter`, and save the result as BMP. → See: `convert-an-odg-file-to-bmp-and-apply-a-threshold-filter-to-create-a-binary-image.cs`
-
-### Q: How do I use JpegOptions to define compression quality when saving an ODG as JPEG with Aspose.Imaging in C#?  
-Create a `JpegOptions` object, set its `Quality` property (e.g., 85), and pass it to `image.Save(outputPath, jpegOptions)`. → See: `convert-an-odg-file-to-jpeg-and-set-the-output-quality-to-85-percent.cs`
-
-### Q: How can I add custom XMP metadata fields to a PDF generated from an ODG using Aspose.Imaging in C#?  
-After loading the ODG, create a `PdfOptions` object, populate its `XmpMetadata` dictionary with custom key‑value pairs, and save the PDF with those options. → See: `convert-an-odg-file-to-pdf-and-embed-xmp-metadata-for-enhanced-document-information.cs`
-## Operations Covered
-- Apply Gaussian blur filter to ODG image  
-- Convert ODG image to JPEG format  
-- Apply specific ICC color profile to ODG image  
-- Convert ODG image to PNG format  
-- Preserve transparency when converting ODG to BMP  
-- Convert ODG image to BMP format  
-- Embed XMP metadata while saving ODG as PDF  
-- Convert ODG image to PDF format  
-- Add text watermark overlay to ODG image before PNG export  
-- Convert ODG image to SVG format  
-- Set correct viewbox attribute in exported SVG  
-- Convert OTG image to BMP while preserving transparency  
-
-## Supported Formats
-- **ODG** – source OpenDocument graphics file loaded for processing  
-- **OTG** – alternative OpenDocument graphics file loaded for processing  
-- **JPEG** – target format when saving blurred image  
-- **PNG** – target format for color‑profile and watermark examples  
-- **BMP** – target format for transparency‑preserving conversions  
-- **PDF** – target format for rasterization with XMP metadata embedding  
-- **SVG** – target format for vector export with viewbox handling  
-
-## API Classes Used
-- `Image` — base class that loads any supported image and provides common functionality.  
-- `RasterImage` — derived class that enables raster‑specific operations such as applying filters.  
-- `GaussianBlurFilterOption` — defines parameters for a Gaussian blur filter applied to a raster image.  
-- `PngOptions` — configures settings (e.g., compression, color type) used when saving an image as PNG.  
-- `JpegOptions` — configures settings (e.g., quality) used when saving an image as JPEG.  
-- `BmpOptions` — configures settings for saving an image as BMP, including transparency handling.  
-- `PdfOptions` — configures settings for saving an image as PDF, including metadata embedding.  
-- `VectorRasterizationOptions` — specifies rasterization parameters (background color, page size, etc.) for vector‑to‑raster conversions like PDF.  
-- `Color` — represents a color value; used for background color or other color specifications.  
-- `ColorProfile` — applies an ICC color profile to an image to ensure accurate color reproduction.  
-- `ImageOptions` — abstract base for all format‑specific save‑option classes.  
-- `Aspose.Imaging.FileFormats.OpenDocument` (namespace) — provides support for loading ODG/OTG files.
-
 <!-- AUTOGENERATED:START -->
-Updated: 2026-08-18 | Run: `20260626_062855` | Examples: 120
+Updated: 2026-08-19 | Run: `20260819_045032` | Examples: 120
 <!-- AUTOGENERATED:END -->
