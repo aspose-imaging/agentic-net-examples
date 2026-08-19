@@ -1,8 +1,10 @@
+// HOW-TO: Convert ODG to 8‑Bit BMP with Palette in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.FileFormats.Bmp;
+using Aspose.Imaging.FileFormats.OpenDocument;
 
 class Program
 {
@@ -11,7 +13,7 @@ class Program
         try
         {
             // Hardcoded input and output paths
-            string inputPath = "sample.odg";
+            string inputPath = "input.odg";
             string outputPath = "output.bmp";
 
             // Verify input file exists
@@ -21,33 +23,24 @@ class Program
                 return;
             }
 
-            // Ensure output directory exists
+            // Ensure the output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
             // Load the ODG image
-            using (Image image = Image.Load(inputPath))
+            using (Image odgImage = Image.Load(inputPath))
             {
                 // Configure BMP save options for 8‑bit palette
                 BmpOptions bmpOptions = new BmpOptions
                 {
-                    BitsPerPixel = 8
+                    BitsPerPixel = 8,
+                    // Use a standard 8‑bit grayscale palette (you could also compute a close palette)
+                    Palette = Aspose.Imaging.ColorPaletteHelper.Create8BitGrayscale(false),
+                    Compression = Aspose.Imaging.FileFormats.Bmp.BitmapCompression.Rgb,
+                    ResolutionSettings = new ResolutionSetting(96.0, 96.0)
                 };
 
-                // Try to obtain a raster image to generate an optimal palette
-                RasterImage raster = image as RasterImage;
-                if (raster != null)
-                {
-                    // Generate a close 8‑bit palette based on the raster content
-                    bmpOptions.Palette = ColorPaletteHelper.GetCloseImagePalette(raster, 256);
-                }
-                else
-                {
-                    // Fallback to a standard 8‑bit grayscale palette
-                    bmpOptions.Palette = ColorPaletteHelper.Create8BitGrayscale(false);
-                }
-
-                // Save the image as BMP using the configured options
-                image.Save(outputPath, bmpOptions);
+                // Save the image as BMP using the specified options
+                odgImage.Save(outputPath, bmpOptions);
             }
         }
         catch (Exception ex)
@@ -59,9 +52,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to convert OpenDocument Graphics (ODG) drawings to BMP files for legacy Windows applications while keeping the file size low by using an 8‑bit palette.
- * 2. When a C# program must generate thumbnail previews of ODG diagrams for a web portal and wants to store them as compact 8‑bit BMP images.
- * 3. When an automated batch‑processing pipeline has to archive ODG assets as BMP with a reduced color depth to meet storage constraints.
- * 4. When integrating Aspose.Imaging in a document management system that requires converting user‑uploaded ODG files to BMP for compatibility with third‑party reporting tools.
- * 5. When a developer wants to ensure an ODG image is saved as a BMP with an optimal 256‑color palette to preserve visual fidelity while minimizing bandwidth for mobile devices.
+ * 1. When you need to embed a vector drawing from an OpenDocument file into a legacy Windows application that only accepts 8‑bit BMP images.
+ * 2. When you want to reduce the file size of exported graphics by converting high‑color ODG files to a grayscale 256‑color BMP for faster loading over a network.
+ * 3. When an automated batch process must convert multiple ODG diagrams to BMP format with a fixed palette for consistent printing on low‑resolution printers.
+ * 4. When a reporting tool requires BMP images with a specific bits‑per‑pixel setting, and you must generate them directly from ODG source files in C#.
+ * 5. When you are migrating assets from an OpenDocument workflow to a .NET image pipeline and need to preserve resolution while limiting colors to 8‑bit for memory‑constrained environments.
  */
