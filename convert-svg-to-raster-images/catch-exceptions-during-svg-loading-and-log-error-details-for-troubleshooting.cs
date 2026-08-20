@@ -1,3 +1,4 @@
+// HOW-TO: How To Convert SVG To PNG With Error Handling In C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -7,27 +8,36 @@ class Program
 {
     static void Main(string[] args)
     {
+        // Hardcoded input and output paths
         string inputPath = "input.svg";
         string outputPath = "output.png";
 
-        if (!File.Exists(inputPath))
-        {
-            Console.Error.WriteLine($"File not found: {inputPath}");
-            return;
-        }
-
-        Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
         try
         {
+            // Verify input file exists
+            if (!File.Exists(inputPath))
+            {
+                Console.Error.WriteLine($"File not found: {inputPath}");
+                return;
+            }
+
+            // Ensure output directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
+            // Load SVG with load options
             using (Image image = Image.Load(inputPath, new Aspose.Imaging.ImageLoadOptions.SvgLoadOptions()))
             {
-                var pngOptions = new PngOptions();
+                // Configure rasterization for SVG to PNG conversion
+                var rasterOptions = new SvgRasterizationOptions { PageSize = image.Size };
+                var pngOptions = new PngOptions { VectorRasterizationOptions = rasterOptions };
+
+                // Save as PNG
                 image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
         {
+            // Log any exception details
             Console.Error.WriteLine($"Error: {ex.Message}");
         }
     }
@@ -35,9 +45,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a web service converts user‑uploaded SVG icons to PNG thumbnails and must handle corrupted or missing SVG files without crashing.
- * 2. When an automated build pipeline generates PNG assets from SVG design files and needs to log load failures for debugging.
- * 3. When a desktop application allows users to export vector drawings as raster PNGs and must report file‑not‑found or parsing errors.
- * 4. When a batch script processes a folder of SVG logos into PNGs for email signatures and must record any format‑specific exceptions.
- * 5. When a cloud function transforms SVG charts into PNG images for reporting and requires detailed error logging to troubleshoot malformed SVG content.
+ * 1. When you need to programmatically convert user‑uploaded SVG graphics to PNG thumbnails while ensuring missing files are reported.
+ * 2. When an automated batch job must generate PNG assets from SVG designs and create output folders on the fly.
+ * 3. When a web service has to rasterize vector logos into PNG format and log any loading or conversion failures for troubleshooting.
+ * 4. When a desktop application processes SVG icons and saves them as PNGs, handling exceptions to avoid crashes.
+ * 5. When you want to validate the existence of an SVG file before conversion and capture detailed error messages for debugging.
  */
