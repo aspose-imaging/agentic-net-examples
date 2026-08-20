@@ -1,9 +1,9 @@
+// HOW-TO: Apply Vertical Edge Detection to PNG Image Using Aspose.Imaging in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
 using Aspose.Imaging.ImageFilters.FilterOptions;
-using Aspose.Imaging.ImageFilters.Convolution;
 
 class Program
 {
@@ -32,18 +32,22 @@ class Program
                 RasterImage rasterImage = (RasterImage)image;
 
                 // Define a vertical edge detection kernel (Sobel operator)
-                double[,] verticalKernel = new double[,]
+                double[,] kernel = new double[,]
                 {
                     { -1, 0, 1 },
                     { -2, 0, 2 },
                     { -1, 0, 1 }
                 };
 
-                // Apply the custom convolution filter using the kernel
-                rasterImage.Filter(rasterImage.Bounds, new ConvolutionFilterOptions(verticalKernel));
+                // Create convolution filter options with the custom kernel
+                ConvolutionFilterOptions filterOptions = new ConvolutionFilterOptions(kernel);
+
+                // Apply the filter to the entire image
+                rasterImage.Filter(rasterImage.Bounds, filterOptions);
 
                 // Save the processed image as PNG
-                rasterImage.Save(outputPath, new PngOptions());
+                PngOptions pngOptions = new PngOptions();
+                image.Save(outputPath, pngOptions);
             }
         }
         catch (Exception ex)
@@ -55,9 +59,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to extract vertical edges from a scanned engineering drawing and save the result as a PNG for further analysis.
- * 2. When an application must preprocess blueprint images by applying a Sobel vertical kernel to highlight structural lines before feeding them into a CAD recognition engine.
- * 3. When a C# service processes user‑uploaded PNG drawings, applies a custom convolution filter to emphasize vertical features, and stores the enhanced image for quality‑control review.
- * 4. When a batch job converts legacy PNG schematics to edge‑enhanced PNGs using Aspose.Imaging’s RasterImage filtering to improve visual clarity in documentation.
- * 5. When a desktop tool loads a drawing, detects vertical edges with a convolution filter, and saves the output as a PNG to be displayed in a web viewer that requires high‑contrast line art.
+ * 1. When you need to highlight vertical lines in a scanned blueprint before sharing it as a PNG.
+ * 2. When you want to preprocess engineering drawings to make vertical edges more pronounced for visual inspection.
+ * 3. When you are building a C# tool that automatically enhances architectural diagrams by applying a Sobel filter.
+ * 4. When you must convert a raw PNG drawing into a sharpened version for inclusion in a PDF report.
+ * 5. When you require a simple way to detect and emphasize vertical features in images for a machine‑vision preprocessing pipeline.
  */
