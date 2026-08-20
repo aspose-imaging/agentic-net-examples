@@ -1,7 +1,7 @@
+// HOW-TO: Validate Odd-Sized Convolution Kernel Before Applying to PNG in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
-using Aspose.Imaging.ImageFilters.FilterOptions;
 
 class Program
 {
@@ -11,7 +11,7 @@ class Program
         {
             // Hardcoded input and output paths
             string inputPath = "input.png";
-            string outputPath = "output/output.png";
+            string outputPath = "output.png";
 
             // Validate input file existence
             if (!File.Exists(inputPath))
@@ -23,30 +23,37 @@ class Program
             // Ensure output directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
 
-            // Define kernel size and validate it is odd
-            int kernelSize = 7;
-            if (kernelSize % 2 == 0)
+            // Define a custom 7x7 kernel
+            double[,] kernel = new double[7, 7]
             {
-                Console.Error.WriteLine("Kernel size must be an odd number.");
+                { 0, 0, 1, 2, 1, 0, 0 },
+                { 0, 3, 5, 8, 5, 3, 0 },
+                { 1, 5, 9,13, 9, 5, 1 },
+                { 2, 8,13,20,13, 8, 2 },
+                { 1, 5, 9,13, 9, 5, 1 },
+                { 0, 3, 5, 8, 5, 3, 0 },
+                { 0, 0, 1, 2, 1, 0, 0 }
+            };
+
+            // Validate that kernel dimensions are odd
+            int rows = kernel.GetLength(0);
+            int cols = kernel.GetLength(1);
+            if (rows % 2 == 0 || cols % 2 == 0)
+            {
+                Console.Error.WriteLine("Kernel dimensions must be odd.");
                 return;
             }
 
-            // Create a 7x7 averaging kernel
-            double[,] kernel = new double[kernelSize, kernelSize];
-            double value = 1.0 / (kernelSize * kernelSize);
-            for (int i = 0; i < kernelSize; i++)
-            {
-                for (int j = 0; j < kernelSize; j++)
-                {
-                    kernel[i, j] = value;
-                }
-            }
-
-            // Load the PNG image, apply the custom kernel, and save the result
+            // Load the PNG image and apply the custom convolution filter
             using (Image image = Image.Load(inputPath))
             {
-                RasterImage raster = (RasterImage)image;
-                raster.Filter(raster.Bounds, new ConvolutionFilterOptions(kernel));
+                Aspose.Imaging.RasterImage raster = (Aspose.Imaging.RasterImage)image;
+
+                // Apply the convolution filter with the custom kernel
+                raster.Filter(raster.Bounds,
+                    new Aspose.Imaging.ImageFilters.FilterOptions.ConvolutionFilterOptions(kernel));
+
+                // Save the processed image
                 raster.Save(outputPath);
             }
         }
@@ -59,9 +66,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer wants to apply a custom 7×7 averaging convolution filter to a PNG image and must ensure the kernel dimensions are odd to avoid runtime errors in Aspose.Imaging for .NET.
- * 2. When building an automated image‑enhancement pipeline that smooths PNG files using a user‑defined kernel, the code validates the kernel size before invoking the ConvolutionFilterOptions.
- * 3. When creating a desktop C# application that lets users upload PNG pictures and apply custom blur effects, the odd‑size check guarantees the filter works correctly with Aspose’s raster image processing.
- * 4. When integrating image preprocessing into a machine‑learning workflow that requires consistent padding, the developer uses this snippet to confirm the kernel’s odd dimensions before filtering PNG inputs.
- * 5. When troubleshooting a batch job that processes thousands of PNG assets with a 7×7 kernel, the validation step helps quickly detect mis‑configured kernel sizes and prevents exceptions during the raster filter operation.
+ * 1. When you need to sharpen or blur a PNG image using a custom 7x7 convolution matrix and must ensure the kernel size is odd to avoid runtime errors.
+ * 2. When processing medical or satellite imagery in C# where a specific odd‑dimensional filter is required for edge detection before saving the result as PNG.
+ * 3. When building an automated image‑processing pipeline that applies user‑defined filters and you want to validate kernel dimensions to prevent invalid filter configurations.
+ * 4. When integrating Aspose.Imaging into a desktop application that lets users upload PNG files and apply custom convolution effects, requiring a pre‑check for odd kernel sizes.
+ * 5. When performing batch image enhancement on PNG assets with a handcrafted filter and need to programmatically verify the kernel meets the odd‑size requirement to maintain consistent results.
  */
