@@ -1,8 +1,9 @@
+// HOW-TO: Batch Convert Multiple SVG Files to BMP Using Shared Raster Options in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
 using Aspose.Imaging.ImageOptions;
-using Aspose.Imaging.FileFormats.Svg;
+using Aspose.Imaging.Sources;
 
 class Program
 {
@@ -10,18 +11,18 @@ class Program
     {
         try
         {
-            // Hard‑coded list of SVG files to convert
+            // Hardcoded input SVG files (modify as needed)
             string[] inputFiles = new[]
             {
-                @"C:\Images\example1.svg",
-                @"C:\Images\example2.svg",
-                @"C:\Images\example3.svg"
+                @"C:\Images\sample1.svg",
+                @"C:\Images\sample2.svg",
+                @"C:\Images\sample3.svg"
             };
 
-            // Single rasterization options instance reused for all conversions
-            SvgRasterizationOptions rasterOptions = new SvgRasterizationOptions();
+            // Create a single SvgRasterizationOptions instance to be reused
+            var rasterOptions = new SvgRasterizationOptions();
 
-            foreach (string inputPath in inputFiles)
+            foreach (var inputPath in inputFiles)
             {
                 // Verify input file exists
                 if (!File.Exists(inputPath))
@@ -30,25 +31,22 @@ class Program
                     return;
                 }
 
+                // Determine output BMP path (same folder, .bmp extension)
+                string outputPath = Path.ChangeExtension(inputPath, ".bmp");
+
+                // Ensure output directory exists
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
                 // Load the SVG image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Adjust page size for the current image
-                    rasterOptions.PageSize = image.Size;
-
-                    // Prepare BMP save options and attach the shared rasterization options
-                    BmpOptions bmpOptions = new BmpOptions
+                    // Configure BMP options with the shared rasterization options
+                    var bmpOptions = new BmpOptions
                     {
                         VectorRasterizationOptions = rasterOptions
                     };
 
-                    // Determine output BMP path (same folder, .bmp extension)
-                    string outputPath = Path.ChangeExtension(inputPath, ".bmp");
-
-                    // Ensure the output directory exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                    // Save the image as BMP
+                    // Save as BMP
                     image.Save(outputPath, bmpOptions);
                 }
             }
@@ -62,9 +60,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate bitmap thumbnails from a collection of SVG icons for a Windows desktop application, they can batch convert the SVG files to BMP using a shared SvgRasterizationOptions instance.
- * 2. When an automated build pipeline must convert vector graphics stored as SVG into BMP assets for legacy reporting tools that only accept raster images, this code provides a fast C# solution.
- * 3. When a content management system imports user‑uploaded SVG illustrations and must store them as BMP files for compatibility with older printers, the developer can reuse a single rasterization options object to process many files efficiently.
- * 4. When a game engine requires BMP textures derived from SVG assets and the developer wants to ensure consistent page size across all conversions, this example shows how to loop through files with Aspose.Imaging.
- * 5. When a batch image‑processing script needs to validate the existence of SVG files, adjust their dimensions, and save them as BMP in the same folder, the code demonstrates the necessary C# file‑system and Aspose.Imaging operations.
+ * 1. When you need to generate bitmap thumbnails from a set of SVG icons for a Windows desktop application.
+ * 2. When you must prepare BMP assets for legacy hardware that only supports raster images, converting many SVG logos at once.
+ * 3. When automating a build pipeline that transforms design SVG files into BMP resources for a game engine.
+ * 4. When creating printable BMP versions of vector diagrams in bulk for a reporting system that only accepts BMP input.
+ * 5. When migrating a web project's SVG assets to BMP format for compatibility with a third‑party imaging service that requires raster files.
  */
