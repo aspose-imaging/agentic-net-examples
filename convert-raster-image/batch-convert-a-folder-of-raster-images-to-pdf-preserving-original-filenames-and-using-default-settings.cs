@@ -1,3 +1,4 @@
+// HOW-TO: Batch Convert Raster Images to PDF with Original Filenames in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -9,14 +10,14 @@ class Program
     {
         try
         {
-            // Hardcoded input and output folders
+            // Hardcoded input and output directories
             string inputFolder = @"C:\Images\Input";
             string outputFolder = @"C:\Images\Output";
 
-            // Get all files in the input folder
-            string[] files = Directory.GetFiles(inputFolder);
+            // Get all files in the input folder (non-recursive)
+            string[] inputFiles = Directory.GetFiles(inputFolder);
 
-            foreach (string inputPath in files)
+            foreach (string inputPath in inputFiles)
             {
                 // Verify the input file exists
                 if (!File.Exists(inputPath))
@@ -35,7 +36,7 @@ class Program
                 // Load the raster image
                 using (Image image = Image.Load(inputPath))
                 {
-                    // Use default PDF options
+                    // Prepare default PDF options
                     var pdfOptions = new PdfOptions();
 
                     // Save the image as PDF
@@ -52,9 +53,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer needs to generate printable PDF catalogs from a folder of JPEG or PNG photos for an e‑commerce website.
- * 2. When an organization wants to archive scanned TIFF documents into PDF files while preserving the original filenames for easy retrieval.
- * 3. When a desktop application must convert user‑uploaded BMP screenshots into PDF reports in bulk without custom rendering options.
- * 4. When a migration script has to transform legacy image assets into PDF format for a document management system, keeping the naming conventions intact.
- * 5. When an automated build process must create PDF versions of design mockups (PNG, GIF) for distribution to stakeholders using default Aspose.Imaging settings.
+ * 1. When you need to generate PDF versions of a set of scanned photos for archiving while keeping each file’s original name.
+ * 2. When an application must automatically transform a folder of JPEG or PNG files into PDFs for email attachment without manual conversion.
+ * 3. When a document management system requires batch conversion of uploaded raster images to PDF to ensure consistent viewing across devices.
+ * 4. When you want to create printable PDFs from a collection of product images for catalog generation while preserving naming for later reference.
+ * 5. When a workflow automates the conversion of user‑submitted screenshots into PDFs for compliance reporting, keeping the source filenames intact.
  */
