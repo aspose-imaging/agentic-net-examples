@@ -1,3 +1,4 @@
+// HOW-TO: Batch Apply Median Filter to PNGs and Convert to PDF in C# (Aspose.Imaging for .NET)
 using System;
 using System.IO;
 using Aspose.Imaging;
@@ -14,37 +15,41 @@ class Program
             string inputFolder = @"C:\Images\Input";
             string outputFolder = @"C:\Images\Output";
 
-            // Ensure the output directory exists
+            // Ensure the output root folder exists
             Directory.CreateDirectory(outputFolder);
 
-            // Process each PNG file in the input folder
-            foreach (string inputPath in Directory.GetFiles(inputFolder, "*.png"))
+            // Get all PNG files in the input folder
+            string[] pngFiles = Directory.GetFiles(inputFolder, "*.png");
+
+            foreach (string pngPath in pngFiles)
             {
-                // Verify input file exists
-                if (!File.Exists(inputPath))
+                // Verify the input file exists
+                if (!File.Exists(pngPath))
                 {
-                    Console.Error.WriteLine($"File not found: {inputPath}");
-                    return;
+                    Console.Error.WriteLine($"File not found: {pngPath}");
+                    continue;
                 }
 
-                // Load the image
-                using (Image image = Image.Load(inputPath))
+                // Load the PNG image
+                using (Image image = Image.Load(pngPath))
                 {
                     // Cast to RasterImage to apply filters
-                    var rasterImage = (RasterImage)image;
+                    RasterImage rasterImage = (RasterImage)image;
 
-                    // Apply median filter with size 5 to the whole image
+                    // Apply a median filter with size 5 to the whole image
                     rasterImage.Filter(rasterImage.Bounds, new MedianFilterOptions(5));
 
-                    // Prepare output PDF path
-                    string outputFileName = Path.GetFileNameWithoutExtension(inputPath) + ".pdf";
-                    string outputPath = Path.Combine(outputFolder, outputFileName);
+                    // Prepare the output PDF path
+                    string outputPdfPath = Path.Combine(
+                        outputFolder,
+                        Path.GetFileNameWithoutExtension(pngPath) + ".pdf");
 
                     // Ensure the directory for the output file exists
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                    Directory.CreateDirectory(Path.GetDirectoryName(outputPdfPath));
 
                     // Save the filtered image as PDF
-                    rasterImage.Save(outputPath, new PdfOptions());
+                    PdfOptions pdfOptions = new PdfOptions();
+                    image.Save(outputPdfPath, pdfOptions);
                 }
             }
         }
@@ -57,9 +62,9 @@ class Program
 
 /*
  * Real-World Use Cases:
- * 1. When a developer uses Aspose.Imaging for .NET to batch‑process a folder of PNG screenshots, apply a median filter to remove noise, and save each result as a PDF for documentation archives.
- * 2. When an e‑commerce site needs to automatically denoise product PNG images with a median filter and convert them to PDF catalogs using C# and Aspose.Imaging.
- * 3. When a medical records system must cleanse PNG scans of X‑ray images with a median filter and generate PDF files for secure patient files via Aspose.Imaging.
- * 4. When a GIS application requires smoothing PNG map tiles with a median filter and exporting them as PDF pages for printed reports using Aspose.Imaging for .NET.
- * 5. When a publishing pipeline has to batch‑convert PNG illustrations to PDF after applying a median filter to improve print quality, leveraging C# and Aspose.Imaging.
+ * 1. When you need to clean up a collection of scanned PNG documents by reducing noise before archiving them as searchable PDFs.
+ * 2. When you want to automate the preparation of product images, applying a median filter to smooth edges and then generate PDF catalogs.
+ * 3. When you must process a folder of PNG screenshots, remove speckles, and bundle each result into a PDF for reporting purposes.
+ * 4. When a medical imaging workflow requires batch denoising of PNG scans and conversion to PDF for patient records.
+ * 5. When you are building a document management system that receives PNG uploads, applies a median filter for quality, and stores them as PDF files.
  */
